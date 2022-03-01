@@ -1,4 +1,4 @@
-// Copyright © 2020 Brad Howes. All rights reserved.
+// Copyright © 2022 Brad Howes. All rights reserved.
 
 #include <iostream>
 #include <unistd.h>

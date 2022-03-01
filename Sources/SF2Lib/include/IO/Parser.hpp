@@ -1,4 +1,4 @@
-// Copyright © 2020 Brad Howes. All rights reserved.
+// Copyright © 2022 Brad Howes. All rights reserved.
 //
 // Loosely based on iffdigest v0.3 by Andrew C. Bulhak. This code has been modified to *only* work on IFF_FMT_RIFF, and
 // it safely parses bogus files by throwing an IFF_FMT_ERROR exception anytime there is an access outside of valid
