@@ -41,7 +41,7 @@ are currently packaged with SF2Lib, they are not part of the SF2Lib API.
 
 # Credits
 
-All of the code has been written by myself over the course of several years, but I have benefitted the existence of 
+All of the code has been written by myself over the course of several years, but I have benefitted from the existence of 
 other projects, especially [FluidSynth](https://www.fluidsynth.org) and their wealth of knowledge in all things SF2. 
 In particular, if there is any confusion about what the SF2 spec means, I rely on their interpretation in code. That
 said, any misrepresentations of SF2 functionality are of my own doing.
