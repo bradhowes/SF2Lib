@@ -1,4 +1,4 @@
-# SF2Lib -- an SF2 library in C++
+# SF2Lib - an SF2 library in C++
 
 This library can read SF2 files and render audio samples from them. It properly reads in a compliant SF2 file and can
 be used to obtain meta data such as preset names. It also has an audio rendering engine that can generate audio samples
