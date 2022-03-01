@@ -7,8 +7,9 @@ can generate audio at the right pitch.
 
 Although nearly all of the code is generic C++17, there are bits that expect an Apple platform that has 
 the AudioToolbox and Accelerate frameworks available. However, this usage is fairly isolated. The goal is to be a 
-simple for reading SF2 files as well as a competent SF2 audio renderer whose output can be fed to any sort of audio
-processing chain, not just macOS and iOS systems Core Audio systems.
+simple library for reading SF2 files as well as a competent SF2 audio renderer whose output can be fed to any sort of 
+audio processing chain, not just macOS and iOS systems Core Audio systems. For my own use, this will be used in AUv3
+components on iOS and macOS platforms.
 
 # DSPTableGenerator
 
@@ -37,3 +38,10 @@ very little to be found in source files.
 * [Render](Sources/SF2Lib/Render) -- handles rendering of audio samples from SF2 entities.
 * [Resources](Sources/SF2Lib/Resources) -- a few SF2 files to use for experimentation and testing. Though these files 
 are currently packaged with SF2Lib, they are not part of the SF2Lib API.
+
+# Credits
+
+All of the code has been written by myself over the course of several years, but I have benefitted the existence of 
+other projects, especially [FluidSynth](https://www.fluidsynth.org) and their wealth of knowledge in all things SF2. 
+In particular, if there is any confusion about what the SF2 spec means, I rely on their interpretation in code. That
+said, any misrepresentations of SF2 functionality are of my own doing.

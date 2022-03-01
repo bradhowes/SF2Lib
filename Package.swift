@@ -23,6 +23,8 @@ let package = Package(
       exclude: [
         "DSP/README.md",
         "Entity/README.md",
+        "Entity/Generator/README.md",
+        "Entity/Modulator/README.md",
         "IO/README.md",
         "MIDI/README.md",
         "Render/README.md"
@@ -47,7 +49,7 @@ let package = Package(
       dependencies: ["SF2Lib"],
       cxxSettings: [
         // Set to 1 to play audio in tests. Set to 0 to keep silent.
-        .define("PLAY_AUDIO", to: "1", .none),
+        .define("PLAY_AUDIO", to: "0", .none),
         .unsafeFlags(["-fmodules", "-fcxx-modules"], .none)
       ]
     )
