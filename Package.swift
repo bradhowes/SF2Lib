@@ -46,7 +46,8 @@ let package = Package(
       name: "SF2LibTests",
       dependencies: ["SF2Lib"],
       cxxSettings: [
-        .define("PLAY_AUDIO", to: "YES", .none),
+        // Set to 1 to play audio in tests. Set to 0 to keep silent.
+        .define("PLAY_AUDIO", to: "1", .none),
         .unsafeFlags(["-fmodules", "-fcxx-modules"], .none)
       ]
     )

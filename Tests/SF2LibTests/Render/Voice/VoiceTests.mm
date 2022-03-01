@@ -31,12 +31,12 @@ using namespace SF2::Render;
 }
 
 - (void)setUp {
-#ifdef PLAY_AUDIO // See Development.xcconfig
+  // See Package.swift
+#if PLAY_AUDIO
   self.playAudio = YES;
 #else
   self.playAudio = NO;
 #endif
-  // self.playAudio = YES;
 }
 
 - (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
