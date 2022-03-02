@@ -29,7 +29,6 @@ let package = Package(
         "MIDI/README.md",
         "Render/README.md"
       ],
-      resources: [.process("Resources")],
       cxxSettings: [
         .headerSearchPath("./include", .none),
         .unsafeFlags(["-fmodules", "-fcxx-modules"], .none)
@@ -47,6 +46,9 @@ let package = Package(
     .testTarget(
       name: "SF2LibTests",
       dependencies: ["SF2Lib"],
+      resources: [
+        .process("Resources")
+      ],
       cxxSettings: [
         // Set to 1 to play audio in tests. Set to 0 to keep silent.
         .define("PLAY_AUDIO", to: "0", .none),
