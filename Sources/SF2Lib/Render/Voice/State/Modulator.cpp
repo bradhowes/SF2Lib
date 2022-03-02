@@ -13,6 +13,15 @@ using namespace SF2::Render::Voice::State;
 
 namespace EntityMod = Entity::Modulator;
 
+int Modulator::ValueProvider::ccValue() const { return state_.channel().continuousControllerValue(cc_); }
+int Modulator::ValueProvider::key() const { return state_.key(); }
+int Modulator::ValueProvider::velocity() const { return state_.velocity(); }
+int Modulator::ValueProvider::keyPressure() const { return state_.channel().keyPressure(state_.key()); }
+int Modulator::ValueProvider::channelPressure() const { return state_.channel().channelPressure(); }
+int Modulator::ValueProvider::pitchWheelValue() const { return state_.channel().pitchWheelValue(); }
+int Modulator::ValueProvider::pitchWheelSensitivity() const { return state_.channel().pitchWheelSensitivity(); }
+int Modulator::ValueProvider::linked() const { return std::round(modulator_->value()); };
+
 Modulator::Modulator(size_t index, const EntityMod::Modulator& configuration, const State& state) :
 configuration_{configuration},
 index_{index},
@@ -25,23 +34,28 @@ amountScale_{SourceValue(configuration.amountSource(), state)}
   log_.debug() << "adding " << index << ' ' << configuration.description() << std::endl;
 }
 
-Modulator::ValueProc
+void
+Modulator::setSource(const Modulator& modulator)
+{
+}
+
+Modulator::ValueProvider
 Modulator::SourceValue(const EntityMod::Source& source, const State& state)
 {
   using GI = EntityMod::Source::GeneralIndex;
   if (source.isContinuousController()) {
     int cc{source.continuousIndex()};
-    return [&state, cc](){ return state.channel().continuousControllerValue(cc); };
+    return ValueProvider{state, &ValueProvider::ccValue, cc};
   }
   switch (source.generalIndex()) {
-    case GI::none: return nullptr;
-    case GI::noteOnVelocity: return [&state](){ return state.velocity(); };
-    case GI::noteOnKeyValue: return [&state](){ return state.key(); };
-    case GI::keyPressure: return [&state](){ return state.channel().keyPressure(state.key()); };
-    case GI::channelPressure: return [&state](){ return state.channel().channelPressure(); };
-    case GI::pitchWheel: return [&state](){ return state.channel().pitchWheelValue(); };
-    case GI::pitchWheelSensitivity: return [&state](){ return state.channel().pitchWheelSensitivity(); };
-    case GI::link: return nullptr;
+    case GI::none: return ValueProvider{state};
+    case GI::noteOnKeyValue: return ValueProvider{state, &ValueProvider::key};
+    case GI::noteOnVelocity: return ValueProvider{state, &ValueProvider::velocity};
+    case GI::keyPressure: return ValueProvider{state, &ValueProvider::keyPressure};
+    case GI::channelPressure: return ValueProvider{state, &ValueProvider::channelPressure};
+    case GI::pitchWheel: return ValueProvider{state, &ValueProvider::pitchWheelValue};
+    case GI::pitchWheelSensitivity: return ValueProvider{state, &ValueProvider::pitchWheelSensitivity};
+    case GI::link: return ValueProvider{state};
   }
 }
 

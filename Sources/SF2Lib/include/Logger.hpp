@@ -24,10 +24,10 @@ namespace SF2 {
  not leak any personal info.
  */
 struct Logger {
-  
+
   /// Base name to use for all os_log subsystem names.
-  inline static const std::string base{"com.braysoft.SoundFontInfoLib.SF2."};
-  
+  static const std::string base;
+
   /**
    Create a new os_log_t instance.
    
@@ -35,10 +35,8 @@ struct Logger {
    @param category the category to use
    @returns new/existing os_log_ instance
    */
-  static Logger Make(const std::string& subsystem, const std::string& category) {
-    return Logger(os_log_create((base + subsystem).c_str(), category.c_str()));
-  }
-  
+  static Logger Make(const std::string& subsystem, const std::string& category);
+
   /**
    Allow Logger instances to appear in os_log API calls.
    @returns internal os_log_t value

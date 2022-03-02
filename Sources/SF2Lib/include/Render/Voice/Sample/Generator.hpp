@@ -66,7 +66,7 @@ public:
     auto whole = index_.whole();
     auto partial = index_.partial();
     index_.increment(increment, canLoop);
-    return interpolatorProc_(this, whole, partial, canLoop);
+    return (this->*interpolatorProc_)(whole, partial, canLoop);
   }
 
   /// @returns true if sill generating samples
@@ -76,7 +76,7 @@ public:
   bool looped() const { return index_.looped(); }
 
 private:
-  using InterpolatorProc = std::function<Float(Generator*, size_t, Float, bool)>;
+  using InterpolatorProc = Float (Generator::*)(size_t, Float, bool) const;
 
   static InterpolatorProc interpolator(Interpolator kind) {
     return kind == Interpolator::linear ? &Generator::linearInterpolate : &Generator::cubic4thOrderInterpolate;

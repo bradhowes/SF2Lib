@@ -48,14 +48,14 @@ public:
     assert(isValid());
 
     // If there is no source for the modulator, it always returns 0.0 (no modulation).
-    if (sourceValue_ == nullptr) return 0.0;
+    if (!sourceValue_.valid()) return 0.0;
 
     // Obtain transformed value from source.
-    Float value = sourceTransform_.value(sourceValue_());
+    Float value = sourceTransform_.value(sourceValue_.value());
     if (value == 0.0) return 0.0;
 
     // If there is a source for the scaling factor, apply its transformed value.
-    if (amountScale_ != nullptr) value *= amountTransform_.value(amountScale_());
+    if (amountScale_.valid()) value *= amountTransform_.value(amountScale_.value());
 
     return value * amount_;
   }
@@ -82,12 +82,33 @@ public:
 
    @param modulator provider for an Sv to use for this modulator
    */
-  void setSource(const Modulator& modulator) { sourceValue_ = [&]() { return int(std::round(modulator.value())); }; }
+  void setSource(const Modulator& modulator);
 
   std::string description() const;
 
 private:
-  using ValueProc = std::function<int()>;
+  struct ValueProvider {
+    using Proc = int (ValueProvider::*)() const;
+
+    ValueProvider(const State& state, Proc proc = nullptr, int cc = 0, const Modulator* modulator = nullptr) :
+    state_{state}, proc_{proc}, cc_{cc}, modulator_{modulator} {}
+    const State& state_;
+    Proc proc_;
+    int cc_;
+    const Modulator* modulator_;
+
+    bool valid() const { return proc_ != nullptr; }
+    int value() const { return valid() ? (this->*proc_)() : 0; }
+
+    int ccValue() const;
+    int key() const;
+    int velocity() const;
+    int keyPressure() const;
+    int channelPressure() const;
+    int pitchWheelValue() const;
+    int pitchWheelSensitivity() const;
+    int linked() const;
+  };
 
   /**
    Obtain a generic callable entity that returns an integral value. This is used to obtain both the Sv and Av values,
@@ -96,7 +117,7 @@ private:
    @param source the modulator source definition from the SF2 file
    @param state the voice state that will be modulated
    */
-  static ValueProc SourceValue(const Entity::Modulator::Source& source, const State& state);
+  static ValueProvider SourceValue(const Entity::Modulator::Source& source, const State& state);
 
   const Entity::Modulator::Modulator& configuration_;
   size_t index_;
@@ -104,8 +125,8 @@ private:
   MIDI::ValueTransformer sourceTransform_;
   MIDI::ValueTransformer amountTransform_;
 
-  ValueProc sourceValue_;
-  ValueProc amountScale_;
+  ValueProvider sourceValue_;
+  ValueProvider amountScale_;
 
   inline static Logger log_{Logger::Make("Render.Voice", "Modulator")};
 };

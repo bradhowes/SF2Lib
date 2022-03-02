@@ -4,7 +4,6 @@
 
 #include <Accelerate/Accelerate.h>
 #include <cmath>
-#include <functional>
 
 namespace SF2 {
 
@@ -24,7 +23,7 @@ struct Accelerated
    Type definition for vDSP_vflt16 / vDSP_vflt16D routines that convert a sequence of signed 16-bit integers into
    floating-point values.
    */
-  using ConversionProc = std::function<void(const int16_t*, vDSP_Stride, T*, vDSP_Stride, vDSP_Length)>;
+  using ConversionProc = void (*)(const int16_t*, vDSP_Stride, T*, vDSP_Stride, vDSP_Length);
   inline static ConversionProc conversionProc = []() {
     if constexpr (std::is_same_v<T, float>) return vDSP_vflt16;
     if constexpr (std::is_same_v<T, double>) return vDSP_vflt16D;
@@ -32,8 +31,9 @@ struct Accelerated
 
   /**
    Type definition for vDSP_vsdiv / vDSP_vsdivD routines that divide a sequence of floating-point values by a scalar.
+   This is used to obtain normalized values (-1.0 - +1.0) after converting from 16-bit integers to floats or doubles.
    */
-  using ScaleProc = std::function<void(const T*, vDSP_Stride, const T*, T*, vDSP_Stride, vDSP_Length)>;
+  using ScaleProc = void (*)(const T*, vDSP_Stride, const T*, T*, vDSP_Stride, vDSP_Length);
   inline static ScaleProc scaleProc = []() {
     if constexpr (std::is_same_v<T, float>) return vDSP_vsdiv;
     if constexpr (std::is_same_v<T, double>) return vDSP_vsdivD;
@@ -43,7 +43,7 @@ struct Accelerated
    Type definition for vDSP_maxmgv / vDSP_maxmgvD routines that calculate the max magnitude of a sequence of
    floating-point values.
    */
-  using MagnitudeProc = std::function<void(const T*, vDSP_Stride, T*, vDSP_Length)>;
+  using MagnitudeProc = void (*)(const T*, vDSP_Stride, T*, vDSP_Length);
   inline static MagnitudeProc magnitudeProc = []() {
     if constexpr (std::is_same_v<T, float>) return vDSP_maxmgv;
     if constexpr (std::is_same_v<T, double>) return vDSP_maxmgvD;
@@ -65,5 +65,4 @@ const typename T::value_type& checkedVectorIndexing(const T& container, size_t i
 #endif
 }
 
-}
-
+} // end namespace SF2
