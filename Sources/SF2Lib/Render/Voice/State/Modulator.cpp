@@ -28,8 +28,8 @@ index_{index},
 amount_{configuration.amount()},
 sourceTransform_{configuration.source()},
 amountTransform_{configuration.amountSource()},
-sourceValue_{SourceValue(configuration.source(), state)},
-amountScale_{SourceValue(configuration.amountSource(), state)}
+sourceValue_{makeValueProvider(configuration.source(), state)},
+amountScale_{makeValueProvider(configuration.amountSource(), state)}
 {
   log_.debug() << "adding " << index << ' ' << configuration.description() << std::endl;
 }
@@ -37,10 +37,12 @@ amountScale_{SourceValue(configuration.amountSource(), state)}
 void
 Modulator::setSource(const Modulator& modulator)
 {
+  sourceValue_.modulator_ = &modulator;
+  sourceValue_.proc_ = &ValueProvider::linked;
 }
 
 Modulator::ValueProvider
-Modulator::SourceValue(const EntityMod::Source& source, const State& state)
+Modulator::makeValueProvider(const EntityMod::Source& source, const State& state)
 {
   using GI = EntityMod::Source::GeneralIndex;
   if (source.isContinuousController()) {

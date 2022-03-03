@@ -82,7 +82,9 @@ public:
    @param controllerValue value to convert between 0 and 127
    @returns transformed value
    */
-  Float value(int controllerValue) const { return Float(active_[size_t(std::clamp<int>(controllerValue, 0, Max))]); }
+  Float operator()(int controllerValue) const {
+    return Float(active_[size_t(std::clamp<int>(controllerValue, 0, Max))]);
+  }
 
 private:
 

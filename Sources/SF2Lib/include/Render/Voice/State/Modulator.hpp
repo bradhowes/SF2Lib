@@ -48,14 +48,14 @@ public:
     assert(isValid());
 
     // If there is no source for the modulator, it always returns 0.0 (no modulation).
-    if (!sourceValue_.valid()) return 0.0;
+    if (!sourceValue_.isValid()) return 0.0;
 
     // Obtain transformed value from source.
-    Float value = sourceTransform_.value(sourceValue_.value());
+    Float value = sourceTransform_(sourceValue_());
     if (value == 0.0) return 0.0;
 
     // If there is a source for the scaling factor, apply its transformed value.
-    if (amountScale_.valid()) value *= amountTransform_.value(amountScale_.value());
+    if (amountScale_.isValid()) value *= amountTransform_(amountScale_());
 
     return value * amount_;
   }
@@ -87,18 +87,20 @@ public:
   std::string description() const;
 
 private:
+
+  // Holds a pointer to member function that determines how to generate a value for a modulator. Holds state for the
+  // member function to use, but not all pieces are used by all methods. Once set, these values normally do not change.
+  // The one exception is when a Modulator is used to provide a value to another (aka linking).
   struct ValueProvider {
     using Proc = int (ValueProvider::*)() const;
 
-    ValueProvider(const State& state, Proc proc = nullptr, int cc = 0, const Modulator* modulator = nullptr) :
-    state_{state}, proc_{proc}, cc_{cc}, modulator_{modulator} {}
     const State& state_;
-    Proc proc_;
-    int cc_;
-    const Modulator* modulator_;
+    Proc proc_{nullptr};
+    const int cc_{0};
+    const Modulator* modulator_{nullptr};
 
-    bool valid() const { return proc_ != nullptr; }
-    int value() const { return valid() ? (this->*proc_)() : 0; }
+    bool isValid() const { return proc_ != nullptr; }
+    int operator()() const { return isValid() ? (this->*proc_)() : 0; }
 
     int ccValue() const;
     int key() const;
@@ -111,13 +113,14 @@ private:
   };
 
   /**
-   Obtain a generic callable entity that returns an integral value. This is used to obtain both the Sv and Av values,
-   regardless of their sources.
+   Obtain a generic callable entity that returns an integral value. This is used to obtain both the `source` and
+   `amount` values, regardless of their actual source.
 
    @param source the modulator source definition from the SF2 file
    @param state the voice state that will be modulated
+   @returns ValueProvider instance for obtaining the value
    */
-  static ValueProvider SourceValue(const Entity::Modulator::Source& source, const State& state);
+  static ValueProvider makeValueProvider(const Entity::Modulator::Source& source, const State& state);
 
   const Entity::Modulator::Modulator& configuration_;
   size_t index_;
