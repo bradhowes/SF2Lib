@@ -1,10 +1,10 @@
 # SF2Lib - an SF2 library in C++
 
-This library can read SF2 SoundFont files and render audio samples from them. It properly reads in a compliant SF2 file and can
-be used to obtain meta data such as preset names. It also has an audio rendering engine that can generate audio samples
-for key events that come from (say) a MIDI keyboard. Work on the rendering side is still on-going, but at present it
-can generate audio at the right pitch. This library is currently being used by my [SoundFonts](https://github.com/bradhowes/SoundFonts)
-application for SF2 file parsing, and soon for rendering.
+This library can read SF2 SoundFont files and render audio samples from them. It properly reads in a compliant SF2 file 
+and can be used to obtain meta data such as preset names. It also has an audio rendering engine that can generate audio 
+samples for key events that come from (say) a MIDI keyboard. Work on the rendering side is still on-going, but at 
+present it can generate audio at the right pitch. This library is currently being used by my 
+[SoundFonts](https://github.com/bradhowes/SoundFonts) application for SF2 file parsing, and soon for rendering.
 
 Although nearly all of the code is generic C++17, there are bits that expect an Apple platform that has 
 the AudioToolbox and Accelerate frameworks available. However, this usage is fairly isolated. The goal is to be a 
