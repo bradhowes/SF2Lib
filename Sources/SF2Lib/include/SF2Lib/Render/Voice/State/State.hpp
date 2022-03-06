@@ -13,7 +13,7 @@
 #include "SF2Lib/Logger.hpp"
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/Entity/Generator/Generator.hpp"
-#include "SF2Lib/MIDI/Channel.hpp"
+#include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Voice/State/GenValue.hpp"
 #include "SF2Lib/Render/Voice/State/GenValueCollection.hpp"
 #include "SF2Lib/Render/Voice/State/Modulator.hpp"
@@ -45,7 +45,8 @@ public:
    @param sampleRate the sample rate of audio being rendered
    @param channel the MIDI channel that is in control
    */
-  State(Float sampleRate, const MIDI::Channel& channel) : sampleRate_{sampleRate}, channel_{channel} {}
+  State(Float sampleRate, const MIDI::ChannelState& channelState) :
+  sampleRate_{sampleRate}, channelState_{channelState} {}
 
   /** Create new state vector for testing purposes.
    @param sampleRate the sample rate of audio being rendered
@@ -53,8 +54,8 @@ public:
    @param key the MIDI key to use
    @param velocity the MIDI velocity to use
    */
-  State(Float sampleRate, const MIDI::Channel& channel, int key, int velocity = 64) :
-  sampleRate_{sampleRate}, channel_{channel}, eventKey_{key}, eventVelocity_{velocity}
+  State(Float sampleRate, const MIDI::ChannelState& channelState, int key, int velocity = 64) :
+  sampleRate_{sampleRate}, channelState_{channelState}, eventKey_{key}, eventVelocity_{velocity}
   {
     setDefaults();
   }
@@ -139,7 +140,7 @@ public:
   }
 
   /// @returns the MIDI channel state associated with the rendering
-  const MIDI::Channel& channel() const { return channel_; }
+  const MIDI::ChannelState& channelState() const { return channelState_; }
 
   /// @returns sample rate defined at construction
   Float sampleRate() const { return sampleRate_; }
@@ -149,7 +150,7 @@ private:
   void setDefaults();
   void linkModulators();
 
-  const MIDI::Channel& channel_;
+  const MIDI::ChannelState& channelState_;
   GenValueCollection gens_{};
   std::vector<Modulator> modulators_{};
 

@@ -6,14 +6,13 @@
 
 #include "SF2Lib/Logger.hpp"
 
+#include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Envelope/Generator.hpp"
 #include "SF2Lib/Render/LFO.hpp"
 #include "SF2Lib/Render/LowPassFilter.hpp"
 #include "SF2Lib/Render/Voice/Sample/Generator.hpp"
 #include "SF2Lib/Render/Voice/State/Modulator.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
-
-namespace SF2::MIDI { class Channel; }
 
 /**
  Collection of types involved in generating audio samples for note that is being played. For a polyphonic instrument,
@@ -48,7 +47,7 @@ public:
    @param sampleRate the sample rate to use for generating audio
    @param channel the MIDI state associated with the renderer
    */
-  Voice(Float sampleRate, const MIDI::Channel& channel, size_t voiceIndex);
+  Voice(Float sampleRate, const MIDI::ChannelState& channelState, size_t voiceIndex);
 
   /**
    Set the sample rate to use for rendering.

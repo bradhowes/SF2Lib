@@ -3,7 +3,6 @@
 #include <XCTest/XCTest.h>
 
 #include "SF2Lib/Entity/SampleHeader.hpp"
-#include "SF2Lib/MIDI/Channel.hpp"
 #include "SF2Lib/Render/Voice/Sample/Pitch.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
@@ -16,7 +15,7 @@ using namespace SF2::Render::Voice::Sample;
 
 @implementation PitchTests {
   Float epsilon;
-  MIDI::Channel channel;
+  MIDI::ChannelState channelState;
 }
 
 - (void)setUp {
@@ -27,7 +26,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
   Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0);
-  State::State state{44100.0, channel, eventKey};
+  State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
 
@@ -39,7 +38,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey + 12; // A5
   Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0);
-  State::State state{44100.0, channel, eventKey};
+  State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
 
@@ -51,7 +50,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey + 24; // A6
   Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0);
-  State::State state{44100.0, channel, eventKey};
+  State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
 
@@ -63,7 +62,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
   Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0);
-  State::State state{44100.0, channel, eventKey};
+  State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
 
   state.setValue(State::State::Index::overridingRootKey, 81);
@@ -78,7 +77,7 @@ using namespace SF2::Render::Voice::Sample;
   auto eventKey = sourceKey + 12;
   Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0);
 
-  State::State state{44100.0, channel, eventKey};
+  State::State state{44100.0, channelState, eventKey};
 
   // NOTE: since the forceMIDIKey is not a real-time parameter, it is only read once when Pitch is created.
   state.setValue(State::State::Index::forcedMIDIKey, 69);
@@ -93,7 +92,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
   Entity::SampleHeader header(0, 100, 80, 90, 22050.0, sourceKey, 0);
-  State::State state{44100.0, channel, eventKey};
+  State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
 
@@ -105,7 +104,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey - 1;
   Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 100.0);
-  State::State state{44100.0, channel, eventKey};
+  State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
 
@@ -117,7 +116,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey + 1;
   Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, -100.0);
-  State::State state{44100.0, channel, eventKey};
+  State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
 
@@ -129,7 +128,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey + 1;
   Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0.0);
-  State::State state{44100.0, channel, eventKey};
+  State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
 
   // Make every key use the same frequency as the source key.
@@ -151,7 +150,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
   Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0.0);
-  State::State state{44100.0, channel, eventKey};
+  State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
 
@@ -179,7 +178,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
   Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0.0);
-  State::State state{44100.0, channel, eventKey};
+  State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
 
@@ -207,7 +206,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
   Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0.0);
-  State::State state{44100.0, channel, eventKey};
+  State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
 

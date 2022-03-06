@@ -6,7 +6,7 @@
 #include "../SampleBasedContexts.hpp"
 
 #include "SF2Lib/Types.hpp"
-#include "SF2Lib/MIDI/Channel.hpp"
+#include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Voice/Sample/Generator.hpp"
 
 using namespace SF2::Render::Voice;
@@ -21,7 +21,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 static SF2::Entity::SampleHeader header{0, 6, 3, 5, 100, 69, 0}; // 0: start, 1: end, 2: loop start, 3: loop end
-static SF2::MIDI::Channel channel;
+static SF2::MIDI::ChannelState channelState;
 static int16_t values[8] = {10000, -20000, 30000, 20000, 10000, -10000, -20000, -30000};
 static SF2::Float epsilon = 1e-6;
 
@@ -66,7 +66,7 @@ static SF2::Float epsilon = 1e-6;
 
 
 - (void)testLinearInterpolation {
-  State::State state{100, channel};
+  State::State state{100, channelState};
   Sample::Generator gen{state, Sample::Generator::Interpolator::linear};
   NormalizedSampleSource source{values, header};
   source.load();

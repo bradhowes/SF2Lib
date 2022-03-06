@@ -3,7 +3,7 @@
 #include "../SampleBasedContexts.hpp"
 
 #include "SF2Lib/IO/File.hpp"
-#include "SF2Lib/MIDI/Channel.hpp"
+// #include "SF2Lib/MIDI/Channel.hpp"
 #include "SF2Lib/Render/Preset.hpp"
 #include "SF2Lib/Render/Voice/State/Config.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
@@ -37,15 +37,15 @@ using namespace SF2::Render::Voice;
   Preset preset(file, instruments, file.presets()[0]);
   auto found = preset.find(64, 64);
 
-  MIDI::Channel channel;
-  State::State left{44100, channel};
+  MIDI::ChannelState channelState;
+  State::State left{44100, channelState};
   left.prepareForVoice(found[0]);
   XCTAssertEqual(-500, left.unmodulated(Entity::Generator::Index::pan));
   XCTAssertEqual(2041, left.unmodulated(Entity::Generator::Index::releaseVolumeEnvelope));
   XCTAssertEqual(9023, left.unmodulated(Entity::Generator::Index::initialFilterCutoff));
   XCTAssertEqual(23, left.unmodulated(Entity::Generator::Index::sampleID));
 
-  State::State right{44100.0, channel};
+  State::State right{44100.0, channelState};
   right.prepareForVoice(found[1]);
   XCTAssertEqual(500, right.unmodulated(Entity::Generator::Index::pan));
   XCTAssertEqual(2041, right.unmodulated(Entity::Generator::Index::releaseVolumeEnvelope));

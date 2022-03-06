@@ -52,29 +52,29 @@ using namespace SF2::Render;
   Float epsilon = getEpsilon();
   const auto& file = contexts.context2.file();
 
-  MIDI::Channel channel;
+  MIDI::ChannelState channelState;
   InstrumentCollection instruments(file);
   Preset preset(file, instruments, file.presets()[0]);
 
   auto found = preset.find(69, 127);
   XCTAssertEqual(found.size(), 2);
-  Voice::Voice v1L{44100, channel, 0};
+  Voice::Voice v1L{44100, channelState, 0};
   v1L.configure(found[0]);
-  Voice::Voice v1R{44100, channel, 1};
+  Voice::Voice v1R{44100, channelState, 1};
   v1R.configure(found[1]);
 
   found = preset.find(73, 127);
   XCTAssertEqual(found.size(), 2);
-  Voice::Voice v2L{44100, channel, 2};
+  Voice::Voice v2L{44100, channelState, 2};
   v2L.configure(found[0]);
-  Voice::Voice v2R{44100, channel, 3};
+  Voice::Voice v2R{44100, channelState, 3};
   v2R.configure(found[1]);
 
   found = preset.find(76, 127);
   XCTAssertEqual(found.size(), 2);
-  Voice::Voice v3L{44100, channel, 4};
+  Voice::Voice v3L{44100, channelState, 4};
   v3L.configure(found[0]);
-  Voice::Voice v3R{44100, channel, 5};
+  Voice::Voice v3R{44100, channelState, 5};
   v3R.configure(found[1]);
 
   Float sampleRate = 44100.0;
@@ -132,20 +132,20 @@ using namespace SF2::Render;
   Float epsilon = getEpsilon();
   const auto& file = contexts.context0.file();
 
-  MIDI::Channel channel;
+  MIDI::ChannelState channelState;
   InstrumentCollection instruments(file);
   Preset preset(file, instruments, file.presets()[89]);
 
   auto found = preset.find(64, 127);
-  Voice::Voice v1{44100, channel, 0};
+  Voice::Voice v1{44100, channelState, 0};
   v1.configure(found[0]);
 
   found = preset.find(68, 127);
-  Voice::Voice v2{44100, channel, 2};
+  Voice::Voice v2{44100, channelState, 2};
   v2.configure(found[0]);
 
   found = preset.find(71, 127);
-  Voice::Voice v3{44100, channel, 4};
+  Voice::Voice v3{44100, channelState, 4};
   v3.configure(found[0]);
 
   double sampleRate = 44100.0;
@@ -279,7 +279,7 @@ using namespace SF2::Render;
 
 - (void)testLoopingModes {
   Voice::State::State state{contexts.context2.makeState(60, 32)};
-  Voice::Voice voice{44100.0, contexts.context2.channel(), 0};
+  Voice::Voice voice{44100.0, contexts.context2.channelState(), 0};
 
   XCTAssertEqual(Voice::Voice::LoopingMode::none, voice.loopingMode());
   voice.state().setValue(Voice::State::State::Index::sampleModes, -1);

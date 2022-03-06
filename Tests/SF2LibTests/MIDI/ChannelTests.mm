@@ -4,7 +4,7 @@
 
 #include <XCTest/XCTest.h>
 
-#include "SF2Lib/MIDI/Channel.hpp"
+#include "SF2Lib/MIDI/ChannelState.hpp"
 
 using namespace SF2::MIDI;
 
@@ -15,7 +15,7 @@ using namespace SF2::MIDI;
 @implementation ChannelTests
 
 - (void)testChannelKeyPressureValues {
-  Channel channel;
+  ChannelState channel;
   for (int key = 0; key < 128; ++key) XCTAssertEqual(0, channel.keyPressure(Note(key)));
 
   channel.setKeyPressure(64, 3);
@@ -26,7 +26,7 @@ using namespace SF2::MIDI;
 }
 
 - (void)testChannelPressureValue {
-  Channel channel;
+  ChannelState channel;
   XCTAssertEqual(0, channel.channelPressure());
 
   channel.setChannelPressure(123);
@@ -34,7 +34,7 @@ using namespace SF2::MIDI;
 }
 
 - (void)testChannelPitchWheelValue {
-  Channel channel;
+  ChannelState channel;
   XCTAssertEqual(0, channel.pitchWheelValue());
 
   channel.setPitchWheelValue(123);
@@ -42,7 +42,7 @@ using namespace SF2::MIDI;
 }
 
 - (void)testChannelPitchWheelSensitivity {
-  Channel channel;
+  ChannelState channel;
   XCTAssertEqual(200, channel.pitchWheelSensitivity());
 
   channel.setPitchWheelSensitivity(123);
@@ -50,7 +50,7 @@ using namespace SF2::MIDI;
 }
 
 - (void)testChannelContinuousControllerValues {
-  Channel channel;
+  ChannelState channel;
   for (int index = 0; index < 127; index += 10) XCTAssertEqual(0, channel.continuousControllerValue(index));
 
   channel.setContinuousControllerValue(0, 123);

@@ -5,7 +5,6 @@
 #include "../SampleBasedContexts.hpp"
 
 #include "SF2Lib/Entity/SampleHeader.hpp"
-#include "SF2Lib/MIDI/Channel.hpp"
 #include "SF2Lib/Render/Voice/Sample/Index.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
@@ -19,8 +18,8 @@ using namespace SF2::Render::Voice::Sample;
 @implementation GeneratorIndexTests
 
 static SF2::Entity::SampleHeader header(0, 6, 2, 5, 100, 69, 0);
-static SF2::MIDI::Channel channel;
-static Bounds bounds{Bounds::make(header, State::State(44100.0, channel))};
+static SF2::MIDI::ChannelState channelState;
+static Bounds bounds{Bounds::make(header, State::State(44100.0, channelState))};
 
 - (void)testConstruction {
   auto index = Index();

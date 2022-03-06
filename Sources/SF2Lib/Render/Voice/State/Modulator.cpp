@@ -4,7 +4,7 @@
 
 #include "SF2Lib/Entity/Modulator/Modulator.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
-#include "SF2Lib/MIDI/Channel.hpp"
+#include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Voice/State/Modulator.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
@@ -13,13 +13,13 @@ using namespace SF2::Render::Voice::State;
 
 namespace EntityMod = Entity::Modulator;
 
-int Modulator::ValueProvider::ccValue() const { return state_.channel().continuousControllerValue(cc_); }
+int Modulator::ValueProvider::ccValue() const { return state_.channelState().continuousControllerValue(cc_); }
 int Modulator::ValueProvider::key() const { return state_.key(); }
 int Modulator::ValueProvider::velocity() const { return state_.velocity(); }
-int Modulator::ValueProvider::keyPressure() const { return state_.channel().keyPressure(state_.key()); }
-int Modulator::ValueProvider::channelPressure() const { return state_.channel().channelPressure(); }
-int Modulator::ValueProvider::pitchWheelValue() const { return state_.channel().pitchWheelValue(); }
-int Modulator::ValueProvider::pitchWheelSensitivity() const { return state_.channel().pitchWheelSensitivity(); }
+int Modulator::ValueProvider::keyPressure() const { return state_.channelState().keyPressure(state_.key()); }
+int Modulator::ValueProvider::channelPressure() const { return state_.channelState().channelPressure(); }
+int Modulator::ValueProvider::pitchWheelValue() const { return state_.channelState().pitchWheelValue(); }
+int Modulator::ValueProvider::pitchWheelSensitivity() const { return state_.channelState().pitchWheelSensitivity(); }
 int Modulator::ValueProvider::linked() const { return std::round(modulator_->value()); };
 
 Modulator::Modulator(size_t index, const EntityMod::Modulator& configuration, const State& state) :

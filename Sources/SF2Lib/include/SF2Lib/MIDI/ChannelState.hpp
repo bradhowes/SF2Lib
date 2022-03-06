@@ -9,14 +9,13 @@
 
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/MIDI/MIDI.hpp"
-#include "SF2Lib/MIDI/Note.hpp"
 
 namespace SF2::MIDI {
 
 /**
  Collection of state values that pertains to a specific MIDI channel.
  */
-class Channel {
+class ChannelState {
 public:
   inline constexpr static int CCMin = 0;
   inline constexpr static int CCMax = 127;
@@ -27,7 +26,7 @@ public:
   /**
    Construct new channel.
    */
-  Channel() : continuousControllerValues_{}, keyPressureValues_{} {
+  ChannelState() : continuousControllerValues_{}, keyPressureValues_{} {
     continuousControllerValues_.fill(0);
     keyPressureValues_.fill(0);
   }

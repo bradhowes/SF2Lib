@@ -11,7 +11,6 @@
 
 #include "DSPHeaders/EventProcessor.hpp"
 
-#include "SF2Lib/Types.hpp"
 #include "SF2Lib/Render/Engine/OldestActiveVoiceCache.hpp"
 #include "SF2Lib/Render/Engine/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
@@ -45,7 +44,7 @@ public:
     available_.reserve(maxVoiceCount);
     voices_.reserve(maxVoiceCount);
     for (size_t voiceIndex = 0; voiceIndex < maxVoiceCount; ++voiceIndex) {
-      voices_.emplace_back(sampleRate, channel_, voiceIndex);
+      voices_.emplace_back(sampleRate, channelState_, voiceIndex);
       available_.push_back(voiceIndex);
     }
   }
@@ -68,7 +67,7 @@ public:
   Float sampleRate() const { return sampleRate_; }
 
   /// Obtain the MIDI channel assigned to the engine.
-  MIDI::Channel channel() const { return channel_; }
+  const MIDI::ChannelState& channelState() const { return channelState_; }
 
   /**
    Load the presets from an SF2 file.
@@ -181,7 +180,41 @@ private:
   void setParameterFromEvent(const AUParameterEvent& event) {}
 
   /// API for EventProcessor
-  void doMIDIEvent(const AUMIDIEvent& midiEvent) {}
+  void doMIDIEvent(const AUMIDIEvent& midiEvent)
+  {
+    if (midiEvent.eventType != AURenderEventMIDI || midiEvent.length < 1) return;
+    switch (midiEvent.data[0] & 0xF0) {
+      case MIDI::CoreEvent::noteOff:
+        if (midiEvent.length == 2)
+          noteOff(midiEvent.data[1]);
+        break;
+      case MIDI::CoreEvent::noteOn:
+        if (midiEvent.length == 3)
+          noteOn(midiEvent.data[1], midiEvent.data[2]);
+        break;
+      case MIDI::CoreEvent::keyPressure:
+        if (midiEvent.length == 3)
+          channelState_.setKeyPressure(midiEvent.data[1], midiEvent.data[2]);
+        break;
+      case MIDI::CoreEvent::controlChange:
+        if (midiEvent.length == 3)
+          channelState_.setContinuousControllerValue(midiEvent.data[1], midiEvent.data[2]);
+        break;
+      case MIDI::CoreEvent::programChange:
+        break;
+      case MIDI::CoreEvent::channelPressure:
+        if (midiEvent.length == 2)
+          channelState_.setChannelPressure(midiEvent.data[1]);
+        break;
+      case MIDI::CoreEvent::pitchBend:
+        if (midiEvent.length == 2)
+          channelState_.setPitchWheelValue(midiEvent.data[1]);
+        break;
+      case MIDI::CoreEvent::reset:
+        allOff();
+        break;
+    }
+  }
 
   /// API for EventProcessor
   void doRendering(std::vector<AUValue*>& ins, std::vector<AUValue*>& outs, AUAudioFrameCount frameCount)
@@ -228,7 +261,7 @@ private:
   }
 
   Float sampleRate_;
-  MIDI::Channel channel_{};
+  MIDI::ChannelState channelState_{};
   std::vector<Voice> voices_{};
   std::vector<size_t> available_{};
   OldestActiveVoiceCache oldestActive_;

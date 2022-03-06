@@ -41,7 +41,7 @@ struct PresetTestContext : PresetTestContextBase
   const SF2::Render::Preset& preset() const { return state()->preset_; }
 
   SF2::Render::Voice::State::State makeState(const SF2::Render::Voice::State::Config& config) const {
-    SF2::Render::Voice::State::State state(sampleRate_, channel_);
+    SF2::Render::Voice::State::State state(sampleRate_, channelState_);
     state.prepareForVoice(config);
     return state;
   }
@@ -51,7 +51,7 @@ struct PresetTestContext : PresetTestContextBase
     return makeState(found[0]);
   }
 
-  SF2::MIDI::Channel& channel() { return channel_; }
+  SF2::MIDI::ChannelState& channelState() { return channelState_; }
 
   static void SamplesEqual(SF2::Float a, SF2::Float b) {
     XCTAssertEqualWithAccuracy(a, b, epsilon);
@@ -72,7 +72,7 @@ private:
     return state_.get();
   }
 
-  SF2::MIDI::Channel channel_{};
+  SF2::MIDI::ChannelState channelState_{};
   SF2::Float sampleRate_;
   int presetIndex_;
   mutable std::unique_ptr<State> state_;

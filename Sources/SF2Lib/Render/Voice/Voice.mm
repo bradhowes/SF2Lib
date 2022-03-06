@@ -2,7 +2,6 @@
 
 #include <cmath>
 
-#include "SF2Lib/MIDI/Channel.hpp"
 #include "SF2Lib/Render/Envelope/Generator.hpp"
 
 #include "SF2Lib/Render/Voice/Sample/Bounds.hpp"
@@ -13,8 +12,8 @@ using namespace SF2::MIDI;
 using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
 
-Voice::Voice(Float sampleRate, const Channel& channel, size_t voiceIndex) :
-state_{sampleRate, channel},
+Voice::Voice(Float sampleRate, const ChannelState& channelState, size_t voiceIndex) :
+state_{sampleRate, channelState},
 loopingMode_{none},
 pitch_{state_},
 sampleGenerator_{state_, Sample::Generator::Interpolator::linear},

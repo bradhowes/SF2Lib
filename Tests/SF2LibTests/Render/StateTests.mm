@@ -5,7 +5,7 @@
 #include "../SampleBasedContexts.hpp"
 
 #include "SF2Lib/Entity/Generator/Index.hpp"
-#include "SF2Lib/MIDI/Channel.hpp"
+// #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Preset.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
