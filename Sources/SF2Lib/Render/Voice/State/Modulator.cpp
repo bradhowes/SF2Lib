@@ -2,11 +2,11 @@
 
 #include <sstream>
 
-#include "Entity/Modulator/Modulator.hpp"
-#include "Entity/Modulator/Source.hpp"
-#include "MIDI/Channel.hpp"
-#include "Render/Voice/State/Modulator.hpp"
-#include "Render/Voice/State/State.hpp"
+#include "SF2Lib/Entity/Modulator/Modulator.hpp"
+#include "SF2Lib/Entity/Modulator/Source.hpp"
+#include "SF2Lib/MIDI/Channel.hpp"
+#include "SF2Lib/Render/Voice/State/Modulator.hpp"
+#include "SF2Lib/Render/Voice/State/State.hpp"
 
 using namespace SF2;
 using namespace SF2::Render::Voice::State;

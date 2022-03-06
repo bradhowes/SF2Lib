@@ -1,11 +1,6 @@
-//
-//  Logger.cpp.cpp
-//  
-//
-//  Created by Brad Howes on 02/03/2022.
-//
+// Copyright © 2022 Brad Howes. All rights reserved.
 
-#include "Logger.hpp"
+#include "SF2Lib/Logger.hpp"
 
 const std::string SF2::Logger::base{"SF2Lib"};
 

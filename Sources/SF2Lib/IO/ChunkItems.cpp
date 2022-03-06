@@ -3,7 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "IO/ChunkItems.hpp"
+#include "SF2Lib/IO/ChunkItems.hpp"
 
 using namespace SF2::IO;
 

@@ -4,7 +4,7 @@
 
 #include <XCTest/XCTest.h>
 
-#include "IO/Tag.hpp"
+#include "SF2Lib/IO/Tag.hpp"
 
 using namespace SF2::IO;
 

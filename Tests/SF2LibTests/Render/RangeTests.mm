@@ -4,8 +4,8 @@
 
 #include <XCTest/XCTest.h>
 
-#include "Entity/Generator/Amount.hpp"
-#include "Render/Range.hpp"
+#include "SF2Lib/Entity/Generator/Amount.hpp"
+#include "SF2Lib/Render/Range.hpp"
 
 using namespace SF2::Render;
 using namespace SF2::Entity::Generator;

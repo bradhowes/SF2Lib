@@ -4,7 +4,7 @@
 
 #include <XCTest/XCTest.h>
 
-#include "MIDI/Channel.hpp"
+#include "SF2Lib/MIDI/Channel.hpp"
 
 using namespace SF2::MIDI;
 

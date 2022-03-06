@@ -3,8 +3,8 @@
 #include <XCTest/XCTest.h>
 #include <cmath>
 
-#include "Types.hpp"
-#include "DSP/DSP.hpp"
+#include "SF2Lib/Types.hpp"
+#include "SF2Lib/DSP/DSP.hpp"
 
 using namespace SF2;
 using namespace SF2::DSP;

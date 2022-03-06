@@ -4,7 +4,7 @@
 
 #include <XCTest/XCTest.h>
 
-#include "Entity/Modulator/Modulator.hpp"
+#include "SF2Lib/Entity/Modulator/Modulator.hpp"
 
 using namespace SF2::Entity::Modulator;
 

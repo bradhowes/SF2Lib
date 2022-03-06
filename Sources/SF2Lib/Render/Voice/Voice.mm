@@ -2,12 +2,12 @@
 
 #include <cmath>
 
-#include "MIDI/Channel.hpp"
-#include "Render/Envelope/Generator.hpp"
+#include "SF2Lib/MIDI/Channel.hpp"
+#include "SF2Lib/Render/Envelope/Generator.hpp"
 
-#include "Render/Voice/Sample/Bounds.hpp"
-#include "Render/Voice/State/Config.hpp"
-#include "Render/Voice/Voice.hpp"
+#include "SF2Lib/Render/Voice/Sample/Bounds.hpp"
+#include "SF2Lib/Render/Voice/State/Config.hpp"
+#include "SF2Lib/Render/Voice/Voice.hpp"
 
 using namespace SF2::MIDI;
 using namespace SF2::Render::Voice;

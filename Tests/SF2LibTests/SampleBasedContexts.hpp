@@ -7,9 +7,9 @@
 
 #include <XCTest/XCTest.h>
 
-#include "IO/File.hpp"
-#include "Render/Preset.hpp"
-#include "Render/Voice/State/State.hpp"
+#include "SF2Lib/IO/File.hpp"
+#include "SF2Lib/Render/Preset.hpp"
+#include "SF2Lib/Render/Voice/State/State.hpp"
 
 struct PresetTestContextBase
 {

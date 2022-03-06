@@ -3,8 +3,8 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "IO/ChunkList.hpp"
-#include "IO/Format.hpp"
+#include "SF2Lib/IO/ChunkList.hpp"
+#include "SF2Lib/IO/Format.hpp"
 
 using namespace SF2::IO;
 

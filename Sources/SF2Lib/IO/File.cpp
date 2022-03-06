@@ -3,10 +3,10 @@
 #include <iostream>
 #include <map>
 
-#include "Entity/Instrument.hpp"
-#include "Entity/Preset.hpp"
-#include "IO/ChunkList.hpp"
-#include "IO/File.hpp"
+#include "SF2Lib/Entity/Instrument.hpp"
+#include "SF2Lib/Entity/Preset.hpp"
+#include "SF2Lib/IO/ChunkList.hpp"
+#include "SF2Lib/IO/File.hpp"
 
 using namespace SF2::IO;
 

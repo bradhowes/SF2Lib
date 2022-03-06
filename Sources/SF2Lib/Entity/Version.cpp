@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "Entity/Version.hpp"
+#include "SF2Lib/Entity/Version.hpp"
 
 using namespace SF2::Entity;
 

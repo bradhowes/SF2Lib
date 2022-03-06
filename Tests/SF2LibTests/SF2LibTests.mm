@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 
-#import "DSP/DSP.hpp"
+#import "SF2Lib/DSP/DSP.hpp"
 
 @interface OneTests : XCTestCase
 

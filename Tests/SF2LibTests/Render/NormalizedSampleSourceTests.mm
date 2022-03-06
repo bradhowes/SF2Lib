@@ -5,9 +5,9 @@
 
 #include "../SampleBasedContexts.hpp"
 
-#include "Types.hpp"
-#include "MIDI/Channel.hpp"
-#include "Render/Voice/Sample/Generator.hpp"
+#include "SF2Lib/Types.hpp"
+#include "SF2Lib/MIDI/Channel.hpp"
+#include "SF2Lib/Render/Voice/Sample/Generator.hpp"
 
 using namespace SF2::Render::Voice;
 using namespace SF2::Render::Voice::Sample;

@@ -4,7 +4,7 @@
 
 #include "../SampleBasedContexts.hpp"
 
-#include "Render/LFO.hpp"
+#include "SF2Lib/Render/LFO.hpp"
 
 using namespace SF2::Render;
 

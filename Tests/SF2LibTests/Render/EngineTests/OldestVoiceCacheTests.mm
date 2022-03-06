@@ -2,7 +2,7 @@
 
 #include <XCTest/XCTest.h>
 
-#include "Render/Engine/OldestActiveVoiceCache.hpp"
+#include "SF2Lib/Render/Engine/OldestActiveVoiceCache.hpp"
 
 using namespace SF2::Render::Engine;
 

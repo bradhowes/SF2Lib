@@ -2,12 +2,12 @@
 
 #include <string>
 
-#include "Entity/Preset.hpp"
+#include "SF2Lib/Entity/Preset.hpp"
 
-#include "IO/ChunkList.hpp"
-#include "IO/Format.hpp"
-#include "IO/Parser.hpp"
-#include "IO/StringUtils.hpp"
+#include "SF2Lib/IO/ChunkList.hpp"
+#include "SF2Lib/IO/Format.hpp"
+#include "SF2Lib/IO/Parser.hpp"
+#include "SF2Lib/IO/StringUtils.hpp"
 
 using namespace SF2::IO;
 

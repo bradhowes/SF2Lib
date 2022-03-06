@@ -2,11 +2,11 @@
 
 #include "../SampleBasedContexts.hpp"
 
-#include "IO/File.hpp"
-#include "MIDI/Channel.hpp"
-#include "Render/Preset.hpp"
-#include "Render/Voice/State/Config.hpp"
-#include "Render/Voice/State/State.hpp"
+#include "SF2Lib/IO/File.hpp"
+#include "SF2Lib/MIDI/Channel.hpp"
+#include "SF2Lib/Render/Preset.hpp"
+#include "SF2Lib/Render/Voice/State/Config.hpp"
+#include "SF2Lib/Render/Voice/State/State.hpp"
 
 using namespace SF2;
 using namespace SF2::Render;

@@ -2,8 +2,8 @@
 
 #include <XCTest/XCTest.h>
 
-#include "Entity/Modulator/Source.hpp"
-#include "MIDI/ValueTransformer.hpp"
+#include "SF2Lib/Entity/Modulator/Source.hpp"
+#include "SF2Lib/MIDI/ValueTransformer.hpp"
 
 using namespace SF2::MIDI;
 using VT = SF2::MIDI::ValueTransformer;

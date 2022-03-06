@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "Entity/Instrument.hpp"
+#include "SF2Lib/Entity/Instrument.hpp"
 
 using namespace SF2::Entity;
 

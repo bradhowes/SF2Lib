@@ -4,7 +4,7 @@
 
 #include <XCTest/XCTest.h>
 
-#include "MIDI/Note.hpp"
+#include "SF2Lib/MIDI/Note.hpp"
 
 using namespace SF2::MIDI;
 

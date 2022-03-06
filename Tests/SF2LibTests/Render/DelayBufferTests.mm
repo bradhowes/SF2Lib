@@ -3,7 +3,7 @@
 #include <XCTest/XCTest.h>
 #include <vector>
 
-#include "Render/DelayBuffer.hpp"
+#include "SF2Lib/Render/DelayBuffer.hpp"
 
 @interface DelayBufferTests : XCTestCase
 

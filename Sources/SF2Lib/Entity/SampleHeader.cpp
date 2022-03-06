@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "Entity/SampleHeader.hpp"
+#include "SF2Lib/Entity/SampleHeader.hpp"
 
 using namespace SF2::Entity;
 

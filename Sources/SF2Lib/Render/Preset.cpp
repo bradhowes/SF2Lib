@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "IO/File.hpp"
-#include "Render/Preset.hpp"
+#include "SF2Lib/IO/File.hpp"
+#include "SF2Lib/Render/Preset.hpp"
 
 using namespace SF2::Render;
 

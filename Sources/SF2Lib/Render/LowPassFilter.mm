@@ -1,3 +1,3 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
-#include "Render/LowPassFilter.hpp"
+#include "SF2Lib/Render/LowPassFilter.hpp"

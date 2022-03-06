@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "Entity/Bag.hpp"
+#include "SF2Lib/Entity/Bag.hpp"
 
 using namespace SF2::Entity;
 

@@ -1,6 +1,6 @@
 // Copyright © 2020 Brad Howes. All rights reserved.
 
-#include "Types.hpp"
+#include "SF2Lib/Types.hpp"
 
 static SF2::Float getEpsilon() {
   if constexpr (std::is_same_v<SF2::Float, float>) return 1.0e-2;
@@ -12,9 +12,9 @@ static SF2::Float getEpsilon() {
 
 #include "../../SampleBasedContexts.hpp"
 
-#include "Render/Preset.hpp"
-#include "Render/Voice/Sample/Generator.hpp"
-#include "Render/Voice/Voice.hpp"
+#include "SF2Lib/Render/Preset.hpp"
+#include "SF2Lib/Render/Voice/Sample/Generator.hpp"
+#include "SF2Lib/Render/Voice/Voice.hpp"
 
 using namespace SF2;
 using namespace SF2::Render;

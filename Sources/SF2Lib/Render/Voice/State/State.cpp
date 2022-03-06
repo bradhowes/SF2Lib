@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "Render/Voice/State/Config.hpp"
-#include "Render/Voice/State/State.hpp"
+#include "SF2Lib/Render/Voice/State/Config.hpp"
+#include "SF2Lib/Render/Voice/State/State.hpp"
 
 using namespace SF2::Render::Voice::State;
 

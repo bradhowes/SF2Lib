@@ -2,10 +2,10 @@
 
 #include <XCTest/XCTest.h>
 
-#include "Entity/SampleHeader.hpp"
-#include "MIDI/Channel.hpp"
-#include "Render/Voice/Sample/Pitch.hpp"
-#include "Render/Voice/State/State.hpp"
+#include "SF2Lib/Entity/SampleHeader.hpp"
+#include "SF2Lib/MIDI/Channel.hpp"
+#include "SF2Lib/Render/Voice/Sample/Pitch.hpp"
+#include "SF2Lib/Render/Voice/State/State.hpp"
 
 using namespace SF2;
 using namespace SF2::Render::Voice;

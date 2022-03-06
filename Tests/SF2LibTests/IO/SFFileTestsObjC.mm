@@ -6,8 +6,8 @@
 
 #include "../SampleBasedContexts.hpp"
 
-#include "IO/File.hpp"
-#include "Render/Voice/Sample/NormalizedSampleSource.hpp"
+#include "SF2Lib/IO/File.hpp"
+#include "SF2Lib/Render/Voice/Sample/NormalizedSampleSource.hpp"
 
 using namespace SF2;
 using namespace SF2::Render;
