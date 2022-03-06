@@ -1,4 +1,4 @@
-# SF2Lib - an SF2 library in C++
+# SF2Lib - an SF2 library in C++ (mostly)
 
 This library can read SF2 SoundFont files and render audio samples from them. It properly reads in a compliant SF2 file 
 and can be used to obtain meta data such as preset names. It also has an audio rendering engine that can generate audio 
@@ -11,6 +11,16 @@ the AudioToolbox and Accelerate frameworks available. However, this usage is fai
 simple library for reading SF2 files as well as a competent SF2 audio renderer whose output can be fed to any sort of 
 audio processing chain, not just macOS and iOS systems Core Audio systems. For my own use, this will be used in AUv3
 components on iOS and macOS platforms.
+
+# SF2 Spec Support
+
+Currently, all SF2 generators and modulators are supported and/or implemented, *except* for the following:
+
+* chorusEffectSend -- how much of a rendered sample is sent to a chorus effect audio channel (L+R)
+* reverbEffectSend -- how much of a rendered sample is sent to a reverb effect audio channel (L+R)
+
+Since there are plenty of chorus and reverb effects available, this library will not have any of its own. Rather the 
+goal will be to make available the effect send channels for other AUv3 nodes to process as they wish.
 
 # DSPTableGenerator
 
@@ -46,3 +56,4 @@ All of the code has been written by myself over the course of several years, but
 other projects, especially [FluidSynth](https://www.fluidsynth.org) and their wealth of knowledge in all things SF2. 
 In particular, if there is any confusion about what the SF2 spec means, I rely on their interpretation in code. That
 said, any misrepresentations of SF2 functionality are of my own doing.
+e
