@@ -14,33 +14,33 @@ enum struct Index : uint16_t {
    played for this instrument. For example, if Start were 7 and startAddressOffset were 2, the first sample data point
    played would be sample data point 9.
    */
-  startAddressOffset = 0,
+  startAddressOffset = 0, // USED
   /**
    The offset, in sample sample data points, beyond the end sample header parameter to the last sample data point to
    be played for this instrument. For example, if end were 17 and endAddressOffset were -2, the last sample data point
    played would be sample data point 15.
    */
-  endAddressOffset,
+  endAddressOffset, // USED
   /**
    The offset, in sample data points, beyond the start loop sample header parameter to the first sample data point to
    be repeated in the loop for this instrument. For example, if start loop were 10 and startLoopAddressOffset were -1,
    the first repeated loop sample data point would be sample data point 9.
    */
-  startLoopAddressOffset,
+  startLoopAddressOffset, // USED
   /**
    The offset, in sample data points, beyond the end loop sample header parameter to the sample data point considered
    equivalent to the start loop sample data point for the loop for this instrument. For example, if end loop were 15
    and endLoopAddressOffset were 2, sample data point 17 would be considered equivalent to the start loop sample data
    point, and hence sample data point 16 would effectively precede start loop during looping.
    */
-  endLoopAddressOffset,
+  endLoopAddressOffset, // USED
   /**
    The offset, in 32768 sample data point increments beyond the sample header parameter and the first sample data
    point to be played in this instrument. This parameter is added to the startAddressOffset parameter. For example, if
    start were 5, startAddressOffset were 3 and startAddressCoarseOffset were 2, the first sample data point played
    would be sample data point 65544.
    */
-  startAddressCoarseOffset,
+  startAddressCoarseOffset, // USED
   // 5
   /**
    This is the degree, in cents, to which a full scale excursion of the Modulation LFO will influence pitch. A
@@ -49,7 +49,7 @@ enum struct Index : uint16_t {
    octaves rather than in Hz. For example, a value of 100 indicates that the pitch will first rise 1 semitone, then
    fall one semitone.
    */
-  modulatorLFOToPitch,
+  modulatorLFOToPitch, // USED
   /**
    This is the degree, in cents, to which a full scale excursion of the Vibrato LFO will influence pitch. A positive
    value indicates a positive LFO excursion increases pitch; a negative value indicates a positive excursion
@@ -57,21 +57,21 @@ enum struct Index : uint16_t {
    octaves rather than in Hz. For example, a value of 100 indicates that the pitch will first rise 1 semitone, then
    fall one semitone.
    */
-  vibratoLFOToPitch,
+  vibratoLFOToPitch, // USED
   /**
    This is the degree, in cents, to which a full scale excursion of the Modulation Envelope will influence pitch. A
    positive value indicates an increase in pitch; a negative value indicates a decrease in pitch. Pitch is always
    modified logarithmically, that is the deviation is in cents, semitones, and octaves rather than in Hz. For example,
    a value of 100 indicates that the pitch will rise 1 semitone at the envelope peak.
    */
-  modulatorEnvelopeToPitch,
+  modulatorEnvelopeToPitch, // USED
   /**
    This is the cutoff and resonant frequency of the lowpass filter in absolute cent units. The lowpass filter is
    defined as a second order resonant pole pair whose pole frequency in Hz is defined by the Initial Filter Cutoff
    parameter. When the cutoff frequency exceeds 20kHz and the Q (resonance) of the filter is zero, the filter does
    not affect the signal.
    */
-  initialFilterCutoff,
+  initialFilterCutoff, // USED
   /**
    This is the height above DC gain in centibels which the filter resonance exhibits at the cutoff frequency. A value
    of zero or less indicates the filter is not resonant; the gain at the cutoff frequency (pole angle) may be less
@@ -81,7 +81,7 @@ enum struct Index : uint16_t {
    also that if initialFilterQ is set to zero or less and the cutoff frequency exceeds 20 kHz, then the filter
    response is flat and unity gain.
    */
-  initialFilterResonance,
+  initialFilterResonance, // USED
   // 10
   /**
    This is the degree, in cents, to which a full scale excursion of the Modulation LFO will influence filter cutoff
@@ -90,7 +90,7 @@ enum struct Index : uint16_t {
    logarithmically, that is the deviation is in cents, semitones, and octaves rather than in Hz. For example, a value
    of 1200 indicates that the cutoff frequency will first rise 1 octave, then fall one octave.
    */
-  modulatorLFOToFilterCutoff,
+  modulatorLFOToFilterCutoff, // USED
   /**
    This is the degree, in cents, to which a full scale excursion of the Modulation Envelope will influence filter
    cutoff frequency. A positive number indicates an increase in cutoff frequency; a negative number indicates a
@@ -98,14 +98,14 @@ enum struct Index : uint16_t {
    deviation is in cents, semitones, and octaves rather than in Hz. For example, a value of 1000 indicates that the
    cutoff frequency will rise one octave at the envelope attack peak.
    */
-  modulatorEnvelopeToFilterCutoff,
+  modulatorEnvelopeToFilterCutoff, // USED
   /**
    The offset, in 32768 sample data point increments beyond the End sample header parameter and the last sample data
    point to be played in this instrument. This parameter is added to the endAddressOffset parameter. For example, if
    End were 65536, startAddressOffset were -3 and startAddressCoarseOffset were -1, the last sample data point played
    would be sample data point 32765.
    */
-  endAddressCoarseOffset,
+  endAddressCoarseOffset, // USED
   /**
    This is the degree, in centibels, to which a full scale excursion of the Modulation LFO will influence volume. A
    positive number indicates a positive LFO excursion increases volume; a negative number indicates a positive
@@ -113,7 +113,7 @@ enum struct Index : uint16_t {
    not in linear amplitude. For example, a value of 100 indicates that the volume will first rise ten dB, then fall
    ten dB.
    */
-  modulatorLFOToVolume,
+  modulatorLFOToVolume, // USED
   unused1,
   // 15
   /**
@@ -123,7 +123,7 @@ enum struct Index : uint16_t {
    unprocessed portion of the output. For example, a value of 250 indicates that the signal is sent at 25% of full
    level (attenuation of 12 dB from full level) to the chorus effects processor.
    */
-  chorusEffectSend,
+  chorusEffectSend, // *** NOT USED ***
   /**
    This is the degree, in 0.1% units, to which the audio output of the note is sent to the reverb effects processor.
    A value of 0% or less indicates no signal is sent from this note; a value of 100% or more indicates the note is
@@ -131,7 +131,7 @@ enum struct Index : uint16_t {
    unprocessed portion of the output. For example, a value of 250 indicates that the signal is sent at 25% of full
    level (attenuation of 12 dB from full level) to the reverb effects processor.
    */
-  reverbEffectSend,
+  reverbEffectSend, // *** NOT USED ***
   /**
    This is the degree, in 0.1% units, to which the “dry” audio output of the note is positioned to the left or right
    output. A value of -50% or less indicates the signal is sent entirely to the left output and not sent to the right
@@ -150,26 +150,26 @@ enum struct Index : uint16_t {
    and a positive value a delay longer than one second. The most negative number (-32768) conventionally indicates no
    delay. For example, a delay of 10 msec would be 1200log2(.01) = -7973.
    */
-  delayModulatorLFO,
+  delayModulatorLFO, // USED
   /**
    This is the frequency, in absolute cents, of the Modulation LFO’s triangular period. A value of zero indicates a
    frequency of 8.176 Hz. A negative value indicates a frequency less than 8.176 Hz; a positive value a frequency
    greater than 8.176 Hz. For example, a frequency of 10 mHz would be 1200log2(.01/8.176) = -11610.
    */
-  frequencyModulatorLFO,
+  frequencyModulatorLFO, // USED
   /**
    This is the delay time, in absolute timecents, from key on until the Vibrato LFO begins its upward ramp from zero
    value. A value of 0 indicates a 1 second delay. A negative value indicates a delay less than one second; a positive
    value a delay longer than one second. The most negative number (-32768) conventionally indicates no delay. For
    example, a delay of 10 msec would be 1200log2(.01) = -7973.
    */
-  delayVibratoLFO,
+  delayVibratoLFO, // USED
   /**
    This is the frequency, in absolute cents, of the Vibrato LFO’s triangular period. A value of zero indicates a
    frequency of 8.176 Hz. A negative value indicates a frequency less than 8.176 Hz; a positive value a frequency
    greater than 8.176 Hz. For example, a frequency of 10 mHz would be 1200log2(.01/8.176) = -11610.
    */
-  frequencyVibratoLFO,
+  frequencyVibratoLFO, // USED
   // 25
   /**
    This is the delay time, in absolute timecents, between key on and the start of the attack phase of the Modulation
@@ -177,7 +177,7 @@ enum struct Index : uint16_t {
    positive value a delay longer than one second. The most negative number (-32768) conventionally indicates no
    delay. For example, a delay of 10 msec would be 1200log2(.01) = -7973.
    */
-  delayModulatorEnvelope,
+  delayModulatorEnvelope, // USED
   /**
    This is the time, in absolute timecents, from the end of the Modulation Envelope Delay Time until the point at
    which the Modulation Envelope value reaches its peak. Note that the attack is “convex”; the curve is nominally
@@ -186,7 +186,7 @@ enum struct Index : uint16_t {
    value a time longer than one second. The most negative number (-32768) conventionally indicates instantaneous
    attack. For example, an attack time of 10 msec would be 1200log2(.01) = -7973.
    */
-  attackModulatorEnvelope,
+  attackModulatorEnvelope, // USED
   /**
    This is the time, in absolute timecents, from the end of the attack phase to the entry into decay phase, during
    which the envelope value is held at its peak. A value of 0 indicates a 1 second hold time. A negative value
@@ -194,7 +194,7 @@ enum struct Index : uint16_t {
    (-32768) conventionally indicates no hold phase. For example, a hold time of 10 msec would be
    1200log2(.01) = -7973.
    */
-  holdModulatorEnvelope,
+  holdModulatorEnvelope, // USED
   /**
    This is the time, in absolute timecents, for a 100% change in the Modulation Envelope value during decay phase.
    For the Modulation Envelope, the decay phase linearly ramps toward the sustain level. If the sustain level were
@@ -202,7 +202,7 @@ enum struct Index : uint16_t {
    decay time for a zero-sustain level. A negative value indicates a time less than one second; a positive value a
    time longer than one second. For example, a decay time of 10 msec would be 1200log2(.01) = -7973.
    */
-  decayModulatorEnvelope,
+  decayModulatorEnvelope, // USED
   /**
    This is the decrease in level, expressed in 0.1% units, to which the Modulation Envelope value ramps during the
    decay phase. For the Modulation Envelope, the sustain level is properly expressed in percent of full scale. Because
@@ -212,7 +212,7 @@ enum struct Index : uint16_t {
    level. Values less than zero are to be interpreted as zero; values above 1000 are to be interpreted as 1000. For
    example, a sustain level which corresponds to an absolute value 40% of peak would be 600.
    */
-  sustainModulatorEnvelope,
+  sustainModulatorEnvelope, // USED
   // 30
   /**
    This is the time, in absolute timecents, for a 100% change in the Modulation Envelope value during release phase.
@@ -222,7 +222,7 @@ enum struct Index : uint16_t {
    indicates a time less than one second; a positive value a time longer than one second. For example, a release time
    of 10 msec would be 1200log2(.01) = -7973.
    */
-  releaseModulatorEnvelope,
+  releaseModulatorEnvelope, // USED
   /**
    This is the degree, in timecents per KeyNumber units which the hold time of the Modulation Envelope is decreased
    by increasing MIDI key number. The hold time at key number 60 is always unchanged. The unit scaling is such that a
@@ -230,7 +230,7 @@ enum struct Index : uint16_t {
    halve. For example, if the Modulation Envelope Hold Time was -7973 = 10 msec and the Key Number to Mod Env Hold
    was 50 when key number 36 was played, the hold time would be 20 msec.
    */
-  midiKeyToModulatorEnvelopeHold,
+  midiKeyToModulatorEnvelopeHold, // USED
   /**
    This is the degree, in timecents per KeyNumber units, to which the hold time of the Modulation Envelope is
    decreased by increasing MIDI key number. The hold time at key number 60 is always unchanged. The unit scaling is
@@ -238,14 +238,14 @@ enum struct Index : uint16_t {
    time to halve. For example, if the Modulation Envelope Hold Time were -7973 = 10 msec and the Key Number to
    Mod Env Hold were 50 when key number 36 was played, the hold time would be 20 msec.
    */
-  midiKeyToModulatorEnvelopeDecay,
+  midiKeyToModulatorEnvelopeDecay, // USED
   /**
    This is the delay time, in absolute timecents, between key on and the start of the attack phase of the Volume
    envelope. A value of 0 indicates a 1 second delay. A negative value indicates a delay less than one second; a
    positive value a delay longer than one second. The most negative number (-32768) conventionally indicates no
    delay. For example, a delay of 10 msec would be 1200log2(.01) = -7973.
    */
-  delayVolumeEnvelope,
+  delayVolumeEnvelope, // USED
   /**
    This is the time, in absolute timecents, from the end of the Volume Envelope Delay Time until the point at which
    the Volume Envelope value reaches its peak. Note that the attack is “convex”; the curve is nominally such that
@@ -254,7 +254,7 @@ enum struct Index : uint16_t {
    second. The most negative number (- 32768) conventionally indicates instantaneous attack. For example, an attack
    time of 10 msec would be 1200log2(.01) = -7973.
    */
-  attackVolumeEnvelope,
+  attackVolumeEnvelope, // USED
   // 35
   /**
    This is the time, in absolute timecents, from the end of the attack phase to the entry into decay phase, during
@@ -263,7 +263,7 @@ enum struct Index : uint16_t {
    (-32768) conventionally indicates no hold phase. For example, a hold time of 10 msec would be
    1200log2(.01) = -7973.
    */
-  holdVolumeEnvelope,
+  holdVolumeEnvelope, // USED
   /**
    This is the time, in absolute timecents, for a 100% change in the Volume Envelope value during decay phase. For
    the Volume Envelope, the decay phase linearly ramps toward the sustain level, causing a constant dB change for
@@ -272,7 +272,7 @@ enum struct Index : uint16_t {
    less than one second; a positive value a time longer than one second. For example, a decay time of 10 msec would
    be 1200log2(.01) = -7973.
    */
-  decayVolumeEnvelope,
+  decayVolumeEnvelope, // USED
   /**
    This is the decrease in level, expressed in centibels, to which the Volume Envelope value ramps during the decay
    phase. For the Volume Envelope, the sustain level is best expressed in centibels of attenuation from full scale. A
@@ -281,7 +281,7 @@ enum struct Index : uint16_t {
    interpreted as zero; conventionally 1000 indicates full attenuation. For example, a sustain level which
    corresponds to an absolute value 12dB below of peak would be 120.
    */
-  sustainVolumeEnvelope,
+  sustainVolumeEnvelope, // USED
   /**
    This is the time, in absolute timecents, for a 100% change in the Volume Envelope value during release phase. For
    the Volume Envelope, the release phase linearly ramps toward zero from the current level, causing a constant dB
@@ -290,7 +290,7 @@ enum struct Index : uint16_t {
    a release from full level. A negative value indicates a time less than one second; a positive value a time longer
    than one second. For example, a release time of 10 msec would be 1200log2(.01) = -7973.
    */
-  releaseVolumeEnvelope,
+  releaseVolumeEnvelope, // USED
   /**
    This is the degree, in timecents per KeyNumber units, to which the hold time of the Volume Envelope is decreased
    by increasing MIDI key number. The hold time at key number 60 is always unchanged. The unit scaling is such that a
@@ -298,7 +298,7 @@ enum struct Index : uint16_t {
    halve. For example, if the Volume Envelope Hold Time were -7973 = 10 msec and the Key Number to Vol Env Hold were
    50 when key number 36 was played, the hold time would be 20 msec.
    */
-  midiKeyToVolumeEnvelopeHold,
+  midiKeyToVolumeEnvelopeHold, // USED
   // 40
   /**
    This is the degree, in timecents per KeyNumber units, to which the hold time of the Volume Envelope is decreased
@@ -310,7 +310,7 @@ enum struct Index : uint16_t {
    NOTE: clearly the above text is wrong for this generator as it is a duplicate of midiKeyToVolumeEnvelopeHold above.
    It affects the `decay` time instead of the `hold` time.
    */
-  midiKeyToVolumeEnvelopeDecay,
+  midiKeyToVolumeEnvelopeDecay, // USED
   /**
    This is the index into the INST sub-chunk providing the instrument to be used for the current preset zone. A value
    of zero indicates the first instrument in the list. The value should never exceed two less than the size of the
@@ -324,13 +324,13 @@ enum struct Index : uint16_t {
    The LS byte indicates the highest and the MS byte the lowest valid key. The keyRange enumerator is optional, but
    when it does appear, it must be the first generator in the zone generator list.
    */
-  keyRange,
+  keyRange, // USED
   /**
    This is the minimum and maximum MIDI velocity values for which this preset zone or instrument zone is active. The
    LS byte indicates the highest and the MS byte the lowest valid velocity. The velRange enumerator is optional, but
    when it does appear, it must be preceded only by keyRange in the zone generator list.
    */
-  velocityRange,
+  velocityRange, // USED
   // 45
   /**
    The offset, in 32768 sample data point increments beyond the start loop sample header parameter and the first
@@ -338,23 +338,23 @@ enum struct Index : uint16_t {
    parameter. For example, if start loop were 5, startLoopAddressOffset were 3 and startAddressCoarseOffset were 2,
    the first sample data point in the loop would be sample data point 65544.
    */
-  startLoopAddressCoarseOffset,
+  startLoopAddressCoarseOffset, // USED
   /**
    This enumerator forces the MIDI key number to effectively be interpreted as the value given. This generator can
    only appear at the instrument level. Valid values are from -1 to 127 (-1 means unset).
    */
-  forcedMIDIKey,
+  forcedMIDIKey, // USED
   /**
    This enumerator forces the MIDI velocity to effectively be interpreted as the value given. This generator can only
    appear at the instrument level. Valid values are from -1 to 127 (-1 means unset).
    */
-  forcedMIDIVelocity,
+  forcedMIDIVelocity, // USED
   /**
    This is the attenuation, in centibels, by which a note is attenuated below full scale. A value of zero indicates
    no attenuation; the note will be played at full scale. For example, a value of 60 indicates the note will be played
    at 6 dB below full scale for the note.
    */
-  initialAttenuation,
+  initialAttenuation, // USED
   reserved2,
   // 50
   /**
@@ -364,26 +364,26 @@ enum struct Index : uint16_t {
    endAddressCoarseOffset were 2, sample data point 65544 would be considered equivalent to the start loop sample data
    point, and hence sample data point 65543 would effectively precede start loop during looping.
    */
-  endLoopAddressCoarseOffset,
+  endLoopAddressCoarseOffset, // USED
   /**
    This is a pitch offset, in semitones, which should be applied to the note. A positive value indicates the sound is
    reproduced at a higher pitch; a negative value indicates a lower pitch. For example, a Coarse Tune value of -4
    would cause the sound to be reproduced four semitones flat.
    */
-  coarseTune,
+  coarseTune, // USED
   /**
    This is a pitch offset, in cents, which should be applied to the note. It is additive with coarseTune. A positive
    value indicates the sound is reproduced at a higher pitch; a negative value indicates a lower pitch. For example,
    a Fine Tuning value of -5 would cause the sound to be reproduced five cents flat.
    */
-  fineTune,
+  fineTune, // USED
   /**
    This is the index into the SHDR sub-chunk providing the sample to be used for the current instrument zone. A value
    of zero indicates the first sample in the list. The value should never exceed two less than the size of the sample
    list. The sampleID enumerator is the terminal generator for IGEN zones. As such, it should only appear in the IGEN
    sub-chunk, and it must appear as the last generator enumerator in all but the global zone.
    */
-  sampleID,
+  sampleID, // USED
   /**
    This enumerator indicates a value which gives a variety of Boolean flags describing the sample for the current
    instrument zone. The sampleModes should only appear in the IGEN sub-chunk, and should not appear in the global
@@ -392,14 +392,14 @@ enum struct Index : uint16_t {
    and 3 indicates a sound which loops for the duration of key depression then proceeds to play the remainder of the
    sample.
    */
-  sampleModes,
+  sampleModes, // USED
   // 55
   reserved3,
   /**
    This parameter represents the degree to which MIDI key number influences pitch. A value of zero indicates that
    MIDI key number has no effect on pitch; a value of 100 represents the usual tempered semitone scale.
    */
-  scaleTuning,
+  scaleTuning, // USED
   /**
    This parameter provides the capability for a key depression in a given instrument to terminate the playback of
    other instruments. This is particularly useful for percussive instruments such as a hi-hat cymbal. An exclusive
@@ -409,7 +409,7 @@ enum struct Index : uint16_t {
    entire preset. In other words, any other instrument zone within the same preset holding a corresponding exclusive
    class will be terminated.
    */
-  exclusiveClass,
+  exclusiveClass, // USED
   /**
    This parameter represents the MIDI key number at which the sample is to be played back at its original sample
    rate. If not present, or if present with a value of -1, then the sample header parameter Original Key is used in
@@ -418,7 +418,7 @@ enum struct Index : uint16_t {
    (Original Key = 60) at a sample rate of 22.050 kHz, and Root Key were set to 69, then playing MIDI key number 69
    (A above middle C) would cause a piano note of pitch middle C to be heard
    */
-  overridingRootKey,
+  overridingRootKey, // USED
 
   // # END OF SF2 DEFINITIONS
 

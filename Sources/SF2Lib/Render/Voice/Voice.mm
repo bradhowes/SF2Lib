@@ -46,13 +46,6 @@ Voice::configure(const State::Config& config)
   modulatorLFO_ = LFO::forModulator(state_);
   vibratoLFO_ = LFO::forVibrato(state_);
 
-  if (sampleHeader.isLeft())
-    audioDestinationChannel_ = AudioDestinationChannel::left;
-  else if (sampleHeader.isRight())
-    audioDestinationChannel_ = AudioDestinationChannel::right;
-  else // (sampleHeader.isMono())
-    audioDestinationChannel_ = AudioDestinationChannel::both;
-
   assert(config.sampleSource().isLoaded());
   noiseFloorOverMagnitude_ = config.sampleSource().noiseFloorOverMagnitude();
   noiseFloorOverMagnitudeOfLoop_ = config.sampleSource().noiseFloorOverMagnitudeOfLoop();

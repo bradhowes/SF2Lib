@@ -27,6 +27,10 @@ class Config;
  instrument or preset entity, with default values used if not explicitly set. Values can change over time via one or
  more modulators being applied to them, but the internal state is always read-only during the life of a Voice to which
  it uniquely belongs.
+
+ The intent for the `State` class is to treat it just as a collection of generator values, and to let other classes
+ perform transformations on the values held here. As such, generator-specific functionality should not exist here but
+ in function-specific classes such as Envelope::Generator or Voice::Sample::Pitch.
  */
 class State
 {
@@ -54,6 +58,13 @@ public:
   {
     setDefaults();
   }
+
+  /**
+   Set the sample rate to use for rendering
+
+   @param sampleRate new value to use.
+   */
+  void setSampleRate(Float sampleRate) { sampleRate_ = sampleRate; }
 
   /**
    Configure the state to be used by a voice for sample rendering.
@@ -132,8 +143,6 @@ public:
 
   /// @returns sample rate defined at construction
   Float sampleRate() const { return sampleRate_; }
-
-  void setSampleRate(Float sampleRate) { sampleRate_ = sampleRate; }
 
 private:
 

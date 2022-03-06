@@ -42,12 +42,6 @@ public:
     duringKeyPress = 3
   };
 
-  enum AudioDestinationChannel {
-    both = 0,
-    left = 1,
-    right = 2
-  };
-
   /**
    Construct a new voice renderer.
 
@@ -224,7 +218,6 @@ private:
   LFO vibratoLFO_;
   LowPassFilter filter_;
   size_t voiceIndex_;
-  AudioDestinationChannel audioDestinationChannel_;
   Float noiseFloorOverMagnitude_;
   Float noiseFloorOverMagnitudeOfLoop_;
 
