@@ -44,7 +44,7 @@ inline constexpr Float HalfSquareRoot2 = Float(M_SQRT2) / 2.0f;
 inline constexpr Float InterNoteMultiplier = Float(1.05946309435929530984310531493975);
 
 inline Float clamp(Float value, Float lowerBound, Float upperBound) {
-  return std::clamp(value, lowerBound, upperBound);
+  return std::min<Float>(std::max<Float>(value, lowerBound), upperBound);
 }
 
 /**
@@ -81,6 +81,15 @@ inline Float lfoCentsToFrequency(Float value) {
  */
 inline Float centibelsToAttenuation(Float centibels) { return std::pow(10.0f, -centibels / CentibelsPerDecade); }
 
+/**
+ Convert centiBels to resonance (Q) value for use in low-pass filter calculations. The input is clamped to the range
+ given in SF2.01 spec #8.1.3. The factor being subtracted comes from FluidSynth code to conform to spec.
+
+ @param centibels the value to convert
+ */
+inline double centibelsToResonance(double centibels) {
+  return std::pow(10.0, (DSP::clamp(centibels, 0.0, 960.0) - 30.1) / 200.0);
+}
 /**
  Restrict lowpass filter cutoff value to be between 1500 and 13500, inclusive.
  

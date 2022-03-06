@@ -22,6 +22,7 @@ gainEnvelope_{},
 modulatorEnvelope_{},
 modulatorLFO_{},
 vibratoLFO_{},
+filter_{sampleRate},
 voiceIndex_{voiceIndex}
 {
   ;
@@ -53,6 +54,7 @@ Voice::configure(const State::Config& config)
   noiseFloorOverMagnitude_ = config.sampleSource().noiseFloorOverMagnitude();
   noiseFloorOverMagnitudeOfLoop_ = config.sampleSource().noiseFloorOverMagnitudeOfLoop();
 
-  // filter_.update();
+  filter_.reset();
+  
   done_ = false;
 }

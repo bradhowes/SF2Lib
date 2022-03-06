@@ -8,6 +8,7 @@
 
 #include "Render/Envelope/Generator.hpp"
 #include "Render/LFO.hpp"
+#include "Render/LowPassFilter.hpp"
 #include "Render/Voice/Sample/Generator.hpp"
 #include "Render/Voice/State/Modulator.hpp"
 #include "Render/Voice/State/State.hpp"
@@ -131,11 +132,18 @@ public:
     // According to FluidSynth this is the right think to do.
     if (gainEnvelope_.isDelayed()) return 0.0;
 
-    auto gain = calculateGain(modLFO, volEnv);
     auto increment = pitch_.samplePhaseIncrement(modLFO, vibLFO, modEnv);
     auto sample = sampleGenerator_.generate(increment, canLoop());
 
-    return sample * gain;
+    auto frequency = state_.modulated(Index::initialFilterCutoff) +
+    state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO +
+    state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv;
+    auto resonance = state_.modulated(Index::initialFilterResonance);
+
+    auto filtered = filter_.transform(frequency, resonance, sample);
+    auto gain = calculateGain(modLFO, volEnv);
+
+    return filtered * gain;
   }
 
   Float calculateGain(Float modLFO, Float volEnv)
@@ -187,6 +195,7 @@ private:
   Envelope::Generator modulatorEnvelope_;
   LFO modulatorLFO_;
   LFO vibratoLFO_;
+  LowPassFilter filter_;
   size_t voiceIndex_;
   AudioDestinationChannel audioDestinationChannel_;
   Float noiseFloorOverMagnitude_;

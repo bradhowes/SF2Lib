@@ -199,4 +199,51 @@ using namespace SF2::DSP::Tables;
   XCTAssertEqualWithAccuracy(110.0, SF2::DSP::lfoCentsToFrequency(9000), 0.00001);
 }
 
+// Copied with small modifications from FluidSynth.
+static double fluid_iir_filter_q_from_dB(double q_dB)
+{
+  /* The generator contains 'centibels' (1/10 dB) => divide by 10 to
+   * obtain dB */
+  q_dB /= 10.0f;
+
+  /* Range: SF2.01 section 8.1.3 # 8 (convert from cB to dB => /10) */
+  q_dB = std::min<double>(std::max<double>(q_dB, 0.0f), 96.0f);
+
+  /* Short version: Modify the Q definition in a way, that a Q of 0
+   * dB leads to no resonance hump in the freq. response.
+   *
+   * Long version: From SF2.01, page 39, item 9 (initialFilterQ):
+   * "The gain at the cutoff frequency may be less than zero when
+   * zero is specified".  Assume q_dB=0 / q_lin=1: If we would leave
+   * q as it is, then this results in a 3 dB hump slightly below
+   * fc. At fc, the gain is exactly the DC gain (0 dB).  What is
+   * (probably) meant here is that the filter does not show a
+   * resonance hump for q_dB=0. In this case, the corresponding
+   * q_lin is 1/sqrt(2)=0.707.  The filter should have 3 dB of
+   * attenuation at fc now.  In this case Q_dB is the height of the
+   * resonance peak not over the DC gain, but over the frequency
+   * response of a non-resonant filter.  This idea is implemented as
+   * follows: */
+  q_dB -= 3.01f;
+
+  /* The 'sound font' Q is defined in dB. The filter needs a linear
+   q. Convert. */
+  q_dB /= 20.0f;
+  return std::pow(10.0f, q_dB);
+}
+
+- (void)testCentiBelsToResonance {
+  auto fs = fluid_iir_filter_q_from_dB(959);
+  auto us = DSP::centibelsToResonance(959);
+
+  for (auto centibels = 0; centibels < 960; ++centibels) {
+
+    // Compare our routine with FluidSynth. Note that I think the order of operations in FluidSynth is not
+    // optimal, at least on clang C++. Dividing by 10.0 and subtracting injects noise into the mantissa which is
+    // amplified when used in pow(). Better is to just divide once by 200.
+    auto fs = fluid_iir_filter_q_from_dB(centibels);
+    auto us = DSP::centibelsToResonance(centibels);
+    XCTAssertEqualWithAccuracy(fs, us, 1.0e-4);
+  }
+}
 @end
