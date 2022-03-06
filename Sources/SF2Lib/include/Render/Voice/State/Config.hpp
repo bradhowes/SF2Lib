@@ -43,6 +43,17 @@ public:
   /// @returns original MIDI velocity that triggered the voice
   int eventVelocity() const { return eventVelocity_; }
 
+  /// @returns value of `exclusiveClass` generator for an instrument if it is set, or 0 if not found.
+  int exclusiveClass() const {
+    for (const auto& box : instrument_.generators()) {
+      const auto& gen{box.get()};
+      if (gen.index() == Entity::Generator::Index::exclusiveClass) {
+        return gen.amount().unsignedAmount();
+      }
+    }
+    return 0;
+  }
+
 private:
 
   /// Grant access to `apply`.

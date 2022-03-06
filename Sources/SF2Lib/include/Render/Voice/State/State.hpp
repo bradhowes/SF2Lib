@@ -111,6 +111,8 @@ public:
    */
   Float modulated(Index gen) const { return gens_[gen].modulated(); }
 
+  /// @returns MIDI key that started a voice to begin emitting samples. For DSP this is *not* what is desired. See
+  /// `key` method below.
   int eventKey() const { return eventKey_; }
 
   /// @returns key value to use for DSP. A generator can force it to be fixed to a set value.

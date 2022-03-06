@@ -123,7 +123,7 @@ public:
         oldestActive_.remove(voiceIndex);
         available_.push_back(voiceIndex);
       }
-      else if (voices_[voiceIndex].key() == key) {
+      else if (voices_[voiceIndex].initiatingKey() == key) {
         voices_[voiceIndex].releaseKey();
       }
     }
@@ -190,14 +190,27 @@ private:
     render(outs[0], outs[1], frameCount);
   }
 
-  size_t selectVoice(int key)
+  size_t selectVoice(const Config& config)
   {
     size_t found = voices_.size();
 
+    // If dealing with an exclusive voice, stop any that have the same `exclusiveClass` value.
+    auto exclusiveClass = config.exclusiveClass();
+    if (exclusiveClass > 0) {
+      for (auto voiceIndex : oldestActive_) {
+        if (voices_[voiceIndex].exclusiveClass() == exclusiveClass) {
+          oldestActive_.remove(voiceIndex);
+          available_.push_back(voiceIndex);
+        }
+      }
+    }
+
+    // Grab next available voice
     if (!available_.empty()) {
       found = available_.back();
       available_.pop_back();
     }
+    // Or steal the oldest voice that is active
     else if (!oldestActive_.empty()){
       found = oldestActive_.takeOldest();
     }
@@ -207,7 +220,7 @@ private:
 
   void startVoice(const Config& config)
   {
-    size_t index = selectVoice(config.eventKey());
+    size_t index = selectVoice(config);
     if (index == voices_.size()) return;
     Voice& voice{voices_[index]};
     voice.configure(config);

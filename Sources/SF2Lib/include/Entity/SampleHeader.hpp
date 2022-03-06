@@ -71,8 +71,11 @@ public:
   /// @returns true if samples come from a ROM
   bool isROM() const { return (sampleType & rom) == rom; }
 
+  /// @returns the name assigned to the sample
   const char* sampleName() const { return achSampleName; }
 
+  /// @returns true if there appears to be a loop in the sample. Note that this is *not* the normal way to determine if
+  /// a voice will loop while rendering -- that belongs to the `sampleModes` generator.
   bool hasLoop() const { return dwStartLoop > dwStart && dwStartLoop < dwEndLoop && dwEndLoop <= dwEnd; }
 
   /**
@@ -118,8 +121,11 @@ public:
   /// @returns the pitch correction to apply when playing back the samples
   int pitchCorrection() const { return correction; }
 
+  /// @returns number of samples between the start and end indices.
   size_t sampleSize() const { return endIndex() - startIndex(); }
-  
+
+  uint16_t sampleLinkIndex() const { return sampleLink; }
+
   void dump(const std::string& indent, size_t index) const;
 
 private:

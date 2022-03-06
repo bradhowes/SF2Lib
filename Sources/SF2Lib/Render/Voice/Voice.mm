@@ -34,6 +34,9 @@ Voice::configure(const State::Config& config)
   config.sampleSource().load();
 
   const auto& sampleHeader{config.sampleSource().header()};
+  os_log_debug(log_, "configure - %d %d %d", sampleHeader.isLeft(), sampleHeader.isRight(),
+               sampleHeader.sampleLinkIndex());
+  
   state_.prepareForVoice(config);
   loopingMode_ = loopingMode();
   pitch_.configure(sampleHeader);

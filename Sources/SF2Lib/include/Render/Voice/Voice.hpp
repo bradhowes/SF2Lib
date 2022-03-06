@@ -56,9 +56,18 @@ public:
    */
   Voice(Float sampleRate, const MIDI::Channel& channel, size_t voiceIndex);
 
+  /**
+   Set the sample rate to use for rendering.
+
+   @param sampleRate the sample rate to use
+   */
   void setSampleRate(Float sampleRate) { state_.setSampleRate(sampleRate); }
 
+  /// @returns the unique index assigned to this voice instance.
   size_t voiceIndex() const { return voiceIndex_; }
+
+  /// @returns the `exclusiveClass` generator value for the voice (only valid if voice is active).
+  int exclusiveClass() const { return state_.unmodulated(Index::exclusiveClass); }
 
   /**
    Configure the voice for rendering.
@@ -67,8 +76,10 @@ public:
    */
   void configure(const State::Config& config);
 
-  int key() const { return state_.eventKey(); }
+  /// @returns the MIDI key that started the voice. NOTE: not to be used for DSP processing.
+  int initiatingKey() const { return state_.eventKey(); }
 
+  /// @returns true if the key used to start the voice is still down.
   bool isKeyDown() const { return gainEnvelope_.isGated(); }
 
   /**
@@ -124,6 +135,7 @@ public:
   Float renderSample() {
     if (isDone()) { return 0.0; }
 
+    // Capture the current state of the modulators and envelopes.
     auto modLFO = modulatorLFO_.getNextValue();
     auto vibLFO = vibratoLFO_.getNextValue();
     auto modEnv = modulatorEnvelope_.getNextValue();
@@ -132,19 +144,56 @@ public:
     // According to FluidSynth this is the right think to do.
     if (gainEnvelope_.isDelayed()) return 0.0;
 
+    // Calculate the pitch to render and then generate a new sample.
     auto increment = pitch_.samplePhaseIncrement(modLFO, vibLFO, modEnv);
     auto sample = sampleGenerator_.generate(increment, canLoop());
 
-    auto frequency = state_.modulated(Index::initialFilterCutoff) +
-    state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO +
-    state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv;
+    // Calculate the low-pass filter parameters. Only the frequency can be affected by an LFO or mod envelope, but both
+    // can have external modulators attached to their primary state value.
+    auto frequency = (state_.modulated(Index::initialFilterCutoff) +
+                      state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO +
+                      state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv);
     auto resonance = state_.modulated(Index::initialFilterResonance);
 
+    // Apply the filter on the sample.
     auto filtered = filter_.transform(frequency, resonance, sample);
-    auto gain = calculateGain(modLFO, volEnv);
 
+    // Finally, calculate gain / attenuation to apply to filtered result and return attenuated value.
+    auto gain = calculateGain(modLFO, volEnv);
     return filtered * gain;
   }
+
+  /**
+   Repeatedly invoke `renderSample` `frameCount` times.
+
+   @param left buffer of at least `frameCount` in size for left channel samples
+   @param right buffer of at least `frameCount` in size for right channel samples
+   @param frameCount number of samples to render
+   */
+  void renderIntoByAdding(float* left, float* right, size_t frameCount) {
+    Float leftAmp;
+    Float rightAmp;
+
+    for (size_t index = 0; index < frameCount; ++index) {
+      if (isDone()) {
+        break;
+      }
+
+      Float pan = state_.modulated(Index::pan);
+      DSP::panLookup(pan, leftAmp, rightAmp);
+
+      auto sample = renderSample();
+      float leftSample = float(sample * leftAmp);
+      float rightSample = float(sample * rightAmp);
+      *left++ += leftSample;
+      *right++ += rightSample;
+    }
+  }
+
+  /// @returns `State` instance for the voice.
+  State::State& state() { return state_; }
+
+private:
 
   Float calculateGain(Float modLFO, Float volEnv)
   {
@@ -161,32 +210,10 @@ public:
         done_ = true;
       }
     }
+
     return gain;
   }
 
-  void renderIntoByAdding(float* left, float* right, size_t frameCount) {
-    Float leftAmp;
-    Float rightAmp;
-
-    Float pan = state_.modulated(Index::pan);
-    DSP::panLookup(pan, leftAmp, rightAmp);
-
-    for (size_t index = 0; index < frameCount; ++index) {
-      if (isDone()) {
-        break;
-      }
-
-      auto sample = renderSample();
-      float leftSample = float(sample * leftAmp);
-      float rightSample = float(sample * rightAmp);
-      *left++ += leftSample;
-      *right++ += rightSample;
-    }
-  }
-
-  State::State& state() { return state_; }
-
-private:
   State::State state_;
   LoopingMode loopingMode_;
   Sample::Pitch pitch_;
