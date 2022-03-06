@@ -9,10 +9,11 @@
 #include <set>
 #include <vector>
 
+#include "DSPHeaders/EventProcessor.hpp"
+
 #include "Types.hpp"
 #include "Render/Engine/OldestActiveVoiceCache.hpp"
 #include "Render/Engine/PresetCollection.hpp"
-#include "Render/Engine/EventProcessor.hpp"
 #include "Render/Voice/Voice.hpp"
 
 namespace SF2::IO { class File; }
@@ -24,8 +25,8 @@ namespace SF2::Render::Engine {
  sole template parameter. A Voice generates samples based on the configuration it is given from a Preset.
  */
 template <size_t VoiceCount>
-class Engine : public EventProcessor<Engine<VoiceCount>> {
-  using super = EventProcessor<Engine>;
+class Engine : public DSPHeaders::EventProcessor<Engine<VoiceCount>> {
+  using super = DSPHeaders::EventProcessor<Engine>;
   friend super;
 
 public:
