@@ -60,7 +60,6 @@ private:
     // Nyquist frequency.
     frequency = DSP::clamp(DSP::centsToFrequency(frequency), 5.0, 0.45 * sampleRate_);
     resonance = DSP::centibelsToResonance(resonance);
-    std::cout << "freq: " << frequency << " Q: " << resonance << '\n';
     filter_.setCoefficients(Coefficients::LPF2(sampleRate_, frequency, resonance));
   }
 

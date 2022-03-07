@@ -104,7 +104,6 @@ public:
   {
     while (!oldestActive_.empty()) {
       auto voiceIndex = oldestActive_.takeOldest();
-      std::cout << "voice " << voiceIndex << " available\n";
       available_.push_back(voiceIndex);
     }
   }

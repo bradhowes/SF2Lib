@@ -66,7 +66,6 @@ public:
                                        modLFO * centFs(Index::modulatorLFOToPitch) +
                                        vibLFO * centFs(Index::vibratoLFOToPitch) +
                                        modEnv * centFs(Index::modulatorEnvelopeToPitch)) / rootFrequency_;
-    // std::cout << "phaseIncrement: " << value << '\n';
     return Float(value);
   }
 
@@ -76,7 +75,6 @@ public:
   void updatePitchOffset() {
     pitchOffset_ = DSP::clamp(state_.modulated(Index::coarseTune), -120.0f, 120.0f) * 100.0f +
     DSP::clamp(state_.modulated(Index::fineTune), -99.0f, 99.0f);
-    std::cout << "pitchOffset: " << pitchOffset_ << '\n';
   }
 
 private:
@@ -95,9 +93,7 @@ private:
     auto rootKey = this->rootKey(originalMIDIKey);
     auto rootPitch = rootKey * 100.0f - pitchCorrection;
     rootFrequency_ = Float(DSP::centsToFrequency(rootPitch) * state_.sampleRate() / originalSampleRate);
-    std::cout << "rootPitch: " << rootPitch << " rootFrequency: " << rootFrequency_ << '\n';
     pitch_ = scaleTuning() * (key_ - rootPitch / 100.0f) + rootPitch;
-    std::cout << "pitch: " << pitch_ << '\n';
     updatePitchOffset();
   }
 

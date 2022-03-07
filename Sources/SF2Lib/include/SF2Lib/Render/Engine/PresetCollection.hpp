@@ -22,7 +22,8 @@ public:
    Representation of a key for a preset that is made up of the bank and program values used to call it up. The
    collection will store the presets in increasing order based on these values.
    */
-  struct BankProgram {
+  struct BankProgram
+  {
     int bank;
     int program;
 
@@ -40,7 +41,8 @@ public:
 
    @param file the data to use to build the preset collection
    */
-  void build(const IO::File& file) {
+  void build(const IO::File& file)
+  {
     auto count = file.presets().size();
     instruments_.build(file);
     presets_.clear();
@@ -62,6 +64,12 @@ public:
     }
   }
 
+  void clear()
+  {
+    presets_.clear();
+    instruments_.clear();
+  }
+  
   /// Obtain the number of presets in the collection.
   size_t size() const { return presets_.size(); }
 

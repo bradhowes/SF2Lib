@@ -19,16 +19,15 @@ public:
 
   InstrumentCollection() = default;
 
-  explicit InstrumentCollection(const IO::File& file) {
-    build(file);
-  }
+  explicit InstrumentCollection(const IO::File& file) { build(file); }
 
   /**
    Construct a new collection using contents from the given file.
 
    @param file the file to build with
    */
-  void build(const IO::File& file) {
+  void build(const IO::File& file)
+  {
     auto count = file.instruments().size();
     instruments_.clear();
     if (count > instruments_.capacity()) instruments_.reserve(count);
@@ -36,6 +35,8 @@ public:
       instruments_.emplace_back(file, configuration);
     }
   }
+
+  void clear() { instruments_.clear(); }
 
   const Instrument& operator[](size_t index) const { return checkedVectorIndexing(instruments_, index); }
 
