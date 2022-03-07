@@ -43,14 +43,14 @@ public:
    Create new state vector with a given sample rate.
 
    @param sampleRate the sample rate of audio being rendered
-   @param channel the MIDI channel that is in control
+   @param channelState the MIDI channel that is in control
    */
   State(Float sampleRate, const MIDI::ChannelState& channelState) :
   sampleRate_{sampleRate}, channelState_{channelState} {}
 
   /** Create new state vector for testing purposes.
    @param sampleRate the sample rate of audio being rendered
-   @param channel the MIDI channel that is in control
+   @param channelState the MIDI channel that is in control
    @param key the MIDI key to use
    @param velocity the MIDI velocity to use
    */

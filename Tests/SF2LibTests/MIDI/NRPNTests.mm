@@ -12,7 +12,7 @@ using namespace SF2::MIDI;
 struct NRPNTestPoint {
   NRPNTestPoint(NRPN& out) : out_{out} {}
   NRPN& out_;
-  int index() { return out_.index_; }
+  size_t index() { return out_.index_; }
   int value(int index) { return out_.nrpnValues_[index]; }
 };
 

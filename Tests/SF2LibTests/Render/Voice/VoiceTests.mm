@@ -1,11 +1,10 @@
 // Copyright © 2020 Brad Howes. All rights reserved.
 
+#include <iostream>
+
 #include "SF2Lib/Types.hpp"
 
-static SF2::Float getEpsilon() {
-  if constexpr (std::is_same_v<SF2::Float, float>) return 1.0e-2;
-  if constexpr (std::is_same_v<SF2::Float, double>) return 1.0e-15;
-}
+static SF2::Float epsilon = 1.0e-8;
 
 #include <AVFoundation/AVFoundation.h>
 #include <iostream>
@@ -49,7 +48,6 @@ using namespace SF2::Render;
 }
 
 - (void)testRolandPianoRender {
-  Float epsilon = getEpsilon();
   const auto& file = contexts.context2.file();
 
   MIDI::ChannelState channelState;
@@ -115,22 +113,39 @@ using namespace SF2::Render;
   renderLR(v2L, v2R);
   renderLR(v3L, v3R);
 
+  std::cout << std::setprecision(10);
+  for (auto index = 0; index < 9; ++index) {
+    std::cout << index << ' ' << samples[index] << '\n';
+  }
+
   XCTAssertEqual(9, samples.size());
-  XCTAssertEqualWithAccuracy( 0.000000, samples[0], epsilon);
-  XCTAssertEqualWithAccuracy(-0.196809, samples[1], epsilon);
-  XCTAssertEqualWithAccuracy( 0.074585, samples[2], epsilon);
-  XCTAssertEqualWithAccuracy( 0.000000, samples[3], epsilon);
-  XCTAssertEqualWithAccuracy( 0.083415, samples[4], epsilon);
-  XCTAssertEqualWithAccuracy( 0.043333, samples[5], epsilon);
-  XCTAssertEqualWithAccuracy( 0.000000, samples[6], epsilon);
-  XCTAssertEqualWithAccuracy( 0.081787, samples[7], epsilon);
-  XCTAssertEqualWithAccuracy( 0.015240, samples[8], epsilon);
+  if constexpr (std::is_same_v<Float, float>) {
+    XCTAssertEqualWithAccuracy( 0.00000000000, samples[0], epsilon);
+    XCTAssertEqualWithAccuracy(-0.19430789350, samples[1], epsilon);
+    XCTAssertEqualWithAccuracy( 0.07492157817, samples[2], epsilon);
+    XCTAssertEqualWithAccuracy( 0.00000000000, samples[3], epsilon);
+    XCTAssertEqualWithAccuracy( 0.07910299301, samples[4], epsilon);
+    XCTAssertEqualWithAccuracy( 0.04325843975, samples[5], epsilon);
+    XCTAssertEqualWithAccuracy( 0.00000000000, samples[6], epsilon);
+    XCTAssertEqualWithAccuracy( 0.08214095235, samples[7], epsilon);
+    XCTAssertEqualWithAccuracy( 0.01485249959, samples[8], epsilon);
+  }
+  else if constexpr (std::is_same_v<Float, double>) {
+    XCTAssertEqualWithAccuracy( 0.0000000000, samples[0], epsilon);
+    XCTAssertEqualWithAccuracy(-0.1943116635, samples[1], epsilon);
+    XCTAssertEqualWithAccuracy( 0.07495743781, samples[2], epsilon);
+    XCTAssertEqualWithAccuracy( 0.00000000000, samples[3], epsilon);
+    XCTAssertEqualWithAccuracy( 0.07910773903, samples[4], epsilon);
+    XCTAssertEqualWithAccuracy( 0.04327972978, samples[5], epsilon);
+    XCTAssertEqualWithAccuracy( 0.00000000000, samples[6], epsilon);
+    XCTAssertEqualWithAccuracy( 0.08214084059, samples[7], epsilon);
+    XCTAssertEqualWithAccuracy( 0.01485970616, samples[8], epsilon);
+  }
 
   [self playSamples: buffer count: sampleCount];
 }
 
 - (void)testOrganRender {
-  Float epsilon = getEpsilon();
   const auto& file = contexts.context0.file();
 
   MIDI::ChannelState channelState;
@@ -200,14 +215,26 @@ using namespace SF2::Render;
     }
   }
 
+  std::cout << std::setprecision(10);
+  for (auto index = 0; index < 9; ++index) {
+    std::cout << index << ' ' << samples[index] << '\n';
+  }
+
   XCTAssertEqual(9, samples.size());
   XCTAssertEqualWithAccuracy(0.0, samples[0], epsilon);
   XCTAssertEqualWithAccuracy(0.0, samples[1], epsilon);
   XCTAssertEqualWithAccuracy(0.0, samples[2], epsilon);
 
-  XCTAssertEqualWithAccuracy(-0.025543, samples[3], epsilon);
-  XCTAssertEqualWithAccuracy(-0.081269, samples[4], epsilon);
-  XCTAssertEqualWithAccuracy(-0.097517, samples[5], epsilon);
+  if constexpr (std::is_same_v<Float, float>) {
+    XCTAssertEqualWithAccuracy(-0.02659720555, samples[3], epsilon);
+    XCTAssertEqualWithAccuracy(-0.08138652891, samples[4], epsilon);
+    XCTAssertEqualWithAccuracy(-0.0973405987, samples[5], epsilon);
+  }
+  else if constexpr (std::is_same_v<Float, double>) {
+    XCTAssertEqualWithAccuracy(-0.02687120624, samples[3], epsilon);
+    XCTAssertEqualWithAccuracy(-0.08148908615, samples[4], epsilon);
+    XCTAssertEqualWithAccuracy(-0.09712578356, samples[5], epsilon);
+  }
 
   XCTAssertEqualWithAccuracy(0.0, samples[6], epsilon);
   XCTAssertEqualWithAccuracy(0.0, samples[7], epsilon);

@@ -90,6 +90,7 @@ inline Float centibelsToAttenuation(Float centibels) { return std::pow(10.0f, -c
 inline double centibelsToResonance(double centibels) {
   return std::pow(10.0, (DSP::clamp(centibels, 0.0, 960.0) - 30.1) / 200.0);
 }
+
 /**
  Restrict lowpass filter cutoff value to be between 1500 and 13500, inclusive.
  

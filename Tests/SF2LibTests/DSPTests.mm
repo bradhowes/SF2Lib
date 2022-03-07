@@ -236,6 +236,11 @@ static double fluid_iir_filter_q_from_dB(double q_dB)
   auto fs = fluid_iir_filter_q_from_dB(959);
   auto us = DSP::centibelsToResonance(959);
 
+  Float epsilon = []() {
+    if constexpr (std::is_same_v<Float, float>) return 1.0e-1;
+    if constexpr (std::is_same_v<Float, double>) return 1.0e-4;
+  }();
+
   for (auto centibels = 0; centibels < 960; ++centibels) {
 
     // Compare our routine with FluidSynth. Note that I think the order of operations in FluidSynth is not
@@ -243,7 +248,8 @@ static double fluid_iir_filter_q_from_dB(double q_dB)
     // amplified when used in pow(). Better is to just divide once by 200.
     auto fs = fluid_iir_filter_q_from_dB(centibels);
     auto us = DSP::centibelsToResonance(centibels);
-    XCTAssertEqualWithAccuracy(fs, us, 1.0e-4);
+    
+    XCTAssertEqualWithAccuracy(fs, us, epsilon);
   }
 }
 @end
