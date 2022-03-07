@@ -104,7 +104,7 @@ private:
    */
   Float cubic4thOrderInterpolate(size_t whole, Float partial, bool canLoop) const {
     return DSP::Interpolation::cubic4thOrder(partial, before(whole, canLoop), sample(whole, canLoop),
-                                             sample(whole, canLoop) + 1, sample(whole, canLoop) + 2);
+                                             sample(whole + 1, canLoop), sample(whole + 2, canLoop));
   }
 
   Float sample(size_t whole, bool canLoop) const {

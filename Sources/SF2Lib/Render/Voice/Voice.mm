@@ -12,11 +12,12 @@ using namespace SF2::MIDI;
 using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
 
-Voice::Voice(Float sampleRate, const ChannelState& channelState, size_t voiceIndex) :
+Voice::Voice(Float sampleRate, const ChannelState& channelState, size_t voiceIndex,
+             Sample::Generator::Interpolator interpolator) :
 state_{sampleRate, channelState},
 loopingMode_{none},
 pitch_{state_},
-sampleGenerator_{state_, Sample::Generator::Interpolator::linear},
+sampleGenerator_{state_, interpolator},
 gainEnvelope_{},
 modulatorEnvelope_{},
 modulatorLFO_{},

@@ -16,32 +16,17 @@ inline constexpr Float TwoPI = 2.0f * PI;
 inline constexpr Float HalfPI = PI / 2.0f;
 inline constexpr Float QuarterPI = PI/ 4.0f;
 
-inline constexpr Float ReferenceNoteFrequency = 440.0f;
-inline constexpr Float ReferenceNoteMIDI = 69.0f;
-inline constexpr Float ReferenceNoteSemi = ReferenceNoteMIDI * 100;
-
-inline constexpr int CentsPerSemitone = 100;
-inline constexpr int SemitonePerOctave = 12;
 inline constexpr Float CentsPerOctave = 1200.0f;
-
 inline constexpr Float CentibelsPerDecade = 200.0f;
-inline constexpr Float CentsToFrequencyMin = -16000.0f;
-inline constexpr Float CentsToFrequencyMax = 4500.0f;
 
 /// Attenuated samples at or below this value will be inaudible.
 inline constexpr Float NoiseFloor = 2.0E-7f;
 
 /// Maximum attenuation defined by SF2 spec.
-inline constexpr Float MaximumAttenuation = 960.0f;
+inline constexpr Float MaximumAttenuationCentiBels = 960.0f;
 
 // 440 * pow(2.0, (N - 69) / 12)
 inline constexpr Float LowestNoteFrequency = Float(8.17579891564370697665253828745335); // C-1
-
-// sqrt(2) / 2.0
-inline constexpr Float HalfSquareRoot2 = Float(M_SQRT2) / 2.0f;
-
-// The value to multiply one note frequency to get the next note's frequency
-inline constexpr Float InterNoteMultiplier = Float(1.05946309435929530984310531493975);
 
 inline Float clamp(Float value, Float lowerBound, Float upperBound) {
   return std::min<Float>(std::max<Float>(value, lowerBound), upperBound);

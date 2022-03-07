@@ -46,8 +46,10 @@ public:
 
    @param sampleRate the sample rate to use for generating audio
    @param channel the MIDI state associated with the renderer
+   @param interpolator how to interpolate sample values
    */
-  Voice(Float sampleRate, const MIDI::ChannelState& channelState, size_t voiceIndex);
+  Voice(Float sampleRate, const MIDI::ChannelState& channelState, size_t voiceIndex,
+        Sample::Generator::Interpolator interpolator = Sample::Generator::Interpolator::linear);
 
   /**
    Set the sample rate to use for rendering.
@@ -193,7 +195,7 @@ private:
   {
     // This formula follows what FluidSynth is doing for attenuation/gain.
     auto gain = (DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation)) *
-                 DSP::centibelsToAttenuation(DSP::MaximumAttenuation * (1.0f - volEnv) +
+                 DSP::centibelsToAttenuation(DSP::MaximumAttenuationCentiBels * (1.0f - volEnv) +
                                              modLFO * -state_.modulated(Index::modulatorLFOToVolume)));
 
     // When in the release stage, look for a magical point at which one can no longer hear the sample being generated.

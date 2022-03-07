@@ -33,19 +33,20 @@ public:
   static constexpr size_t maxVoiceCount = VoiceCount;
   using Config = Voice::State::Config;
   using Voice = Voice::Voice;
+  using Interpolator = Render::Voice::Sample::Generator::Interpolator;
 
   /**
    Construct new engine and its voices.
 
    @param sampleRate the expected sample rate to use
    */
-  Engine(Float sampleRate) : super(os_log_create("SoundFonts", "Engine")),
-  sampleRate_{sampleRate}, oldestActive_{maxVoiceCount}
+  Engine(Float sampleRate, Interpolator interpolator) :
+  super(os_log_create("SoundFonts", "Engine")), sampleRate_{sampleRate}, oldestActive_{maxVoiceCount}
   {
     available_.reserve(maxVoiceCount);
     voices_.reserve(maxVoiceCount);
     for (size_t voiceIndex = 0; voiceIndex < maxVoiceCount; ++voiceIndex) {
-      voices_.emplace_back(sampleRate, channelState_, voiceIndex);
+      voices_.emplace_back(sampleRate, channelState_, voiceIndex, interpolator);
       available_.push_back(voiceIndex);
     }
   }
