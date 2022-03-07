@@ -106,11 +106,15 @@ public:
   }
 
 private:
-  ContinuousControllerValues continuousControllerValues_;
-  KeyPressureValues keyPressureValues_;
+  ContinuousControllerValues continuousControllerValues_{};
+  KeyPressureValues keyPressureValues_{};
+
   int channelPressure_{0};
   int pitchWheelValue_{0};
   int pitchWheelSensitivity_{200};
+
+  bool sustainActive_{false};
+  bool sostenutoActive_{false};
 };
 
 } // namespace SF2::MIDI

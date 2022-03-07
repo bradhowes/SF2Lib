@@ -11,6 +11,7 @@
 
 #include "DSPHeaders/EventProcessor.hpp"
 
+#include "SF2Lib/MIDI/NRPN.hpp"
 #include "SF2Lib/Render/Engine/OldestActiveVoiceCache.hpp"
 #include "SF2Lib/Render/Engine/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
@@ -197,8 +198,10 @@ private:
           channelState_.setKeyPressure(midiEvent.data[1], midiEvent.data[2]);
         break;
       case MIDI::CoreEvent::controlChange:
-        if (midiEvent.length == 3)
+        if (midiEvent.length == 3) {
           channelState_.setContinuousControllerValue(midiEvent.data[1], midiEvent.data[2]);
+          nrpn_.process(midiEvent.data[1]);
+        }
         break;
       case MIDI::CoreEvent::programChange:
         break;
@@ -207,8 +210,10 @@ private:
           channelState_.setChannelPressure(midiEvent.data[1]);
         break;
       case MIDI::CoreEvent::pitchBend:
-        if (midiEvent.length == 2)
-          channelState_.setPitchWheelValue(midiEvent.data[1]);
+        if (midiEvent.length == 3) {
+          int bend = (midiEvent.data[2] << 7) | midiEvent.data[1];
+          channelState_.setPitchWheelValue(bend);
+        }
         break;
       case MIDI::CoreEvent::reset:
         allOff();
@@ -262,6 +267,8 @@ private:
 
   Float sampleRate_;
   MIDI::ChannelState channelState_{};
+  MIDI::NRPN nrpn_{channelState_};
+
   std::vector<Voice> voices_{};
   std::vector<size_t> available_{};
   OldestActiveVoiceCache oldestActive_;

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace SF2::Entity::Generator {
 
 /**

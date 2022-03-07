@@ -59,6 +59,25 @@ public:
   /// @returns true if the generator can be used in a preset zone
   bool isAvailableInPreset() const { return availableInPreset_; }
 
+  /**
+   Obtain the NRPN multiplier for a generator index. Per SF 2.01 spec:
+
+   Data Entry value spans the “useful” range as outlined in section 8.1.3, and in the same
+   perceptually-additive-real-world units. In the case where the meaningful range consists of more than 8192
+   perceptually-additive-real-world units, the range of the NRPN control of that parameter is decreased by a factor of
+   two until the adjusted range consists of 8192 or less of the perceptually-additive-real-world units. In the case
+   where the meaningful range consists of less than 8192 perceptually- additive-real-world units, the range of the
+   NRPN control of that parameter is left unchanged, and the synthesizer may or may not permit the control to exceed
+   that range.
+
+   In other words, we have 14 bits to indicate a signed NRPN value, which means +/- 8192. Some generators cover larger
+   ranges, so for those, we will reduce resolution by multiplying the NPRN value with a multiplier large enough to
+   cover the generator range (1, 2 or 4).
+
+   @returns multiplier for NRPN values.
+  */
+  uint8_t nrpnMultiplier() const { return nrpnMultiplier_; }
+
   /// @returns true if the generator amount value is unsigned or signed
   bool isUnsignedValue() const { return valueKind_ < ValueKind::signedShort; }
 
@@ -100,12 +119,13 @@ public:
 private:
   static std::array<Definition, NumDefs> const definitions_;
 
-  Definition(const char* name, ValueKind valueKind, bool availableInPreset) :
-  name_{name}, valueKind_{valueKind}, availableInPreset_{availableInPreset} {}
+  Definition(const char* name, ValueKind valueKind, bool availableInPreset, uint8_t nrpnMultiplier) :
+  name_{name}, valueKind_{valueKind}, availableInPreset_{availableInPreset}, nrpnMultiplier_{nrpnMultiplier} {}
 
   std::string name_;
   ValueKind valueKind_;
   bool availableInPreset_;
+  uint8_t nrpnMultiplier_;
 };
 
 } // end namespace SF2::Entity::Generator
