@@ -28,7 +28,7 @@ voiceIndex_{voiceIndex}
 }
 
 void
-Voice::configure(const State::Config& config)
+Voice::configure(const State::Config& config, const NRPN& nrpn)
 {
   config.sampleSource().load();
 
@@ -36,7 +36,8 @@ Voice::configure(const State::Config& config)
   os_log_debug(log_, "configure - %d %d %d", sampleHeader.isLeft(), sampleHeader.isRight(),
                sampleHeader.sampleLinkIndex());
   
-  state_.prepareForVoice(config);
+  state_.prepareForVoice(config, nrpn);
+  
   loopingMode_ = loopingMode();
   pitch_.configure(sampleHeader);
   gainEnvelope_ = Envelope::Generator::forVol(state_);

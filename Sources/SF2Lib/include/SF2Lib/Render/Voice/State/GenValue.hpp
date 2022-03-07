@@ -31,11 +31,12 @@ struct GenValue {
   int unmodulated() const { return value + adjustment; }
 
   /// @returns generator value that includes modulator contributions
-  Float modulated() const { return unmodulated() + sumMods; }
+  Float modulated() const { return unmodulated() + sumMods + nrpn; }
 
   int value{0};
   int adjustment{0};
   Float sumMods{0.0};
+  Float nrpn{0};
 
   ModulatorIndexLinkedList mods;
 };

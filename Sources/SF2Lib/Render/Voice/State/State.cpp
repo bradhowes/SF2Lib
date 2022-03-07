@@ -8,7 +8,7 @@
 using namespace SF2::Render::Voice::State;
 
 void
-State::prepareForVoice(const Config& config)
+State::prepareForVoice(const Config& config, const MIDI::NRPN& nrpn)
 {
   // (1) Initialize to default values
   setDefaults();
@@ -16,10 +16,13 @@ State::prepareForVoice(const Config& config)
   // (2) Set values from preset and instrument zone configurations that matched the MIDI key/velocity combination.
   config.apply(*this);
 
+  // (3) Set values from NRPN channel messages
+  nrpn.apply(*this);
+
   eventKey_ = config.eventKey();
   eventVelocity_ = config.eventVelocity();
 
-  // (3) Now finish configuring the modulators by resolving any links between them.
+  // (4) Now finish configuring the modulators by resolving any links between them.
   for (const auto& modulator : modulators_) {
     if (!modulator.configuration().hasModulatorDestination()) continue;
     for (auto& destination : modulators_) {

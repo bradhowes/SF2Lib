@@ -13,7 +13,7 @@
 #include "SF2Lib/Logger.hpp"
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/Entity/Generator/Generator.hpp"
-#include "SF2Lib/MIDI/ChannelState.hpp"
+#include "SF2Lib/MIDI/NRPN.hpp"
 #include "SF2Lib/Render/Voice/State/GenValue.hpp"
 #include "SF2Lib/Render/Voice/State/GenValueCollection.hpp"
 #include "SF2Lib/Render/Voice/State/Modulator.hpp"
@@ -69,8 +69,11 @@ public:
 
   /**
    Configure the state to be used by a voice for sample rendering.
+
+   @param config the preset / instrument configuration to apply to the state
+   @param nrpn the MIDI NRPN controller values to apply to the state
    */
-  void prepareForVoice(const Config& config);
+  void prepareForVoice(const Config& config, const MIDI::NRPN& nrpn);
 
   /**
    Set a generator value. Should only be called with a value from an InstrumentZone. It can be set twice, once by a
@@ -96,6 +99,16 @@ public:
   void setAdjustment(Index gen, int value) {
     log_.debug() << "adjust " << Definition::definition(gen).name() << " by " << value << std::endl;
     gens_[gen].adjustment = value;
+  }
+
+  /**
+   Set a generator's NRPN adjustment value. Should only be called from NRPN::apply method.
+
+   @param gen the generator to modify
+   @param value the value to set
+   */
+  void setNRPNAdjustment(Index gen, Float value) {
+    gens_[gen].nrpn = value;
   }
 
   /**

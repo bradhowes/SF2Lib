@@ -66,8 +66,9 @@ public:
    Configure the voice for rendering.
 
    @param config the voice configuration to apply
+   @param nrpn the MIDI NRPN values to apply
    */
-  void configure(const State::Config& config);
+  void configure(const State::Config& config, const MIDI::NRPN& nrpn);
 
   /// @returns the MIDI key that started the voice. NOTE: not to be used for DSP processing.
   int initiatingKey() const { return state_.eventKey(); }

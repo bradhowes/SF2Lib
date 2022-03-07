@@ -53,29 +53,30 @@ using namespace SF2::Render;
   const auto& file = contexts.context2.file();
 
   MIDI::ChannelState channelState;
+  MIDI::NRPN nrpn{channelState};
   InstrumentCollection instruments(file);
   Preset preset(file, instruments, file.presets()[0]);
 
   auto found = preset.find(69, 127);
   XCTAssertEqual(found.size(), 2);
   Voice::Voice v1L{44100, channelState, 0};
-  v1L.configure(found[0]);
+  v1L.configure(found[0], nrpn);
   Voice::Voice v1R{44100, channelState, 1};
-  v1R.configure(found[1]);
+  v1R.configure(found[1], nrpn);
 
   found = preset.find(73, 127);
   XCTAssertEqual(found.size(), 2);
   Voice::Voice v2L{44100, channelState, 2};
-  v2L.configure(found[0]);
+  v2L.configure(found[0], nrpn);
   Voice::Voice v2R{44100, channelState, 3};
-  v2R.configure(found[1]);
+  v2R.configure(found[1], nrpn);
 
   found = preset.find(76, 127);
   XCTAssertEqual(found.size(), 2);
   Voice::Voice v3L{44100, channelState, 4};
-  v3L.configure(found[0]);
+  v3L.configure(found[0], nrpn);
   Voice::Voice v3R{44100, channelState, 5};
-  v3R.configure(found[1]);
+  v3R.configure(found[1], nrpn);
 
   Float sampleRate = 44100.0;
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
@@ -133,20 +134,21 @@ using namespace SF2::Render;
   const auto& file = contexts.context0.file();
 
   MIDI::ChannelState channelState;
+  MIDI::NRPN nrpn{channelState};
   InstrumentCollection instruments(file);
   Preset preset(file, instruments, file.presets()[89]);
 
   auto found = preset.find(64, 127);
   Voice::Voice v1{44100, channelState, 0};
-  v1.configure(found[0]);
+  v1.configure(found[0], nrpn);
 
   found = preset.find(68, 127);
   Voice::Voice v2{44100, channelState, 2};
-  v2.configure(found[0]);
+  v2.configure(found[0], nrpn);
 
   found = preset.find(71, 127);
   Voice::Voice v3{44100, channelState, 4};
-  v3.configure(found[0]);
+  v3.configure(found[0], nrpn);
 
   double sampleRate = 44100.0;
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];

@@ -261,7 +261,7 @@ private:
     size_t index = selectVoice(config);
     if (index == voices_.size()) return;
     Voice& voice{voices_[index]};
-    voice.configure(config);
+    voice.configure(config, nrpn_);
     oldestActive_.add(index);
   }
 

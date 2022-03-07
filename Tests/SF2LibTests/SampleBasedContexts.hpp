@@ -42,7 +42,7 @@ struct PresetTestContext : PresetTestContextBase
 
   SF2::Render::Voice::State::State makeState(const SF2::Render::Voice::State::Config& config) const {
     SF2::Render::Voice::State::State state(sampleRate_, channelState_);
-    state.prepareForVoice(config);
+    state.prepareForVoice(config, nrpn_);
     return state;
   }
 
@@ -73,6 +73,7 @@ private:
   }
 
   SF2::MIDI::ChannelState channelState_{};
+  SF2::MIDI::NRPN nrpn_{channelState_};
   SF2::Float sampleRate_;
   int presetIndex_;
   mutable std::unique_ptr<State> state_;

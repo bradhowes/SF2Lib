@@ -3,8 +3,17 @@
 #include "SF2Lib/Entity/Generator/Definition.hpp"
 #include "SF2Lib/MIDI/MIDI.hpp"
 #include "SF2Lib/MIDI/NRPN.hpp"
+#include "SF2Lib/Render/Voice/State/State.hpp"
 
 using namespace SF2::MIDI;
+
+void
+NRPN::apply(Render::Voice::State::State &state) const
+{
+  for (auto index = 0; index < nrpnValues_.size(); ++index) {
+    state.setNRPNAdjustment(Entity::Generator::Index(index), nrpnValues_[index]);
+  }
+}
 
 void
 NRPN::process(int cc, int value)
@@ -28,14 +37,16 @@ NRPN::process(int cc, int value)
 
     case MIDI::ControlChange::dataEntryMSB:
 
-      // We set new values when we see an MSB value.
+      // We set new values when we see an MSB value. The LSB value comes from the current channel state.
       if (active_) {
         if (index_ < nrpnValues_.size()) {
           auto msb = (value << 7);
           auto lsb = channelState_.continuousControllerValue(MIDI::ControlChange::dataEntryLSB);
           auto factor = Entity::Generator::Definition::definition(Entity::Generator::Index(index_)).nrpnMultiplier();
-          auto maxValue = 8192; // signed 13-bit value.
-          nrpnValues_[index_] = DSP::clamp(((msb + lsb) - maxValue), -maxValue, maxValue) * factor;
+          auto maxValue = 8192;
+          auto value = DSP::clamp(((msb + lsb) - maxValue), -maxValue, maxValue) * factor;
+          os_log_debug(log_, "setting index %zu to %f", index_, value);
+          nrpnValues_[index_] = value;
         }
         index_ = 0;
       }

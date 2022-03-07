@@ -2,10 +2,14 @@
 
 #pragma once
 
+#include "SF2Lib/Logger.hpp"
+
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
 
 struct NRPNTestPoint;
+
+namespace SF2::Render::Voice::State { class State; }
 
 namespace SF2::MIDI {
 
@@ -26,6 +30,8 @@ public:
    */
   NRPN(const ChannelState& channelState) : channelState_{channelState} {}
 
+  void apply(Render::Voice::State::State& state) const;
+
   /**
    Process a continuous controller message.
 
@@ -34,8 +40,10 @@ public:
    */
   void process(int cc, int value);
 
+  /// @returns true if actively processing SoundFont generator changes.
   bool isActive() const { return active_; }
 
+  /// @returns collection of generator values possibly set by NRPN messages.
   const NRPNValues& values() const { return nrpnValues_; }
 
 private:
@@ -46,6 +54,8 @@ private:
   bool active_{false};
 
   friend NRPNTestPoint;
+
+  inline static Logger log_{Logger::Make("MIDI", "NRPN")};
 };
 
 }
