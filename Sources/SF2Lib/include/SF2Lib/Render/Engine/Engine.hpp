@@ -38,6 +38,8 @@ public:
    Construct new engine and its voices.
 
    @param sampleRate the expected sample rate to use
+   @param voiceCount the maximum number of individual voices to support
+   @param interpolator the type of interpolation to use when rendering samples
    */
   Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator) :
   super(os_log_create("SoundFonts", "Engine")), sampleRate_{sampleRate}, oldestActive_{voiceCount}
@@ -171,8 +173,6 @@ public:
   MIDI::NRPN& nprn() { return nrpn_; }
 
 private:
-
-  static void zero(AUValue* ptr, AUAudioFrameCount frameCount) { std::fill(ptr, ptr + frameCount, 0.0); }
 
   void initialize(int channelCount, double sampleRate) {
     sampleRate_ = sampleRate;
