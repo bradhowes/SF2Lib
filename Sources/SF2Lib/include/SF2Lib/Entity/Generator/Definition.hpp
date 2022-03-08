@@ -31,10 +31,12 @@ public:
      @param value the value to clamp
      @returns clamped value if range is valid, or original value.
      */
-    Float clamp(Float value) const { return isValid() ? DSP::clamp(value, min, max) : value; }
+    template <typename T> T clamp(T value) const {
+      return isValid() ? std::min<T>(std::max<T>(value, min), max) : value;
+    }
 
-    Float min{};
-    Float max{};
+    int min{};
+    int max{};
   };
 
   static constexpr size_t NumDefs = static_cast<size_t>(Index::numValues);
@@ -139,7 +141,7 @@ public:
    @param value the value to clamp
    @returns clamped value
    */
-  Float clamp(Float value) const { return valueRange_.clamp(value); }
+  template <typename T> T clamp(T value) const { return valueRange_.clamp(value); }
 
   void dump(const Amount& amount) const;
 
