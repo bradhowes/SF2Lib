@@ -10,7 +10,15 @@ namespace SF2 {
 /**
  Type to use for all floating-point operations in SF2.
  */
-using Float = float;
+using Float = double;
+
+#ifndef __AVAudioTypes_h__
+using AUValue = float;
+using AUAudioFrameCount = uint32_t;
+#else
+using AUValue = ::AUValue;
+using AUAudioFrameCount = ::AUAudioFrameCount;
+#endif
 
 /**
  Collection of function pointers that refer to routines found in Apple's Accelerated framework.

@@ -35,19 +35,19 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testInit {
-  Engine<32> engine(44100.0, interpolator);
-  XCTAssertEqual(engine.maxVoiceCount, 32);
+  Engine engine(44100.0, 32, interpolator);
+  XCTAssertEqual(engine.voiceCount(), 32);
   XCTAssertEqual(engine.activeVoiceCount(), 0);
 }
 
 - (void)testLoad {
-  Engine<32> engine(44100.0, interpolator);
+  Engine engine(44100.0, 32, interpolator);
   engine.load(contexts.context0.file());
   XCTAssertEqual(engine.presetCount(), 235);
 }
 
 - (void)testUsePreset {
-  Engine<32> engine(44100.0, interpolator);
+  Engine engine(44100.0, 32, interpolator);
 }
 
 - (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
@@ -61,7 +61,7 @@ using namespace SF2::Render::Engine;
 
 - (void)testRolandPianoChordRenderLinear {
   Float sampleRate{44100.0};
-  Engine<32> engine(sampleRate, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
+  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
 
   engine.load(contexts.context2.file());
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
@@ -87,14 +87,17 @@ using namespace SF2::Render::Engine;
   float* samplesLeft = (float*)(bufferList->mBuffers[0].mData);
   float* samplesRight = (float*)(bufferList->mBuffers[1].mData);
 
+  Utils::OutputBufferPair dry{samplesLeft, samplesRight, AUAudioFrameCount(sampleCount)};
+  Utils::OutputBufferPair chorusSend;
+  Utils::OutputBufferPair reverbSend;
+  Utils::Mixer mixer{dry, chorusSend, reverbSend};
+
   XCTAssertEqual(0, engine.activeVoiceCount());
 
   int frameIndex = 0;
   auto renderUntil = [&](int until) {
     while (frameIndex++ < until) {
-      engine.render(samplesLeft, samplesRight, frameCount);
-      samplesLeft += frameCount;
-      samplesRight += frameCount;
+      engine.renderInto(mixer, frameCount);
     }
   };
 
@@ -119,9 +122,7 @@ using namespace SF2::Render::Engine;
 
   renderUntil(frameCount);
   if (remaining > 0) {
-    engine.render(samplesLeft, samplesRight, remaining);
-    samplesLeft += remaining;
-    samplesRight += remaining;
+    engine.renderInto(mixer, frameCount);
   }
 
   XCTAssertEqual(2, engine.activeVoiceCount());
@@ -131,13 +132,18 @@ using namespace SF2::Render::Engine;
 
 - (void)testRolandPianoChordRenderCubic4thOrder {
   Float sampleRate{44100.0};
-  Engine<32> engine(sampleRate, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
-
-  engine.load(contexts.context2.file());
+  AUAudioFrameCount frameCount = 512;
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-  AUAudioFrameCount frameCount = 512;
+  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+  engine.load(contexts.context2.file());
   engine.setRenderingFormat(format, frameCount);
+
+  // Set NPRN state so that voices send 20% output to the chorus channel
+  engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
+  engine.nprn().process(MIDI::ControlChange::nprnLSB, int(Entity::Generator::Index::chorusEffectSend));
+  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
+  engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 65);
 
   int seconds = 6;
   int sampleCount = sampleRate * seconds;
@@ -147,24 +153,34 @@ using namespace SF2::Render::Engine;
   int noteOnDuration = 50;
   int noteOffFrame = noteOnFrame + noteOnDuration;
 
-  AVAudioPCMBuffer* buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  assert(buffer != nullptr);
+  AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+  assert(dryBuffer != nullptr);
 
-  AudioBufferList* bufferList = buffer.mutableAudioBufferList;
+  AudioBufferList* bufferList = dryBuffer.mutableAudioBufferList;
   bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(float);
   bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(float);
 
-  float* samplesLeft = (float*)(bufferList->mBuffers[0].mData);
-  float* samplesRight = (float*)(bufferList->mBuffers[1].mData);
+  Utils::OutputBufferPair dry{(float*)(bufferList->mBuffers[0].mData), (float*)(bufferList->mBuffers[1].mData),
+    AUAudioFrameCount(sampleCount)};
+
+  AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+  assert(chorusBuffer != nullptr);
+
+  bufferList = chorusBuffer.mutableAudioBufferList;
+  bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(float);
+  bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(float);
+
+  Utils::OutputBufferPair chorusSend{(float*)(bufferList->mBuffers[0].mData), (float*)(bufferList->mBuffers[1].mData),
+    AUAudioFrameCount(sampleCount)};
+  Utils::OutputBufferPair reverbSend;
+  Utils::Mixer mixer{dry, chorusSend, reverbSend};
 
   XCTAssertEqual(0, engine.activeVoiceCount());
 
   int frameIndex = 0;
   auto renderUntil = [&](int until) {
     while (frameIndex++ < until) {
-      engine.render(samplesLeft, samplesRight, frameCount);
-      samplesLeft += frameCount;
-      samplesRight += frameCount;
+      engine.renderInto(mixer, frameCount);
     }
   };
 
@@ -189,14 +205,13 @@ using namespace SF2::Render::Engine;
 
   renderUntil(frameCount);
   if (remaining > 0) {
-    engine.render(samplesLeft, samplesRight, remaining);
-    samplesLeft += remaining;
-    samplesRight += remaining;
+    engine.renderInto(mixer, frameCount);
   }
 
   XCTAssertEqual(2, engine.activeVoiceCount());
 
-  [self playSamples: buffer count: sampleCount];
+  [self playSamples: dryBuffer count: sampleCount];
+  [self playSamples: chorusBuffer count: sampleCount];
 }
 
 - (void)playSamples:(AVAudioPCMBuffer*)buffer count:(int)sampleCount
@@ -260,6 +275,72 @@ using namespace SF2::Render::Engine;
   CFRelease(uuid);
 
   return result;
+}
+
+// Render 1 second of audio at 44100 sample rate using all voices of an engine and interpolating using 4th-order cubic.
+// Uses both effects buffers to account for mixing effort when they are active.
+- (void)testEngineRenderPerformance
+{
+  NSArray* metrics = @[XCTPerformanceMetric_WallClockTime];
+  [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
+    Float sampleRate{44100.0};
+    AUAudioFrameCount frameCount = 512;
+    AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
+
+    Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+    engine.load(contexts.context2.file());
+    engine.setRenderingFormat(format, frameCount);
+
+    // Set NPRN state so that voices send 20% output to the chorus channel
+    engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
+    engine.nprn().process(MIDI::ControlChange::nprnLSB, int(Entity::Generator::Index::chorusEffectSend));
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
+    engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 65);
+
+    // Set NPRN state so that voices send 10% output to the reverb channel
+    engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
+    engine.nprn().process(MIDI::ControlChange::nprnLSB, int(Entity::Generator::Index::reverbEffectSend));
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 100);
+    engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 64);
+
+    int seconds = 1;
+    int sampleCount = sampleRate * seconds;
+    int frames = sampleCount / frameCount;
+    int remaining = sampleCount - frames * frameCount;
+
+    AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+    AudioBufferList* bufferList = dryBuffer.mutableAudioBufferList;
+    bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(float);
+    bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(float);
+    Utils::OutputBufferPair dry{(float*)(bufferList->mBuffers[0].mData), (float*)(bufferList->mBuffers[1].mData),
+      AUAudioFrameCount(sampleCount)};
+
+    AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+    bufferList = chorusBuffer.mutableAudioBufferList;
+    bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(float);
+    bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(float);
+    Utils::OutputBufferPair chorusSend{(float*)(bufferList->mBuffers[0].mData), (float*)(bufferList->mBuffers[1].mData),
+      AUAudioFrameCount(sampleCount)};
+
+    AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+    bufferList = reverbBuffer.mutableAudioBufferList;
+    bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(float);
+    bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(float);
+    Utils::OutputBufferPair reverbSend{(float*)(bufferList->mBuffers[0].mData), (float*)(bufferList->mBuffers[1].mData),
+      AUAudioFrameCount(sampleCount)};
+
+    Utils::Mixer mixer{dry, chorusSend, reverbSend};
+
+    for (int voice = 0; voice < engine.voiceCount(); ++voice) {
+      engine.noteOn(32 + 2 * voice, 64);
+    }
+
+    [self startMeasuring];
+    for (auto frameIndex = 0; frameIndex < frames; ++frameIndex) {
+      engine.renderInto(mixer, frameCount);
+    }
+    [self stopMeasuring];
+  }];
 }
 
 @end

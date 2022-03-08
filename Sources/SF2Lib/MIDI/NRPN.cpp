@@ -18,6 +18,7 @@ NRPN::apply(Render::Voice::State::State &state) const
 void
 NRPN::process(int cc, int value)
 {
+  std::cout << "process: " << cc << " value: " << value << '\n';
   switch (cc) {
     case MIDI::ControlChange::nprnMSB:
       active_ = value == 120;
@@ -40,12 +41,12 @@ NRPN::process(int cc, int value)
       // We set new values when we see an MSB value. The LSB value comes from the current channel state.
       if (active_) {
         if (index_ < nrpnValues_.size()) {
-          auto msb = (value << 7);
-          auto lsb = channelState_.continuousControllerValue(MIDI::ControlChange::dataEntryLSB);
+          auto msb = ((0x7F & value) << 7);
+          auto lsb = 0x7F & channelState_.continuousControllerValue(MIDI::ControlChange::dataEntryLSB);
           auto factor = Entity::Generator::Definition::definition(Entity::Generator::Index(index_)).nrpnMultiplier();
           auto maxValue = 8192;
-          auto value = DSP::clamp(((msb + lsb) - maxValue), -maxValue, maxValue) * factor;
-          os_log_debug(log_, "setting index %zu to %f", index_, value);
+          value = DSP::clamp(((msb | lsb) - maxValue), -maxValue, maxValue) * factor;
+          os_log_debug(log_, "setting index %zu to %d", index_, value);
           nrpnValues_[index_] = value;
         }
         index_ = 0;

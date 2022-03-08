@@ -51,7 +51,7 @@ let package = Package(
       ],
       cxxSettings: [
         // Set to 1 to play audio in tests. Set to 0 to keep silent.
-        .define("PLAY_AUDIO", to: "0", .none),
+        .define("PLAY_AUDIO", to: "1", .none),
         .unsafeFlags(["-fmodules", "-fcxx-modules"], .none)
       ]
     )

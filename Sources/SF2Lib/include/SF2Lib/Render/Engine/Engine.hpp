@@ -15,6 +15,7 @@
 #include "SF2Lib/Render/Engine/OldestActiveVoiceCache.hpp"
 #include "SF2Lib/Render/Engine/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
+#include "SF2Lib/Utils/Mixer.hpp"
 
 namespace SF2::IO { class File; }
 
@@ -24,13 +25,11 @@ namespace SF2::Render::Engine {
  Engine that generates audio from SF2 files due to incoming MIDI signals. Maintains a collection of voices sized by the
  sole template parameter. A Voice generates samples based on the configuration it is given from a Preset.
  */
-template <size_t VoiceCount>
-class Engine : public DSPHeaders::EventProcessor<Engine<VoiceCount>> {
+class Engine : public DSPHeaders::EventProcessor<Engine> {
   using super = DSPHeaders::EventProcessor<Engine>;
   friend super;
 
 public:
-  static constexpr size_t maxVoiceCount = VoiceCount;
   using Config = Voice::State::Config;
   using Voice = Voice::Voice;
   using Interpolator = Render::Voice::Sample::Generator::Interpolator;
@@ -40,17 +39,20 @@ public:
 
    @param sampleRate the expected sample rate to use
    */
-  Engine(Float sampleRate, Interpolator interpolator) :
-  super(os_log_create("SoundFonts", "Engine")), sampleRate_{sampleRate}, oldestActive_{maxVoiceCount}
+  Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator) :
+  super(os_log_create("SoundFonts", "Engine")), sampleRate_{sampleRate}, oldestActive_{voiceCount}
   {
-    available_.reserve(maxVoiceCount);
-    voices_.reserve(maxVoiceCount);
-    for (size_t voiceIndex = 0; voiceIndex < maxVoiceCount; ++voiceIndex) {
+    available_.reserve(voiceCount);
+    voices_.reserve(voiceCount);
+    for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex) {
       voices_.emplace_back(sampleRate, channelState_, voiceIndex, interpolator);
       available_.push_back(voiceIndex);
     }
   }
 
+  /// @returns maximum number of voices available for simultaneous rendering
+  size_t voiceCount() const { return voices_.size(); }
+  
   /**
    Update kernel and buffers to support the given format and channel count
 
@@ -60,15 +62,16 @@ public:
   void setRenderingFormat(AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) {
     super::setRenderingFormat(format, maxFramesToRender);
     initialize(format.channelCount, format.sampleRate);
-//    for (auto& voice : voices_) {
-//      voice.setMaxFramesToRender(maxFramesToRender);
-//    }
+    for (auto& voice : voices_) {
+      voice.setMaxFramesToRender(maxFramesToRender);
+    }
   }
 
   /// Obtain the current sample rate
   Float sampleRate() const { return sampleRate_; }
 
   /// Obtain the MIDI channel assigned to the engine.
+  MIDI::ChannelState& channelState() { return channelState_; }
   const MIDI::ChannelState& channelState() const { return channelState_; }
 
   /**
@@ -147,27 +150,29 @@ public:
    Render samples to the given stereo output buffers. The buffers are guaranteed to be able to hold `frameCount`
    samples, and `frameCount` will never be more than the `maxFramesToRender` value given to the `setRenderingFormat`.
 
-   @param left pointer to buffer for left channel audio samples
-   @param right pointer to buffer for right channel audio samples
+   @param mixer collection of buffers to render into
    @param frameCount number of samples to render.
    */
-  void render(AUValue* left, AUValue* right, AUAudioFrameCount frameCount)
+  void renderInto(Utils::Mixer& mixer, AUAudioFrameCount frameCount)
   {
-    std::fill(left, left + frameCount, 0.0);
-    std::fill(right, right + frameCount, 0.0);
     for (auto voiceIndex : oldestActive_) {
       auto& voice{voices_[voiceIndex]};
       if (voice.isActive()) {
-        voice.renderIntoByAdding(left, right, frameCount);
+        voice.renderInto(mixer, frameCount);
       }
       if (voice.isDone()) {
         oldestActive_.remove(voiceIndex);
         available_.push_back(voiceIndex);
       }
     }
+    mixer.shift(frameCount);
   }
 
+  MIDI::NRPN& nprn() { return nrpn_; }
+
 private:
+
+  static void zero(AUValue* ptr, AUAudioFrameCount frameCount) { std::fill(ptr, ptr + frameCount, 0.0); }
 
   void initialize(int channelCount, double sampleRate) {
     sampleRate_ = sampleRate;
@@ -181,51 +186,22 @@ private:
   void setParameterFromEvent(const AUParameterEvent& event) {}
 
   /// API for EventProcessor
-  void doMIDIEvent(const AUMIDIEvent& midiEvent)
-  {
-    if (midiEvent.eventType != AURenderEventMIDI || midiEvent.length < 1) return;
-    switch (midiEvent.data[0] & 0xF0) {
-      case MIDI::CoreEvent::noteOff:
-        if (midiEvent.length == 2)
-          noteOff(midiEvent.data[1]);
-        break;
-      case MIDI::CoreEvent::noteOn:
-        if (midiEvent.length == 3)
-          noteOn(midiEvent.data[1], midiEvent.data[2]);
-        break;
-      case MIDI::CoreEvent::keyPressure:
-        if (midiEvent.length == 3)
-          channelState_.setKeyPressure(midiEvent.data[1], midiEvent.data[2]);
-        break;
-      case MIDI::CoreEvent::controlChange:
-        if (midiEvent.length == 3) {
-          channelState_.setContinuousControllerValue(midiEvent.data[1], midiEvent.data[2]);
-          nrpn_.process(midiEvent.data[1]);
-        }
-        break;
-      case MIDI::CoreEvent::programChange:
-        break;
-      case MIDI::CoreEvent::channelPressure:
-        if (midiEvent.length == 2)
-          channelState_.setChannelPressure(midiEvent.data[1]);
-        break;
-      case MIDI::CoreEvent::pitchBend:
-        if (midiEvent.length == 3) {
-          int bend = (midiEvent.data[2] << 7) | midiEvent.data[1];
-          channelState_.setPitchWheelValue(bend);
-        }
-        break;
-      case MIDI::CoreEvent::reset:
-        allOff();
-        break;
-    }
-  }
+  void doMIDIEvent(const AUMIDIEvent& midiEvent);
 
   /// API for EventProcessor
-  void doRendering(std::vector<AUValue*>& ins, std::vector<AUValue*>& outs, AUAudioFrameCount frameCount)
+  void doRendering(std::vector<AUValue*>&, std::vector<AUValue*>& outs, AUAudioFrameCount frameCount)
   {
-    assert(outs.size() == 2);
-    render(outs[0], outs[1], frameCount);
+    assert(outs.size() >= 2);
+
+    Utils::OutputBufferPair dry{outs[0], outs[1], frameCount};
+    Utils::OutputBufferPair chorusSend;
+    if (outs.size() >= 4) chorusSend = {outs[2], outs[3], frameCount};
+
+    Utils::OutputBufferPair reverbSend;
+    if (outs.size() >= 6) reverbSend = {outs[4], outs[5], frameCount};
+
+    Utils::Mixer mixer{dry, chorusSend, reverbSend};
+    renderInto(mixer, frameCount);
   }
 
   size_t selectVoice(const Config& config)

@@ -13,6 +13,7 @@
 #include "SF2Lib/Render/Voice/Sample/Generator.hpp"
 #include "SF2Lib/Render/Voice/State/Modulator.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
+#include "SF2Lib/Utils/Mixer.hpp"
 
 /**
  Collection of types involved in generating audio samples for note that is being played. For a polyphonic instrument,
@@ -57,6 +58,12 @@ public:
    @param sampleRate the sample rate to use
    */
   void setSampleRate(Float sampleRate) { state_.setSampleRate(sampleRate); }
+
+  void setMaxFramesToRender(SF2::AUAudioFrameCount maxFramesToRender)
+  {
+    samples_.reserve(maxFramesToRender);
+    samples_.resize(maxFramesToRender, 0.0f);
+  }
 
   /// @returns the unique index assigned to this voice instance.
   size_t voiceIndex() const { return voiceIndex_; }
@@ -162,28 +169,24 @@ public:
   /**
    Repeatedly invoke `renderSample` `frameCount` times.
 
-   @param left buffer of at least `frameCount` in size for left channel samples
-   @param right buffer of at least `frameCount` in size for right channel samples
+   @param mixer collection of buffers to mix into
    @param frameCount number of samples to render
    */
-  void renderIntoByAdding(float* left, float* right, size_t frameCount) {
-    Float leftAmp;
-    Float rightAmp;
+  void renderInto(Utils::Mixer& mixer, SF2::AUAudioFrameCount frameCount) {
+    assert(samples_.size() <= frameCount);
 
-    for (size_t index = 0; index < frameCount; ++index) {
-      if (isDone()) {
-        break;
-      }
-
-      Float pan = state_.modulated(Index::pan);
-      DSP::panLookup(pan, leftAmp, rightAmp);
-
-      auto sample = renderSample();
-      float leftSample = float(sample * leftAmp);
-      float rightSample = float(sample * rightAmp);
-      *left++ += leftSample;
-      *right++ += rightSample;
+    SF2::AUAudioFrameCount index = 0;
+    for (; index < frameCount; ++index) {
+      if (isDone()) break;
+      samples_[index] = renderSample();
     }
+
+    Float pan = state_.modulated(Index::pan);
+    Float chorusSend = state_.modulated(Index::chorusEffectSend) / 1000.0;
+    Float reverbSend = state_.modulated(Index::reverbEffectSend) / 1000.0;
+
+    // Only mix in the number of samples that we rendered
+    mixer.add(samples_.data(), index, pan, chorusSend, reverbSend);
   }
 
   /// @returns `State` instance for the voice.
@@ -222,6 +225,8 @@ private:
   size_t voiceIndex_;
   Float noiseFloorOverMagnitude_;
   Float noiseFloorOverMagnitudeOfLoop_;
+
+  std::vector<SF2::AUValue> samples_;
 
   mutable bool done_{false};
 

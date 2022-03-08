@@ -90,10 +90,10 @@ struct NRPNTestPoint {
   XCTAssertEqual(nrpn.values()[56], z);
   XCTAssertEqual(0, tp.index());
 
-  channelState.setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 456);
+  channelState.setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 123);
   nrpn.process(MIDI::ControlChange::nprnLSB, 56);
-  nrpn.process(MIDI::ControlChange::dataEntryMSB, 1);
-  z = (1 << 7) + 456 - 8192;
+  nrpn.process(MIDI::ControlChange::dataEntryMSB, 21);
+  z = ((21 << 7) | 123) - 8192;
   XCTAssertEqual(nrpn.values()[56], z);
   XCTAssertEqual(0, tp.index());
 }
