@@ -184,11 +184,11 @@ using namespace SF2::DSP::Tables;
 }
 
 - (void)testTenthPercentage {
-  XCTAssertEqualWithAccuracy(0.0, SF2::DSP::tenthPercentage(-1), 0.0001);
-  XCTAssertEqualWithAccuracy(0.0, SF2::DSP::tenthPercentage(0), 0.0001);
-  XCTAssertEqualWithAccuracy(0.123, SF2::DSP::tenthPercentage(123), 0.0001);
-  XCTAssertEqualWithAccuracy(1.0, SF2::DSP::tenthPercentage(1000), 0.0001);
-  XCTAssertEqualWithAccuracy(1.0, SF2::DSP::tenthPercentage(1001), 0.0001);
+  XCTAssertEqualWithAccuracy(0.0, SF2::DSP::tenthPercentageToNormalized(-1), 0.0001);
+  XCTAssertEqualWithAccuracy(0.0, SF2::DSP::tenthPercentageToNormalized(0), 0.0001);
+  XCTAssertEqualWithAccuracy(0.123, SF2::DSP::tenthPercentageToNormalized(123), 0.0001);
+  XCTAssertEqualWithAccuracy(1.0, SF2::DSP::tenthPercentageToNormalized(1000), 0.0001);
+  XCTAssertEqualWithAccuracy(1.0, SF2::DSP::tenthPercentageToNormalized(1001), 0.0001);
 }
 
 - (void)testLFOCentsToFrequency {

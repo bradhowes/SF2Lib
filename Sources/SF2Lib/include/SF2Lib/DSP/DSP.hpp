@@ -90,7 +90,7 @@ inline Float clampFilterCutoff(Float value) { return clamp(value, 1500.0f, 20000
  @param value percentage value expressed as tenths
  @returns normalized value between 0 and 1.
  */
-inline Float tenthPercentage(Float value) { return clamp(value / 1000.0f, 0.0f, 1.0f); }
+inline Float tenthPercentageToNormalized(Float value) { return clamp(value / 1000.0f, 0.0f, 1.0f); }
 
 /**
  Translate value in range [0, +1] into one in range [-1, +1]

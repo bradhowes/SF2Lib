@@ -181,9 +181,9 @@ public:
       samples_[index] = renderSample();
     }
 
-    Float pan = state_.modulated(Index::pan);
-    Float chorusSend = state_.modulated(Index::chorusEffectSend) / 1000.0;
-    Float reverbSend = state_.modulated(Index::reverbEffectSend) / 1000.0;
+    Float pan = DSP::clamp(state_.modulated(Index::pan), -500, 500);
+    Float chorusSend = DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend));
+    Float reverbSend = DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend));
 
     // Only mix in the number of samples that we rendered
     mixer.add(samples_.data(), index, pan, chorusSend, reverbSend);

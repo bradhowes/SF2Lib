@@ -5,7 +5,6 @@
 #include "../SampleBasedContexts.hpp"
 
 #include "SF2Lib/Entity/Generator/Index.hpp"
-// #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Preset.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
@@ -22,39 +21,39 @@ using namespace SF2::Entity::Generator;
 }
 
 - (void)testInit {
-  State::State state{contexts.context2.makeState(69, 64)};
-  XCTAssertEqual(0, state.unmodulated(Index::startAddressOffset));
-  XCTAssertEqual(0, state.unmodulated(Index::endAddressOffset));
-  XCTAssertEqual(9023, state.unmodulated(Index::initialFilterCutoff));
-  XCTAssertEqual(-12000, state.unmodulated(Index::delayModulatorLFO));
-  XCTAssertEqual(-12000, state.unmodulated(Index::delayVibratoLFO));
-  XCTAssertEqual(-12000, state.unmodulated(Index::attackModulatorEnvelope));
-  XCTAssertEqual(-12000, state.unmodulated(Index::holdModulatorEnvelope));
-  XCTAssertEqual(-12000, state.unmodulated(Index::decayModulatorEnvelope));
-  XCTAssertEqual(-12000, state.unmodulated(Index::releaseModulatorEnvelope));
-  XCTAssertEqual(-12000, state.unmodulated(Index::delayVolumeEnvelope));
-  XCTAssertEqual(-12000, state.unmodulated(Index::attackVolumeEnvelope));
-  XCTAssertEqual(-12000, state.unmodulated(Index::holdVolumeEnvelope));
-  XCTAssertEqual(-12000, state.unmodulated(Index::decayVolumeEnvelope));
-  XCTAssertEqual(2041, state.unmodulated(Index::releaseVolumeEnvelope));
-  XCTAssertEqual(-1, state.unmodulated(Index::forcedMIDIKey));
-  XCTAssertEqual(-1, state.unmodulated(Index::forcedMIDIVelocity));
-  XCTAssertEqual(100, state.unmodulated(Index::scaleTuning));
-  XCTAssertEqual(-1, state.unmodulated(Index::overridingRootKey));
+  State::State state{contexts.context2.makeState(69 + 24, 64)};
+  XCTAssertEqual(      0, state.unmodulated(Index::startAddressOffset));
+  XCTAssertEqual(      0, state.unmodulated(Index::endAddressOffset));
+  XCTAssertEqual(  9'023, state.unmodulated(Index::initialFilterCutoff));
+  XCTAssertEqual(-12'000, state.unmodulated(Index::delayModulatorLFO));
+  XCTAssertEqual(-12'000, state.unmodulated(Index::delayVibratoLFO));
+  XCTAssertEqual(-12'000, state.unmodulated(Index::attackModulatorEnvelope));
+  XCTAssertEqual(-12'000, state.unmodulated(Index::holdModulatorEnvelope));
+  XCTAssertEqual(-12'000, state.unmodulated(Index::decayModulatorEnvelope));
+  XCTAssertEqual(-12'000, state.unmodulated(Index::releaseModulatorEnvelope));
+  XCTAssertEqual(-12'000, state.unmodulated(Index::delayVolumeEnvelope));
+  XCTAssertEqual(-12'000, state.unmodulated(Index::attackVolumeEnvelope));
+  XCTAssertEqual(-12'000, state.unmodulated(Index::holdVolumeEnvelope));
+  XCTAssertEqual(-12'000, state.unmodulated(Index::decayVolumeEnvelope));
+  XCTAssertEqual(  2'041, state.unmodulated(Index::releaseVolumeEnvelope));
+  XCTAssertEqual(     -1, state.unmodulated(Index::forcedMIDIKey));
+  XCTAssertEqual(     -1, state.unmodulated(Index::forcedMIDIVelocity));
+  XCTAssertEqual(    100, state.unmodulated(Index::scaleTuning));
+  XCTAssertEqual(     -1, state.unmodulated(Index::overridingRootKey));
 }
 
 - (void)testKey {
   State::State state{contexts.context2.makeState(64, 32)};
   XCTAssertEqual(64, state.key());
   state.setValue(Index::forcedMIDIKey, 128);
-  XCTAssertEqual(128, state.key());
+  XCTAssertEqual(127, state.key());
 }
 
 - (void)testVelocity {
   State::State state{contexts.context2.makeState(64, 32)};
   XCTAssertEqual(32, state.velocity());
   state.setValue(Index::forcedMIDIVelocity, 128);
-  XCTAssertEqual(128, state.velocity());
+  XCTAssertEqual(127, state.velocity());
 }
 
 - (void)testModulatedValue {

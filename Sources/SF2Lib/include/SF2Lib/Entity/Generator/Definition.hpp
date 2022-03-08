@@ -18,6 +18,25 @@ namespace SF2::Entity::Generator {
  */
 class Definition {
 public:
+
+  /// Range for generator values. Default is no range checking.
+  struct ValueRange {
+
+    /// @returns true if the range is valid
+    bool isValid() const { return min < max; }
+
+    /**
+     Clamp the given value to be within the defined range. If range is not valid, no clamping will take place.
+
+     @param value the value to clamp
+     @returns clamped value if range is valid, or original value.
+     */
+    Float clamp(Float value) const { return isValid() ? DSP::clamp(value, min, max) : value; }
+
+    Float min{};
+    Float max{};
+  };
+
   static constexpr size_t NumDefs = static_cast<size_t>(Index::numValues);
 
   /// The kind of value held by the generator
@@ -114,16 +133,26 @@ public:
     }
   }
 
+  /**
+   Clamp a given value to the defined range for the generator.
+
+   @param value the value to clamp
+   @returns clamped value
+   */
+  Float clamp(Float value) const { return valueRange_.clamp(value); }
+
   void dump(const Amount& amount) const;
 
 private:
   static std::array<Definition, NumDefs> const definitions_;
 
-  Definition(const char* name, ValueKind valueKind, bool availableInPreset, uint8_t nrpnMultiplier) :
-  name_{name}, valueKind_{valueKind}, availableInPreset_{availableInPreset}, nrpnMultiplier_{nrpnMultiplier} {}
+  Definition(const char* name, ValueKind valueKind, ValueRange minMax, bool availableInPreset, uint8_t nrpnMultiplier) :
+  name_{name}, valueKind_{valueKind}, valueRange_{minMax}, availableInPreset_{availableInPreset},
+  nrpnMultiplier_{nrpnMultiplier} {}
 
   std::string name_;
   ValueKind valueKind_;
+  ValueRange valueRange_;
   bool availableInPreset_;
   uint8_t nrpnMultiplier_;
 };
