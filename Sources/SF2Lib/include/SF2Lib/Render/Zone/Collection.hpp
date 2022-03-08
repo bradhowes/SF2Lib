@@ -45,9 +45,9 @@ public:
    */
   Matches filter(int key, int velocity) const {
     Matches matches;
-    auto pos = zones_.begin();
+    auto pos = zones_.cbegin();
     if (hasGlobal()) ++pos;
-    std::copy_if(pos, zones_.end(), std::back_inserter(matches),
+    std::copy_if(pos, zones_.cend(), std::back_inserter(matches),
                  [key, velocity](const Zone& zone) { return zone.appliesTo(key, velocity); });
     return matches;
   }

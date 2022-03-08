@@ -22,6 +22,7 @@ class OldestActiveVoiceCache
 {
 public:
   using Allocator = Utils::ListNodeAllocator<size_t>;
+  using iterator = std::list<size_t, Allocator>::iterator;
   using const_iterator = std::list<size_t, Allocator>::const_iterator;
 
   /**
@@ -84,9 +85,11 @@ public:
   /// @returns the number of voices in the cache (since C++11 this is guaranteed to be O(1)).
   size_t size() const { return leastRecentlyUsed_.size(); }
 
-  const_iterator begin() const { return leastRecentlyUsed_.begin(); }
+  iterator begin() { return leastRecentlyUsed_.begin(); }
+  iterator end() { return leastRecentlyUsed_.end(); }
 
-  const_iterator end() const { return leastRecentlyUsed_.end(); }
+  const_iterator cbegin() const { return leastRecentlyUsed_.cbegin(); }
+  const_iterator cend() const { return leastRecentlyUsed_.cend(); }
 
   void clear() { while (!empty()) takeOldest(); }
 

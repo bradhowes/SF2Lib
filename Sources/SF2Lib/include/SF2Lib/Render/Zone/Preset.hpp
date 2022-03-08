@@ -40,7 +40,7 @@ public:
    */
   void refine(Voice::State::State& state) const
   {
-    std::for_each(generators().begin(), generators().end(), [&](const Entity::Generator::Generator& generator) {
+    std::for_each(generators().cbegin(), generators().cend(), [&](const Entity::Generator::Generator& generator) {
       if (generator.definition().isAvailableInPreset()) {
         log_.debug() << "adding " << generator.name() << " + " << generator.value() << std::endl;
         state.setAdjustment(generator.index(), generator.value());

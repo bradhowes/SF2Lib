@@ -29,6 +29,7 @@ class ChunkItems : private ChunkItemsSupport
 public:
   using ItemType = T;
   using ItemCollection = std::vector<ItemType>;
+  using iterator = typename std::vector<ItemType>::iterator;
   using const_iterator = typename std::vector<ItemType>::const_iterator;
   using ItemRefCollection = std::vector<std::reference_wrapper<ItemType const>>;
   
@@ -87,17 +88,30 @@ public:
   
   /**
    Obtain iterator to the start of the collection
+
+   @returns iterator to start of the collection
+   */
+  iterator begin() { return items_.begin(); }
+
+  /**
+   Obtain iterator at the end of the collection
+
+   @returns iterator at the end of the collection
+   */
+  iterator end() { return items_.end() - 1; }
+  /**
+   Obtain iterator to the start of the collection
    
    @returns iterator to start of the collection
    */
-  const_iterator begin() const { return items_.begin(); }
+  const_iterator cbegin() const { return items_.cbegin(); }
   
   /**
    Obtain iterator at the end of the collection
    
    @returns iterator at the end of the collection
    */
-  const_iterator end() const { return items_.end() - 1; }
+  const_iterator cend() const { return items_.cend() - 1; }
 
   /**
    Utility to dump out the contents of the collection
@@ -107,7 +121,7 @@ public:
   void dump(const std::string& indent) const {
     beginDump(size());
     size_t index = 0;
-    std::for_each(begin(), end(), [&](const ItemType& item) { item.dump(indent, index++); });
+    std::for_each(cbegin(), cend(), [&](const ItemType& item) { item.dump(indent, index++); });
   }
   
 private:
