@@ -6,8 +6,9 @@ samples for key events that come from (say) a MIDI keyboard. Work on the renderi
 present it can generate audio at the right pitch. This library is currently being used by my 
 [SoundFonts](https://github.com/bradhowes/SoundFonts) application for SF2 file parsing, and soon for rendering.
 
-Although nearly all of the code is generic C++17, there are bits that expect an Apple platform that has 
-the AudioToolbox and Accelerate frameworks available. However, this usage is fairly isolated. The goal is to be a 
+Although much of the code is generic C++17, there are bits that expect an Apple platform that has 
+the AudioToolbox and Accelerate frameworks available. As such, there are some code files that have the `.mm` suffix
+so that they compile as Obj-C++ instead of C++. However, such cases are fairly isolated. The goal is to be a 
 simple library for reading SF2 files as well as a competent SF2 audio renderer whose output can be fed to any sort of 
 audio processing chain, not just macOS and iOS systems Core Audio systems. For my own use, this will be used in AUv3
 components on iOS and macOS platforms.
@@ -20,7 +21,11 @@ Currently, all SF2 generators and modulators are supported and/or implemented, *
 * reverbEffectSend -- how much of a rendered sample is sent to a reverb effect audio channel (L+R)
 
 Since there are plenty of chorus and reverb effects available, this library will not have any of its own. Rather the 
-goal will be to make available the effect send channels for other AUv3 nodes to process as they wish.
+goal will be to make available the effect send channels for other AUv3 nodes to process as they wish. This is the case
+now: the render [Engine](Sources/SF2Lib/include/SF2Lib/Render/Engine/Engine.hpp) `renderInto` method takes a 
+[Mixer](Sources/SF2Lib/include/SF2Lib/Utils/Mixer.hpp) instance which support generating a "chorus effect send" and a
+"reverb effect send" channels. These are populated with samples from active voices, and their levels are controlled by
+the `chorusEffectSend` and `reverbEffectSend` parameters mentioned above.
 
 # DSPTableGenerator
 
