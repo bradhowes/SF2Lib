@@ -70,7 +70,7 @@ public:
 
    @param source the source definition to use
    */
-  explicit ValueTransformer(const Entity::Modulator::Source& source) :
+  explicit ValueTransformer(const Entity::Modulator::Source& source) noexcept :
   ValueTransformer(Kind(source.type()),
                    source.isMinToMax() ? Direction::ascending : Direction::descending,
                    source.isUnipolar() ? Polarity::unipolar : Polarity::bipolar)
@@ -82,7 +82,7 @@ public:
    @param controllerValue value to convert between 0 and 127
    @returns transformed value
    */
-  Float operator()(int controllerValue) const {
+  Float operator()(int controllerValue) const noexcept {
     return Float(active_[size_t(std::clamp<int>(controllerValue, 0, Max))]);
   }
 
@@ -95,7 +95,7 @@ private:
    @param direction ordering from min to max
    @param polarity range lower and upper bounds
    */
-  ValueTransformer(Kind kind, Direction direction, Polarity polarity);
+  ValueTransformer(Kind kind, Direction direction, Polarity polarity) noexcept;
 
   /**
    Locate the right table to use based on the transformation, direction, and polarity.
@@ -104,7 +104,7 @@ private:
    @param direction the min/max ordering to use
    @param polarity the lower bound of the transformed result
    */
-  static const TransformArrayType& selectActive(Kind kind, Direction direction, Polarity polarity);
+  static const TransformArrayType& selectActive(Kind kind, Direction direction, Polarity polarity) noexcept;
 
   /**
    Generator function for the positive linear curve
@@ -112,7 +112,7 @@ private:
    @param index the table index to generate the value for
    @returns transform value
    */
-  static Float positiveLinear(size_t index) { return Float(index) / TableSize; }
+  static Float positiveLinear(size_t index) noexcept { return Float(index) / TableSize; }
 
   /**
    Generator function for the negative linear curve
@@ -120,26 +120,26 @@ private:
    @param index the table index to generate the value for
    @returns transform value
    */
-  static Float negativeLinear(size_t index) { return 1.0f - positiveLinear(index); }
+  static Float negativeLinear(size_t index) noexcept { return 1.0f - positiveLinear(index); }
 
-  static Float positiveConcave(size_t index) {
+  static Float positiveConcave(size_t index) noexcept {
     return index == (TableSize - 1) ? 1.0f : -40.0f / 96.0f * std::log10((127.0f - index) / 127.0f);
   }
-  static Float negativeConcave(size_t index) {
+  static Float negativeConcave(size_t index) noexcept {
     return index == 0 ? 1.0f : -40.0f / 96.0f * std::log10(index / 127.0f);
   }
 
-  static Float positiveConvex(size_t index) {
+  static Float positiveConvex(size_t index) noexcept {
     return index == 0 ? 0.0f : 1.0f - -40.0f / 96.0f * std::log10(index / 127.0f);
   }
 
-  static Float negativeConvex(size_t index) {
+  static Float negativeConvex(size_t index) noexcept {
     return index == (TableSize - 1) ? 0.0f : 1.0f - -40.0f / 96.0f * std::log10(Float(127.0f - index) / 127.0f);
   }
 
-  static Float positiveSwitched(size_t index) { return index < TableSize / 2 ? 0.0 : 1.0; }
+  static Float positiveSwitched(size_t index) noexcept { return index < TableSize / 2 ? 0.0 : 1.0; }
 
-  static Float negativeSwitched(size_t index) { return index < TableSize / 2 ? 1.0 : 0.0; }
+  static Float negativeSwitched(size_t index) noexcept { return index < TableSize / 2 ? 1.0 : 0.0; }
 
   static TransformArrayType const positiveLinear_;
   static TransformArrayType const negativeLinear_;

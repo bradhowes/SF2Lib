@@ -10,7 +10,7 @@
 
 namespace SF2::IO {
 
-static inline void trim_property(char* property, size_t size)
+static inline void trim_property(char* property, size_t size) noexcept
 {
   // This is really inefficient, but these sizes are very small (< 50) so...
   std::string s(property, size - 1);
@@ -25,6 +25,8 @@ static inline void trim_property(char* property, size_t size)
   strncpy(property, s.c_str(), std::min(s.size() + 1, size));
 }
 
-template <typename T> static inline void trim_property(T& property) { trim_property(property, sizeof(property)); }
+template <typename T> static inline void trim_property(T& property) noexcept {
+  trim_property(property, sizeof(property));
+}
 
 } // end namespace SF2::IO

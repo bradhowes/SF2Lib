@@ -29,22 +29,22 @@ public:
    @param eventVelocity the MIDI velocity that triggered the rendering
    */
   Config(const Zone::Preset& preset, const Zone::Preset* globalPreset, const Zone::Instrument& instrument,
-         const Zone::Instrument* globalInstrument, int eventKey, int eventVelocity) :
+         const Zone::Instrument* globalInstrument, int eventKey, int eventVelocity) noexcept :
   preset_{preset}, globalPreset_{globalPreset},
   instrument_{instrument}, globalInstrument_{globalInstrument}, eventKey_{eventKey}, eventVelocity_{eventVelocity}
   {}
 
   /// @returns the buffer of audio samples to use for rendering
-  const Sample::NormalizedSampleSource& sampleSource() const { return instrument_.sampleSource(); }
+  const Sample::NormalizedSampleSource& sampleSource() const noexcept { return instrument_.sampleSource(); }
 
   /// @returns original MIDI key that triggered the voice
-  int eventKey() const { return eventKey_; }
+  int eventKey() const noexcept { return eventKey_; }
 
   /// @returns original MIDI velocity that triggered the voice
-  int eventVelocity() const { return eventVelocity_; }
+  int eventVelocity() const noexcept { return eventVelocity_; }
 
   /// @returns value of `exclusiveClass` generator for an instrument if it is set, or 0 if not found.
-  int exclusiveClass() const {
+  int exclusiveClass() const noexcept {
     for (const auto& box : instrument_.generators()) {
       const auto& gen{box.get()};
       if (gen.index() == Entity::Generator::Index::exclusiveClass) {
@@ -65,7 +65,7 @@ private:
 
    @param state the voice state to update
    */
-  void apply(State& state) const {
+  void apply(State& state) const noexcept {
 
     // Use Instrument zones to set absolute values. Do the global state first, then allow instruments to change
     // their settings.

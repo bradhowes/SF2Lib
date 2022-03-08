@@ -13,16 +13,18 @@ using namespace SF2::Render::Voice::State;
 
 namespace EntityMod = Entity::Modulator;
 
-int Modulator::ValueProvider::ccValue() const { return state_.channelState().continuousControllerValue(cc_); }
-int Modulator::ValueProvider::key() const { return state_.key(); }
-int Modulator::ValueProvider::velocity() const { return state_.velocity(); }
-int Modulator::ValueProvider::keyPressure() const { return state_.channelState().keyPressure(state_.key()); }
-int Modulator::ValueProvider::channelPressure() const { return state_.channelState().channelPressure(); }
-int Modulator::ValueProvider::pitchWheelValue() const { return state_.channelState().pitchWheelValue(); }
-int Modulator::ValueProvider::pitchWheelSensitivity() const { return state_.channelState().pitchWheelSensitivity(); }
-int Modulator::ValueProvider::linked() const { return std::round(modulator_->value()); };
+int Modulator::ValueProvider::ccValue() const noexcept { return state_.channelState().continuousControllerValue(cc_); }
+int Modulator::ValueProvider::key() const noexcept { return state_.key(); }
+int Modulator::ValueProvider::velocity() const noexcept { return state_.velocity(); }
+int Modulator::ValueProvider::keyPressure() const noexcept { return state_.channelState().keyPressure(state_.key()); }
+int Modulator::ValueProvider::channelPressure() const noexcept { return state_.channelState().channelPressure(); }
+int Modulator::ValueProvider::pitchWheelValue() const noexcept { return state_.channelState().pitchWheelValue(); }
+int Modulator::ValueProvider::pitchWheelSensitivity() const noexcept {
+  return state_.channelState().pitchWheelSensitivity();
+}
+int Modulator::ValueProvider::linked() const noexcept { return std::round(modulator_->value()); };
 
-Modulator::Modulator(size_t index, const EntityMod::Modulator& configuration, const State& state) :
+Modulator::Modulator(size_t index, const EntityMod::Modulator& configuration, const State& state) noexcept :
 configuration_{configuration},
 index_{index},
 amount_{configuration.amount()},
@@ -35,14 +37,14 @@ amountScale_{makeValueProvider(configuration.amountSource(), state)}
 }
 
 void
-Modulator::setSource(const Modulator& modulator)
+Modulator::setSource(const Modulator& modulator) noexcept
 {
   sourceValue_.modulator_ = &modulator;
   sourceValue_.proc_ = &ValueProvider::linked;
 }
 
 Modulator::ValueProvider
-Modulator::makeValueProvider(const EntityMod::Source& source, const State& state)
+Modulator::makeValueProvider(const EntityMod::Source& source, const State& state) noexcept
 {
   using GI = EntityMod::Source::GeneralIndex;
   if (source.isContinuousController()) {
@@ -62,7 +64,7 @@ Modulator::makeValueProvider(const EntityMod::Source& source, const State& state
 }
 
 std::string
-Modulator::description() const
+Modulator::description() const noexcept
 {
   std::ostringstream os;
   os << configuration().description();

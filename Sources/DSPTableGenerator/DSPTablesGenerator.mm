@@ -9,7 +9,7 @@ using namespace SF2::DSP;
 using namespace SF2::DSP::Tables;
 using namespace SF2::MIDI;
 
-Generator::Generator(std::ostream& os) : os_{os}
+Generator::Generator(std::ostream& os) noexcept : os_{os}
 {
   os_ << std::fixed;
   os_ << std::setprecision(16); // should be OK for 64-bit doubles

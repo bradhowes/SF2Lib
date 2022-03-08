@@ -5,7 +5,7 @@
 using namespace SF2::Render::Engine;
 
 void
-Engine::doMIDIEvent(const AUMIDIEvent& midiEvent)
+Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 {
   if (midiEvent.eventType != AURenderEventMIDI || midiEvent.length < 1) return;
   switch (MIDI::CoreEvent(midiEvent.data[0] & 0xF0)) {

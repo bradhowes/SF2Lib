@@ -24,24 +24,24 @@ public:
 
    @param pos location in file to read
    */
-  explicit Generator(IO::Pos& pos) { assert(sizeof(*this) == size); pos = pos.readInto(*this); }
+  explicit Generator(IO::Pos& pos) noexcept { assert(sizeof(*this) == size); pos = pos.readInto(*this); }
 
   /// @returns index of the generator as an enumerated type
-  Index index() const { return index_.index(); }
+  Index index() const noexcept { return index_.index(); }
 
   /// @returns value configured for the generator
-  Amount amount() const { return amount_; }
+  Amount amount() const noexcept { return amount_; }
 
   /// @returns meta-data for the generator
-  const Definition& definition() const { return Definition::definition(index_.index()); }
+  const Definition& definition() const noexcept { return Definition::definition(index_.index()); }
 
   /// @returns the name of the generator
-  const std::string& name() const { return definition().name(); }
+  const std::string& name() const noexcept { return definition().name(); }
 
   /// @returns the configured value of a generator
-  int value() const { return definition().valueOf(amount_); }
+  int value() const noexcept { return definition().valueOf(amount_); }
 
-  void dump(const std::string& indent, size_t index) const;
+  void dump(const std::string& indent, size_t index) const noexcept;
 
 private:
   RawIndex index_;

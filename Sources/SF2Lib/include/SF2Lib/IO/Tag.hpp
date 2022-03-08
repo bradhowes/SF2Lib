@@ -6,7 +6,7 @@
 
 namespace SF2::IO {
 
-inline constexpr uint32_t Pack4Chars(const char* c)
+inline constexpr uint32_t Pack4Chars(const char* c) noexcept
 {
   return ((uint32_t)(c[3])) << 24 | ((uint32_t)(c[2])) << 16 | ((uint32_t)(c[1])) << 8 | ((uint32_t)(c[0]));
 }
@@ -58,15 +58,15 @@ enum struct Tags {
  */
 class Tag {
 public:
-  Tag(uint32_t tag) : tag_{tag} {}
-  Tag(Tags tag) : tag_{static_cast<uint32_t>(tag)} {}
+  Tag(uint32_t tag) noexcept : tag_{tag} {}
+  Tag(Tags tag) noexcept : tag_{static_cast<uint32_t>(tag)} {}
 
-  uint32_t rawValue() const { return tag_; }
+  uint32_t rawValue() const noexcept { return tag_; }
 
-  bool operator ==(const Tag& rhs) const { return tag_ == rhs.tag_; }
-  bool operator !=(const Tag& rhs) const { return tag_ != rhs.tag_; }
+  bool operator ==(const Tag& rhs) const noexcept { return tag_ == rhs.tag_; }
+  bool operator !=(const Tag& rhs) const noexcept { return tag_ != rhs.tag_; }
 
-  std::string toString() const { return std::string(reinterpret_cast<char const*>(&tag_), 4); }
+  std::string toString() const noexcept { return std::string(reinterpret_cast<char const*>(&tag_), 4); }
 
 private:
   uint32_t tag_;

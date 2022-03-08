@@ -22,14 +22,14 @@ public:
      @param low the first value in the range
      @param high the last value in the range
      */
-    Range(ValueType low, ValueType high) : low_{low}, high_{high} {}
+    Range(ValueType low, ValueType high) noexcept : low_{low}, high_{high} {}
 
     /**
      Conversion constructor from Entity::Generator::Amount
 
      @param range the union value to use for range bounds
      */
-    explicit Range(const Entity::Generator::Amount& range) : Range(range.low(), range.high()) {}
+    explicit Range(const Entity::Generator::Amount& range) noexcept : Range(range.low(), range.high()) {}
 
     /**
      Determine if a given value is within the defined range.
@@ -37,13 +37,13 @@ public:
      @param value the value to test
      @returns true if so
      */
-    bool contains(ValueType value) const { return value >= low_ && value <= high_; }
+    bool contains(ValueType value) const noexcept { return value >= low_ && value <= high_; }
 
     /// @returns lowest value in range
-    ValueType low() const { return low_; }
+    ValueType low() const noexcept { return low_; }
 
     /// @returns highest value in range
-    ValueType high() const { return high_; }
+    ValueType high() const noexcept { return high_; }
 
 private:
     ValueType low_;

@@ -89,7 +89,7 @@ File::load(bool dump)
 }
 
 void
-File::patchReleaseTimes(float maxDuration) {
+File::patchReleaseTimes(float maxDuration) noexcept {
   int limit = int(log2(maxDuration) * 1200.0 + 0.5);
   std::cout << "maxDuration: " << maxDuration << " limit: " << limit << '\n';
 
@@ -128,7 +128,7 @@ File::patchReleaseTimes(float maxDuration) {
 }
 
 void
-File::dump() const {
+File::dump() const noexcept {
   std::cout << "|-phdr"; presets().dump("|-phdr: ");
   std::cout << "|-pbag"; presetZones().dump("|-pbag: ");
   std::cout << "|-pgen"; presetZoneGenerators().dump("|-pgen: ");
@@ -141,7 +141,7 @@ File::dump() const {
 }
 
 void
-File::dumpThreaded() const {
+File::dumpThreaded() const noexcept {
   std::map<int, int> instrumentLines;
   int lineCounter = 1;
   for (size_t phdrIndex = 0; phdrIndex < presets_.size(); ++phdrIndex) {

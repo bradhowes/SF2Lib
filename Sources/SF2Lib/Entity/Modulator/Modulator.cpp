@@ -45,13 +45,13 @@ const std::array<Modulator, Modulator::size> Modulator::defaults {
 };
 
 void
-Modulator::dump(const std::string& indent, size_t index) const
+Modulator::dump(const std::string& indent, size_t index) const noexcept
 {
   std::cout << indent << '[' << index << "] " << description() << std::endl;
 }
 
 std::string
-Modulator::description() const
+Modulator::description() const noexcept
 {
   std::ostringstream os;
   os << "Sv: " << sfModSrcOper << " Av: " << sfModAmtSrcOper << " dest: ";

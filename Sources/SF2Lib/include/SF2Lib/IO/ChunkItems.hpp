@@ -37,14 +37,14 @@ public:
   static constexpr size_t itemSize = T::size;
   
   /// Constructor for an empty collection.
-  ChunkItems() : items_{} {}
-  
+  ChunkItems() noexcept : items_{} {}
+
   /**
    Constructor that loads items from the file.
    
    @param source defines where to load and how many items to load
    */
-  explicit ChunkItems(const ChunkList& source) : items_{}
+  explicit ChunkItems(const ChunkList& source) noexcept : items_{}
   {
     load(source);
   }
@@ -54,14 +54,14 @@ public:
    
    @returns collection count
    */
-  size_t size() const { return items_.size() - 1; }
+  size_t size() const noexcept { return items_.size() - 1; }
 
   /**
    Determine if collection is empty
    
    @returns true if so
    */
-  bool empty() const { return items_.size() < 2; }
+  bool empty() const noexcept { return items_.size() < 2; }
 
   /**
    Obtain a (read-only) reference to an entity in the collection.
@@ -69,7 +69,7 @@ public:
    @param index the entity to fetch
    @returns entity reference
    */
-  const ItemType& operator[](size_t index) const { return checkedVectorIndexing(items_, index); }
+  const ItemType& operator[](size_t index) const noexcept { return checkedVectorIndexing(items_, index); }
   
   /**
    Obtain a read-only slice of the original collection. This is used to parcel out a run of values from a collection
@@ -79,7 +79,7 @@ public:
    @param count the number of items to have in the slice
    @returns the sliced references
    */
-  ItemRefCollection slice(size_t first, size_t count) const {
+  ItemRefCollection slice(size_t first, size_t count) const noexcept {
     return (first < size() && first + count <= size())
     ? ItemRefCollection(items_.begin() + typename ItemRefCollection::difference_type(first),
                         items_.begin() + typename ItemRefCollection::difference_type(first + count))
@@ -91,34 +91,34 @@ public:
 
    @returns iterator to start of the collection
    */
-  iterator begin() { return items_.begin(); }
+  iterator begin() noexcept { return items_.begin(); }
 
   /**
    Obtain iterator at the end of the collection
 
    @returns iterator at the end of the collection
    */
-  iterator end() { return items_.end() - 1; }
+  iterator end() noexcept { return items_.end() - 1; }
   /**
    Obtain iterator to the start of the collection
    
    @returns iterator to start of the collection
    */
-  const_iterator cbegin() const { return items_.cbegin(); }
+  const_iterator cbegin() const noexcept { return items_.cbegin(); }
   
   /**
    Obtain iterator at the end of the collection
    
    @returns iterator at the end of the collection
    */
-  const_iterator cend() const { return items_.cend() - 1; }
+  const_iterator cend() const noexcept { return items_.cend() - 1; }
 
   /**
    Utility to dump out the contents of the collection
    
    @param indent the prefix to use for all output
    */
-  void dump(const std::string& indent) const {
+  void dump(const std::string& indent) const noexcept {
     beginDump(size());
     size_t index = 0;
     std::for_each(cbegin(), cend(), [&](const ItemType& item) { item.dump(indent, index++); });
@@ -131,7 +131,7 @@ private:
    
    @param source the location in the file to read
    */
-  void load(const Chunk& source)
+  void load(const Chunk& source) noexcept
   {
     size_t count = source.size() / itemSize;
     items_.reserve(count);

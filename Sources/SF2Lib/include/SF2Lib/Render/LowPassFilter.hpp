@@ -18,7 +18,7 @@ public:
   inline static Float defaultFrequency = 13500;
   inline static Float defaultResonance = 0.0;
 
-  LowPassFilter(Float sampleRate) :
+  LowPassFilter(Float sampleRate) noexcept :
   filter_{Coefficients()}, sampleRate_{sampleRate},
   lastFrequency_{defaultFrequency}, lastResonance_{defaultResonance}
   {
@@ -31,7 +31,7 @@ public:
    @param frequency frequency represented in cents
    @param resonance resonance in centiBels
    */
-  Float transform(Float frequency, Float resonance, Float sample) {
+  Float transform(Float frequency, Float resonance, Float sample) noexcept {
     // return sample;
     
     if (lastFrequency_ != frequency || lastResonance_ != resonance) {
@@ -47,11 +47,11 @@ public:
     return filter_.transform(sample);
   }
 
-  void reset() { filter_.reset(); }
+  void reset() noexcept { filter_.reset(); }
 
 private:
 
-  void updateSettings(Float frequency, Float resonance)
+  void updateSettings(Float frequency, Float resonance) noexcept
   {
     lastFrequency_ = frequency;
     lastResonance_ = resonance;

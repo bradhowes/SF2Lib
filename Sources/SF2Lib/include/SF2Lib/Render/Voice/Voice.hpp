@@ -50,26 +50,26 @@ public:
    @param interpolator how to interpolate sample values
    */
   Voice(Float sampleRate, const MIDI::ChannelState& channelState, size_t voiceIndex,
-        Sample::Generator::Interpolator interpolator = Sample::Generator::Interpolator::linear);
+        Sample::Generator::Interpolator interpolator = Sample::Generator::Interpolator::linear) noexcept;
 
   /**
    Set the sample rate to use for rendering.
 
    @param sampleRate the sample rate to use
    */
-  void setSampleRate(Float sampleRate) { state_.setSampleRate(sampleRate); }
+  void setSampleRate(Float sampleRate) noexcept { state_.setSampleRate(sampleRate); }
 
-  void setMaxFramesToRender(SF2::AUAudioFrameCount maxFramesToRender)
+  void setMaxFramesToRender(SF2::AUAudioFrameCount maxFramesToRender) noexcept
   {
     samples_.reserve(maxFramesToRender);
     samples_.resize(maxFramesToRender, 0.0f);
   }
 
   /// @returns the unique index assigned to this voice instance.
-  size_t voiceIndex() const { return voiceIndex_; }
+  size_t voiceIndex() const noexcept { return voiceIndex_; }
 
   /// @returns the `exclusiveClass` generator value for the voice (only valid if voice is active).
-  int exclusiveClass() const { return state_.unmodulated(Index::exclusiveClass); }
+  int exclusiveClass() const noexcept { return state_.unmodulated(Index::exclusiveClass); }
 
   /**
    Configure the voice for rendering.
@@ -77,33 +77,33 @@ public:
    @param config the voice configuration to apply
    @param nrpn the MIDI NRPN values to apply
    */
-  void configure(const State::Config& config, const MIDI::NRPN& nrpn);
+  void configure(const State::Config& config, const MIDI::NRPN& nrpn) noexcept;
 
   /// @returns the MIDI key that started the voice. NOTE: not to be used for DSP processing.
-  int initiatingKey() const { return state_.eventKey(); }
+  int initiatingKey() const noexcept { return state_.eventKey(); }
 
   /// @returns true if the key used to start the voice is still down.
-  bool isKeyDown() const { return gainEnvelope_.isGated(); }
+  bool isKeyDown() const noexcept { return gainEnvelope_.isGated(); }
 
   /**
    Signal the envelopes that the key is no longer pressed, transitioning to release phase.
    */
-  void releaseKey() {
+  void releaseKey() noexcept {
     gainEnvelope_.gate(false);
     modulatorEnvelope_.gate(false);
   }
 
   /// @returns true if this voice is still rendering interesting samples
-  bool isActive() const { return !isDone(); }
+  bool isActive() const noexcept { return !isDone(); }
 
   /// @returns true if this voice is done processing and will no longer render meaningful samples.
-  bool isDone() const {
+  bool isDone() const noexcept {
     if (!done_) done_ = (!gainEnvelope_.isActive() || !sampleGenerator_.isActive());
     return done_;
   }
 
   /// @returns looping mode of the sample being rendered
-  LoopingMode loopingMode() const {
+  LoopingMode loopingMode() const noexcept {
     switch (state_.unmodulated(Index::sampleModes)) {
       case 1: return LoopingMode::activeEnvelope;
       case 3: return LoopingMode::duringKeyPress;
@@ -112,7 +112,7 @@ public:
   }
 
   /// @returns true if the voice can enter a loop if it is available
-  bool canLoop() const {
+  bool canLoop() const noexcept {
     return (loopingMode_ == LoopingMode::activeEnvelope && gainEnvelope_.isActive()) ||
     (loopingMode_ == LoopingMode::duringKeyPress && gainEnvelope_.isGated());
   }
@@ -135,7 +135,7 @@ public:
 
    @returns next sample
    */
-  Float renderSample() {
+  Float renderSample() noexcept {
     if (isDone()) { return 0.0; }
 
     // Capture the current state of the modulators and envelopes.
@@ -172,7 +172,7 @@ public:
    @param mixer collection of buffers to mix into
    @param frameCount number of samples to render
    */
-  void renderInto(Utils::Mixer& mixer, SF2::AUAudioFrameCount frameCount) {
+  void renderInto(Utils::Mixer& mixer, SF2::AUAudioFrameCount frameCount) noexcept {
     assert(samples_.size() <= frameCount);
 
     SF2::AUAudioFrameCount index = 0;
@@ -194,7 +194,7 @@ public:
 
 private:
 
-  Float calculateGain(Float modLFO, Float volEnv)
+  Float calculateGain(Float modLFO, Float volEnv) noexcept
   {
     // This formula follows what FluidSynth is doing for attenuation/gain.
     auto gain = (DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation)) *

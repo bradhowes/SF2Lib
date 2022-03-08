@@ -8,7 +8,7 @@
 using namespace SF2::Entity::Generator;
 
 void
-Definition::dump(const Amount& amount) const
+Definition::dump(const Amount& amount) const noexcept
 {
   Float value = convertedValueOf(amount);
   switch (valueKind_) {

@@ -67,7 +67,7 @@ public:
 
    @param state the state holding the generator values for the envelope definition
    */
-  static Generator forVol(const State& state) {
+  static Generator forVol(const State& state) noexcept {
     return Generator(state.sampleRate(),
                      DSP::centsToSeconds(state.modulated(Index::delayVolumeEnvelope)),
                      DSP::centsToSeconds(state.modulated(Index::attackVolumeEnvelope)),
@@ -83,7 +83,7 @@ public:
 
    @param state the state holding the generator values for the envelope definition
    */
-  static Generator forMod(const State& state) {
+  static Generator forMod(const State& state) noexcept {
     return Generator(state.sampleRate(),
                      DSP::centsToSeconds(state.modulated(Index::delayModulatorEnvelope)),
                      DSP::centsToSeconds(state.modulated(Index::attackModulatorEnvelope)),
@@ -98,7 +98,7 @@ public:
    Set the status of a note playing. When true, the envelope begins proper. When set to false, the envelope will
    jump to the release stage.
    */
-  void gate(bool noteOn) {
+  void gate(bool noteOn) noexcept {
     if (noteOn) {
       value_ = 0.0;
       enterStage(StageIndex::delay);
@@ -109,25 +109,25 @@ public:
   }
 
   /// @returns the currently active stage.
-  StageIndex stage() const { return stageIndex_; }
+  StageIndex stage() const noexcept { return stageIndex_; }
 
   /// @returns true if the generator still has values to emit
-  bool isActive() const { return stageIndex_ != StageIndex::idle; }
+  bool isActive() const noexcept { return stageIndex_ != StageIndex::idle; }
 
   /// @returns true if the generator is active and has not yet reached the release state
-  bool isGated() const { return isActive() && stageIndex_ != StageIndex::release; }
+  bool isGated() const noexcept { return isActive() && stageIndex_ != StageIndex::release; }
 
-  bool isDelayed() const { return stageIndex_ == StageIndex::delay; }
+  bool isDelayed() const noexcept { return stageIndex_ == StageIndex::delay; }
 
   /// @returns the current envelope value.
-  Float value() const { return value_; }
+  Float value() const noexcept { return value_; }
 
   /**
    Calculate the next envelope value. This must be called on every sample for proper timing of the stages.
 
    @returns the new envelope value.
    */
-  Float getNextValue() {
+  Float getNextValue() noexcept {
     switch (stageIndex_) {
       case StageIndex::delay: checkIfEndStage(StageIndex::attack); break;
       case StageIndex::attack: updateValue(); checkIfEndStage(StageIndex::hold); break;
@@ -140,12 +140,12 @@ public:
     return value_;
   }
 
-  const Stage& operator[](StageIndex stageIndex) const { return stages_[static_cast<size_t>(stageIndex)]; }
+  const Stage& operator[](StageIndex stageIndex) const noexcept { return stages_[static_cast<size_t>(stageIndex)]; }
 
 private:
 
   Generator(Float sampleRate, Float delay, Float attack, Float hold, Float decay, Float sustain, Float release,
-            bool noteOn = false) : stages_{
+            bool noteOn = false) noexcept : stages_{
     Stage::Delay(samplesFor(sampleRate, delay)),
     Stage::Attack(samplesFor(sampleRate, attack), defaultCurvature),
     Stage::Hold(samplesFor(sampleRate, hold)),
@@ -165,7 +165,7 @@ private:
    @param gen the generator holding the timecents/semitone scaling factor
    @returns result of generator value x (60 - key)
    */
-  static Float keyModEnv(const State& state, Index gen) {
+  static Float keyModEnv(const State& state, Index gen) noexcept {
     assert(gen == Index::midiKeyToVolumeEnvelopeHold ||
            gen == Index::midiKeyToVolumeEnvelopeDecay ||
            gen == Index::midiKeyToModulatorEnvelopeHold ||
@@ -174,31 +174,43 @@ private:
   }
 
   /// @returns the adjustment to the volume envelope's hold stage timing based on the MIDI key event
-  static Float keyToVolEnvHold(const State& state) { return keyModEnv(state, Index::midiKeyToVolumeEnvelopeHold); }
+  static Float keyToVolEnvHold(const State& state) noexcept {
+    return keyModEnv(state, Index::midiKeyToVolumeEnvelopeHold);
+  }
 
   /// @returns the adjustment to the volume envelope's decay stage timing based on the MIDI key event
-  static Float keyToVolEnvDecay(const State& state) { return keyModEnv(state, Index::midiKeyToVolumeEnvelopeDecay); }
+  static Float keyToVolEnvDecay(const State& state) noexcept {
+    return keyModEnv(state, Index::midiKeyToVolumeEnvelopeDecay);
+  }
 
   /// @returns the adjustment to the modulator envelope's hold stage timing based on the MIDI key event
-  static Float keyToModEnvHold(const State& state) { return keyModEnv(state, Index::midiKeyToModulatorEnvelopeHold); }
+  static Float keyToModEnvHold(const State& state) noexcept {
+    return keyModEnv(state, Index::midiKeyToModulatorEnvelopeHold);
+  }
 
   /// @returns the adjustment to the modulator envelope's decay stage timing based on the MIDI key event
-  static Float keyToModEnvDecay(const State& state) { return keyModEnv(state, Index::midiKeyToModulatorEnvelopeDecay); }
+  static Float keyToModEnvDecay(const State& state) noexcept {
+    return keyModEnv(state, Index::midiKeyToModulatorEnvelopeDecay);
+  }
 
-  static Float envSustain(const State& state, Index gen) {
+  static Float envSustain(const State& state, Index gen) noexcept {
     assert(gen == Index::sustainVolumeEnvelope || gen == Index::sustainModulatorEnvelope);
     return 1.0f - state.modulated(gen) / 1000.0f;
   }
 
   /// @returns the sustain level for the volume envelope (gain)
-  static Float volEnvSustain(const State& state) { return envSustain(state, Index::sustainVolumeEnvelope); }
+  static Float volEnvSustain(const State& state) noexcept {
+    return envSustain(state, Index::sustainVolumeEnvelope);
+  }
 
   /// @returns the sustain level for the modulator envelope
-  static Float modEnvSustain(const State& state) { return envSustain(state, Index::sustainModulatorEnvelope); }
+  static Float modEnvSustain(const State& state) noexcept {
+    return envSustain(state, Index::sustainModulatorEnvelope);
+  }
 
-  static int samplesFor(Float sampleRate, Float duration) { return int(round(sampleRate * duration)); }
+  static int samplesFor(Float sampleRate, Float duration) noexcept { return int(round(sampleRate * duration)); }
 
-  void updateAndCompare(Float floor, StageIndex next) {
+  void updateAndCompare(Float floor, StageIndex next) noexcept {
     updateValue();
     if (value_ < floor)
       enterStage(next);
@@ -206,24 +218,24 @@ private:
       checkIfEndStage(next);
   }
 
-  const Stage& active() const { return stage(stageIndex_); }
+  const Stage& active() const noexcept { return stage(stageIndex_); }
 
-  const Stage& stage(StageIndex stageIndex) const { return stages_[static_cast<size_t>(stageIndex)]; }
+  const Stage& stage(StageIndex stageIndex) const noexcept { return stages_[static_cast<size_t>(stageIndex)]; }
 
-  Float sustainLevel() const { return stage(StageIndex::sustain).initial_; }
+  Float sustainLevel() const noexcept { return stage(StageIndex::sustain).initial_; }
 
-  void updateValue() { value_ = active().next(value_); }
+  void updateValue() noexcept { value_ = active().next(value_); }
 
-  void checkIfEndStage(StageIndex next) {
+  void checkIfEndStage(StageIndex next) noexcept {
     if (--counter_ == 0) {
       os_log_debug(log_, "end stage: %{public}s", StageName(next));
       enterStage(next);
     }
   }
 
-  int activeDurationInSamples() const { return active().durationInSamples_; }
+  int activeDurationInSamples() const noexcept { return active().durationInSamples_; }
 
-  void enterStage(StageIndex next) {
+  void enterStage(StageIndex next) noexcept {
     os_log_debug(log_, "new stage: %{public}s", StageName(next));
     stageIndex_ = next;
     switch (stageIndex_) {

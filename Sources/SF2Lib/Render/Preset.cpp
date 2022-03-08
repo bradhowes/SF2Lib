@@ -7,7 +7,7 @@
 
 using namespace SF2::Render;
 
-Preset::Preset(const IO::File& file, const InstrumentCollection& instruments, const Entity::Preset& config)
+Preset::Preset(const IO::File& file, const InstrumentCollection& instruments, const Entity::Preset& config) noexcept
 : Zone::WithCollectionBase<Zone::Preset, Entity::Preset>(config.zoneCount(), config)
 {
   for (const Entity::Bag& bag : file.presetZones().slice(config.firstZoneIndex(), config.zoneCount())) {

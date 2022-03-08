@@ -41,10 +41,11 @@ public:
    @param configuration the entity configuration that defines the modulator
    @param state the voice state that can be used as a source for modulators
    */
-  Modulator(size_t index, const Entity::Modulator::Modulator& configuration, const State& state);
+  Modulator(size_t index, const Entity::Modulator::Modulator& configuration, const State& state) noexcept;
 
   /// @returns current value of the modulator
-  Float value() const {
+  Float value() const noexcept
+  {
     assert(isValid());
 
     // If there is no source for the modulator, it always returns 0.0 (no modulation).
@@ -61,16 +62,16 @@ public:
   }
 
   /// @returns configuration of the modulator from the SF2 file
-  const Entity::Modulator::Modulator& configuration() const { return configuration_; }
+  const Entity::Modulator::Modulator& configuration() const noexcept { return configuration_; }
 
   /// @returns index offset for the modulator
-  size_t index() const { return index_; }
+  size_t index() const noexcept { return index_; }
 
   /// Flag this modulator as being invalid.
-  void flagInvalid() { index_ = std::numeric_limits<size_t>::max(); }
+  void flagInvalid() noexcept { index_ = std::numeric_limits<size_t>::max(); }
 
   /// @returns true if the modulator is valid.
-  bool isValid() const { return index_ != std::numeric_limits<size_t>::max(); }
+  bool isValid() const noexcept { return index_ != std::numeric_limits<size_t>::max(); }
 
   /**
    Resolve the linking between two modulators. Configures this modulator to invoke the `value()` method of another to
@@ -82,9 +83,9 @@ public:
 
    @param modulator provider for an Sv to use for this modulator
    */
-  void setSource(const Modulator& modulator);
+  void setSource(const Modulator& modulator) noexcept;
 
-  std::string description() const;
+  std::string description() const noexcept;
 
 private:
 
@@ -99,17 +100,17 @@ private:
     const int cc_{0};
     const Modulator* modulator_{nullptr};
 
-    bool isValid() const { return proc_ != nullptr; }
-    int operator()() const { return isValid() ? (this->*proc_)() : 0; }
+    bool isValid() const noexcept { return proc_ != nullptr; }
+    int operator()() const noexcept { return isValid() ? (this->*proc_)() : 0; }
 
-    int ccValue() const;
-    int key() const;
-    int velocity() const;
-    int keyPressure() const;
-    int channelPressure() const;
-    int pitchWheelValue() const;
-    int pitchWheelSensitivity() const;
-    int linked() const;
+    int ccValue() const noexcept;
+    int key() const noexcept;
+    int velocity() const noexcept;
+    int keyPressure() const noexcept;
+    int channelPressure() const noexcept;
+    int pitchWheelValue() const noexcept;
+    int pitchWheelSensitivity() const noexcept;
+    int linked() const noexcept;
   };
 
   /**
@@ -120,7 +121,7 @@ private:
    @param state the voice state that will be modulated
    @returns ValueProvider instance for obtaining the value
    */
-  static ValueProvider makeValueProvider(const Entity::Modulator::Source& source, const State& state);
+  static ValueProvider makeValueProvider(const Entity::Modulator::Source& source, const State& state) noexcept;
 
   const Entity::Modulator::Modulator& configuration_;
   size_t index_;

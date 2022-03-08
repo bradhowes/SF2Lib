@@ -38,7 +38,7 @@ public:
    @param state the voice state to work with
    @param kind the interpolation to apply to the samples
    */
-  Generator(State& state, Interpolator kind) :
+  Generator(State& state, Interpolator kind) noexcept :
   state_{state}, interpolatorProc_{interpolator(kind)} {}
 
   /**
@@ -46,7 +46,7 @@ public:
 
    @param sampleSource the samples to use for rendering
    */
-  void configure(const NormalizedSampleSource& sampleSource)
+  void configure(const NormalizedSampleSource& sampleSource) noexcept
   {
     bounds_ = Bounds::make(sampleSource.header(), state_);
     index_.configure(bounds_);
@@ -61,7 +61,8 @@ public:
    @param canLoop true if the generator is permitted to loop for more samples
    @returns new sample value
    */
-  Float generate(Float increment, bool canLoop) {
+  Float generate(Float increment, bool canLoop) noexcept
+  {
     if (index_.finished()) return 0.0;
     auto whole = index_.whole();
     auto partial = index_.partial();
@@ -70,15 +71,15 @@ public:
   }
 
   /// @returns true if sill generating samples
-  bool isActive() const { return !index_.finished(); }
+  bool isActive() const noexcept { return !index_.finished(); }
 
   /// @returns true if generator has looped during rendering.
-  bool looped() const { return index_.looped(); }
+  bool looped() const noexcept { return index_.looped(); }
 
 private:
   using InterpolatorProc = Float (Generator::*)(size_t, Float, bool) const;
 
-  static InterpolatorProc interpolator(Interpolator kind) {
+  static InterpolatorProc interpolator(Interpolator kind) noexcept {
     return kind == Interpolator::linear ? &Generator::linearInterpolate : &Generator::cubic4thOrderInterpolate;
   }
 
@@ -90,7 +91,7 @@ private:
    @param canLoop true if wrapping around in loop is allowed
    @returns interpolated sample result
    */
-  Float linearInterpolate(size_t whole, Float partial, bool canLoop) const {
+  Float linearInterpolate(size_t whole, Float partial, bool canLoop) const noexcept {
     return DSP::Interpolation::linear(partial, sample(whole, canLoop), sample(whole + 1, canLoop));
   }
 
@@ -102,17 +103,17 @@ private:
    @param canLoop true if wrapping around in loop is allowed
    @returns interpolated sample result
    */
-  Float cubic4thOrderInterpolate(size_t whole, Float partial, bool canLoop) const {
+  Float cubic4thOrderInterpolate(size_t whole, Float partial, bool canLoop) const noexcept {
     return DSP::Interpolation::cubic4thOrder(partial, before(whole, canLoop), sample(whole, canLoop),
                                              sample(whole + 1, canLoop), sample(whole + 2, canLoop));
   }
 
-  Float sample(size_t whole, bool canLoop) const {
+  Float sample(size_t whole, bool canLoop) const noexcept {
     if (whole == bounds_.endLoopPos() && canLoop) whole = bounds_.startLoopPos();
     return whole < sampleSource_->size() ? (*sampleSource_)[whole] : 0.0;
   }
 
-  Float before(size_t whole, bool canLoop) const {
+  Float before(size_t whole, bool canLoop) const noexcept {
     if (whole == 0) return 0.0;
     if (whole == bounds_.startLoopPos() && canLoop) whole = bounds_.endLoopPos();
     return (*sampleSource_)[whole - 1];

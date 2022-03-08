@@ -44,7 +44,7 @@ public:
    
    @param pos location to read from
    */
-  explicit Modulator(IO::Pos& pos) {
+  explicit Modulator(IO::Pos& pos) noexcept {
     assert(sizeof(*this) == size);
     pos = pos.readInto(*this);
   }
@@ -52,50 +52,51 @@ public:
   /**
    Construct instance from values. Used to define default mods and support unit tests.
    */
-  Modulator(Source modSrcOper, Generator::Index dest, int16_t amount, Source modAmtSrcOper, Transform transform) :
+  Modulator(Source modSrcOper, Generator::Index dest, int16_t amount, Source modAmtSrcOper,
+            Transform transform) noexcept :
   sfModSrcOper{modSrcOper}, sfModDestOper{static_cast<uint16_t>(dest)}, modAmount{amount},
   sfModAmtSrcOper{modAmtSrcOper}, sfModTransOper{transform} {}
   
   /// @returns the source of data for the modulator
-  const Source& source() const { return sfModSrcOper; }
+  const Source& source() const noexcept { return sfModSrcOper; }
   
   /// @returns true if this modulator is the source of a value for another modulator
-  bool hasModulatorDestination() const { return (sfModDestOper & (1 << 15)) != 0; }
+  bool hasModulatorDestination() const noexcept { return (sfModDestOper & (1 << 15)) != 0; }
   
   /// @returns true if this modulator directly affects a generator value
-  bool hasGeneratorDestination() const { return !hasModulatorDestination(); }
+  bool hasGeneratorDestination() const noexcept { return !hasModulatorDestination(); }
   
   /// @returns the destination (generator) for the modulator
-  Generator::Index generatorDestination() const {
+  Generator::Index generatorDestination() const noexcept {
     assert(hasGeneratorDestination() && sfModDestOper < size_t(Generator::Index::numValues));
     return Generator::Index(sfModDestOper);
   }
 
   /// @returns the index of the destination modulator. This is the index in the pmod/imod bag.
-  size_t linkDestination() const {
+  size_t linkDestination() const noexcept {
     assert(hasModulatorDestination());
     return size_t(sfModDestOper ^ (1 << 15));
   }
   
   /// @returns the maximum deviation that a modulator can apply to a generator
-  int16_t amount() const { return modAmount; }
+  int16_t amount() const noexcept { return modAmount; }
   
   /// @returns the second source of data for the modulator
-  const Source& amountSource() const { return sfModAmtSrcOper; }
+  const Source& amountSource() const noexcept { return sfModAmtSrcOper; }
   
   /// @returns the transform to apply to values created by the modulator
-  const Transform& transform() const { return sfModTransOper; }
+  const Transform& transform() const noexcept { return sfModTransOper; }
   
-  std::string description() const;
+  std::string description() const noexcept;
   
-  bool operator ==(const Modulator& rhs) const {
+  bool operator ==(const Modulator& rhs) const noexcept {
     return (sfModSrcOper == rhs.sfModSrcOper && sfModDestOper == rhs.sfModDestOper &&
             sfModAmtSrcOper == rhs.sfModAmtSrcOper);
   }
   
-  bool operator !=(const Modulator& rhs) const {  return !operator==(rhs); }
+  bool operator !=(const Modulator& rhs) const noexcept {  return !operator==(rhs); }
   
-  void dump(const std::string& indent, size_t index) const;
+  void dump(const std::string& indent, size_t index) const noexcept;
   
 private:
   Source sfModSrcOper;

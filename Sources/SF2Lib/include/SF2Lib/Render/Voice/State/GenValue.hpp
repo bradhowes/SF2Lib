@@ -25,13 +25,13 @@ struct GenValue {
   /**
    Construct a new value
    */
-  GenValue() : mods{allocator} {}
+  GenValue() noexcept : mods{allocator} {}
 
   /// @returns generator value as defined by zones (no modulators).
-  int unmodulated() const { return value + adjustment; }
+  int unmodulated() const noexcept { return value + adjustment; }
 
   /// @returns generator value that includes modulator contributions
-  Float modulated() const { return unmodulated() + sumMods + nrpn; }
+  Float modulated() const noexcept { return unmodulated() + sumMods + nrpn; }
 
   int value{0};
   int adjustment{0};

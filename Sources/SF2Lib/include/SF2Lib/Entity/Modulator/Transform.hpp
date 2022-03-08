@@ -30,7 +30,7 @@ public:
 
    @param bits the value that determines the type of transform to apply
    */
-  explicit Transform(uint16_t bits) : bits_{bits} {}
+  explicit Transform(uint16_t bits) noexcept : bits_{bits} {}
 
   /**
    Default constructor.
@@ -38,7 +38,7 @@ public:
   Transform() : Transform(0) {}
 
   /// @returns the kind of transform to apply
-  Kind kind() const { return bits_ == 0 ? Kind::linear : Kind::absolute; }
+  Kind kind() const noexcept { return bits_ == 0 ? Kind::linear : Kind::absolute; }
 
   /**
    Transform a value.
@@ -47,7 +47,7 @@ public:
    @returns transformed value
    */
   template <typename T>
-  T transform(T value) const {
+  T transform(T value) const noexcept {
     switch (kind()) {
       case Kind::linear: return value;
       case Kind::absolute: return std::abs(value);
@@ -55,7 +55,7 @@ public:
     }
   }
 
-  friend std::ostream& operator<<(std::ostream& os, const Transform& value);
+  friend std::ostream& operator<<(std::ostream& os, const Transform& value) noexcept;
 
 private:
   const uint16_t bits_;

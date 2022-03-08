@@ -13,7 +13,7 @@ using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
 
 Voice::Voice(Float sampleRate, const ChannelState& channelState, size_t voiceIndex,
-             Sample::Generator::Interpolator interpolator) :
+             Sample::Generator::Interpolator interpolator) noexcept :
 state_{sampleRate, channelState},
 loopingMode_{LoopingMode::none},
 pitch_{state_},
@@ -31,7 +31,7 @@ samples_{}
 }
 
 void
-Voice::configure(const State::Config& config, const NRPN& nrpn)
+Voice::configure(const State::Config& config, const NRPN& nrpn) noexcept
 {
   config.sampleSource().load();
 

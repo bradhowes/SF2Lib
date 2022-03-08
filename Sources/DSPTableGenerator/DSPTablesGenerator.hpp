@@ -24,7 +24,7 @@ struct Generator {
    @param name the name of the table to initialize
    */
   template <typename T>
-  void generate(const std::string& name) {
+  void generate(const std::string& name) noexcept {
     os_ << "const std::array<double, " << name << "::TableSize> " << name << "::lookup_ = {\n";
     for (auto index = 0; index < T::TableSize; ++index) os_ << T::value(index) << ",\n";
     os_ << "};\n\n";
@@ -37,7 +37,7 @@ struct Generator {
    @param name the table name to initialize
    @param bipolar if true, initialize a bipolar table; otherwise, a unipolar one (default).
    */
-  void generateTransform(std::function<double(int)> proc, const std::string& name, bool bipolar = false) {
+  void generateTransform(std::function<double(int)> proc, const std::string& name, bool bipolar = false) noexcept {
     os_ << "const ValueTransformer::TransformArrayType ValueTransformer::" << name;
     if (bipolar) os_ << "Bipolar";
     os_ << "_ = {\n";
@@ -57,7 +57,7 @@ struct Generator {
    Initialize the coefficients for the interpolation. The math comes from a mail, posted by Olli Niemitalo to the
    music-dsp mailing list (I found it in the music-dsp archives http://www.smartelectronix.com/musicdsp/).
    */
-  void generateCubic4thOrderWeights() {
+  void generateCubic4thOrderWeights() noexcept {
     os_ << "const Tables::Cubic4thOrder::WeightsArray Tables::Cubic4thOrder::weights_ = { {\n";
     for (auto index = 0; index < Tables::Cubic4thOrder::TableSize; ++index) {
       auto x = double(index) / double(Tables::Cubic4thOrder::TableSize);
@@ -76,7 +76,7 @@ struct Generator {
     os_ << "} };\n\n";
   }
   
-  Generator(std::ostream& os);
+  Generator(std::ostream& os) noexcept;
 };
 
 } // SF2::DSP::Tables

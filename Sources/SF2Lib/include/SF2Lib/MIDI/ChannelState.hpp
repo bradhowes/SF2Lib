@@ -26,7 +26,7 @@ public:
   /**
    Construct new channel.
    */
-  ChannelState() : continuousControllerValues_{}, keyPressureValues_{} {
+  ChannelState() noexcept : continuousControllerValues_{}, keyPressureValues_{} {
     continuousControllerValues_.fill(0);
     keyPressureValues_.fill(0);
   }
@@ -37,7 +37,7 @@ public:
    @param key the key to set
    @param value the pressure value to record
    */
-  void setKeyPressure(int key, int value) {
+  void setKeyPressure(int key, int value) noexcept {
     assert(key <= Note::Max);
     keyPressureValues_[size_t(key)] = value;
   }
@@ -48,7 +48,7 @@ public:
    @param key the key to get
    @returns the current pressure value for a key
    */
-  int keyPressure(int key) const {
+  int keyPressure(int key) const noexcept {
     assert(key <= Note::Max);
     return keyPressureValues_[size_t(key)];
   }
@@ -58,30 +58,30 @@ public:
 
    @param value the pressure value to record
    */
-  void setChannelPressure(int value) { channelPressure_ = value; }
+  void setChannelPressure(int value) noexcept { channelPressure_ = value; }
 
   /// @returns the current channel pressure
-  int channelPressure() const { return channelPressure_; }
+  int channelPressure() const noexcept { return channelPressure_; }
 
   /**
    Set the pitch wheel value
 
    @param value the pitch wheel value
    */
-  void setPitchWheelValue(int value) { pitchWheelValue_ = value; }
+  void setPitchWheelValue(int value) noexcept { pitchWheelValue_ = value; }
 
   /// @returns the current pitch wheel value
-  int pitchWheelValue() const { return pitchWheelValue_; }
+  int pitchWheelValue() const noexcept { return pitchWheelValue_; }
 
   /**
    Set the pitch wheel sensitivity value
 
    @param value the sensitivity value to record
    */
-  void setPitchWheelSensitivity(int value) { pitchWheelSensitivity_ = value; }
+  void setPitchWheelSensitivity(int value) noexcept { pitchWheelSensitivity_ = value; }
 
   /// @returns the current pitch wheel sensitivity value
-  int pitchWheelSensitivity() const { return pitchWheelSensitivity_; }
+  int pitchWheelSensitivity() const noexcept { return pitchWheelSensitivity_; }
 
   /**
    Set a continuous controller value
@@ -89,7 +89,7 @@ public:
    @param id the controller ID
    @param value the value to set for the controller
    */
-  void setContinuousControllerValue(MIDI::ControlChange id, int value) {
+  void setContinuousControllerValue(MIDI::ControlChange id, int value) noexcept {
     assert(static_cast<int>(id) >= CCMin && static_cast<int>(id) <= CCMax);
     continuousControllerValues_[static_cast<size_t>(id) - CCMin] = value;
   }
@@ -100,7 +100,7 @@ public:
    @param id the controller ID to get
    @returns the controller value
    */
-  int continuousControllerValue(int id) const {
+  int continuousControllerValue(int id) const noexcept {
     assert(id >= CCMin && id <= CCMax);
     return continuousControllerValues_[size_t(id - CCMin)];
   }

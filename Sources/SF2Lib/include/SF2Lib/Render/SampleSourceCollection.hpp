@@ -36,7 +36,7 @@ public:
 
 private:
 
-  Key makeKey(const SampleHeader& header) const {
+  Key makeKey(const SampleHeader& header) const noexcept {
     return uint64_t(header.startIndex()) << 32 | header.endIndex();
   }
 

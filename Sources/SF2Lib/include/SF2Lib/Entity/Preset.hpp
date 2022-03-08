@@ -22,7 +22,7 @@ public:
    
    @param pos location to read from
    */
-  explicit Preset(IO::Pos& pos)
+  explicit Preset(IO::Pos& pos) noexcept
   {
     assert(sizeof(*this) == size + 2);
     // Account for the extra padding by reading twice.
@@ -32,22 +32,22 @@ public:
   }
   
   /// @returns name of the preset
-  char const* cname() const { return achPresetName; }
-  std::string name() const { return achPresetName; }
+  char const* cname() const noexcept { return achPresetName; }
+  std::string name() const noexcept { return achPresetName; }
   
   /// @returns preset number for this patch
-  uint16_t program() const { return wPreset; }
+  uint16_t program() const noexcept { return wPreset; }
   
   /// @returns bank number for the patch
-  uint16_t bank() const { return wBank; }
+  uint16_t bank() const noexcept { return wBank; }
   
   /// @returns the index of the first zone of the preset
-  uint16_t firstZoneIndex() const { return wPresetBagNdx; }
+  uint16_t firstZoneIndex() const noexcept { return wPresetBagNdx; }
   
   /// @returns the number of preset zones
-  uint16_t zoneCount() const { return calculateSize(next(this).firstZoneIndex(), firstZoneIndex()); }
+  uint16_t zoneCount() const noexcept { return calculateSize(next(this).firstZoneIndex(), firstZoneIndex()); }
   
-  void dump(const std::string& indent, size_t index) const;
+  void dump(const std::string& indent, size_t index) const noexcept;
   
 private:
   

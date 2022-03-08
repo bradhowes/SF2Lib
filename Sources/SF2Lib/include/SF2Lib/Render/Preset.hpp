@@ -30,16 +30,16 @@ public:
    @param instruments the collection of instruments that apply to the preset
    @param config the SF2 preset definition
    */
-  Preset(const IO::File& file, const InstrumentCollection& instruments, const Entity::Preset& config);
+  Preset(const IO::File& file, const InstrumentCollection& instruments, const Entity::Preset& config) noexcept;
 
   /// Obtain the preset name.
-  std::string name() const { return configuration().name(); }
+  std::string name() const noexcept { return configuration().name(); }
 
   /// Obtain the preset bank number
-  int bank() const { return configuration().bank(); }
+  int bank() const noexcept { return configuration().bank(); }
 
   /// Obtain the preset program number
-  int program() const { return configuration().program(); }
+  int program() const noexcept { return configuration().program(); }
 
   /**
    Locate preset/instrument zones for the given key/velocity values. There can be more than one match, often due to
@@ -49,7 +49,7 @@ public:
    @param velocity the MIDI velocity to filter with
    @returns vector of Voice:Config instances containing the zones to use
    */
-  ConfigCollection find(int key, int velocity) const {
+  ConfigCollection find(int key, int velocity) const noexcept {
     ConfigCollection zonePairs;
 
     // Obtain the preset zones that match the key/velocity combination

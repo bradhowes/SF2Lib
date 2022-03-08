@@ -30,7 +30,7 @@ public:
 
    @param maxVoiceCount the number of voices to support
    */
-  OldestActiveVoiceCache(size_t maxVoiceCount)
+  OldestActiveVoiceCache(size_t maxVoiceCount) noexcept
   : leastRecentlyUsed_(Allocator(maxVoiceCount))
   {
     for (size_t voiceIndex = 0; voiceIndex < maxVoiceCount; ++voiceIndex) {
@@ -80,18 +80,18 @@ public:
   }
 
   /// @returns true if the cache is empty
-  bool empty() const { return leastRecentlyUsed_.empty(); }
+  bool empty() const noexcept { return leastRecentlyUsed_.empty(); }
 
   /// @returns the number of voices in the cache (since C++11 this is guaranteed to be O(1)).
-  size_t size() const { return leastRecentlyUsed_.size(); }
+  size_t size() const noexcept { return leastRecentlyUsed_.size(); }
 
-  iterator begin() { return leastRecentlyUsed_.begin(); }
-  iterator end() { return leastRecentlyUsed_.end(); }
+  iterator begin() noexcept { return leastRecentlyUsed_.begin(); }
+  iterator end() noexcept { return leastRecentlyUsed_.end(); }
 
-  const_iterator cbegin() const { return leastRecentlyUsed_.cbegin(); }
-  const_iterator cend() const { return leastRecentlyUsed_.cend(); }
+  const_iterator cbegin() const noexcept { return leastRecentlyUsed_.cbegin(); }
+  const_iterator cend() const noexcept { return leastRecentlyUsed_.cend(); }
 
-  void clear() { while (!empty()) takeOldest(); }
+  void clear() noexcept { while (!empty()) takeOldest(); }
 
 private:
   std::list<size_t, Allocator> leastRecentlyUsed_;

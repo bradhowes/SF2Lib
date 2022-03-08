@@ -12,9 +12,9 @@ struct Dumper {
   const Definition& genDef_;
   const Amount& amount_;
 
-  explicit Dumper(const Definition& genDef, const Amount& amount) : genDef_{genDef}, amount_{amount} {}
+  explicit Dumper(const Definition& genDef, const Amount& amount) noexcept : genDef_{genDef}, amount_{amount} {}
 
-  friend std::ostream& operator <<(std::ostream& os, const Dumper& dumper)
+  friend std::ostream& operator <<(std::ostream& os, const Dumper& dumper) noexcept
   {
     dumper.genDef_.dump(dumper.amount_);
     return os;
@@ -22,7 +22,7 @@ struct Dumper {
 };
 
 void
-Generator::dump(const std::string& indent, size_t index) const
+Generator::dump(const std::string& indent, size_t index) const noexcept
 {
   std::cout << indent << '[' << index << "] " << name() << ' ' << Dumper(definition(), amount_) << std::endl;
 }

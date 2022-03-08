@@ -8,7 +8,7 @@
 using namespace SF2::MIDI;
 
 void
-NRPN::apply(Render::Voice::State::State &state) const
+NRPN::apply(Render::Voice::State::State &state) const noexcept
 {
   for (auto index = 0; index < nrpnValues_.size(); ++index) {
     state.setNRPNAdjustment(Entity::Generator::Index(index), nrpnValues_[index]);
@@ -16,7 +16,7 @@ NRPN::apply(Render::Voice::State::State &state) const
 }
 
 void
-NRPN::process(MIDI::ControlChange cc, int value)
+NRPN::process(MIDI::ControlChange cc, int value) noexcept
 {
   std::cout << "process: " << static_cast<int>(cc) << " value: " << value << '\n';
   switch (cc) {

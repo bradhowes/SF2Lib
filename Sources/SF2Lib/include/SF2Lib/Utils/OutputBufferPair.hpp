@@ -29,7 +29,7 @@ public:
    @param right pointer to first location to store a sample for the right output channel
    @param maxFrameCount maximum number of samples to process
    */
-  OutputBufferPair(SF2::AUValue* left, SF2::AUValue* right, SF2::AUAudioFrameCount maxFrameCount)
+  OutputBufferPair(SF2::AUValue* left, SF2::AUValue* right, SF2::AUAudioFrameCount maxFrameCount) noexcept
   : left_{left}, right_{right}
   {
     assert(left != nullptr && right != nullptr);
@@ -44,7 +44,7 @@ public:
   }
 
   void add(const SF2::AUValue* samples, SF2::AUAudioFrameCount frameCount,
-           SF2::AUValue leftGain, SF2::AUValue rightGain)
+           SF2::AUValue leftGain, SF2::AUValue rightGain) noexcept
   {
     if (left_ == nullptr) return;
 
@@ -73,7 +73,7 @@ public:
 #endif
   }
 
-  void shift(SF2::AUAudioFrameCount shift) {
+  void shift(SF2::AUAudioFrameCount shift) noexcept {
     if (left_ == nullptr) return;
     left_ += shift;
     right_ += shift;

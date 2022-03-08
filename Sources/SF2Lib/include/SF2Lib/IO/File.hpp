@@ -39,8 +39,7 @@ public:
    @param path the file to open and load
    @param dump if true, dump contents of file to log stream
    */
-  File(const char* path, bool dump = false)
-  : path_{path}, fd_{-1}
+  File(const char* path, bool dump = false) : path_{path}, fd_{-1}
   {
     fd_ = ::open(path, O_RDONLY);
     if (fd_ == -1) throw std::runtime_error("file not found");
@@ -50,7 +49,7 @@ public:
   /**
    Custom destructor. Closes file that was opened in constructor.
    */
-  ~File()
+  ~File() noexcept
   {
     if (fd_ >= 0) ::close(fd_);
   }
@@ -67,53 +66,61 @@ public:
   };
 
   /// @returns the embedded name in the file
-  const std::string& embeddedName() const { return embeddedName_; }
+  const std::string& embeddedName() const noexcept { return embeddedName_; }
 
   /// @returns the embedded author name in the file
-  const std::string& embeddedAuthor() const { return embeddedAuthor_; }
+  const std::string& embeddedAuthor() const noexcept { return embeddedAuthor_; }
 
   /// @returns any embedded comment in the file
-  const std::string& embeddedComment() const { return embeddedComment_; }
+  const std::string& embeddedComment() const noexcept { return embeddedComment_; }
 
   /// @returns any embedded copyright notice in the file
-  const std::string& embeddedCopyright() const { return embeddedCopyright_; }
+  const std::string& embeddedCopyright() const noexcept { return embeddedCopyright_; }
 
   /// @returns reference to preset definitions found in the file
-  const ChunkItems<Entity::Preset>& presets() const { return presets_; };
+  const ChunkItems<Entity::Preset>& presets() const noexcept { return presets_; };
 
   /// @returns reference to preset zone definitions
-  const ChunkItems<Entity::Bag>& presetZones() const { return presetZones_; };
+  const ChunkItems<Entity::Bag>& presetZones() const noexcept { return presetZones_; };
 
   /// @returns reference to preset zone generator definitions
-  const ChunkItems<Entity::Generator::Generator>& presetZoneGenerators() const { return presetZoneGenerators_; };
+  const ChunkItems<Entity::Generator::Generator>& presetZoneGenerators() const noexcept {
+    return presetZoneGenerators_;
+  };
 
   /// @returns reference to preset zone modulator definitions
-  const ChunkItems<Entity::Modulator::Modulator>& presetZoneModulators() const { return presetZoneModulators_; };
+  const ChunkItems<Entity::Modulator::Modulator>& presetZoneModulators() const noexcept {
+    return presetZoneModulators_;
+  };
 
   /// @returns reference to instrument definitions found in the file
-  const ChunkItems<Entity::Instrument>& instruments() const { return instruments_; };
+  const ChunkItems<Entity::Instrument>& instruments() const noexcept { return instruments_; };
 
   /// @returns reference to instrument zone definitions
-  const ChunkItems<Entity::Bag>& instrumentZones() const { return instrumentZones_; };
+  const ChunkItems<Entity::Bag>& instrumentZones() const noexcept { return instrumentZones_; };
 
   /// @returns reference to instrument zone generator definitions
-  const ChunkItems<Entity::Generator::Generator>& instrumentZoneGenerators() const { return instrumentZoneGenerators_; };
+  const ChunkItems<Entity::Generator::Generator>& instrumentZoneGenerators() const noexcept {
+    return instrumentZoneGenerators_;
+  };
 
   /// @returns reference to instrument zone modulator definitions
-  const ChunkItems<Entity::Modulator::Modulator>& instrumentZoneModulators() const { return instrumentZoneModulators_; };
+  const ChunkItems<Entity::Modulator::Modulator>& instrumentZoneModulators() const noexcept {
+    return instrumentZoneModulators_;
+  };
 
   /// @returns reference to samples definitions
-  const ChunkItems<Entity::SampleHeader>& sampleHeaders() const { return sampleHeaders_; };
+  const ChunkItems<Entity::SampleHeader>& sampleHeaders() const noexcept { return sampleHeaders_; };
 
-  const Render::SampleSourceCollection& sampleSourceCollection() const {
+  const Render::SampleSourceCollection& sampleSourceCollection() const noexcept {
     return sampleSourceCollection_;
   }
 
-  void patchReleaseTimes(float maxDuration);
+  void patchReleaseTimes(float maxDuration) noexcept;
   
-  void dumpThreaded() const;
+  void dumpThreaded() const noexcept;
 
-  void dump() const;
+  void dump() const noexcept;
 
 private:
 

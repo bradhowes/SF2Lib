@@ -21,24 +21,24 @@ public:
    
    @param raw the value to hold
    */
-  explicit Amount(uint16_t raw) : raw_{raw} { assert(sizeof(*this) == size); }
+  explicit Amount(uint16_t raw) noexcept : raw_{raw} { assert(sizeof(*this) == size); }
   
   /**
    Default constructor. Sets held value to 0.
    */
-  Amount() : Amount(0) {}
+  Amount() noexcept : Amount(0) {}
   
   /// @returns unsigned integer value
-  uint16_t unsignedAmount() const { return raw_.wAmount; }
+  uint16_t unsignedAmount() const noexcept { return raw_.wAmount; }
   
   /// @returns signed integer value
-  int16_t signedAmount() const { return raw_.shAmount; }
+  int16_t signedAmount() const noexcept { return raw_.shAmount; }
   
   /// @returns low value of a range (0-255)
-  int low() const { return int(raw_.ranges[0]); }
+  int low() const noexcept { return int(raw_.ranges[0]); }
 
   /// @returns high value of a range (0-255)
-  int high() const { return int(raw_.ranges[1]); }
+  int high() const noexcept { return int(raw_.ranges[1]); }
   
 private:
   

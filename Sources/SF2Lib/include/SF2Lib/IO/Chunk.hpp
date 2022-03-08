@@ -31,41 +31,41 @@ public:
    @param size the number of bytes held by the chunk
    @param pos the file position where the contents of the chunk is to be found
    */
-  Chunk(Tag tag, uint32_t size, Pos pos) : tag_{tag}, size_{size}, pos_{pos} {}
+  Chunk(Tag tag, uint32_t size, Pos pos) noexcept : tag_{tag}, size_{size}, pos_{pos} {}
 
   /**
    Obtain the Tag type for the chunk
 
    @return Tag type
    */
-  Tag tag() const { return tag_; }
+  Tag tag() const noexcept { return tag_; }
 
   /**
    Obtain the size of the chunk data
 
    @return Tag type
    */
-  size_t size() const { return size_; }
+  size_t size() const noexcept { return size_; }
 
   /**
    Obtain the location of the first byte of the chunk data
 
    @return Pos instance
    */
-  Pos begin() const { return pos_; }
+  Pos begin() const noexcept { return pos_; }
 
   /**
    Obtain the location right after the last byte of chunk data
 
    @return Pos instance
    */
-  Pos end() const { return pos_.advance(size_); }
+  Pos end() const noexcept { return pos_.advance(size_); }
 
   /** Obtain the file position of the next chunk in the file after this one.
 
    @return Pos instance
    */
-  Pos advance() const { return pos_.advance(paddedSize()); }
+  Pos advance() const noexcept { return pos_.advance(paddedSize()); }
 
   /**
    Treat the chunk data as a string of ASCII characters with a max length of 256 characters. The result is sanitized:
@@ -73,7 +73,7 @@ public:
 
    @return chunk contents as std::string value
    */
-  std::string extract() const {
+  std::string extract() const noexcept {
     char buffer[256];
     size_t count = std::min(size(), sizeof(buffer));
     begin().readInto(buffer, count);
@@ -87,13 +87,13 @@ public:
 
    @param buffer to hold the 16-bit audio samples
    */
-  void extractSamples(std::vector<int16_t>& buffer) const {
+  void extractSamples(std::vector<int16_t>& buffer) const noexcept {
     buffer.resize(size() / sizeof(int16_t), 0);
     begin().readInto(buffer.data(), size());
   }
 
 private:
-  uint32_t paddedSize() const { return size_ + (size_ & 1); }
+  uint32_t paddedSize() const noexcept { return size_ + (size_ & 1); }
 
   Tag const tag_;
   uint32_t const size_;

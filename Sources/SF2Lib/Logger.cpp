@@ -5,6 +5,6 @@
 const std::string SF2::Logger::base{"SF2Lib"};
 
 SF2::Logger
-SF2::Logger::Make(const std::string& subsystem, const std::string& category) {
+SF2::Logger::Make(const std::string& subsystem, const std::string& category) noexcept {
   return SF2::Logger(os_log_create((base + subsystem).c_str(), category.c_str()));
 }

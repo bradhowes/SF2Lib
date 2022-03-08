@@ -94,7 +94,7 @@ public:
    @param p pointer to node to deallocate.
    @param num number of items to be deallocated. Must be 1.
    */
-  void deallocate(value_type* p, std::size_t num)
+  void deallocate(value_type* p, std::size_t num) noexcept
   {
     assert(num == 1);
     auto ptr = reinterpret_cast<Node*>(p);
@@ -102,7 +102,7 @@ public:
     freeList_ = ptr;
   }
 
-  size_t maxNodeCount() const { return maxNodeCount_; }
+  size_t maxNodeCount() const noexcept { return maxNodeCount_; }
 
 private:
   size_t maxNodeCount_;
@@ -111,12 +111,12 @@ private:
 };
 
 template <typename T, typename U>
-inline bool operator == (const ListNodeAllocator<T>&, const ListNodeAllocator<U>&) {
+inline bool operator == (const ListNodeAllocator<T>&, const ListNodeAllocator<U>&) noexcept {
   return true;
 }
 
 template <typename T, typename U>
-inline bool operator != (const ListNodeAllocator<T>&, const ListNodeAllocator<U>&) {
+inline bool operator != (const ListNodeAllocator<T>&, const ListNodeAllocator<U>&) noexcept {
   return false;
 }
 

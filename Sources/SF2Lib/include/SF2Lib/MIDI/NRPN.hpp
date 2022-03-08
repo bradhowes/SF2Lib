@@ -28,9 +28,9 @@ public:
 
    @param channelState the record of current CC state for a MIDI channel.
    */
-  NRPN(const ChannelState& channelState) : channelState_{channelState} {}
+  NRPN(const ChannelState& channelState) noexcept : channelState_{channelState} {}
 
-  void apply(Render::Voice::State::State& state) const;
+  void apply(Render::Voice::State::State& state) const noexcept;
 
   /**
    Process a continuous controller message.
@@ -38,13 +38,13 @@ public:
    @param cc continuous controller index
    @param value the value assigned to the controller
    */
-  void process(MIDI::ControlChange cc, int value);
+  void process(MIDI::ControlChange cc, int value) noexcept;
 
   /// @returns true if actively processing SoundFont generator changes.
-  bool isActive() const { return active_; }
+  bool isActive() const noexcept { return active_; }
 
   /// @returns collection of generator values possibly set by NRPN messages.
-  const NRPNValues& values() const { return nrpnValues_; }
+  const NRPNValues& values() const noexcept { return nrpnValues_; }
 
 private:
   const ChannelState& channelState_;

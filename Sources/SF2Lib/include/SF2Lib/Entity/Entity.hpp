@@ -20,7 +20,7 @@ struct Entity {
    @param next the bag index from the following item in the collection
    @param current the bag index from the current item in the collection
    */
-  static uint16_t calculateSize(uint16_t next, uint16_t current) {
+  static uint16_t calculateSize(uint16_t next, uint16_t current) noexcept {
     assert(next >= current);
     return next - current;
   }
@@ -33,7 +33,7 @@ struct Entity {
    @returns reference to next object
    */
   template <typename T>
-  static const T& next(const T* obj) { return *(obj + 1); }
+  static const T& next(const T* obj) noexcept { return *(obj + 1); }
 };
 
 } // end namespace SF2::Entity

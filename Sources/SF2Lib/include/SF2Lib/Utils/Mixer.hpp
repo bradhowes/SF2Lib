@@ -29,7 +29,7 @@ public:
    @param chorusSend the L+R buffers for the fraction sent by each voice to the chorus effect
    @param reverbSend the L+R buffers for the fraction sent by each voice to the reverb effect
    */
-  Mixer(const OutputBufferPair& dry, const OutputBufferPair& chorusSend, const OutputBufferPair& reverbSend)
+  Mixer(const OutputBufferPair& dry, const OutputBufferPair& chorusSend, const OutputBufferPair& reverbSend) noexcept
   : dry_{dry}, chorusSend_{chorusSend}, reverbSend_{reverbSend}
   {}
 
@@ -40,7 +40,7 @@ public:
    @param chorusSend the L+R buffers for the fraction sent by each voice to the chorus effect
    @param reverbSend the L+R buffers for the fraction sent by each voice to the reverb effect
    */
-  Mixer(OutputBufferPair&& dry, OutputBufferPair&& chorusSend, OutputBufferPair&& reverbSend)
+  Mixer(OutputBufferPair&& dry, OutputBufferPair&& chorusSend, OutputBufferPair&& reverbSend) noexcept
   : dry_{std::move(dry)}, chorusSend_{std::move(chorusSend)}, reverbSend_{std::move(reverbSend)}
   {}
 
@@ -54,7 +54,7 @@ public:
    @param reverbSend the gain to apply to samples when adding to the reverbSend L+R channels
    */
   void add(const SF2::AUValue* samples, SF2::AUAudioFrameCount frameCount,
-           SF2::AUValue pan, SF2::AUValue chorusSend, SF2::AUValue reverbSend)
+           SF2::AUValue pan, SF2::AUValue chorusSend, SF2::AUValue reverbSend) noexcept
   {
     Float leftGain;
     Float rightGain;
@@ -70,7 +70,7 @@ public:
 
    @param shift the number of samples to advance over.
    */
-  void shift(SF2::AUAudioFrameCount shift) {
+  void shift(SF2::AUAudioFrameCount shift) noexcept {
     dry_.shift(shift);
     chorusSend_.shift(shift);
     reverbSend_.shift(shift);

@@ -41,7 +41,7 @@ public:
    @param voiceCount the maximum number of individual voices to support
    @param interpolator the type of interpolation to use when rendering samples
    */
-  Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator) :
+  Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator) noexcept :
   super(os_log_create("SoundFonts", "Engine")), sampleRate_{sampleRate}, oldestActive_{voiceCount}
   {
     available_.reserve(voiceCount);
@@ -53,7 +53,7 @@ public:
   }
 
   /// @returns maximum number of voices available for simultaneous rendering
-  size_t voiceCount() const { return voices_.size(); }
+  size_t voiceCount() const noexcept { return voices_.size(); }
   
   /**
    Update kernel and buffers to support the given format and channel count
@@ -61,7 +61,7 @@ public:
    @param format the audio format to render
    @param maxFramesToRender the maximum number of samples we will be asked to render in one go
    */
-  void setRenderingFormat(AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) {
+  void setRenderingFormat(AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept {
     super::setRenderingFormat(format, maxFramesToRender);
     initialize(format.channelCount, format.sampleRate);
     for (auto& voice : voices_) {
@@ -70,24 +70,24 @@ public:
   }
 
   /// Obtain the current sample rate
-  Float sampleRate() const { return sampleRate_; }
+  Float sampleRate() const noexcept { return sampleRate_; }
 
   /// Obtain the MIDI channel assigned to the engine.
-  MIDI::ChannelState& channelState() { return channelState_; }
-  const MIDI::ChannelState& channelState() const { return channelState_; }
+  MIDI::ChannelState& channelState() noexcept { return channelState_; }
+  const MIDI::ChannelState& channelState() const noexcept { return channelState_; }
 
   /**
    Load the presets from an SF2 file.
 
    @param file the file to load from
    */
-  void load(const IO::File& file) {
+  void load(const IO::File& file) noexcept {
     allOff();
     presets_.build(file);
   }
 
   /// @returns number of presets available.
-  size_t presetCount() const { return presets_.size(); }
+  size_t presetCount() const noexcept { return presets_.size(); }
 
   /**
    Activate the preset at the given index.
@@ -101,12 +101,12 @@ public:
   }
 
   /// @return the number of active voices
-  size_t activeVoiceCount() const { return oldestActive_.size(); }
+  size_t activeVoiceCount() const noexcept { return oldestActive_.size(); }
 
   /**
    Turn off all voices, making them all available for rendering.
    */
-  void allOff()
+  void allOff() noexcept
   {
     while (!oldestActive_.empty()) {
       auto voiceIndex = oldestActive_.takeOldest();
@@ -120,7 +120,7 @@ public:
 
    @param key the MIDI key that was released
    */
-  void noteOff(int key)
+  void noteOff(int key) noexcept
   {
     for (auto voiceIndex : oldestActive_) {
       const auto& voice{voices_[voiceIndex]};
@@ -140,7 +140,7 @@ public:
    @param key the MIDI key to play
    @param velocity the MIDI velocity to play at
    */
-  void noteOn(int key, int velocity)
+  void noteOn(int key, int velocity) noexcept
   {
     if (activePreset_ >= presets_.size()) return;
     for (const Config& config : presets_[activePreset_].find(key, velocity)) {
@@ -155,7 +155,7 @@ public:
    @param mixer collection of buffers to render into
    @param frameCount number of samples to render.
    */
-  void renderInto(Utils::Mixer& mixer, AUAudioFrameCount frameCount)
+  void renderInto(Utils::Mixer& mixer, AUAudioFrameCount frameCount) noexcept
   {
     for (auto voiceIndex : oldestActive_) {
       auto& voice{voices_[voiceIndex]};
@@ -174,7 +174,8 @@ public:
 
 private:
 
-  void initialize(int channelCount, double sampleRate) {
+  void initialize(int channelCount, double sampleRate) noexcept
+  {
     sampleRate_ = sampleRate;
     allOff();
     for (auto& voice : voices_) {
@@ -183,13 +184,13 @@ private:
   }
 
   /// API for EventProcessor
-  void setParameterFromEvent(const AUParameterEvent& event) {}
+  void setParameterFromEvent(const AUParameterEvent& event) noexcept {}
 
   /// API for EventProcessor
-  void doMIDIEvent(const AUMIDIEvent& midiEvent);
+  void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
 
   /// API for EventProcessor
-  void doRendering(std::vector<AUValue*>&, std::vector<AUValue*>& outs, AUAudioFrameCount frameCount)
+  void doRendering(std::vector<AUValue*>&, std::vector<AUValue*>& outs, AUAudioFrameCount frameCount) noexcept
   {
     assert(outs.size() >= 2);
 
@@ -204,7 +205,7 @@ private:
     renderInto(mixer, frameCount);
   }
 
-  size_t selectVoice(const Config& config)
+  size_t selectVoice(const Config& config) noexcept
   {
     size_t found = voices_.size();
 
@@ -232,7 +233,7 @@ private:
     return found;
   }
 
-  void startVoice(const Config& config)
+  void startVoice(const Config& config) noexcept
   {
     size_t index = selectVoice(config);
     if (index == voices_.size()) return;

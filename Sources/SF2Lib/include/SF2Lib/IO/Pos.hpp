@@ -24,7 +24,7 @@ struct Pos {
    @param pos the current location in the file being processed
    @param end the end of the file being processed
    */
-  Pos(int fd, off_t pos, off_t end) : fd_{fd}, pos_{pos}, end_{end} {}
+  Pos(int fd, off_t pos, off_t end) noexcept : fd_{fd}, pos_{pos}, end_{end} {}
 
   /**
    Create a new ChunkList from the current position.
@@ -85,10 +85,10 @@ struct Pos {
 
    @returns file offset
    */
-  constexpr off_t offset() const { return pos_; }
+  constexpr off_t offset() const noexcept { return pos_; }
 
   /// @returns number of bytes available to read at this position in the file.
-  constexpr off_t available() const { return end_ - pos_; }
+  constexpr off_t available() const noexcept { return end_ - pos_; }
 
   /**
    Calculate new Pos value after advancing `offset` bytes forward.
@@ -96,13 +96,13 @@ struct Pos {
    @param offset the number of bytes to advance
    @returns new Pos instance for the next bytes in the file
    */
-  Pos advance(off_t offset) const { return Pos(fd_, std::min(pos_ + offset, end_), end_); }
+  Pos advance(off_t offset) const noexcept { return Pos(fd_, std::min(pos_ + offset, end_), end_); }
 
   /// @returns true if Pos is invalid
-  constexpr explicit operator bool() const { return fd_ < 0 || pos_ >= end_; }
+  constexpr explicit operator bool() const noexcept { return fd_ < 0 || pos_ >= end_; }
 
   /// @returns true if first Pos value is less than the second one
-  friend bool operator <(const Pos& lhs, const Pos& rhs) { return lhs.pos_ < rhs.pos_; }
+  friend bool operator <(const Pos& lhs, const Pos& rhs) noexcept { return lhs.pos_ < rhs.pos_; }
 
   /// Type of function to call to seek to a position in a file
   using SeekProcType = off_t (*)(int fd, off_t offset, int whence);
@@ -135,8 +135,8 @@ struct Pos {
 
 private:
 
-  static off_t seek(int fd, off_t offset, int whence) { return (*SeekProc)(fd, offset, whence); }
-  static ssize_t read(int fd, void* buffer, size_t size) { return (*ReadProc)(fd, buffer, size); }
+  static off_t seek(int fd, off_t offset, int whence) noexcept { return (*SeekProc)(fd, offset, whence); }
+  static ssize_t read(int fd, void* buffer, size_t size) noexcept { return (*ReadProc)(fd, buffer, size); }
 
   int fd_;
   off_t pos_;

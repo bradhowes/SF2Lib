@@ -427,7 +427,7 @@ enum struct Index : uint16_t {
   numValues
 };
 
-inline size_t indexValue(Index index) { return static_cast<size_t>(index); }
+inline size_t indexValue(Index index) noexcept { return static_cast<size_t>(index); }
 
 /**
  Representation of the 2-byte generator index found in SF2 files. Provides conversion from raw value to the nicer
@@ -436,17 +436,17 @@ inline size_t indexValue(Index index) { return static_cast<size_t>(index); }
 class RawIndex {
 public:
 
-  RawIndex() : value_{0} {}
+  RawIndex() noexcept : value_{0} {}
 
   /**
    Obtain the raw index value.
    */
-  uint16_t value() const { return value_; }
+  uint16_t value() const noexcept { return value_; }
 
   /**
    Obtain the Index value that corresponds to a raw index value.
    */
-  Index index() const { return Index(value_); }
+  Index index() const noexcept { return Index(value_); }
 
 private:
   uint16_t const value_;

@@ -28,7 +28,7 @@ public:
    @param header the 'shdr' header to use
    @param state the generator values to use
    */
-  static Bounds make(const Entity::SampleHeader& header, const State::State& state) {
+  static Bounds make(const Entity::SampleHeader& header, const State::State& state) noexcept {
     constexpr size_t coarse = 1 << 15;
     auto offset = [&state, coarse](Index a, Index b) -> size_t {
       return size_t(state.unmodulated(a)) + size_t(state.unmodulated(b)) * coarse;
@@ -66,7 +66,7 @@ public:
 
    @param header the 'shdr' header to use
    */
-  static Bounds make(const Entity::SampleHeader& header) {
+  static Bounds make(const Entity::SampleHeader& header) noexcept {
     auto lower = header.startIndex();
     auto upper = std::max(lower, header.endIndex());
     auto clampPos = [header, lower, upper](size_t value) -> size_t {
@@ -87,20 +87,22 @@ public:
   Bounds() = default;
 
   /// @returns the index of the first sample to use for rendering
-  size_t startPos() const { return startPos_; }
+  size_t startPos() const noexcept { return startPos_; }
   /// @returns the index of the first sample of a loop
-  size_t startLoopPos() const { return startLoopPos_; }
+  size_t startLoopPos() const noexcept { return startLoopPos_; }
   /// @returns the index of the first sample AFTER a loop
-  size_t endLoopPos() const { return endLoopPos_; }
+  size_t endLoopPos() const noexcept { return endLoopPos_; }
   /// @returns the index after the last valid sample to use for rendering
-  size_t endPos() const { return endPos_; }
+  size_t endPos() const noexcept { return endPos_; }
   /// Number of samples involved in a loop
-  size_t loopSize() const { return endLoopPos() - startLoopPos(); }
+  size_t loopSize() const noexcept { return endLoopPos() - startLoopPos(); }
   /// True if there is a loop established for the samples
-  bool hasLoop() const { return startLoopPos_ > startPos_ && startLoopPos_ < endLoopPos_ && endLoopPos_ <= endPos_; }
+  bool hasLoop() const noexcept {
+    return startLoopPos_ > startPos_ && startLoopPos_ < endLoopPos_ && endLoopPos_ <= endPos_;
+  }
 
 private:
-  Bounds(size_t startPos, size_t startLoopPos, size_t endLoopPos, size_t endPos) :
+  Bounds(size_t startPos, size_t startLoopPos, size_t endLoopPos, size_t endPos) noexcept :
   startPos_{startPos}, startLoopPos_{startLoopPos}, endLoopPos_{endLoopPos}, endPos_{endPos} {}
 
   size_t startPos_{0};

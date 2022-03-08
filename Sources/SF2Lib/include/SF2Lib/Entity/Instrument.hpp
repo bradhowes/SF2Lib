@@ -18,22 +18,22 @@ class Instrument : Entity {
 public:
   constexpr static size_t size = 22;
   
-  explicit Instrument(IO::Pos& pos) {
+  explicit Instrument(IO::Pos& pos) noexcept {
     assert(sizeof(*this) == size);
     pos = pos.readInto(*this);
     IO::trim_property(achInstName);
   }
   
   /// @returns the name of the instrument
-  std::string name() const { return std::string(achInstName); }
+  std::string name() const noexcept { return std::string(achInstName); }
   
   /// @returns the index of the first Zone of the instrument
-  uint16_t firstZoneIndex() const { return wInstBagNdx; }
+  uint16_t firstZoneIndex() const noexcept { return wInstBagNdx; }
   
   /// @returns the number of instrument zones
-  uint16_t zoneCount() const { return calculateSize(next(this).firstZoneIndex(), firstZoneIndex()); }
+  uint16_t zoneCount() const noexcept { return calculateSize(next(this).firstZoneIndex(), firstZoneIndex()); }
   
-  void dump(const std::string& indent, size_t index) const;
+  void dump(const std::string& indent, size_t index) const noexcept;
   
 private:
   char achInstName[20];

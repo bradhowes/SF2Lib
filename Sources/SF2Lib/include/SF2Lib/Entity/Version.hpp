@@ -13,14 +13,14 @@ class Version {
 public:
   constexpr static size_t size = 4;
   
-  Version() : wMajor{0}, wMinor{0} {}
+  Version() noexcept : wMajor{0}, wMinor{0} {}
   
   /**
    Constructor that reads from file.
    
    @param pos location to read from
    */
-  void load(const IO::Pos& pos) {
+  void load(const IO::Pos& pos) noexcept {
     assert(sizeof(*this) == size);
     pos.readInto(*this);
   }
@@ -30,7 +30,7 @@ public:
    
    @param indent the prefix to write out before each line
    */
-  void dump(const std::string& indent) const;
+  void dump(const std::string& indent) const noexcept;
   
 private:
   uint16_t wMajor;

@@ -28,22 +28,24 @@ public:
 
    @param pos location to read from
    */
-  explicit Bag(IO::Pos& pos) {
+  explicit Bag(IO::Pos& pos) noexcept {
     assert(sizeof(*this) == 4);
     pos = pos.readInto(*this);
   }
 
   /// @returns first generator index in this collection
-  uint16_t firstGeneratorIndex() const { return wGenNdx; }
+  uint16_t firstGeneratorIndex() const noexcept { return wGenNdx; }
 
   /// @returns number of generators in this collection
-  uint16_t generatorCount() const { return calculateSize(next(this).firstGeneratorIndex(), firstGeneratorIndex()); }
+  uint16_t generatorCount() const noexcept { return calculateSize(next(this).firstGeneratorIndex(), firstGeneratorIndex()); }
   
   /// @returns first modulator index in this collection
-  uint16_t firstModulatorIndex() const { return wModNdx; }
+  uint16_t firstModulatorIndex() const noexcept { return wModNdx; }
 
   /// @returns number of modulators in this collection
-  uint16_t modulatorCount() const { return calculateSize(next(this).firstModulatorIndex(), firstModulatorIndex()); }
+  uint16_t modulatorCount() const noexcept {
+    return calculateSize(next(this).firstModulatorIndex(), firstModulatorIndex());
+  }
 
   /**
    Utility for displaying bag contents on output stream.
@@ -51,7 +53,7 @@ public:
    @param indent the prefix to write out before each line
    @param index a prefix index value to write out before each lines
    */
-  void dump(const std::string& indent, size_t index) const;
+  void dump(const std::string& indent, size_t index) const noexcept;
 
 private:
   uint16_t wGenNdx;

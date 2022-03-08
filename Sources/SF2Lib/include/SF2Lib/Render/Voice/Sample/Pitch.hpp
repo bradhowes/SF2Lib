@@ -44,9 +44,9 @@ class Pitch
 public:
   using Index = State::State::Index;
 
-  Pitch(const State::State& state) : state_{state} {}
+  Pitch(const State::State& state) noexcept : state_{state} {}
 
-  void configure(const Entity::SampleHeader& header)
+  void configure(const Entity::SampleHeader& header) noexcept
   {
     key_ = state_.key();
     initialize(header.originalMIDIKey(), header.pitchCorrection(), header.sampleRate());
@@ -61,7 +61,8 @@ public:
    @param vibLFO the current vibrato LFO value
    @param modEnv the current modulation envelope value
    */
-  Float samplePhaseIncrement(Float modLFO, Float vibLFO, Float modEnv) const {
+  Float samplePhaseIncrement(Float modLFO, Float vibLFO, Float modEnv) const noexcept
+  {
     auto value = DSP::centsToFrequency(pitch_ + pitchOffset_ +
                                        modLFO * centFs(Index::modulatorLFOToPitch) +
                                        vibLFO * centFs(Index::vibratoLFOToPitch) +
@@ -72,24 +73,26 @@ public:
   /**
    Recalculate pitch offset using state generators `coarseTune` and `fineTune`.
    */
-  void updatePitchOffset() {
+  void updatePitchOffset() noexcept
+  {
     pitchOffset_ = DSP::clamp(state_.modulated(Index::coarseTune), -120.0f, 120.0f) * 100.0f +
     DSP::clamp(state_.modulated(Index::fineTune), -99.0f, 99.0f);
   }
 
 private:
 
-  Float centFs(Index index) const { return DSP::clamp(state_.modulated(index), -12000.0f, 12000.0f); }
+  Float centFs(Index index) const noexcept { return DSP::clamp(state_.modulated(index), -12000.0f, 12000.0f); }
 
-  int rootKey(int originalMIDIKey) const {
+  int rootKey(int originalMIDIKey) const noexcept
+  {
     auto value = std::clamp(state_.unmodulated(Index::overridingRootKey), -1, 127);
     if (value == -1) value = originalMIDIKey;
     return value;
   }
 
-  int scaleTuning() const { return std::clamp(state_.unmodulated(Index::scaleTuning), 0, 1200); }
+  int scaleTuning() const noexcept { return std::clamp(state_.unmodulated(Index::scaleTuning), 0, 1200); }
 
-  void initialize(int originalMIDIKey, int pitchCorrection, Float originalSampleRate) {
+  void initialize(int originalMIDIKey, int pitchCorrection, Float originalSampleRate) noexcept {
     auto rootKey = this->rootKey(originalMIDIKey);
     auto rootPitch = rootKey * 100.0f - pitchCorrection;
     rootFrequency_ = Float(DSP::centsToFrequency(rootPitch) * state_.sampleRate() / originalSampleRate);

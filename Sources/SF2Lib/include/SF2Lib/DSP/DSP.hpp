@@ -38,14 +38,14 @@ inline Float clamp(Float value, Float lowerBound, Float upperBound) {
  @param value the value to convert
  @returns power of 2 value
  */
-inline Float centsToPower2(Float value) { return std::exp2(value / CentsPerOctave); }
+inline Float centsToPower2(Float value) noexcept { return std::exp2(value / CentsPerOctave); }
 
 /**
  Convert cents value into seconds, where There are 1200 cents per power of 2.
 
  @param value the number to convert
  */
-inline Float centsToSeconds(Float value) { return centsToPower2(value); }
+inline Float centsToSeconds(Float value) noexcept { return centsToPower2(value); }
 
 /**
  Convert cents to frequency, with 0 being 8.175798 Hz. Values are clamped to [-16000, 4500].
@@ -53,7 +53,7 @@ inline Float centsToSeconds(Float value) { return centsToPower2(value); }
  @param value the value to convert
  @returns frequency in Hz
  */
-inline Float lfoCentsToFrequency(Float value) {
+inline Float lfoCentsToFrequency(Float value) noexcept {
   return LowestNoteFrequency * centsToPower2(clamp(value, -16000.0f, 4500.0f));
 }
 
@@ -64,7 +64,9 @@ inline Float lfoCentsToFrequency(Float value) {
  @param centibels the value to convert
  @returns attenuation amount
  */
-inline Float centibelsToAttenuation(Float centibels) { return std::pow(10.0f, -centibels / CentibelsPerDecade); }
+inline Float centibelsToAttenuation(Float centibels) noexcept {
+  return std::pow(10.0f, -centibels / CentibelsPerDecade);
+}
 
 /**
  Convert centiBels to resonance (Q) value for use in low-pass filter calculations. The input is clamped to the range
@@ -72,7 +74,7 @@ inline Float centibelsToAttenuation(Float centibels) { return std::pow(10.0f, -c
 
  @param centibels the value to convert
  */
-inline double centibelsToResonance(double centibels) {
+inline double centibelsToResonance(double centibels) noexcept {
   return std::pow(10.0, (DSP::clamp(centibels, 0.0, 960.0) - 30.1) / 200.0);
 }
 
@@ -82,7 +84,7 @@ inline double centibelsToResonance(double centibels) {
  @param value cutoff value
  @returns clamped cutoff value
  */
-inline Float clampFilterCutoff(Float value) { return clamp(value, 1500.0f, 20000.0f); }
+inline Float clampFilterCutoff(Float value) noexcept { return clamp(value, 1500.0f, 20000.0f); }
 
 /**
  Convert integer from integer [0-1000] into [0.0-1.0]
@@ -90,7 +92,7 @@ inline Float clampFilterCutoff(Float value) { return clamp(value, 1500.0f, 20000
  @param value percentage value expressed as tenths
  @returns normalized value between 0 and 1.
  */
-inline Float tenthPercentageToNormalized(Float value) { return clamp(value / 1000.0f, 0.0f, 1.0f); }
+inline Float tenthPercentageToNormalized(Float value) noexcept { return clamp(value / 1000.0f, 0.0f, 1.0f); }
 
 /**
  Translate value in range [0, +1] into one in range [-1, +1]
@@ -98,7 +100,7 @@ inline Float tenthPercentageToNormalized(Float value) { return clamp(value / 100
  @param modulator the value to translate
  @returns value in range [-1, +1]
  */
-inline Float unipolarToBipolar(Float modulator) { return 2.0f * modulator - 1.0f; }
+inline Float unipolarToBipolar(Float modulator) noexcept { return 2.0f * modulator - 1.0f; }
 
 /**
  Translate value in range [-1, +1] into one in range [0, +1]
@@ -106,7 +108,7 @@ inline Float unipolarToBipolar(Float modulator) { return 2.0f * modulator - 1.0f
  @param modulator the value to translate
  @returns value in range [0, +1]
  */
-inline Float bipolarToUnipolar(Float modulator) { return 0.5f * modulator + 0.5f; }
+inline Float bipolarToUnipolar(Float modulator) noexcept { return 0.5f * modulator + 0.5f; }
 
 /**
  Perform linear translation from a value in range [0.0, 1.0] into one in [minValue, maxValue].
@@ -116,7 +118,7 @@ inline Float bipolarToUnipolar(Float modulator) { return 0.5f * modulator + 0.5f
  @param maxValue the highest value to return when modulator is +1
  @returns value in range [minValue, maxValue]
  */
-inline Float unipolarModulate(Float modulator, Float minValue, Float maxValue) {
+inline Float unipolarModulate(Float modulator, Float minValue, Float maxValue) noexcept {
   return clamp(modulator, 0.0f, 1.0f) * (maxValue - minValue) + minValue;
 }
 
@@ -128,7 +130,7 @@ inline Float unipolarModulate(Float modulator, Float minValue, Float maxValue) {
  @param maxValue the highest value to return when modulator is +1
  @returns value in range [minValue, maxValue]
  */
-inline Float bipolarModulate(Float modulator, Float minValue, Float maxValue) {
+inline Float bipolarModulate(Float modulator, Float minValue, Float maxValue) noexcept {
   auto mid = (maxValue - minValue) * 0.5f;
   return clamp(modulator, -1.0f, 1.0f) * mid + mid + minValue;
 }
@@ -142,7 +144,7 @@ inline Float bipolarModulate(Float modulator, Float minValue, Float maxValue) {
  @param angle value between -PI and PI
  @returns approximate sin value
  */
-constexpr Float parabolicSine(Float angle) {
+constexpr Float parabolicSine(Float angle) noexcept {
   constexpr Float B = 4.0f / PI;
   constexpr Float C = -4.0f / (PI * PI);
   constexpr Float P = 0.225f;
@@ -165,7 +167,7 @@ namespace SF2::DSP {
  @param left reference to storage for the left gain
  @param right reference to storage for the right gain
  */
-inline void panLookup(Float pan, Float& left, Float& right) { Tables::PanLookup::lookup(pan, left, right); }
+inline void panLookup(Float pan, Float& left, Float& right) noexcept { Tables::PanLookup::lookup(pan, left, right); }
 
 /**
  Obtain approximate sine value from table.
@@ -173,7 +175,7 @@ inline void panLookup(Float pan, Float& left, Float& right) { Tables::PanLookup:
  @param radians the value to use for theta
  @returns the sine approximation
  */
-inline double sineLookup(Float radians) { return Tables::SineLookup::sine(radians); }
+inline double sineLookup(Float radians) noexcept { return Tables::SineLookup::sine(radians); }
 
 /**
  Quickly convert cent value into a frequency using a table lookup. These calculations are taken from the Fluid Synth
@@ -198,7 +200,7 @@ inline double centsToFrequency(Float value) {
  @param centibels value to convert
  @returns gain value
  */
-inline double centibelsToAttenuation(int centibels) { return Tables::AttenuationLookup::convert(centibels); }
+inline double centibelsToAttenuation(int centibels) noexcept { return Tables::AttenuationLookup::convert(centibels); }
 
 /**
  Convert centibels [0-1441] into a gain value [0.0-1.0]. This is the inverse of the above.
@@ -206,7 +208,7 @@ inline double centibelsToAttenuation(int centibels) { return Tables::Attenuation
  @param centibels value to convert
  @returns gain value
  */
-inline double centibelsToGain(Float centibels) { return Tables::GainLookup::convert(centibels); }
+inline double centibelsToGain(Float centibels) noexcept { return Tables::GainLookup::convert(centibels); }
 
 namespace Interpolation {
 
@@ -218,7 +220,7 @@ namespace Interpolation {
  @param x0 first value to use
  @param x1 second value to use
  */
-inline Float linear(Float partial, Float x0, Float x1) { return partial * (x1 - x0) + x0; }
+inline Float linear(Float partial, Float x0, Float x1) noexcept { return partial * (x1 - x0) + x0; }
 
 /**
  Interpolate a value from four values.
@@ -229,7 +231,7 @@ inline Float linear(Float partial, Float x0, Float x1) { return partial * (x1 - 
  @param x2 third value to use
  @param x3 fourth value to use
  */
-inline static Float cubic4thOrder(Float partial, Float x0, Float x1, Float x2, Float x3) {
+inline static Float cubic4thOrder(Float partial, Float x0, Float x1, Float x2, Float x3) noexcept {
   return Float(Tables::Cubic4thOrder::interpolate(partial, x0, x1, x2, x3));
 }
 

@@ -45,7 +45,7 @@ public:
    @param sampleRate the sample rate of audio being rendered
    @param channelState the MIDI channel that is in control
    */
-  State(Float sampleRate, const MIDI::ChannelState& channelState) :
+  State(Float sampleRate, const MIDI::ChannelState& channelState) noexcept :
   sampleRate_{sampleRate}, channelState_{channelState} {}
 
   /** Create new state vector for testing purposes.
@@ -54,7 +54,7 @@ public:
    @param key the MIDI key to use
    @param velocity the MIDI velocity to use
    */
-  State(Float sampleRate, const MIDI::ChannelState& channelState, int key, int velocity = 64) :
+  State(Float sampleRate, const MIDI::ChannelState& channelState, int key, int velocity = 64) noexcept :
   sampleRate_{sampleRate}, channelState_{channelState}, eventKey_{key}, eventVelocity_{velocity}
   {
     setDefaults();
@@ -65,7 +65,7 @@ public:
 
    @param sampleRate new value to use.
    */
-  void setSampleRate(Float sampleRate) { sampleRate_ = sampleRate; }
+  void setSampleRate(Float sampleRate) noexcept { sampleRate_ = sampleRate; }
 
   /**
    Configure the state to be used by a voice for sample rendering.
@@ -73,7 +73,7 @@ public:
    @param config the preset / instrument configuration to apply to the state
    @param nrpn the MIDI NRPN controller values to apply to the state
    */
-  void prepareForVoice(const Config& config, const MIDI::NRPN& nrpn);
+  void prepareForVoice(const Config& config, const MIDI::NRPN& nrpn) noexcept;
 
   /**
    Set a generator value. Should only be called with a value from an InstrumentZone. It can be set twice, once by a
@@ -116,7 +116,7 @@ public:
 
    @param modulator the modulator to install
    */
-  void addModulator(const Entity::Modulator::Modulator& modulator);
+  void addModulator(const Entity::Modulator::Modulator& modulator) noexcept;
 
   /**
    Obtain a generator value without any adjustments from modulators. This is the sum of values set by zone generator
@@ -126,7 +126,7 @@ public:
    @param gen the index of the generator
    @returns configured value of the generator
    */
-  int unmodulated(Index gen) const {
+  int unmodulated(Index gen) const noexcept {
     return Definition::definition(gen).clamp(gens_[gen].unmodulated());
   }
 
@@ -136,36 +136,36 @@ public:
    @param gen the index of the generator
    @returns current value of the generator
    */
-  Float modulated(Index gen) const {
+  Float modulated(Index gen) const noexcept {
     return Definition::definition(gen).clamp(gens_[gen].modulated());
   }
 
   /// @returns MIDI key that started a voice to begin emitting samples. For DSP this is *not* what is desired. See
   /// `key` method below.
-  int eventKey() const { return eventKey_; }
+  int eventKey() const noexcept { return eventKey_; }
 
   /// @returns key value to use for DSP. A generator can force it to be fixed to a set value.
-  int key() const {
+  int key() const noexcept {
     int key = unmodulated(Index::forcedMIDIKey);
     return key >= 0 ? key : eventKey_;
   }
 
   /// @returns velocity to use for DSP. A generator can force it to be fixed to a set value.
-  int velocity() const {
+  int velocity() const noexcept {
     int velocity = unmodulated(Index::forcedMIDIVelocity);
     return velocity >= 0 ? velocity : eventVelocity_;
   }
 
   /// @returns the MIDI channel state associated with the rendering
-  const MIDI::ChannelState& channelState() const { return channelState_; }
+  const MIDI::ChannelState& channelState() const noexcept { return channelState_; }
 
   /// @returns sample rate defined at construction
-  Float sampleRate() const { return sampleRate_; }
+  Float sampleRate() const noexcept { return sampleRate_; }
 
 private:
 
-  void setDefaults();
-  void linkModulators();
+  void setDefaults() noexcept ;
+  void linkModulators() noexcept ;
 
   const MIDI::ChannelState& channelState_;
   GenValueCollection gens_{};

@@ -31,10 +31,10 @@ public:
 
    @param zoneCount the number of zones that the collection will hold
    */
-  explicit Collection(size_t zoneCount) : zones_{} { zones_.reserve(zoneCount); }
+  explicit Collection(size_t zoneCount) noexcept : zones_{} { zones_.reserve(zoneCount); }
 
   /// @returns number of zones in the collection (including the optional global one)
-  size_t size() const { return zones_.size(); }
+  size_t size() const noexcept { return zones_.size(); }
 
   /**
    Locate the zones that match the given key/velocity pair.
@@ -43,7 +43,8 @@ public:
    @param velocity the MIDI velocity to filter on
    @returns a vector references to matching zones
    */
-  Matches filter(int key, int velocity) const {
+  Matches filter(int key, int velocity) const noexcept
+  {
     Matches matches;
     auto pos = zones_.cbegin();
     if (hasGlobal()) ++pos;
@@ -53,10 +54,10 @@ public:
   }
 
   /// @returns true if first zone in collection is a global zone
-  bool hasGlobal() const { return !zones_.empty() && zones_.front().isGlobal(); }
+  bool hasGlobal() const noexcept { return !zones_.empty() && zones_.front().isGlobal(); }
 
   /// @returns pointer to global zone or nullptr if there is not one
-  const T* global() const { return hasGlobal() ? &zones_.front() : nullptr; }
+  const T* global() const noexcept { return hasGlobal() ? &zones_.front() : nullptr; }
 
   /**
    Add a zone with the given args. Note that empty zones (no generators and no modulators) are dropped, as are any
@@ -69,7 +70,7 @@ public:
    */
   template<class... Args>
   void add(Entity::Generator::Index notGlobalIfPresent, GeneratorCollection&& gens, ModulatorCollection&& mods,
-           const Args&... values) {
+           const Args&... values) noexcept {
 
     // Per spec, disregard zones that have no gens AND mods
     if (gens.empty() && mods.empty()) return;

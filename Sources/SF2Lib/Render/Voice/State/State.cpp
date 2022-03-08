@@ -8,7 +8,7 @@
 using namespace SF2::Render::Voice::State;
 
 void
-State::prepareForVoice(const Config& config, const MIDI::NRPN& nrpn)
+State::prepareForVoice(const Config& config, const MIDI::NRPN& nrpn) noexcept
 {
   // (1) Initialize to default values
   setDefaults();
@@ -38,7 +38,7 @@ State::prepareForVoice(const Config& config, const MIDI::NRPN& nrpn)
 }
 
 void
-State::setDefaults() {
+State::setDefaults() noexcept {
   gens_.zero();
   setValue(Index::initialFilterCutoff, 13500);
   setValue(Index::delayModulatorLFO, -12000);
@@ -65,7 +65,7 @@ State::setDefaults() {
 }
 
 void
-State::addModulator(const Entity::Modulator::Modulator& modulator) {
+State::addModulator(const Entity::Modulator::Modulator& modulator) noexcept {
 
   // Per spec, there must only be one modulator with specific (sfModSrcOper, sfModDestOper, and sfModSrcAmtOper)
   // values. If we find a duplicate, flag it as not being used, but keep it around so that modulator linking is not

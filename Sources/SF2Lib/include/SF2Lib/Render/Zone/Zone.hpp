@@ -45,25 +45,25 @@ public:
    @param mods collection of modulators for the zone
    */
   static bool IsGlobal(const GeneratorCollection& gens, Entity::Generator::Index expected,
-                       const ModulatorCollection& mods) {
+                       const ModulatorCollection& mods) noexcept {
     assert(!gens.empty() || !mods.empty());
     return (gens.empty() && !mods.empty()) || (!gens.empty() && gens.back().get().index() != expected);
   }
 
   /// @returns range of MID key values that this Zone handles
-  const MIDIRange& keyRange() const { return keyRange_; }
+  const MIDIRange& keyRange() const noexcept { return keyRange_; }
 
   /// @returns range of MIDI velocity values that this Zone handles
-  const MIDIRange& velocityRange() const { return velocityRange_; }
+  const MIDIRange& velocityRange() const noexcept { return velocityRange_; }
 
   /// @returns collection of generators defined for this zone
-  const GeneratorCollection& generators() const { return generators_; }
+  const GeneratorCollection& generators() const noexcept { return generators_; }
 
   /// @returns collection of modulators defined for this zone
-  const ModulatorCollection& modulators() const { return modulators_; }
+  const ModulatorCollection& modulators() const noexcept { return modulators_; }
 
   /// @returns true if this is a global zone
-  bool isGlobal() const { return isGlobal_; }
+  bool isGlobal() const noexcept { return isGlobal_; }
 
   /**
    Determines if this zone applies to a given MIDI key/velocity pair. NOTE: this should not be called for a global
@@ -73,7 +73,7 @@ public:
    @param velocity MIDI velocity value
    @returns true if so
    */
-  bool appliesTo(int key, int velocity) const {
+  bool appliesTo(int key, int velocity) const noexcept {
     assert(!isGlobal_); // Global zones do not have ranges
     return keyRange_.contains(key) && velocityRange_.contains(velocity);
   }
@@ -120,7 +120,7 @@ private:
    @param generators collection of generators for the zone
    @returns key range if found or `all` if not
    */
-  static MIDIRange GetKeyRange(const GeneratorCollection& generators) {
+  static MIDIRange GetKeyRange(const GeneratorCollection& generators) noexcept {
     if (generators.size() > 0 && generators[0].get().index() == Entity::Generator::Index::keyRange) {
       return MIDIRange(generators[0].get().amount());
     }
@@ -134,7 +134,7 @@ private:
    @param generators collection of generators for the zone
    @returns velocity range if found or `all` if not
    */
-  static MIDIRange GetVelocityRange(const GeneratorCollection& generators) {
+  static MIDIRange GetVelocityRange(const GeneratorCollection& generators) noexcept {
     int index = -1;
     if (generators.size() > 1 && generators[0].get().index() == Entity::Generator::Index::keyRange &&
         generators[1].get().index() == Entity::Generator::Index::velocityRange) {

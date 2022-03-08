@@ -44,29 +44,29 @@ public:
   struct Builder {
     uint16_t bits;
 
-    static Builder GeneralController(GeneralIndex index) {
+    static Builder GeneralController(GeneralIndex index) noexcept {
       return Builder{static_cast<uint16_t>(uint16_t(index) & 0x7F)};
     }
 
-    static Builder ContinuousController(int index) {
+    static Builder ContinuousController(int index) noexcept {
       return Builder{static_cast<uint16_t>((uint16_t(index) & 0x7F) | (1 << 7))};
     }
 
-    Builder& positive() { bits &= ~(1 << 8); return *this; }
-    Builder& negative() { bits |=  (1 << 8); return *this; }
-    Builder& unipolar() { bits &= ~(1 << 9); return *this; }
-    Builder& bipolar()  { bits |=  (1 << 9); return *this; }
-    Builder& linear() { return continuity(ContinuityType::linear); }
-    Builder& concave() { return continuity(ContinuityType::concave); }
-    Builder& convex() { return continuity(ContinuityType::convex); }
-    Builder& switched() { return continuity(ContinuityType::switched); }
+    Builder& positive() noexcept { bits &= ~(1 << 8); return *this; }
+    Builder& negative() noexcept { bits |=  (1 << 8); return *this; }
+    Builder& unipolar() noexcept { bits &= ~(1 << 9); return *this; }
+    Builder& bipolar()  noexcept { bits |=  (1 << 9); return *this; }
+    Builder& linear() noexcept { return continuity(ContinuityType::linear); }
+    Builder& concave() noexcept { return continuity(ContinuityType::concave); }
+    Builder& convex() noexcept { return continuity(ContinuityType::convex); }
+    Builder& switched() noexcept { return continuity(ContinuityType::switched); }
 
-    Builder& continuity(ContinuityType continuity) {
+    Builder& continuity(ContinuityType continuity) noexcept {
       bits = static_cast<uint16_t>((bits & 0x3FF) | (uint16_t(continuity) << 10));
       return *this;
     }
 
-    Source make() const { return Source{bits}; }
+    Source make() const noexcept { return Source{bits}; }
   };
 
   /**
@@ -74,19 +74,19 @@ public:
    
    @param bits value that defines a source
    */
-  explicit Source(uint16_t bits) : bits_{bits} {}
+  explicit Source(uint16_t bits) noexcept : bits_{bits} {}
 
   /**
    Constructor using value from a Builder instance.
 
    @param builder the Builder holding the value to initialize with.
    */
-  explicit Source(const Builder& builder) : bits_{builder.bits} {}
+  explicit Source(const Builder& builder) noexcept : bits_{builder.bits} {}
 
-  Source() : bits_{} {}
+  Source() noexcept : bits_{} {}
 
   /// @returns true if the source is valid
-  bool isValid() const {
+  bool isValid() const noexcept {
     if (rawType() > static_cast<uint16_t>(ContinuityType::switched)) return false;
     auto idx = rawIndex();
     if (isContinuousController()) {
@@ -99,67 +99,67 @@ public:
   }
   
   /// @returns true if the source is a continuous controller (CC)
-  bool isContinuousController() const { return (bits_ & (1 << 7)) ? true : false; }
+  bool isContinuousController() const noexcept { return (bits_ & (1 << 7)) ? true : false; }
   
   /// @returns true if the source is a general controller
-  bool isGeneralController() const { return !isContinuousController(); }
+  bool isGeneralController() const noexcept { return !isContinuousController(); }
   
   /// @returns true if the source acts in a unipolar manner
-  bool isUnipolar() const { return polarity() == 0; }
+  bool isUnipolar() const noexcept { return polarity() == 0; }
   
   /// @returns true if the source acts in a bipolar manner
-  bool isBipolar() const { return !isUnipolar(); }
+  bool isBipolar() const noexcept { return !isUnipolar(); }
   
   /// @returns true if the source values go from small to large as the controller goes from min to max
-  bool isMinToMax() const { return direction() == 0; }
+  bool isMinToMax() const noexcept { return direction() == 0; }
   
   /// @returns true if the source values go from large to small as the controller goes from min to max
-  bool isMaxToMin() const { return !isMinToMax(); }
+  bool isMaxToMin() const noexcept { return !isMinToMax(); }
   
   /// @returns true if this modulator relies on another for a source value
-  bool isLinked() const {
+  bool isLinked() const noexcept {
     return isValid() && isGeneralController() && generalIndex() == GeneralIndex::link;
   }
 
   /// @returns the index of the general controller (raises exception if not configured to be a general controller)
-  GeneralIndex generalIndex() const {
+  GeneralIndex generalIndex() const noexcept {
     assert(isValid() && isGeneralController());
     return GeneralIndex(rawIndex());
   }
   
   /// @returns the index of the continuous controller (raises exception if not configured to be a continuous
   /// controller)
-  int continuousIndex() const {
+  int continuousIndex() const noexcept {
     assert(isValid() && isContinuousController());
     return rawIndex();
   }
 
   /// @returns true if this source is not connected to anything (or it is invalid)
-  bool isNone() const { return !isValid() || (isGeneralController() && generalIndex() == GeneralIndex::none); }
+  bool isNone() const noexcept { return !isValid() || (isGeneralController() && generalIndex() == GeneralIndex::none); }
   
   /// @returns the continuity type for the controller values
-  ContinuityType type() const {
+  ContinuityType type() const noexcept {
     assert(isValid());
     return ContinuityType(rawType());
   }
   
   /// @returns the name of the continuity type
-  std::string continuityTypeName() const { return isValid() ? std::string(typeNames[rawType()]) : "N/A"; }
+  std::string continuityTypeName() const noexcept { return isValid() ? std::string(typeNames[rawType()]) : "N/A"; }
   
-  std::string description() const;
+  std::string description() const noexcept;
   
-  friend std::ostream& operator<<(std::ostream& os, const Source& mod);
+  friend std::ostream& operator<<(std::ostream& os, const Source& mod) noexcept;
   
-  bool operator ==(const Source& rhs) const { return bits_ == rhs.bits_; }
-  bool operator !=(const Source& rhs) const { return bits_ != rhs.bits_; }
+  bool operator ==(const Source& rhs) const noexcept { return bits_ == rhs.bits_; }
+  bool operator !=(const Source& rhs) const noexcept { return bits_ != rhs.bits_; }
   
 private:
   static constexpr char const* typeNames[] = { "linear", "concave", "convex", "switched" };
   
-  uint16_t rawIndex() const { return bits_ & 0x7F; }
-  uint16_t rawType() const { return bits_ >> 10; }
-  uint16_t polarity() const { return bits_ & (1 << 9); }
-  uint16_t direction() const { return bits_ & (1 << 8); }
+  uint16_t rawIndex() const noexcept { return bits_ & 0x7F; }
+  uint16_t rawType() const noexcept { return bits_ >> 10; }
+  uint16_t polarity() const noexcept { return bits_ & (1 << 9); }
+  uint16_t direction() const noexcept { return bits_ & (1 << 8); }
   
   uint16_t bits_;
 };

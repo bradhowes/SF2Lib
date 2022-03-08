@@ -19,14 +19,14 @@ public:
 
   InstrumentCollection() = default;
 
-  explicit InstrumentCollection(const IO::File& file) { build(file); }
+  explicit InstrumentCollection(const IO::File& file) noexcept { build(file); }
 
   /**
    Construct a new collection using contents from the given file.
 
    @param file the file to build with
    */
-  void build(const IO::File& file)
+  void build(const IO::File& file) noexcept
   {
     auto count = file.instruments().size();
     instruments_.clear();
@@ -36,9 +36,9 @@ public:
     }
   }
 
-  void clear() { instruments_.clear(); }
+  void clear() noexcept { instruments_.clear(); }
 
-  const Instrument& operator[](size_t index) const { return checkedVectorIndexing(instruments_, index); }
+  const Instrument& operator[](size_t index) const noexcept { return checkedVectorIndexing(instruments_, index); }
 
 private:
   std::vector<Instrument> instruments_{};

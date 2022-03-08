@@ -22,7 +22,8 @@ public:
    @param mods the vector of modulators that define the zone
    @param instruments collection of instrument definitions found in the file
    */
-  Preset(GeneratorCollection&& gens, ModulatorCollection&& mods, const Render::InstrumentCollection& instruments) :
+  Preset(GeneratorCollection&& gens, ModulatorCollection&& mods,
+         const Render::InstrumentCollection& instruments) noexcept :
   Zone(std::forward<decltype(gens)>(gens), std::forward<decltype(mods)>(mods), Entity::Generator::Index::instrument),
   instrument_{isGlobal() ? nullptr : &instruments[resourceLink()]}
   {}
@@ -38,7 +39,7 @@ public:
 
    @param state the voice state to update
    */
-  void refine(Voice::State::State& state) const
+  void refine(Voice::State::State& state) const noexcept
   {
     std::for_each(generators().cbegin(), generators().cend(), [&](const Entity::Generator::Generator& generator) {
       if (generator.definition().isAvailableInPreset()) {

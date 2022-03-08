@@ -35,29 +35,29 @@ struct Logger {
    @param category the category to use
    @returns new/existing os_log_ instance
    */
-  static Logger Make(const std::string& subsystem, const std::string& category);
+  static Logger Make(const std::string& subsystem, const std::string& category) noexcept;
 
   /**
    Allow Logger instances to appear in os_log API calls.
    @returns internal os_log_t value
    */
-  operator os_log_t() const { return log_; }
+  operator os_log_t() const noexcept { return log_; }
   
   /// @returns stream to use for debug-level messages (NOTE: streams are not thread-safe)
-  std::ostream& debug() { return getStream(OS_LOG_TYPE_DEBUG); }
+  std::ostream& debug() noexcept { return getStream(OS_LOG_TYPE_DEBUG); }
   
   /// @returns stream to use for info-level messages (NOTE: streams are not thread-safe)
-  std::ostream& info() { return getStream(OS_LOG_TYPE_INFO); }
+  std::ostream& info() noexcept { return getStream(OS_LOG_TYPE_INFO); }
   
   /// @returns stream to use for error-level messages (NOTE: streams are not thread-safe)
-  std::ostream& error() { return getStream(OS_LOG_TYPE_ERROR); }
+  std::ostream& error() noexcept { return getStream(OS_LOG_TYPE_ERROR); }
   
   /// @returns stream to use for fault-level messages (NOTE: streams are not thread-safe)
-  std::ostream& fault() { return getStream(OS_LOG_TYPE_FAULT); }
+  std::ostream& fault() noexcept { return getStream(OS_LOG_TYPE_FAULT); }
   
 private:
   
-  Logger(os_log_t log) :
+  Logger(os_log_t log) noexcept :
   log_{log},
   lsb_(new LogStreamBuf(log_)),
   os_(new std::ostream(lsb_.get())),
@@ -72,11 +72,11 @@ private:
    sends a string to os_log with at the appropriate level.
    */
   struct LogStreamBuf : public std::stringbuf {
-    LogStreamBuf(os_log_t log) : std::stringbuf(std::ios_base::out), log_(log) {}
+    LogStreamBuf(os_log_t log) noexcept : std::stringbuf(std::ios_base::out), log_(log) {}
     
-    void setLevel(os_log_type_t level) { level_ = level; }
+    void setLevel(os_log_type_t level) noexcept { level_ = level; }
     
-    int sync() {
+    int sync() noexcept {
       int rc = std::stringbuf::sync();
       os_log_with_type(log_, level_, "%{public}s", str().c_str());
       str("");
@@ -91,8 +91,8 @@ private:
    Stream buffer used for loggers that are not enabled. Does not accumulate any data, and if the
    */
   struct NullLogStreamBuf : public std::stringbuf {
-    NullLogStreamBuf() : std::stringbuf(std::ios_base::out) {}
-    std::streamsize xsputn(const char_type*, std::streamsize n) { return n; }
+    NullLogStreamBuf() noexcept : std::stringbuf(std::ios_base::out) {}
+    std::streamsize xsputn(const char_type*, std::streamsize n) noexcept { return n; }
   };
   
   /**
@@ -101,7 +101,7 @@ private:
    @param level the log level to use
    @returns output stream
    */
-  std::ostream& getStream(os_log_type_t level) {
+  std::ostream& getStream(os_log_type_t level) noexcept {
     if (!os_log_type_enabled(log_, level)) return *null_;
     lsb_->setLevel(level);
     return *os_;

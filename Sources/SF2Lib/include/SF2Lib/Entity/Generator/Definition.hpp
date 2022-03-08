@@ -23,7 +23,7 @@ public:
   struct ValueRange {
 
     /// @returns true if the range is valid
-    bool isValid() const { return min < max; }
+    bool isValid() const noexcept { return min < max; }
 
     /**
      Clamp the given value to be within the defined range. If range is not valid, no clamping will take place.
@@ -31,7 +31,7 @@ public:
      @param value the value to clamp
      @returns clamped value if range is valid, or original value.
      */
-    template <typename T> T clamp(T value) const {
+    template <typename T> T clamp(T value) const noexcept {
       return isValid() ? std::min<T>(std::max<T>(value, min), max) : value;
     }
 
@@ -72,13 +72,13 @@ public:
   static const Definition& definition(Index index) { return definitions_.at(static_cast<size_t>(index)); }
 
   /// @returns name of the definition
-  const std::string& name() const { return name_; }
+  const std::string& name() const noexcept { return name_; }
 
   /// @returns value type of the generator
-  ValueKind valueKind() const { return valueKind_; }
+  ValueKind valueKind() const noexcept { return valueKind_; }
 
   /// @returns true if the generator can be used in a preset zone
-  bool isAvailableInPreset() const { return availableInPreset_; }
+  bool isAvailableInPreset() const noexcept { return availableInPreset_; }
 
   /**
    Obtain the NRPN multiplier for a generator index. Per SF 2.01 spec:
@@ -97,10 +97,10 @@ public:
 
    @returns multiplier for NRPN values.
   */
-  uint8_t nrpnMultiplier() const { return nrpnMultiplier_; }
+  uint8_t nrpnMultiplier() const noexcept { return nrpnMultiplier_; }
 
   /// @returns true if the generator amount value is unsigned or signed
-  bool isUnsignedValue() const { return valueKind_ < ValueKind::signedShort; }
+  bool isUnsignedValue() const noexcept { return valueKind_ < ValueKind::signedShort; }
 
   /**
    Obtain the value from a generator Amount instance. Properly handles unsigned integer values.
@@ -108,7 +108,7 @@ public:
    @param amount the container holding the value to extract
    @returns extracted value
    */
-  int valueOf(const Amount& amount) const {
+  int valueOf(const Amount& amount) const noexcept {
     return isUnsignedValue() ? amount.unsignedAmount() : amount.signedAmount();
   }
 
@@ -119,7 +119,7 @@ public:
    @param amount the container holding the value to extract
    @returns the converted value
    */
-  Float convertedValueOf(const Amount& amount) const {
+  Float convertedValueOf(const Amount& amount) const noexcept {
     switch (valueKind_) {
       case ValueKind::coarseOffset: return valueOf(amount) * 32768;
       case ValueKind::signedCents: return valueOf(amount) / 1200.0f;
@@ -141,14 +141,15 @@ public:
    @param value the value to clamp
    @returns clamped value
    */
-  template <typename T> T clamp(T value) const { return valueRange_.clamp(value); }
+  template <typename T> T clamp(T value) const noexcept { return valueRange_.clamp(value); }
 
-  void dump(const Amount& amount) const;
+  void dump(const Amount& amount) const noexcept;
 
 private:
   static std::array<Definition, NumDefs> const definitions_;
 
-  Definition(const char* name, ValueKind valueKind, ValueRange minMax, bool availableInPreset, uint8_t nrpnMultiplier) :
+  Definition(const char* name, ValueKind valueKind, ValueRange minMax, bool availableInPreset,
+             uint8_t nrpnMultiplier) noexcept :
   name_{name}, valueKind_{valueKind}, valueRange_{minMax}, availableInPreset_{availableInPreset},
   nrpnMultiplier_{nrpnMultiplier} {}
 

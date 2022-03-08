@@ -31,21 +31,21 @@ public:
    @param samples pointer to the first 16-bit sample in the SF2 file
    @param header defines the range of samples to actually load
    */
-  NormalizedSampleSource(const int16_t* samples, const Entity::SampleHeader& header) :
+  NormalizedSampleSource(const int16_t* samples, const Entity::SampleHeader& header) noexcept :
   samples_(header.endIndex() - header.startIndex() + sizePaddingAfterEnd), header_{header}, allSamples_{samples} {}
 
   /**
    Load the samples into buffer if not already available.
    */
-  inline void load() const { if (!loaded_) loadNormalizedSamples<Float>(); }
+  inline void load() const noexcept { if (!loaded_) loadNormalizedSamples<Float>(); }
 
   /// @returns true if the buffer is loaded
-  bool isLoaded() const { return loaded_; }
+  bool isLoaded() const noexcept { return loaded_; }
 
   /// @returns number of samples in the canonical representation
-  size_t size() const { return loaded_ ? samples_.size() : 0; }
+  size_t size() const noexcept { return loaded_ ? samples_.size() : 0; }
 
-  void unload() const {
+  void unload() const noexcept {
     loaded_ = false;
     samples_.clear();
   }
@@ -56,25 +56,26 @@ public:
    @param index the index to use
    @returns sample at the index
    */
-  Float operator[](size_t index) const { return checkedVectorIndexing<decltype(samples_)>(samples_, index); }
+  Float operator[](size_t index) const noexcept { return checkedVectorIndexing<decltype(samples_)>(samples_, index); }
 
   /// @returns the sample header ('shdr') of the sample stream being rendered
-  const Entity::SampleHeader& header() const { return header_; }
+  const Entity::SampleHeader& header() const noexcept { return header_; }
 
   /**
    Obtain the max magnitude seen in the samples.
    */
-  Float noiseFloorOverMagnitude() const { return loaded_ ? noiseFloorOverMagnitude_ : 0.0; }
+  Float noiseFloorOverMagnitude() const noexcept { return loaded_ ? noiseFloorOverMagnitude_ : 0.0; }
 
   /**
    Obtain the max magnitude seen in the samples of the loop specified by the given bounds.
    */
-  Float noiseFloorOverMagnitudeOfLoop() const { return loaded_ ? noiseFloorOverMagnitudeOfLoop_ : 0.0; }
+  Float noiseFloorOverMagnitudeOfLoop() const noexcept { return loaded_ ? noiseFloorOverMagnitudeOfLoop_ : 0.0; }
 
 private:
 
   template <typename T>
-  void loadNormalizedSamples() const {
+  void loadNormalizedSamples() const noexcept
+  {
     assert(!loaded_);
 
     os_signpost_id_t signpost = os_signpost_id_generate(log_);
@@ -100,7 +101,8 @@ private:
   }
 
   template <typename T>
-  T getMaxMagnitude(size_t startPos, size_t endPos) const {
+  T getMaxMagnitude(size_t startPos, size_t endPos) const noexcept
+  {
     T value{0.0f};
     if (samples_.size() > startPos && samples_.size() >= endPos) {
       Accelerated<T>::magnitudeProc(samples_.data() + startPos, 1, &value, endPos - startPos);

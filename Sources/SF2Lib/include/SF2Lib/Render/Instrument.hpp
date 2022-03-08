@@ -27,7 +27,7 @@ public:
    @param file the SF2 file that was loaded
    @param config the SF2 file entity that defines the instrument
    */
-  Instrument(const IO::File& file, const Entity::Instrument& config) :
+  Instrument(const IO::File& file, const Entity::Instrument& config) noexcept :
   Zone::WithCollectionBase<Zone::Instrument, Entity::Instrument>(config.zoneCount(), config) {
     for (const Entity::Bag& bag : file.instrumentZones().slice(config.firstZoneIndex(), config.zoneCount())) {
       zones_.add(Entity::Generator::Index::sampleID,
@@ -44,7 +44,7 @@ public:
    @param velocity the MIDI velocity value
    @returns vector of matching zones
    */
-  CollectionType::Matches filter(int key, int velocity) const { return zones_.filter(key, velocity); }
+  CollectionType::Matches filter(int key, int velocity) const noexcept { return zones_.filter(key, velocity); }
 };
 
 } // namespace SF2::Render

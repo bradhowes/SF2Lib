@@ -7,7 +7,7 @@
 using namespace SF2::Entity;
 
 std::string
-SampleHeader::sampleTypeDescription() const
+SampleHeader::sampleTypeDescription() const noexcept
 {
   std::string tag("");
   if (sampleIsA(Type::monoSample)) tag += "M";
@@ -18,7 +18,7 @@ SampleHeader::sampleTypeDescription() const
 }
 
 void
-SampleHeader::dump(const std::string& indent, size_t index) const
+SampleHeader::dump(const std::string& indent, size_t index) const noexcept
 {
   std::cout << indent << '[' << index << "] '" << achSampleName
   << "' sampleRate: " << dwSampleRate

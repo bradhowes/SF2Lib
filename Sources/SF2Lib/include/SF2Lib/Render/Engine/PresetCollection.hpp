@@ -27,9 +27,9 @@ public:
     int bank;
     int program;
 
-    friend bool operator ==(const BankProgram& lhs, const BankProgram& rhs) { return lhs.bank == rhs.bank; }
+    friend bool operator ==(const BankProgram& lhs, const BankProgram& rhs) noexcept { return lhs.bank == rhs.bank; }
 
-    friend bool operator <(const BankProgram& lhs, const BankProgram& rhs) {
+    friend bool operator <(const BankProgram& lhs, const BankProgram& rhs) noexcept {
       return lhs.bank < rhs.bank || (lhs.bank == rhs.bank && lhs.program < rhs.program);
     }
   };
@@ -64,17 +64,17 @@ public:
     }
   }
 
-  void clear()
+  void clear() noexcept
   {
     presets_.clear();
     instruments_.clear();
   }
   
   /// Obtain the number of presets in the collection.
-  size_t size() const { return presets_.size(); }
+  size_t size() const noexcept { return presets_.size(); }
 
   /// Obtain the preset at a given index.
-  const Preset& operator[](size_t index) const { return presets_[index]; }
+  const Preset& operator[](size_t index) const noexcept { return presets_[index]; }
 
 private:
   std::vector<Preset> presets_{};

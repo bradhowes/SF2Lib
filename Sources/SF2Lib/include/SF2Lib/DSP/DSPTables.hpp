@@ -34,7 +34,7 @@ struct PanLookup {
    @param left reference to left channel attenuation storage
    @param right reference to right channel attenuation storage
    */
-  static void lookup(Float pan, Float& left, Float& right) {
+  static void lookup(Float pan, Float& left, Float& right) noexcept {
     int index = std::clamp(int(std::round(pan)), -500, 500);
     left = Float(lookup_[size_t(-index + 500)]);
     right = Float(lookup_[size_t(index + 500)]);
@@ -61,7 +61,7 @@ struct SineLookup {
    
    @param radians the angle in radians to use
    */
-  inline static double sine(Float radians) {
+  inline static double sine(Float radians) noexcept {
     if (radians < 0.0) return -sin(-radians);
     while (radians > TwoPI) radians -= TwoPI;
     if (radians <= HalfPI) return interpolate(radians);
@@ -105,9 +105,9 @@ struct CentsFrequencyScalingLookup {
    @param value the value to convert
    @returns multiplier for a frequency that will change the frequency by the given cent value
    */
-  static double convert(int value) { return lookup_[size_t(std::clamp(value, -Max, Max) + Max)]; }
+  static double convert(int value) noexcept { return lookup_[size_t(std::clamp(value, -Max, Max) + Max)]; }
   
-  static double convert(Float value) { return convert(int(std::round(value))); }
+  static double convert(Float value) noexcept { return convert(int(std::round(value))); }
   
 private:
   inline constexpr static Float Span = Float((TableSize - 1) / 2);
@@ -134,7 +134,7 @@ struct CentsPartialLookup {
    @param partial a value between 0 and MaxCentsValue - 1
    @returns frequency multiplier
    */
-  static double convert(int partial) { return lookup_[size_t(std::clamp(partial, 0, MaxCentsValue - 1))]; }
+  static double convert(int partial) noexcept { return lookup_[size_t(std::clamp(partial, 0, MaxCentsValue - 1))]; }
   
 private:
   static double value(size_t index) { return 6.875 * std::exp2(double(index) / 1200.0); }
@@ -154,14 +154,16 @@ struct AttenuationLookup {
    
    @param centibels value to convert
    */
-  static double convert(int centibels) { return lookup_[size_t(std::clamp<int>(centibels, 0, TableSize - 1))]; }
+  static double convert(int centibels) noexcept {
+    return lookup_[size_t(std::clamp<int>(centibels, 0, TableSize - 1))];
+  }
   
   /**
    Convert from floating-point value to attenuation. Rounds to nearest integer to obtain index.
    
    @param centibels value to convert
    */
-  static double convert(Float centibels) { return convert(int(std::round(centibels))); }
+  static double convert(Float centibels) noexcept { return convert(int(std::round(centibels))); }
   
 private:
   static const std::array<double, TableSize> lookup_;
@@ -183,14 +185,16 @@ struct GainLookup {
    
    @param centibels value to convert
    */
-  static double convert(int centibels) { return lookup_[size_t(std::clamp<int>(centibels, 0, TableSize - 1))]; }
+  static double convert(int centibels) noexcept {
+    return lookup_[size_t(std::clamp<int>(centibels, 0, TableSize - 1))];
+  }
   
   /**
    Convert from floating-point value to gain. Rounds to nearest integer to obtain index.
    
    @param centibels value to convert
    */
-  static double convert(Float centibels) { return convert(int(std::round(centibels))); }
+  static double convert(Float centibels) noexcept { return convert(int(std::round(centibels))); }
   
 private:
   static double value(size_t index) { return 1.0 / centibelsToAttenuation(index); }
@@ -219,7 +223,7 @@ struct Cubic4thOrder {
    @param x2 third value to use
    @param x3 fourth value to use
    */
-  inline static double interpolate(Float partial, Float x0, Float x1, Float x2, Float x3) {
+  inline static double interpolate(Float partial, Float x0, Float x1, Float x2, Float x3) noexcept {
     auto index = size_t(partial * TableSize);
     assert(index < TableSize); // should always be true based on definition of `partial`
     const auto& w{weights_[index]};

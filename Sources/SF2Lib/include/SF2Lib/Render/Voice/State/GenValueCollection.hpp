@@ -21,7 +21,7 @@ struct GenValueCollection {
    @param index the generator to get
    @returns GenValue reference
    */
-  GenValue& operator[](Index index) { return array_[indexValue(index)]; }
+  GenValue& operator[](Index index) noexcept { return array_[indexValue(index)]; }
 
   /**
    Obtain a read-only GenValue reference via indexing by Entity::Generator::Index enumeration values.
@@ -29,12 +29,12 @@ struct GenValueCollection {
    @param index the generator to get
    @returns GenValue reference
    */
-  const GenValue& operator[](Index index) const { return array_[indexValue(index)]; }
+  const GenValue& operator[](Index index) const noexcept { return array_[indexValue(index)]; }
 
   /**
    Reset all values to zero.
    */
-  void zero() { array_.fill(GenValue()); }
+  void zero() noexcept { array_.fill(GenValue()); }
 
 private:
   std::array<GenValue, static_cast<size_t>(Index::numValues)> array_;

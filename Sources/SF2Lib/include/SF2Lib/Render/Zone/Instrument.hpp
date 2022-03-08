@@ -21,7 +21,8 @@ public:
    @param mods the vector of modulators that define the zone
    @param sampleSources the source fo
    */
-  Instrument(GeneratorCollection&& gens, ModulatorCollection&& mods, const SampleSourceCollection& sampleSources) :
+  Instrument(GeneratorCollection&& gens, ModulatorCollection&& mods,
+             const SampleSourceCollection& sampleSources) noexcept :
   Zone(std::forward<decltype(gens)>(gens), std::forward<decltype(mods)>(mods), Entity::Generator::Index::sampleID),
   sampleSource_{isGlobal() ? nullptr : &sampleSources[resourceLink()]}
   {}
@@ -37,7 +38,7 @@ public:
 
    @param state the voice state to update
    */
-  void apply(Voice::State::State& state) const
+  void apply(Voice::State::State& state) const noexcept
   {
     // Generator state settings
     std::for_each(generators().cbegin(), generators().cend(), [&](const Entity::Generator::Generator& generator) {
