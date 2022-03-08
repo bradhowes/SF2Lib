@@ -14,14 +14,14 @@
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
 /**
- Representation of an envelope with various states that have timing characteristics and levels.
+ Representation of an envelope with various stages that have their own timing characteristics and levels.
  */
 namespace SF2::Render::Envelope {
 
 /**
- Collection of states for all of the stages in an envelope.
+ Collection of states for all of the stages in an SF2 envelope.
  */
-using Stages = std::array<Stage, static_cast<int>(StageIndex::release) + 1>;
+using Stages = std::array<Stage, static_cast<size_t>(StageIndex::release) + 1>;
 
 /**
  Generator of values for the SF2 volume/filter envelopes. An envelope contains 6 stages:
@@ -38,7 +38,7 @@ using Stages = std::array<Stage, static_cast<int>(StageIndex::release) + 1>;
  order in which they are performed, any stage will transition to the `release` stage upon a `gate(false)`
  call.
 
- The more traditional ADSR (attack, decay, sustain, release) envelope can be achieve by setting the delay and hold
+ The more traditional ADSR (attack, decay, sustain, release) envelope can be achieved by setting the delay and hold
  durations to zero (0.0).
  */
 class Generator {
@@ -54,7 +54,7 @@ public:
   : stages_{std::move(rhs.stages_)}, stageIndex_{rhs.stageIndex_}, counter_{rhs.counter_}, value_{rhs.value_}
   {}
 
-  Generator& operator=(Generator&& rhs) {
+  Generator& operator=(Generator&& rhs) noexcept {
     stages_ = std::move(rhs.stages_);
     stageIndex_ = rhs.stageIndex_;
     counter_ = rhs.counter_;

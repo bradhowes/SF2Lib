@@ -16,9 +16,9 @@ NRPN::apply(Render::Voice::State::State &state) const
 }
 
 void
-NRPN::process(int cc, int value)
+NRPN::process(MIDI::ControlChange cc, int value)
 {
-  std::cout << "process: " << cc << " value: " << value << '\n';
+  std::cout << "process: " << static_cast<int>(cc) << " value: " << value << '\n';
   switch (cc) {
     case MIDI::ControlChange::nprnMSB:
       active_ = value == 120;
@@ -42,7 +42,7 @@ NRPN::process(int cc, int value)
       if (active_) {
         if (index_ < nrpnValues_.size()) {
           auto msb = ((0x7F & value) << 7);
-          auto lsb = 0x7F & channelState_.continuousControllerValue(MIDI::ControlChange::dataEntryLSB);
+          auto lsb = 0x7F & channelState_.continuousControllerValue(static_cast<int>(MIDI::ControlChange::dataEntryLSB));
           auto factor = Entity::Generator::Definition::definition(Entity::Generator::Index(index_)).nrpnMultiplier();
           auto maxValue = 8192;
           value = DSP::clamp(((msb | lsb) - maxValue), -maxValue, maxValue) * factor;
@@ -59,6 +59,9 @@ NRPN::process(int cc, int value)
     case MIDI::ControlChange::rpnLSB:
     case MIDI::ControlChange::rpnMSB:
       active_ = false;
+      break;
+
+    default:
       break;
   }
 }

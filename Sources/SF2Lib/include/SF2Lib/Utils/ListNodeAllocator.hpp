@@ -52,7 +52,7 @@ public:
 
   union Node {
     Node* next;
-    typename std::aligned_storage<sizeof(T), alignof(T)>::type storage;
+    typename std::aligned_storage_t<sizeof(T), alignof(T)> storage;
   };
 
   /**

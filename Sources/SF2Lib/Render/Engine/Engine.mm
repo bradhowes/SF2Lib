@@ -8,7 +8,7 @@ void
 Engine::doMIDIEvent(const AUMIDIEvent& midiEvent)
 {
   if (midiEvent.eventType != AURenderEventMIDI || midiEvent.length < 1) return;
-  switch (midiEvent.data[0] & 0xF0) {
+  switch (MIDI::CoreEvent(midiEvent.data[0] & 0xF0)) {
 
     case MIDI::CoreEvent::noteOff:
       if (midiEvent.length == 2) {
@@ -30,8 +30,9 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent)
 
     case MIDI::CoreEvent::controlChange:
       if (midiEvent.length == 3) {
-        channelState_.setContinuousControllerValue(midiEvent.data[1], midiEvent.data[2]);
-        nrpn_.process(midiEvent.data[1], midiEvent.data[2]);
+        auto cc{MIDI::ControlChange(midiEvent.data[1])};
+        channelState_.setContinuousControllerValue(cc, midiEvent.data[2]);
+        nrpn_.process(cc, midiEvent.data[2]);
       }
       break;
 

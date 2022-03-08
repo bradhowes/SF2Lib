@@ -34,7 +34,7 @@ public:
   {
     assert(left != nullptr && right != nullptr);
 
-#if 1
+#if USE_ACCELERATE
     vDSP_vclr(left_, 1, maxFrameCount);
     vDSP_vclr(right_, 1, maxFrameCount);
 #else
@@ -48,7 +48,7 @@ public:
   {
     if (left_ == nullptr) return;
 
-#if 1
+#if USE_ACCELERATE
     // left_ += samples * leftGain
     vDSP_vsma(samples, 1, &leftGain, left_, 1, left_, 1, frameCount);
     // right_ += samples * rightGain

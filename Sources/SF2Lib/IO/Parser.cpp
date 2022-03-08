@@ -32,7 +32,8 @@ Parser::parse(const char* path)
     while (p1 < chunkList.end()) {
       auto chunk = p1.makeChunk();
       p1 = chunk.advance();
-      switch (chunk.tag().rawValue()) {
+      auto p2 = p1;
+      switch (Tags(chunk.tag().rawValue())) {
         case Tags::inam:
           info.embeddedName = chunk.extract();
           break;
@@ -49,12 +50,15 @@ Parser::parse(const char* path)
           break;
 
         case Tags::phdr:
-          auto p2 = chunk.begin();
+          p2 = chunk.begin();
           while (p2 < chunk.end()) {
             Entity::Preset sfp(p2);
             info.presets.emplace_back(sfp.name(), sfp.bank(), sfp.program());
           }
           info.presets.pop_back();
+          break;
+
+        default:
           break;
       }
     }

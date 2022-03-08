@@ -43,7 +43,7 @@ File::load(bool dump)
         if (dump) {
           log_.debug() << "chunk: tag: " << chunk.tag().toString() << std::endl;
         }
-        switch (chunk.tag().rawValue()) {
+        switch (Tags(chunk.tag().rawValue())) {
           case Tags::ifil: soundFontVersion_.load(chunk.begin()); break;
           case Tags::isng: soundEngine_ = chunk.extract(); break;
           case Tags::irom: rom_ = chunk.extract(); break;
@@ -70,6 +70,8 @@ File::load(bool dump)
             log_.debug() << path_ << " - sampleDataBegin: " << sampleDataBegin_ << " sampleDataEnd: " << sampleDataEnd_
             << '\n';
             chunk.extractSamples(rawSamples_);
+            break;
+          default:
             break;
         }
       }

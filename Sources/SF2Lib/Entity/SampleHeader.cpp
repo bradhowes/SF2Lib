@@ -10,10 +10,10 @@ std::string
 SampleHeader::sampleTypeDescription() const
 {
   std::string tag("");
-  if (sampleType & monoSample) tag += "M";
-  if (sampleType & rightSample) tag += "R";
-  if (sampleType & leftSample) tag += "L";
-  if (sampleType & rom) tag += "*";
+  if (sampleIsA(Type::monoSample)) tag += "M";
+  if (sampleIsA(Type::rightSample)) tag += "R";
+  if (sampleIsA(Type::leftSample)) tag += "L";
+  if (sampleIsA(Type::rom)) tag += "*";
   return tag;
 }
 

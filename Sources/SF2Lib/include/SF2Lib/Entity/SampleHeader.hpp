@@ -31,14 +31,17 @@ class SampleHeader {
 public:
   constexpr static size_t size = 46;
   
-  enum Type {
+  enum struct Type {
     monoSample = 1,
     rightSample = 2,
     leftSample = 4,
     linkedSample = 8,
     rom = 0x8000
   };
-  
+
+  template<typename E>
+  static constexpr auto toType(E value) noexcept { return static_cast<std::underlying_type_t<E>>(value); }
+
   /**
    Construct new instance from SF2 file
    */
@@ -58,18 +61,22 @@ public:
                uint32_t sampleRate, uint8_t key, int8_t adjustment) :
   dwStart{start}, dwEnd{end}, dwStartLoop{loopBegin}, dwEndLoop{loopEnd}, dwSampleRate{sampleRate}, originalKey{key},
   correction{adjustment} {}
-  
+
+  bool sampleIsA(Type type) const {
+    return (sampleType & toType<Type>(type)) == toType<Type>(type);
+  }
+
   /// @returns true if this sample only has one channel
-  bool isMono() const { return (sampleType & monoSample) == monoSample; }
+  bool isMono() const { return sampleIsA(Type::monoSample); }
   
   /// @returns true if these samples generate for the right channel
-  bool isRight() const { return (sampleType & rightSample) == rightSample; }
+  bool isRight() const { return sampleIsA(Type::rightSample); }
   
   /// @returns true if these samples generate for the left channel
-  bool isLeft() const { return (sampleType & leftSample) == leftSample; }
+  bool isLeft() const { return sampleIsA(Type::leftSample); }
   
   /// @returns true if samples come from a ROM
-  bool isROM() const { return (sampleType & rom) == rom; }
+  bool isROM() const { return sampleIsA(Type::rom); }
 
   /// @returns the name assigned to the sample
   const char* sampleName() const { return achSampleName; }

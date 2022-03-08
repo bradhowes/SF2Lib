@@ -38,7 +38,7 @@ public:
    @param cc continuous controller index
    @param value the value assigned to the controller
    */
-  void process(int cc, int value);
+  void process(MIDI::ControlChange cc, int value);
 
   /// @returns true if actively processing SoundFont generator changes.
   bool isActive() const { return active_; }

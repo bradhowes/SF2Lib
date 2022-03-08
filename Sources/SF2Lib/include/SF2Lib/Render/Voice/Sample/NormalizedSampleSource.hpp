@@ -4,8 +4,6 @@
 
 #include <os/log.h>
 #include <os/signpost.h>
-#include <Accelerate/Accelerate.h>
-// #include <AudioToolbox/AUParameters.h>
 
 #include <vector>
 

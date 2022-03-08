@@ -40,6 +40,7 @@ let package = Package(
         .target(name: "SF2Lib", condition: .none),
       ],
       cxxSettings: [
+        .define("USE_ACCELERATE", to: "1", .none),
         .unsafeFlags(["-fmodules", "-fcxx-modules"], .none)
       ]
     ),

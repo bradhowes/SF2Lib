@@ -15,7 +15,7 @@ using namespace SF2::Entity::Generator;
 Voice::Voice(Float sampleRate, const ChannelState& channelState, size_t voiceIndex,
              Sample::Generator::Interpolator interpolator) :
 state_{sampleRate, channelState},
-loopingMode_{none},
+loopingMode_{LoopingMode::none},
 pitch_{state_},
 sampleGenerator_{state_, interpolator},
 gainEnvelope_{},

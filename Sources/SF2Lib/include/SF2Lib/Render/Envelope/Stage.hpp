@@ -10,6 +10,7 @@
 
 namespace SF2::Render::Envelope {
 
+/// Stages defined in the SF2 2.01 spec (except for the `idle` state).
 enum struct StageIndex {
   idle = -1,
   delay = 0,
@@ -62,8 +63,8 @@ public:
    Generate a configuration for the attack stage.
    */
   static Stage Attack(int sampleCount, Float curvature) {
-    curvature = clampCurvature(curvature);
-    Float alpha = calculateCoefficient(sampleCount, curvature);
+    curvature = clampedCurvature(curvature);
+    Float alpha = calculateAlphaCoefficient(sampleCount, curvature);
     return Stage(StageIndex::attack, 0.0f, alpha, (1.0f + curvature) * (1.0f - alpha), sampleCount);
   }
 
@@ -76,8 +77,8 @@ public:
    Generate a configuration for the decay stage.
    */
   static Stage Decay(int sampleCount, Float curvature, Float sustainLevel) {
-    curvature = clampCurvature(curvature);
-    Float alpha = calculateCoefficient(sampleCount, curvature);
+    curvature = clampedCurvature(curvature);
+    Float alpha = calculateAlphaCoefficient(sampleCount, curvature);
     return Stage(StageIndex::decay, 1.0f, alpha, (sustainLevel - curvature) * (1.0f - alpha), sampleCount);
   }
 
@@ -92,8 +93,8 @@ public:
    Generate a configuration for the release stage.
    */
   static Stage Release(int sampleCount, Float curvature, Float sustainLevel) {
-    curvature = clampCurvature(curvature);
-    Float alpha = calculateCoefficient(sampleCount, curvature);
+    curvature = clampedCurvature(curvature);
+    Float alpha = calculateAlphaCoefficient(sampleCount, curvature);
     return Stage(StageIndex::release, sustainLevel, alpha, (0.0f - curvature) * (1.0f - alpha), sampleCount);
   }
 
@@ -105,9 +106,16 @@ public:
    */
   Float next(Float last) const { return std::max<Float>(std::min<Float>(last * alpha_ + beta_, 1.0), 0.0); }
 
+  /// @returns initial envelope value for the stage
   Float initial() const { return initial_; }
+
+  /// @returns the alpha curve parameter
   Float alpha() const { return alpha_; }
+
+  /// @returns the beta curve parameter
   Float beta() const { return beta_; }
+
+  /// @returns the duration of the stage in seconds
   int duration() const { return durationInSamples_; }
   
 private:
@@ -118,12 +126,10 @@ private:
     << " beta: " << beta << std::endl;
   }
 
-  static Float clampCurvature(Float curvature) {
-    return std::max(std::min(curvature, maximumCurvature), minimumCurvature);
-  }
+  static Float clampedCurvature(Float curvature) { return DSP::clamp(curvature, minimumCurvature, maximumCurvature); }
 
-  static Float calculateCoefficient(Float sampleCount, Float curvature) {
-    curvature = clampCurvature(curvature);
+  static Float calculateAlphaCoefficient(Float sampleCount, Float curvature) {
+    curvature = clampedCurvature(curvature);
     return (sampleCount <= 0.0f) ? 0.0f : std::exp(-std::log((1.0f + curvature) / curvature) / sampleCount);
   }
 

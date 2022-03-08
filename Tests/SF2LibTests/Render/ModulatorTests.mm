@@ -82,13 +82,13 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqual(1, config.source().continuousIndex());
   State::Modulator modulator{0, config, *state};
 
-  channelState->setContinuousControllerValue(1, 0);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::modulationWheelMSB, 0);
   XCTAssertEqualWithAccuracy(modulator.value(), 0.0, epsilon);
 
-  channelState->setContinuousControllerValue(1, 64);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::modulationWheelMSB, 64);
   XCTAssertEqualWithAccuracy(modulator.value(), 25.0, epsilon);
 
-  channelState->setContinuousControllerValue(1, 127);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::modulationWheelMSB, 127);
   XCTAssertEqualWithAccuracy(modulator.value(), config.amount() * 127.0 / 128.0, epsilon);
 }
 
@@ -98,13 +98,13 @@ using namespace SF2::Entity::Generator;
 
   State::Modulator modulator{0, config, *state};
 
-  channelState->setContinuousControllerValue(7, 0);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::volumeMSB, 0);
   XCTAssertEqualWithAccuracy(modulator.value(), 960.0, epsilon);
 
-  channelState->setContinuousControllerValue(7, 64);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::volumeMSB, 64);
   XCTAssertEqualWithAccuracy(modulator.value(), 119.049498789, epsilon);
 
-  channelState->setContinuousControllerValue(7, 127);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::volumeMSB, 127);
   XCTAssertEqualWithAccuracy(modulator.value(), 0.0, epsilon);
 }
 
@@ -113,13 +113,13 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqual(10, config.source().continuousIndex());
   State::Modulator modulator{0, config, *state};
 
-  channelState->setContinuousControllerValue(10, 0);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::panMSB, 0);
   XCTAssertEqualWithAccuracy(modulator.value(), -1000, epsilon);
 
-  channelState->setContinuousControllerValue(10, 64);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::panMSB, 64);
   XCTAssertEqualWithAccuracy(modulator.value(), 0, epsilon);
 
-  channelState->setContinuousControllerValue(10, 127);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::panMSB, 127);
   XCTAssertEqualWithAccuracy(modulator.value(), config.amount() * DSP::unipolarToBipolar(127.0 / 128.0), epsilon);
 }
 
@@ -128,13 +128,13 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqual(11, config.source().continuousIndex());
   State::Modulator modulator{0, config, *state};
 
-  channelState->setContinuousControllerValue(11, 0);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::expressionMSB, 0);
   XCTAssertEqualWithAccuracy(modulator.value(), 960.0, epsilon);
 
-  channelState->setContinuousControllerValue(11, 64);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::expressionMSB, 64);
   XCTAssertEqualWithAccuracy(modulator.value(), 119.049498789, epsilon);
 
-  channelState->setContinuousControllerValue(11, 127);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::expressionMSB, 127);
   XCTAssertEqualWithAccuracy(modulator.value(), 0.0, epsilon);
 }
 
@@ -143,13 +143,13 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqual(91, config.source().continuousIndex());
   State::Modulator modulator{0, config, *state};
 
-  channelState->setContinuousControllerValue(91, 0);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::effectsDepth1, 0);
   XCTAssertEqualWithAccuracy(modulator.value(), 0.0, epsilon);
 
-  channelState->setContinuousControllerValue(91, 64);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::effectsDepth1, 64);
   XCTAssertEqualWithAccuracy(modulator.value(), 100.0, epsilon);
 
-  channelState->setContinuousControllerValue(91, 127);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::effectsDepth1, 127);
   XCTAssertEqualWithAccuracy(modulator.value(), config.amount() * 127.0 / 128.0, epsilon);
 }
 
@@ -158,13 +158,13 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqual(93, config.source().continuousIndex());
   State:: Modulator modulator{0, config, *state};
 
-  channelState->setContinuousControllerValue(93, 0);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::effectsDepth3, 0);
   XCTAssertEqualWithAccuracy(modulator.value(), 0.0, epsilon);
 
-  channelState->setContinuousControllerValue(93, 64);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::effectsDepth3, 64);
   XCTAssertEqualWithAccuracy(modulator.value(), 100.0, epsilon);
 
-  channelState->setContinuousControllerValue(93, 127);
+  channelState->setContinuousControllerValue(MIDI::ControlChange::effectsDepth3, 127);
   XCTAssertEqualWithAccuracy( modulator.value(), config.amount() * 127.0 / 128.0, epsilon);
 }
 

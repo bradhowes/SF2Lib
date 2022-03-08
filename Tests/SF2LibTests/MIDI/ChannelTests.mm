@@ -5,6 +5,7 @@
 #include <XCTest/XCTest.h>
 
 #include "SF2Lib/MIDI/ChannelState.hpp"
+#include "SF2Lib/MIDI/MIDI.hpp"
 
 using namespace SF2::MIDI;
 
@@ -53,14 +54,14 @@ using namespace SF2::MIDI;
   ChannelState channel;
   for (int index = 0; index < 127; index += 10) XCTAssertEqual(0, channel.continuousControllerValue(index));
 
-  channel.setContinuousControllerValue(0, 123);
+  channel.setContinuousControllerValue(SF2::MIDI::ControlChange::bankSelectMSB, 123);
   XCTAssertEqual(123, channel.continuousControllerValue(0));
 
-  channel.setContinuousControllerValue(0, 456);
+  channel.setContinuousControllerValue(SF2::MIDI::ControlChange::bankSelectMSB, 456);
   XCTAssertEqual(456, channel.continuousControllerValue(0));
 
   for (int index = 0; index < 127; index += 10) {
-    channel.setContinuousControllerValue(index, -50 + index);
+    channel.setContinuousControllerValue(SF2::MIDI::ControlChange(index), -50 + index);
   }
 
   for (int index = 0; index < 127; index += 10) {

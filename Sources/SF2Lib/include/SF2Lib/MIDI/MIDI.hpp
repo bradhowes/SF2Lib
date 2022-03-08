@@ -17,7 +17,7 @@
  */
 namespace SF2::MIDI {
 
-enum CoreEvent {
+enum struct CoreEvent {
   noteOff = 0x80,
   noteOn = 0x90,
   keyPressure = 0xa0,
@@ -28,7 +28,7 @@ enum CoreEvent {
   reset = 0xff
 };
 
-enum ControlChange {
+enum struct ControlChange {
   bankSelectMSB = 0x00,
   modulationWheelMSB = 0x01,
   breathMSB = 0x02,
@@ -114,7 +114,7 @@ enum ControlChange {
 };
 
 /* General MIDI RPN event numbers (LSB, MSB = 0) */
-enum RPNEvent
+enum struct RPNEvent
 {
   pitchBendRange = 0x00,
   channelFineTune = 0x01,

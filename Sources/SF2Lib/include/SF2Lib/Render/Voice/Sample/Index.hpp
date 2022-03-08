@@ -23,10 +23,12 @@ public:
 
   Index() = default;
 
-  void configure(const Bounds& bounds)
-  {
-    bounds_ = bounds;
-  }
+  /**
+   Configure the index to work with the given bounds
+
+   @param bounds the sample bounds to work with
+   */
+  void configure(const Bounds& bounds) { bounds_ = bounds; }
 
   /// Signal that no further operations will take place using this index.
   void stop() { whole_ = bounds_.endPos(); }

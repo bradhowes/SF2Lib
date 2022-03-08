@@ -36,7 +36,7 @@ public:
    - activeEnvelope -- loop as long as the envelope allows
    - duringKeyPress -- loop only while they key is down
    */
-  enum LoopingMode {
+  enum struct LoopingMode {
     none = 0,
     activeEnvelope = 1,
     duringKeyPress = 3
@@ -113,8 +113,8 @@ public:
 
   /// @returns true if the voice can enter a loop if it is available
   bool canLoop() const {
-    return (loopingMode_ == activeEnvelope && gainEnvelope_.isActive()) ||
-    (loopingMode_ == duringKeyPress && gainEnvelope_.isGated());
+    return (loopingMode_ == LoopingMode::activeEnvelope && gainEnvelope_.isActive()) ||
+    (loopingMode_ == LoopingMode::duringKeyPress && gainEnvelope_.isGated());
   }
 
   /**

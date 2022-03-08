@@ -89,9 +89,9 @@ public:
    @param id the controller ID
    @param value the value to set for the controller
    */
-  void setContinuousControllerValue(int id, int value) {
-    assert(id >= CCMin && id <= CCMax);
-    continuousControllerValues_[size_t(id - CCMin)] = value;
+  void setContinuousControllerValue(MIDI::ControlChange id, int value) {
+    assert(static_cast<int>(id) >= CCMin && static_cast<int>(id) <= CCMax);
+    continuousControllerValues_[static_cast<size_t>(id) - CCMin] = value;
   }
 
   /**
