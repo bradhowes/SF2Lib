@@ -88,30 +88,17 @@ public:
   
   /**
    Obtain iterator to the start of the collection
-
-   @returns iterator to start of the collection
-   */
-  iterator begin() noexcept { return items_.begin(); }
-
-  /**
-   Obtain iterator at the end of the collection
-
-   @returns iterator at the end of the collection
-   */
-  iterator end() noexcept { return items_.end() - 1; }
-  /**
-   Obtain iterator to the start of the collection
    
    @returns iterator to start of the collection
    */
-  const_iterator cbegin() const noexcept { return items_.cbegin(); }
+  const_iterator begin() const noexcept { return items_.begin(); }
   
   /**
    Obtain iterator at the end of the collection
    
    @returns iterator at the end of the collection
    */
-  const_iterator cend() const noexcept { return items_.cend() - 1; }
+  const_iterator end() const noexcept { return items_.end() - 1; }
 
   /**
    Utility to dump out the contents of the collection
@@ -121,7 +108,7 @@ public:
   void dump(const std::string& indent) const noexcept {
     beginDump(size());
     size_t index = 0;
-    std::for_each(cbegin(), cend(), [&](const ItemType& item) { item.dump(indent, index++); });
+    std::for_each(begin(), end(), [&](const ItemType& item) { item.dump(indent, index++); });
   }
   
 private:
