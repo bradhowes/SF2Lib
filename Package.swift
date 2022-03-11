@@ -33,8 +33,12 @@ let package = Package(
         .process("Resources", localization: nil)
       ],
       cxxSettings: [
-        .headerSearchPath("./include", .none),
-        .unsafeFlags(["-fmodules", "-fcxx-modules"], .none)
+        .headerSearchPath("./include", .none)
+      ],
+      linkerSettings: [
+        .linkedFramework("Accelerate", .none),
+        .linkedFramework("AudioToolbox", .none),
+        .linkedFramework("AVFoundation", .none)
       ]
     ),
     .executableTarget(
@@ -43,9 +47,9 @@ let package = Package(
         .target(name: "SF2Lib", condition: .none),
       ],
       cxxSettings: [
-        .define("USE_ACCELERATE", to: "1", .none),
-        .unsafeFlags(["-fmodules", "-fcxx-modules"], .none)
-      ]
+        .define("USE_ACCELERATE", to: "1", .none)
+      ],
+      linkerSettings: [.linkedFramework("Accelerate", .none)]
     ),
     .testTarget(
       name: "SF2LibTests",
@@ -55,8 +59,12 @@ let package = Package(
       ],
       cxxSettings: [
         // Set to 1 to play audio in tests. Set to 0 to keep silent.
-        .define("PLAY_AUDIO", to: "0", .none),
-        .unsafeFlags(["-fmodules", "-fcxx-modules"], .none)
+        .define("PLAY_AUDIO", to: "0", .none)
+      ],
+      linkerSettings: [
+        .linkedFramework("Accelerate", .none),
+        .linkedFramework("AudioToolbox", .none),
+        .linkedFramework("AVFoundation", .none)
       ]
     )
   ],
