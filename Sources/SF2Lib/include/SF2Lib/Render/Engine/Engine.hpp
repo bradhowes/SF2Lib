@@ -199,8 +199,13 @@ private:
   /// API for EventProcessor
   void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
 
+  AUAudioUnitStatus doPullInput(const AudioTimeStamp* timestamp, UInt32 frameCount, NSInteger inputBusNumber,
+                              AURenderPullInputBlock pullInputBlock) {
+    return pullInput(timestamp, frameCount, inputBusNumber, pullInputBlock);
+  }
+
   /// API for EventProcessor
-  void doRendering(std::vector<AUValue*>&, std::vector<AUValue*>& outs, AUAudioFrameCount frameCount) noexcept
+  void doRendering(NSInteger outputBusNumber, std::vector<AUValue*>&, std::vector<AUValue*>& outs, AUAudioFrameCount frameCount) noexcept
   {
     assert(outs.size() >= 2);
 
