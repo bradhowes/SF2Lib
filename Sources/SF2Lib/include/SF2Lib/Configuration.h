@@ -12,7 +12,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSString* loggingBase;
 @property (nonatomic, readonly) BOOL testsPlayAudio;
 
++ (instancetype)shared:(NSDictionary*)overrides;
 + (instancetype)shared;
++ (void)reset;
 
 @end
 

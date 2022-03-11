@@ -2,9 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>LoggingBase</key>
+	<key>loggingBase</key>
 	<string>com.braysoftware.SF2Lib</string>
-	<key>TestsPlayAudio</key>
+	<key>testsPlayAudio</key>
 	<true/>
 </dict>
 </plist>
