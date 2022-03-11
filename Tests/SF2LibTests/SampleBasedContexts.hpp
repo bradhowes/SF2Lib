@@ -24,7 +24,7 @@ struct PresetTestContextBase
 template <int UrlIndex>
 struct PresetTestContext : PresetTestContextBase
 {
-  PresetTestContext(int presetIndex = 0, SF2::Float sampleRate = 44100.0) :
+  PresetTestContext(int presetIndex = 0, SF2::Float sampleRate = 48000.0) :
   sampleRate_{sampleRate}, presetIndex_{presetIndex}
   {}
 

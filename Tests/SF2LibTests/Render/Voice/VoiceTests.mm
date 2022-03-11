@@ -11,6 +11,7 @@ static SF2::Float epsilon = 1.0e-8;
 
 #include "../../SampleBasedContexts.hpp"
 
+#include "SF2Lib/Configuration.h"
 #include "SF2Lib/Render/Preset.hpp"
 #include "SF2Lib/Render/Voice/Sample/Generator.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
@@ -34,7 +35,8 @@ using namespace SF2::Render;
 #if PLAY_AUDIO
   self.playAudio = YES;
 #else
-  self.playAudio = NO;
+  self.playAudio = Configuration.shared.testsPlayAudio;
+;
 #endif
 }
 

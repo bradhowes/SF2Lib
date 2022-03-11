@@ -201,7 +201,7 @@ struct EnvelopeTestInjector {
   s4.setValue(State::State::Index::midiKeyToVolumeEnvelopeHold, 50);
   s4.setValue(State::State::Index::holdVolumeEnvelope, -7973);
   duration = Generator::forVol(s4)[StageIndex::hold].duration();
-  XCTAssertEqualWithAccuracy(882, duration, 0.000001);
+  XCTAssertEqualWithAccuracy(960, duration, 0.000001);
 }
 
 @end

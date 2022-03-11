@@ -29,6 +29,9 @@ let package = Package(
         "MIDI/README.md",
         "Render/README.md"
       ],
+      resources: [
+        .process("Resources", localization: nil)
+      ],
       cxxSettings: [
         .headerSearchPath("./include", .none),
         .unsafeFlags(["-fmodules", "-fcxx-modules"], .none)

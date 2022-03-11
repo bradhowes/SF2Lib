@@ -69,21 +69,28 @@ public:
     }
   }
 
-  /// Obtain the current sample rate
+  /// @returns the current sample rate
   Float sampleRate() const noexcept { return sampleRate_; }
 
-  /// Obtain the MIDI channel assigned to the engine.
+  /// @returns the MIDI channel state assigned to the engine
   MIDI::ChannelState& channelState() noexcept { return channelState_; }
+
+  /// @returns the MIDI channel state assigned to the engine
   const MIDI::ChannelState& channelState() const noexcept { return channelState_; }
 
+  /// @returns true if there is an active preset
+  bool hasActivePreset() const { return activePreset_ < presets_.size(); }
+
   /**
-   Load the presets from an SF2 file.
+   Load the presets from an SF2 file and activate one.
 
    @param file the file to load from
+   @param index the preset to make active
    */
-  void load(const IO::File& file) noexcept {
+  void load(const IO::File& file, size_t index) noexcept {
     allOff();
     presets_.build(file);
+    usePreset(index);
   }
 
   /// @returns number of presets available.
@@ -95,8 +102,11 @@ public:
    @param index the preset to use
    */
   void usePreset(size_t index) {
-    if (index >= presets_.size()) throw std::runtime_error("invalid preset index");
     allOff();
+    if (index >= presets_.size()) {
+      os_log_error(log_, "preset index %zu is invalid", index);
+      index = presets_.size();
+    }
     activePreset_ = index;
   }
 
@@ -142,7 +152,7 @@ public:
    */
   void noteOn(int key, int velocity) noexcept
   {
-    if (activePreset_ >= presets_.size()) return;
+    if (! hasActivePreset()) return;
     for (const Config& config : presets_[activePreset_].find(key, velocity)) {
       startVoice(config);
     }
@@ -227,6 +237,7 @@ private:
     }
     // Or steal the oldest voice that is active
     else if (!oldestActive_.empty()){
+      os_log_debug(log_, "stealing oldest active voice");
       found = oldestActive_.takeOldest();
     }
 
@@ -252,6 +263,8 @@ private:
 
   PresetCollection presets_{};
   size_t activePreset_{0};
+
+  inline static Logger log_{Logger::Make("Render", "Engine")};
 };
 
 } // end namespace SF2::Render

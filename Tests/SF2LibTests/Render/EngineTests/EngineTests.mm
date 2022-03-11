@@ -7,6 +7,7 @@
 
 #include "../../SampleBasedContexts.hpp"
 
+#include "SF2Lib/Configuration.h"
 #include "SF2Lib/Render/Engine/Engine.hpp"
 
 using namespace SF2;
@@ -30,7 +31,7 @@ using namespace SF2::Render::Engine;
 #if PLAY_AUDIO
   self.playAudio = YES;
 #else
-  self.playAudio = NO;
+  self.playAudio = Configuration.shared.testsPlayAudio;
 #endif
 }
 
@@ -42,7 +43,7 @@ using namespace SF2::Render::Engine;
 
 - (void)testLoad {
   Engine engine(44100.0, 32, interpolator);
-  engine.load(contexts.context0.file());
+  engine.load(contexts.context0.file(), 0);
   XCTAssertEqual(engine.presetCount(), 235);
 }
 
@@ -63,7 +64,7 @@ using namespace SF2::Render::Engine;
   Float sampleRate{44100.0};
   Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
 
-  engine.load(contexts.context2.file());
+  engine.load(contexts.context2.file(), 0);
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
   AUAudioFrameCount frameCount = 512;
@@ -136,7 +137,7 @@ using namespace SF2::Render::Engine;
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
   Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
-  engine.load(contexts.context2.file());
+  engine.load(contexts.context2.file(), 0);
   engine.setRenderingFormat(format, frameCount);
 
   // Set NPRN state so that voices send 20% output to the chorus channel
@@ -277,7 +278,7 @@ using namespace SF2::Render::Engine;
   return result;
 }
 
-// Render 1 second of audio at 44100 sample rate using all voices of an engine and interpolating using 4th-order cubic.
+// Render 1 second of audio at 44100.0 sample rate using all voices of an engine and interpolating using 4th-order cubic.
 // Uses both effects buffers to account for mixing effort when they are active.
 - (void)testEngineRenderPerformance
 {
@@ -288,7 +289,7 @@ using namespace SF2::Render::Engine;
     AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
     Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
-    engine.load(contexts.context2.file());
+    engine.load(contexts.context2.file(), 0);
     engine.setRenderingFormat(format, frameCount);
 
     // Set NPRN state so that voices send 20% output to the chorus channel
