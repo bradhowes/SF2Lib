@@ -5,6 +5,6 @@
 	<key>loggingBase</key>
 	<string>com.braysoftware.SF2Lib</string>
 	<key>testsPlayAudio</key>
-	<true/>
+	<false/>
 </dict>
 </plist>
