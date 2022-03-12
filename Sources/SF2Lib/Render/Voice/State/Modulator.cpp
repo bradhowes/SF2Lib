@@ -22,7 +22,8 @@ int Modulator::ValueProvider::pitchWheelValue() const noexcept { return state_.c
 int Modulator::ValueProvider::pitchWheelSensitivity() const noexcept {
   return state_.channelState().pitchWheelSensitivity();
 }
-int Modulator::ValueProvider::linked() const noexcept { return std::round(modulator_->value()); };
+
+int Modulator::ValueProvider::linked() const noexcept { return int(std::round(modulator_->value())); };
 
 Modulator::Modulator(size_t index, const EntityMod::Modulator& configuration, const State& state) noexcept :
 configuration_{configuration},

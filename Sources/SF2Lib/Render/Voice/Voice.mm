@@ -23,11 +23,9 @@ modulatorEnvelope_{},
 modulatorLFO_{},
 vibratoLFO_{},
 filter_{sampleRate},
-voiceIndex_{voiceIndex},
-samples_{}
+voiceIndex_{voiceIndex}
 {
-  samples_.reserve(512);
-  samples_.resize(512, 0.0f);
+  ;
 }
 
 void

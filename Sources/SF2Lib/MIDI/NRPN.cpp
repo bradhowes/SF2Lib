@@ -10,7 +10,7 @@ using namespace SF2::MIDI;
 void
 NRPN::apply(Render::Voice::State::State &state) const noexcept
 {
-  for (auto index = 0; index < nrpnValues_.size(); ++index) {
+  for (size_t index = 0; index < nrpnValues_.size(); ++index) {
     state.setNRPNAdjustment(Entity::Generator::Index(index), nrpnValues_[index]);
   }
 }
@@ -30,7 +30,7 @@ NRPN::process(MIDI::ControlChange cc, int value) noexcept
       // According to SF2.01 spec, generator index values can be built up using special encoded values of the LSB.
       // Right now, the max generator defined is index 58 (overridingRootKey). I highly doubt there will be an expansion
       // which will get us above 100 much less 1k or 10k.
-      if (value < 100) index_ += value;
+      if (value < 100) index_ += size_t(value);
       else if (value == 100) index_ += 100;
       else if (value == 101) index_ += 1000;
       else if (value == 102) index_ += 10000;
@@ -45,7 +45,7 @@ NRPN::process(MIDI::ControlChange cc, int value) noexcept
           auto lsb = 0x7F & channelState_.continuousControllerValue(static_cast<int>(MIDI::ControlChange::dataEntryLSB));
           auto factor = Entity::Generator::Definition::definition(Entity::Generator::Index(index_)).nrpnMultiplier();
           auto maxValue = 8192;
-          value = DSP::clamp(((msb | lsb) - maxValue), -maxValue, maxValue) * factor;
+          value = std::clamp<int>(((msb | lsb) - maxValue), -maxValue, maxValue) * factor;
           os_log_debug(log_, "setting index %zu to %d", index_, value);
           nrpnValues_[index_] = value;
         }

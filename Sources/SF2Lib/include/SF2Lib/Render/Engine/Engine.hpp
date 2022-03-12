@@ -10,12 +10,12 @@
 #include <vector>
 
 #include "DSPHeaders/EventProcessor.hpp"
+#include "DSPHeaders/Mixer.hpp"
 
 #include "SF2Lib/MIDI/NRPN.hpp"
 #include "SF2Lib/Render/Engine/OldestActiveVoiceCache.hpp"
 #include "SF2Lib/Render/Engine/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
-#include "SF2Lib/Utils/Mixer.hpp"
 
 namespace SF2::IO { class File; }
 
@@ -64,9 +64,6 @@ public:
   void setRenderingFormat(AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept {
     super::setRenderingFormat(format, maxFramesToRender);
     initialize(format.channelCount, format.sampleRate);
-    for (auto& voice : voices_) {
-      voice.setMaxFramesToRender(maxFramesToRender);
-    }
   }
 
   /// @returns the current sample rate
@@ -165,7 +162,7 @@ public:
    @param mixer collection of buffers to render into
    @param frameCount number of samples to render.
    */
-  void renderInto(Utils::Mixer& mixer, AUAudioFrameCount frameCount) noexcept
+  void renderInto(DSPHeaders::Mixer mixer, AUAudioFrameCount frameCount) noexcept
   {
     for (auto voiceIndex : oldestActive_) {
       auto& voice{voices_[voiceIndex]};
@@ -177,14 +174,13 @@ public:
         available_.push_back(voiceIndex);
       }
     }
-    mixer.shift(frameCount);
   }
 
   MIDI::NRPN& nprn() { return nrpn_; }
 
 private:
 
-  void initialize(int channelCount, double sampleRate) noexcept
+  void initialize(AVAudioChannelCount, double sampleRate) noexcept
   {
     sampleRate_ = sampleRate;
     allOff();
@@ -194,30 +190,20 @@ private:
   }
 
   /// API for EventProcessor
-  void setParameterFromEvent(const AUParameterEvent& event) noexcept {}
+  void setParameterFromEvent(const AUParameterEvent&) noexcept {}
 
   /// API for EventProcessor
   void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
 
-  AUAudioUnitStatus doPullInput(const AudioTimeStamp* timestamp, UInt32 frameCount, NSInteger inputBusNumber,
-                              AURenderPullInputBlock pullInputBlock) {
-    return pullInput(timestamp, frameCount, inputBusNumber, pullInputBlock);
-  }
-
   /// API for EventProcessor
-  void doRendering(NSInteger outputBusNumber, std::vector<AUValue*>&, std::vector<AUValue*>& outs, AUAudioFrameCount frameCount) noexcept
+  void doRendering(NSInteger outputBusNumber, DSPHeaders::BufferPair, DSPHeaders::BufferPair outs,
+                   AUAudioFrameCount frameCount) noexcept
   {
-    assert(outs.size() >= 2);
-
-    Utils::OutputBufferPair dry{outs[0], outs[1], frameCount};
-    Utils::OutputBufferPair chorusSend;
-    if (outs.size() >= 4) chorusSend = {outs[2], outs[3], frameCount};
-
-    Utils::OutputBufferPair reverbSend;
-    if (outs.size() >= 6) reverbSend = {outs[4], outs[5], frameCount};
-
-    Utils::Mixer mixer{dry, chorusSend, reverbSend};
-    renderInto(mixer, frameCount);
+    if (outputBusNumber == 0) {
+      // All of the work is done when working with output bus 0. If all is wired correctly, busses 1 and 2 will
+      // use the buffered values that were created here.
+      renderInto(DSPHeaders::Mixer(outs, channelBuffers(1, frameCount), channelBuffers(2, frameCount)), frameCount);
+    }
   }
 
   size_t selectVoice(const Config& config) noexcept
