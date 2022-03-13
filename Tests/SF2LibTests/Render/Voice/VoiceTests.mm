@@ -35,7 +35,7 @@ using namespace SF2::Render;
 #if PLAY_AUDIO
   self.playAudio = YES;
 #else
-  self.playAudio = YES; // Configuration.shared.testsPlayAudio;
+  self.playAudio = Configuration.shared.testsPlayAudio;
 ;
 #endif
 }
