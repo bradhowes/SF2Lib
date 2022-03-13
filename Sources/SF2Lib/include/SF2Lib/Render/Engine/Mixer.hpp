@@ -6,7 +6,7 @@
 #include <cmath>
 #include <vector>
 
-#include "DSPHeaders/BufferPair.hpp"
+#include "DSPHeaders/BusBuffers.hpp"
 
 namespace SF2::Render::Engine {
 
@@ -23,7 +23,7 @@ public:
    @param chorusSend the samples that will go to the first effects channel
    @param reverbSend the samples that will go to the second effects channel
    */
-  Mixer(BufferPair dry, BufferPair effects1, BufferPair effects2) :
+  Mixer(DSPHeaders::BusBuffers dry, DSPHeaders::BusBuffers effects1, DSPHeaders::BusBuffers effects2) :
   dry_{dry}, effects1_{effects1}, effects2_{effects2}
   {
     ;
@@ -40,9 +40,9 @@ public:
    */
   void add(AUAudioFrameCount frame, AUValue left, AUValue right, AUValue effects1, AUValue effects2) noexcept
   {
-    dry_.add(frame, left, right);
-    if (effects1_.isValid() && effects1 > 0.0) effects1_.add(frame, left * effects1, right * effects1);
-    if (effects2_.isValid() && effects2 > 0.0) effects2_.add(frame, left * effects2, right * effects2);
+    dry_.addStereo(frame, left, right);
+    if (effects1_.isValid() && effects1 > 0.0) effects1_.addStereo(frame, left * effects1, right * effects1);
+    if (effects2_.isValid() && effects2 > 0.0) effects2_.addStereo(frame, left * effects2, right * effects2);
   }
 
   /**
@@ -58,9 +58,9 @@ public:
   }
 
 private:
-  BufferPair dry_;
-  BufferPair effects1_;
-  BufferPair effects2_;
+  DSPHeaders::BusBuffers dry_;
+  DSPHeaders::BusBuffers effects1_;
+  DSPHeaders::BusBuffers effects2_;
 };
 
 } // end namespace

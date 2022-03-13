@@ -84,10 +84,10 @@ using namespace SF2::Render::Engine;
   AudioBufferList* bufferList = dryBuffer.mutableAudioBufferList;
   bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(AUValue);
   bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(AUValue);
-  DSPHeaders::BufferPair dry{(AUValue*)(bufferList->mBuffers[0].mData), (AUValue*)(bufferList->mBuffers[1].mData)};
-  DSPHeaders::BufferPair chorus{nullptr, nullptr};
-  DSPHeaders::BufferPair reverb{nullptr, nullptr};
-  DSPHeaders::Mixer mixer{DSPHeaders::BufferPair(dry), chorus, reverb};
+  DSPHeaders::BusBuffers dry({(AUValue*)(bufferList->mBuffers[0].mData), (AUValue*)(bufferList->mBuffers[1].mData)});
+  DSPHeaders::BusBuffers chorus({});
+  DSPHeaders::BusBuffers reverb({});
+  Mixer mixer{dry, chorus, reverb};
 
   XCTAssertEqual(0, engine.activeVoiceCount());
 
@@ -158,7 +158,7 @@ using namespace SF2::Render::Engine;
   bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(AUValue);
   bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(AUValue);
 
-  DSPHeaders::BufferPair dry{(AUValue*)(bufferList->mBuffers[0].mData), (AUValue*)(bufferList->mBuffers[1].mData)};
+  DSPHeaders::BusBuffers dry({(AUValue*)(bufferList->mBuffers[0].mData), (AUValue*)(bufferList->mBuffers[1].mData)});
 
   AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   assert(chorusBuffer != nullptr);
@@ -167,9 +167,9 @@ using namespace SF2::Render::Engine;
   bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(AUValue);
   bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(AUValue);
 
-  DSPHeaders::BufferPair chorus{(AUValue*)(bufferList->mBuffers[0].mData), (AUValue*)(bufferList->mBuffers[1].mData)};
-  DSPHeaders::BufferPair reverb{nullptr, nullptr};
-  DSPHeaders::Mixer mixer{dry, chorus, reverb};
+  DSPHeaders::BusBuffers chorus({(AUValue*)(bufferList->mBuffers[0].mData), (AUValue*)(bufferList->mBuffers[1].mData)});
+  DSPHeaders::BusBuffers reverb({});
+  Mixer mixer{dry, chorus, reverb};
 
   XCTAssertEqual(0, engine.activeVoiceCount());
 
@@ -312,7 +312,7 @@ using namespace SF2::Render::Engine;
     bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(float);
     bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(float);
 
-    DSPHeaders::BufferPair dry{(float*)(bufferList->mBuffers[0].mData), (float*)(bufferList->mBuffers[1].mData)};
+    DSPHeaders::BusBuffers dry({(float*)(bufferList->mBuffers[0].mData), (float*)(bufferList->mBuffers[1].mData)});
 
     AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
     assert(chorusBuffer != nullptr);
@@ -321,9 +321,9 @@ using namespace SF2::Render::Engine;
     bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(float);
     bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(float);
 
-    DSPHeaders::BufferPair chorus{(float*)(bufferList->mBuffers[0].mData), (float*)(bufferList->mBuffers[1].mData)};
-    DSPHeaders::BufferPair reverb{nullptr, nullptr};
-    DSPHeaders::Mixer mixer{dry, chorus, reverb};
+    DSPHeaders::BusBuffers chorus({(float*)(bufferList->mBuffers[0].mData), (float*)(bufferList->mBuffers[1].mData)});
+    DSPHeaders::BusBuffers reverb({});
+    Mixer mixer{dry, chorus, reverb};
 
     for (int voice = 0; voice < engine.voiceCount(); ++voice) {
       engine.noteOn(32 + 2 * voice, 64);

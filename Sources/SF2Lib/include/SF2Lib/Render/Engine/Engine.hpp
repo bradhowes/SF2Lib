@@ -10,9 +10,9 @@
 #include <vector>
 
 #include "DSPHeaders/EventProcessor.hpp"
-#include "DSPHeaders/Mixer.hpp"
 
 #include "SF2Lib/MIDI/NRPN.hpp"
+#include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Engine/OldestActiveVoiceCache.hpp"
 #include "SF2Lib/Render/Engine/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
@@ -162,7 +162,7 @@ public:
    @param mixer collection of buffers to render into
    @param frameCount number of samples to render.
    */
-  void renderInto(DSPHeaders::Mixer mixer, AUAudioFrameCount frameCount) noexcept
+  void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
   {
     for (auto voiceIndex : oldestActive_) {
       auto& voice{voices_[voiceIndex]};
@@ -196,13 +196,13 @@ private:
   void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
 
   /// API for EventProcessor
-  void doRendering(NSInteger outputBusNumber, DSPHeaders::BufferPair, DSPHeaders::BufferPair outs,
+  void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs,
                    AUAudioFrameCount frameCount) noexcept
   {
     if (outputBusNumber == 0) {
       // All of the work is done when working with output bus 0. If all is wired correctly, busses 1 and 2 will
       // use the buffered values that were created here.
-      renderInto(DSPHeaders::Mixer(outs, channelBuffers(1, frameCount), channelBuffers(2, frameCount)), frameCount);
+      renderInto(Mixer(outs, busBuffers(1, frameCount), busBuffers(2, frameCount)), frameCount);
     }
   }
 

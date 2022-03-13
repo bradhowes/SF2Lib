@@ -4,10 +4,9 @@
 
 #include <vector>
 
-#include "DSPHeaders/Mixer.hpp"
-
 #include "SF2Lib/Logger.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
+#include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Envelope/Generator.hpp"
 #include "SF2Lib/Render/LFO.hpp"
 #include "SF2Lib/Render/LowPassFilter.hpp"
@@ -166,7 +165,7 @@ public:
    @param mixer collection of buffers to mix into
    @param frameCount number of samples to render
    */
-  void renderInto(DSPHeaders::Mixer& mixer, SF2::AUAudioFrameCount frameCount) noexcept {
+  void renderInto(Engine::Mixer& mixer, SF2::AUAudioFrameCount frameCount) noexcept {
     SF2::AUAudioFrameCount index = 0;
     SF2::AUValue chorusSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend)));
     SF2::AUValue reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
