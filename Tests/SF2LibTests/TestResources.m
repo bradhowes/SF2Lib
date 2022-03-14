@@ -13,7 +13,6 @@
     NSBundle* bundle = [allBundles objectAtIndex:index];
     NSString* bundleIdent = bundle.bundleIdentifier;
     NSLog(@"bundle: %@ - %@", bundleIdent, bundle.resourcePath);
-    // if ([bundleIdent isEqualToString:@"SF2Lib-SF2LibTests"]) {
     NSArray<NSURL*>* found = [bundle URLsForResourcesWithExtension:@"sf2" subdirectory:nil];
     if (found != NULL && found.count == 3) {
       return found;
