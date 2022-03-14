@@ -1,7 +1,8 @@
 [![Swift](https://github.com/bradhowes/SF2Lib/workflows/CI/badge.svg)]()
-[![License Badge]][License]
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbradhowes%2Fmorkandmidi%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/bradhowes/SF2Lib)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbradhowes%2Fmorkandmidi%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/bradhowes/SF2Lib)
+[![Swift 5.4](https://img.shields.io/badge/Swift-5.4-orange.svg?style=flat)](https://swift.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-A31F34.svg)](https://opensource.org/licenses/MIT)
 
 # SF2Lib - an SF2 library in C++ (mostly)
 
