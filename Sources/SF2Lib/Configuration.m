@@ -26,7 +26,7 @@ static dispatch_once_t onceToken;
   onceToken = NULL;
 }
 
-#ifndef SWIFTPM_MODULE_BUNDLED
+#ifndef SWIFTPM_MODULE_BUNDLE
 
 + (NSString*)getConfigurationPath {
   NSArray<NSBundle*>* allBundles = [NSBundle allBundles];
