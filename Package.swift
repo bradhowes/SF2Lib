@@ -63,6 +63,8 @@ let package = Package(
           "-Wsign-conversion",
           "-Wmove",
           "-Wcomma",
+          "-Wno-newline-eof", // resource_bundle_accessor.h is missing newline at end of file
+          "-x", "objective-c++", // treat source files as Obj-C++ files
         ], .none)
       ],
       linkerSettings: [
@@ -79,22 +81,32 @@ let package = Package(
       cxxSettings: [
         .define("USE_ACCELERATE", to: "1", .none)
       ],
-      linkerSettings: [.linkedFramework("Accelerate", .none)]
+      linkerSettings: [
+        .linkedFramework("Accelerate", .none),
+        .linkedFramework("Foundation", .none)
+      ]
     ),
     .testTarget(
       name: "SF2LibTests",
       dependencies: ["SF2Lib"],
       resources: [
-        .process("Resources")
+        .process("Resources"),
       ],
       cxxSettings: [
         // Set to 1 to play audio in tests. Set to 0 to keep silent.
-        .define("PLAY_AUDIO", to: "0", .none)
+        .define("PLAY_AUDIO", to: "0", .none),
+        .define("SWIFT_PACKAGE", to: "1", .none),
+        .unsafeFlags([
+          "-Wno-newline-eof", // resource_bundle_accessor.h is missing newline at end of file
+          "-x", "objective-c++", // treat source files as Obj-C++ files
+        ], .none)
       ],
       linkerSettings: [
         .linkedFramework("Accelerate", .none),
         .linkedFramework("AudioToolbox", .none),
-        .linkedFramework("AVFoundation", .none)
+        .linkedFramework("AVFoundation", .none),
+        .linkedFramework("Foundation", .none),
+        .linkedFramework("XCTest", .none),
       ]
     )
   ],
