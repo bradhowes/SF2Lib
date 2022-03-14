@@ -23,18 +23,7 @@ State::prepareForVoice(const Config& config, const MIDI::NRPN& nrpn) noexcept
   eventVelocity_ = config.eventVelocity();
 
   // (4) Now finish configuring the modulators by resolving any links between them.
-  for (const auto& modulator : modulators_) {
-    if (!modulator.configuration().hasModulatorDestination()) continue;
-    for (auto& destination : modulators_) {
-      if (destination.configuration().source().isLinked() &&
-          modulator.configuration().linkDestination() == destination.index()) {
-
-        // Set up the destination modulator so that it pulls a value from another modulator when it is asked for a value
-        // to apply to a generator.
-        destination.setSource(modulator);
-      }
-    }
-  }
+  Modulator::resolveLinks(modulators_);
 }
 
 void

@@ -99,7 +99,7 @@
 		OBJ_221 /* RangeTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_88 /* RangeTests.mm */; };
 		OBJ_222 /* StateTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_89 /* StateTests.mm */; };
 		OBJ_223 /* VoiceTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_91 /* VoiceTests.mm */; };
-		OBJ_224 /* SF2LibTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_92 /* SF2LibTests.mm */; };
+		OBJ_224 /* ParserTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_92 /* ParserTests.mm */; };
 		OBJ_225 /* SampleBasedContexts.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_93 /* SampleBasedContexts.mm */; };
 		OBJ_226 /* TestResources.m in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_94 /* TestResources.m */; };
 		OBJ_228 /* SF2Lib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SF2Lib::SF2Lib::Product" /* SF2Lib.framework */; };
@@ -164,6 +164,68 @@
 		BD13357027DF59DB005988F8 /* FreeFont.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = FreeFont.sf2; sourceTree = "<group>"; };
 		BD13357127DF59DB005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "GeneralUser GS MuseScore v1.442.sf2"; sourceTree = "<group>"; };
 		BD13357227DF59DB005988F8 /* RolandNicePiano.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = RolandNicePiano.sf2; sourceTree = "<group>"; };
+		BD13357C27DF9D1E005988F8 /* Logger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Logger.hpp; sourceTree = "<group>"; };
+		BD13357E27DF9D1E005988F8 /* Note.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Note.hpp; sourceTree = "<group>"; };
+		BD13357F27DF9D1E005988F8 /* NRPN.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = NRPN.hpp; sourceTree = "<group>"; };
+		BD13358027DF9D1E005988F8 /* ValueTransformer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ValueTransformer.hpp; sourceTree = "<group>"; };
+		BD13358127DF9D1E005988F8 /* ChannelState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ChannelState.hpp; sourceTree = "<group>"; };
+		BD13358227DF9D1E005988F8 /* MIDI.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MIDI.hpp; sourceTree = "<group>"; };
+		BD13358427DF9D1E005988F8 /* Preset.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Preset.hpp; sourceTree = "<group>"; };
+		BD13358627DF9D1E005988F8 /* Modulator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Modulator.hpp; sourceTree = "<group>"; };
+		BD13358727DF9D1E005988F8 /* Transform.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Transform.hpp; sourceTree = "<group>"; };
+		BD13358827DF9D1E005988F8 /* Source.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Source.hpp; sourceTree = "<group>"; };
+		BD13358927DF9D1E005988F8 /* SampleHeader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SampleHeader.hpp; sourceTree = "<group>"; };
+		BD13358A27DF9D1E005988F8 /* Version.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Version.hpp; sourceTree = "<group>"; };
+		BD13358C27DF9D1E005988F8 /* Index.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Index.hpp; sourceTree = "<group>"; };
+		BD13358D27DF9D1E005988F8 /* Definition.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Definition.hpp; sourceTree = "<group>"; };
+		BD13358E27DF9D1E005988F8 /* Amount.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Amount.hpp; sourceTree = "<group>"; };
+		BD13358F27DF9D1E005988F8 /* Generator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Generator.hpp; sourceTree = "<group>"; };
+		BD13359027DF9D1E005988F8 /* Instrument.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Instrument.hpp; sourceTree = "<group>"; };
+		BD13359127DF9D1E005988F8 /* Bag.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Bag.hpp; sourceTree = "<group>"; };
+		BD13359227DF9D1E005988F8 /* Entity.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Entity.hpp; sourceTree = "<group>"; };
+		BD13359427DF9D1E005988F8 /* Parser.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Parser.hpp; sourceTree = "<group>"; };
+		BD13359527DF9D1E005988F8 /* Tag.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Tag.hpp; sourceTree = "<group>"; };
+		BD13359627DF9D1E005988F8 /* File.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = File.hpp; sourceTree = "<group>"; };
+		BD13359727DF9D1E005988F8 /* ChunkList.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ChunkList.hpp; sourceTree = "<group>"; };
+		BD13359827DF9D1E005988F8 /* StringUtils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = StringUtils.hpp; sourceTree = "<group>"; };
+		BD13359927DF9D1E005988F8 /* Chunk.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Chunk.hpp; sourceTree = "<group>"; };
+		BD13359A27DF9D1E005988F8 /* ChunkItems.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ChunkItems.hpp; sourceTree = "<group>"; };
+		BD13359B27DF9D1E005988F8 /* Pos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Pos.hpp; sourceTree = "<group>"; };
+		BD13359C27DF9D1E005988F8 /* Format.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Format.hpp; sourceTree = "<group>"; };
+		BD13359E27DF9D1E005988F8 /* Preset.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Preset.hpp; sourceTree = "<group>"; };
+		BD13359F27DF9D1E005988F8 /* InstrumentCollection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = InstrumentCollection.hpp; sourceTree = "<group>"; };
+		BD1335A027DF9D1E005988F8 /* SampleSourceCollection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SampleSourceCollection.hpp; sourceTree = "<group>"; };
+		BD1335A127DF9D1E005988F8 /* LowPassFilter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LowPassFilter.hpp; sourceTree = "<group>"; };
+		BD1335A327DF9D1E005988F8 /* Preset.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Preset.hpp; sourceTree = "<group>"; };
+		BD1335A427DF9D1E005988F8 /* WithCollectionBase.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WithCollectionBase.hpp; sourceTree = "<group>"; };
+		BD1335A527DF9D1E005988F8 /* Instrument.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Instrument.hpp; sourceTree = "<group>"; };
+		BD1335A627DF9D1E005988F8 /* Collection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Collection.hpp; sourceTree = "<group>"; };
+		BD1335A727DF9D1E005988F8 /* Zone.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Zone.hpp; sourceTree = "<group>"; };
+		BD1335A927DF9D1E005988F8 /* Generator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Generator.hpp; sourceTree = "<group>"; };
+		BD1335AA27DF9D1E005988F8 /* Stage.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Stage.hpp; sourceTree = "<group>"; };
+		BD1335AD27DF9D1E005988F8 /* Modulator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Modulator.hpp; sourceTree = "<group>"; };
+		BD1335AE27DF9D1E005988F8 /* Config.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Config.hpp; sourceTree = "<group>"; };
+		BD1335AF27DF9D1E005988F8 /* State.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = State.hpp; sourceTree = "<group>"; };
+		BD1335B027DF9D1E005988F8 /* GenValue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenValue.hpp; sourceTree = "<group>"; };
+		BD1335B127DF9D1E005988F8 /* GenValueCollection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenValueCollection.hpp; sourceTree = "<group>"; };
+		BD1335B327DF9D1E005988F8 /* NormalizedSampleSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = NormalizedSampleSource.hpp; sourceTree = "<group>"; };
+		BD1335B427DF9D1E005988F8 /* Index.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Index.hpp; sourceTree = "<group>"; };
+		BD1335B527DF9D1E005988F8 /* Bounds.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Bounds.hpp; sourceTree = "<group>"; };
+		BD1335B627DF9D1E005988F8 /* Generator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Generator.hpp; sourceTree = "<group>"; };
+		BD1335B727DF9D1E005988F8 /* Pitch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Pitch.hpp; sourceTree = "<group>"; };
+		BD1335B827DF9D1E005988F8 /* Voice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Voice.hpp; sourceTree = "<group>"; };
+		BD1335B927DF9D1E005988F8 /* LFO.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LFO.hpp; sourceTree = "<group>"; };
+		BD1335BA27DF9D1E005988F8 /* Instrument.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Instrument.hpp; sourceTree = "<group>"; };
+		BD1335BB27DF9D1E005988F8 /* Range.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Range.hpp; sourceTree = "<group>"; };
+		BD1335BD27DF9D1E005988F8 /* Engine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Engine.hpp; sourceTree = "<group>"; };
+		BD1335BE27DF9D1E005988F8 /* PresetCollection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PresetCollection.hpp; sourceTree = "<group>"; };
+		BD1335BF27DF9D1E005988F8 /* Mixer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Mixer.hpp; sourceTree = "<group>"; };
+		BD1335C027DF9D1E005988F8 /* OldestActiveVoiceCache.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OldestActiveVoiceCache.hpp; sourceTree = "<group>"; };
+		BD1335C127DF9D1E005988F8 /* Configuration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Configuration.h; sourceTree = "<group>"; };
+		BD1335C327DF9D1E005988F8 /* ListNodeAllocator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ListNodeAllocator.hpp; sourceTree = "<group>"; };
+		BD1335C427DF9D1E005988F8 /* Types.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Types.hpp; sourceTree = "<group>"; };
+		BD1335C627DF9D1E005988F8 /* DSPTables.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DSPTables.hpp; sourceTree = "<group>"; };
+		BD1335C727DF9D1E005988F8 /* DSP.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DSP.hpp; sourceTree = "<group>"; };
 		OBJ_10 /* DSPTablesGenerator.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSPTablesGenerator.mm; sourceTree = "<group>"; };
 		OBJ_101 /* DSPHeaders.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSPHeaders.mm; sourceTree = "<group>"; };
 		OBJ_103 /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = /Users/howes/src/Mine/SF2Lib/SF2Lib.xcodeproj/GeneratedModuleMap/DSPHeaders/module.modulemap; sourceTree = "<group>"; };
@@ -235,7 +297,7 @@
 		OBJ_89 /* StateTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = StateTests.mm; sourceTree = "<group>"; };
 		OBJ_9 /* DSPTablesGenerator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DSPTablesGenerator.hpp; sourceTree = "<group>"; };
 		OBJ_91 /* VoiceTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VoiceTests.mm; sourceTree = "<group>"; };
-		OBJ_92 /* SF2LibTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SF2LibTests.mm; sourceTree = "<group>"; };
+		OBJ_92 /* ParserTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = ParserTests.mm; path = IO/ParserTests.mm; sourceTree = "<group>"; };
 		OBJ_93 /* SampleBasedContexts.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SampleBasedContexts.mm; sourceTree = "<group>"; };
 		OBJ_94 /* TestResources.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestResources.m; sourceTree = "<group>"; };
 		"SF2Lib::DSPTableGenerator::Product" /* DSPTableGenerator */ = {isa = PBXFileReference; lastKnownFileType = text; path = DSPTableGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -298,6 +360,195 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		BD13357A27DF9D1E005988F8 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				BD13357B27DF9D1E005988F8 /* SF2Lib */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		BD13357B27DF9D1E005988F8 /* SF2Lib */ = {
+			isa = PBXGroup;
+			children = (
+				BD13357C27DF9D1E005988F8 /* Logger.hpp */,
+				BD13357D27DF9D1E005988F8 /* MIDI */,
+				BD13358327DF9D1E005988F8 /* Entity */,
+				BD13359327DF9D1E005988F8 /* IO */,
+				BD13359D27DF9D1E005988F8 /* Render */,
+				BD1335C127DF9D1E005988F8 /* Configuration.h */,
+				BD1335C227DF9D1E005988F8 /* Utils */,
+				BD1335C427DF9D1E005988F8 /* Types.hpp */,
+				BD1335C527DF9D1E005988F8 /* DSP */,
+			);
+			path = SF2Lib;
+			sourceTree = "<group>";
+		};
+		BD13357D27DF9D1E005988F8 /* MIDI */ = {
+			isa = PBXGroup;
+			children = (
+				BD13357E27DF9D1E005988F8 /* Note.hpp */,
+				BD13357F27DF9D1E005988F8 /* NRPN.hpp */,
+				BD13358027DF9D1E005988F8 /* ValueTransformer.hpp */,
+				BD13358127DF9D1E005988F8 /* ChannelState.hpp */,
+				BD13358227DF9D1E005988F8 /* MIDI.hpp */,
+			);
+			path = MIDI;
+			sourceTree = "<group>";
+		};
+		BD13358327DF9D1E005988F8 /* Entity */ = {
+			isa = PBXGroup;
+			children = (
+				BD13358427DF9D1E005988F8 /* Preset.hpp */,
+				BD13358527DF9D1E005988F8 /* Modulator */,
+				BD13358927DF9D1E005988F8 /* SampleHeader.hpp */,
+				BD13358A27DF9D1E005988F8 /* Version.hpp */,
+				BD13358B27DF9D1E005988F8 /* Generator */,
+				BD13359027DF9D1E005988F8 /* Instrument.hpp */,
+				BD13359127DF9D1E005988F8 /* Bag.hpp */,
+				BD13359227DF9D1E005988F8 /* Entity.hpp */,
+			);
+			path = Entity;
+			sourceTree = "<group>";
+		};
+		BD13358527DF9D1E005988F8 /* Modulator */ = {
+			isa = PBXGroup;
+			children = (
+				BD13358627DF9D1E005988F8 /* Modulator.hpp */,
+				BD13358727DF9D1E005988F8 /* Transform.hpp */,
+				BD13358827DF9D1E005988F8 /* Source.hpp */,
+			);
+			path = Modulator;
+			sourceTree = "<group>";
+		};
+		BD13358B27DF9D1E005988F8 /* Generator */ = {
+			isa = PBXGroup;
+			children = (
+				BD13358C27DF9D1E005988F8 /* Index.hpp */,
+				BD13358D27DF9D1E005988F8 /* Definition.hpp */,
+				BD13358E27DF9D1E005988F8 /* Amount.hpp */,
+				BD13358F27DF9D1E005988F8 /* Generator.hpp */,
+			);
+			path = Generator;
+			sourceTree = "<group>";
+		};
+		BD13359327DF9D1E005988F8 /* IO */ = {
+			isa = PBXGroup;
+			children = (
+				BD13359427DF9D1E005988F8 /* Parser.hpp */,
+				BD13359527DF9D1E005988F8 /* Tag.hpp */,
+				BD13359627DF9D1E005988F8 /* File.hpp */,
+				BD13359727DF9D1E005988F8 /* ChunkList.hpp */,
+				BD13359827DF9D1E005988F8 /* StringUtils.hpp */,
+				BD13359927DF9D1E005988F8 /* Chunk.hpp */,
+				BD13359A27DF9D1E005988F8 /* ChunkItems.hpp */,
+				BD13359B27DF9D1E005988F8 /* Pos.hpp */,
+				BD13359C27DF9D1E005988F8 /* Format.hpp */,
+			);
+			path = IO;
+			sourceTree = "<group>";
+		};
+		BD13359D27DF9D1E005988F8 /* Render */ = {
+			isa = PBXGroup;
+			children = (
+				BD13359E27DF9D1E005988F8 /* Preset.hpp */,
+				BD13359F27DF9D1E005988F8 /* InstrumentCollection.hpp */,
+				BD1335A027DF9D1E005988F8 /* SampleSourceCollection.hpp */,
+				BD1335A127DF9D1E005988F8 /* LowPassFilter.hpp */,
+				BD1335A227DF9D1E005988F8 /* Zone */,
+				BD1335A827DF9D1E005988F8 /* Envelope */,
+				BD1335AB27DF9D1E005988F8 /* Voice */,
+				BD1335B927DF9D1E005988F8 /* LFO.hpp */,
+				BD1335BA27DF9D1E005988F8 /* Instrument.hpp */,
+				BD1335BB27DF9D1E005988F8 /* Range.hpp */,
+				BD1335BC27DF9D1E005988F8 /* Engine */,
+			);
+			path = Render;
+			sourceTree = "<group>";
+		};
+		BD1335A227DF9D1E005988F8 /* Zone */ = {
+			isa = PBXGroup;
+			children = (
+				BD1335A327DF9D1E005988F8 /* Preset.hpp */,
+				BD1335A427DF9D1E005988F8 /* WithCollectionBase.hpp */,
+				BD1335A527DF9D1E005988F8 /* Instrument.hpp */,
+				BD1335A627DF9D1E005988F8 /* Collection.hpp */,
+				BD1335A727DF9D1E005988F8 /* Zone.hpp */,
+			);
+			path = Zone;
+			sourceTree = "<group>";
+		};
+		BD1335A827DF9D1E005988F8 /* Envelope */ = {
+			isa = PBXGroup;
+			children = (
+				BD1335A927DF9D1E005988F8 /* Generator.hpp */,
+				BD1335AA27DF9D1E005988F8 /* Stage.hpp */,
+			);
+			path = Envelope;
+			sourceTree = "<group>";
+		};
+		BD1335AB27DF9D1E005988F8 /* Voice */ = {
+			isa = PBXGroup;
+			children = (
+				BD1335AC27DF9D1E005988F8 /* State */,
+				BD1335B227DF9D1E005988F8 /* Sample */,
+				BD1335B827DF9D1E005988F8 /* Voice.hpp */,
+			);
+			path = Voice;
+			sourceTree = "<group>";
+		};
+		BD1335AC27DF9D1E005988F8 /* State */ = {
+			isa = PBXGroup;
+			children = (
+				BD1335AD27DF9D1E005988F8 /* Modulator.hpp */,
+				BD1335AE27DF9D1E005988F8 /* Config.hpp */,
+				BD1335AF27DF9D1E005988F8 /* State.hpp */,
+				BD1335B027DF9D1E005988F8 /* GenValue.hpp */,
+				BD1335B127DF9D1E005988F8 /* GenValueCollection.hpp */,
+			);
+			path = State;
+			sourceTree = "<group>";
+		};
+		BD1335B227DF9D1E005988F8 /* Sample */ = {
+			isa = PBXGroup;
+			children = (
+				BD1335B327DF9D1E005988F8 /* NormalizedSampleSource.hpp */,
+				BD1335B427DF9D1E005988F8 /* Index.hpp */,
+				BD1335B527DF9D1E005988F8 /* Bounds.hpp */,
+				BD1335B627DF9D1E005988F8 /* Generator.hpp */,
+				BD1335B727DF9D1E005988F8 /* Pitch.hpp */,
+			);
+			path = Sample;
+			sourceTree = "<group>";
+		};
+		BD1335BC27DF9D1E005988F8 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				BD1335BD27DF9D1E005988F8 /* Engine.hpp */,
+				BD1335BE27DF9D1E005988F8 /* PresetCollection.hpp */,
+				BD1335BF27DF9D1E005988F8 /* Mixer.hpp */,
+				BD1335C027DF9D1E005988F8 /* OldestActiveVoiceCache.hpp */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		BD1335C227DF9D1E005988F8 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				BD1335C327DF9D1E005988F8 /* ListNodeAllocator.hpp */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		BD1335C527DF9D1E005988F8 /* DSP */ = {
+			isa = PBXGroup;
+			children = (
+				BD1335C627DF9D1E005988F8 /* DSPTables.hpp */,
+				BD1335C727DF9D1E005988F8 /* DSP.hpp */,
+			);
+			path = DSP;
+			sourceTree = "<group>";
+		};
 		OBJ_100 /* DSPHeaders */ = {
 			isa = PBXGroup;
 			children = (
@@ -330,6 +581,7 @@
 		OBJ_12 /* SF2Lib */ = {
 			isa = PBXGroup;
 			children = (
+				BD13357A27DF9D1E005988F8 /* include */,
 				BD13356B27DF598B005988F8 /* Resources */,
 				OBJ_13 /* Configuration.m */,
 				OBJ_14 /* DSP */,
@@ -452,7 +704,7 @@
 			path = Zone;
 			sourceTree = "<group>";
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -467,7 +719,6 @@
 				OBJ_114 /* Makefile */,
 				OBJ_115 /* README.md */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_51 /* include */ = {
@@ -500,6 +751,7 @@
 			children = (
 				BD13356F27DF59DB005988F8 /* Resources */,
 				OBJ_57 /* SampleBasedContexts.hpp */,
+				OBJ_92 /* ParserTests.mm */,
 				OBJ_58 /* TestResources.h */,
 				OBJ_59 /* ConfigurationTests.mm */,
 				OBJ_60 /* DSPTests.mm */,
@@ -507,7 +759,6 @@
 				OBJ_65 /* IO */,
 				OBJ_69 /* MIDI */,
 				OBJ_75 /* Render */,
-				OBJ_92 /* SF2LibTests.mm */,
 				OBJ_93 /* SampleBasedContexts.mm */,
 				OBJ_94 /* TestResources.m */,
 			);
@@ -564,12 +815,10 @@
 				OBJ_81 /* GeneratorIndexTests.mm */,
 				OBJ_82 /* InstrumentTests.mm */,
 				OBJ_83 /* LFOTests.mm */,
-				OBJ_84 /* ModulatorTests.mm */,
 				OBJ_85 /* NormalizedSampleSourceTests.mm */,
 				OBJ_86 /* PitchTests.mm */,
 				OBJ_87 /* PresetTests.mm */,
 				OBJ_88 /* RangeTests.mm */,
-				OBJ_89 /* StateTests.mm */,
 				OBJ_90 /* Voice */,
 			);
 			path = Render;
@@ -599,7 +848,9 @@
 		OBJ_90 /* Voice */ = {
 			isa = PBXGroup;
 			children = (
+				OBJ_84 /* ModulatorTests.mm */,
 				OBJ_91 /* VoiceTests.mm */,
+				OBJ_89 /* StateTests.mm */,
 			);
 			path = Voice;
 			sourceTree = "<group>";
@@ -766,7 +1017,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_105 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -904,7 +1155,7 @@
 				OBJ_221 /* RangeTests.mm in Sources */,
 				OBJ_222 /* StateTests.mm in Sources */,
 				OBJ_223 /* VoiceTests.mm in Sources */,
-				OBJ_224 /* SF2LibTests.mm in Sources */,
+				OBJ_224 /* ParserTests.mm in Sources */,
 				OBJ_225 /* SampleBasedContexts.mm in Sources */,
 				OBJ_226 /* TestResources.m in Sources */,
 			);

@@ -34,6 +34,8 @@ class State;
 class Modulator {
 public:
 
+  static void resolveLinks(std::vector<Modulator>& modulators);
+  
   /**
    Construct new modulator
 

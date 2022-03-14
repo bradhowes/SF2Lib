@@ -54,7 +54,7 @@ Modulator::makeValueProvider(const EntityMod::Source& source, const State& state
   }
   switch (source.generalIndex()) {
     case GI::none: return ValueProvider{state};
-    case GI::noteOnKeyValue: return ValueProvider{state, &ValueProvider::key};
+    case GI::noteOnKey: return ValueProvider{state, &ValueProvider::key};
     case GI::noteOnVelocity: return ValueProvider{state, &ValueProvider::velocity};
     case GI::keyPressure: return ValueProvider{state, &ValueProvider::keyPressure};
     case GI::channelPressure: return ValueProvider{state, &ValueProvider::channelPressure};
@@ -70,4 +70,23 @@ Modulator::description() const noexcept
   std::ostringstream os;
   os << configuration().description();
   return os.str();
+}
+
+void
+Modulator::resolveLinks(std::vector<Modulator> &modulators)
+{
+  for (const auto& modulator : modulators) {
+    const auto& modConfig{modulator.configuration()};
+    if (!modConfig.hasModulatorDestination()) continue;
+
+    for (auto& destination : modulators) {
+      const auto& destConfig{destination.configuration()};
+      if (destConfig.source().isLinked() && modConfig.linkDestination() == destination.index()) {
+
+        // Set up the destination modulator so that it pulls a value from another modulator when it is asked for a value
+        // to apply to a generator.
+        destination.setSource(modulator);
+      }
+    }
+  }
 }

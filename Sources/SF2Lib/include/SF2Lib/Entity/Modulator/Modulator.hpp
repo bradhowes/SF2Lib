@@ -33,12 +33,14 @@ class Modulator {
 public:
   static constexpr size_t size = 10;
 
+  inline static constexpr uint16_t modulatorDestinationBit = 1 << 15;
+
   /**
    Default modulators that are predefined for every instrument. These get copied over to each voice's State before the
    preset/instrument configurations are applied.
    */
   static const std::array<Modulator, size> defaults;
-  
+
   /**
    Construct instance from contents of SF2 file.
    
@@ -48,7 +50,7 @@ public:
     assert(sizeof(*this) == size);
     pos = pos.readInto(*this);
   }
-  
+
   /**
    Construct instance from values. Used to define default mods and support unit tests.
    */
@@ -57,11 +59,19 @@ public:
   sfModSrcOper{modSrcOper}, sfModDestOper{static_cast<uint16_t>(dest)}, modAmount{amount},
   sfModAmtSrcOper{modAmtSrcOper}, sfModTransOper{transform} {}
   
+  /**
+   Construct instance from values. Used to support unit tests.
+   */
+  Modulator(Source modSrcOper, int link, int16_t amount, Source modAmtSrcOper,
+            Transform transform) noexcept :
+  sfModSrcOper{modSrcOper}, sfModDestOper{static_cast<uint16_t>(link | modulatorDestinationBit)}, modAmount{amount},
+  sfModAmtSrcOper{modAmtSrcOper}, sfModTransOper{transform} {}
+
   /// @returns the source of data for the modulator
   const Source& source() const noexcept { return sfModSrcOper; }
-  
+
   /// @returns true if this modulator is the source of a value for another modulator
-  bool hasModulatorDestination() const noexcept { return (sfModDestOper & (1 << 15)) != 0; }
+  bool hasModulatorDestination() const noexcept { return (sfModDestOper & modulatorDestinationBit) != 0; }
   
   /// @returns true if this modulator directly affects a generator value
   bool hasGeneratorDestination() const noexcept { return !hasModulatorDestination(); }
@@ -75,7 +85,7 @@ public:
   /// @returns the index of the destination modulator. This is the index in the pmod/imod bag.
   size_t linkDestination() const noexcept {
     assert(hasModulatorDestination());
-    return size_t(sfModDestOper ^ (1 << 15));
+    return size_t(sfModDestOper ^ modulatorDestinationBit);
   }
   
   /// @returns the maximum deviation that a modulator can apply to a generator
@@ -87,13 +97,26 @@ public:
   /// @returns the transform to apply to values created by the modulator
   const Transform& transform() const noexcept { return sfModTransOper; }
   
+  /// @returns textual description of the modulator
   std::string description() const noexcept;
-  
+
+  /**
+   Compare two instances for equality.
+
+   @param rhs the modulator to compare with
+   @returns true if this modulator is equivalent to `rhs`
+   */
   bool operator ==(const Modulator& rhs) const noexcept {
     return (sfModSrcOper == rhs.sfModSrcOper && sfModDestOper == rhs.sfModDestOper &&
             sfModAmtSrcOper == rhs.sfModAmtSrcOper);
   }
-  
+
+  /**
+   Compare two instances for inequality.
+
+   @param rhs the modulator to compare with
+   @return true if this modulator is not equivalent to `rhs`
+   */
   bool operator !=(const Modulator& rhs) const noexcept {  return !operator==(rhs); }
   
   void dump(const std::string& indent, size_t index) const noexcept;

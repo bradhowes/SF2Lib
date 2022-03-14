@@ -25,7 +25,7 @@ public:
   enum struct GeneralIndex : uint16_t {
     none = 0,
     noteOnVelocity = 2,
-    noteOnKeyValue = 3,
+    noteOnKey = 3,
     keyPressure = 10,
     channelPressure = 13,
     pitchWheel = 14,
@@ -50,6 +50,10 @@ public:
 
     static Builder ContinuousController(int index) noexcept {
       return Builder{static_cast<uint16_t>((uint16_t(index) & 0x7F) | (1 << 7))};
+    }
+
+    static Builder LinkedController(size_t index) noexcept {
+      return Builder{static_cast<uint16_t>(uint16_t(index) & 0x7F)};
     }
 
     Builder& positive() noexcept { bits &= ~(1 << 8); return *this; }

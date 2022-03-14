@@ -9,7 +9,7 @@
 
 #include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/Render/Preset.hpp"
-#include "SF2Lib/Render/Voice/State/State.hpp"
+// #include "SF2Lib/Render/Voice/State/State.hpp"
 
 struct PresetTestContextBase
 {
@@ -24,7 +24,7 @@ struct PresetTestContextBase
 template <int UrlIndex>
 struct PresetTestContext : PresetTestContextBase
 {
-  PresetTestContext(int presetIndex = 0, SF2::Float sampleRate = 48000.0) :
+  PresetTestContext(size_t presetIndex = 0, SF2::Float sampleRate = 48000.0) :
   sampleRate_{sampleRate}, presetIndex_{presetIndex}
   {}
 
@@ -54,7 +54,7 @@ struct PresetTestContext : PresetTestContextBase
   SF2::MIDI::ChannelState& channelState() { return channelState_; }
 
   static void SamplesEqual(SF2::Float a, SF2::Float b) {
-    XCTAssertEqualWithAccuracy(a, b, epsilon);
+    XCTAssertEqualWithAccuracy(a, b, PresetTestContextBase::epsilon);
   }
 
 private:
@@ -75,7 +75,7 @@ private:
   SF2::MIDI::ChannelState channelState_{};
   SF2::MIDI::NRPN nrpn_{channelState_};
   SF2::Float sampleRate_;
-  int presetIndex_;
+  size_t presetIndex_;
   mutable std::unique_ptr<State> state_;
 };
 

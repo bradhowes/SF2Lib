@@ -15,7 +15,7 @@ Source::description() const noexcept {
     switch (generalIndex()) {
       case GeneralIndex::none: os << "none"; break;
       case GeneralIndex::noteOnVelocity: os << "velocity"; break;
-      case GeneralIndex::noteOnKeyValue: os << "key"; break;
+      case GeneralIndex::noteOnKey: os << "key"; break;
       case GeneralIndex::keyPressure: os << "keyPressure"; break;
       case GeneralIndex::channelPressure: os << "channelPressure"; break;
       case GeneralIndex::pitchWheel: os << "pitchWheel"; break;

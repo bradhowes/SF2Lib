@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "../SampleBasedContexts.hpp"
+#include "../../SampleBasedContexts.hpp"
 
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/Entity/Modulator/Modulator.hpp"
@@ -10,6 +10,7 @@
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
 using namespace SF2;
+using namespace SF2::Entity::Modulator;
 using namespace SF2::Render;
 using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
@@ -47,6 +48,10 @@ using namespace SF2::Entity::Generator;
 
   state->setValue(Index::forcedMIDIVelocity, 1);
   XCTAssertEqualWithAccuracy(modulator.value(), 841.521488382, epsilon);
+
+  std::cout << modulator.description() << '\n';
+  XCTAssertEqual("Sv: velocity(uni/+-/concave) Av: none(uni/-+/linear) dest: initialAttenuation amount: 960 trans: linear",
+                 modulator.description());
 }
 
 - (void)testKeyVelocityToFilterCutoff {
@@ -197,23 +202,64 @@ using namespace SF2::Entity::Generator;
 }
 
 - (void)testLinking {
-  state->setValue(Index::forcedMIDIVelocity, -1);
-  const Entity::Modulator::Modulator& config1{Entity::Modulator::Modulator::defaults[0]};
-  const Entity::Modulator::Modulator& config2{Entity::Modulator::Modulator::defaults[1]};
+  auto src1 = Source::Builder::GeneralController(Source::GeneralIndex::link).make();
+  auto mod1 = Modulator(src1, Index::sustainVolumeEnvelope, 3.0, Source(0), Transform());
 
-  State::Modulator modulator1{0, config1, *state};
-  State::Modulator modulator2{1, config2, *state};
+  auto src2 = Source::Builder::GeneralController(Source::GeneralIndex::channelPressure).make();
+  auto mod2 = Modulator(src2, 0, 2.0, Source(0), Transform());
 
-  modulator1.setSource(modulator2);
+  XCTAssertTrue(mod1.source().isValid());
+  XCTAssertTrue(mod1.source().isLinked());
+  mod1.description();
 
-  // Not sure about these test results...
-  state->setValue(Index::forcedMIDIVelocity, 127);
-  XCTAssertEqualWithAccuracy(modulator1.value(), 960.0, epsilon);
+  XCTAssertTrue(mod2.hasModulatorDestination());
+  XCTAssertEqual(0, mod2.linkDestination());
+  mod2.description();
+  
+  std::vector<State::Modulator> mods;
+  mods.emplace_back(0, mod1, *state);
+  mods.emplace_back(1, mod2, *state);
 
-  state->setValue(Index::forcedMIDIVelocity, 64);
-  XCTAssertEqualWithAccuracy(modulator1.value(), 960.0, epsilon);
+  State::Modulator::resolveLinks(mods);
 
-  state->setValue(Index::forcedMIDIVelocity, 1);
-  XCTAssertEqualWithAccuracy(modulator1.value(), 960.0, epsilon);
+  channelState->setChannelPressure(0);
+  XCTAssertEqual(0.0, mods[0].value());
+  XCTAssertEqual(0.0, mods[1].value());
+
+  channelState->setChannelPressure(127);
+  XCTAssertEqualWithAccuracy(0.046875, mods[0].value(), epsilon);
+  XCTAssertEqualWithAccuracy(1.984375, mods[1].value(), epsilon);
 }
+
+- (void)testKeyValueProvider {
+  auto src = Source::Builder::GeneralController(Source::GeneralIndex::noteOnKey).make();
+  State::Modulator mod{0, Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(0), Transform()), *state};
+  XCTAssertEqualWithAccuracy(0.0, mod.value(), epsilon);
+  state->setValue(Index::forcedMIDIKey, 64);
+  XCTAssertEqualWithAccuracy(1.5, mod.value(), epsilon);
+  state->setValue(Index::forcedMIDIKey, 127);
+  XCTAssertEqualWithAccuracy(2.9765625, mod.value(), epsilon);
+}
+
+- (void)testVelocityValueProvider {
+  auto src = Source::Builder::GeneralController(Source::GeneralIndex::noteOnVelocity).make();
+  State::Modulator mod{0, Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(0), Transform()), *state};
+  XCTAssertEqualWithAccuracy(0.0, mod.value(), epsilon);
+  state->setValue(Index::forcedMIDIVelocity, 64);
+  XCTAssertEqualWithAccuracy(1.5, mod.value(), epsilon);
+  state->setValue(Index::forcedMIDIVelocity, 127);
+  XCTAssertEqualWithAccuracy(2.9765625, mod.value(), epsilon);
+}
+
+- (void)testKeyPressureValueProvider {
+  auto src = Source::Builder::GeneralController(Source::GeneralIndex::keyPressure).make();
+  State::Modulator mod{0, Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(0), Transform()), *state};
+  XCTAssertEqualWithAccuracy(0.0, mod.value(), epsilon);
+  state->setValue(Index::forcedMIDIKey, 100);
+  channelState->setKeyPressure(100, 64);
+  XCTAssertEqualWithAccuracy(1.5, mod.value(), epsilon);
+  channelState->setKeyPressure(100, 127);
+  XCTAssertEqualWithAccuracy(2.9765625, mod.value(), epsilon);
+}
+
 @end

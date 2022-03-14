@@ -103,4 +103,9 @@ using namespace SF2::Render::Voice::Sample;
   file.dumpThreaded();
 }
 
+- (void)testDump {
+  const auto& file = contexts->context0.file();
+  XCTAssertNoThrow(file.dump());
+}
+
 @end
