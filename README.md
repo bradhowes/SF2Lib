@@ -1,15 +1,20 @@
+[![Swift](https://github.com/bradhowes/SF2Lib/workflows/CI/badge.svg)]()
+[![License Badge]][License]
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbradhowes%2Fmorkandmidi%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/bradhowes/SF2Lib)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbradhowes%2Fmorkandmidi%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/bradhowes/SF2Lib)
+
 # SF2Lib - an SF2 library in C++ (mostly)
 
-This library can read SF2 SoundFont files and render audio samples from them. It properly reads in a compliant SF2 file 
-and can be used to obtain meta data such as preset names. It also has an audio rendering engine that can generate audio 
-samples for key events that come from (say) a MIDI keyboard. Work on the rendering side is still on-going, but at 
-present it can generate audio at the right pitch. This library is currently being used by my 
+This library can read SF2 SoundFont files and render audio samples from them. It properly reads in a compliant SF2 file
+and can be used to obtain meta data such as preset names. It also has an audio rendering engine that can generate audio
+samples for key events that come from (say) a MIDI keyboard. Work on the rendering side is still on-going, but at
+present it can generate audio at the right pitch. This library is currently being used by my
 [SoundFonts](https://github.com/bradhowes/SoundFonts) application for SF2 file parsing, and soon for rendering.
 
-Although much of the code is generic C++17, there are bits that expect an Apple platform that has 
+Although much of the code is generic C++17, there are bits that expect an Apple platform that has
 the AudioToolbox and Accelerate frameworks available. As such, there are some code files that have the `.mm` suffix
-so that they compile as Obj-C++ instead of C++. However, such cases are fairly isolated. The goal is to be a 
-simple library for reading SF2 files as well as a competent SF2 audio renderer whose output can be fed to any sort of 
+so that they compile as Obj-C++ instead of C++. However, such cases are fairly isolated. The goal is to be a
+simple library for reading SF2 files as well as a competent SF2 audio renderer whose output can be fed to any sort of
 audio processing chain, not just macOS and iOS systems Core Audio systems. For my own use, this will be used in AUv3
 components on iOS and macOS platforms.
 
@@ -20,12 +25,14 @@ Currently, all SF2 generators and modulators are supported and/or implemented, *
 * chorusEffectSend -- how much of a rendered sample is sent to a chorus effect audio channel (L+R)
 * reverbEffectSend -- how much of a rendered sample is sent to a reverb effect audio channel (L+R)
 
-Since there are plenty of chorus and reverb effects available, this library will not have any of its own. Rather the 
-goal will be to make available the effect send channels for other AUv3 nodes to process as they wish. This is the case
-now: the render [Engine](Sources/SF2Lib/include/SF2Lib/Render/Engine/Engine.hpp) `renderInto` method takes a 
-[Mixer](Sources/SF2Lib/include/SF2Lib/Utils/Mixer.hpp) instance which support generating a "chorus effect send" and a
-"reverb effect send" channels. These are populated with samples from active voices, and their levels are controlled by
-the `chorusEffectSend` and `reverbEffectSend` parameters mentioned above.
+Since there are plenty of chorus and reverb effects available, this library will not have any of its own. Rather the
+goal will be to make available the effect send busses for other AUv3 nodes to process as they wish. This is the case
+now: the render [Engine](Sources/SF2Lib/include/SF2Lib/Render/Engine/Engine.hpp) `renderInto` method takes a
+[Mixer](Sources/SF2Lib/include/SF2Lib/Utils/Mixer.hpp) instance which supports a main "dry" bus and two busses
+for the "chorus effect send" and a "reverb effect send". These are populated with samples from active voices,
+and their levels are controlled by the `chorusEffectSend` and `reverbEffectSend` parameters mentioned above. One
+can then connect bus 1 to a chorus effect and bus 2 to reverb, and then connect those outputs and bus 0 of this
+library to a mixer to generate the final output.
 
 # DSPTableGenerator
 
@@ -52,13 +59,13 @@ very little to be found in source files.
 * [IO](Sources/SF2Lib/IO) -- performs the reading and loading of SF2 files.
 * [MIDI](Sources/SF2Lib/MIDI) -- state for a MIDI connection.
 * [Render](Sources/SF2Lib/Render) -- handles rendering of audio samples from SF2 entities.
-* [Resources](Sources/SF2Lib/Resources) -- a few SF2 files to use for experimentation and testing. Though these files 
+* [Resources](Sources/SF2Lib/Resources) -- a few SF2 files to use for experimentation and testing. Though these files
 are currently packaged with SF2Lib, they are not part of the SF2Lib API.
 
 # Credits
 
-All of the code has been written by myself over the course of several years, but I have benefitted from the existence of 
-other projects, especially [FluidSynth](https://www.fluidsynth.org) and their wealth of knowledge in all things SF2. 
+All of the code has been written by myself over the course of several years, but I have benefitted from the existence of
+other projects, especially [FluidSynth](https://www.fluidsynth.org) and their wealth of knowledge in all things SF2.
 In particular, if there is any confusion about what the SF2 spec means, I rely on their interpretation in code. That
 said, any misrepresentations of SF2 functionality are of my own doing.
 e

@@ -1,4 +1,4 @@
 module DSPHeaders {
-    umbrella "/Users/howes/src/Mine/AUv3Support/Sources/DSPHeaders/include"
+    umbrella "/Users/howes/src/Mine/SF2Lib/.build/checkouts/AUv3Support/Sources/DSPHeaders/include"
     export *
 }

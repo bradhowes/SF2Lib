@@ -12,8 +12,8 @@ let package = Package(
     .executable(name: "DSPTableGenerator", targets: ["DSPTableGenerator"])
   ],
   dependencies: [
-    // .package(name: "AUv3SupportPackage", url: "https://github.com/bradhowes/AUv3Support", branch: "main"),
-    .package(name: "AUv3SupportPackage", path: "../AUv3Support")
+    .package(name: "AUv3SupportPackage", url: "https://github.com/bradhowes/AUv3Support", branch: "main")
+    // .package(name: "AUv3SupportPackage", path: "../AUv3Support")
   ],
   targets: [
     .target(

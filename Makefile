@@ -7,6 +7,7 @@ default: post
 
 build.run:
 #   swift package generate-xcodeproj
+	swift package resolve
 	xcodebuild build $(DEST)
 	touch build.run
 
