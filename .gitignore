@@ -5,3 +5,9 @@
 xcuserdata/
 DerivedData/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+build.run
+test.run
+cov.txt
+percentage.txt
+WD
+WD.xcresult/

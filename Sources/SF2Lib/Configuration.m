@@ -26,9 +26,32 @@ static dispatch_once_t onceToken;
   onceToken = NULL;
 }
 
+#ifndef SWIFTPM_MODULE_BUNDLED
+
++ (NSString*)getConfigurationPath {
+  NSArray<NSBundle*>* allBundles = [NSBundle allBundles];
+  for (int index = 0; index < [allBundles count]; ++index) {
+    NSBundle* bundle = [allBundles objectAtIndex:index];
+    NSString* bundleIdent = bundle.bundleIdentifier;
+    NSLog(@"bundle: %@ - %@", bundleIdent, bundle.resourcePath);
+    NSString* found = [bundle pathForResource:@"Configuration" ofType:@"plist"];
+    if (found != NULL) return found;
+  }
+
+  return NULL;
+}
+
+#else
+
++ (NSString*)getConfigurationPath {
+  return [SWIFTPM_MODULE_BUNDLE pathForResource:@"Configuration" ofType:@"plist"];
+}
+
+#endif
+
 - (instancetype)init:(nullable NSDictionary*)overrides {
   if (self = [super init]) {
-    NSString* path = [SWIFTPM_MODULE_BUNDLE pathForResource:@"Configuration" ofType:@"plist"];
+    NSString* path = [Configuration getConfigurationPath];
     NSMutableDictionary* config = [[NSMutableDictionary alloc] init];
     [config addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:path]];
     if (overrides != NULL) {

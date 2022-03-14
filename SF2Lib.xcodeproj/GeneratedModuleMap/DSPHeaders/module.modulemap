@@ -1,0 +1,4 @@
+module DSPHeaders {
+    umbrella "/Users/howes/src/Mine/AUv3Support/Sources/DSPHeaders/include"
+    export *
+}

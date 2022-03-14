@@ -1,0 +1,1615 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		"AUv3SupportPackage::AUv3-DSP-Headers::ProductTarget" /* AUv3-DSP-Headers */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = OBJ_115 /* Build configuration list for PBXAggregateTarget "AUv3-DSP-Headers" */;
+			buildPhases = (
+			);
+			dependencies = (
+				OBJ_118 /* PBXTargetDependency */,
+			);
+			name = "AUv3-DSP-Headers";
+			productName = "AUv3-DSP-Headers";
+		};
+		"SF2Lib::SF2LibPackageTests::ProductTarget" /* SF2LibPackageTests */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = OBJ_186 /* Build configuration list for PBXAggregateTarget "SF2LibPackageTests" */;
+			buildPhases = (
+			);
+			dependencies = (
+				OBJ_189 /* PBXTargetDependency */,
+			);
+			name = SF2LibPackageTests;
+			productName = SF2LibPackageTests;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		BD13355D27DF3DF0005988F8 /* Configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = BD13355C27DF3DF0005988F8 /* Configuration.plist */; };
+		BD13356227DF3E0F005988F8 /* FreeFont.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = BD13355F27DF3E0F005988F8 /* FreeFont.sf2 */; };
+		BD13356327DF3E0F005988F8 /* GeneralUser GS MuseScore v1.442.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = BD13356027DF3E0F005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */; };
+		BD13356427DF3E0F005988F8 /* RolandNicePiano.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = BD13356127DF3E0F005988F8 /* RolandNicePiano.sf2 */; };
+		BD13356527DF3E31005988F8 /* Configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = BD13355C27DF3DF0005988F8 /* Configuration.plist */; };
+		OBJ_125 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_104 /* Package.swift */; };
+		OBJ_130 /* DSPHeaders.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_101 /* DSPHeaders.mm */; };
+		OBJ_137 /* DSPTablesGenerator.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* DSPTablesGenerator.mm */; };
+		OBJ_138 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* main.mm */; };
+		OBJ_140 /* SF2Lib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SF2Lib::SF2Lib::Product" /* SF2Lib.framework */; };
+		OBJ_141 /* DSPHeaders.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */; };
+		OBJ_149 /* Configuration.m in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* Configuration.m */; };
+		OBJ_150 /* DSPGenerated.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* DSPGenerated.cpp */; };
+		OBJ_151 /* Bag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* Bag.cpp */; };
+		OBJ_152 /* Definition.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* Definition.cpp */; };
+		OBJ_153 /* Generator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* Generator.cpp */; };
+		OBJ_154 /* Instrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Instrument.cpp */; };
+		OBJ_155 /* Modulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* Modulator.cpp */; };
+		OBJ_156 /* Source.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* Source.cpp */; };
+		OBJ_157 /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* Transform.cpp */; };
+		OBJ_158 /* Preset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* Preset.cpp */; };
+		OBJ_159 /* SampleHeader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_27 /* SampleHeader.cpp */; };
+		OBJ_160 /* Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* Version.cpp */; };
+		OBJ_161 /* ChunkItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* ChunkItems.cpp */; };
+		OBJ_162 /* File.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* File.cpp */; };
+		OBJ_163 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_32 /* Parser.cpp */; };
+		OBJ_164 /* Pos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* Pos.cpp */; };
+		OBJ_165 /* Logger.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_34 /* Logger.mm */; };
+		OBJ_166 /* ChannelState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_36 /* ChannelState.cpp */; };
+		OBJ_167 /* NRPN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* NRPN.cpp */; };
+		OBJ_168 /* ValueTransformer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* ValueTransformer.cpp */; };
+		OBJ_169 /* Engine.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_41 /* Engine.mm */; };
+		OBJ_170 /* LowPassFilter.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* LowPassFilter.mm */; };
+		OBJ_171 /* Preset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_43 /* Preset.cpp */; };
+		OBJ_172 /* Modulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_46 /* Modulator.cpp */; };
+		OBJ_173 /* State.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_47 /* State.cpp */; };
+		OBJ_174 /* Voice.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_48 /* Voice.mm */; };
+		OBJ_175 /* Zone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* Zone.cpp */; };
+		OBJ_177 /* DSPHeaders.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */; };
+		OBJ_184 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
+		OBJ_195 /* ConfigurationTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_59 /* ConfigurationTests.mm */; };
+		OBJ_196 /* DSPTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_60 /* DSPTests.mm */; };
+		OBJ_197 /* GeneratorAmountTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_62 /* GeneratorAmountTests.mm */; };
+		OBJ_198 /* ModulatorDefaultsTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* ModulatorDefaultsTests.mm */; };
+		OBJ_199 /* ModulatorSourceTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_64 /* ModulatorSourceTests.mm */; };
+		OBJ_200 /* ChunkTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_66 /* ChunkTests.mm */; };
+		OBJ_201 /* SFFileTestsObjC.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_67 /* SFFileTestsObjC.mm */; };
+		OBJ_202 /* TagTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_68 /* TagTests.mm */; };
+		OBJ_203 /* ChannelTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_70 /* ChannelTests.mm */; };
+		OBJ_204 /* MIDITests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_71 /* MIDITests.mm */; };
+		OBJ_205 /* NRPNTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_72 /* NRPNTests.mm */; };
+		OBJ_206 /* NoteTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_73 /* NoteTests.mm */; };
+		OBJ_207 /* ValueTransformerTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_74 /* ValueTransformerTests.mm */; };
+		OBJ_208 /* EngineTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_77 /* EngineTests.mm */; };
+		OBJ_209 /* OldestVoiceCacheTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_78 /* OldestVoiceCacheTests.mm */; };
+		OBJ_210 /* PresetCollectionTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_79 /* PresetCollectionTests.mm */; };
+		OBJ_211 /* EnvelopeTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_80 /* EnvelopeTests.mm */; };
+		OBJ_212 /* GeneratorIndexTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_81 /* GeneratorIndexTests.mm */; };
+		OBJ_213 /* InstrumentTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_82 /* InstrumentTests.mm */; };
+		OBJ_214 /* LFOTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_83 /* LFOTests.mm */; };
+		OBJ_215 /* ModulatorTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_84 /* ModulatorTests.mm */; };
+		OBJ_216 /* NormalizedSampleSourceTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_85 /* NormalizedSampleSourceTests.mm */; };
+		OBJ_217 /* PitchTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_86 /* PitchTests.mm */; };
+		OBJ_218 /* PresetTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_87 /* PresetTests.mm */; };
+		OBJ_219 /* RangeTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_88 /* RangeTests.mm */; };
+		OBJ_220 /* StateTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_89 /* StateTests.mm */; };
+		OBJ_221 /* VoiceTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_91 /* VoiceTests.mm */; };
+		OBJ_222 /* SF2LibTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_92 /* SF2LibTests.mm */; };
+		OBJ_223 /* SampleBasedContexts.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_93 /* SampleBasedContexts.mm */; };
+		OBJ_224 /* TestResources.m in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_94 /* TestResources.m */; };
+		OBJ_226 /* SF2Lib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SF2Lib::SF2Lib::Product" /* SF2Lib.framework */; };
+		OBJ_227 /* DSPHeaders.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BD13354D27DF385A005988F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = OBJ_1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "SF2Lib::SF2Lib";
+			remoteInfo = SF2Lib;
+		};
+		BD13354E27DF385A005988F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = OBJ_1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "AUv3SupportPackage::DSPHeaders";
+			remoteInfo = DSPHeaders;
+		};
+		BD13354F27DF385A005988F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = OBJ_1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "AUv3SupportPackage::DSPHeaders";
+			remoteInfo = DSPHeaders;
+		};
+		BD13355027DF385A005988F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = OBJ_1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "SF2Lib::SF2Lib";
+			remoteInfo = SF2Lib;
+		};
+		BD13355127DF385A005988F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = OBJ_1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "AUv3SupportPackage::DSPHeaders";
+			remoteInfo = DSPHeaders;
+		};
+		BD13355227DF38B1005988F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = OBJ_1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "SF2Lib::SF2LibTests";
+			remoteInfo = SF2LibTests;
+		};
+		BD13355327DF38B1005988F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = OBJ_1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "AUv3SupportPackage::DSPHeaders";
+			remoteInfo = DSPHeaders;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		"AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DSPHeaders.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD13355C27DF3DF0005988F8 /* Configuration.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Configuration.plist; sourceTree = "<group>"; };
+		BD13355F27DF3E0F005988F8 /* FreeFont.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = FreeFont.sf2; sourceTree = "<group>"; };
+		BD13356027DF3E0F005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "GeneralUser GS MuseScore v1.442.sf2"; sourceTree = "<group>"; };
+		BD13356127DF3E0F005988F8 /* RolandNicePiano.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = RolandNicePiano.sf2; sourceTree = "<group>"; };
+		OBJ_10 /* DSPTablesGenerator.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSPTablesGenerator.mm; sourceTree = "<group>"; };
+		OBJ_101 /* DSPHeaders.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSPHeaders.mm; sourceTree = "<group>"; };
+		OBJ_103 /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = /Users/howes/src/Mine/SF2Lib/SF2Lib.xcodeproj/GeneratedModuleMap/DSPHeaders/module.modulemap; sourceTree = "<group>"; };
+		OBJ_104 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/howes/src/Mine/AUv3Support/Package.swift; sourceTree = "<group>"; };
+		OBJ_11 /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
+		OBJ_110 /* regen.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = regen.sh; sourceTree = "<group>"; };
+		OBJ_111 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		OBJ_112 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		OBJ_113 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		OBJ_13 /* Configuration.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Configuration.m; sourceTree = "<group>"; };
+		OBJ_15 /* DSPGenerated.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DSPGenerated.cpp; sourceTree = "<group>"; };
+		OBJ_17 /* Bag.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Bag.cpp; sourceTree = "<group>"; };
+		OBJ_19 /* Definition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Definition.cpp; sourceTree = "<group>"; };
+		OBJ_20 /* Generator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Generator.cpp; sourceTree = "<group>"; };
+		OBJ_21 /* Instrument.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Instrument.cpp; sourceTree = "<group>"; };
+		OBJ_23 /* Modulator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Modulator.cpp; sourceTree = "<group>"; };
+		OBJ_24 /* Source.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Source.cpp; sourceTree = "<group>"; };
+		OBJ_25 /* Transform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Transform.cpp; sourceTree = "<group>"; };
+		OBJ_26 /* Preset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Preset.cpp; sourceTree = "<group>"; };
+		OBJ_27 /* SampleHeader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SampleHeader.cpp; sourceTree = "<group>"; };
+		OBJ_28 /* Version.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Version.cpp; sourceTree = "<group>"; };
+		OBJ_30 /* ChunkItems.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChunkItems.cpp; sourceTree = "<group>"; };
+		OBJ_31 /* File.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = File.cpp; sourceTree = "<group>"; };
+		OBJ_32 /* Parser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
+		OBJ_33 /* Pos.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Pos.cpp; sourceTree = "<group>"; };
+		OBJ_34 /* Logger.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Logger.mm; sourceTree = "<group>"; };
+		OBJ_36 /* ChannelState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChannelState.cpp; sourceTree = "<group>"; };
+		OBJ_37 /* NRPN.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NRPN.cpp; sourceTree = "<group>"; };
+		OBJ_38 /* ValueTransformer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ValueTransformer.cpp; sourceTree = "<group>"; };
+		OBJ_41 /* Engine.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Engine.mm; sourceTree = "<group>"; };
+		OBJ_42 /* LowPassFilter.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = LowPassFilter.mm; sourceTree = "<group>"; };
+		OBJ_43 /* Preset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Preset.cpp; sourceTree = "<group>"; };
+		OBJ_46 /* Modulator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Modulator.cpp; sourceTree = "<group>"; };
+		OBJ_47 /* State.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = State.cpp; sourceTree = "<group>"; };
+		OBJ_48 /* Voice.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Voice.mm; sourceTree = "<group>"; };
+		OBJ_50 /* Zone.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Zone.cpp; sourceTree = "<group>"; };
+		OBJ_53 /* Configuration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Configuration.h; sourceTree = "<group>"; };
+		OBJ_54 /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = /Users/howes/src/Mine/SF2Lib/SF2Lib.xcodeproj/GeneratedModuleMap/SF2Lib/module.modulemap; sourceTree = "<group>"; };
+		OBJ_57 /* SampleBasedContexts.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SampleBasedContexts.hpp; sourceTree = "<group>"; };
+		OBJ_58 /* TestResources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestResources.h; sourceTree = "<group>"; };
+		OBJ_59 /* ConfigurationTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ConfigurationTests.mm; sourceTree = "<group>"; };
+		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		OBJ_60 /* DSPTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSPTests.mm; sourceTree = "<group>"; };
+		OBJ_62 /* GeneratorAmountTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GeneratorAmountTests.mm; sourceTree = "<group>"; };
+		OBJ_63 /* ModulatorDefaultsTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ModulatorDefaultsTests.mm; sourceTree = "<group>"; };
+		OBJ_64 /* ModulatorSourceTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ModulatorSourceTests.mm; sourceTree = "<group>"; };
+		OBJ_66 /* ChunkTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ChunkTests.mm; sourceTree = "<group>"; };
+		OBJ_67 /* SFFileTestsObjC.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SFFileTestsObjC.mm; sourceTree = "<group>"; };
+		OBJ_68 /* TagTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TagTests.mm; sourceTree = "<group>"; };
+		OBJ_70 /* ChannelTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ChannelTests.mm; sourceTree = "<group>"; };
+		OBJ_71 /* MIDITests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MIDITests.mm; sourceTree = "<group>"; };
+		OBJ_72 /* NRPNTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = NRPNTests.mm; sourceTree = "<group>"; };
+		OBJ_73 /* NoteTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = NoteTests.mm; sourceTree = "<group>"; };
+		OBJ_74 /* ValueTransformerTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ValueTransformerTests.mm; sourceTree = "<group>"; };
+		OBJ_77 /* EngineTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = EngineTests.mm; sourceTree = "<group>"; };
+		OBJ_78 /* OldestVoiceCacheTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = OldestVoiceCacheTests.mm; sourceTree = "<group>"; };
+		OBJ_79 /* PresetCollectionTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PresetCollectionTests.mm; sourceTree = "<group>"; };
+		OBJ_80 /* EnvelopeTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = EnvelopeTests.mm; sourceTree = "<group>"; };
+		OBJ_81 /* GeneratorIndexTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GeneratorIndexTests.mm; sourceTree = "<group>"; };
+		OBJ_82 /* InstrumentTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = InstrumentTests.mm; sourceTree = "<group>"; };
+		OBJ_83 /* LFOTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = LFOTests.mm; sourceTree = "<group>"; };
+		OBJ_84 /* ModulatorTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ModulatorTests.mm; sourceTree = "<group>"; };
+		OBJ_85 /* NormalizedSampleSourceTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = NormalizedSampleSourceTests.mm; sourceTree = "<group>"; };
+		OBJ_86 /* PitchTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PitchTests.mm; sourceTree = "<group>"; };
+		OBJ_87 /* PresetTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PresetTests.mm; sourceTree = "<group>"; };
+		OBJ_88 /* RangeTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RangeTests.mm; sourceTree = "<group>"; };
+		OBJ_89 /* StateTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = StateTests.mm; sourceTree = "<group>"; };
+		OBJ_9 /* DSPTablesGenerator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DSPTablesGenerator.hpp; sourceTree = "<group>"; };
+		OBJ_91 /* VoiceTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VoiceTests.mm; sourceTree = "<group>"; };
+		OBJ_92 /* SF2LibTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SF2LibTests.mm; sourceTree = "<group>"; };
+		OBJ_93 /* SampleBasedContexts.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SampleBasedContexts.mm; sourceTree = "<group>"; };
+		OBJ_94 /* TestResources.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestResources.m; sourceTree = "<group>"; };
+		"SF2Lib::DSPTableGenerator::Product" /* DSPTableGenerator */ = {isa = PBXFileReference; lastKnownFileType = text; path = DSPTableGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
+		"SF2Lib::SF2Lib::Product" /* SF2Lib.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SF2Lib.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		"SF2Lib::SF2LibTests::Product" /* SF2LibTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = SF2LibTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		OBJ_131 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_139 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_140 /* SF2Lib.framework in Frameworks */,
+				OBJ_141 /* DSPHeaders.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_176 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_177 /* DSPHeaders.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_225 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_226 /* SF2Lib.framework in Frameworks */,
+				OBJ_227 /* DSPHeaders.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BD13355B27DF3DF0005988F8 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				BD13355C27DF3DF0005988F8 /* Configuration.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		BD13355E27DF3E0F005988F8 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				BD13355F27DF3E0F005988F8 /* FreeFont.sf2 */,
+				BD13356027DF3E0F005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */,
+				BD13356127DF3E0F005988F8 /* RolandNicePiano.sf2 */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		OBJ_100 /* DSPHeaders */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_101 /* DSPHeaders.mm */,
+				OBJ_102 /* include */,
+			);
+			name = DSPHeaders;
+			path = ../AUv3Support/Sources/DSPHeaders;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_102 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_103 /* module.modulemap */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		OBJ_105 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				"AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */,
+				"SF2Lib::DSPTableGenerator::Product" /* DSPTableGenerator */,
+				"SF2Lib::SF2Lib::Product" /* SF2Lib.framework */,
+				"SF2Lib::SF2LibTests::Product" /* SF2LibTests.xctest */,
+			);
+			name = Products;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		OBJ_12 /* SF2Lib */ = {
+			isa = PBXGroup;
+			children = (
+				BD13355B27DF3DF0005988F8 /* Resources */,
+				OBJ_13 /* Configuration.m */,
+				OBJ_14 /* DSP */,
+				OBJ_16 /* Entity */,
+				OBJ_29 /* IO */,
+				OBJ_34 /* Logger.mm */,
+				OBJ_35 /* MIDI */,
+				OBJ_39 /* Render */,
+				OBJ_51 /* include */,
+			);
+			name = SF2Lib;
+			path = Sources/SF2Lib;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_14 /* DSP */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_15 /* DSPGenerated.cpp */,
+			);
+			path = DSP;
+			sourceTree = "<group>";
+		};
+		OBJ_16 /* Entity */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_17 /* Bag.cpp */,
+				OBJ_18 /* Generator */,
+				OBJ_21 /* Instrument.cpp */,
+				OBJ_22 /* Modulator */,
+				OBJ_26 /* Preset.cpp */,
+				OBJ_27 /* SampleHeader.cpp */,
+				OBJ_28 /* Version.cpp */,
+			);
+			path = Entity;
+			sourceTree = "<group>";
+		};
+		OBJ_18 /* Generator */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_19 /* Definition.cpp */,
+				OBJ_20 /* Generator.cpp */,
+			);
+			path = Generator;
+			sourceTree = "<group>";
+		};
+		OBJ_22 /* Modulator */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_23 /* Modulator.cpp */,
+				OBJ_24 /* Source.cpp */,
+				OBJ_25 /* Transform.cpp */,
+			);
+			path = Modulator;
+			sourceTree = "<group>";
+		};
+		OBJ_29 /* IO */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_30 /* ChunkItems.cpp */,
+				OBJ_31 /* File.cpp */,
+				OBJ_32 /* Parser.cpp */,
+				OBJ_33 /* Pos.cpp */,
+			);
+			path = IO;
+			sourceTree = "<group>";
+		};
+		OBJ_35 /* MIDI */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_36 /* ChannelState.cpp */,
+				OBJ_37 /* NRPN.cpp */,
+				OBJ_38 /* ValueTransformer.cpp */,
+			);
+			path = MIDI;
+			sourceTree = "<group>";
+		};
+		OBJ_39 /* Render */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_40 /* Engine */,
+				OBJ_42 /* LowPassFilter.mm */,
+				OBJ_43 /* Preset.cpp */,
+				OBJ_44 /* Voice */,
+				OBJ_49 /* Zone */,
+			);
+			path = Render;
+			sourceTree = "<group>";
+		};
+		OBJ_40 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_41 /* Engine.mm */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		OBJ_44 /* Voice */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_45 /* State */,
+				OBJ_48 /* Voice.mm */,
+			);
+			path = Voice;
+			sourceTree = "<group>";
+		};
+		OBJ_45 /* State */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_46 /* Modulator.cpp */,
+				OBJ_47 /* State.cpp */,
+			);
+			path = State;
+			sourceTree = "<group>";
+		};
+		OBJ_49 /* Zone */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_50 /* Zone.cpp */,
+			);
+			path = Zone;
+			sourceTree = "<group>";
+		};
+		OBJ_5 /*  */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_6 /* Package.swift */,
+				OBJ_7 /* Sources */,
+				OBJ_55 /* Tests */,
+				OBJ_95 /* Dependencies */,
+				OBJ_105 /* Products */,
+				OBJ_110 /* regen.sh */,
+				OBJ_111 /* LICENSE */,
+				OBJ_112 /* Makefile */,
+				OBJ_113 /* README.md */,
+			);
+			name = "";
+			sourceTree = "<group>";
+		};
+		OBJ_51 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_52 /* SF2Lib */,
+				OBJ_54 /* module.modulemap */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		OBJ_52 /* SF2Lib */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_53 /* Configuration.h */,
+			);
+			path = SF2Lib;
+			sourceTree = "<group>";
+		};
+		OBJ_55 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_56 /* SF2LibTests */,
+			);
+			name = Tests;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_56 /* SF2LibTests */ = {
+			isa = PBXGroup;
+			children = (
+				BD13355E27DF3E0F005988F8 /* Resources */,
+				OBJ_57 /* SampleBasedContexts.hpp */,
+				OBJ_58 /* TestResources.h */,
+				OBJ_59 /* ConfigurationTests.mm */,
+				OBJ_60 /* DSPTests.mm */,
+				OBJ_61 /* Entity */,
+				OBJ_65 /* IO */,
+				OBJ_69 /* MIDI */,
+				OBJ_75 /* Render */,
+				OBJ_92 /* SF2LibTests.mm */,
+				OBJ_93 /* SampleBasedContexts.mm */,
+				OBJ_94 /* TestResources.m */,
+			);
+			name = SF2LibTests;
+			path = Tests/SF2LibTests;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_61 /* Entity */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_62 /* GeneratorAmountTests.mm */,
+				OBJ_63 /* ModulatorDefaultsTests.mm */,
+				OBJ_64 /* ModulatorSourceTests.mm */,
+			);
+			path = Entity;
+			sourceTree = "<group>";
+		};
+		OBJ_65 /* IO */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_66 /* ChunkTests.mm */,
+				OBJ_67 /* SFFileTestsObjC.mm */,
+				OBJ_68 /* TagTests.mm */,
+			);
+			path = IO;
+			sourceTree = "<group>";
+		};
+		OBJ_69 /* MIDI */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_70 /* ChannelTests.mm */,
+				OBJ_71 /* MIDITests.mm */,
+				OBJ_72 /* NRPNTests.mm */,
+				OBJ_73 /* NoteTests.mm */,
+				OBJ_74 /* ValueTransformerTests.mm */,
+			);
+			path = MIDI;
+			sourceTree = "<group>";
+		};
+		OBJ_7 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_8 /* DSPTableGenerator */,
+				OBJ_12 /* SF2Lib */,
+			);
+			name = Sources;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_75 /* Render */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_76 /* EngineTests */,
+				OBJ_80 /* EnvelopeTests.mm */,
+				OBJ_81 /* GeneratorIndexTests.mm */,
+				OBJ_82 /* InstrumentTests.mm */,
+				OBJ_83 /* LFOTests.mm */,
+				OBJ_84 /* ModulatorTests.mm */,
+				OBJ_85 /* NormalizedSampleSourceTests.mm */,
+				OBJ_86 /* PitchTests.mm */,
+				OBJ_87 /* PresetTests.mm */,
+				OBJ_88 /* RangeTests.mm */,
+				OBJ_89 /* StateTests.mm */,
+				OBJ_90 /* Voice */,
+			);
+			path = Render;
+			sourceTree = "<group>";
+		};
+		OBJ_76 /* EngineTests */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_77 /* EngineTests.mm */,
+				OBJ_78 /* OldestVoiceCacheTests.mm */,
+				OBJ_79 /* PresetCollectionTests.mm */,
+			);
+			path = EngineTests;
+			sourceTree = "<group>";
+		};
+		OBJ_8 /* DSPTableGenerator */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_9 /* DSPTablesGenerator.hpp */,
+				OBJ_10 /* DSPTablesGenerator.mm */,
+				OBJ_11 /* main.mm */,
+			);
+			name = DSPTableGenerator;
+			path = Sources/DSPTableGenerator;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_90 /* Voice */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_91 /* VoiceTests.mm */,
+			);
+			path = Voice;
+			sourceTree = "<group>";
+		};
+		OBJ_95 /* Dependencies */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_96 /* AUv3SupportPackage */,
+			);
+			name = Dependencies;
+			sourceTree = "<group>";
+		};
+		OBJ_96 /* AUv3SupportPackage */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_97 /* AUv3Support */,
+				OBJ_98 /* AUv3Support_iOS */,
+				OBJ_99 /* AUv3Support_macOS */,
+				OBJ_100 /* DSPHeaders */,
+				OBJ_104 /* Package.swift */,
+			);
+			name = AUv3SupportPackage;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_97 /* AUv3Support */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = AUv3Support;
+			path = ../AUv3Support/Sources/AUv3Support;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_98 /* AUv3Support_iOS */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = AUv3Support_iOS;
+			path = ../AUv3Support/Sources/AUv3Support_iOS;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_99 /* AUv3Support_macOS */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = AUv3Support_macOS;
+			path = ../AUv3Support/Sources/AUv3Support_macOS;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		"AUv3SupportPackage::DSPHeaders" /* DSPHeaders */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = OBJ_126 /* Build configuration list for PBXNativeTarget "DSPHeaders" */;
+			buildPhases = (
+				OBJ_129 /* Sources */,
+				OBJ_131 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DSPHeaders;
+			productName = DSPHeaders;
+			productReference = "AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		"AUv3SupportPackage::SwiftPMPackageDescription" /* AUv3SupportPackagePackageDescription */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = OBJ_121 /* Build configuration list for PBXNativeTarget "AUv3SupportPackagePackageDescription" */;
+			buildPhases = (
+				OBJ_124 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AUv3SupportPackagePackageDescription;
+			productName = AUv3SupportPackagePackageDescription;
+			productType = "com.apple.product-type.framework";
+		};
+		"SF2Lib::DSPTableGenerator" /* DSPTableGenerator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = OBJ_133 /* Build configuration list for PBXNativeTarget "DSPTableGenerator" */;
+			buildPhases = (
+				OBJ_136 /* Sources */,
+				OBJ_139 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				OBJ_142 /* PBXTargetDependency */,
+				OBJ_144 /* PBXTargetDependency */,
+			);
+			name = DSPTableGenerator;
+			productName = DSPTableGenerator;
+			productReference = "SF2Lib::DSPTableGenerator::Product" /* DSPTableGenerator */;
+			productType = "com.apple.product-type.tool";
+		};
+		"SF2Lib::SF2Lib" /* SF2Lib */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = OBJ_145 /* Build configuration list for PBXNativeTarget "SF2Lib" */;
+			buildPhases = (
+				OBJ_148 /* Sources */,
+				OBJ_176 /* Frameworks */,
+				BD13355427DF38FC005988F8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				OBJ_178 /* PBXTargetDependency */,
+			);
+			name = SF2Lib;
+			productName = SF2Lib;
+			productReference = "SF2Lib::SF2Lib::Product" /* SF2Lib.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		"SF2Lib::SF2LibTests" /* SF2LibTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = OBJ_191 /* Build configuration list for PBXNativeTarget "SF2LibTests" */;
+			buildPhases = (
+				OBJ_194 /* Sources */,
+				OBJ_225 /* Frameworks */,
+				BD13355827DF39B1005988F8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				OBJ_228 /* PBXTargetDependency */,
+				OBJ_229 /* PBXTargetDependency */,
+			);
+			name = SF2LibTests;
+			productName = SF2LibTests;
+			productReference = "SF2Lib::SF2LibTests::Product" /* SF2LibTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		"SF2Lib::SwiftPMPackageDescription" /* SF2LibPackageDescription */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = OBJ_180 /* Build configuration list for PBXNativeTarget "SF2LibPackageDescription" */;
+			buildPhases = (
+				OBJ_183 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SF2LibPackageDescription;
+			productName = SF2LibPackageDescription;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		OBJ_1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				KnownAssetTags = (
+					New,
+				);
+				LastSwiftMigration = 9999;
+				LastUpgradeCheck = 9999;
+			};
+			buildConfigurationList = OBJ_2 /* Build configuration list for PBXProject "SF2Lib" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = OBJ_5 /*  */;
+			productRefGroup = OBJ_105 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				"AUv3SupportPackage::AUv3-DSP-Headers::ProductTarget" /* AUv3-DSP-Headers */,
+				"AUv3SupportPackage::SwiftPMPackageDescription" /* AUv3SupportPackagePackageDescription */,
+				"AUv3SupportPackage::DSPHeaders" /* DSPHeaders */,
+				"SF2Lib::DSPTableGenerator" /* DSPTableGenerator */,
+				"SF2Lib::SF2Lib" /* SF2Lib */,
+				"SF2Lib::SwiftPMPackageDescription" /* SF2LibPackageDescription */,
+				"SF2Lib::SF2LibPackageTests::ProductTarget" /* SF2LibPackageTests */,
+				"SF2Lib::SF2LibTests" /* SF2LibTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BD13355427DF38FC005988F8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD13355D27DF3DF0005988F8 /* Configuration.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD13355827DF39B1005988F8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD13356527DF3E31005988F8 /* Configuration.plist in Resources */,
+				BD13356327DF3E0F005988F8 /* GeneralUser GS MuseScore v1.442.sf2 in Resources */,
+				BD13356227DF3E0F005988F8 /* FreeFont.sf2 in Resources */,
+				BD13356427DF3E0F005988F8 /* RolandNicePiano.sf2 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		OBJ_124 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_125 /* Package.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_129 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_130 /* DSPHeaders.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_136 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_137 /* DSPTablesGenerator.mm in Sources */,
+				OBJ_138 /* main.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_148 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_149 /* Configuration.m in Sources */,
+				OBJ_150 /* DSPGenerated.cpp in Sources */,
+				OBJ_151 /* Bag.cpp in Sources */,
+				OBJ_152 /* Definition.cpp in Sources */,
+				OBJ_153 /* Generator.cpp in Sources */,
+				OBJ_154 /* Instrument.cpp in Sources */,
+				OBJ_155 /* Modulator.cpp in Sources */,
+				OBJ_156 /* Source.cpp in Sources */,
+				OBJ_157 /* Transform.cpp in Sources */,
+				OBJ_158 /* Preset.cpp in Sources */,
+				OBJ_159 /* SampleHeader.cpp in Sources */,
+				OBJ_160 /* Version.cpp in Sources */,
+				OBJ_161 /* ChunkItems.cpp in Sources */,
+				OBJ_162 /* File.cpp in Sources */,
+				OBJ_163 /* Parser.cpp in Sources */,
+				OBJ_164 /* Pos.cpp in Sources */,
+				OBJ_165 /* Logger.mm in Sources */,
+				OBJ_166 /* ChannelState.cpp in Sources */,
+				OBJ_167 /* NRPN.cpp in Sources */,
+				OBJ_168 /* ValueTransformer.cpp in Sources */,
+				OBJ_169 /* Engine.mm in Sources */,
+				OBJ_170 /* LowPassFilter.mm in Sources */,
+				OBJ_171 /* Preset.cpp in Sources */,
+				OBJ_172 /* Modulator.cpp in Sources */,
+				OBJ_173 /* State.cpp in Sources */,
+				OBJ_174 /* Voice.mm in Sources */,
+				OBJ_175 /* Zone.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_183 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_184 /* Package.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_194 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_195 /* ConfigurationTests.mm in Sources */,
+				OBJ_196 /* DSPTests.mm in Sources */,
+				OBJ_197 /* GeneratorAmountTests.mm in Sources */,
+				OBJ_198 /* ModulatorDefaultsTests.mm in Sources */,
+				OBJ_199 /* ModulatorSourceTests.mm in Sources */,
+				OBJ_200 /* ChunkTests.mm in Sources */,
+				OBJ_201 /* SFFileTestsObjC.mm in Sources */,
+				OBJ_202 /* TagTests.mm in Sources */,
+				OBJ_203 /* ChannelTests.mm in Sources */,
+				OBJ_204 /* MIDITests.mm in Sources */,
+				OBJ_205 /* NRPNTests.mm in Sources */,
+				OBJ_206 /* NoteTests.mm in Sources */,
+				OBJ_207 /* ValueTransformerTests.mm in Sources */,
+				OBJ_208 /* EngineTests.mm in Sources */,
+				OBJ_209 /* OldestVoiceCacheTests.mm in Sources */,
+				OBJ_210 /* PresetCollectionTests.mm in Sources */,
+				OBJ_211 /* EnvelopeTests.mm in Sources */,
+				OBJ_212 /* GeneratorIndexTests.mm in Sources */,
+				OBJ_213 /* InstrumentTests.mm in Sources */,
+				OBJ_214 /* LFOTests.mm in Sources */,
+				OBJ_215 /* ModulatorTests.mm in Sources */,
+				OBJ_216 /* NormalizedSampleSourceTests.mm in Sources */,
+				OBJ_217 /* PitchTests.mm in Sources */,
+				OBJ_218 /* PresetTests.mm in Sources */,
+				OBJ_219 /* RangeTests.mm in Sources */,
+				OBJ_220 /* StateTests.mm in Sources */,
+				OBJ_221 /* VoiceTests.mm in Sources */,
+				OBJ_222 /* SF2LibTests.mm in Sources */,
+				OBJ_223 /* SampleBasedContexts.mm in Sources */,
+				OBJ_224 /* TestResources.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		OBJ_118 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "AUv3SupportPackage::DSPHeaders" /* DSPHeaders */;
+			targetProxy = BD13355327DF38B1005988F8 /* PBXContainerItemProxy */;
+		};
+		OBJ_142 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "SF2Lib::SF2Lib" /* SF2Lib */;
+			targetProxy = BD13354D27DF385A005988F8 /* PBXContainerItemProxy */;
+		};
+		OBJ_144 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "AUv3SupportPackage::DSPHeaders" /* DSPHeaders */;
+			targetProxy = BD13354F27DF385A005988F8 /* PBXContainerItemProxy */;
+		};
+		OBJ_178 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "AUv3SupportPackage::DSPHeaders" /* DSPHeaders */;
+			targetProxy = BD13354E27DF385A005988F8 /* PBXContainerItemProxy */;
+		};
+		OBJ_189 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "SF2Lib::SF2LibTests" /* SF2LibTests */;
+			targetProxy = BD13355227DF38B1005988F8 /* PBXContainerItemProxy */;
+		};
+		OBJ_228 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "SF2Lib::SF2Lib" /* SF2Lib */;
+			targetProxy = BD13355027DF385A005988F8 /* PBXContainerItemProxy */;
+		};
+		OBJ_229 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "AUv3SupportPackage::DSPHeaders" /* DSPHeaders */;
+			targetProxy = BD13355127DF385A005988F8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		OBJ_116 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		OBJ_117 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		OBJ_122 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LD = /usr/bin/true;
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/ManifestAPI -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk -package-description-version 5.5.0";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		OBJ_123 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LD = /usr/bin/true;
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/ManifestAPI -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk -package-description-version 5.5.0";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		OBJ_127 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = NO;
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../AUv3Support/Sources/DSPHeaders/include",
+				);
+				INFOPLIST_FILE = SF2Lib.xcodeproj/DSPHeaders_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_CPLUSPLUSFLAGS = (
+					"-pedantic",
+					"-Wmissing-braces",
+					"-Wparentheses",
+					"-Wswitch",
+					"-Wcompletion-handler",
+					"-Wunused-function",
+					"-Wunused-label",
+					"-Wunused-parameter",
+					"-Wunused-variable",
+					"-Wunused-value",
+					"-Wempty-body",
+					"-Wno-unknown-pragmas",
+					"-Wuninitialized",
+					"-Wconditional-uninitialized",
+					"-Wconversion",
+					"-Wconstant-conversion",
+					"-Wassign-enum",
+					"-Wsign-compare",
+					"-Wint-conversion",
+					"-Wbool-conversion",
+					"-Wenum-conversion",
+					"-Wfloat-conversion",
+					"-Wshorten-64-to-32",
+					"-Wsign-conversion",
+					"-Wmove",
+					"-Wcomma",
+				);
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = DSPHeaders;
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				TARGET_NAME = DSPHeaders;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Debug;
+		};
+		OBJ_128 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = NO;
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../AUv3Support/Sources/DSPHeaders/include",
+				);
+				INFOPLIST_FILE = SF2Lib.xcodeproj/DSPHeaders_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_CPLUSPLUSFLAGS = (
+					"-pedantic",
+					"-Wmissing-braces",
+					"-Wparentheses",
+					"-Wswitch",
+					"-Wcompletion-handler",
+					"-Wunused-function",
+					"-Wunused-label",
+					"-Wunused-parameter",
+					"-Wunused-variable",
+					"-Wunused-value",
+					"-Wempty-body",
+					"-Wno-unknown-pragmas",
+					"-Wuninitialized",
+					"-Wconditional-uninitialized",
+					"-Wconversion",
+					"-Wconstant-conversion",
+					"-Wassign-enum",
+					"-Wsign-compare",
+					"-Wint-conversion",
+					"-Wbool-conversion",
+					"-Wenum-conversion",
+					"-Wfloat-conversion",
+					"-Wshorten-64-to-32",
+					"-Wsign-conversion",
+					"-Wmove",
+					"-Wcomma",
+				);
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = DSPHeaders;
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				TARGET_NAME = DSPHeaders;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Release;
+		};
+		OBJ_134 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CURRENT_PROJECT_VERSION = 1;
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = "USE_ACCELERATE=1";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Sources/DSPTableGenerator/include",
+					"$(SRCROOT)/Sources/SF2Lib/include",
+					"$(SRCROOT)/../AUv3Support/Sources/DSPHeaders/include",
+				);
+				INFOPLIST_FILE = SF2Lib.xcodeproj/DSPTableGenerator_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Accelerate,
+					"-framework",
+					Foundation,
+				);
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
+				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
+				TARGET_NAME = DSPTableGenerator;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Debug;
+		};
+		OBJ_135 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CURRENT_PROJECT_VERSION = 1;
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = "USE_ACCELERATE=1";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Sources/DSPTableGenerator/include",
+					"$(SRCROOT)/Sources/SF2Lib/include",
+					"$(SRCROOT)/../AUv3Support/Sources/DSPHeaders/include",
+				);
+				INFOPLIST_FILE = SF2Lib.xcodeproj/DSPTableGenerator_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Accelerate,
+					"-framework",
+					Foundation,
+				);
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
+				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
+				TARGET_NAME = DSPTableGenerator;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Release;
+		};
+		OBJ_146 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = NO;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = "USE_ACCELERATE=1";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Sources/SF2Lib/include",
+					"$(SRCROOT)/../AUv3Support/Sources/DSPHeaders/include",
+					./include,
+				);
+				INFOPLIST_FILE = SF2Lib.xcodeproj/SF2Lib_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_CPLUSPLUSFLAGS = (
+					"-pedantic",
+					"-Wmissing-braces",
+					"-Wparentheses",
+					"-Wswitch",
+					"-Wcompletion-handler",
+					"-Wunused-function",
+					"-Wunused-label",
+					"-Wunused-parameter",
+					"-Wunused-variable",
+					"-Wunused-value",
+					"-Wempty-body",
+					"-Wno-unknown-pragmas",
+					"-Wuninitialized",
+					"-Wconditional-uninitialized",
+					"-Wconversion",
+					"-Wconstant-conversion",
+					"-Wassign-enum",
+					"-Wsign-compare",
+					"-Wint-conversion",
+					"-Wbool-conversion",
+					"-Wenum-conversion",
+					"-Wfloat-conversion",
+					"-Wshorten-64-to-32",
+					"-Wsign-conversion",
+					"-Wmove",
+					"-Wcomma",
+					"-Wno-newline-eof",
+					"-x",
+					"objective-c++",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Accelerate,
+					"-framework",
+					AudioToolbox,
+					"-framework",
+					AVFoundation,
+				);
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = SF2Lib;
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				TARGET_NAME = SF2Lib;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Debug;
+		};
+		OBJ_147 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = NO;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = "USE_ACCELERATE=1";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Sources/SF2Lib/include",
+					"$(SRCROOT)/../AUv3Support/Sources/DSPHeaders/include",
+					./include,
+				);
+				INFOPLIST_FILE = SF2Lib.xcodeproj/SF2Lib_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_CPLUSPLUSFLAGS = (
+					"-pedantic",
+					"-Wmissing-braces",
+					"-Wparentheses",
+					"-Wswitch",
+					"-Wcompletion-handler",
+					"-Wunused-function",
+					"-Wunused-label",
+					"-Wunused-parameter",
+					"-Wunused-variable",
+					"-Wunused-value",
+					"-Wempty-body",
+					"-Wno-unknown-pragmas",
+					"-Wuninitialized",
+					"-Wconditional-uninitialized",
+					"-Wconversion",
+					"-Wconstant-conversion",
+					"-Wassign-enum",
+					"-Wsign-compare",
+					"-Wint-conversion",
+					"-Wbool-conversion",
+					"-Wenum-conversion",
+					"-Wfloat-conversion",
+					"-Wshorten-64-to-32",
+					"-Wsign-conversion",
+					"-Wmove",
+					"-Wcomma",
+					"-Wno-newline-eof",
+					"-x",
+					"objective-c++",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Accelerate,
+					"-framework",
+					AudioToolbox,
+					"-framework",
+					AVFoundation,
+				);
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = SF2Lib;
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				TARGET_NAME = SF2Lib;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Release;
+		};
+		OBJ_181 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LD = /usr/bin/true;
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/ManifestAPI -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk -package-description-version 5.5.0";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		OBJ_182 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LD = /usr/bin/true;
+				OTHER_SWIFT_FLAGS = "-swift-version 5 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/ManifestAPI -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk -package-description-version 5.5.0";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		OBJ_187 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		OBJ_188 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		OBJ_192 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"PLAY_AUDIO=0",
+					"SWIFT_PACKAGE=1",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Tests/SF2LibTests/include",
+					"$(SRCROOT)/Sources/SF2Lib/include",
+					"$(SRCROOT)/../AUv3Support/Sources/DSPHeaders/include",
+				);
+				INFOPLIST_FILE = SF2Lib.xcodeproj/SF2LibTests_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_CPLUSPLUSFLAGS = (
+					"-Wno-newline-eof",
+					"-x",
+					"objective-c++",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Accelerate,
+					"-framework",
+					AudioToolbox,
+					"-framework",
+					AVFoundation,
+					"-framework",
+					Foundation,
+					"-framework",
+					XCTest,
+				);
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				TARGET_NAME = SF2LibTests;
+				TVOS_DEPLOYMENT_TARGET = 14.0;
+				WATCHOS_DEPLOYMENT_TARGET = 7.0;
+			};
+			name = Debug;
+		};
+		OBJ_193 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"PLAY_AUDIO=0",
+					"SWIFT_PACKAGE=1",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Tests/SF2LibTests/include",
+					"$(SRCROOT)/Sources/SF2Lib/include",
+					"$(SRCROOT)/../AUv3Support/Sources/DSPHeaders/include",
+				);
+				INFOPLIST_FILE = SF2Lib.xcodeproj/SF2LibTests_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_CPLUSPLUSFLAGS = (
+					"-Wno-newline-eof",
+					"-x",
+					"objective-c++",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Accelerate,
+					"-framework",
+					AudioToolbox,
+					"-framework",
+					AVFoundation,
+					"-framework",
+					Foundation,
+					"-framework",
+					XCTest,
+				);
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				TARGET_NAME = SF2LibTests;
+				TVOS_DEPLOYMENT_TARGET = 14.0;
+				WATCHOS_DEPLOYMENT_TARGET = 7.0;
+			};
+			name = Release;
+		};
+		OBJ_3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_NS_ASSERTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"SWIFT_PACKAGE=1",
+					"DEBUG=1",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -DXcode";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "$(AVAILABLE_PLATFORMS)";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) SWIFT_PACKAGE DEBUG";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				USE_HEADERMAP = NO;
+			};
+			name = Debug;
+		};
+		OBJ_4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"SWIFT_PACKAGE=1",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				OTHER_SWIFT_FLAGS = "$(inherited) -DXcode";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "$(AVAILABLE_PLATFORMS)";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) SWIFT_PACKAGE";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				USE_HEADERMAP = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		OBJ_115 /* Build configuration list for PBXAggregateTarget "AUv3-DSP-Headers" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_116 /* Debug */,
+				OBJ_117 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		OBJ_121 /* Build configuration list for PBXNativeTarget "AUv3SupportPackagePackageDescription" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_122 /* Debug */,
+				OBJ_123 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		OBJ_126 /* Build configuration list for PBXNativeTarget "DSPHeaders" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_127 /* Debug */,
+				OBJ_128 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		OBJ_133 /* Build configuration list for PBXNativeTarget "DSPTableGenerator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_134 /* Debug */,
+				OBJ_135 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		OBJ_145 /* Build configuration list for PBXNativeTarget "SF2Lib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_146 /* Debug */,
+				OBJ_147 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		OBJ_180 /* Build configuration list for PBXNativeTarget "SF2LibPackageDescription" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_181 /* Debug */,
+				OBJ_182 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		OBJ_186 /* Build configuration list for PBXAggregateTarget "SF2LibPackageTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_187 /* Debug */,
+				OBJ_188 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		OBJ_191 /* Build configuration list for PBXNativeTarget "SF2LibTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_192 /* Debug */,
+				OBJ_193 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		OBJ_2 /* Build configuration list for PBXProject "SF2Lib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_3 /* Debug */,
+				OBJ_4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = OBJ_1 /* Project object */;
+}
