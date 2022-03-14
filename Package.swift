@@ -95,7 +95,6 @@ let package = Package(
       cxxSettings: [
         // Set to 1 to play audio in tests. Set to 0 to keep silent.
         .define("PLAY_AUDIO", to: "0", .none),
-        .define("SWIFT_PACKAGE", to: "1", .none),
         .unsafeFlags([
           "-Wno-newline-eof", // resource_bundle_accessor.h is missing newline at end of file
           "-x", "objective-c++", // treat source files as Obj-C++ files

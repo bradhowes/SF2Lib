@@ -22,8 +22,14 @@ namespace SF2::IO { class File; }
 namespace SF2::Render::Engine {
 
 /**
- Engine that generates audio from SF2 files due to incoming MIDI signals. Maintains a collection of voices sized by the
- sole template parameter. A Voice generates samples based on the configuration it is given from a Preset.
+ Engine that generates audio from SF2 files due to incoming MIDI signals. Maintains a collection of voices created at
+ construction time. A Voice generates samples based on the configuration it is given from a Preset.
+
+ Note that a major design goal is to keep from allocating any memory while a render thread is running and generating
+ samples. This also implies that all communications with the engine while rendering (eg MIDI events or real-time
+ parameter changes should be done with care. For the AUv3 use-case, this is handled by the `EventProcessor` base class
+ and the AUv3 API. MIDI events and parameter changes are scheduled using dedicated APIs and the render thread sees them
+ during a render request.
  */
 class Engine : public DSPHeaders::EventProcessor<Engine> {
   using super = DSPHeaders::EventProcessor<Engine>;
