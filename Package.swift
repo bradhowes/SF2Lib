@@ -104,6 +104,7 @@ let package = Package(
         .linkedFramework("Accelerate", .none),
         .linkedFramework("AudioToolbox", .none),
         .linkedFramework("AVFoundation", .none),
+        .linkedFramework("QuartzCore", .none),
         .linkedFramework("Foundation", .none),
         .linkedFramework("XCTest", .none),
       ]
