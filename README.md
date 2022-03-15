@@ -1,4 +1,5 @@
 [![CI](https://github.com/bradhowes/SF2Lib/workflows/CI/badge.svg)](https://github.com/bradhowes/SF2Lib/actions/workflows/CI.yml)
+[![COV](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bradhowes/dbe62f18182c82eb36dc1030819bc54b/raw/SF2Lib-coverage.json)](https://github.com/bradhowes/SF2Lib/blob/main/.github/workflows/CI.yml)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbradhowes%2FSF2Lib%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/bradhowes/SF2Lib)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbradhowes%2FSF2Lib%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/bradhowes/SF2Lib)
 [![License: MIT](https://img.shields.io/badge/License-MIT-A31F34.svg)](https://opensource.org/licenses/MIT)
