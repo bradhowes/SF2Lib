@@ -16,11 +16,10 @@ static constexpr double generator(size_t index) {
 static constexpr auto lookup_ = ConstMath::make_array<double, TableSize>(generator);
 
 /**
- Convert a value between 0 and 1200 into a frequency multiplier. See DSP::centsToFrequency for details on how it is
- used.
+ Convert a value between 0 and 1440 into an attenuation.
 
- @param partial a value between 0 and MaxCentsValue - 1
- @returns frequency multiplier
+ @param centibels a value between 0 and 1440
+ @returns attenuation
  */
 Float
 SF2::DSP::attenuationLookup(int centibels) noexcept {

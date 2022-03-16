@@ -185,14 +185,6 @@ inline double centsToFrequency(Float value) noexcept {
   return (1u << whole) * centsPartialLookup(partial);
 }
 
-/**
- Convert centibels [0-1441] into a gain value [0.0-1.0]. This is the inverse of the above.
- 
- @param centibels value to convert
- @returns gain value
- */
-inline double centibelsToGain(Float centibels) noexcept { return Tables::GainLookup::convert(centibels); }
-
 namespace Interpolation {
 
 /**

@@ -17,35 +17,6 @@ namespace SF2::DSP::Tables {
 struct Generator;
 
 /**
- Convert centibels into gain value (same as 1.0 / attenuation)
- */
-struct GainLookup {
-  inline constexpr static size_t TableSize = 1441;
-  
-  /**
-   Convert from integer (generator) value to gain
-   
-   @param centibels value to convert
-   */
-  static double convert(int centibels) noexcept {
-    return lookup_[size_t(std::clamp<int>(centibels, 0, TableSize - 1))];
-  }
-  
-  /**
-   Convert from floating-point value to gain. Rounds to nearest integer to obtain index.
-   
-   @param centibels value to convert
-   */
-  static double convert(Float centibels) noexcept { return convert(int(std::round(centibels))); }
-  
-private:
-  // static double value(size_t index) { return 1.0 / centibelsToAttenuation(index); }
-  static const std::array<double, TableSize> lookup_;
-  GainLookup() = delete;
-  friend struct Generator;
-};
-
-/**
  Interpolation using a cubic 4th-order polynomial. The coefficients of the polynomial are stored in a lookup table that
  is generated at compile time.
  */
