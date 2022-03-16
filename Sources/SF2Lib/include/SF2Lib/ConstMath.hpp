@@ -289,13 +289,13 @@ constexpr bool is_even(Integer x) {
  */
 template <typename Real, typename Integer>
 constexpr Real ipow(Real a, Integer n) {
-  static_assert(std::is_integral_v<Integer>, "pow supports only integral powers");
+  static_assert(std::is_integral_v<Integer>, "ipow supports only integral powers");
   return
-  (n <  0) ? 1 / ipow(a, -n)              :
-  (n == 0) ? 1                           :
-  (n == 1) ? a                           :
-  (a == 2) ? 1LL << n                    :
-  (is_even(n)) ? ipow(a * a, n / 2)       :
+  (n <  0) ? 1 / ipow(a, -n)        :
+  (n == 0) ? 1                      :
+  (n == 1) ? a                      :
+  (a == 2) ? Real(Integer(1) << n)  :
+  (is_even(n)) ? ipow(a * a, n / 2) :
   a * ipow(a * a, (n - 1) / 2);
 }
 
