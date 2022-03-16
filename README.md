@@ -35,17 +35,6 @@ and their levels are controlled by the `chorusEffectSend` and `reverbEffectSend`
 can then connect bus 1 to a chorus effect and bus 2 to reverb, and then connect those outputs and bus 0 of this
 library to a mixer to generate the final output.
 
-# DSPTableGenerator
-
-The SF2Lib relies on some lookup tables for fast value conversions of expensive operations at the cost of resolution.
-The library comes with generated values, but it also has a command-line tool to regenerate it. In the Xcode project that
-originally hosted this code, the generation of the table values was automated. Swift Package Manager does not support
-this type of operation, so we are left with a manual step:
-
-```
-% bash regen.sh
-```
-
 # Code
 
 Here is a rough description of the top-level folders in SF2Lib:
@@ -60,8 +49,7 @@ very little to be found in source files.
 * [IO](Sources/SF2Lib/IO) -- performs the reading and loading of SF2 files.
 * [MIDI](Sources/SF2Lib/MIDI) -- state for a MIDI connection.
 * [Render](Sources/SF2Lib/Render) -- handles rendering of audio samples from SF2 entities.
-* [Resources](Sources/SF2Lib/Resources) -- a few SF2 files to use for experimentation and testing. Though these files
-are currently packaged with SF2Lib, they are not part of the SF2Lib API.
+* [Resources](Sources/SF2Lib/Resources) -- contains a [Configuration.plist](Sources/SF2Lib/Resources/Configuration.plist) file that sets some configury options.
 
 # Credits
 
@@ -69,4 +57,10 @@ All of the code has been written by myself over the course of several years, but
 other projects, especially [FluidSynth](https://www.fluidsynth.org) and their wealth of knowledge in all things SF2.
 In particular, if there is any confusion about what the SF2 spec means, I rely on their interpretation in code. That
 said, any misrepresentations of SF2 functionality are of my own doing.
-e
+
+There are a collection of routines in [ConstMath](Sources/SF2Lib/include/ConstMath.hpp] that provide compile-time values for
+sine, natural log, and exponential function. These are used to generate the lookup tables for MIDI controller value mapping and panning.
+The functions that do this were taken from Lakshay Garg's [compile_time](https://github.com/lakshayg/compile_time) (no specific liceense) repo
+and Keith O'Hara's [GCEM](https://github.com/kthohr/gcem) (Apache license) repo. I start off with `compile_time` but I lifted the natural log function from
+`GCEM`. Again, note that the use of these compile-time methods are *only* for a very limited set of use-cases, all of which are not that 
+demanding in terms of precision. This *is* SF2 after all.
