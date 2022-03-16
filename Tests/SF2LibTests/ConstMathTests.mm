@@ -74,7 +74,6 @@ using namespace SF2;
   XCTAssertEqualWithAccuracy(2.5 * 2.5 * 2.5 * 2.5, ConstMath::ipow(-2.5, 4), epsilon);
   XCTAssertEqualWithAccuracy(-2.5 * 2.5 * 2.5, ConstMath::ipow(-2.5, 3), epsilon);
   XCTAssertEqualWithAccuracy(1.0, ConstMath::ipow(123, 0), epsilon);
-  XCTAssertEqualWithAccuracy(1.0, ConstMath::ipow(123, 0), epsilon);
 }
 
 - (void)testIsEven {
