@@ -198,6 +198,16 @@ namespace Interpolation {
 inline Float linear(Float partial, Float x0, Float x1) noexcept { return partial * (x1 - x0) + x0; }
 
 /**
+ Types and configuration for the cubic 4th order interpolator.
+ */
+struct Cubic4thOrder {
+  static constexpr size_t TableSize = 1024;
+  using WeightsEntry = std::array<double, 4>;
+
+  static const WeightsEntry& weights(size_t index) noexcept;
+};
+
+/**
  Interpolate a value from four values.
 
  @param partial location between the second value and the third. By definition it should always be < 1.0
@@ -207,7 +217,10 @@ inline Float linear(Float partial, Float x0, Float x1) noexcept { return partial
  @param x3 fourth value to use
  */
 inline static Float cubic4thOrder(Float partial, Float x0, Float x1, Float x2, Float x3) noexcept {
-  return Float(Tables::Cubic4thOrder::interpolate(partial, x0, x1, x2, x3));
+  auto index = size_t(partial * Cubic4thOrder::TableSize);
+  assert(index < Cubic4thOrder::TableSize);
+  const auto& w{Cubic4thOrder::weights(index)};
+  return x0 * w[0] + x1 * w[1] + x2 * w[2] + x3 * w[3];
 }
 
 } // Interpolation namespace
@@ -228,7 +241,6 @@ inline Float centibelsToAttenuation(Float centibels) noexcept {
   if (partial < std::numeric_limits<Float>::min()) return attenuationLookup(index1);
   int index2 = std::min<int>(index1 + 1, 1440);
   return Interpolation::linear(partial, attenuationLookup(index1), attenuationLookup(index2));
-  // return std::pow(10.0f, -DSP::clamp(centibels, 0.0, 1440.0) / CentibelsPerDecade);
 }
 
 } // SF2::DSP namespaces
