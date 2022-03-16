@@ -130,14 +130,6 @@ using namespace SF2::DSP::Tables;
   XCTAssertEqualWithAccuracy(4186.00904481, centsToFrequency(10800), self.epsilon); // C8
 }
 
-- (void)testCentsFrequncyScalingLookup {
-  XCTAssertEqualWithAccuracy(0.5, CentsFrequencyScalingLookup::convert(-1200), self.epsilon); // ⬇️ Octave
-  XCTAssertEqualWithAccuracy(std::sqrt(2.0) / 2.0, CentsFrequencyScalingLookup::convert(-600), self.epsilon); // ⬇️ 1/2
-  XCTAssertEqualWithAccuracy(1.0, CentsFrequencyScalingLookup::convert(0), self.epsilon); // No change
-  XCTAssertEqualWithAccuracy(std::sqrt(2.0), CentsFrequencyScalingLookup::convert(600), self.epsilon); // ⬆️ 1/2
-  XCTAssertEqualWithAccuracy(2.0, CentsFrequencyScalingLookup::convert(1200), self.epsilon); // ⬆️ Octave
-}
-
 - (void)testCentibelsToAttenuation {
   XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuation(-1), self.epsilon);
   XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuation(0), self.epsilon);
