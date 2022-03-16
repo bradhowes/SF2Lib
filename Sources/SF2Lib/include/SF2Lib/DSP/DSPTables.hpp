@@ -17,30 +17,6 @@ namespace SF2::DSP::Tables {
 struct Generator;
 
 /**
- Convert cents [0-1200) into frequency multiplier. This is used by the centsToFrequency() function to perform a fast
- conversion between cents and frequency.
- */
-struct CentsPartialLookup {
-  inline constexpr static int MaxCentsValue = 1200;
-  inline constexpr static size_t TableSize = MaxCentsValue;
-
-  /**
-   Convert a value between 0 and 1200 into a frequency multiplier. See DSP::centsToFrequency for details on how it is
-   used.
-
-   @param partial a value between 0 and MaxCentsValue - 1
-   @returns frequency multiplier
-   */
-  static double convert(int partial) noexcept { return lookup_[size_t(std::clamp(partial, 0, MaxCentsValue - 1))]; }
-  
-private:
-  static double value(size_t index) { return 6.875 * std::exp2(double(index) / 1200.0); }
-  static const std::array<double, TableSize> lookup_;
-  CentsPartialLookup() = delete;
-  friend struct Generator;
-};
-
-/**
  Convert centibels into attenuation via table lookup.
  */
 struct AttenuationLookup {

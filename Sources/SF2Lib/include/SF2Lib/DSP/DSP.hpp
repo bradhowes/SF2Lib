@@ -169,12 +169,14 @@ namespace SF2::DSP {
  */
 extern void panLookup(Float pan, Float& left, Float& right) noexcept;
 
+extern double centsPartialLookup(int partial) noexcept;
+
 /**
  Quickly convert cent value into a frequency using a table lookup. These calculations are taken from the Fluid Synth
  fluid_conv.c file, in particular the fluid_ct2hz_real function. Uses CentPartialLookup above to convert values from
  0 - 1199 into the proper multiplier.
  */
-inline double centsToFrequency(Float value) {
+inline double centsToFrequency(Float value) noexcept {
   if (value < 0.0f) return 1.0f;
 
   // This seems to be the fastest way to do the following. Curiously, the operation `cents % 1200` is faster than doing
@@ -182,7 +184,7 @@ inline double centsToFrequency(Float value) {
   int cents = int(value + 300);
   int whole = cents / 1200;
   int partial = cents % 1200;
-  return (1u << whole) * Tables::CentsPartialLookup::convert(partial);
+  return (1u << whole) * centsPartialLookup(partial);
 }
 
 /**
