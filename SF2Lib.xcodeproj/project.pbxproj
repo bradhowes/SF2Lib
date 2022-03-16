@@ -9,22 +9,22 @@
 /* Begin PBXAggregateTarget section */
 		"AUv3SupportPackage::AUv3-DSP-Headers::ProductTarget" /* AUv3-DSP-Headers */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = OBJ_117 /* Build configuration list for PBXAggregateTarget "AUv3-DSP-Headers" */;
+			buildConfigurationList = OBJ_116 /* Build configuration list for PBXAggregateTarget "AUv3-DSP-Headers" */;
 			buildPhases = (
 			);
 			dependencies = (
-				OBJ_120 /* PBXTargetDependency */,
+				OBJ_119 /* PBXTargetDependency */,
 			);
 			name = "AUv3-DSP-Headers";
 			productName = "AUv3-DSP-Headers";
 		};
 		"SF2Lib::SF2LibPackageTests::ProductTarget" /* SF2LibPackageTests */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = OBJ_188 /* Build configuration list for PBXAggregateTarget "SF2LibPackageTests" */;
+			buildConfigurationList = OBJ_178 /* Build configuration list for PBXAggregateTarget "SF2LibPackageTests" */;
 			buildPhases = (
 			);
 			dependencies = (
-				OBJ_191 /* PBXTargetDependency */,
+				OBJ_181 /* PBXTargetDependency */,
 			);
 			name = SF2LibPackageTests;
 			productName = SF2LibPackageTests;
@@ -32,124 +32,109 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		BD13356E27DF59C5005988F8 /* Configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = BD13356C27DF598B005988F8 /* Configuration.plist */; };
-		BD13357427DF59EB005988F8 /* Configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = BD13356C27DF598B005988F8 /* Configuration.plist */; };
-		BD13357727DF59F2005988F8 /* FreeFont.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = BD13357027DF59DB005988F8 /* FreeFont.sf2 */; };
-		BD13357827DF59F2005988F8 /* GeneralUser GS MuseScore v1.442.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = BD13357127DF59DB005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */; };
-		BD13357927DF59F2005988F8 /* RolandNicePiano.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = BD13357227DF59DB005988F8 /* RolandNicePiano.sf2 */; };
-		OBJ_127 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_104 /* Package.swift */; };
-		OBJ_132 /* DSPHeaders.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_101 /* DSPHeaders.mm */; };
-		OBJ_139 /* DSPTablesGenerator.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* DSPTablesGenerator.mm */; };
-		OBJ_140 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* main.mm */; };
-		OBJ_142 /* SF2Lib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SF2Lib::SF2Lib::Product" /* SF2Lib.framework */; };
-		OBJ_143 /* DSPHeaders.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */; };
-		OBJ_151 /* Configuration.m in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* Configuration.m */; };
-		OBJ_152 /* DSPGenerated.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* DSPGenerated.cpp */; };
-		OBJ_153 /* Bag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* Bag.cpp */; };
-		OBJ_154 /* Definition.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* Definition.cpp */; };
-		OBJ_155 /* Generator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* Generator.cpp */; };
-		OBJ_156 /* Instrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* Instrument.cpp */; };
-		OBJ_157 /* Modulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* Modulator.cpp */; };
-		OBJ_158 /* Source.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* Source.cpp */; };
-		OBJ_159 /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* Transform.cpp */; };
-		OBJ_160 /* Preset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* Preset.cpp */; };
-		OBJ_161 /* SampleHeader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_27 /* SampleHeader.cpp */; };
-		OBJ_162 /* Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* Version.cpp */; };
-		OBJ_163 /* ChunkItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* ChunkItems.cpp */; };
-		OBJ_164 /* File.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* File.cpp */; };
-		OBJ_165 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_32 /* Parser.cpp */; };
-		OBJ_166 /* Pos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* Pos.cpp */; };
-		OBJ_167 /* Logger.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_34 /* Logger.mm */; };
-		OBJ_168 /* ChannelState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_36 /* ChannelState.cpp */; };
-		OBJ_169 /* NRPN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* NRPN.cpp */; };
-		OBJ_170 /* ValueTransformer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* ValueTransformer.cpp */; };
-		OBJ_171 /* Engine.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_41 /* Engine.mm */; };
-		OBJ_172 /* LowPassFilter.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* LowPassFilter.mm */; };
-		OBJ_173 /* Preset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_43 /* Preset.cpp */; };
-		OBJ_174 /* Modulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_46 /* Modulator.cpp */; };
-		OBJ_175 /* State.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_47 /* State.cpp */; };
-		OBJ_176 /* Voice.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_48 /* Voice.mm */; };
-		OBJ_177 /* Zone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* Zone.cpp */; };
-		OBJ_179 /* DSPHeaders.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */; };
-		OBJ_186 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
-		OBJ_197 /* ConfigurationTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_59 /* ConfigurationTests.mm */; };
-		OBJ_198 /* DSPTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_60 /* DSPTests.mm */; };
-		OBJ_199 /* GeneratorAmountTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_62 /* GeneratorAmountTests.mm */; };
-		OBJ_200 /* ModulatorDefaultsTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* ModulatorDefaultsTests.mm */; };
-		OBJ_201 /* ModulatorSourceTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_64 /* ModulatorSourceTests.mm */; };
-		OBJ_202 /* ChunkTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_66 /* ChunkTests.mm */; };
-		OBJ_203 /* SFFileTestsObjC.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_67 /* SFFileTestsObjC.mm */; };
-		OBJ_204 /* TagTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_68 /* TagTests.mm */; };
-		OBJ_205 /* ChannelTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_70 /* ChannelTests.mm */; };
-		OBJ_206 /* MIDITests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_71 /* MIDITests.mm */; };
-		OBJ_207 /* NRPNTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_72 /* NRPNTests.mm */; };
-		OBJ_208 /* NoteTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_73 /* NoteTests.mm */; };
-		OBJ_209 /* ValueTransformerTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_74 /* ValueTransformerTests.mm */; };
-		OBJ_210 /* EngineTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_77 /* EngineTests.mm */; };
-		OBJ_211 /* OldestVoiceCacheTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_78 /* OldestVoiceCacheTests.mm */; };
-		OBJ_212 /* PresetCollectionTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_79 /* PresetCollectionTests.mm */; };
-		OBJ_213 /* EnvelopeTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_80 /* EnvelopeTests.mm */; };
-		OBJ_214 /* GeneratorIndexTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_81 /* GeneratorIndexTests.mm */; };
-		OBJ_215 /* InstrumentTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_82 /* InstrumentTests.mm */; };
-		OBJ_216 /* LFOTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_83 /* LFOTests.mm */; };
-		OBJ_217 /* ModulatorTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_84 /* ModulatorTests.mm */; };
-		OBJ_218 /* NormalizedSampleSourceTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_85 /* NormalizedSampleSourceTests.mm */; };
-		OBJ_219 /* PitchTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_86 /* PitchTests.mm */; };
-		OBJ_220 /* PresetTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_87 /* PresetTests.mm */; };
-		OBJ_221 /* RangeTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_88 /* RangeTests.mm */; };
-		OBJ_222 /* StateTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_89 /* StateTests.mm */; };
-		OBJ_223 /* VoiceTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_91 /* VoiceTests.mm */; };
-		OBJ_224 /* ParserTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_92 /* ParserTests.mm */; };
-		OBJ_225 /* SampleBasedContexts.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_93 /* SampleBasedContexts.mm */; };
-		OBJ_226 /* TestResources.m in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_94 /* TestResources.m */; };
-		OBJ_228 /* SF2Lib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SF2Lib::SF2Lib::Product" /* SF2Lib.framework */; };
-		OBJ_229 /* DSPHeaders.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */; };
+		BD13367F27E24B9C005988F8 /* FreeFont.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = BD13367B27E24B85005988F8 /* FreeFont.sf2 */; };
+		BD13368027E24B9C005988F8 /* GeneralUser GS MuseScore v1.442.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = BD13367C27E24B85005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */; };
+		BD13368127E24B9C005988F8 /* RolandNicePiano.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = BD13367D27E24B85005988F8 /* RolandNicePiano.sf2 */; };
+		BD13368827E24F7F005988F8 /* Configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = BD13368727E24EF6005988F8 /* Configuration.plist */; };
+		OBJ_126 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_104 /* Package.swift */; };
+		OBJ_131 /* DSPHeaders.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_101 /* DSPHeaders.mm */; };
+		OBJ_138 /* Configuration.m in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Configuration.m */; };
+		OBJ_139 /* AttenuationLookup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* AttenuationLookup.cpp */; };
+		OBJ_140 /* CentsPartialLookup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* CentsPartialLookup.cpp */; };
+		OBJ_141 /* Cubic4thOrderLookup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* Cubic4thOrderLookup.cpp */; };
+		OBJ_142 /* PanLookup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* PanLookup.cpp */; };
+		OBJ_143 /* Bag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* Bag.cpp */; };
+		OBJ_144 /* Definition.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* Definition.cpp */; };
+		OBJ_145 /* Generator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* Generator.cpp */; };
+		OBJ_146 /* Instrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* Instrument.cpp */; };
+		OBJ_147 /* Modulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_22 /* Modulator.cpp */; };
+		OBJ_148 /* Source.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* Source.cpp */; };
+		OBJ_149 /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* Transform.cpp */; };
+		OBJ_150 /* Preset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* Preset.cpp */; };
+		OBJ_151 /* SampleHeader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* SampleHeader.cpp */; };
+		OBJ_152 /* Version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_27 /* Version.cpp */; };
+		OBJ_153 /* ChunkItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* ChunkItems.cpp */; };
+		OBJ_154 /* File.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* File.cpp */; };
+		OBJ_155 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* Parser.cpp */; };
+		OBJ_156 /* Pos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_32 /* Pos.cpp */; };
+		OBJ_157 /* Logger.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* Logger.mm */; };
+		OBJ_158 /* ChannelState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* ChannelState.cpp */; };
+		OBJ_159 /* NRPN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_36 /* NRPN.cpp */; };
+		OBJ_160 /* ValueTransformer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* ValueTransformer.cpp */; };
+		OBJ_161 /* Engine.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_40 /* Engine.mm */; };
+		OBJ_162 /* LowPassFilter.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_41 /* LowPassFilter.mm */; };
+		OBJ_163 /* Preset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* Preset.cpp */; };
+		OBJ_164 /* Modulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_45 /* Modulator.cpp */; };
+		OBJ_165 /* State.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_46 /* State.cpp */; };
+		OBJ_166 /* Voice.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_47 /* Voice.mm */; };
+		OBJ_167 /* Zone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* Zone.cpp */; };
+		OBJ_169 /* DSPHeaders.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */; };
+		OBJ_176 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
+		OBJ_187 /* ConfigurationTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_58 /* ConfigurationTests.mm */; };
+		OBJ_188 /* ConstMathTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_59 /* ConstMathTests.mm */; };
+		OBJ_189 /* DSPTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_60 /* DSPTests.mm */; };
+		OBJ_190 /* GeneratorAmountTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_62 /* GeneratorAmountTests.mm */; };
+		OBJ_191 /* ModulatorDefaultsTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* ModulatorDefaultsTests.mm */; };
+		OBJ_192 /* ModulatorSourceTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_64 /* ModulatorSourceTests.mm */; };
+		OBJ_193 /* ChunkTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_66 /* ChunkTests.mm */; };
+		OBJ_194 /* ParserTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_67 /* ParserTests.mm */; };
+		OBJ_195 /* SFFileTestsObjC.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_68 /* SFFileTestsObjC.mm */; };
+		OBJ_196 /* TagTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_69 /* TagTests.mm */; };
+		OBJ_197 /* ChannelTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_71 /* ChannelTests.mm */; };
+		OBJ_198 /* MIDITests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_72 /* MIDITests.mm */; };
+		OBJ_199 /* NRPNTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_73 /* NRPNTests.mm */; };
+		OBJ_200 /* NoteTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_74 /* NoteTests.mm */; };
+		OBJ_201 /* ValueTransformerTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_75 /* ValueTransformerTests.mm */; };
+		OBJ_202 /* EngineTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_78 /* EngineTests.mm */; };
+		OBJ_203 /* OldestVoiceCacheTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_79 /* OldestVoiceCacheTests.mm */; };
+		OBJ_204 /* PresetCollectionTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_80 /* PresetCollectionTests.mm */; };
+		OBJ_205 /* EnvelopeTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_81 /* EnvelopeTests.mm */; };
+		OBJ_206 /* GeneratorIndexTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_82 /* GeneratorIndexTests.mm */; };
+		OBJ_207 /* InstrumentTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_83 /* InstrumentTests.mm */; };
+		OBJ_208 /* LFOTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_84 /* LFOTests.mm */; };
+		OBJ_209 /* NormalizedSampleSourceTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_85 /* NormalizedSampleSourceTests.mm */; };
+		OBJ_210 /* PitchTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_86 /* PitchTests.mm */; };
+		OBJ_211 /* PresetTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_87 /* PresetTests.mm */; };
+		OBJ_212 /* RangeTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_88 /* RangeTests.mm */; };
+		OBJ_213 /* ModulatorTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_90 /* ModulatorTests.mm */; };
+		OBJ_214 /* StateTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_91 /* StateTests.mm */; };
+		OBJ_215 /* VoiceTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_92 /* VoiceTests.mm */; };
+		OBJ_216 /* SampleBasedContexts.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_93 /* SampleBasedContexts.mm */; };
+		OBJ_217 /* TestResources.m in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_94 /* TestResources.m */; };
+		OBJ_219 /* SF2Lib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SF2Lib::SF2Lib::Product" /* SF2Lib.framework */; };
+		OBJ_220 /* DSPHeaders.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		BD13356627DF5962005988F8 /* PBXContainerItemProxy */ = {
+		BD13367127E24B1D005988F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = OBJ_1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "AUv3SupportPackage::DSPHeaders";
+			remoteInfo = DSPHeaders;
+		};
+		BD13367227E24B1D005988F8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "SF2Lib::SF2Lib";
 			remoteInfo = SF2Lib;
 		};
-		BD13356727DF5962005988F8 /* PBXContainerItemProxy */ = {
+		BD13367327E24B1D005988F8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "AUv3SupportPackage::DSPHeaders";
 			remoteInfo = DSPHeaders;
 		};
-		BD13356827DF5962005988F8 /* PBXContainerItemProxy */ = {
+		BD13367427E24B1D005988F8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "AUv3SupportPackage::DSPHeaders";
 			remoteInfo = DSPHeaders;
 		};
-		BD13356927DF5962005988F8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "SF2Lib::SF2Lib";
-			remoteInfo = SF2Lib;
-		};
-		BD13356A27DF5962005988F8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "AUv3SupportPackage::DSPHeaders";
-			remoteInfo = DSPHeaders;
-		};
-		BD13357527DF59EB005988F8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "AUv3SupportPackage::DSPHeaders";
-			remoteInfo = DSPHeaders;
-		};
-		BD13357627DF59EB005988F8 /* PBXContainerItemProxy */ = {
+		BD13367527E24B1D005988F8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
@@ -160,391 +145,142 @@
 
 /* Begin PBXFileReference section */
 		"AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DSPHeaders.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		BD13356C27DF598B005988F8 /* Configuration.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Configuration.plist; sourceTree = "<group>"; };
-		BD13357027DF59DB005988F8 /* FreeFont.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = FreeFont.sf2; sourceTree = "<group>"; };
-		BD13357127DF59DB005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "GeneralUser GS MuseScore v1.442.sf2"; sourceTree = "<group>"; };
-		BD13357227DF59DB005988F8 /* RolandNicePiano.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = RolandNicePiano.sf2; sourceTree = "<group>"; };
-		BD13357C27DF9D1E005988F8 /* Logger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Logger.hpp; sourceTree = "<group>"; };
-		BD13357E27DF9D1E005988F8 /* Note.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Note.hpp; sourceTree = "<group>"; };
-		BD13357F27DF9D1E005988F8 /* NRPN.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = NRPN.hpp; sourceTree = "<group>"; };
-		BD13358027DF9D1E005988F8 /* ValueTransformer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ValueTransformer.hpp; sourceTree = "<group>"; };
-		BD13358127DF9D1E005988F8 /* ChannelState.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ChannelState.hpp; sourceTree = "<group>"; };
-		BD13358227DF9D1E005988F8 /* MIDI.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MIDI.hpp; sourceTree = "<group>"; };
-		BD13358427DF9D1E005988F8 /* Preset.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Preset.hpp; sourceTree = "<group>"; };
-		BD13358627DF9D1E005988F8 /* Modulator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Modulator.hpp; sourceTree = "<group>"; };
-		BD13358727DF9D1E005988F8 /* Transform.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Transform.hpp; sourceTree = "<group>"; };
-		BD13358827DF9D1E005988F8 /* Source.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Source.hpp; sourceTree = "<group>"; };
-		BD13358927DF9D1E005988F8 /* SampleHeader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SampleHeader.hpp; sourceTree = "<group>"; };
-		BD13358A27DF9D1E005988F8 /* Version.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Version.hpp; sourceTree = "<group>"; };
-		BD13358C27DF9D1E005988F8 /* Index.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Index.hpp; sourceTree = "<group>"; };
-		BD13358D27DF9D1E005988F8 /* Definition.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Definition.hpp; sourceTree = "<group>"; };
-		BD13358E27DF9D1E005988F8 /* Amount.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Amount.hpp; sourceTree = "<group>"; };
-		BD13358F27DF9D1E005988F8 /* Generator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Generator.hpp; sourceTree = "<group>"; };
-		BD13359027DF9D1E005988F8 /* Instrument.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Instrument.hpp; sourceTree = "<group>"; };
-		BD13359127DF9D1E005988F8 /* Bag.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Bag.hpp; sourceTree = "<group>"; };
-		BD13359227DF9D1E005988F8 /* Entity.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Entity.hpp; sourceTree = "<group>"; };
-		BD13359427DF9D1E005988F8 /* Parser.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Parser.hpp; sourceTree = "<group>"; };
-		BD13359527DF9D1E005988F8 /* Tag.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Tag.hpp; sourceTree = "<group>"; };
-		BD13359627DF9D1E005988F8 /* File.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = File.hpp; sourceTree = "<group>"; };
-		BD13359727DF9D1E005988F8 /* ChunkList.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ChunkList.hpp; sourceTree = "<group>"; };
-		BD13359827DF9D1E005988F8 /* StringUtils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = StringUtils.hpp; sourceTree = "<group>"; };
-		BD13359927DF9D1E005988F8 /* Chunk.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Chunk.hpp; sourceTree = "<group>"; };
-		BD13359A27DF9D1E005988F8 /* ChunkItems.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ChunkItems.hpp; sourceTree = "<group>"; };
-		BD13359B27DF9D1E005988F8 /* Pos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Pos.hpp; sourceTree = "<group>"; };
-		BD13359C27DF9D1E005988F8 /* Format.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Format.hpp; sourceTree = "<group>"; };
-		BD13359E27DF9D1E005988F8 /* Preset.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Preset.hpp; sourceTree = "<group>"; };
-		BD13359F27DF9D1E005988F8 /* InstrumentCollection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = InstrumentCollection.hpp; sourceTree = "<group>"; };
-		BD1335A027DF9D1E005988F8 /* SampleSourceCollection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SampleSourceCollection.hpp; sourceTree = "<group>"; };
-		BD1335A127DF9D1E005988F8 /* LowPassFilter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LowPassFilter.hpp; sourceTree = "<group>"; };
-		BD1335A327DF9D1E005988F8 /* Preset.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Preset.hpp; sourceTree = "<group>"; };
-		BD1335A427DF9D1E005988F8 /* WithCollectionBase.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = WithCollectionBase.hpp; sourceTree = "<group>"; };
-		BD1335A527DF9D1E005988F8 /* Instrument.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Instrument.hpp; sourceTree = "<group>"; };
-		BD1335A627DF9D1E005988F8 /* Collection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Collection.hpp; sourceTree = "<group>"; };
-		BD1335A727DF9D1E005988F8 /* Zone.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Zone.hpp; sourceTree = "<group>"; };
-		BD1335A927DF9D1E005988F8 /* Generator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Generator.hpp; sourceTree = "<group>"; };
-		BD1335AA27DF9D1E005988F8 /* Stage.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Stage.hpp; sourceTree = "<group>"; };
-		BD1335AD27DF9D1E005988F8 /* Modulator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Modulator.hpp; sourceTree = "<group>"; };
-		BD1335AE27DF9D1E005988F8 /* Config.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Config.hpp; sourceTree = "<group>"; };
-		BD1335AF27DF9D1E005988F8 /* State.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = State.hpp; sourceTree = "<group>"; };
-		BD1335B027DF9D1E005988F8 /* GenValue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenValue.hpp; sourceTree = "<group>"; };
-		BD1335B127DF9D1E005988F8 /* GenValueCollection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GenValueCollection.hpp; sourceTree = "<group>"; };
-		BD1335B327DF9D1E005988F8 /* NormalizedSampleSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = NormalizedSampleSource.hpp; sourceTree = "<group>"; };
-		BD1335B427DF9D1E005988F8 /* Index.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Index.hpp; sourceTree = "<group>"; };
-		BD1335B527DF9D1E005988F8 /* Bounds.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Bounds.hpp; sourceTree = "<group>"; };
-		BD1335B627DF9D1E005988F8 /* Generator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Generator.hpp; sourceTree = "<group>"; };
-		BD1335B727DF9D1E005988F8 /* Pitch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Pitch.hpp; sourceTree = "<group>"; };
-		BD1335B827DF9D1E005988F8 /* Voice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Voice.hpp; sourceTree = "<group>"; };
-		BD1335B927DF9D1E005988F8 /* LFO.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = LFO.hpp; sourceTree = "<group>"; };
-		BD1335BA27DF9D1E005988F8 /* Instrument.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Instrument.hpp; sourceTree = "<group>"; };
-		BD1335BB27DF9D1E005988F8 /* Range.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Range.hpp; sourceTree = "<group>"; };
-		BD1335BD27DF9D1E005988F8 /* Engine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Engine.hpp; sourceTree = "<group>"; };
-		BD1335BE27DF9D1E005988F8 /* PresetCollection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PresetCollection.hpp; sourceTree = "<group>"; };
-		BD1335BF27DF9D1E005988F8 /* Mixer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Mixer.hpp; sourceTree = "<group>"; };
-		BD1335C027DF9D1E005988F8 /* OldestActiveVoiceCache.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OldestActiveVoiceCache.hpp; sourceTree = "<group>"; };
-		BD1335C127DF9D1E005988F8 /* Configuration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Configuration.h; sourceTree = "<group>"; };
-		BD1335C327DF9D1E005988F8 /* ListNodeAllocator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ListNodeAllocator.hpp; sourceTree = "<group>"; };
-		BD1335C427DF9D1E005988F8 /* Types.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Types.hpp; sourceTree = "<group>"; };
-		BD1335C627DF9D1E005988F8 /* DSPTables.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DSPTables.hpp; sourceTree = "<group>"; };
-		BD1335C727DF9D1E005988F8 /* DSP.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DSP.hpp; sourceTree = "<group>"; };
-		OBJ_10 /* DSPTablesGenerator.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSPTablesGenerator.mm; sourceTree = "<group>"; };
+		BD13367B27E24B85005988F8 /* FreeFont.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = FreeFont.sf2; sourceTree = "<group>"; };
+		BD13367C27E24B85005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "GeneralUser GS MuseScore v1.442.sf2"; sourceTree = "<group>"; };
+		BD13367D27E24B85005988F8 /* RolandNicePiano.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = RolandNicePiano.sf2; sourceTree = "<group>"; };
+		BD13368727E24EF6005988F8 /* Configuration.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Configuration.plist; sourceTree = "<group>"; };
 		OBJ_101 /* DSPHeaders.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSPHeaders.mm; sourceTree = "<group>"; };
 		OBJ_103 /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = /Users/howes/src/Mine/SF2Lib/SF2Lib.xcodeproj/GeneratedModuleMap/DSPHeaders/module.modulemap; sourceTree = "<group>"; };
 		OBJ_104 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/howes/src/Mine/SF2Lib/.build/checkouts/AUv3Support/Package.swift; sourceTree = "<group>"; };
-		OBJ_11 /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
-		OBJ_110 /* WD.xcresult */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = WD.xcresult; sourceTree = SOURCE_ROOT; };
-		OBJ_111 /* WD */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = WD; sourceTree = SOURCE_ROOT; };
-		OBJ_112 /* regen.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = regen.sh; sourceTree = "<group>"; };
-		OBJ_113 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		OBJ_114 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
-		OBJ_115 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		OBJ_13 /* Configuration.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Configuration.m; sourceTree = "<group>"; };
-		OBJ_15 /* DSPGenerated.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DSPGenerated.cpp; sourceTree = "<group>"; };
-		OBJ_17 /* Bag.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Bag.cpp; sourceTree = "<group>"; };
-		OBJ_19 /* Definition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Definition.cpp; sourceTree = "<group>"; };
-		OBJ_20 /* Generator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Generator.cpp; sourceTree = "<group>"; };
-		OBJ_21 /* Instrument.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Instrument.cpp; sourceTree = "<group>"; };
-		OBJ_23 /* Modulator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Modulator.cpp; sourceTree = "<group>"; };
-		OBJ_24 /* Source.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Source.cpp; sourceTree = "<group>"; };
-		OBJ_25 /* Transform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Transform.cpp; sourceTree = "<group>"; };
-		OBJ_26 /* Preset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Preset.cpp; sourceTree = "<group>"; };
-		OBJ_27 /* SampleHeader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SampleHeader.cpp; sourceTree = "<group>"; };
-		OBJ_28 /* Version.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Version.cpp; sourceTree = "<group>"; };
-		OBJ_30 /* ChunkItems.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChunkItems.cpp; sourceTree = "<group>"; };
-		OBJ_31 /* File.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = File.cpp; sourceTree = "<group>"; };
-		OBJ_32 /* Parser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
-		OBJ_33 /* Pos.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Pos.cpp; sourceTree = "<group>"; };
-		OBJ_34 /* Logger.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Logger.mm; sourceTree = "<group>"; };
-		OBJ_36 /* ChannelState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChannelState.cpp; sourceTree = "<group>"; };
-		OBJ_37 /* NRPN.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NRPN.cpp; sourceTree = "<group>"; };
-		OBJ_38 /* ValueTransformer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ValueTransformer.cpp; sourceTree = "<group>"; };
-		OBJ_41 /* Engine.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Engine.mm; sourceTree = "<group>"; };
-		OBJ_42 /* LowPassFilter.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = LowPassFilter.mm; sourceTree = "<group>"; };
-		OBJ_43 /* Preset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Preset.cpp; sourceTree = "<group>"; };
-		OBJ_46 /* Modulator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Modulator.cpp; sourceTree = "<group>"; };
-		OBJ_47 /* State.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = State.cpp; sourceTree = "<group>"; };
-		OBJ_48 /* Voice.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Voice.mm; sourceTree = "<group>"; };
-		OBJ_50 /* Zone.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Zone.cpp; sourceTree = "<group>"; };
-		OBJ_53 /* Configuration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Configuration.h; sourceTree = "<group>"; };
-		OBJ_54 /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = /Users/howes/src/Mine/SF2Lib/SF2Lib.xcodeproj/GeneratedModuleMap/SF2Lib/module.modulemap; sourceTree = "<group>"; };
-		OBJ_57 /* SampleBasedContexts.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SampleBasedContexts.hpp; sourceTree = "<group>"; };
-		OBJ_58 /* TestResources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestResources.h; sourceTree = "<group>"; };
-		OBJ_59 /* ConfigurationTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ConfigurationTests.mm; sourceTree = "<group>"; };
+		OBJ_109 /* WD.xcresult */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = WD.xcresult; sourceTree = SOURCE_ROOT; };
+		OBJ_11 /* AttenuationLookup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AttenuationLookup.cpp; sourceTree = "<group>"; };
+		OBJ_110 /* WD */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = WD; sourceTree = SOURCE_ROOT; };
+		OBJ_111 /* regen.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = regen.sh; sourceTree = "<group>"; };
+		OBJ_112 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		OBJ_113 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		OBJ_114 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		OBJ_12 /* CentsPartialLookup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CentsPartialLookup.cpp; sourceTree = "<group>"; };
+		OBJ_13 /* Cubic4thOrderLookup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Cubic4thOrderLookup.cpp; sourceTree = "<group>"; };
+		OBJ_14 /* PanLookup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PanLookup.cpp; sourceTree = "<group>"; };
+		OBJ_16 /* Bag.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Bag.cpp; sourceTree = "<group>"; };
+		OBJ_18 /* Definition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Definition.cpp; sourceTree = "<group>"; };
+		OBJ_19 /* Generator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Generator.cpp; sourceTree = "<group>"; };
+		OBJ_20 /* Instrument.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Instrument.cpp; sourceTree = "<group>"; };
+		OBJ_22 /* Modulator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Modulator.cpp; sourceTree = "<group>"; };
+		OBJ_23 /* Source.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Source.cpp; sourceTree = "<group>"; };
+		OBJ_24 /* Transform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Transform.cpp; sourceTree = "<group>"; };
+		OBJ_25 /* Preset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Preset.cpp; sourceTree = "<group>"; };
+		OBJ_26 /* SampleHeader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SampleHeader.cpp; sourceTree = "<group>"; };
+		OBJ_27 /* Version.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Version.cpp; sourceTree = "<group>"; };
+		OBJ_29 /* ChunkItems.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChunkItems.cpp; sourceTree = "<group>"; };
+		OBJ_30 /* File.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = File.cpp; sourceTree = "<group>"; };
+		OBJ_31 /* Parser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
+		OBJ_32 /* Pos.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Pos.cpp; sourceTree = "<group>"; };
+		OBJ_33 /* Logger.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Logger.mm; sourceTree = "<group>"; };
+		OBJ_35 /* ChannelState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ChannelState.cpp; sourceTree = "<group>"; };
+		OBJ_36 /* NRPN.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NRPN.cpp; sourceTree = "<group>"; };
+		OBJ_37 /* ValueTransformer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ValueTransformer.cpp; sourceTree = "<group>"; };
+		OBJ_40 /* Engine.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Engine.mm; sourceTree = "<group>"; };
+		OBJ_41 /* LowPassFilter.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = LowPassFilter.mm; sourceTree = "<group>"; };
+		OBJ_42 /* Preset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Preset.cpp; sourceTree = "<group>"; };
+		OBJ_45 /* Modulator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Modulator.cpp; sourceTree = "<group>"; };
+		OBJ_46 /* State.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = State.cpp; sourceTree = "<group>"; };
+		OBJ_47 /* Voice.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Voice.mm; sourceTree = "<group>"; };
+		OBJ_49 /* Zone.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Zone.cpp; sourceTree = "<group>"; };
+		OBJ_52 /* Configuration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Configuration.h; sourceTree = "<group>"; };
+		OBJ_53 /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = /Users/howes/src/Mine/SF2Lib/SF2Lib.xcodeproj/GeneratedModuleMap/SF2Lib/module.modulemap; sourceTree = "<group>"; };
+		OBJ_56 /* SampleBasedContexts.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SampleBasedContexts.hpp; sourceTree = "<group>"; };
+		OBJ_57 /* TestResources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestResources.h; sourceTree = "<group>"; };
+		OBJ_58 /* ConfigurationTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ConfigurationTests.mm; sourceTree = "<group>"; };
+		OBJ_59 /* ConstMathTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ConstMathTests.mm; sourceTree = "<group>"; };
 		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		OBJ_60 /* DSPTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSPTests.mm; sourceTree = "<group>"; };
 		OBJ_62 /* GeneratorAmountTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GeneratorAmountTests.mm; sourceTree = "<group>"; };
 		OBJ_63 /* ModulatorDefaultsTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ModulatorDefaultsTests.mm; sourceTree = "<group>"; };
 		OBJ_64 /* ModulatorSourceTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ModulatorSourceTests.mm; sourceTree = "<group>"; };
 		OBJ_66 /* ChunkTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ChunkTests.mm; sourceTree = "<group>"; };
-		OBJ_67 /* SFFileTestsObjC.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SFFileTestsObjC.mm; sourceTree = "<group>"; };
-		OBJ_68 /* TagTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TagTests.mm; sourceTree = "<group>"; };
-		OBJ_70 /* ChannelTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ChannelTests.mm; sourceTree = "<group>"; };
-		OBJ_71 /* MIDITests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MIDITests.mm; sourceTree = "<group>"; };
-		OBJ_72 /* NRPNTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = NRPNTests.mm; sourceTree = "<group>"; };
-		OBJ_73 /* NoteTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = NoteTests.mm; sourceTree = "<group>"; };
-		OBJ_74 /* ValueTransformerTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ValueTransformerTests.mm; sourceTree = "<group>"; };
-		OBJ_77 /* EngineTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = EngineTests.mm; sourceTree = "<group>"; };
-		OBJ_78 /* OldestVoiceCacheTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = OldestVoiceCacheTests.mm; sourceTree = "<group>"; };
-		OBJ_79 /* PresetCollectionTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PresetCollectionTests.mm; sourceTree = "<group>"; };
-		OBJ_80 /* EnvelopeTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = EnvelopeTests.mm; sourceTree = "<group>"; };
-		OBJ_81 /* GeneratorIndexTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GeneratorIndexTests.mm; sourceTree = "<group>"; };
-		OBJ_82 /* InstrumentTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = InstrumentTests.mm; sourceTree = "<group>"; };
-		OBJ_83 /* LFOTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = LFOTests.mm; sourceTree = "<group>"; };
-		OBJ_84 /* ModulatorTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ModulatorTests.mm; sourceTree = "<group>"; };
+		OBJ_67 /* ParserTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ParserTests.mm; sourceTree = "<group>"; };
+		OBJ_68 /* SFFileTestsObjC.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SFFileTestsObjC.mm; sourceTree = "<group>"; };
+		OBJ_69 /* TagTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TagTests.mm; sourceTree = "<group>"; };
+		OBJ_71 /* ChannelTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ChannelTests.mm; sourceTree = "<group>"; };
+		OBJ_72 /* MIDITests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MIDITests.mm; sourceTree = "<group>"; };
+		OBJ_73 /* NRPNTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = NRPNTests.mm; sourceTree = "<group>"; };
+		OBJ_74 /* NoteTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = NoteTests.mm; sourceTree = "<group>"; };
+		OBJ_75 /* ValueTransformerTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ValueTransformerTests.mm; sourceTree = "<group>"; };
+		OBJ_78 /* EngineTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = EngineTests.mm; sourceTree = "<group>"; };
+		OBJ_79 /* OldestVoiceCacheTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = OldestVoiceCacheTests.mm; sourceTree = "<group>"; };
+		OBJ_80 /* PresetCollectionTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PresetCollectionTests.mm; sourceTree = "<group>"; };
+		OBJ_81 /* EnvelopeTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = EnvelopeTests.mm; sourceTree = "<group>"; };
+		OBJ_82 /* GeneratorIndexTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GeneratorIndexTests.mm; sourceTree = "<group>"; };
+		OBJ_83 /* InstrumentTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = InstrumentTests.mm; sourceTree = "<group>"; };
+		OBJ_84 /* LFOTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = LFOTests.mm; sourceTree = "<group>"; };
 		OBJ_85 /* NormalizedSampleSourceTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = NormalizedSampleSourceTests.mm; sourceTree = "<group>"; };
 		OBJ_86 /* PitchTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PitchTests.mm; sourceTree = "<group>"; };
 		OBJ_87 /* PresetTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PresetTests.mm; sourceTree = "<group>"; };
 		OBJ_88 /* RangeTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RangeTests.mm; sourceTree = "<group>"; };
-		OBJ_89 /* StateTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = StateTests.mm; sourceTree = "<group>"; };
-		OBJ_9 /* DSPTablesGenerator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DSPTablesGenerator.hpp; sourceTree = "<group>"; };
-		OBJ_91 /* VoiceTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VoiceTests.mm; sourceTree = "<group>"; };
-		OBJ_92 /* ParserTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = ParserTests.mm; path = IO/ParserTests.mm; sourceTree = "<group>"; };
+		OBJ_9 /* Configuration.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Configuration.m; sourceTree = "<group>"; };
+		OBJ_90 /* ModulatorTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ModulatorTests.mm; sourceTree = "<group>"; };
+		OBJ_91 /* StateTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = StateTests.mm; sourceTree = "<group>"; };
+		OBJ_92 /* VoiceTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VoiceTests.mm; sourceTree = "<group>"; };
 		OBJ_93 /* SampleBasedContexts.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SampleBasedContexts.mm; sourceTree = "<group>"; };
 		OBJ_94 /* TestResources.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestResources.m; sourceTree = "<group>"; };
-		"SF2Lib::DSPTableGenerator::Product" /* DSPTableGenerator */ = {isa = PBXFileReference; lastKnownFileType = text; path = DSPTableGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		"SF2Lib::SF2Lib::Product" /* SF2Lib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SF2Lib.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"SF2Lib::SF2LibTests::Product" /* SF2LibTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = SF2LibTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		OBJ_133 /* Frameworks */ = {
+		OBJ_132 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_141 /* Frameworks */ = {
+		OBJ_168 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_142 /* SF2Lib.framework in Frameworks */,
-				OBJ_143 /* DSPHeaders.framework in Frameworks */,
+				OBJ_169 /* DSPHeaders.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_178 /* Frameworks */ = {
+		OBJ_218 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_179 /* DSPHeaders.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		OBJ_227 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_228 /* SF2Lib.framework in Frameworks */,
-				OBJ_229 /* DSPHeaders.framework in Frameworks */,
+				OBJ_219 /* SF2Lib.framework in Frameworks */,
+				OBJ_220 /* DSPHeaders.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		BD13356B27DF598B005988F8 /* Resources */ = {
+		BD13367A27E24B85005988F8 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				BD13356C27DF598B005988F8 /* Configuration.plist */,
+				BD13367B27E24B85005988F8 /* FreeFont.sf2 */,
+				BD13367C27E24B85005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */,
+				BD13367D27E24B85005988F8 /* RolandNicePiano.sf2 */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		BD13356F27DF59DB005988F8 /* Resources */ = {
+		BD13368627E24EF6005988F8 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				BD13357027DF59DB005988F8 /* FreeFont.sf2 */,
-				BD13357127DF59DB005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */,
-				BD13357227DF59DB005988F8 /* RolandNicePiano.sf2 */,
+				BD13368727E24EF6005988F8 /* Configuration.plist */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		BD13357A27DF9D1E005988F8 /* include */ = {
+		OBJ_10 /* DSP */ = {
 			isa = PBXGroup;
 			children = (
-				BD13357B27DF9D1E005988F8 /* SF2Lib */,
-			);
-			path = include;
-			sourceTree = "<group>";
-		};
-		BD13357B27DF9D1E005988F8 /* SF2Lib */ = {
-			isa = PBXGroup;
-			children = (
-				BD13357C27DF9D1E005988F8 /* Logger.hpp */,
-				BD13357D27DF9D1E005988F8 /* MIDI */,
-				BD13358327DF9D1E005988F8 /* Entity */,
-				BD13359327DF9D1E005988F8 /* IO */,
-				BD13359D27DF9D1E005988F8 /* Render */,
-				BD1335C127DF9D1E005988F8 /* Configuration.h */,
-				BD1335C227DF9D1E005988F8 /* Utils */,
-				BD1335C427DF9D1E005988F8 /* Types.hpp */,
-				BD1335C527DF9D1E005988F8 /* DSP */,
-			);
-			path = SF2Lib;
-			sourceTree = "<group>";
-		};
-		BD13357D27DF9D1E005988F8 /* MIDI */ = {
-			isa = PBXGroup;
-			children = (
-				BD13357E27DF9D1E005988F8 /* Note.hpp */,
-				BD13357F27DF9D1E005988F8 /* NRPN.hpp */,
-				BD13358027DF9D1E005988F8 /* ValueTransformer.hpp */,
-				BD13358127DF9D1E005988F8 /* ChannelState.hpp */,
-				BD13358227DF9D1E005988F8 /* MIDI.hpp */,
-			);
-			path = MIDI;
-			sourceTree = "<group>";
-		};
-		BD13358327DF9D1E005988F8 /* Entity */ = {
-			isa = PBXGroup;
-			children = (
-				BD13358427DF9D1E005988F8 /* Preset.hpp */,
-				BD13358527DF9D1E005988F8 /* Modulator */,
-				BD13358927DF9D1E005988F8 /* SampleHeader.hpp */,
-				BD13358A27DF9D1E005988F8 /* Version.hpp */,
-				BD13358B27DF9D1E005988F8 /* Generator */,
-				BD13359027DF9D1E005988F8 /* Instrument.hpp */,
-				BD13359127DF9D1E005988F8 /* Bag.hpp */,
-				BD13359227DF9D1E005988F8 /* Entity.hpp */,
-			);
-			path = Entity;
-			sourceTree = "<group>";
-		};
-		BD13358527DF9D1E005988F8 /* Modulator */ = {
-			isa = PBXGroup;
-			children = (
-				BD13358627DF9D1E005988F8 /* Modulator.hpp */,
-				BD13358727DF9D1E005988F8 /* Transform.hpp */,
-				BD13358827DF9D1E005988F8 /* Source.hpp */,
-			);
-			path = Modulator;
-			sourceTree = "<group>";
-		};
-		BD13358B27DF9D1E005988F8 /* Generator */ = {
-			isa = PBXGroup;
-			children = (
-				BD13358C27DF9D1E005988F8 /* Index.hpp */,
-				BD13358D27DF9D1E005988F8 /* Definition.hpp */,
-				BD13358E27DF9D1E005988F8 /* Amount.hpp */,
-				BD13358F27DF9D1E005988F8 /* Generator.hpp */,
-			);
-			path = Generator;
-			sourceTree = "<group>";
-		};
-		BD13359327DF9D1E005988F8 /* IO */ = {
-			isa = PBXGroup;
-			children = (
-				BD13359427DF9D1E005988F8 /* Parser.hpp */,
-				BD13359527DF9D1E005988F8 /* Tag.hpp */,
-				BD13359627DF9D1E005988F8 /* File.hpp */,
-				BD13359727DF9D1E005988F8 /* ChunkList.hpp */,
-				BD13359827DF9D1E005988F8 /* StringUtils.hpp */,
-				BD13359927DF9D1E005988F8 /* Chunk.hpp */,
-				BD13359A27DF9D1E005988F8 /* ChunkItems.hpp */,
-				BD13359B27DF9D1E005988F8 /* Pos.hpp */,
-				BD13359C27DF9D1E005988F8 /* Format.hpp */,
-			);
-			path = IO;
-			sourceTree = "<group>";
-		};
-		BD13359D27DF9D1E005988F8 /* Render */ = {
-			isa = PBXGroup;
-			children = (
-				BD13359E27DF9D1E005988F8 /* Preset.hpp */,
-				BD13359F27DF9D1E005988F8 /* InstrumentCollection.hpp */,
-				BD1335A027DF9D1E005988F8 /* SampleSourceCollection.hpp */,
-				BD1335A127DF9D1E005988F8 /* LowPassFilter.hpp */,
-				BD1335A227DF9D1E005988F8 /* Zone */,
-				BD1335A827DF9D1E005988F8 /* Envelope */,
-				BD1335AB27DF9D1E005988F8 /* Voice */,
-				BD1335B927DF9D1E005988F8 /* LFO.hpp */,
-				BD1335BA27DF9D1E005988F8 /* Instrument.hpp */,
-				BD1335BB27DF9D1E005988F8 /* Range.hpp */,
-				BD1335BC27DF9D1E005988F8 /* Engine */,
-			);
-			path = Render;
-			sourceTree = "<group>";
-		};
-		BD1335A227DF9D1E005988F8 /* Zone */ = {
-			isa = PBXGroup;
-			children = (
-				BD1335A327DF9D1E005988F8 /* Preset.hpp */,
-				BD1335A427DF9D1E005988F8 /* WithCollectionBase.hpp */,
-				BD1335A527DF9D1E005988F8 /* Instrument.hpp */,
-				BD1335A627DF9D1E005988F8 /* Collection.hpp */,
-				BD1335A727DF9D1E005988F8 /* Zone.hpp */,
-			);
-			path = Zone;
-			sourceTree = "<group>";
-		};
-		BD1335A827DF9D1E005988F8 /* Envelope */ = {
-			isa = PBXGroup;
-			children = (
-				BD1335A927DF9D1E005988F8 /* Generator.hpp */,
-				BD1335AA27DF9D1E005988F8 /* Stage.hpp */,
-			);
-			path = Envelope;
-			sourceTree = "<group>";
-		};
-		BD1335AB27DF9D1E005988F8 /* Voice */ = {
-			isa = PBXGroup;
-			children = (
-				BD1335AC27DF9D1E005988F8 /* State */,
-				BD1335B227DF9D1E005988F8 /* Sample */,
-				BD1335B827DF9D1E005988F8 /* Voice.hpp */,
-			);
-			path = Voice;
-			sourceTree = "<group>";
-		};
-		BD1335AC27DF9D1E005988F8 /* State */ = {
-			isa = PBXGroup;
-			children = (
-				BD1335AD27DF9D1E005988F8 /* Modulator.hpp */,
-				BD1335AE27DF9D1E005988F8 /* Config.hpp */,
-				BD1335AF27DF9D1E005988F8 /* State.hpp */,
-				BD1335B027DF9D1E005988F8 /* GenValue.hpp */,
-				BD1335B127DF9D1E005988F8 /* GenValueCollection.hpp */,
-			);
-			path = State;
-			sourceTree = "<group>";
-		};
-		BD1335B227DF9D1E005988F8 /* Sample */ = {
-			isa = PBXGroup;
-			children = (
-				BD1335B327DF9D1E005988F8 /* NormalizedSampleSource.hpp */,
-				BD1335B427DF9D1E005988F8 /* Index.hpp */,
-				BD1335B527DF9D1E005988F8 /* Bounds.hpp */,
-				BD1335B627DF9D1E005988F8 /* Generator.hpp */,
-				BD1335B727DF9D1E005988F8 /* Pitch.hpp */,
-			);
-			path = Sample;
-			sourceTree = "<group>";
-		};
-		BD1335BC27DF9D1E005988F8 /* Engine */ = {
-			isa = PBXGroup;
-			children = (
-				BD1335BD27DF9D1E005988F8 /* Engine.hpp */,
-				BD1335BE27DF9D1E005988F8 /* PresetCollection.hpp */,
-				BD1335BF27DF9D1E005988F8 /* Mixer.hpp */,
-				BD1335C027DF9D1E005988F8 /* OldestActiveVoiceCache.hpp */,
-			);
-			path = Engine;
-			sourceTree = "<group>";
-		};
-		BD1335C227DF9D1E005988F8 /* Utils */ = {
-			isa = PBXGroup;
-			children = (
-				BD1335C327DF9D1E005988F8 /* ListNodeAllocator.hpp */,
-			);
-			path = Utils;
-			sourceTree = "<group>";
-		};
-		BD1335C527DF9D1E005988F8 /* DSP */ = {
-			isa = PBXGroup;
-			children = (
-				BD1335C627DF9D1E005988F8 /* DSPTables.hpp */,
-				BD1335C727DF9D1E005988F8 /* DSP.hpp */,
+				OBJ_11 /* AttenuationLookup.cpp */,
+				OBJ_12 /* CentsPartialLookup.cpp */,
+				OBJ_13 /* Cubic4thOrderLookup.cpp */,
+				OBJ_14 /* PanLookup.cpp */,
 			);
 			path = DSP;
 			sourceTree = "<group>";
@@ -571,194 +307,168 @@
 			isa = PBXGroup;
 			children = (
 				"AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */,
-				"SF2Lib::DSPTableGenerator::Product" /* DSPTableGenerator */,
 				"SF2Lib::SF2Lib::Product" /* SF2Lib.framework */,
 				"SF2Lib::SF2LibTests::Product" /* SF2LibTests.xctest */,
 			);
 			name = Products;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		OBJ_12 /* SF2Lib */ = {
+		OBJ_15 /* Entity */ = {
 			isa = PBXGroup;
 			children = (
-				BD13357A27DF9D1E005988F8 /* include */,
-				BD13356B27DF598B005988F8 /* Resources */,
-				OBJ_13 /* Configuration.m */,
-				OBJ_14 /* DSP */,
-				OBJ_16 /* Entity */,
-				OBJ_29 /* IO */,
-				OBJ_34 /* Logger.mm */,
-				OBJ_35 /* MIDI */,
-				OBJ_39 /* Render */,
-				OBJ_51 /* include */,
-			);
-			name = SF2Lib;
-			path = Sources/SF2Lib;
-			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_14 /* DSP */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_15 /* DSPGenerated.cpp */,
-			);
-			path = DSP;
-			sourceTree = "<group>";
-		};
-		OBJ_16 /* Entity */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_17 /* Bag.cpp */,
-				OBJ_18 /* Generator */,
-				OBJ_21 /* Instrument.cpp */,
-				OBJ_22 /* Modulator */,
-				OBJ_26 /* Preset.cpp */,
-				OBJ_27 /* SampleHeader.cpp */,
-				OBJ_28 /* Version.cpp */,
+				OBJ_16 /* Bag.cpp */,
+				OBJ_17 /* Generator */,
+				OBJ_20 /* Instrument.cpp */,
+				OBJ_21 /* Modulator */,
+				OBJ_25 /* Preset.cpp */,
+				OBJ_26 /* SampleHeader.cpp */,
+				OBJ_27 /* Version.cpp */,
 			);
 			path = Entity;
 			sourceTree = "<group>";
 		};
-		OBJ_18 /* Generator */ = {
+		OBJ_17 /* Generator */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_19 /* Definition.cpp */,
-				OBJ_20 /* Generator.cpp */,
+				OBJ_18 /* Definition.cpp */,
+				OBJ_19 /* Generator.cpp */,
 			);
 			path = Generator;
 			sourceTree = "<group>";
 		};
-		OBJ_22 /* Modulator */ = {
+		OBJ_21 /* Modulator */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_23 /* Modulator.cpp */,
-				OBJ_24 /* Source.cpp */,
-				OBJ_25 /* Transform.cpp */,
+				OBJ_22 /* Modulator.cpp */,
+				OBJ_23 /* Source.cpp */,
+				OBJ_24 /* Transform.cpp */,
 			);
 			path = Modulator;
 			sourceTree = "<group>";
 		};
-		OBJ_29 /* IO */ = {
+		OBJ_28 /* IO */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_30 /* ChunkItems.cpp */,
-				OBJ_31 /* File.cpp */,
-				OBJ_32 /* Parser.cpp */,
-				OBJ_33 /* Pos.cpp */,
+				OBJ_29 /* ChunkItems.cpp */,
+				OBJ_30 /* File.cpp */,
+				OBJ_31 /* Parser.cpp */,
+				OBJ_32 /* Pos.cpp */,
 			);
 			path = IO;
 			sourceTree = "<group>";
 		};
-		OBJ_35 /* MIDI */ = {
+		OBJ_34 /* MIDI */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_36 /* ChannelState.cpp */,
-				OBJ_37 /* NRPN.cpp */,
-				OBJ_38 /* ValueTransformer.cpp */,
+				OBJ_35 /* ChannelState.cpp */,
+				OBJ_36 /* NRPN.cpp */,
+				OBJ_37 /* ValueTransformer.cpp */,
 			);
 			path = MIDI;
 			sourceTree = "<group>";
 		};
-		OBJ_39 /* Render */ = {
+		OBJ_38 /* Render */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_40 /* Engine */,
-				OBJ_42 /* LowPassFilter.mm */,
-				OBJ_43 /* Preset.cpp */,
-				OBJ_44 /* Voice */,
-				OBJ_49 /* Zone */,
+				OBJ_39 /* Engine */,
+				OBJ_41 /* LowPassFilter.mm */,
+				OBJ_42 /* Preset.cpp */,
+				OBJ_43 /* Voice */,
+				OBJ_48 /* Zone */,
 			);
 			path = Render;
 			sourceTree = "<group>";
 		};
-		OBJ_40 /* Engine */ = {
+		OBJ_39 /* Engine */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_41 /* Engine.mm */,
+				OBJ_40 /* Engine.mm */,
 			);
 			path = Engine;
 			sourceTree = "<group>";
 		};
-		OBJ_44 /* Voice */ = {
+		OBJ_43 /* Voice */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_45 /* State */,
-				OBJ_48 /* Voice.mm */,
+				OBJ_44 /* State */,
+				OBJ_47 /* Voice.mm */,
 			);
 			path = Voice;
 			sourceTree = "<group>";
 		};
-		OBJ_45 /* State */ = {
+		OBJ_44 /* State */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_46 /* Modulator.cpp */,
-				OBJ_47 /* State.cpp */,
+				OBJ_45 /* Modulator.cpp */,
+				OBJ_46 /* State.cpp */,
 			);
 			path = State;
 			sourceTree = "<group>";
 		};
-		OBJ_49 /* Zone */ = {
+		OBJ_48 /* Zone */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_50 /* Zone.cpp */,
+				OBJ_49 /* Zone.cpp */,
 			);
 			path = Zone;
 			sourceTree = "<group>";
 		};
-		OBJ_5 = {
+		OBJ_5 /*  */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
 				OBJ_7 /* Sources */,
-				OBJ_55 /* Tests */,
+				OBJ_54 /* Tests */,
 				OBJ_95 /* Dependencies */,
 				OBJ_105 /* Products */,
-				OBJ_110 /* WD.xcresult */,
-				OBJ_111 /* WD */,
-				OBJ_112 /* regen.sh */,
-				OBJ_113 /* LICENSE */,
-				OBJ_114 /* Makefile */,
-				OBJ_115 /* README.md */,
+				OBJ_109 /* WD.xcresult */,
+				OBJ_110 /* WD */,
+				OBJ_111 /* regen.sh */,
+				OBJ_112 /* LICENSE */,
+				OBJ_113 /* Makefile */,
+				OBJ_114 /* README.md */,
 			);
+			name = "";
 			sourceTree = "<group>";
 		};
-		OBJ_51 /* include */ = {
+		OBJ_50 /* include */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_52 /* SF2Lib */,
-				OBJ_54 /* module.modulemap */,
+				OBJ_51 /* SF2Lib */,
+				OBJ_53 /* module.modulemap */,
 			);
 			path = include;
 			sourceTree = "<group>";
 		};
-		OBJ_52 /* SF2Lib */ = {
+		OBJ_51 /* SF2Lib */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_53 /* Configuration.h */,
+				OBJ_52 /* Configuration.h */,
 			);
 			path = SF2Lib;
 			sourceTree = "<group>";
 		};
-		OBJ_55 /* Tests */ = {
+		OBJ_54 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_56 /* SF2LibTests */,
+				OBJ_55 /* SF2LibTests */,
 			);
 			name = Tests;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_56 /* SF2LibTests */ = {
+		OBJ_55 /* SF2LibTests */ = {
 			isa = PBXGroup;
 			children = (
-				BD13356F27DF59DB005988F8 /* Resources */,
-				OBJ_57 /* SampleBasedContexts.hpp */,
-				OBJ_92 /* ParserTests.mm */,
-				OBJ_58 /* TestResources.h */,
-				OBJ_59 /* ConfigurationTests.mm */,
+				BD13367A27E24B85005988F8 /* Resources */,
+				OBJ_56 /* SampleBasedContexts.hpp */,
+				OBJ_57 /* TestResources.h */,
+				OBJ_58 /* ConfigurationTests.mm */,
+				OBJ_59 /* ConstMathTests.mm */,
 				OBJ_60 /* DSPTests.mm */,
 				OBJ_61 /* Entity */,
 				OBJ_65 /* IO */,
-				OBJ_69 /* MIDI */,
-				OBJ_75 /* Render */,
+				OBJ_70 /* MIDI */,
+				OBJ_76 /* Render */,
 				OBJ_93 /* SampleBasedContexts.mm */,
 				OBJ_94 /* TestResources.m */,
 			);
@@ -780,77 +490,83 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_66 /* ChunkTests.mm */,
-				OBJ_67 /* SFFileTestsObjC.mm */,
-				OBJ_68 /* TagTests.mm */,
+				OBJ_67 /* ParserTests.mm */,
+				OBJ_68 /* SFFileTestsObjC.mm */,
+				OBJ_69 /* TagTests.mm */,
 			);
 			path = IO;
-			sourceTree = "<group>";
-		};
-		OBJ_69 /* MIDI */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_70 /* ChannelTests.mm */,
-				OBJ_71 /* MIDITests.mm */,
-				OBJ_72 /* NRPNTests.mm */,
-				OBJ_73 /* NoteTests.mm */,
-				OBJ_74 /* ValueTransformerTests.mm */,
-			);
-			path = MIDI;
 			sourceTree = "<group>";
 		};
 		OBJ_7 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_8 /* DSPTableGenerator */,
-				OBJ_12 /* SF2Lib */,
+				OBJ_8 /* SF2Lib */,
 			);
 			name = Sources;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_75 /* Render */ = {
+		OBJ_70 /* MIDI */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_76 /* EngineTests */,
-				OBJ_80 /* EnvelopeTests.mm */,
-				OBJ_81 /* GeneratorIndexTests.mm */,
-				OBJ_82 /* InstrumentTests.mm */,
-				OBJ_83 /* LFOTests.mm */,
+				OBJ_71 /* ChannelTests.mm */,
+				OBJ_72 /* MIDITests.mm */,
+				OBJ_73 /* NRPNTests.mm */,
+				OBJ_74 /* NoteTests.mm */,
+				OBJ_75 /* ValueTransformerTests.mm */,
+			);
+			path = MIDI;
+			sourceTree = "<group>";
+		};
+		OBJ_76 /* Render */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_77 /* EngineTests */,
+				OBJ_81 /* EnvelopeTests.mm */,
+				OBJ_82 /* GeneratorIndexTests.mm */,
+				OBJ_83 /* InstrumentTests.mm */,
+				OBJ_84 /* LFOTests.mm */,
 				OBJ_85 /* NormalizedSampleSourceTests.mm */,
 				OBJ_86 /* PitchTests.mm */,
 				OBJ_87 /* PresetTests.mm */,
 				OBJ_88 /* RangeTests.mm */,
-				OBJ_90 /* Voice */,
+				OBJ_89 /* Voice */,
 			);
 			path = Render;
 			sourceTree = "<group>";
 		};
-		OBJ_76 /* EngineTests */ = {
+		OBJ_77 /* EngineTests */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_77 /* EngineTests.mm */,
-				OBJ_78 /* OldestVoiceCacheTests.mm */,
-				OBJ_79 /* PresetCollectionTests.mm */,
+				OBJ_78 /* EngineTests.mm */,
+				OBJ_79 /* OldestVoiceCacheTests.mm */,
+				OBJ_80 /* PresetCollectionTests.mm */,
 			);
 			path = EngineTests;
 			sourceTree = "<group>";
 		};
-		OBJ_8 /* DSPTableGenerator */ = {
+		OBJ_8 /* SF2Lib */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_9 /* DSPTablesGenerator.hpp */,
-				OBJ_10 /* DSPTablesGenerator.mm */,
-				OBJ_11 /* main.mm */,
+				BD13368627E24EF6005988F8 /* Resources */,
+				OBJ_9 /* Configuration.m */,
+				OBJ_10 /* DSP */,
+				OBJ_15 /* Entity */,
+				OBJ_28 /* IO */,
+				OBJ_33 /* Logger.mm */,
+				OBJ_34 /* MIDI */,
+				OBJ_38 /* Render */,
+				OBJ_50 /* include */,
 			);
-			name = DSPTableGenerator;
-			path = Sources/DSPTableGenerator;
+			name = SF2Lib;
+			path = Sources/SF2Lib;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_90 /* Voice */ = {
+		OBJ_89 /* Voice */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_84 /* ModulatorTests.mm */,
-				OBJ_91 /* VoiceTests.mm */,
-				OBJ_89 /* StateTests.mm */,
+				OBJ_90 /* ModulatorTests.mm */,
+				OBJ_91 /* StateTests.mm */,
+				OBJ_92 /* VoiceTests.mm */,
 			);
 			path = Voice;
 			sourceTree = "<group>";
@@ -904,10 +620,10 @@
 /* Begin PBXNativeTarget section */
 		"AUv3SupportPackage::DSPHeaders" /* DSPHeaders */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_128 /* Build configuration list for PBXNativeTarget "DSPHeaders" */;
+			buildConfigurationList = OBJ_127 /* Build configuration list for PBXNativeTarget "DSPHeaders" */;
 			buildPhases = (
-				OBJ_131 /* Sources */,
-				OBJ_133 /* Frameworks */,
+				OBJ_130 /* Sources */,
+				OBJ_132 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -920,9 +636,9 @@
 		};
 		"AUv3SupportPackage::SwiftPMPackageDescription" /* AUv3SupportPackagePackageDescription */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_123 /* Build configuration list for PBXNativeTarget "AUv3SupportPackagePackageDescription" */;
+			buildConfigurationList = OBJ_122 /* Build configuration list for PBXNativeTarget "AUv3SupportPackagePackageDescription" */;
 			buildPhases = (
-				OBJ_126 /* Sources */,
+				OBJ_125 /* Sources */,
 			);
 			buildRules = (
 			);
@@ -932,36 +648,17 @@
 			productName = AUv3SupportPackagePackageDescription;
 			productType = "com.apple.product-type.framework";
 		};
-		"SF2Lib::DSPTableGenerator" /* DSPTableGenerator */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_135 /* Build configuration list for PBXNativeTarget "DSPTableGenerator" */;
-			buildPhases = (
-				OBJ_138 /* Sources */,
-				OBJ_141 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				OBJ_144 /* PBXTargetDependency */,
-				OBJ_146 /* PBXTargetDependency */,
-			);
-			name = DSPTableGenerator;
-			productName = DSPTableGenerator;
-			productReference = "SF2Lib::DSPTableGenerator::Product" /* DSPTableGenerator */;
-			productType = "com.apple.product-type.tool";
-		};
 		"SF2Lib::SF2Lib" /* SF2Lib */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_147 /* Build configuration list for PBXNativeTarget "SF2Lib" */;
+			buildConfigurationList = OBJ_134 /* Build configuration list for PBXNativeTarget "SF2Lib" */;
 			buildPhases = (
-				OBJ_150 /* Sources */,
-				OBJ_178 /* Frameworks */,
-				BD13356D27DF59BC005988F8 /* Resources */,
+				OBJ_137 /* Sources */,
+				OBJ_168 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				OBJ_180 /* PBXTargetDependency */,
+				OBJ_170 /* PBXTargetDependency */,
 			);
 			name = SF2Lib;
 			productName = SF2Lib;
@@ -970,17 +667,17 @@
 		};
 		"SF2Lib::SF2LibTests" /* SF2LibTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_193 /* Build configuration list for PBXNativeTarget "SF2LibTests" */;
+			buildConfigurationList = OBJ_183 /* Build configuration list for PBXNativeTarget "SF2LibTests" */;
 			buildPhases = (
-				OBJ_196 /* Sources */,
-				OBJ_227 /* Frameworks */,
-				BD13357327DF59E6005988F8 /* Resources */,
+				OBJ_186 /* Sources */,
+				OBJ_218 /* Frameworks */,
+				BD13367E27E24B8F005988F8 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				OBJ_230 /* PBXTargetDependency */,
-				OBJ_231 /* PBXTargetDependency */,
+				OBJ_221 /* PBXTargetDependency */,
+				OBJ_222 /* PBXTargetDependency */,
 			);
 			name = SF2LibTests;
 			productName = SF2LibTests;
@@ -989,9 +686,9 @@
 		};
 		"SF2Lib::SwiftPMPackageDescription" /* SF2LibPackageDescription */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_182 /* Build configuration list for PBXNativeTarget "SF2LibPackageDescription" */;
+			buildConfigurationList = OBJ_172 /* Build configuration list for PBXNativeTarget "SF2LibPackageDescription" */;
 			buildPhases = (
-				OBJ_185 /* Sources */,
+				OBJ_175 /* Sources */,
 			);
 			buildRules = (
 			);
@@ -1017,7 +714,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5;
+			mainGroup = OBJ_5 /*  */;
 			productRefGroup = OBJ_105 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1025,7 +722,6 @@
 				"AUv3SupportPackage::AUv3-DSP-Headers::ProductTarget" /* AUv3-DSP-Headers */,
 				"AUv3SupportPackage::SwiftPMPackageDescription" /* AUv3SupportPackagePackageDescription */,
 				"AUv3SupportPackage::DSPHeaders" /* DSPHeaders */,
-				"SF2Lib::DSPTableGenerator" /* DSPTableGenerator */,
 				"SF2Lib::SF2Lib" /* SF2Lib */,
 				"SF2Lib::SwiftPMPackageDescription" /* SF2LibPackageDescription */,
 				"SF2Lib::SF2LibPackageTests::ProductTarget" /* SF2LibPackageTests */,
@@ -1035,186 +731,163 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		BD13356D27DF59BC005988F8 /* Resources */ = {
+		BD13367E27E24B8F005988F8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BD13356E27DF59C5005988F8 /* Configuration.plist in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		BD13357327DF59E6005988F8 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				BD13357727DF59F2005988F8 /* FreeFont.sf2 in Resources */,
-				BD13357827DF59F2005988F8 /* GeneralUser GS MuseScore v1.442.sf2 in Resources */,
-				BD13357927DF59F2005988F8 /* RolandNicePiano.sf2 in Resources */,
-				BD13357427DF59EB005988F8 /* Configuration.plist in Resources */,
+				BD13367F27E24B9C005988F8 /* FreeFont.sf2 in Resources */,
+				BD13368827E24F7F005988F8 /* Configuration.plist in Resources */,
+				BD13368027E24B9C005988F8 /* GeneralUser GS MuseScore v1.442.sf2 in Resources */,
+				BD13368127E24B9C005988F8 /* RolandNicePiano.sf2 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		OBJ_126 /* Sources */ = {
+		OBJ_125 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_127 /* Package.swift in Sources */,
+				OBJ_126 /* Package.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_131 /* Sources */ = {
+		OBJ_130 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_132 /* DSPHeaders.mm in Sources */,
+				OBJ_131 /* DSPHeaders.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_138 /* Sources */ = {
+		OBJ_137 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_139 /* DSPTablesGenerator.mm in Sources */,
-				OBJ_140 /* main.mm in Sources */,
+				OBJ_138 /* Configuration.m in Sources */,
+				OBJ_139 /* AttenuationLookup.cpp in Sources */,
+				OBJ_140 /* CentsPartialLookup.cpp in Sources */,
+				OBJ_141 /* Cubic4thOrderLookup.cpp in Sources */,
+				OBJ_142 /* PanLookup.cpp in Sources */,
+				OBJ_143 /* Bag.cpp in Sources */,
+				OBJ_144 /* Definition.cpp in Sources */,
+				OBJ_145 /* Generator.cpp in Sources */,
+				OBJ_146 /* Instrument.cpp in Sources */,
+				OBJ_147 /* Modulator.cpp in Sources */,
+				OBJ_148 /* Source.cpp in Sources */,
+				OBJ_149 /* Transform.cpp in Sources */,
+				OBJ_150 /* Preset.cpp in Sources */,
+				OBJ_151 /* SampleHeader.cpp in Sources */,
+				OBJ_152 /* Version.cpp in Sources */,
+				OBJ_153 /* ChunkItems.cpp in Sources */,
+				OBJ_154 /* File.cpp in Sources */,
+				OBJ_155 /* Parser.cpp in Sources */,
+				OBJ_156 /* Pos.cpp in Sources */,
+				OBJ_157 /* Logger.mm in Sources */,
+				OBJ_158 /* ChannelState.cpp in Sources */,
+				OBJ_159 /* NRPN.cpp in Sources */,
+				OBJ_160 /* ValueTransformer.cpp in Sources */,
+				OBJ_161 /* Engine.mm in Sources */,
+				OBJ_162 /* LowPassFilter.mm in Sources */,
+				OBJ_163 /* Preset.cpp in Sources */,
+				OBJ_164 /* Modulator.cpp in Sources */,
+				OBJ_165 /* State.cpp in Sources */,
+				OBJ_166 /* Voice.mm in Sources */,
+				OBJ_167 /* Zone.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_150 /* Sources */ = {
+		OBJ_175 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_151 /* Configuration.m in Sources */,
-				OBJ_152 /* DSPGenerated.cpp in Sources */,
-				OBJ_153 /* Bag.cpp in Sources */,
-				OBJ_154 /* Definition.cpp in Sources */,
-				OBJ_155 /* Generator.cpp in Sources */,
-				OBJ_156 /* Instrument.cpp in Sources */,
-				OBJ_157 /* Modulator.cpp in Sources */,
-				OBJ_158 /* Source.cpp in Sources */,
-				OBJ_159 /* Transform.cpp in Sources */,
-				OBJ_160 /* Preset.cpp in Sources */,
-				OBJ_161 /* SampleHeader.cpp in Sources */,
-				OBJ_162 /* Version.cpp in Sources */,
-				OBJ_163 /* ChunkItems.cpp in Sources */,
-				OBJ_164 /* File.cpp in Sources */,
-				OBJ_165 /* Parser.cpp in Sources */,
-				OBJ_166 /* Pos.cpp in Sources */,
-				OBJ_167 /* Logger.mm in Sources */,
-				OBJ_168 /* ChannelState.cpp in Sources */,
-				OBJ_169 /* NRPN.cpp in Sources */,
-				OBJ_170 /* ValueTransformer.cpp in Sources */,
-				OBJ_171 /* Engine.mm in Sources */,
-				OBJ_172 /* LowPassFilter.mm in Sources */,
-				OBJ_173 /* Preset.cpp in Sources */,
-				OBJ_174 /* Modulator.cpp in Sources */,
-				OBJ_175 /* State.cpp in Sources */,
-				OBJ_176 /* Voice.mm in Sources */,
-				OBJ_177 /* Zone.cpp in Sources */,
+				OBJ_176 /* Package.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_185 /* Sources */ = {
+		OBJ_186 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_186 /* Package.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		OBJ_196 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_197 /* ConfigurationTests.mm in Sources */,
-				OBJ_198 /* DSPTests.mm in Sources */,
-				OBJ_199 /* GeneratorAmountTests.mm in Sources */,
-				OBJ_200 /* ModulatorDefaultsTests.mm in Sources */,
-				OBJ_201 /* ModulatorSourceTests.mm in Sources */,
-				OBJ_202 /* ChunkTests.mm in Sources */,
-				OBJ_203 /* SFFileTestsObjC.mm in Sources */,
-				OBJ_204 /* TagTests.mm in Sources */,
-				OBJ_205 /* ChannelTests.mm in Sources */,
-				OBJ_206 /* MIDITests.mm in Sources */,
-				OBJ_207 /* NRPNTests.mm in Sources */,
-				OBJ_208 /* NoteTests.mm in Sources */,
-				OBJ_209 /* ValueTransformerTests.mm in Sources */,
-				OBJ_210 /* EngineTests.mm in Sources */,
-				OBJ_211 /* OldestVoiceCacheTests.mm in Sources */,
-				OBJ_212 /* PresetCollectionTests.mm in Sources */,
-				OBJ_213 /* EnvelopeTests.mm in Sources */,
-				OBJ_214 /* GeneratorIndexTests.mm in Sources */,
-				OBJ_215 /* InstrumentTests.mm in Sources */,
-				OBJ_216 /* LFOTests.mm in Sources */,
-				OBJ_217 /* ModulatorTests.mm in Sources */,
-				OBJ_218 /* NormalizedSampleSourceTests.mm in Sources */,
-				OBJ_219 /* PitchTests.mm in Sources */,
-				OBJ_220 /* PresetTests.mm in Sources */,
-				OBJ_221 /* RangeTests.mm in Sources */,
-				OBJ_222 /* StateTests.mm in Sources */,
-				OBJ_223 /* VoiceTests.mm in Sources */,
-				OBJ_224 /* ParserTests.mm in Sources */,
-				OBJ_225 /* SampleBasedContexts.mm in Sources */,
-				OBJ_226 /* TestResources.m in Sources */,
+				OBJ_187 /* ConfigurationTests.mm in Sources */,
+				OBJ_188 /* ConstMathTests.mm in Sources */,
+				OBJ_189 /* DSPTests.mm in Sources */,
+				OBJ_190 /* GeneratorAmountTests.mm in Sources */,
+				OBJ_191 /* ModulatorDefaultsTests.mm in Sources */,
+				OBJ_192 /* ModulatorSourceTests.mm in Sources */,
+				OBJ_193 /* ChunkTests.mm in Sources */,
+				OBJ_194 /* ParserTests.mm in Sources */,
+				OBJ_195 /* SFFileTestsObjC.mm in Sources */,
+				OBJ_196 /* TagTests.mm in Sources */,
+				OBJ_197 /* ChannelTests.mm in Sources */,
+				OBJ_198 /* MIDITests.mm in Sources */,
+				OBJ_199 /* NRPNTests.mm in Sources */,
+				OBJ_200 /* NoteTests.mm in Sources */,
+				OBJ_201 /* ValueTransformerTests.mm in Sources */,
+				OBJ_202 /* EngineTests.mm in Sources */,
+				OBJ_203 /* OldestVoiceCacheTests.mm in Sources */,
+				OBJ_204 /* PresetCollectionTests.mm in Sources */,
+				OBJ_205 /* EnvelopeTests.mm in Sources */,
+				OBJ_206 /* GeneratorIndexTests.mm in Sources */,
+				OBJ_207 /* InstrumentTests.mm in Sources */,
+				OBJ_208 /* LFOTests.mm in Sources */,
+				OBJ_209 /* NormalizedSampleSourceTests.mm in Sources */,
+				OBJ_210 /* PitchTests.mm in Sources */,
+				OBJ_211 /* PresetTests.mm in Sources */,
+				OBJ_212 /* RangeTests.mm in Sources */,
+				OBJ_213 /* ModulatorTests.mm in Sources */,
+				OBJ_214 /* StateTests.mm in Sources */,
+				OBJ_215 /* VoiceTests.mm in Sources */,
+				OBJ_216 /* SampleBasedContexts.mm in Sources */,
+				OBJ_217 /* TestResources.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		OBJ_120 /* PBXTargetDependency */ = {
+		OBJ_119 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "AUv3SupportPackage::DSPHeaders" /* DSPHeaders */;
-			targetProxy = BD13357527DF59EB005988F8 /* PBXContainerItemProxy */;
+			targetProxy = BD13367427E24B1D005988F8 /* PBXContainerItemProxy */;
 		};
-		OBJ_144 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "SF2Lib::SF2Lib" /* SF2Lib */;
-			targetProxy = BD13356627DF5962005988F8 /* PBXContainerItemProxy */;
-		};
-		OBJ_146 /* PBXTargetDependency */ = {
+		OBJ_170 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "AUv3SupportPackage::DSPHeaders" /* DSPHeaders */;
-			targetProxy = BD13356827DF5962005988F8 /* PBXContainerItemProxy */;
+			targetProxy = BD13367127E24B1D005988F8 /* PBXContainerItemProxy */;
 		};
-		OBJ_180 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "AUv3SupportPackage::DSPHeaders" /* DSPHeaders */;
-			targetProxy = BD13356727DF5962005988F8 /* PBXContainerItemProxy */;
-		};
-		OBJ_191 /* PBXTargetDependency */ = {
+		OBJ_181 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SF2Lib::SF2LibTests" /* SF2LibTests */;
-			targetProxy = BD13357627DF59EB005988F8 /* PBXContainerItemProxy */;
+			targetProxy = BD13367527E24B1D005988F8 /* PBXContainerItemProxy */;
 		};
-		OBJ_230 /* PBXTargetDependency */ = {
+		OBJ_221 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SF2Lib::SF2Lib" /* SF2Lib */;
-			targetProxy = BD13356927DF5962005988F8 /* PBXContainerItemProxy */;
+			targetProxy = BD13367227E24B1D005988F8 /* PBXContainerItemProxy */;
 		};
-		OBJ_231 /* PBXTargetDependency */ = {
+		OBJ_222 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "AUv3SupportPackage::DSPHeaders" /* DSPHeaders */;
-			targetProxy = BD13356A27DF5962005988F8 /* PBXContainerItemProxy */;
+			targetProxy = BD13367327E24B1D005988F8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		OBJ_118 /* Debug */ = {
+		OBJ_117 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			};
 			name = Debug;
 		};
-		OBJ_119 /* Release */ = {
+		OBJ_118 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			};
 			name = Release;
 		};
-		OBJ_124 /* Debug */ = {
+		OBJ_123 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
@@ -1223,7 +896,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_125 /* Release */ = {
+		OBJ_124 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
@@ -1232,7 +905,7 @@
 			};
 			name = Release;
 		};
-		OBJ_129 /* Debug */ = {
+		OBJ_128 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
@@ -1294,7 +967,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_130 /* Release */ = {
+		OBJ_129 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
@@ -1356,85 +1029,7 @@
 			};
 			name = Release;
 		};
-		OBJ_136 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
-				CURRENT_PROJECT_VERSION = 1;
-				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = "USE_ACCELERATE=1";
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/DSPTableGenerator/include",
-					"$(SRCROOT)/Sources/SF2Lib/include",
-					"$(SRCROOT)/.build/checkouts/AUv3Support/Sources/DSPHeaders/include",
-				);
-				INFOPLIST_FILE = SF2Lib.xcodeproj/DSPTableGenerator_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-framework",
-					Accelerate,
-					"-framework",
-					Foundation,
-				);
-				OTHER_SWIFT_FLAGS = "$(inherited)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
-				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
-				TARGET_NAME = DSPTableGenerator;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Debug;
-		};
-		OBJ_137 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
-				CURRENT_PROJECT_VERSION = 1;
-				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = "USE_ACCELERATE=1";
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/DSPTableGenerator/include",
-					"$(SRCROOT)/Sources/SF2Lib/include",
-					"$(SRCROOT)/.build/checkouts/AUv3Support/Sources/DSPHeaders/include",
-				);
-				INFOPLIST_FILE = SF2Lib.xcodeproj/DSPTableGenerator_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-framework",
-					Accelerate,
-					"-framework",
-					Foundation,
-				);
-				OTHER_SWIFT_FLAGS = "$(inherited)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
-				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
-				TARGET_NAME = DSPTableGenerator;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Release;
-		};
-		OBJ_148 /* Debug */ = {
+		OBJ_135 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
@@ -1510,7 +1105,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_149 /* Release */ = {
+		OBJ_136 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
@@ -1586,7 +1181,7 @@
 			};
 			name = Release;
 		};
-		OBJ_183 /* Debug */ = {
+		OBJ_173 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
@@ -1595,7 +1190,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_184 /* Release */ = {
+		OBJ_174 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				LD = /usr/bin/true;
@@ -1604,19 +1199,19 @@
 			};
 			name = Release;
 		};
-		OBJ_189 /* Debug */ = {
+		OBJ_179 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			};
 			name = Debug;
 		};
-		OBJ_190 /* Release */ = {
+		OBJ_180 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			};
 			name = Release;
 		};
-		OBJ_194 /* Debug */ = {
+		OBJ_184 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
@@ -1628,10 +1223,7 @@
 					"$(inherited)",
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"PLAY_AUDIO=0",
-					"SWIFT_PACKAGE=1",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "PLAY_AUDIO=0";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/Tests/SF2LibTests/include",
@@ -1656,6 +1248,8 @@
 					AudioToolbox,
 					"-framework",
 					AVFoundation,
+					"-framework",
+					QuartzCore,
 					"-framework",
 					Foundation,
 					"-framework",
@@ -1669,7 +1263,7 @@
 			};
 			name = Debug;
 		};
-		OBJ_195 /* Release */ = {
+		OBJ_185 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
@@ -1681,10 +1275,7 @@
 					"$(inherited)",
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"PLAY_AUDIO=0",
-					"SWIFT_PACKAGE=1",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "PLAY_AUDIO=0";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/Tests/SF2LibTests/include",
@@ -1709,6 +1300,8 @@
 					AudioToolbox,
 					"-framework",
 					AVFoundation,
+					"-framework",
+					QuartzCore,
 					"-framework",
 					Foundation,
 					"-framework",
@@ -1778,74 +1371,65 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		OBJ_117 /* Build configuration list for PBXAggregateTarget "AUv3-DSP-Headers" */ = {
+		OBJ_116 /* Build configuration list for PBXAggregateTarget "AUv3-DSP-Headers" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_118 /* Debug */,
-				OBJ_119 /* Release */,
+				OBJ_117 /* Debug */,
+				OBJ_118 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_123 /* Build configuration list for PBXNativeTarget "AUv3SupportPackagePackageDescription" */ = {
+		OBJ_122 /* Build configuration list for PBXNativeTarget "AUv3SupportPackagePackageDescription" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_124 /* Debug */,
-				OBJ_125 /* Release */,
+				OBJ_123 /* Debug */,
+				OBJ_124 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_128 /* Build configuration list for PBXNativeTarget "DSPHeaders" */ = {
+		OBJ_127 /* Build configuration list for PBXNativeTarget "DSPHeaders" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_129 /* Debug */,
-				OBJ_130 /* Release */,
+				OBJ_128 /* Debug */,
+				OBJ_129 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_135 /* Build configuration list for PBXNativeTarget "DSPTableGenerator" */ = {
+		OBJ_134 /* Build configuration list for PBXNativeTarget "SF2Lib" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_136 /* Debug */,
-				OBJ_137 /* Release */,
+				OBJ_135 /* Debug */,
+				OBJ_136 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_147 /* Build configuration list for PBXNativeTarget "SF2Lib" */ = {
+		OBJ_172 /* Build configuration list for PBXNativeTarget "SF2LibPackageDescription" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_148 /* Debug */,
-				OBJ_149 /* Release */,
+				OBJ_173 /* Debug */,
+				OBJ_174 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_182 /* Build configuration list for PBXNativeTarget "SF2LibPackageDescription" */ = {
+		OBJ_178 /* Build configuration list for PBXAggregateTarget "SF2LibPackageTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_183 /* Debug */,
-				OBJ_184 /* Release */,
+				OBJ_179 /* Debug */,
+				OBJ_180 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_188 /* Build configuration list for PBXAggregateTarget "SF2LibPackageTests" */ = {
+		OBJ_183 /* Build configuration list for PBXNativeTarget "SF2LibTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				OBJ_189 /* Debug */,
-				OBJ_190 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		OBJ_193 /* Build configuration list for PBXNativeTarget "SF2LibTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_194 /* Debug */,
-				OBJ_195 /* Release */,
+				OBJ_184 /* Debug */,
+				OBJ_185 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
