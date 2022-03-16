@@ -170,14 +170,6 @@ namespace SF2::DSP {
 extern void panLookup(Float pan, Float& left, Float& right) noexcept;
 
 /**
- Obtain approximate sine value from table.
- 
- @param radians the value to use for theta
- @returns the sine approximation
- */
-// inline double sineLookup(Float radians) noexcept { return Tables::SineLookup::sine(radians); }
-
-/**
  Quickly convert cent value into a frequency using a table lookup. These calculations are taken from the Fluid Synth
  fluid_conv.c file, in particular the fluid_ct2hz_real function. Uses CentPartialLookup above to convert values from
  0 - 1199 into the proper multiplier.
