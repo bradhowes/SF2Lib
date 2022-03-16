@@ -17,40 +17,6 @@ namespace SF2::DSP::Tables {
 struct Generator;
 
 /**
- Lookup tables for SF2 pan values, where -500 means only left-channel, and +500 means only right channel. Other values
- give attenuation values for the left and right channels between 0.0 and 1.0. These values come from the sine function
- for a pleasing audio experience when panning.
-
- NOTE: FluidSynth has a table size of 1002 for some reason. Thus its values are slightly off from what this table
- contains. I don't see a reason for the one extra element.
- */
-struct PanLookup {
-  inline constexpr static size_t TableSize = 500 + 500 + 1;
-
-  /**
-   Obtain the attenuation values for the left and right channels.
-   
-   @param pan the pan setting
-   @param left reference to left channel attenuation storage
-   @param right reference to right channel attenuation storage
-   */
-  static void lookup(Float pan, Float& left, Float& right) noexcept {
-    int index = std::clamp(int(std::round(pan)), -500, 500);
-    left = Float(lookup_[size_t(-index + 500)]);
-    right = Float(lookup_[size_t(index + 500)]);
-  }
-
-private:
-  inline constexpr static Float Scaling = HalfPI / (TableSize - 1);
-  
-  static double value(size_t index) { return std::sin(index * Scaling); }
-  
-  static const std::array<double, PanLookup::TableSize> lookup_;
-  PanLookup() = delete;
-  friend struct Generator;
-};
-
-/**
  Estimate std::sin() value using a table of pre-calculated sin values and linear interpolation.
  */
 struct SineLookup {
