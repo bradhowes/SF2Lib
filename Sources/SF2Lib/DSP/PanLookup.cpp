@@ -28,7 +28,7 @@ static constexpr double generator(size_t index) {
 static constexpr auto lookup_ = ConstMath::make_array<double, TableSize>(generator);
 
 void
-SF2::DSP::panLookup2(Float pan, Float& left, Float& right) noexcept {
+SF2::DSP::panLookup(Float pan, Float& left, Float& right) noexcept {
   int index = std::clamp(int(std::round(pan)), -500, 500);
   left = Float(lookup_[size_t(-index + 500)]);
   right = Float(lookup_[size_t(index + 500)]);

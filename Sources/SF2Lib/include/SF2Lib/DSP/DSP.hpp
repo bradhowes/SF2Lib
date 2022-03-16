@@ -167,9 +167,7 @@ namespace SF2::DSP {
  @param left reference to storage for the left gain
  @param right reference to storage for the right gain
  */
-inline void panLookup(Float pan, Float& left, Float& right) noexcept { Tables::PanLookup::lookup(pan, left, right); }
-
-extern void panLookup2(Float pan, Float& left, Float& right) noexcept;
+extern void panLookup(Float pan, Float& left, Float& right) noexcept;
 
 /**
  Obtain approximate sine value from table.
