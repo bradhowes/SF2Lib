@@ -19,8 +19,7 @@ namespace SF2::MIDI {
  Transforms MIDI controller domain values (between 0 and 127) into various ranges. This currently only works with the
  `coarse` controller values.
 
- The conversion is done via a collection of lookup tables that map between [0, 127] and [0, 1] or [-1, 1]. Verified in
- Xcode 12.5 that the tables are built using precomputed values in a TEXT segment, and not via any initialization code.
+ The conversion is done via a collection of lookup tables that map between [0, 127] and [0, 1] or [-1, 1].
  */
 class ValueTransformer {
 public:
@@ -70,8 +69,7 @@ public:
    @param source the source definition to use
    */
   explicit ValueTransformer(const Entity::Modulator::Source& source) noexcept :
-  ValueTransformer(Kind(source.type()),
-                   source.isMinToMax() ? Direction::ascending : Direction::descending,
+  ValueTransformer(Kind(source.type()), source.isMinToMax() ? Direction::ascending : Direction::descending,
                    source.isUnipolar() ? Polarity::unipolar : Polarity::bipolar)
   {}
 
@@ -102,12 +100,11 @@ private:
    @param kind the transformation function to apply
    @param direction the min/max ordering to use
    @param polarity the lower bound of the transformed result
+   @returns reference to table to use for MIDI value transformations.
    */
   static const TransformArrayType& selectActive(Kind kind, Direction direction, Polarity polarity) noexcept;
 
   const TransformArrayType& active_;
-
-  // friend struct DSP::Tables::Generator;
 };
 
 } // namespace SF2::MIDI
