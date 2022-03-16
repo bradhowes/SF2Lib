@@ -15,7 +15,7 @@ static constexpr double generator0(size_t index) {
   auto x2 = x * x;
   auto x3 = x2 * x;
   auto x3_05 = 0.5 * x3;
-  return -x3_05 +       x2 - x_05;
+  return -x3_05 + x2 - x_05;
 }
 
 static constexpr double generator1(size_t index) {
@@ -23,7 +23,7 @@ static constexpr double generator1(size_t index) {
   auto x2 = x * x;
   auto x3 = x2 * x;
   auto x3_15 = 1.5 * x3;
-  return x3_15 - 2.5 * x2         + 1.0;
+  return x3_15 - 2.5 * x2 + 1.0;
 }
 
 static constexpr double generator2(size_t index) {

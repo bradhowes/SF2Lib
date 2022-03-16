@@ -143,10 +143,10 @@ inline constexpr Float bipolarModulate(Float modulator, Float minValue, Float ma
  @returns approximate sin value
  */
 constexpr Float parabolicSine(Float angle) noexcept {
-  constexpr Float B = 4.0f / PI;
-  constexpr Float C = -4.0f / (PI * PI);
-  constexpr Float P = 0.225f;
-  const Float y = B * angle + C * angle * (angle >= 0.0f ? angle : -angle);
+  constexpr auto B = 4.0f / PI;
+  constexpr auto C = -4.0f / (PI * PI);
+  constexpr auto P = 0.225f;
+  const auto y = B * angle + C * angle * (angle >= 0.0f ? angle : -angle);
   return P * y * ((y >= 0.0f ? y : -y) - 1.0f) + y;
 }
 
@@ -173,9 +173,9 @@ inline double centsToFrequency(Float value) noexcept {
 
   // This seems to be the fastest way to do the following. Curiously, the operation `cents % 1200` is faster than doing
   // `cents - whole * 1200` in optimized build.
-  int cents = int(value + 300);
-  int whole = cents / 1200;
-  int partial = cents % 1200;
+  auto cents = int(value + 300);
+  auto whole = cents / 1200;
+  auto partial = cents % 1200;
   return (1u << whole) * centsPartialLookup(partial);
 }
 
@@ -230,10 +230,10 @@ inline static Float cubic4thOrder(Float partial, Float x0, Float x1, Float x2, F
  */
 inline Float centibelsToAttenuation(Float centibels) noexcept {
   centibels = DSP::clamp(centibels, 0.0, 1440.0);
-  int index1 = int(centibels);
-  Float partial = centibels - index1;
+  auto index1 = int(centibels);
+  auto partial = centibels - index1;
   if (partial < std::numeric_limits<Float>::min()) return attenuationLookup(index1);
-  int index2 = std::min<int>(index1 + 1, 1440);
+  auto index2 = std::min<int>(index1 + 1, 1440);
   return Interpolation::linear(partial, attenuationLookup(index1), attenuationLookup(index2));
 }
 

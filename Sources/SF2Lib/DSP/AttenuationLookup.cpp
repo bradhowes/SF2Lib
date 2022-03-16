@@ -23,5 +23,5 @@ static constexpr auto lookup_ = ConstMath::make_array<double, TableSize>(generat
  */
 Float
 SF2::DSP::attenuationLookup(int centibels) noexcept {
-  return Float(lookup_[size_t(std::clamp<int>(centibels, 0, TableSize - 1))]);
+  return Float(lookup_[static_cast<size_t>(std::clamp<int>(centibels, 0, TableSize - 1))]);
 }

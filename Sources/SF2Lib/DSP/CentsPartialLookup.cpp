@@ -29,5 +29,5 @@ static constexpr auto lookup_ = ConstMath::make_array<double, TableSize>(generat
  */
 double
 SF2::DSP::centsPartialLookup(int partial) noexcept {
-  return lookup_[size_t(std::clamp(partial, 0, MaxCentsValue - 1))];
+  return lookup_[static_cast<size_t>(std::clamp(partial, 0, MaxCentsValue - 1))];
 }

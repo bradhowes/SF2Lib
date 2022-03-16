@@ -7,6 +7,10 @@
 #include <cmath>
 #include <cstdint>
 
+/**
+ Collection of compile-time methods that are used to create a small set of lookup tables for various SF2 conversions.
+ Originally this was done via a separate program that created a C++ file.
+ */
 namespace SF2::ConstMath {
 
 // Based on work from https://github.com/lakshayg/compile_time (no specific liceense)
@@ -112,6 +116,12 @@ constexpr T normalizedRadians(T theta) noexcept {
   return (theta <= -PI) ? normalizedRadians(theta + TwoPI) : (theta > PI) ? normalizedRadians(theta - TwoPI) : theta;
 }
 
+/**
+ Determine if the given value is NaN
+
+ @param x the value to check
+ @returns true if so
+ */
 template<typename T>
 constexpr bool is_nan(const T x) noexcept { return x != x; }
 
@@ -119,6 +129,12 @@ constexpr bool is_nan(const T x) noexcept { return x != x; }
 
 namespace detail {
 
+/**
+ Obtain a normalized mantissa, one that is >= 1 and <= 10.
+
+ @param x the value to work with
+ @returns the normalized value
+ */
 template<typename T>
 constexpr T mantissa(const T x) noexcept {
   return x < T(1) ? mantissa(x * T(10)) : x > T(10) ? mantissa(x / T(10)) : x;
@@ -126,9 +142,7 @@ constexpr T mantissa(const T x) noexcept {
 
 template <typename Real>
 constexpr Real sin_cfrac(Real x2, int k = 2, int n = 40) {
-  return (n == 0) ? k * (k + 1) - x2
-  : k * (k + 1) - x2 +
-  (k * (k + 1) * x2) / sin_cfrac(x2, k + 2, n - 1);
+  return (n == 0) ? k * (k + 1) - x2 : k * (k + 1) - x2 + (k * (k + 1) * x2) / sin_cfrac(x2, k + 2, n - 1);
 }
 
 template <typename Real>
@@ -137,9 +151,7 @@ constexpr Real exp_frac_helper(Real x2, int iter = 5, int k = 6) {
 }
 
 template <typename Real>
-constexpr Real exp_frac(Real x) {
-  return (x != 0) ? 1 + 2 * x / (2 - x + (x * x) / exp_frac_helper(x * x)) : 1;
-}
+constexpr Real exp_frac(Real x) { return (x != 0) ? 1 + 2 * x / (2 - x + (x * x) / exp_frac_helper(x * x)) : 1; }
 
 /**
  Normalize x ^ y so that x is between 1 and 10.
@@ -306,9 +318,7 @@ constexpr Real ipow(Real a, Integer n) {
  @returns e ^ x
  */
 template <typename Real>
-constexpr Real exp(Real x) {
-  return ipow(Constants<Real>::e, floor(x)) * detail::exp_frac(x - floor(x));
-}
+constexpr Real exp(Real x) { return ipow(Constants<Real>::e, floor(x)) * detail::exp_frac(x - floor(x)); }
 
 /**
  * Compile-time natural logarithm function
@@ -319,18 +329,25 @@ constexpr Real exp(Real x) {
  */
 
 template<typename T>
-constexpr IntegralAsDouble<T> log(const T x) noexcept {
-  return detail::log_integral_check(x);
-}
+constexpr IntegralAsDouble<T> log(const T x) noexcept { return detail::log_integral_check(x); }
 
+/**
+ Compile-time base-10 logarithm.
+
+ @param x value to work with
+ @returns log10(x) = log(x) / log(10)
+ */
 template<typename T>
-constexpr IntegralAsDouble<T> log10(const T x) noexcept {
-  return detail::log_integral_check(x) / Constants<T>::ln10;
-}
+constexpr IntegralAsDouble<T> log10(const T x) noexcept { return detail::log_integral_check(x) / Constants<T>::ln10; }
 
+/**
+ Compile-time pow function that calculates x ^ y.
+
+ @param x the base value
+ @param y the exponent
+ @returns x ^ y = exp(y * log(x))
+ */
 template <typename Real>
-constexpr Real pow(Real x, Real y) noexcept {
-  return exp(y * log(x));
-}
+constexpr Real pow(Real x, Real y) noexcept { return exp(y * log(x)); }
 
 } // end namespace ConstMath
