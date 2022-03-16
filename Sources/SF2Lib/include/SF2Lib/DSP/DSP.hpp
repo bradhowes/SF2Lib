@@ -58,15 +58,13 @@ inline Float lfoCentsToFrequency(Float value) noexcept {
 }
 
 /**
- Convert centiBels to attenuation, where 60 corresponds to a drop of 6dB or 0.5 reduction of audio samples. Note that
- for raw generator values in an SF2 file, better to use the centibelsToAttenuation(int) value below.
- 
- @param centibels the value to convert
- @returns attenuation amount
+ Convert centibels [0-1440] into an attenuation value from [1.0-0.0]. Zero indicates no attenuation (1.0), 60 is 0.5,
+ and every 200 is a reduction by 10 (0.1, 0.001, etc.)
+
+ @param centibels value to convert
+ @returns gain value
  */
-inline Float centibelsToAttenuation(Float centibels) noexcept {
-  return std::pow(10.0f, -centibels / CentibelsPerDecade);
-}
+extern Float attenuationLookup(int centibels) noexcept;
 
 /**
  Convert centiBels to resonance (Q) value for use in low-pass filter calculations. The input is clamped to the range
@@ -188,15 +186,6 @@ inline double centsToFrequency(Float value) noexcept {
 }
 
 /**
- Convert centibels [0-1441] into an attenuation value from [1.0-0.0]. Zero indicates no attenuation (1.0), 60 is 0.5,
- and every 200 is a reduction by 10 (0.1, 0.001, etc.)
- 
- @param centibels value to convert
- @returns gain value
- */
-inline double centibelsToAttenuation(int centibels) noexcept { return Tables::AttenuationLookup::convert(centibels); }
-
-/**
  Convert centibels [0-1441] into a gain value [0.0-1.0]. This is the inverse of the above.
  
  @param centibels value to convert
@@ -208,7 +197,7 @@ namespace Interpolation {
 
 /**
  Interpolate a value from two values.
- 
+
  @param partial indication of affinity for one of the two values. Values [0-0.5) favor x0, while values (0.5-1.0)
  favor x1. A value of 0.5 equally favors both.
  @param x0 first value to use
@@ -218,7 +207,7 @@ inline Float linear(Float partial, Float x0, Float x1) noexcept { return partial
 
 /**
  Interpolate a value from four values.
- 
+
  @param partial location between the second value and the third. By definition it should always be < 1.0
  @param x0 first value to use
  @param x1 second value to use
@@ -230,4 +219,24 @@ inline static Float cubic4thOrder(Float partial, Float x0, Float x1, Float x2, F
 }
 
 } // Interpolation namespace
+
+/**
+ Convert centiBels to attenuation, where 60 corresponds to a drop of 6dB or 0.5 reduction of audio samples. Note that
+ for raw generator values in an SF2 file, better to use the attenuationLookup(int) method above. However, this
+ method uses it as well, though with an additional step of performing linear interpolation to arrive at the
+ final value.
+
+ @param centibels the value to convert
+ @returns attenuation amount
+ */
+inline Float centibelsToAttenuation(Float centibels) noexcept {
+  centibels = DSP::clamp(centibels, 0.0, 1440.0);
+  int index1 = int(centibels);
+  Float partial = centibels - index1;
+  if (partial < std::numeric_limits<Float>::min()) return attenuationLookup(index1);
+  int index2 = std::min<int>(index1 + 1, 1440);
+  return Interpolation::linear(partial, attenuationLookup(index1), attenuationLookup(index2));
+  // return std::pow(10.0f, -DSP::clamp(centibels, 0.0, 1440.0) / CentibelsPerDecade);
+}
+
 } // SF2::DSP namespaces

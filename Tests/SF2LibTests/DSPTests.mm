@@ -121,14 +121,26 @@ using namespace SF2::DSP::Tables;
   XCTAssertEqualWithAccuracy(4186.00904481, centsToFrequency(10800), self.epsilon); // C8
 }
 
+- (void)testCentibelsToAttenuationLookup {
+  self.epsilon = 1.0e-12; // 0.0000001;
+  XCTAssertEqualWithAccuracy(1.0, attenuationLookup(-1), self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0, attenuationLookup(0), self.epsilon);
+  XCTAssertEqualWithAccuracy(0.891250938134, attenuationLookup(10), self.epsilon);
+  XCTAssertEqualWithAccuracy(0.316227766017, attenuationLookup(100), self.epsilon);
+  XCTAssertEqualWithAccuracy(1e-05, attenuationLookup(1000), self.epsilon);
+  XCTAssertEqualWithAccuracy(6.3095734448e-08, attenuationLookup(1440), self.epsilon);
+  XCTAssertEqualWithAccuracy(6.3095734448e-08, attenuationLookup(1441), self.epsilon);
+}
+
 - (void)testCentibelsToAttenuation {
-  XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuation(-1), self.epsilon);
-  XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuation(0), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.891250938134, centibelsToAttenuation(10), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.316227766017, centibelsToAttenuation(100), self.epsilon);
-  XCTAssertEqualWithAccuracy(1e-05, centibelsToAttenuation(1000), self.epsilon);
-  XCTAssertEqualWithAccuracy(6.3095734448e-08, centibelsToAttenuation(1440), self.epsilon);
-  XCTAssertEqualWithAccuracy(1e-07, centibelsToAttenuation(1441), self.epsilon);
+  self.epsilon = 1.0e-12; // 0.0000001;
+  XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuation(-1.0), self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuation(0.0), self.epsilon);
+  XCTAssertEqualWithAccuracy(0.891250938134, centibelsToAttenuation(10.0), self.epsilon);
+  XCTAssertEqualWithAccuracy(0.316227766017, centibelsToAttenuation(100.0), self.epsilon);
+  XCTAssertEqualWithAccuracy(1e-05, centibelsToAttenuation(1000.0), self.epsilon);
+  XCTAssertEqualWithAccuracy(6.3095734448e-08, centibelsToAttenuation(1440.0), self.epsilon);
+  XCTAssertEqualWithAccuracy(6.3095734448e-08, centibelsToAttenuation(1441.0), self.epsilon);
 }
 
 - (void)testCentibelsToGain {

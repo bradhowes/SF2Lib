@@ -17,37 +17,6 @@ namespace SF2::DSP::Tables {
 struct Generator;
 
 /**
- Convert centibels into attenuation via table lookup.
- */
-struct AttenuationLookup {
-  inline constexpr static size_t TableSize = 1441;
-  
-  /**
-   Convert from integer (generator) value to attenuation.
-   
-   @param centibels value to convert
-   */
-  static double convert(int centibels) noexcept {
-    return lookup_[size_t(std::clamp<int>(centibels, 0, TableSize - 1))];
-  }
-  
-  /**
-   Convert from floating-point value to attenuation. Rounds to nearest integer to obtain index.
-   
-   @param centibels value to convert
-   */
-  static double convert(Float centibels) noexcept { return convert(int(std::round(centibels))); }
-  
-private:
-  static const std::array<double, TableSize> lookup_;
-  
-  static double value(size_t index) { return centibelsToAttenuation(index); }
-  
-  AttenuationLookup() = delete;
-  friend struct Generator;
-};
-
-/**
  Convert centibels into gain value (same as 1.0 / attenuation)
  */
 struct GainLookup {
@@ -70,7 +39,7 @@ struct GainLookup {
   static double convert(Float centibels) noexcept { return convert(int(std::round(centibels))); }
   
 private:
-  static double value(size_t index) { return 1.0 / centibelsToAttenuation(index); }
+  // static double value(size_t index) { return 1.0 / centibelsToAttenuation(index); }
   static const std::array<double, TableSize> lookup_;
   GainLookup() = delete;
   friend struct Generator;
