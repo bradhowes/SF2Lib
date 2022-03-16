@@ -13,7 +13,7 @@
  */
 namespace SF2::ConstMath {
 
-// Based on work from https://github.com/lakshayg/compile_time (no specific liceense)
+// Based on work from https://github.com/lakshayg/compile_time (no specific license)
 // and https://github.com/kthohr/gcem (Apache license). Here is the GCEM license in full:
 //
 /*################################################################################
