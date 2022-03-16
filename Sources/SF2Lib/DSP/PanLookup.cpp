@@ -19,14 +19,16 @@ using namespace SF2::DSP;
  contains. I don't see a reason for the one extra element.
  */
 static constexpr size_t TableSize = 500 + 500 + 1;
-static constexpr double value(size_t index) {
-    return ConstMath::sin(index * ConstMath::constants<double>::HalfPI / (TableSize - 1));
-  }
+static constexpr double Scaling = ConstMath::Constants<double>::HalfPI / (TableSize - 1);
 
-static constexpr auto lookup_ = ConstMath::make_array<double, TableSize>(value);
+static constexpr double generator(size_t index) {
+  return ConstMath::sin(index * Scaling);
+}
+
+static constexpr auto lookup_ = ConstMath::make_array<double, TableSize>(generator);
 
 void
-SF2::DSP::panLookup(Float pan, Float& left, Float& right) noexcept {
+SF2::DSP::panLookup2(Float pan, Float& left, Float& right) noexcept {
   int index = std::clamp(int(std::round(pan)), -500, 500);
   left = Float(lookup_[size_t(-index + 500)]);
   right = Float(lookup_[size_t(index + 500)]);

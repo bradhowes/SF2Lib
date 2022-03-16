@@ -93,6 +93,38 @@ using namespace SF2::DSP::Tables;
   XCTAssertEqualWithAccuracy(1.0, right, self.epsilon);
 }
 
+- (void)testPanLookup2 {
+  SF2::Float left, right;
+
+  SF2::DSP::panLookup2(-501, left, right);
+  XCTAssertEqualWithAccuracy(1.0, left, self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, right, self.epsilon);
+
+  SF2::DSP::panLookup2(-500, left, right);
+  XCTAssertEqualWithAccuracy(1.0, left, self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, right, self.epsilon);
+
+  SF2::DSP::panLookup2(-100, left, right);
+  XCTAssertEqualWithAccuracy(0.809016994375, left, self.epsilon);
+  XCTAssertEqualWithAccuracy(0.587785252292, right, self.epsilon);
+
+  SF2::DSP::panLookup2(0, left, right);
+  XCTAssertEqualWithAccuracy(left, right, self.epsilon);
+  XCTAssertEqualWithAccuracy(0.707106781187, right, self.epsilon);
+
+  SF2::DSP::panLookup2(100, left, right);
+  XCTAssertEqualWithAccuracy(0.587785252292, left, self.epsilon);
+  XCTAssertEqualWithAccuracy(0.809016994375, right, self.epsilon);
+
+  SF2::DSP::panLookup2(500, left, right);
+  XCTAssertEqualWithAccuracy(0.0, left, self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0, right, self.epsilon);
+
+  SF2::DSP::panLookup2(501, left, right);
+  XCTAssertEqualWithAccuracy(0.0, left, self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0, right, self.epsilon);
+}
+
 - (void)testParabolicSineAccuracy {
   for (int index = 0; index < 360.0; ++index) {
     auto theta = 2.0 * M_PI * index / 360.0 - M_PI;
@@ -101,20 +133,20 @@ using namespace SF2::DSP::Tables;
   }
 }
 
-- (void)testSinLookup {
-  XCTAssertEqualWithAccuracy(0.0, sineLookup(0.0), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.707106768181, sineLookup(QuarterPI), self.epsilon); // 45°
-  XCTAssertEqualWithAccuracy(1.0, sineLookup(HalfPI - 0.0000001), self.epsilon); // 90°
-}
+//- (void)testSinLookup {
+//  XCTAssertEqualWithAccuracy(0.0, sineLookup(0.0), self.epsilon);
+//  XCTAssertEqualWithAccuracy(0.707106768181, sineLookup(QuarterPI), self.epsilon); // 45°
+//  XCTAssertEqualWithAccuracy(1.0, sineLookup(HalfPI - 0.0000001), self.epsilon); // 90°
+//}
 
-- (void)testSin {
-  for (int degrees = -720; degrees <= 720; degrees += 10) {
-    Float radians = degrees * PI / 180.0;
-    Float value = sineLookup(radians);
-    // std::cout << degrees << " " << value << std::endl;
-    XCTAssertEqualWithAccuracy(::std::sin(radians), value, self.epsilon);
-  }
-}
+//- (void)testSin {
+//  for (int degrees = -720; degrees <= 720; degrees += 10) {
+//    Float radians = degrees * PI / 180.0;
+//    Float value = sineLookup(radians);
+//    // std::cout << degrees << " " << value << std::endl;
+//    XCTAssertEqualWithAccuracy(::std::sin(radians), value, self.epsilon);
+//  }
+//}
 
 - (void)testCentToFrequency {
   XCTAssertEqualWithAccuracy(1.0, centsToFrequency(-1), self.epsilon); // A0

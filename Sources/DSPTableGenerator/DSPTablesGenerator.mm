@@ -26,8 +26,8 @@ Generator::Generator(std::ostream& os) noexcept : os_{os}
   os_ << "using namespace SF2::MIDI;\n\n";
   
   // Lookup tables
-  generate<PanLookup>("PanLookup");
-  generate<SineLookup>("SineLookup");
+  // generate<PanLookup>("PanLookup");
+  // generate<SineLookup>("SineLookup");
   generate<CentsFrequencyScalingLookup>("CentsFrequencyScalingLookup");
   generate<CentsPartialLookup>("CentsPartialLookup");
   generate<AttenuationLookup>("AttenuationLookup");
