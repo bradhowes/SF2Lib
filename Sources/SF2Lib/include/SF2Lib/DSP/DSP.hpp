@@ -150,12 +150,6 @@ constexpr Float parabolicSine(Float angle) noexcept {
   return P * y * ((y >= 0.0f ? y : -y) - 1.0f) + y;
 }
 
-} // SF2::DSP namespace
-
-#include "SF2Lib/DSP/DSPTables.hpp" // implementation details for lookups used below
-
-namespace SF2::DSP {
-
 /**
  Calculate the amount of left and right signal gain in [0.0-1.0] for the given `pan` value which is in range
  [-500, +500]. A `pan` of -500 is only left, and +500 is only right. A `pan` of 0 should result in ~0.7078 for both,
