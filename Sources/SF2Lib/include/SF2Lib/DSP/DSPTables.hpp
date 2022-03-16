@@ -17,46 +17,6 @@ namespace SF2::DSP::Tables {
 struct Generator;
 
 /**
- Estimate std::sin() value using a table of pre-calculated sin values and linear interpolation.
- */
-struct SineLookup {
-  inline constexpr static size_t TableSize = 4096;
-  
-  /**
-   Obtain sine value.
-   
-   @param radians the angle in radians to use
-   */
-  inline static double sine(Float radians) noexcept {
-    if (radians < 0.0) return -sin(-radians);
-    while (radians > TwoPI) radians -= TwoPI;
-    if (radians <= HalfPI) return interpolate(radians);
-    if (radians <= PI) return interpolate(PI - radians);
-    if (radians <= 3 * HalfPI) return -interpolate(radians - PI);
-    return -interpolate(TwoPI - radians);
-  }
-  
-private:
-  inline constexpr static Float TableScale = (TableSize - 1) / HalfPI;
-  inline constexpr static Float Scaling = HalfPI / (TableSize - 1);
-  
-  inline static double interpolate(Float radians) {
-    double phase = clamp(radians, 0.0, HalfPI) * TableScale;
-    size_t index = size_t(phase);
-    double partial = phase - index;
-    double value = lookup_[index] * (1.0f - partial);
-    if (partial > 0.0) value += lookup_[index + 1] * partial;
-    return value;
-  }
-
-  static Float value(size_t index) { return std::sin(index * Scaling); }
-
-  static const std::array<double, TableSize> lookup_;
-  SineLookup() = delete;
-  friend struct Generator;
-};
-
-/**
  Convert cent into frequency multiplier using a table lookup. For instance, to reduce a frequency by -1200 cents means
  to drop 1 octave which is the same as multiplying the source frequency by 0.5. In the other direction an increase of
  1200 cents should result in a multiplier of 2.0 to double the source frequency.
