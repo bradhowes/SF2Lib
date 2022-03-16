@@ -93,6 +93,12 @@ using namespace SF2::DSP::Tables;
   XCTAssertEqualWithAccuracy(1.0, right, self.epsilon);
 }
 
+- (void)testCentsPartialLookup {
+  XCTAssertEqualWithAccuracy(6.875, centsPartialLookup(0), self.epsilon);
+  XCTAssertEqualWithAccuracy(9.72271824132, centsPartialLookup(600), self.epsilon);
+  XCTAssertEqualWithAccuracy(13.7420599819, centsPartialLookup(1199), self.epsilon);
+}
+
 - (void)testParabolicSineAccuracy {
   for (int index = 0; index < 360.0; ++index) {
     auto theta = 2.0 * M_PI * index / 360.0 - M_PI;
@@ -100,21 +106,6 @@ using namespace SF2::DSP::Tables;
     XCTAssertEqualWithAccuracy(SF2::DSP::parabolicSine(theta), real, 0.0011);
   }
 }
-
-//- (void)testSinLookup {
-//  XCTAssertEqualWithAccuracy(0.0, sineLookup(0.0), self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.707106768181, sineLookup(QuarterPI), self.epsilon); // 45°
-//  XCTAssertEqualWithAccuracy(1.0, sineLookup(HalfPI - 0.0000001), self.epsilon); // 90°
-//}
-
-//- (void)testSin {
-//  for (int degrees = -720; degrees <= 720; degrees += 10) {
-//    Float radians = degrees * PI / 180.0;
-//    Float value = sineLookup(radians);
-//    // std::cout << degrees << " " << value << std::endl;
-//    XCTAssertEqualWithAccuracy(::std::sin(radians), value, self.epsilon);
-//  }
-//}
 
 - (void)testCentToFrequency {
   XCTAssertEqualWithAccuracy(1.0, centsToFrequency(-1), self.epsilon); // A0
