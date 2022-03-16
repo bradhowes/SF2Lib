@@ -1,0 +1,72 @@
+diff --git b/SF2Lib.xcodeproj/project.pbxproj a/SF2Lib.xcodeproj/project.pbxproj
+index 405c8ea..dc625e1 100644
+--- b/SF2Lib.xcodeproj/project.pbxproj
++++ a/SF2Lib.xcodeproj/project.pbxproj
+@@ -32,6 +32,10 @@
+ /* End PBXAggregateTarget section */
+ 
+ /* Begin PBXBuildFile section */
++		BD13367F27E24B9C005988F8 /* FreeFont.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = BD13367B27E24B85005988F8 /* FreeFont.sf2 */; };
++		BD13368027E24B9C005988F8 /* GeneralUser GS MuseScore v1.442.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = BD13367C27E24B85005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */; };
++		BD13368127E24B9C005988F8 /* RolandNicePiano.sf2 in Resources */ = {isa = PBXBuildFile; fileRef = BD13367D27E24B85005988F8 /* RolandNicePiano.sf2 */; };
++		BD13368827E24F7F005988F8 /* Configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = BD13368727E24EF6005988F8 /* Configuration.plist */; };
+ 		OBJ_126 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_104 /* Package.swift */; };
+ 		OBJ_131 /* DSPHeaders.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_101 /* DSPHeaders.mm */; };
+ 		OBJ_138 /* Configuration.m in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Configuration.m */; };
+@@ -141,6 +145,10 @@
+ 
+ /* Begin PBXFileReference section */
+ 		"AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DSPHeaders.framework; sourceTree = BUILT_PRODUCTS_DIR; };
++		BD13367B27E24B85005988F8 /* FreeFont.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = FreeFont.sf2; sourceTree = "<group>"; };
++		BD13367C27E24B85005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "GeneralUser GS MuseScore v1.442.sf2"; sourceTree = "<group>"; };
++		BD13367D27E24B85005988F8 /* RolandNicePiano.sf2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = RolandNicePiano.sf2; sourceTree = "<group>"; };
++		BD13368727E24EF6005988F8 /* Configuration.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Configuration.plist; sourceTree = "<group>"; };
+ 		OBJ_101 /* DSPHeaders.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSPHeaders.mm; sourceTree = "<group>"; };
+ 		OBJ_103 /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = /Users/howes/src/Mine/SF2Lib/SF2Lib.xcodeproj/GeneratedModuleMap/DSPHeaders/module.modulemap; sourceTree = "<group>"; };
+ 		OBJ_104 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = /Users/howes/src/Mine/SF2Lib/.build/checkouts/AUv3Support/Package.swift; sourceTree = "<group>"; };
+@@ -248,6 +256,24 @@
+ /* End PBXFrameworksBuildPhase section */
+ 
+ /* Begin PBXGroup section */
++		BD13367A27E24B85005988F8 /* Resources */ = {
++			isa = PBXGroup;
++			children = (
++				BD13367B27E24B85005988F8 /* FreeFont.sf2 */,
++				BD13367C27E24B85005988F8 /* GeneralUser GS MuseScore v1.442.sf2 */,
++				BD13367D27E24B85005988F8 /* RolandNicePiano.sf2 */,
++			);
++			path = Resources;
++			sourceTree = "<group>";
++		};
++		BD13368627E24EF6005988F8 /* Resources */ = {
++			isa = PBXGroup;
++			children = (
++				BD13368727E24EF6005988F8 /* Configuration.plist */,
++			);
++			path = Resources;
++			sourceTree = "<group>";
++		};
+ 		OBJ_10 /* DSP */ = {
+ 			isa = PBXGroup;
+ 			children = (
+@@ -704,6 +730,20 @@
+ 		};
+ /* End PBXProject section */
+ 
++/* Begin PBXResourcesBuildPhase section */
++		BD13367E27E24B8F005988F8 /* Resources */ = {
++			isa = PBXResourcesBuildPhase;
++			buildActionMask = 2147483647;
++			files = (
++				BD13367F27E24B9C005988F8 /* FreeFont.sf2 in Resources */,
++				BD13368827E24F7F005988F8 /* Configuration.plist in Resources */,
++				BD13368027E24B9C005988F8 /* GeneralUser GS MuseScore v1.442.sf2 in Resources */,
++				BD13368127E24B9C005988F8 /* RolandNicePiano.sf2 in Resources */,
++			);
++			runOnlyForDeploymentPostprocessing = 0;
++		};
++/* End PBXResourcesBuildPhase section */
++
+ /* Begin PBXSourcesBuildPhase section */
+ 		OBJ_125 /* Sources */ = {
+ 			isa = PBXSourcesBuildPhase;
