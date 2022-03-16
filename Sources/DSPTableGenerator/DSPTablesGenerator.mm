@@ -46,7 +46,4 @@ Generator::Generator(std::ostream& os) noexcept : os_{os}
   generateTransform(ValueTransformer::negativeConvex, "negativeConvex", true);
   generateTransform(ValueTransformer::positiveSwitched, "positiveSwitched", true);
   generateTransform(ValueTransformer::negativeSwitched, "negativeSwitched", true);
-  
-  // Cubic4thOrder weights table
-  generateCubic4thOrderWeights();
 }

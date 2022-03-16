@@ -8,7 +8,6 @@
 
 using namespace SF2;
 using namespace SF2::DSP;
-using namespace SF2::DSP::Tables;
 
 @interface DSPTests : XCTestCase
 @property (nonatomic, assign) SF2::Float epsilon;
