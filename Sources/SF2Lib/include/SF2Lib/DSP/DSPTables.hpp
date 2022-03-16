@@ -17,35 +17,6 @@ namespace SF2::DSP::Tables {
 struct Generator;
 
 /**
- Convert cent into frequency multiplier using a table lookup. For instance, to reduce a frequency by -1200 cents means
- to drop 1 octave which is the same as multiplying the source frequency by 0.5. In the other direction an increase of
- 1200 cents should result in a multiplier of 2.0 to double the source frequency.
- */
-struct CentsFrequencyScalingLookup {
-  inline constexpr static int Max = 1200;
-  inline constexpr static size_t TableSize = Max * 2 + 1;
-  
-  /**
-   Convert given cents value into a frequency multiplier.
-   
-   @param value the value to convert
-   @returns multiplier for a frequency that will change the frequency by the given cent value
-   */
-  static double convert(int value) noexcept { return lookup_[size_t(std::clamp(value, -Max, Max) + Max)]; }
-  
-  static double convert(Float value) noexcept { return convert(int(std::round(value))); }
-  
-private:
-  inline constexpr static Float Span = Float((TableSize - 1) / 2);
-  
-  static Float value(size_t index) { return std::exp2((index - Span) / Span); }
-  
-  static const std::array<double, TableSize> lookup_;
-  CentsFrequencyScalingLookup() = delete;
-  friend struct Generator;
-};
-
-/**
  Convert cents [0-1200) into frequency multiplier. This is used by the centsToFrequency() function to perform a fast
  conversion between cents and frequency.
  */
