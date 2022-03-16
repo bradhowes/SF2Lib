@@ -28,7 +28,7 @@ inline constexpr Float MaximumAttenuationCentiBels = 960.0f;
 // 440 * pow(2.0, (N - 69) / 12)
 inline constexpr Float LowestNoteFrequency = Float(8.17579891564370697665253828745335); // C-1
 
-inline Float clamp(Float value, Float lowerBound, Float upperBound) {
+inline constexpr Float clamp(Float value, Float lowerBound, Float upperBound) {
   return std::min<Float>(std::max<Float>(value, lowerBound), upperBound);
 }
 
@@ -82,7 +82,7 @@ inline double centibelsToResonance(double centibels) noexcept {
  @param value cutoff value
  @returns clamped cutoff value
  */
-inline Float clampFilterCutoff(Float value) noexcept { return clamp(value, 1500.0f, 20000.0f); }
+inline constexpr Float clampFilterCutoff(Float value) noexcept { return clamp(value, 1500.0f, 20000.0f); }
 
 /**
  Convert integer from integer [0-1000] into [0.0-1.0]
@@ -90,7 +90,7 @@ inline Float clampFilterCutoff(Float value) noexcept { return clamp(value, 1500.
  @param value percentage value expressed as tenths
  @returns normalized value between 0 and 1.
  */
-inline Float tenthPercentageToNormalized(Float value) noexcept { return clamp(value / 1000.0f, 0.0f, 1.0f); }
+inline constexpr Float tenthPercentageToNormalized(Float value) noexcept { return clamp(value / 1000.0f, 0.0f, 1.0f); }
 
 /**
  Translate value in range [0, +1] into one in range [-1, +1]
@@ -98,7 +98,7 @@ inline Float tenthPercentageToNormalized(Float value) noexcept { return clamp(va
  @param modulator the value to translate
  @returns value in range [-1, +1]
  */
-inline Float unipolarToBipolar(Float modulator) noexcept { return 2.0f * modulator - 1.0f; }
+inline constexpr Float unipolarToBipolar(Float modulator) noexcept { return 2.0f * modulator - 1.0f; }
 
 /**
  Translate value in range [-1, +1] into one in range [0, +1]
@@ -106,7 +106,7 @@ inline Float unipolarToBipolar(Float modulator) noexcept { return 2.0f * modulat
  @param modulator the value to translate
  @returns value in range [0, +1]
  */
-inline Float bipolarToUnipolar(Float modulator) noexcept { return 0.5f * modulator + 0.5f; }
+inline constexpr Float bipolarToUnipolar(Float modulator) noexcept { return 0.5f * modulator + 0.5f; }
 
 /**
  Perform linear translation from a value in range [0.0, 1.0] into one in [minValue, maxValue].
@@ -116,7 +116,7 @@ inline Float bipolarToUnipolar(Float modulator) noexcept { return 0.5f * modulat
  @param maxValue the highest value to return when modulator is +1
  @returns value in range [minValue, maxValue]
  */
-inline Float unipolarModulate(Float modulator, Float minValue, Float maxValue) noexcept {
+inline constexpr Float unipolarModulate(Float modulator, Float minValue, Float maxValue) noexcept {
   return clamp(modulator, 0.0f, 1.0f) * (maxValue - minValue) + minValue;
 }
 
@@ -128,7 +128,7 @@ inline Float unipolarModulate(Float modulator, Float minValue, Float maxValue) n
  @param maxValue the highest value to return when modulator is +1
  @returns value in range [minValue, maxValue]
  */
-inline Float bipolarModulate(Float modulator, Float minValue, Float maxValue) noexcept {
+inline constexpr Float bipolarModulate(Float modulator, Float minValue, Float maxValue) noexcept {
   auto mid = (maxValue - minValue) * 0.5f;
   return clamp(modulator, -1.0f, 1.0f) * mid + mid + minValue;
 }
@@ -189,7 +189,7 @@ namespace Interpolation {
  @param x0 first value to use
  @param x1 second value to use
  */
-inline Float linear(Float partial, Float x0, Float x1) noexcept { return partial * (x1 - x0) + x0; }
+inline constexpr Float linear(Float partial, Float x0, Float x1) noexcept { return partial * (x1 - x0) + x0; }
 
 /**
  Types and configuration for the cubic 4th order interpolator.

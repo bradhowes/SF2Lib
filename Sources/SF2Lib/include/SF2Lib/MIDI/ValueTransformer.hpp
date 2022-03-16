@@ -9,9 +9,10 @@
 #include <iosfwd>
 
 #include "SF2Lib/Types.hpp"
+#include "SF2Lib/ConstMath.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
 
-namespace SF2::DSP { namespace Tables { struct Generator; } }
+// namespace SF2::DSP { namespace Tables { struct Generator; } }
 namespace SF2::MIDI {
 
 /**
@@ -26,10 +27,8 @@ public:
   using Float = SF2::Float;
   inline constexpr static int Min = 0;
   inline constexpr static int Max = 127;
-
-  /// Since we have only 128 values to handle, use lookup tables for quick conversion
   inline constexpr static size_t TableSize = Max + 1;
-  using TransformArrayType = std::array<double, TableSize>;
+  using TransformArrayType = std::array<Float, TableSize>;
 
   /**
    Kind specifies the curvature of the MIDI value transformation function.
@@ -106,62 +105,9 @@ private:
    */
   static const TransformArrayType& selectActive(Kind kind, Direction direction, Polarity polarity) noexcept;
 
-  /**
-   Generator function for the positive linear curve
-
-   @param index the table index to generate the value for
-   @returns transform value
-   */
-  static Float positiveLinear(size_t index) noexcept { return Float(index) / TableSize; }
-
-  /**
-   Generator function for the negative linear curve
-
-   @param index the table index to generate the value for
-   @returns transform value
-   */
-  static Float negativeLinear(size_t index) noexcept { return 1.0f - positiveLinear(index); }
-
-  static Float positiveConcave(size_t index) noexcept {
-    return index == (TableSize - 1) ? 1.0f : -40.0f / 96.0f * std::log10((127.0f - index) / 127.0f);
-  }
-  static Float negativeConcave(size_t index) noexcept {
-    return index == 0 ? 1.0f : -40.0f / 96.0f * std::log10(index / 127.0f);
-  }
-
-  static Float positiveConvex(size_t index) noexcept {
-    return index == 0 ? 0.0f : 1.0f - -40.0f / 96.0f * std::log10(index / 127.0f);
-  }
-
-  static Float negativeConvex(size_t index) noexcept {
-    return index == (TableSize - 1) ? 0.0f : 1.0f - -40.0f / 96.0f * std::log10(Float(127.0f - index) / 127.0f);
-  }
-
-  static Float positiveSwitched(size_t index) noexcept { return index < TableSize / 2 ? 0.0 : 1.0; }
-
-  static Float negativeSwitched(size_t index) noexcept { return index < TableSize / 2 ? 1.0 : 0.0; }
-
-  static TransformArrayType const positiveLinear_;
-  static TransformArrayType const negativeLinear_;
-  static TransformArrayType const positiveConcave_;
-  static TransformArrayType const negativeConcave_;
-  static TransformArrayType const positiveConvex_;
-  static TransformArrayType const negativeConvex_;
-  static TransformArrayType const positiveSwitched_;
-  static TransformArrayType const negativeSwitched_;
-
-  static TransformArrayType const positiveLinearBipolar_;
-  static TransformArrayType const negativeLinearBipolar_;
-  static TransformArrayType const positiveConcaveBipolar_;
-  static TransformArrayType const negativeConcaveBipolar_;
-  static TransformArrayType const positiveConvexBipolar_;
-  static TransformArrayType const negativeConvexBipolar_;
-  static TransformArrayType const positiveSwitchedBipolar_;
-  static TransformArrayType const negativeSwitchedBipolar_;
-
   const TransformArrayType& active_;
 
-  friend struct DSP::Tables::Generator;
+  // friend struct DSP::Tables::Generator;
 };
 
 } // namespace SF2::MIDI

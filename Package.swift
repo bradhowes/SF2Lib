@@ -8,8 +8,7 @@ let package = Package(
   products: [
     .library(
       name: "SF2Lib",
-      targets: ["SF2Lib"]),
-    .executable(name: "DSPTableGenerator", targets: ["DSPTableGenerator"])
+      targets: ["SF2Lib"])
   ],
   dependencies: [
     .package(name: "AUv3SupportPackage", url: "https://github.com/bradhowes/AUv3Support", branch: "main")
@@ -71,19 +70,6 @@ let package = Package(
         .linkedFramework("Accelerate", .none),
         .linkedFramework("AudioToolbox", .none),
         .linkedFramework("AVFoundation", .none)
-      ]
-    ),
-    .executableTarget(
-      name: "DSPTableGenerator",
-      dependencies: [
-        .target(name: "SF2Lib", condition: .none),
-      ],
-      cxxSettings: [
-        .define("USE_ACCELERATE", to: "1", .none)
-      ],
-      linkerSettings: [
-        .linkedFramework("Accelerate", .none),
-        .linkedFramework("Foundation", .none)
       ]
     ),
     .testTarget(
