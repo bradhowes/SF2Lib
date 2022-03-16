@@ -169,13 +169,15 @@ namespace SF2::DSP {
  */
 inline void panLookup(Float pan, Float& left, Float& right) noexcept { Tables::PanLookup::lookup(pan, left, right); }
 
+extern void panLookup2(Float pan, Float& left, Float& right) noexcept;
+
 /**
  Obtain approximate sine value from table.
  
  @param radians the value to use for theta
  @returns the sine approximation
  */
-inline double sineLookup(Float radians) noexcept { return Tables::SineLookup::sine(radians); }
+// inline double sineLookup(Float radians) noexcept { return Tables::SineLookup::sine(radians); }
 
 /**
  Quickly convert cent value into a frequency using a table lookup. These calculations are taken from the Fluid Synth
