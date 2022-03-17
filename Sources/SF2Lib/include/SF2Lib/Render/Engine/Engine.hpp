@@ -48,7 +48,7 @@ public:
    @param interpolator the type of interpolation to use when rendering samples
    */
   Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator) noexcept :
-  super(os_log_create("SoundFonts", "Engine")), sampleRate_{sampleRate}, oldestActive_{voiceCount}
+  super("SoundFonts"), sampleRate_{sampleRate}, oldestActive_{voiceCount}
   {
     available_.reserve(voiceCount);
     voices_.reserve(voiceCount);
@@ -67,8 +67,8 @@ public:
    @param format the audio format to render
    @param maxFramesToRender the maximum number of samples we will be asked to render in one go
    */
-  void setRenderingFormat(AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept {
-    super::setRenderingFormat(format, maxFramesToRender);
+  void setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept {
+    super::setRenderingFormat(busCount, format, maxFramesToRender);
     initialize(format.channelCount, format.sampleRate);
   }
 

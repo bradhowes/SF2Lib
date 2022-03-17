@@ -68,7 +68,7 @@ using namespace SF2::Render::Engine;
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
   AUAudioFrameCount frameCount = 512;
-  engine.setRenderingFormat(format, frameCount);
+  engine.setRenderingFormat(3, format, frameCount);
 
   int seconds = 6;
   int sampleCount = sampleRate * seconds;
@@ -135,7 +135,7 @@ using namespace SF2::Render::Engine;
 
   Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
   engine.load(contexts.context2.file(), 0);
-  engine.setRenderingFormat(format, frameCount);
+  engine.setRenderingFormat(3, format, frameCount);
 
   // Set NPRN state so that voices send 20% output to the chorus channel
   engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
@@ -286,7 +286,7 @@ using namespace SF2::Render::Engine;
 
     Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
     engine.load(contexts.context2.file(), 0);
-    engine.setRenderingFormat(format, frameCount);
+    engine.setRenderingFormat(3, format, frameCount);
 
     // Set NPRN state so that voices send 20% output to the chorus channel
     engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
