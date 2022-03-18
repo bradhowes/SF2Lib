@@ -26,7 +26,13 @@ static dispatch_once_t onceToken;
   onceToken = NULL;
 }
 
-#ifndef SWIFTPM_MODULE_BUNDLE
+#if defined(SWIFTPM_MODULE_BUNDLE) && !defined(TESTING)
+
++ (NSString*)getConfigurationPath {
+  return [SWIFTPM_MODULE_BUNDLE pathForResource:@"Configuration" ofType:@"plist"];
+}
+
+#else
 
 + (NSString*)getConfigurationPath {
   NSArray<NSBundle*>* allBundles = [NSBundle allBundles];
@@ -39,12 +45,6 @@ static dispatch_once_t onceToken;
   }
 
   return NULL;
-}
-
-#else
-
-+ (NSString*)getConfigurationPath {
-  return [SWIFTPM_MODULE_BUNDLE pathForResource:@"Configuration" ofType:@"plist"];
 }
 
 #endif
