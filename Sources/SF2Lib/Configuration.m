@@ -32,13 +32,22 @@ static dispatch_once_t onceToken;
   @try {
     return [SWIFTPM_MODULE_BUNDLE pathForResource:@"Configuration" ofType:@"plist"];
   } @catch (NSException *exception) {
+
+    // Most likely we are in a unit test for something that depends on SF2Lib -- either the build system is not putting
+    // stuff in the right location, or the code for SWIFTPM_MODULE_BUNDLE is not accounting for the test case.
     NSArray<NSBundle*>* allBundles = [NSBundle allBundles];
     for (int index = 0; index < [allBundles count]; ++index) {
       NSBundle* bundle = [allBundles objectAtIndex:index];
       NSString* bundleIdent = bundle.bundleIdentifier;
       NSLog(@"bundle: %@ - %@", bundleIdent, bundle.resourcePath);
-      NSString* found = [bundle pathForResource:@"Configuration" ofType:@"plist"];
-      if (found != NULL) return found;
+      NSString* found = [bundle pathForResource:@"SF2Lib_SF2Lib" ofType:@"bundle"];
+      if (found != NULL) {
+        bundle = [[NSBundle alloc] initWithPath:found];
+        bundleIdent = bundle.bundleIdentifier;
+        NSLog(@"bundle: %@ - %@", bundleIdent, bundle.resourcePath);
+        NSString* found = [bundle pathForResource:@"Configuration" ofType:@"plist"];
+        if (found != NULL) return found;
+      }
     }
     return NULL;
   }
