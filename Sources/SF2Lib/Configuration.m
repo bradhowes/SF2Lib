@@ -26,10 +26,22 @@ static dispatch_once_t onceToken;
   onceToken = NULL;
 }
 
-#if defined(SWIFTPM_MODULE_BUNDLE) && !defined(TESTING)
+#if defined(SWIFTPM_MODULE_BUNDLE)
 
 + (NSString*)getConfigurationPath {
-  return [SWIFTPM_MODULE_BUNDLE pathForResource:@"Configuration" ofType:@"plist"];
+  @try {
+    return [SWIFTPM_MODULE_BUNDLE pathForResource:@"Configuration" ofType:@"plist"];
+  } @catch (NSException *exception) {
+    NSArray<NSBundle*>* allBundles = [NSBundle allBundles];
+    for (int index = 0; index < [allBundles count]; ++index) {
+      NSBundle* bundle = [allBundles objectAtIndex:index];
+      NSString* bundleIdent = bundle.bundleIdentifier;
+      NSLog(@"bundle: %@ - %@", bundleIdent, bundle.resourcePath);
+      NSString* found = [bundle pathForResource:@"Configuration" ofType:@"plist"];
+      if (found != NULL) return found;
+    }
+    return NULL;
+  }
 }
 
 #else
