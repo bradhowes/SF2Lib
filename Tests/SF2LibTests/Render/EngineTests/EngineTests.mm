@@ -36,19 +36,19 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testInit {
-  Engine engine(44100.0, 32, interpolator);
+  Engine engine("Engine", 44100.0, 32, interpolator);
   XCTAssertEqual(engine.voiceCount(), 32);
   XCTAssertEqual(engine.activeVoiceCount(), 0);
 }
 
 - (void)testLoad {
-  Engine engine(44100.0, 32, interpolator);
+  Engine engine("Engine", 44100.0, 32, interpolator);
   engine.load(contexts.context0.file(), 0);
   XCTAssertEqual(engine.presetCount(), 235);
 }
 
 - (void)testUsePreset {
-  Engine engine(44100.0, 32, interpolator);
+  Engine engine("Engine", 44100.0, 32, interpolator);
 }
 
 - (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
@@ -62,7 +62,7 @@ using namespace SF2::Render::Engine;
 
 - (void)testRolandPianoChordRenderLinear {
   Float sampleRate{44100.0};
-  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
+  Engine engine("Engine", sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
 
   engine.load(contexts.context2.file(), 0);
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
@@ -133,7 +133,7 @@ using namespace SF2::Render::Engine;
   AUAudioFrameCount frameCount = 512;
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+  Engine engine("Engine", sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
   engine.load(contexts.context2.file(), 0);
   engine.setRenderingFormat(3, format, frameCount);
 
@@ -284,7 +284,7 @@ using namespace SF2::Render::Engine;
     AUAudioFrameCount frameCount = 512;
     AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-    Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+    Engine engine("Engine", sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
     engine.load(contexts.context2.file(), 0);
     engine.setRenderingFormat(3, format, frameCount);
 

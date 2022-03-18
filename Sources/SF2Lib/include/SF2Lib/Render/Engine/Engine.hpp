@@ -47,8 +47,8 @@ public:
    @param voiceCount the maximum number of individual voices to support
    @param interpolator the type of interpolation to use when rendering samples
    */
-  Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator) noexcept :
-  super("SoundFonts"), sampleRate_{sampleRate}, oldestActive_{voiceCount}
+  Engine(std::string loggingBase, Float sampleRate, size_t voiceCount, Interpolator interpolator) noexcept :
+  super(loggingBase), sampleRate_{sampleRate}, oldestActive_{voiceCount}
   {
     available_.reserve(voiceCount);
     voices_.reserve(voiceCount);
