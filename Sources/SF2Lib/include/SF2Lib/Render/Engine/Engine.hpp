@@ -206,9 +206,9 @@ private:
                    AUAudioFrameCount frameCount) noexcept
   {
     if (outputBusNumber == 0) {
-      // All of the work is done when working with output bus 0. If all is wired correctly, busses 1 and 2 will
+      // All of the work is done when working with output bus 0. If wired correctly, busses 1 and 2 will
       // use the buffered values that were created here.
-      renderInto(Mixer(outs, busBuffers(1, frameCount), busBuffers(2, frameCount)), frameCount);
+      renderInto(Mixer(outs, busBuffers(1), busBuffers(2)), frameCount);
     }
   }
 
