@@ -44,8 +44,20 @@ class Pitch
 public:
   using Index = State::State::Index;
 
+  /**
+   Construct new instance. NOTE: the instance is not usable for audio rendering at this point. One must call
+   `configure` in order to be useable for rendering purposes.
+
+   @param state the state to use for pitch calculations
+   */
   Pitch(const State::State& state) noexcept : state_{state} {}
 
+  /**
+   Configure instance to use the given sample definition. NOTE: this is invoked before start of rendering a note. This
+   routine *must* ensure that the state is properly setup to do so, just as if it was created from scratch.
+
+   @param header the sample header to use
+   */
   void configure(const Entity::SampleHeader& header) noexcept
   {
     key_ = state_.key();

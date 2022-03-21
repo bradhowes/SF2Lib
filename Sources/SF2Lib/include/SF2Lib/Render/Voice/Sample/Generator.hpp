@@ -33,7 +33,8 @@ public:
   };
 
   /**
-   Constructor.
+   Construct new instance. NOTE: the instance is not usable for audio rendering at this point. One must call
+   `configure` in order to be useable for rendering purposes.
 
    @param state the voice state to work with
    @param kind the interpolation to apply to the samples
@@ -42,7 +43,8 @@ public:
   state_{state}, interpolatorProc_{interpolator(kind)} {}
 
   /**
-   Configure the generator to work with the given sample source.
+   Configure instance to use the given sample source. NOTE: this is invoked before start of rendering a note. This
+   routine *must* ensure that the state is properly setup to do so, just as if it was created from scratch.
 
    @param sampleSource the samples to use for rendering
    */

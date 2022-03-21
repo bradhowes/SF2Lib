@@ -108,24 +108,26 @@ using namespace SF2::Render::Engine;
     }
   };
 
-  auto playChord = [&](int note1, int note2, int note3) {
+  auto playChord = [&](int note1, int note2, int note3, bool sustain) {
     renderUntil(noteOnFrame);
     engine.noteOn(note1, 64);
     engine.noteOn(note2, 64);
     engine.noteOn(note3, 64);
     renderUntil(noteOffFrame);
-    engine.noteOff(note1);
-    engine.noteOff(note2);
-    engine.noteOff(note3);
+    if (!sustain) {
+      engine.noteOff(note1);
+      engine.noteOff(note2);
+      engine.noteOff(note3);
+    }
     noteOnFrame += noteOnDuration;
     noteOffFrame += noteOnDuration;
   };
 
-  playChord(60, 64, 67);
-  playChord(60, 65, 69);
-  playChord(60, 64, 67);
-  playChord(59, 62, 67);
-  playChord(60, 64, 67);
+  playChord(60, 64, 67, false);
+  playChord(60, 65, 69, false);
+  playChord(60, 64, 67, false);
+  playChord(59, 62, 67, false);
+  playChord(60, 64, 67, true);
 
   renderUntil(frameCount);
   if (remaining > 0) engine.renderInto(mixer, remaining);
@@ -188,24 +190,26 @@ using namespace SF2::Render::Engine;
     }
   };
 
-  auto playChord = [&](int note1, int note2, int note3) {
+  auto playChord = [&](int note1, int note2, int note3, bool sustain) {
     renderUntil(noteOnFrame);
     engine.noteOn(note1, 64);
     engine.noteOn(note2, 64);
     engine.noteOn(note3, 64);
     renderUntil(noteOffFrame);
-    engine.noteOff(note1);
-    engine.noteOff(note2);
-    engine.noteOff(note3);
+    if (!sustain) {
+      engine.noteOff(note1);
+      engine.noteOff(note2);
+      engine.noteOff(note3);
+    }
     noteOnFrame += noteOnDuration;
     noteOffFrame += noteOnDuration;
   };
 
-  playChord(60, 64, 67);
-  playChord(60, 65, 69);
-  playChord(60, 64, 67);
-  playChord(59, 62, 67);
-  playChord(60, 64, 67);
+  playChord(60, 64, 67, false);
+  playChord(60, 65, 69, false);
+  playChord(60, 64, 67, false);
+  playChord(59, 62, 67, false);
+  playChord(60, 64, 67, true);
 
   renderUntil(frameCount);
   if (remaining > 0) engine.renderInto(mixer, remaining);
@@ -214,6 +218,88 @@ using namespace SF2::Render::Engine;
 
   [self playSamples: dryBuffer count: sampleCount];
   [self playSamples: chorusBuffer count: sampleCount];
+}
+
+- (void)testYamahaPianoChordRender {
+  Float sampleRate{44100.0};
+  AUAudioFrameCount frameCount = 512;
+  AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
+
+  Engine engine("Engine", sampleRate, 6, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+  engine.load(contexts.context0.file(), 0);
+  engine.setRenderingFormat(3, format, frameCount);
+
+  // Set NPRN state so that voices send 20% output to the chorus channel
+  engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
+  engine.nprn().process(MIDI::ControlChange::nprnLSB, int(Entity::Generator::Index::chorusEffectSend));
+  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
+  engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 65);
+
+  int seconds = 6;
+  int sampleCount = sampleRate * seconds;
+  int frames = sampleCount / frameCount;
+  int remaining = sampleCount - frames * frameCount;
+  int noteOnFrame = 10;
+  int noteOnDuration = 50;
+  int noteOffFrame = noteOnFrame + noteOnDuration;
+
+  AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+  DSPHeaders::BufferFacet dryFacet{"foo"};
+  dryFacet.setChannelCount(2);
+  dryFacet.setBufferList(dryBuffer.mutableAudioBufferList);
+  DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
+
+  AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+  DSPHeaders::BufferFacet chorusFacet{"foo"};
+  chorusFacet.setChannelCount(2);
+  chorusFacet.setBufferList(chorusBuffer.mutableAudioBufferList);
+  DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
+
+  AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+  DSPHeaders::BufferFacet reverbFacet{"foo"};
+  reverbFacet.setChannelCount(2);
+  reverbFacet.setBufferList(reverbBuffer.mutableAudioBufferList);
+  DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
+
+  Mixer mixer{dry, chorus, reverb};
+
+  XCTAssertEqual(0, engine.activeVoiceCount());
+
+  int frameIndex = 0;
+  auto renderUntil = [&](int until) {
+    while (frameIndex++ < until) {
+      engine.renderInto(mixer, frameCount);
+      mixer.shiftOver(frameCount);
+    }
+  };
+
+  auto playChord = [&](int note1, int note2, int note3, bool sustain) {
+    renderUntil(noteOnFrame);
+    engine.noteOn(note1, 64);
+    engine.noteOn(note2, 64);
+    engine.noteOn(note3, 64);
+    renderUntil(noteOffFrame);
+    if (!sustain) {
+      engine.noteOff(note1);
+      engine.noteOff(note2);
+      engine.noteOff(note3);
+    }
+    noteOnFrame += noteOnDuration;
+    noteOffFrame += noteOnDuration;
+  };
+
+  playChord(60, 64, 67, false);
+  playChord(60, 65, 69, false);
+  playChord(60, 64, 67, false);
+  playChord(59, 62, 67, false);
+  playChord(60, 64, 67, true);
+
+  renderUntil(frameCount);
+  if (remaining > 0) engine.renderInto(mixer, remaining);
+
+  XCTAssertEqual(3, engine.activeVoiceCount());
+
+  [self playSamples: dryBuffer count: sampleCount];
 }
 
 - (void)playSamples:(AVAudioPCMBuffer*)buffer count:(int)sampleCount

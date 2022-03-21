@@ -36,14 +36,20 @@ Voice::configure(const State::Config& config, const NRPN& nrpn) noexcept
   const auto& sampleHeader{config.sampleSource().header()};
   os_log_debug(log_, "configure - %d %d %d", sampleHeader.isLeft(), sampleHeader.isRight(),
                sampleHeader.sampleLinkIndex());
-  
+
+  // All components of the Voice must properly reset their state prior to rendering a note. Many attributes are created
+
   state_.prepareForVoice(config, nrpn);
   
   loopingMode_ = loopingMode();
+  
   pitch_.configure(sampleHeader);
+
   gainEnvelope_ = Envelope::Generator::forVol(state_);
   modulatorEnvelope_ = Envelope::Generator::forMod(state_);
+
   sampleGenerator_.configure(config.sampleSource());
+
   modulatorLFO_ = LFO::forModulator(state_);
   vibratoLFO_ = LFO::forVibrato(state_);
 

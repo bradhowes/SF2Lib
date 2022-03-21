@@ -3,6 +3,7 @@
 #pragma once
 
 #include <limits>
+#include <utility>
 
 #include "SF2Lib/Logger.hpp"
 #include "SF2Lib/Entity/SampleHeader.hpp"
@@ -19,25 +20,33 @@ namespace SF2::Render::Voice::Sample {
  end of the sample stream via its `finished` method.
  */
 class Index {
+  struct State;
 public:
 
+  /**
+   Construct new instance. NOTE: the instance is not usable for audio rendering at this point. One must call
+   `configure` in order to be useable for rendering purposes.
+   */
   Index() = default;
 
   /**
-   Configure the index to work with the given bounds
+   Configure the index to work with the given bounds. NOTE: this is invoked before start of rendering a note. This
+   routine *must* ensure that the state is properly setup to do so, just as if it was created from scratch.
 
    @param bounds the sample bounds to work with
    */
-  void configure(const Bounds& bounds) noexcept { bounds_ = bounds; }
+  void configure(Bounds bounds) noexcept {
+    state_ = State(std::forward<Bounds>(bounds));
+  }
 
   /// Signal that no further operations will take place using this index.
-  void stop() noexcept { whole_ = bounds_.endPos(); }
+  void stop() noexcept { state_.stop(); }
 
   /// @returns true if the index has been stopped.
-  bool finished() const noexcept { return whole_ >= bounds_.endPos(); }
+  bool finished() const noexcept { return state_.whole_ >= state_.bounds_.endPos(); }
 
   /// @returns true if the index has looped.
-  bool looped() const noexcept { return looped_; }
+  bool looped() const noexcept { return state_.looped_; }
 
   /**
    Increment the index to the next location. Properly handles looping and buffer end.
@@ -47,40 +56,53 @@ public:
    */
   void increment(Float increment, bool canLoop) noexcept {
     if (finished()) return;
-
-    auto wholeIncrement = size_t(increment);
-    auto partialIncrement = increment - Float(wholeIncrement);
-
-    whole_ += wholeIncrement;
-    partial_ += partialIncrement;
-
-    if (partial_ >= 1.0) {
-      auto carry = size_t(partial_);
-      whole_ += carry;
-      partial_ -= carry;
-    }
-
-    if (canLoop && whole_ >= bounds_.endLoopPos()) {
-      whole_ -= (bounds_.endLoopPos() - bounds_.startLoopPos());
-      looped_ = true;
-    }
-    else if (whole_ >= bounds_.endPos()) {
-      log_.debug() << "stopping" << std::endl;
-      stop();
-    }
+    state_.increment(increment, canLoop);
   }
 
   /// @returns index to first sample to use for rendering
-  size_t whole() const noexcept { return whole_; }
+  size_t whole() const noexcept { return state_.whole_; }
 
   /// @returns normalized position between 2 samples. For instance, 0.5 indicates half-way between two samples.
-  Float partial() const noexcept { return partial_; }
+  Float partial() const noexcept { return state_.partial_; }
 
 private:
-  size_t whole_{0};
-  Float partial_{0.0};
-  Bounds bounds_{};
-  bool looped_{false};
+
+  struct State {
+    size_t whole_{0};
+    Float partial_{0.0};
+    Bounds bounds_{};
+    bool looped_{false};
+
+    State() = default;
+    State(Bounds&& bounds) : bounds_{std::move(bounds)} {}
+
+    void stop() noexcept { whole_ = bounds_.endPos(); }
+
+    void increment(Float increment, bool canLoop) {
+      auto wholeIncrement = size_t(increment);
+      auto partialIncrement = increment - Float(wholeIncrement);
+
+      whole_ += wholeIncrement;
+      partial_ += partialIncrement;
+
+      if (partial_ >= 1.0) {
+        auto carry = size_t(partial_);
+        whole_ += carry;
+        partial_ -= carry;
+      }
+
+      if (canLoop && whole_ >= bounds_.endLoopPos()) {
+        whole_ -= (bounds_.endLoopPos() - bounds_.startLoopPos());
+        looped_ = true;
+      }
+      else if (whole_ >= bounds_.endPos()) {
+        log_.debug() << "stopping" << std::endl;
+        stop();
+      }
+    }
+  };
+
+  State state_{};
 
   inline static Logger log_{Logger::Make("Render.Sample.Generator", "Index")};
 };
