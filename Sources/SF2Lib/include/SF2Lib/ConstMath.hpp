@@ -324,8 +324,7 @@ constexpr Real exp(Real x) { return ipow(Constants<Real>::e, floor(x)) * detail:
  * Compile-time natural logarithm function
  *
  * @param x a real-valued input.
- * @return \f$ \log_e(x) \f$ using \f[ \log\left(\frac{1+x}{1-x}\right) = \dfrac{2x}{1-\dfrac{x^2}{3-\dfrac{4x^2}{5 - \dfrac{9x^3}{7 - \ddots}}}}, \ \ x \in [-1,1] \f]
- * The continued fraction argument is split into two parts: \f$ x = a \times 10^c \f$, where \f$ c \f$ is an integer.
+ * @returns natural logarithm of given value
  */
 
 template<typename T>
