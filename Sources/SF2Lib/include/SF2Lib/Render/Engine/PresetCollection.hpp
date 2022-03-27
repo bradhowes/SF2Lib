@@ -45,6 +45,8 @@ public:
   {
     auto count = file.presets().size();
     instruments_.build(file);
+
+    ordering_.clear();
     presets_.clear();
     if (presets_.capacity() < count) presets_.reserve(count);
 

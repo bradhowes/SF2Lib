@@ -43,12 +43,54 @@ using namespace SF2::Render::Engine;
 
 - (void)testLoad {
   Engine engine("Engine", 44100.0, 32, interpolator);
+  XCTAssertFalse(engine.hasActivePreset());
   engine.load(contexts.context0.file(), 0);
   XCTAssertEqual(engine.presetCount(), 235);
+  XCTAssertTrue(engine.hasActivePreset());
+  engine.load(contexts.context1.file(), 10000);
+  XCTAssertFalse(engine.hasActivePreset());
 }
 
-- (void)testUsePreset {
+- (void)testUsePresetByIndex {
   Engine engine("Engine", 44100.0, 32, interpolator);
+  engine.load(contexts.context0.file(), 0);
+  XCTAssertTrue(engine.hasActivePreset());
+  XCTAssertEqual("Piano 1", engine.activePresetName());
+  engine.usePreset(1);
+  XCTAssertTrue(engine.hasActivePreset());
+  XCTAssertEqual("Piano 2", engine.activePresetName());
+  engine.usePreset(9999);
+  XCTAssertFalse(engine.hasActivePreset());
+  XCTAssertEqual("", engine.activePresetName());
+}
+
+- (void)testUsePresetByBankProgram {
+  Engine engine("Engine", 44100.0, 32, interpolator);
+  engine.load(contexts.context0.file(), 0);
+  engine.usePreset(0, 0);
+  XCTAssertTrue(engine.hasActivePreset());
+  XCTAssertEqual("Piano 1", engine.activePresetName());
+  engine.usePreset(0, 1);
+  XCTAssertTrue(engine.hasActivePreset());
+  XCTAssertEqual("Piano 2", engine.activePresetName());
+  engine.usePreset(128, 56);
+  XCTAssertTrue(engine.hasActivePreset());
+  XCTAssertEqual("SFX", engine.activePresetName());
+  engine.usePreset(-1, -1);
+  XCTAssertFalse(engine.hasActivePreset());
+  XCTAssertEqual("", engine.activePresetName());
+  engine.usePreset(-1, 0);
+  XCTAssertFalse(engine.hasActivePreset());
+  XCTAssertEqual("", engine.activePresetName());
+  engine.usePreset(0, -1);
+  XCTAssertFalse(engine.hasActivePreset());
+  XCTAssertEqual("", engine.activePresetName());
+  engine.usePreset(129, 0);
+  XCTAssertFalse(engine.hasActivePreset());
+  XCTAssertEqual("", engine.activePresetName());
+  engine.usePreset(0, 128);
+  XCTAssertFalse(engine.hasActivePreset());
+  XCTAssertEqual("", engine.activePresetName());
 }
 
 - (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
