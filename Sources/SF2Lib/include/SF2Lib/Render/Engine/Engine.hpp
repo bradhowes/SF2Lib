@@ -84,6 +84,9 @@ public:
   /// @returns true if there is an active preset
   bool hasActivePreset() const { return activePreset_ < presets_.size(); }
 
+  /// @ereturns name of the active preset or empty string if none is active
+  std::string activePresetName() const noexcept { return hasActivePreset() ? presets_[activePreset_].name() : ""; }
+
   /**
    Load the presets from an SF2 file and activate one.
 
