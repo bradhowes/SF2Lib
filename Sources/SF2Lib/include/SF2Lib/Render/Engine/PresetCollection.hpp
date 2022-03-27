@@ -48,19 +48,22 @@ public:
     presets_.clear();
     if (presets_.capacity() < count) presets_.reserve(count);
 
-    // The order of the presets from the file is unknown. We visit each one and add the config index to a map.
-    // Then we iterate over the map and create Preset entries that are sorted by increasing bank and program number.
-    std::map<BankProgram, size_t> ordering;
+    // The order of the presets from the file is unknown. We could order them by first-come, but here we visit each one
+    // and map their bank/program numbers to their arrival read index. Then we iterate over the map and create Preset
+    // entries that are sorted by increasing bank and program number.
     for (const Entity::Preset& configuration : file.presets().slice(0, count)) {
       BankProgram key{configuration.bank(), configuration.program()};
-      auto [pos, success] = ordering.insert(std::pair(key, ordering.size()));
+      auto [pos, success] = ordering_.insert(std::pair(key, ordering_.size()));
       if (!success) throw std::runtime_error("duplicate bank/program pair");
     }
 
-    // Build the collection in increasing bank/program order.
-    auto presetConfigs = file.presets();
-    for (auto [key, value] : ordering) {
+    // Build the collection in increasing bank/program order. Replace index in the file.presets() collection with the
+    // index in the presets_ collection so we can locate the preset in future lookup requests.
+    presets_.reserve(ordering_.size());
+    const auto& presetConfigs{file.presets()};
+    for (auto& [key, value] : ordering_) {
       presets_.emplace_back(file, instruments_, presetConfigs[value]);
+      value = presets_.size() - 1;
     }
   }
 
@@ -69,15 +72,28 @@ public:
     presets_.clear();
     instruments_.clear();
   }
-  
-  /// Obtain the number of presets in the collection.
+
+  /// @returns the number of presets in the collection.
   size_t size() const noexcept { return presets_.size(); }
 
-  /// Obtain the preset at a given index.
+  /// @returns the preset at a given index.
   const Preset& operator[](size_t index) const noexcept { return presets_[index]; }
+
+  /**
+   Locate a preset based on bank/program pair.
+
+   @param bank the bank to locate
+   @param program the program in the bank to locate
+   @returns pointer to `Preset` if found or nullptr if not found
+   */
+  const Preset* locate(int bank, int program) const noexcept {
+    const auto& pos{ordering_.find(BankProgram{bank, program})};
+    return pos == ordering_.end() ? nullptr : &presets_[pos->second];
+  }
 
 private:
   std::vector<Preset> presets_{};
+  std::map<BankProgram, size_t> ordering_{};
   InstrumentCollection instruments_;
 };
 
