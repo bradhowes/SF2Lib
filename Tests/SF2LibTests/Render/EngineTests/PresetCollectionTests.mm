@@ -60,17 +60,17 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(presets[presets.size() - 1].program(), 56);
 }
 
-- (void)testLookup {
+- (void)testLocate {
   PresetCollection presets;
   presets.build(contexts.context0.file());
-  XCTAssertEqual(presets.locate(0, 0)->name(), "Piano 1");
+  XCTAssertEqual(presets.locatePreset(0, 0)->name(), "Piano 1");
   // std::cout << presets.locate(128, 0)->name() << '\n';
-  XCTAssertEqual(presets.locate(128, 0)->name(), "Standard");
-  XCTAssertEqual(presets.locate(128, 56)->name(), "SFX");
+  XCTAssertEqual(presets.locatePreset(128, 0)->name(), "Standard");
+  XCTAssertEqual(presets.locatePreset(128, 56)->name(), "SFX");
 
-  XCTAssertEqual(presets.locate(127, 0), nullptr);
-  XCTAssertEqual(presets.locate(128, 57), nullptr);
-  XCTAssertEqual(presets.locate(-1, -1), nullptr);
+  XCTAssertEqual(presets.locatePreset(127, 0), nullptr);
+  XCTAssertEqual(presets.locatePreset(128, 57), nullptr);
+  XCTAssertEqual(presets.locatePreset(-1, -1), nullptr);
 }
 
 @end

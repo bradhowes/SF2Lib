@@ -113,6 +113,22 @@ public:
     activePreset_ = index;
   }
 
+  /**
+   Activate the preset at the given bank/program
+
+   @param bank the bank to use
+   @param program the program in the bank to use
+   */
+  void usePreset(int bank, int program) {
+    allOff();
+    auto index = presets_.locatePresetIndex(bank, program);
+    if (index >= presets_.size()) {
+      os_log_error(log_, "preset index %zu is invalid", index);
+      index = presets_.size();
+    }
+    activePreset_ = index;
+  }
+
   /// @return the number of active voices
   size_t activeVoiceCount() const noexcept { return oldestActive_.size(); }
 

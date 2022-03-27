@@ -80,15 +80,27 @@ public:
   const Preset& operator[](size_t index) const noexcept { return presets_[index]; }
 
   /**
+   Locate the index of the preset based on bank/program pair.
+
+   @param bank the bank to locate
+   @param program the program in the bank to locate
+   @returns index of the `Preset` if found or `size()`
+   */
+  size_t locatePresetIndex(int bank, int program) const noexcept {
+    const auto& pos{ordering_.find(BankProgram{bank, program})};
+    return pos == ordering_.end() ? size() : pos->second;
+  }
+
+  /**
    Locate a preset based on bank/program pair.
 
    @param bank the bank to locate
    @param program the program in the bank to locate
    @returns pointer to `Preset` if found or nullptr if not found
    */
-  const Preset* locate(int bank, int program) const noexcept {
-    const auto& pos{ordering_.find(BankProgram{bank, program})};
-    return pos == ordering_.end() ? nullptr : &presets_[pos->second];
+  const Preset* locatePreset(int bank, int program) const noexcept {
+    auto index = locatePresetIndex(bank, program);
+    return index == size() ? nullptr : &presets_[index];
   }
 
 private:
