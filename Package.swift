@@ -4,7 +4,7 @@ import PackageDescription
 
 let package = Package(
   name: "SF2Lib",
-  platforms: [.iOS(.v13), .macOS(.v10_15)],
+  platforms: [.iOS(.v13), .macOS(.v10_15), .tvOS(.v12)],
   products: [
     .library(
       name: "SF2Lib",
