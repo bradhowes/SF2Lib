@@ -41,7 +41,6 @@
 		OBJ_138 /* Configuration.m in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Configuration.m */; };
 		OBJ_139 /* AttenuationLookup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* AttenuationLookup.cpp */; };
 		OBJ_140 /* CentsPartialLookup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* CentsPartialLookup.cpp */; };
-		OBJ_141 /* Cubic4thOrderLookup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* Cubic4thOrderLookup.cpp */; };
 		OBJ_142 /* PanLookup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* PanLookup.cpp */; };
 		OBJ_143 /* Bag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* Bag.cpp */; };
 		OBJ_144 /* Definition.cpp in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* Definition.cpp */; };
@@ -160,7 +159,6 @@
 		OBJ_113 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		OBJ_114 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		OBJ_12 /* CentsPartialLookup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CentsPartialLookup.cpp; sourceTree = "<group>"; };
-		OBJ_13 /* Cubic4thOrderLookup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Cubic4thOrderLookup.cpp; sourceTree = "<group>"; };
 		OBJ_14 /* PanLookup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PanLookup.cpp; sourceTree = "<group>"; };
 		OBJ_16 /* Bag.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Bag.cpp; sourceTree = "<group>"; };
 		OBJ_18 /* Definition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Definition.cpp; sourceTree = "<group>"; };
@@ -279,7 +277,6 @@
 			children = (
 				OBJ_11 /* AttenuationLookup.cpp */,
 				OBJ_12 /* CentsPartialLookup.cpp */,
-				OBJ_13 /* Cubic4thOrderLookup.cpp */,
 				OBJ_14 /* PanLookup.cpp */,
 			);
 			path = DSP;
@@ -768,7 +765,6 @@
 				OBJ_138 /* Configuration.m in Sources */,
 				OBJ_139 /* AttenuationLookup.cpp in Sources */,
 				OBJ_140 /* CentsPartialLookup.cpp in Sources */,
-				OBJ_141 /* Cubic4thOrderLookup.cpp in Sources */,
 				OBJ_142 /* PanLookup.cpp in Sources */,
 				OBJ_143 /* Bag.cpp in Sources */,
 				OBJ_144 /* Definition.cpp in Sources */,
