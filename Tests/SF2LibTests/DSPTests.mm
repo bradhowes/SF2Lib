@@ -3,9 +3,11 @@
 #include <XCTest/XCTest.h>
 #include <cmath>
 
+#include "DSPHeaders/DSP.hpp"
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/DSP/DSP.hpp"
 
+using namespace DSPHeaders::DSP;
 using namespace SF2;
 using namespace SF2::DSP;
 
@@ -31,21 +33,21 @@ using namespace SF2::DSP;
 }
 
 - (void)testUnipolarModulation {
-  XCTAssertEqual(unipolarModulate(-3.0, 10.0, 20.0), 10.0);
-  XCTAssertEqual(unipolarModulate(0.0, 10.0, 20.0), 10.0);
-  XCTAssertEqual(unipolarModulate(0.5, 10.0, 20.0), 15.0);
-  XCTAssertEqual(unipolarModulate(1.0, 10.0, 20.0), 20.0);
-  XCTAssertEqual(unipolarModulate(11.0, 10.0, 20.0), 20.0);
+  XCTAssertEqual(unipolarModulation(-3.0, 10.0, 20.0), 10.0);
+  XCTAssertEqual(unipolarModulation(0.0, 10.0, 20.0), 10.0);
+  XCTAssertEqual(unipolarModulation(0.5, 10.0, 20.0), 15.0);
+  XCTAssertEqual(unipolarModulation(1.0, 10.0, 20.0), 20.0);
+  XCTAssertEqual(unipolarModulation(11.0, 10.0, 20.0), 20.0);
 }
 
 - (void)testBipolarModulation {
-  XCTAssertEqual(bipolarModulate(-3.0, 10.0, 20.0), 10.0);
-  XCTAssertEqual(bipolarModulate(-1.0, 10.0, 20.0), 10.0);
-  XCTAssertEqual(bipolarModulate(0.0, 10.0, 20.0), 15.0);
-  XCTAssertEqual(bipolarModulate(1.0, 10.0, 20.0), 20.0);
-  XCTAssertEqual(bipolarModulate(-1.0, -20.0, 13.0), -20.0);
-  XCTAssertEqual(bipolarModulate(0.0,  -20.0, 13.0), -3.5);
-  XCTAssertEqual(bipolarModulate(1.0,  -20.0, 13.0), 13.0);
+  XCTAssertEqual(bipolarModulation(-3.0, 10.0, 20.0), 10.0);
+  XCTAssertEqual(bipolarModulation(-1.0, 10.0, 20.0), 10.0);
+  XCTAssertEqual(bipolarModulation(0.0, 10.0, 20.0), 15.0);
+  XCTAssertEqual(bipolarModulation(1.0, 10.0, 20.0), 20.0);
+  XCTAssertEqual(bipolarModulation(-1.0, -20.0, 13.0), -20.0);
+  XCTAssertEqual(bipolarModulation(0.0,  -20.0, 13.0), -3.5);
+  XCTAssertEqual(bipolarModulation(1.0,  -20.0, 13.0), 13.0);
 }
 
 - (void)testUnipolarToBipolar {
@@ -99,10 +101,10 @@ using namespace SF2::DSP;
 }
 
 - (void)testParabolicSineAccuracy {
-  for (int index = 0; index < 360.0; ++index) {
-    auto theta = 2.0 * M_PI * index / 360.0 - M_PI;
+  for (int index = 0; index < 36000.0; ++index) {
+    auto theta = 2.0 * M_PI * index / 36000.0 - M_PI;
     auto real = std::sin(theta);
-    XCTAssertEqualWithAccuracy(SF2::DSP::parabolicSine(theta), real, 0.0011);
+    XCTAssertEqualWithAccuracy(DSPHeaders::DSP::parabolicSine(theta), real, 0.0011);
   }
 }
 
@@ -140,32 +142,6 @@ using namespace SF2::DSP;
   XCTAssertEqualWithAccuracy(1e-05, centibelsToAttenuation(1000.0), self.epsilon);
   XCTAssertEqualWithAccuracy(6.3095734448e-08, centibelsToAttenuation(1440.0), self.epsilon);
   XCTAssertEqualWithAccuracy(6.3095734448e-08, centibelsToAttenuation(1441.0), self.epsilon);
-}
-
-- (void)testInterpolationCubic4thOrderInterpolate {
-  Float epsilon = 0.0000001;
-  
-  auto v = SF2::DSP::Interpolation::cubic4thOrder(0.0, 1, 2, 3, 4);
-  XCTAssertEqualWithAccuracy(2.0, v, epsilon);
-  
-  v = SF2::DSP::Interpolation::cubic4thOrder(0.5, 1, 2, 3, 4);
-  XCTAssertEqualWithAccuracy(1 * -0.0625 + 2 * 0.5625 + 3 * 0.5625 + 4 * -0.0625, v, epsilon);
-  
-  v = SF2::DSP::Interpolation::cubic4thOrder(0.99999, 1, 2, 3, 4);
-  XCTAssertEqualWithAccuracy(2.9990234375, v, epsilon);
-}
-
-- (void)testInterpolationLinearInterpolate {
-  Float epsilon = 0.0000001;
-  
-  auto v = SF2::DSP::Interpolation::linear(0.0, 1, 2);
-  XCTAssertEqualWithAccuracy(1.0, v, epsilon);
-  
-  v = SF2::DSP::Interpolation::linear(0.5, 1, 2);
-  XCTAssertEqualWithAccuracy(0.5 * 1.0 + 0.5 * 2.0, v, epsilon);
-  
-  v = SF2::DSP::Interpolation::linear(0.9, 1, 2);
-  XCTAssertEqualWithAccuracy(0.1 * 1.0 + 0.9 * 2.0, v, epsilon);
 }
 
 - (void)testTenthPercentage {

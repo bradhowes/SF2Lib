@@ -8,8 +8,9 @@
 #include <array>
 #include <iosfwd>
 
+#include "DSPHeaders/ConstMath.hpp"
+
 #include "SF2Lib/Types.hpp"
-#include "SF2Lib/ConstMath.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
 
 // namespace SF2::DSP { namespace Tables { struct Generator; } }

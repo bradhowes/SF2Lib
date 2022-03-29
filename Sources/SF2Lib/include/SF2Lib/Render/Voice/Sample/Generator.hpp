@@ -94,7 +94,7 @@ private:
    @returns interpolated sample result
    */
   Float linearInterpolate(size_t whole, Float partial, bool canLoop) const noexcept {
-    return DSP::Interpolation::linear(partial, sample(whole, canLoop), sample(whole + 1, canLoop));
+    return DSPHeaders::DSP::Interpolation::linear(partial, sample(whole, canLoop), sample(whole + 1, canLoop));
   }
 
   /**
@@ -106,8 +106,8 @@ private:
    @returns interpolated sample result
    */
   Float cubic4thOrderInterpolate(size_t whole, Float partial, bool canLoop) const noexcept {
-    return DSP::Interpolation::cubic4thOrder(partial, before(whole, canLoop), sample(whole, canLoop),
-                                             sample(whole + 1, canLoop), sample(whole + 2, canLoop));
+    return DSPHeaders::DSP::Interpolation::cubic4thOrder(partial, before(whole, canLoop), sample(whole, canLoop),
+                                                         sample(whole + 1, canLoop), sample(whole + 2, canLoop));
   }
 
   Float sample(size_t whole, bool canLoop) const noexcept {

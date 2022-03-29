@@ -1,9 +1,11 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
-#include "SF2Lib/ConstMath.hpp"
+#include "DSPHeaders/ConstMath.hpp"
+
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/DSP/DSP.hpp"
 
+using namespace DSPHeaders;
 using namespace SF2;
 using namespace SF2::DSP;
 

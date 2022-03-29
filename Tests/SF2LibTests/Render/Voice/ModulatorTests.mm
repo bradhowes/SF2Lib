@@ -125,7 +125,8 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqualWithAccuracy(modulator.value(), 0, epsilon);
 
   channelState->setContinuousControllerValue(MIDI::ControlChange::panMSB, 127);
-  XCTAssertEqualWithAccuracy(modulator.value(), config.amount() * DSP::unipolarToBipolar(127.0 / 128.0), epsilon);
+  XCTAssertEqualWithAccuracy(modulator.value(), config.amount() * DSPHeaders::DSP::unipolarToBipolar(127.0 / 128.0),
+                             epsilon);
 }
 
 - (void)testCC11ToInitialAttenuation {
