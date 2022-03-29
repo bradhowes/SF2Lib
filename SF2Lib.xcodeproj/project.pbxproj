@@ -70,7 +70,6 @@
 		OBJ_169 /* DSPHeaders.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "AUv3SupportPackage::DSPHeaders::Product" /* DSPHeaders.framework */; };
 		OBJ_176 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_187 /* ConfigurationTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_58 /* ConfigurationTests.mm */; };
-		OBJ_188 /* ConstMathTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_59 /* ConstMathTests.mm */; };
 		OBJ_189 /* DSPTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_60 /* DSPTests.mm */; };
 		OBJ_190 /* GeneratorAmountTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_62 /* GeneratorAmountTests.mm */; };
 		OBJ_191 /* ModulatorDefaultsTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_63 /* ModulatorDefaultsTests.mm */; };
@@ -190,7 +189,6 @@
 		OBJ_56 /* SampleBasedContexts.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SampleBasedContexts.hpp; sourceTree = "<group>"; };
 		OBJ_57 /* TestResources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestResources.h; sourceTree = "<group>"; };
 		OBJ_58 /* ConfigurationTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ConfigurationTests.mm; sourceTree = "<group>"; };
-		OBJ_59 /* ConstMathTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ConstMathTests.mm; sourceTree = "<group>"; };
 		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		OBJ_60 /* DSPTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = DSPTests.mm; sourceTree = "<group>"; };
 		OBJ_62 /* GeneratorAmountTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GeneratorAmountTests.mm; sourceTree = "<group>"; };
@@ -460,7 +458,6 @@
 				OBJ_56 /* SampleBasedContexts.hpp */,
 				OBJ_57 /* TestResources.h */,
 				OBJ_58 /* ConfigurationTests.mm */,
-				OBJ_59 /* ConstMathTests.mm */,
 				OBJ_60 /* DSPTests.mm */,
 				OBJ_61 /* Entity */,
 				OBJ_65 /* IO */,
@@ -807,7 +804,6 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_187 /* ConfigurationTests.mm in Sources */,
-				OBJ_188 /* ConstMathTests.mm in Sources */,
 				OBJ_189 /* DSPTests.mm in Sources */,
 				OBJ_190 /* GeneratorAmountTests.mm in Sources */,
 				OBJ_191 /* ModulatorDefaultsTests.mm in Sources */,
