@@ -19,6 +19,9 @@ simple library for reading SF2 files as well as a competent SF2 audio renderer w
 audio processing chain, not just macOS and iOS systems Core Audio systems. For my own use, this will be used in AUv3
 components on iOS and macOS platforms.
 
+This package depends on some general DSP and audio class from my [AUv3Support](https://github.com/bradhowes/AUv3Support)
+package.
+
 # SF2 Spec Support
 
 Currently, all SF2 generators and modulators are supported and/or implemented, *except* for the following:
