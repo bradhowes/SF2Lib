@@ -66,6 +66,9 @@ let package = Package(
           "-x", "objective-c++", // treat source files as Obj-C++ files
         ], .none)
       ],
+      swiftSettings: [
+        .define("APPLICATION_EXTENSION_API_ONLY")
+      ],
       linkerSettings: [
         .linkedFramework("Accelerate", .none),
         .linkedFramework("AudioToolbox", .none),
