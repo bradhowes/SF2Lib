@@ -47,8 +47,8 @@ public:
    @param voiceCount the maximum number of individual voices to support
    @param interpolator the type of interpolation to use when rendering samples
    */
-  Engine(std::string loggingBase, Float sampleRate, size_t voiceCount, Interpolator interpolator) noexcept :
-  super(loggingBase), sampleRate_{sampleRate}, oldestActive_{voiceCount}
+  Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator) noexcept :
+  super(), sampleRate_{sampleRate}, oldestActive_{voiceCount}
   {
     available_.reserve(voiceCount);
     voices_.reserve(voiceCount);
@@ -110,7 +110,6 @@ public:
   void usePreset(size_t index) {
     allOff();
     if (index >= presets_.size()) {
-      os_log_error(log_, "preset index %zu is invalid", index);
       index = presets_.size();
     }
     activePreset_ = index;
@@ -126,7 +125,6 @@ public:
     allOff();
     auto index = presets_.locatePresetIndex(bank, program);
     if (index >= presets_.size()) {
-      os_log_error(log_, "preset index %zu is invalid", index);
       index = presets_.size();
     }
     activePreset_ = index;

@@ -36,13 +36,13 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testInit {
-  Engine engine("Engine", 44100.0, 32, interpolator);
+  Engine engine(44100.0, 32, interpolator);
   XCTAssertEqual(engine.voiceCount(), 32);
   XCTAssertEqual(engine.activeVoiceCount(), 0);
 }
 
 - (void)testLoad {
-  Engine engine("Engine", 44100.0, 32, interpolator);
+  Engine engine(44100.0, 32, interpolator);
   XCTAssertFalse(engine.hasActivePreset());
   engine.load(contexts.context0.file(), 0);
   XCTAssertEqual(engine.presetCount(), 235);
@@ -52,7 +52,7 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testUsePresetByIndex {
-  Engine engine("Engine", 44100.0, 32, interpolator);
+  Engine engine(44100.0, 32, interpolator);
   engine.load(contexts.context0.file(), 0);
   XCTAssertTrue(engine.hasActivePreset());
   XCTAssertEqual("Piano 1", engine.activePresetName());
@@ -65,7 +65,7 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testUsePresetByBankProgram {
-  Engine engine("Engine", 44100.0, 32, interpolator);
+  Engine engine(44100.0, 32, interpolator);
   engine.load(contexts.context0.file(), 0);
   engine.usePreset(0, 0);
   XCTAssertTrue(engine.hasActivePreset());
@@ -104,7 +104,7 @@ using namespace SF2::Render::Engine;
 
 - (void)testRolandPianoChordRenderLinear {
   Float sampleRate{44100.0};
-  Engine engine("Engine", sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
+  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
 
   engine.load(contexts.context2.file(), 0);
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
@@ -121,19 +121,19 @@ using namespace SF2::Render::Engine;
   int noteOffFrame = noteOnFrame + noteOnDuration;
 
   AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet dryFacet{"foo"};
+  DSPHeaders::BufferFacet dryFacet;
   dryFacet.setChannelCount(2);
   dryFacet.setBufferList(dryBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
 
   AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet chorusFacet{"foo"};
+  DSPHeaders::BufferFacet chorusFacet;
   chorusFacet.setChannelCount(2);
   chorusFacet.setBufferList(chorusBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
 
   AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet reverbFacet{"foo"};
+  DSPHeaders::BufferFacet reverbFacet;
   reverbFacet.setChannelCount(2);
   reverbFacet.setBufferList(reverbBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
@@ -184,7 +184,7 @@ using namespace SF2::Render::Engine;
   AUAudioFrameCount frameCount = 512;
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-  Engine engine("Engine", sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
   engine.load(contexts.context2.file(), 0);
   engine.setRenderingFormat(3, format, frameCount);
 
@@ -203,19 +203,19 @@ using namespace SF2::Render::Engine;
   int noteOffFrame = noteOnFrame + noteOnDuration;
 
   AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet dryFacet{"foo"};
+  DSPHeaders::BufferFacet dryFacet;
   dryFacet.setChannelCount(2);
   dryFacet.setBufferList(dryBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
 
   AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet chorusFacet{"foo"};
+  DSPHeaders::BufferFacet chorusFacet;
   chorusFacet.setChannelCount(2);
   chorusFacet.setBufferList(chorusBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
 
   AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet reverbFacet{"foo"};
+  DSPHeaders::BufferFacet reverbFacet;
   reverbFacet.setChannelCount(2);
   reverbFacet.setBufferList(reverbBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
@@ -267,7 +267,7 @@ using namespace SF2::Render::Engine;
   AUAudioFrameCount frameCount = 512;
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-  Engine engine("Engine", sampleRate, 6, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+  Engine engine(sampleRate, 6, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
   engine.load(contexts.context0.file(), 0);
   engine.setRenderingFormat(3, format, frameCount);
 
@@ -286,19 +286,19 @@ using namespace SF2::Render::Engine;
   int noteOffFrame = noteOnFrame + noteOnDuration;
 
   AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet dryFacet{"foo"};
+  DSPHeaders::BufferFacet dryFacet;
   dryFacet.setChannelCount(2);
   dryFacet.setBufferList(dryBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
 
   AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet chorusFacet{"foo"};
+  DSPHeaders::BufferFacet chorusFacet;
   chorusFacet.setChannelCount(2);
   chorusFacet.setBufferList(chorusBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
 
   AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet reverbFacet{"foo"};
+  DSPHeaders::BufferFacet reverbFacet;
   reverbFacet.setChannelCount(2);
   reverbFacet.setBufferList(reverbBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
@@ -417,7 +417,7 @@ using namespace SF2::Render::Engine;
     AUAudioFrameCount frameCount = 512;
     AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-    Engine engine("Engine", sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+    Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
     engine.load(contexts.context2.file(), 0);
     engine.setRenderingFormat(3, format, frameCount);
 
@@ -439,19 +439,19 @@ using namespace SF2::Render::Engine;
     int remaining = sampleCount - frames * frameCount;
 
     AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-    DSPHeaders::BufferFacet dryFacet{"foo"};
+    DSPHeaders::BufferFacet dryFacet;
     dryFacet.setChannelCount(2);
     dryFacet.setBufferList(dryBuffer.mutableAudioBufferList);
     DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
 
     AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-    DSPHeaders::BufferFacet chorusFacet{"foo"};
+    DSPHeaders::BufferFacet chorusFacet;
     chorusFacet.setChannelCount(2);
     chorusFacet.setBufferList(chorusBuffer.mutableAudioBufferList);
     DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
 
     AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-    DSPHeaders::BufferFacet reverbFacet{"foo"};
+    DSPHeaders::BufferFacet reverbFacet;
     reverbFacet.setChannelCount(2);
     reverbFacet.setBufferList(reverbBuffer.mutableAudioBufferList);
     DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
