@@ -7,7 +7,6 @@
 
 #include <vector>
 
-#include "SF2Lib/Logger.hpp"
 #include "SF2Lib/DSP/DSP.hpp"
 #include "SF2Lib/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Voice/Sample/Bounds.hpp"
@@ -78,18 +77,14 @@ private:
   {
     assert(!loaded_);
 
-    os_signpost_id_t signpost = os_signpost_id_generate(log_);
-
     const size_t startIndex = header_.startIndex();
     const size_t size = header_.endIndex() - startIndex;
     samples_.resize(size + sizePaddingAfterEnd);
 
-    os_signpost_interval_begin(log_, signpost, "loadNormalizedSamples", "begin - size: %ld", size);
     auto pos = allSamples_ + header_.startIndex();
     constexpr T scale = (1 << 15);
     Accelerated<T>::conversionProc(pos, 1, samples_.data(), 1, size);
     Accelerated<T>::scaleProc(samples_.data(), 1, &scale, samples_.data(), 1, size);
-    os_signpost_interval_end(log_, signpost, "loadNormalizedSamples", "end");
 
     auto bounds{Sample::Bounds::make(header_)};
 
@@ -119,8 +114,6 @@ private:
   mutable bool loaded_{false};
   mutable Float noiseFloorOverMagnitude_;
   mutable Float noiseFloorOverMagnitudeOfLoop_;
-
-  inline static Logger log_{Logger::Make("Render", "NormalizedSampleSource")};
 };
 
 } // namespace SF2::Render::Sample::Source

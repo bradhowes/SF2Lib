@@ -4,7 +4,6 @@
 
 #include <vector>
 
-#include "SF2Lib/Logger.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Envelope/Generator.hpp"
@@ -218,8 +217,6 @@ private:
   Float noiseFloorOverMagnitudeOfLoop_;
 
   mutable bool done_{false};
-
-  inline static Logger log_{Logger::Make("Render", "Voice")};
 };
 
 } // namespace SF2::Render::Voice

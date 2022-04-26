@@ -6,7 +6,6 @@
 #include <limits>
 
 #include "SF2Lib/Types.hpp"
-#include "SF2Lib/Logger.hpp"
 
 namespace SF2::Render::Envelope {
 
@@ -50,14 +49,14 @@ public:
   /**
    Generate a configuration that will emit a constant value for a fixed or indefinite time.
    */
-  static Stage Constant(StageIndex stageIndex, int sampleCount, Float value) noexcept {
-    return Stage(stageIndex, value, 1.0, 0.0, sampleCount);
+  static Stage Constant(int sampleCount, Float value) noexcept {
+    return Stage(value, 1.0, 0.0, sampleCount);
   }
 
   /**
    Generate a configuration for the delay stage.
    */
-  static Stage Delay(int sampleCount) noexcept { return Constant(StageIndex::delay, sampleCount, 0.0); }
+  static Stage Delay(int sampleCount) noexcept { return Constant(sampleCount, 0.0); }
 
   /**
    Generate a configuration for the attack stage.
@@ -65,13 +64,13 @@ public:
   static Stage Attack(int sampleCount, Float curvature) noexcept {
     curvature = clampedCurvature(curvature);
     Float alpha = calculateAlphaCoefficient(sampleCount, curvature);
-    return Stage(StageIndex::attack, 0.0f, alpha, (1.0f + curvature) * (1.0f - alpha), sampleCount);
+    return Stage(0.0f, alpha, (1.0f + curvature) * (1.0f - alpha), sampleCount);
   }
 
   /**
    Generate a configuration for the delay stage.
    */
-  static Stage Hold(int sampleCount) noexcept { return Constant(StageIndex::hold, sampleCount, 1.0f); }
+  static Stage Hold(int sampleCount) noexcept { return Constant(sampleCount, 1.0f); }
 
   /**
    Generate a configuration for the decay stage.
@@ -79,14 +78,14 @@ public:
   static Stage Decay(int sampleCount, Float curvature, Float sustainLevel) noexcept {
     curvature = clampedCurvature(curvature);
     Float alpha = calculateAlphaCoefficient(sampleCount, curvature);
-    return Stage(StageIndex::decay, 1.0f, alpha, (sustainLevel - curvature) * (1.0f - alpha), sampleCount);
+    return Stage(1.0f, alpha, (sustainLevel - curvature) * (1.0f - alpha), sampleCount);
   }
 
   /**
    Generate a configuration for the sustain stage.
    */
   static Stage Sustain(Float level) noexcept {
-    return Constant(StageIndex::sustain, std::numeric_limits<uint16_t>::max(), level);
+    return Constant(std::numeric_limits<uint16_t>::max(), level);
   }
 
   /**
@@ -95,7 +94,7 @@ public:
   static Stage Release(int sampleCount, Float curvature, Float sustainLevel) noexcept {
     curvature = clampedCurvature(curvature);
     Float alpha = calculateAlphaCoefficient(sampleCount, curvature);
-    return Stage(StageIndex::release, sustainLevel, alpha, (0.0f - curvature) * (1.0f - alpha), sampleCount);
+    return Stage(sustainLevel, alpha, (0.0f - curvature) * (1.0f - alpha), sampleCount);
   }
 
   /**
@@ -120,11 +119,8 @@ public:
   
 private:
 
-  Stage(StageIndex stageIndex, Float initial, Float alpha, Float beta, int durationInSamples) noexcept :
-  initial_{initial}, alpha_{alpha}, beta_{beta}, durationInSamples_{durationInSamples} {
-    log_.info() << "Stage " << StageName(stageIndex) << " init: " << initial << " alpha: " << alpha
-    << " beta: " << beta << std::endl;
-  }
+  Stage(Float initial, Float alpha, Float beta, int durationInSamples) noexcept :
+  initial_{initial}, alpha_{alpha}, beta_{beta}, durationInSamples_{durationInSamples} {}
 
   static Float clampedCurvature(Float curvature) noexcept {
     return DSP::clamp(curvature, minimumCurvature, maximumCurvature);
@@ -141,8 +137,6 @@ private:
   Float alpha_{0.0};
   Float beta_{0.0};
   int durationInSamples_{0};
-
-  inline static Logger log_{Logger::Make("Render.Envelope", "Stage")};
 };
 
 } // namespace SF2::Render::Envelope

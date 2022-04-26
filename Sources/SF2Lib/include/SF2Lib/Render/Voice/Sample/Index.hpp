@@ -5,7 +5,6 @@
 #include <limits>
 #include <utility>
 
-#include "SF2Lib/Logger.hpp"
 #include "SF2Lib/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Voice/Sample/Bounds.hpp"
 
@@ -96,15 +95,12 @@ private:
         looped_ = true;
       }
       else if (whole_ >= bounds_.endPos()) {
-        log_.debug() << "stopping" << std::endl;
         stop();
       }
     }
   };
 
   State state_{};
-
-  inline static Logger log_{Logger::Make("Render.Sample.Generator", "Index")};
 };
 
 } // namespace Sf2::Render::Sample

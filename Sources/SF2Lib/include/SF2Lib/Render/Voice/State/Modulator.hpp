@@ -7,7 +7,6 @@
 #include <functional>
 #include <limits>
 
-#include "SF2Lib/Logger.hpp"
 #include "SF2Lib/MIDI/ValueTransformer.hpp"
 
 namespace SF2::Entity::Modulator { class Modulator; class Source; }
@@ -133,8 +132,6 @@ private:
 
   ValueProvider sourceValue_;
   ValueProvider amountScale_;
-
-  inline static Logger log_{Logger::Make("Render.Voice", "Modulator")};
 };
 
 } // namespace SF2::Render

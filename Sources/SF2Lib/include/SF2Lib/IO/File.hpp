@@ -7,8 +7,6 @@
 #include <memory>
 #include <vector>
 
-#include "SF2Lib/Logger.hpp"
-
 #include "SF2Lib/Entity/Bag.hpp"
 #include "SF2Lib/Entity/Generator/Generator.hpp"
 #include "SF2Lib/Entity/Instrument.hpp"
@@ -39,11 +37,11 @@ public:
    @param path the file to open and load
    @param dump if true, dump contents of file to log stream
    */
-  File(const char* path, bool dump = false) : path_{path}, fd_{-1}
+  File(const char* path) : path_{path}, fd_{-1}
   {
     fd_ = ::open(path, O_RDONLY);
     if (fd_ == -1) throw std::runtime_error("file not found");
-    if (load(dump) != LoadResponse::ok) throw Format::error;
+    if (load() != LoadResponse::ok) throw Format::error;
   }
 
   /**
@@ -124,7 +122,7 @@ public:
 
 private:
 
-  LoadResponse load(bool dump);
+  LoadResponse load();
 
   std::string path_;
   int fd_;
@@ -156,8 +154,6 @@ private:
 
   Render::SampleSourceCollection sampleSourceCollection_;
   std::vector<int16_t> rawSamples_;
-
-  inline static Logger log_{Logger::Make("IO", "File")};
 };
 
 } // end namespace SF2::IO

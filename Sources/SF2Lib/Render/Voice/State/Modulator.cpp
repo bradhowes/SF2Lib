@@ -33,9 +33,7 @@ sourceTransform_{configuration.source()},
 amountTransform_{configuration.amountSource()},
 sourceValue_{makeValueProvider(configuration.source(), state)},
 amountScale_{makeValueProvider(configuration.amountSource(), state)}
-{
-  log_.debug() << "adding " << index << ' ' << configuration.description() << std::endl;
-}
+{}
 
 void
 Modulator::setSource(const Modulator& modulator) noexcept

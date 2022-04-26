@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "SF2Lib/DSP/DSP.hpp"
-#include "SF2Lib/Logger.hpp"
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Envelope/Stage.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
@@ -154,7 +153,6 @@ private:
     Stage::Release(samplesFor(sampleRate, release), defaultCurvature, sustain)
   }
   {
-    os_log_debug(log_, "Generator constructor");
     if (noteOn) gate(true);
   }
 
@@ -228,7 +226,6 @@ private:
 
   void checkIfEndStage(StageIndex next) noexcept {
     if (--counter_ == 0) {
-      os_log_debug(log_, "end stage: %{public}s", StageName(next));
       enterStage(next);
     }
   }
@@ -236,28 +233,23 @@ private:
   int activeDurationInSamples() const noexcept { return active().durationInSamples_; }
 
   void enterStage(StageIndex next) noexcept {
-    os_log_debug(log_, "new stage: %{public}s", StageName(next));
     stageIndex_ = next;
     switch (stageIndex_) {
       case StageIndex::delay:
         if (activeDurationInSamples()) break;
-        os_log_debug(log_, "next stage: attack");
         stageIndex_ = StageIndex::attack;
 
       case StageIndex::attack:
         if (activeDurationInSamples()) break;
-        os_log_debug(log_, "next stage: hold");
         stageIndex_ = StageIndex::hold;
 
       case StageIndex::hold:
         value_ = 1.0;
         if (activeDurationInSamples()) break;
-        os_log_debug(log_, "next stage: decay");
         stageIndex_ = StageIndex::decay;
 
       case StageIndex::decay:
         if (activeDurationInSamples()) break;
-        os_log_debug(log_, "next stage: sustain");
         stageIndex_ = StageIndex::sustain;
 
       case StageIndex::sustain:
@@ -266,7 +258,6 @@ private:
 
       case StageIndex::release:
         if (activeDurationInSamples()) break;
-        os_log_debug(log_, "next stage: idle");
         stageIndex_ = StageIndex::idle;
         value_ = 0.0;
 
@@ -282,8 +273,6 @@ private:
   Float value_{0.0};
 
   friend class EnvelopeTestInjector;
-  
-  inline static Logger log_{Logger::Make("Render.Envelope", "Generator")};
 };
 
 } // namespace SF2::Render::Envelope

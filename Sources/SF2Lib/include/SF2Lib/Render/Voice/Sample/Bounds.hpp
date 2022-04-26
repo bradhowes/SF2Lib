@@ -45,11 +45,9 @@ public:
     auto upper = header.endIndex();
     auto clampPos = [header, lower, upper](size_t value) -> size_t {
       if (value < lower) {
-        os_log_error(log_, "value < lower - %{public}s value: %zu lower: %zu", header.sampleName(), value, lower);
         value = lower;
       }
       else if (value > upper) {
-        os_log_error(log_, "value > upper - %{public}s value: %zu upper: %zu", header.sampleName(), value, upper);
         value = upper;
       }
       return value - lower;
@@ -71,11 +69,9 @@ public:
     auto upper = std::max(lower, header.endIndex());
     auto clampPos = [header, lower, upper](size_t value) -> size_t {
       if (value < lower) {
-        os_log_error(log_, "value < lower - %{public}s value: %zu lower: %zu", header.sampleName(), value, lower);
         value = lower;
       }
       else if (value > upper) {
-        os_log_error(log_, "value > upper - %{public}s value: %zu upper: %zu", header.sampleName(), value, upper);
         value = upper;
       }
       return value - lower;
@@ -109,8 +105,6 @@ private:
   size_t startLoopPos_{0};
   size_t endLoopPos_{0};
   size_t endPos_{0};
-
-  inline static Logger log_{Logger::Make("Render.Sample", "Bounds")};
 };
 
 } // namespace SF2::Render::Sample

@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include "SF2Lib/Logger.hpp"
-
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
 
@@ -54,8 +52,6 @@ private:
   bool active_{false};
 
   friend NRPNTestPoint;
-
-  inline static Logger log_{Logger::Make("MIDI", "NRPN")};
 };
 
 }

@@ -34,8 +34,6 @@ Voice::configure(const State::Config& config, const NRPN& nrpn) noexcept
   config.sampleSource().load();
 
   const auto& sampleHeader{config.sampleSource().header()};
-  os_log_debug(log_, "configure - %d %d %d", sampleHeader.isLeft(), sampleHeader.isRight(),
-               sampleHeader.sampleLinkIndex());
 
   // All components of the Voice must properly reset their state prior to rendering a note. Many attributes are created
 

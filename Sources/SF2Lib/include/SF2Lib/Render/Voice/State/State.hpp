@@ -10,7 +10,6 @@
 #include <numeric>
 #include <vector>
 
-#include "SF2Lib/Logger.hpp"
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/Entity/Generator/Generator.hpp"
 #include "SF2Lib/MIDI/NRPN.hpp"
@@ -84,7 +83,6 @@ public:
    @param value the value to use
    */
   void setValue(Index gen, int value) {
-    log_.debug() << "setting " << Definition::definition(gen).name() << " = " << value << std::endl;
     gens_[gen].value = value;
   }
 
@@ -97,7 +95,6 @@ public:
    @param value the value to use
    */
   void setAdjustment(Index gen, int value) {
-    log_.debug() << "adjust " << Definition::definition(gen).name() << " by " << value << std::endl;
     gens_[gen].adjustment = value;
   }
 
@@ -174,8 +171,6 @@ private:
   Float sampleRate_;
   int eventKey_;
   int eventVelocity_;
-
-  inline static Logger log_{Logger::Make("Render.Voice", "State")};
 };
 
 } // namespace SF2::Render

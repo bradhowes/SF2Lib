@@ -43,7 +43,6 @@ public:
   {
     std::for_each(generators().cbegin(), generators().cend(), [&](const Entity::Generator::Generator& generator) {
       if (generator.definition().isAvailableInPreset()) {
-        log_.debug() << "adding " << generator.name() << " + " << generator.value() << std::endl;
         state.setAdjustment(generator.index(), generator.value());
       }
     });
@@ -51,8 +50,6 @@ public:
 
 private:
   const Render::Instrument* instrument_;
-
-  inline static Logger log_{Logger::Make("Render", "Zone::Preset")};
 };
 
 } // namespace SF2::Render

@@ -253,7 +253,6 @@ private:
     }
     // Or steal the oldest voice that is active
     else if (!oldestActive_.empty()){
-      os_log_debug(log_, "stealing oldest active voice");
       found = oldestActive_.takeOldest();
     }
 
@@ -279,8 +278,6 @@ private:
 
   PresetCollection presets_{};
   size_t activePreset_{0};
-
-  inline static Logger log_{Logger::Make("Render", "Engine")};
 };
 
 } // end namespace SF2::Render

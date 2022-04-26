@@ -45,9 +45,7 @@ NRPN::process(MIDI::ControlChange cc, int value) noexcept
           auto lsb = 0x7F & channelState_.continuousControllerValue(static_cast<int>(MIDI::ControlChange::dataEntryLSB));
           auto factor = Entity::Generator::Definition::definition(Entity::Generator::Index(index_)).nrpnMultiplier();
           auto maxValue = 8192;
-          value = std::clamp<int>(((msb | lsb) - maxValue), -maxValue, maxValue) * factor;
-          os_log_debug(log_, "setting index %zu to %d", index_, value);
-          nrpnValues_[index_] = value;
+          nrpnValues_[index_] = std::clamp<int>(((msb | lsb) - maxValue), -maxValue, maxValue) * factor;
         }
         index_ = 0;
       }

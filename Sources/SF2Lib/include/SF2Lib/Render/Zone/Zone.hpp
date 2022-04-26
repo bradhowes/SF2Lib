@@ -5,7 +5,6 @@
 #include <functional>
 #include <vector>
 
-#include "SF2Lib/Logger.hpp"
 #include "SF2Lib/Entity/Bag.hpp"
 #include "SF2Lib/Entity/Generator/Generator.hpp"
 #include "SF2Lib/Entity/Modulator/Modulator.hpp"
@@ -152,8 +151,6 @@ private:
   MIDIRange velocityRange_;
   bool isGlobal_;
   bool filterGenerators_;
-
-  inline static Logger log_{Logger::Make("Render", "Zone")};
 };
 
 } // namespace SF2::Render

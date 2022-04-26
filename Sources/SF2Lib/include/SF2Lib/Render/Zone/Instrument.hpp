@@ -42,21 +42,17 @@ public:
   {
     // Generator state settings
     std::for_each(generators().cbegin(), generators().cend(), [&](const Entity::Generator::Generator& generator) {
-      log_.debug() << "setting " << generator.name() << " = " << generator.value() << std::endl;
       state.setValue(generator.index(), generator.value());
     });
 
     // Modulator definitions
     std::for_each(modulators().cbegin(), modulators().cend(), [&](const Entity::Modulator::Modulator& modulator) {
-      log_.debug() << "adding mod " << modulator.description() << std::endl;
       state.addModulator(modulator);
     });
   }
 
 private:
   const Render::Voice::Sample::NormalizedSampleSource* sampleSource_;
-
-  inline static Logger log_{Logger::Make("Render", "Zone::Instrument")};
 };
 
 } // namespace SF2::Render
