@@ -24,6 +24,21 @@ modulatorLFO_{},
 vibratoLFO_{},
 filter_{sampleRate},
 voiceIndex_{voiceIndex}
+{}
+
+Voice::Voice(Voice&& rhs) noexcept :
+state_{std::move(rhs.state_)},
+loopingMode_{rhs.loopingMode_},
+pitch_{std::move(rhs.pitch_)},
+sampleGenerator_{std::move(rhs.sampleGenerator_)},
+gainEnvelope_{std::move(rhs.gainEnvelope_)},
+modulatorEnvelope_{std::move(rhs.modulatorEnvelope_)},
+modulatorLFO_{std::move(rhs.modulatorLFO_)},
+vibratoLFO_{std::move(rhs.vibratoLFO_)},
+filter_{std::move(rhs.filter_)},
+voiceIndex_{rhs.voiceIndex_},
+releasedKey_{},
+done_{}
 {
   ;
 }
@@ -57,5 +72,6 @@ Voice::configure(const State::Config& config, const NRPN& nrpn) noexcept
 
   filter_.reset();
   
-  done_ = false;
+  done_.clear();
+  releasedKey_.clear();
 }

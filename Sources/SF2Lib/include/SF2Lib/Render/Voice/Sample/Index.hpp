@@ -73,11 +73,11 @@ private:
     bool looped_{false};
 
     State() = default;
-    State(Bounds&& bounds) : bounds_{std::move(bounds)} {}
+    State(Bounds&& bounds) noexcept : bounds_{std::move(bounds)} {}
 
     void stop() noexcept { whole_ = bounds_.endPos(); }
 
-    void increment(Float increment, bool canLoop) {
+    void increment(Float increment, bool canLoop) noexcept {
       auto wholeIncrement = size_t(increment);
       auto partialIncrement = increment - Float(wholeIncrement);
 
@@ -90,8 +90,8 @@ private:
         partial_ -= carry;
       }
 
-      if (canLoop && whole_ >= bounds_.endLoopPos()) {
-        whole_ -= (bounds_.endLoopPos() - bounds_.startLoopPos());
+      if (canLoop && bounds_.hasLoop() && whole_ >= bounds_.endLoopPos() - 1) {
+        whole_ -= bounds_.loopSize();
         looped_ = true;
       }
       else if (whole_ >= bounds_.endPos()) {

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <vector>
 
 #include "SF2Lib/MIDI/ChannelState.hpp"
@@ -50,6 +51,8 @@ public:
   Voice(Float sampleRate, const MIDI::ChannelState& channelState, size_t voiceIndex,
         Sample::Generator::Interpolator interpolator = Sample::Generator::Interpolator::linear) noexcept;
 
+  Voice(Voice&& rhs) noexcept;
+
   /**
    Set the sample rate to use for rendering.
 
@@ -78,11 +81,13 @@ public:
   bool isKeyDown() const noexcept { return gainEnvelope_.isGated(); }
 
   /**
-   Signal the envelopes that the key is no longer pressed, transitioning to release phase.
+   Signal the envelopes that the key is no longer pressed, transitioning to release phase. NOTE: this is invoked on a
+   non-render thread so we need to signal the render thread that it has taken place and let the render thread handle it.
    */
   void releaseKey() noexcept {
-    gainEnvelope_.gate(false);
-    modulatorEnvelope_.gate(false);
+    releasedKey_.test_and_set();
+    // gainEnvelope_.gate(false);
+    // modulatorEnvelope_.gate(false);
   }
 
   /// @returns true if this voice is still rendering interesting samples
@@ -90,8 +95,8 @@ public:
 
   /// @returns true if this voice is done processing and will no longer render meaningful samples.
   bool isDone() const noexcept {
-    if (!done_) done_ = (!gainEnvelope_.isActive() || !sampleGenerator_.isActive());
-    return done_;
+    // if (!done_) done_ = (!gainEnvelope_.isActive() || !sampleGenerator_.isActive());
+    return done_.test();
   }
 
   /// @returns looping mode of the sample being rendered
@@ -128,7 +133,12 @@ public:
    @returns next sample
    */
   Float renderSample() noexcept {
-    if (isDone()) { return 0.0; }
+    if (done_.test()) { return 0.0; }
+
+    if (releasedKey_.test()) {
+      gainEnvelope_.gate(false);
+      modulatorEnvelope_.gate(false);
+    }
 
     // Capture the current state of the modulators and envelopes.
     auto modLFO = modulatorLFO_.getNextValue();
@@ -155,6 +165,8 @@ public:
 
     // Finally, calculate gain / attenuation to apply to filtered result and return attenuated value.
     auto gain = calculateGain(modLFO, volEnv);
+
+    if (!gainEnvelope_.isActive() || !sampleGenerator_.isActive()) done_.test_and_set();
     return filtered * gain;
   }
 
@@ -196,7 +208,7 @@ private:
     if (gainEnvelope_.stage() == Envelope::StageIndex::release) {
       auto minGain = sampleGenerator_.looped() ? noiseFloorOverMagnitudeOfLoop_ : noiseFloorOverMagnitude_;
       if (gain < minGain) {
-        done_ = true;
+        done_.test_and_set();
       }
     }
 
@@ -216,7 +228,8 @@ private:
   Float noiseFloorOverMagnitude_;
   Float noiseFloorOverMagnitudeOfLoop_;
 
-  mutable bool done_{false};
+  std::atomic_flag releasedKey_ = ATOMIC_FLAG_INIT;
+  std::atomic_flag done_ = ATOMIC_FLAG_INIT;
 };
 
 } // namespace SF2::Render::Voice

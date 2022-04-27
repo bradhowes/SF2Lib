@@ -55,5 +55,8 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
     case MIDI::CoreEvent::reset:
       allOff();
       break;
+
+    case MIDI::CoreEvent::programChange:
+      
   }
 }

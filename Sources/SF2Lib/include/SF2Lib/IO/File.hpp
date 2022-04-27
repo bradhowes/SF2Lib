@@ -35,7 +35,6 @@ public:
    Constructor. Processes the SF2 file contents and builds up various collections based on what it finds.
 
    @param path the file to open and load
-   @param dump if true, dump contents of file to log stream
    */
   File(const char* path) : path_{path}, fd_{-1}
   {
