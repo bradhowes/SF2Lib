@@ -16,7 +16,7 @@ namespace EntityMod = Entity::Modulator;
 int Modulator::ValueProvider::ccValue() const noexcept { return state_.channelState().continuousControllerValue(cc_); }
 int Modulator::ValueProvider::key() const noexcept { return state_.key(); }
 int Modulator::ValueProvider::velocity() const noexcept { return state_.velocity(); }
-int Modulator::ValueProvider::keyPressure() const noexcept { return state_.channelState().keyPressure(state_.key()); }
+int Modulator::ValueProvider::keyPressure() const noexcept { return state_.channelState().notePressure(state_.key()); }
 int Modulator::ValueProvider::channelPressure() const noexcept { return state_.channelState().channelPressure(); }
 int Modulator::ValueProvider::pitchWheelValue() const noexcept { return state_.channelState().pitchWheelValue(); }
 int Modulator::ValueProvider::pitchWheelSensitivity() const noexcept {

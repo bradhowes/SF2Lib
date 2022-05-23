@@ -20,12 +20,23 @@ namespace SF2::MIDI {
 enum struct CoreEvent {
   noteOff = 0x80,
   noteOn = 0x90,
-  keyPressure = 0xa0,
-  controlChange = 0xb0,
-  programChange = 0xc0,
-  channelPressure = 0xd0,
-  pitchBend = 0xe0,
-  reset = 0xff
+  keyPressure = 0xA0,
+  controlChange = 0xB0,
+  programChange = 0xC0,
+  channelPressure = 0xD0,
+  pitchBend = 0xE0,
+  systemExclusive = 0xF0,
+  timeCodeQuarterFrame = 0xF1,
+  songPositionPointer = 0xF2,
+  songSelect = 0xF3,
+  undefined1 = 0xF4,
+  undefined2 = 0xF5,
+  tuneRequest = 0xF6,
+  EOX = 0xF7,
+  timingClock = 0xF8,
+  undefined3 = 0xF9,
+  undefined4 = 0xFD,
+  reset = 0xFF
 };
 
 enum struct ControlChange {
@@ -103,13 +114,14 @@ enum struct ControlChange {
   rpnLSB = 0x64,
   rpnMSB = 0x65,
 
+  // Channel messages
   allSoundOff = 0x78,
-  allControlOff = 0x79,
+  resetAllControllers = 0x79,
   localControl = 0x7A,
   allNotesOff = 0x7B,
   omniOff = 0x7C,
   omniOn = 0x7D,
-  polyOff = 0x7E,
+  monoOn = 0x7E,
   polyOn = 0x7F
 };
 

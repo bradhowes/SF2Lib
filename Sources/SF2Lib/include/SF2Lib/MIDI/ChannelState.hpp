@@ -21,25 +21,26 @@ public:
   inline constexpr static int CCMax = 127;
 
   using ContinuousControllerValues = std::array<int, CCMax - CCMin + 1>;
-  using KeyPressureValues = std::array<int, Note::Max + 1>;
+  using NotePressureValues = std::array<int, Note::Max + 1>;
 
   /**
    Construct new channel.
    */
-  ChannelState() noexcept : continuousControllerValues_{}, keyPressureValues_{} {
+  ChannelState() noexcept : continuousControllerValues_{}, notePressureValues_{} {
     continuousControllerValues_.fill(0);
-    keyPressureValues_.fill(0);
+    notePressureValues_.fill(0);
   }
 
   /**
-   Set the pressure for a given key.
+   Set the pressure for a given note. This should only apply for an actively-playing note, and not a new one which
+   should use the velocity component.
 
-   @param key the key to set
+   @param note the note to set
    @param value the pressure value to record
    */
-  void setKeyPressure(int key, int value) noexcept {
-    assert(key <= Note::Max);
-    keyPressureValues_[size_t(key)] = value;
+  void setNotePressure(int note, int value) noexcept {
+    assert(note <= Note::Max);
+    notePressureValues_[static_cast<size_t>(note)] = value;
   }
 
   /**
@@ -48,9 +49,9 @@ public:
    @param key the key to get
    @returns the current pressure value for a key
    */
-  int keyPressure(int key) const noexcept {
+  int notePressure(int key) const noexcept {
     assert(key <= Note::Max);
-    return keyPressureValues_[size_t(key)];
+    return notePressureValues_[static_cast<size_t>(key)];
   }
 
   /**
@@ -102,12 +103,22 @@ public:
    */
   int continuousControllerValue(int id) const noexcept {
     assert(id >= CCMin && id <= CCMax);
-    return continuousControllerValues_[size_t(id - CCMin)];
+    return continuousControllerValues_[static_cast<size_t>(id - CCMin)];
+  }
+
+  /**
+   Get a continuous controller value.
+
+   @param id the controller ID to get
+   @returns the controller value
+   */
+  int continuousControllerValue(MIDI::ControlChange id) const noexcept {
+    return continuousControllerValue(static_cast<int>(id));
   }
 
 private:
   ContinuousControllerValues continuousControllerValues_{};
-  KeyPressureValues keyPressureValues_{};
+  NotePressureValues notePressureValues_{};
 
   int channelPressure_{0};
   int pitchWheelValue_{0};

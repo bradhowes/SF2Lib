@@ -90,7 +90,7 @@ private:
         partial_ -= carry;
       }
 
-      if (canLoop && bounds_.hasLoop() && whole_ >= bounds_.endLoopPos() - 1) {
+      if (canLoop && bounds_.hasLoop() && whole_ >= bounds_.endLoopPos()) {
         whole_ -= bounds_.loopSize();
         looped_ = true;
       }

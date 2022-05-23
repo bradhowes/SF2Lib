@@ -257,9 +257,9 @@ using namespace SF2::Entity::Generator;
   State::Modulator mod{0, Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(0), Transform()), *state};
   XCTAssertEqualWithAccuracy(0.0, mod.value(), epsilon);
   state->setValue(Index::forcedMIDIKey, 100);
-  channelState->setKeyPressure(100, 64);
+  channelState->setNotePressure(100, 64);
   XCTAssertEqualWithAccuracy(1.5, mod.value(), epsilon);
-  channelState->setKeyPressure(100, 127);
+  channelState->setNotePressure(100, 127);
   XCTAssertEqualWithAccuracy(2.9765625, mod.value(), epsilon);
 }
 

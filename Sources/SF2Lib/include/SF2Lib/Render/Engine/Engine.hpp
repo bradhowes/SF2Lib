@@ -48,7 +48,7 @@ public:
    @param interpolator the type of interpolation to use when rendering samples
    */
   Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator) noexcept :
-  super(), sampleRate_{sampleRate}, oldestActive_{voiceCount}
+  super(), sampleRate_{sampleRate}, oldestActive_{voiceCount}, log_{os_log_create("SF2Lib", "Engine")}
   {
     available_.reserve(voiceCount);
     voices_.reserve(voiceCount);
@@ -84,11 +84,12 @@ public:
   /// @returns true if there is an active preset
   bool hasActivePreset() const { return activePreset_ < presets_.size(); }
 
-  /// @ereturns name of the active preset or empty string if none is active
+  /// @returns name of the active preset or empty string if none is active
   std::string activePresetName() const noexcept { return hasActivePreset() ? presets_[activePreset_].name() : ""; }
 
   /**
-   Load the presets from an SF2 file and activate one.
+   Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
+   one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
 
    @param file the file to load from
    @param index the preset to make active
@@ -103,7 +104,8 @@ public:
   size_t presetCount() const noexcept { return presets_.size(); }
 
   /**
-   Activate the preset at the given index.
+   Activate the preset at the given index. NOTE: this is not thread-safe. When running in a render thread, one should
+   use the program controller change MIDI command to perform a preset change.
 
    @param index the preset to use
    */
@@ -116,7 +118,8 @@ public:
   }
 
   /**
-   Activate the preset at the given bank/program
+   Activate the preset at the given bank/program. NOTE: this is not thread-safe. When running in a render thread,
+   one should use the bank/program controller change MIDI commands to perform a preset change.
 
    @param bank the bank to use
    @param program the program in the bank to use
@@ -134,7 +137,8 @@ public:
   size_t activeVoiceCount() const noexcept { return oldestActive_.size(); }
 
   /**
-   Turn off all voices, making them all available for rendering.
+   Turn off all voices, making them all available for rendering. NOTE: this is not thread-safe. When running in a
+   render thread, one should use a MIDI command to stop all notes.
    */
   void allOff() noexcept
   {
@@ -146,7 +150,8 @@ public:
 
   /**
    Tell any voices playing the current MIDI key that the key has been released. The voice will continue to render until
-   it figures out that it is done.
+   it figures out that it is done. NOTE: this is not thread-safe. When running in a render thread, one should use a
+   MIDI command to stop a note.
 
    @param key the MIDI key that was released
    */
@@ -165,7 +170,8 @@ public:
   }
 
   /**
-   Activate one or more voices to play a MIDI key with the given velocity.
+   Activate one or more voices to play a MIDI key with the given velocity. NOTE: this is not thread-safe. When running
+   in a render thread, one should use a MIDI command to start a note.
 
    @param key the MIDI key to play
    @param velocity the MIDI velocity to play at
@@ -266,6 +272,10 @@ private:
     oldestActive_.add(index);
   }
 
+  void processControlChange(MIDI::ControlChange cc) noexcept;
+  void changeProgram(int program) noexcept;
+  void loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept;
+
   Float sampleRate_;
   MIDI::ChannelState channelState_{};
   MIDI::NRPN nrpn_{channelState_};
@@ -276,6 +286,7 @@ private:
 
   PresetCollection presets_{};
   size_t activePreset_{0};
+  os_log_t log_;
 };
 
 } // end namespace SF2::Render

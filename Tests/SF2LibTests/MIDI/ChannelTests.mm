@@ -17,13 +17,13 @@ using namespace SF2::MIDI;
 
 - (void)testChannelKeyPressureValues {
   ChannelState channel;
-  for (int key = 0; key < 128; ++key) XCTAssertEqual(0, channel.keyPressure(Note(key)));
+  for (int key = 0; key < 128; ++key) XCTAssertEqual(0, channel.notePressure(Note(key)));
 
-  channel.setKeyPressure(64, 3);
-  XCTAssertEqual(3, channel.keyPressure(64));
+  channel.setNotePressure(64, 3);
+  XCTAssertEqual(3, channel.notePressure(64));
 
-  for (int key = 0; key < 128; ++key) channel.setKeyPressure(key, 121);
-  for (int key = 0; key < 128; ++key) XCTAssertEqual(121, channel.keyPressure(key));
+  for (int key = 0; key < 128; ++key) channel.setNotePressure(key, 121);
+  for (int key = 0; key < 128; ++key) XCTAssertEqual(121, channel.notePressure(key));
 }
 
 - (void)testChannelPressureValue {
