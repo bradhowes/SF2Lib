@@ -84,6 +84,25 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
   }
 }
 
+- (void)testEndOffset {
+  auto channelState = MIDI::ChannelState();
+  auto state = State::State(48'000.0, channelState);
+
+  state.setValue(SF2::Entity::Generator::Index::endAddressOffset, -1);
+  {
+    auto bounds = Bounds::make(sampleHeaderNoLoop, state);
+    XCTAssertEqual(bounds.startPos(), 0);
+    XCTAssertEqual(bounds.endPos(), sampleHeaderNoLoop.sampleSize() - 1);
+  }
+  // Positive values are useless here
+  state.setValue(SF2::Entity::Generator::Index::endAddressOffset, 1);
+  {
+    auto bounds = Bounds::make(sampleHeaderNoLoop, state);
+    XCTAssertEqual(bounds.startPos(), 0);
+    XCTAssertEqual(bounds.endPos(), sampleHeaderNoLoop.sampleSize());
+  }
+}
+
 - (void)testEndOffsetCoarse {
   auto channelState = MIDI::ChannelState();
   auto state = State::State(48'000.0, channelState);
@@ -124,6 +143,156 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
     XCTAssertEqual(bounds.startPos(), 0);
     XCTAssertEqual(bounds.endPos(), sampleHeaderNoLoop.sampleSize());
+  }
+}
+
+- (void)testStartLoopOffset {
+  auto channelState = MIDI::ChannelState();
+  auto state = State::State(48'000.0, channelState);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startPos(), 0);
+    XCTAssertEqual(bounds.startLoopPos(), 43);
+    XCTAssertEqual(bounds.endLoopPos(), 90);
+    XCTAssertEqual(bounds.endPos(), 128);
+    XCTAssertEqual(bounds.hasLoop(), true);
+  }
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressOffset, -1);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startLoopPos(), 42);
+    XCTAssertEqual(bounds.hasLoop(), true);
+  }
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressOffset, -43);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startLoopPos(), 0);
+    XCTAssertEqual(bounds.endLoopPos(), 90);
+    XCTAssertEqual(bounds.endPos(), 128);
+    XCTAssertEqual(bounds.hasLoop(), false);
+  }
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressOffset, 80);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startLoopPos(), 123);
+    XCTAssertEqual(bounds.endLoopPos(), 90);
+    XCTAssertEqual(bounds.endPos(), 128);
+    XCTAssertEqual(bounds.hasLoop(), false);
+  }
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressOffset, 90);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startLoopPos(), 128);
+    XCTAssertEqual(bounds.endLoopPos(), 90);
+    XCTAssertEqual(bounds.endPos(), 128);
+    XCTAssertEqual(bounds.hasLoop(), false);
+  }
+}
+
+- (void)testStartLoopOffsetCoarse {
+  auto channelState = MIDI::ChannelState();
+  auto state = State::State(48'000.0, channelState);
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 1);
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressOffset, -32760);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startLoopPos(), 43 + 32768 - 32760);
+    XCTAssertEqual(bounds.hasLoop(), true);
+  }
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, -1);
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressOffset, 32750);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startLoopPos(), 43 - 32768 + 32750);
+    XCTAssertEqual(bounds.hasLoop(), true);
+  }
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 2);
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressOffset, 0);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startLoopPos(), 128);
+    XCTAssertEqual(bounds.hasLoop(), false);
+  }
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, -2);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startLoopPos(), 0);
+    XCTAssertEqual(bounds.hasLoop(), false);
+  }
+}
+
+- (void)testEndLoopOffset {
+  auto channelState = MIDI::ChannelState();
+  auto state = State::State(48'000.0, channelState);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startPos(), 0);
+    XCTAssertEqual(bounds.startLoopPos(), 43);
+    XCTAssertEqual(bounds.endLoopPos(), 90);
+    XCTAssertEqual(bounds.endPos(), 128);
+    XCTAssertEqual(bounds.hasLoop(), true);
+  }
+  state.setValue(SF2::Entity::Generator::Index::endLoopAddressOffset, 1);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.endLoopPos(), 91);
+    XCTAssertEqual(bounds.hasLoop(), true);
+  }
+  state.setValue(SF2::Entity::Generator::Index::endLoopAddressOffset, 40);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.endLoopPos(), 128);
+    XCTAssertEqual(bounds.hasLoop(), true);
+  }
+  state.setValue(SF2::Entity::Generator::Index::endLoopAddressOffset, -1);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.endLoopPos(), 89);
+    XCTAssertEqual(bounds.hasLoop(), true);
+  }
+  state.setValue(SF2::Entity::Generator::Index::endLoopAddressOffset, -47);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.endLoopPos(), 43);
+    XCTAssertEqual(bounds.hasLoop(), false);
+  }
+  state.setValue(SF2::Entity::Generator::Index::endLoopAddressOffset, -100);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.endLoopPos(), 0);
+    XCTAssertEqual(bounds.hasLoop(), false);
+  }
+}
+
+- (void)testEndLoopOffsetCoarse {
+  auto channelState = MIDI::ChannelState();
+  auto state = State::State(48'000.0, channelState);
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 1);
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressOffset, -32760);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startLoopPos(), 43 + 32768 - 32760);
+    XCTAssertEqual(bounds.hasLoop(), true);
+  }
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, -1);
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressOffset, 32750);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startLoopPos(), 43 - 32768 + 32750);
+    XCTAssertEqual(bounds.hasLoop(), true);
+  }
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 2);
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressOffset, 0);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startLoopPos(), 128);
+    XCTAssertEqual(bounds.hasLoop(), false);
+  }
+  state.setValue(SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, -2);
+  {
+    auto bounds = Bounds::make(sampleHeaderLooped, state);
+    XCTAssertEqual(bounds.startLoopPos(), 0);
+    XCTAssertEqual(bounds.hasLoop(), false);
   }
 }
 
