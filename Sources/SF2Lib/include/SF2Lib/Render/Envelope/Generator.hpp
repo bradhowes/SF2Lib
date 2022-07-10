@@ -210,10 +210,7 @@ private:
 
   void updateAndCompare(Float floor, StageIndex next) noexcept {
     updateValue();
-    if (value_ < floor)
-      enterStage(next);
-    else
-      checkIfEndStage(next);
+    unlikely(value_ < floor) ? enterStage(next) : checkIfEndStage(next);
   }
 
   const Stage& active() const noexcept { return stage(stageIndex_); }
@@ -225,7 +222,7 @@ private:
   void updateValue() noexcept { value_ = active().next(value_); }
 
   void checkIfEndStage(StageIndex next) noexcept {
-    if (--counter_ == 0) {
+    if (unlikely(--counter_ == 0)) {
       enterStage(next);
     }
   }

@@ -10,6 +10,10 @@
 #include "DSPHeaders/DSP.hpp"
 #include "SF2Lib/Types.hpp"
 
+// *Experimental*
+#define likely(x) __builtin_expect(!!(x), 1) gcc built-in functions, help compiler branch optimization
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
 /// Functions and constants for general-purpose signal processing specific to SF2 realm. More general-purpose routines
 /// are in the DSPHeaders::DSP namespace of AUv3Support package.
 namespace SF2::DSP {
@@ -27,7 +31,7 @@ inline constexpr Float MaximumAttenuationCentiBels = 960.0f;
 inline constexpr Float LowestNoteFrequency = Float(8.17579891564370697665253828745335); // C-1
 
 inline constexpr Float clamp(Float value, Float lowerBound, Float upperBound) {
-  return std::min<Float>(std::max<Float>(value, lowerBound), upperBound);
+  return std::clamp(value, lowerBound, upperBound);
 }
 
 /**
@@ -71,7 +75,7 @@ extern Float attenuationLookup(int centibels) noexcept;
  @param centibels the value to convert
  */
 inline double centibelsToResonance(double centibels) noexcept {
-  return std::pow(10.0, (DSP::clamp(centibels, 0.0, 960.0) - 30.1) / 200.0);
+  return std::pow(10.0, (clamp(centibels, 0.0, 960.0) - 30.1) / 200.0);
 }
 
 /**
@@ -109,7 +113,7 @@ extern double centsPartialLookup(int partial) noexcept;
  0 - 1199 into the proper multiplier.
  */
 inline double centsToFrequency(Float value) noexcept {
-  if (value < 0.0f) return 1.0f;
+  if (unlikely(value < 0.0f)) return 1.0f;
 
   // This seems to be the fastest way to do the following. Curiously, the operation `cents % 1200` is faster than doing
   // `cents - whole * 1200` in optimized build.
@@ -129,7 +133,7 @@ inline double centsToFrequency(Float value) noexcept {
  @returns attenuation amount
  */
 inline Float centibelsToAttenuation(Float centibels) noexcept {
-  centibels = DSP::clamp(centibels, 0.0, 1440.0);
+  centibels = clamp(centibels, 0.0, 1440.0);
   auto index1 = int(centibels);
   auto partial = centibels - index1;
   if (partial < std::numeric_limits<Float>::min()) return attenuationLookup(index1);

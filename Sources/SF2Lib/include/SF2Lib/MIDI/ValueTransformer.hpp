@@ -25,9 +25,9 @@ namespace SF2::MIDI {
 class ValueTransformer {
 public:
   using Float = SF2::Float;
-  inline constexpr static int Min = 0;
-  inline constexpr static int Max = 127;
-  inline constexpr static size_t TableSize = Max + 1;
+  inline constexpr static int MinValue = 0;
+  inline constexpr static int MaxValue = 127;
+  inline constexpr static size_t TableSize = MaxValue + 1;
   using TransformArrayType = std::array<Float, TableSize>;
 
   /**
@@ -81,7 +81,7 @@ public:
    @returns transformed value
    */
   Float operator()(int controllerValue) const noexcept {
-    return Float(active_[size_t(std::clamp<int>(controllerValue, 0, Max))]);
+    return Float(active_[size_t(std::clamp(controllerValue, MinValue, MaxValue))]);
   }
 
 private:

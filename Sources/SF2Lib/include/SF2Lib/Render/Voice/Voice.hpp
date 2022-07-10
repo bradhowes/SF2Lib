@@ -183,7 +183,7 @@ public:
 
     for (; index < frameCount; ++index) {
       if (isDone()) break;
-      Float pan = DSP::clamp(state_.modulated(Index::pan), -500, 500);
+      Float pan = state_.modulated(Index::pan);
       Float leftPan, rightPan;
       DSP::panLookup(pan, leftPan, rightPan);
       SF2::Float sample{renderSample()};

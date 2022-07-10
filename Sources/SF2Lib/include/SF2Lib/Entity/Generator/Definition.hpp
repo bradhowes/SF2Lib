@@ -22,21 +22,18 @@ public:
   /// Range for generator values. Default is no range checking.
   struct ValueRange {
 
-    /// @returns true if the range is valid
-    bool isValid() const noexcept { return min < max; }
+    constexpr ValueRange(int _min, int _max) : min{_min}, max{_max} {}
 
     /**
-     Clamp the given value to be within the defined range. If range is not valid, no clamping will take place.
+     Clamp the given value to be within the defined range.
 
      @param value the value to clamp
-     @returns clamped value if range is valid, or original value.
+     @returns clamped value
      */
-    template <typename T> T clamp(T value) const noexcept {
-      return isValid() ? std::min<T>(std::max<T>(value, min), max) : value;
-    }
+    template <typename T> T clamp(T value) const noexcept { return std::clamp<T>(value, min, max); }
 
-    int min{};
-    int max{};
+    const int min;
+    const int max;
   };
 
   static constexpr size_t NumDefs = static_cast<size_t>(Index::numValues);
@@ -69,7 +66,7 @@ public:
    @param index value to lookup
    @returns Definition entry
    */
-  static const Definition& definition(Index index) { return definitions_.at(static_cast<size_t>(index)); }
+  static const Definition& definition(Index index) { return definitions_[static_cast<size_t>(index)]; }
 
   /// @returns name of the definition
   const std::string& name() const noexcept { return name_; }

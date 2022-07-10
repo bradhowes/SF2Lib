@@ -76,9 +76,9 @@ public:
   Float samplePhaseIncrement(Float modLFO, Float vibLFO, Float modEnv) const noexcept
   {
     auto value = DSP::centsToFrequency(pitch_ + pitchOffset_ +
-                                       modLFO * centFs(Index::modulatorLFOToPitch) +
-                                       vibLFO * centFs(Index::vibratoLFOToPitch) +
-                                       modEnv * centFs(Index::modulatorEnvelopeToPitch)) / rootFrequency_;
+                                       modLFO * state_.modulated(Index::modulatorLFOToPitch) +
+                                       vibLFO * state_.modulated(Index::vibratoLFOToPitch) +
+                                       modEnv * state_.modulated(Index::modulatorEnvelopeToPitch)) / rootFrequency_;
     return Float(value);
   }
 
@@ -87,28 +87,23 @@ public:
    */
   void updatePitchOffset() noexcept
   {
-    pitchOffset_ = DSP::clamp(state_.modulated(Index::coarseTune), -120.0f, 120.0f) * 100.0f +
-    DSP::clamp(state_.modulated(Index::fineTune), -99.0f, 99.0f);
+    pitchOffset_ = state_.modulated(Index::coarseTune) * 100.0f + state_.modulated(Index::fineTune);
   }
 
 private:
 
-  Float centFs(Index index) const noexcept { return DSP::clamp(state_.modulated(index), -12000.0f, 12000.0f); }
-
   int rootKey(int originalMIDIKey) const noexcept
   {
-    auto value = std::clamp(state_.unmodulated(Index::overridingRootKey), -1, 127);
+    auto value = state_.unmodulated(Index::overridingRootKey);
     if (value == -1) value = originalMIDIKey;
     return value;
   }
-
-  int scaleTuning() const noexcept { return std::clamp(state_.unmodulated(Index::scaleTuning), 0, 1200); }
 
   void initialize(int originalMIDIKey, int pitchCorrection, Float originalSampleRate) noexcept {
     auto rootKey = this->rootKey(originalMIDIKey);
     auto rootPitch = rootKey * 100.0f - pitchCorrection;
     rootFrequency_ = Float(DSP::centsToFrequency(rootPitch) * state_.sampleRate() / originalSampleRate);
-    pitch_ = scaleTuning() * (key_ - rootPitch / 100.0f) + rootPitch;
+    pitch_ = state_.unmodulated(Index::scaleTuning) * (key_ - rootPitch / 100.0f) + rootPitch;
     updatePitchOffset();
   }
 

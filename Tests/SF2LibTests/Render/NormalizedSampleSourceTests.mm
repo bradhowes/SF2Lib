@@ -78,27 +78,15 @@ static SF2::Float epsilon = 1e-6;
   XCTAssertEqualWithAccuracy(-0.6103515625, gen.generate(inc, true), epsilon);
   XCTAssertEqualWithAccuracy(0.91552734375, gen.generate(inc, true), epsilon);
   XCTAssertEqualWithAccuracy(0.6103515625, gen.generate(inc, true), epsilon);
-//}
-//
-//- (void)testCubicInterpolation {
-//  State state{100, channel};
-//  NormalizedSampleSource source{values, header};
-//  source.load();
-//
-//  // XCTAssertEqualWithAccuracy(0.30517578125, gen.generate(0.0, false), 0.0000001);
-//#if 0
-//  XCTAssertEqualWithAccuracy(0.721051098083, gen.generate(0.0, false), 0.0000001);
-//  XCTAssertEqualWithAccuracy(0.761876096931, gen.generate(0.0, false), 0.0000001);
-//  XCTAssertEqualWithAccuracy(0.348288029812, gen.generate(0.0, false), 0.0000001);
-//#endif
 }
 
 - (void)testLoadSamplesPerformance0 {
   const auto& file = contexts->context0.file();
-  auto count = file.sampleHeaders().size();
+  auto sampleEntries = file.sampleHeaders().size();
+  XCTAssertEqual(sampleEntries, 495);
 
   [self measureBlock:^{
-    for (size_t index = 0; index < count; ++index) {
+    for (size_t index = 0; index < sampleEntries; ++index) {
       auto samples = file.sampleSourceCollection()[index];
       samples.load();
       samples.unload();
@@ -108,10 +96,11 @@ static SF2::Float epsilon = 1e-6;
 
 - (void)testLoadSamplesPerformance1 {
   const auto& file = contexts->context1.file();
-  auto count = file.sampleHeaders().size();
+  auto sampleEntries = file.sampleHeaders().size();
+  XCTAssertEqual(sampleEntries, 864);
 
   [self measureBlock:^{
-    for (size_t index = 0; index < count; ++index) {
+    for (size_t index = 0; index < sampleEntries; ++index) {
       auto samples = file.sampleSourceCollection()[index];
       samples.load();
       samples.unload();
@@ -121,10 +110,11 @@ static SF2::Float epsilon = 1e-6;
 
 - (void)testLoadSamplesPerformance2 {
   const auto& file = contexts->context2.file();
-  auto count = file.sampleHeaders().size();
+  auto sampleEntries = file.sampleHeaders().size();
+  XCTAssertEqual(sampleEntries, 24);
 
   [self measureBlock:^{
-    for (size_t index = 0; index < count; ++index) {
+    for (size_t index = 0; index < sampleEntries; ++index) {
       auto samples = file.sampleSourceCollection()[index];
       samples.load();
       samples.unload();

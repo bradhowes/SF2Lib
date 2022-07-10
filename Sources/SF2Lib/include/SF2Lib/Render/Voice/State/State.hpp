@@ -128,7 +128,8 @@ public:
   }
 
   /**
-   Obtain a generator value that includes the changes added by attached modulators.
+   Obtain a generator value that includes the changes added by attached modulators. Value is clamped to allowed range in
+   spec.
 
    @param gen the index of the generator
    @returns current value of the generator

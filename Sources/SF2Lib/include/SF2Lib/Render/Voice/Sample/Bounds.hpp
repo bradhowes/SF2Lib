@@ -29,9 +29,9 @@ public:
    @param state the generator values to use
    */
   static Bounds make(const Entity::SampleHeader& header, const State::State& state) noexcept {
-    constexpr size_t coarse = 1 << 15;
-    auto offset = [&state, coarse](Index a, Index b) -> size_t {
-      return size_t(state.unmodulated(a)) + size_t(state.unmodulated(b)) * coarse;
+    constexpr int coarse = 1 << 15;
+    auto offset = [&state, coarse](Index fineIndex, Index courseIndex) -> int {
+      return state.unmodulated(fineIndex) + state.unmodulated(courseIndex) * coarse;
     };
 
     // Calculate offsets for the samples using state generator values set by preset/instrument zones.
@@ -41,21 +41,21 @@ public:
     auto endOffset = offset(Index::endAddressOffset, Index::endAddressCoarseOffset);
 
     // Don't trust values above. Clamp them to valid ranges before using.
-    auto lower = header.startIndex();
-    auto upper = header.endIndex();
-    auto clampPos = [header, lower, upper](size_t value) -> size_t {
+    auto lower = int(header.startIndex());
+    auto upper = int(header.endIndex());
+    auto clampPos = [lower, upper](int value) -> size_t {
       if (value < lower) {
         value = lower;
       }
       else if (value > upper) {
         value = upper;
       }
-      return value - lower;
+      return size_t(value - lower);
     };
 
     return Bounds(clampPos(lower + startOffset),
-                  clampPos(header.startLoopIndex() + startLoopOffset),
-                  clampPos(header.endLoopIndex() + endLoopOffset),
+                  clampPos(int(header.startLoopIndex()) + startLoopOffset),
+                  clampPos(int(header.endLoopIndex()) + endLoopOffset),
                   clampPos(upper + endOffset));
   }
 
@@ -83,17 +83,17 @@ public:
   Bounds() = default;
 
   /// @returns the index of the first sample to use for rendering
-  size_t startPos() const noexcept { return startPos_; }
+  constexpr size_t startPos() const noexcept { return startPos_; }
   /// @returns the index of the first sample of a loop
-  size_t startLoopPos() const noexcept { return startLoopPos_; }
+  constexpr size_t startLoopPos() const noexcept { return startLoopPos_; }
   /// @returns the index of the first sample AFTER a loop
-  size_t endLoopPos() const noexcept { return endLoopPos_; }
+  constexpr size_t endLoopPos() const noexcept { return endLoopPos_; }
   /// @returns the index after the last valid sample to use for rendering
-  size_t endPos() const noexcept { return endPos_; }
+  constexpr size_t endPos() const noexcept { return endPos_; }
   /// Number of samples involved in a loop
-  size_t loopSize() const noexcept { return endLoopPos() - startLoopPos(); }
+  constexpr size_t loopSize() const noexcept { return endLoopPos() - startLoopPos(); }
   /// True if there is a loop established for the samples
-  bool hasLoop() const noexcept {
+  constexpr bool hasLoop() const noexcept {
     return startLoopPos_ > startPos_ && startLoopPos_ < endLoopPos_ && endLoopPos_ <= endPos_;
   }
 

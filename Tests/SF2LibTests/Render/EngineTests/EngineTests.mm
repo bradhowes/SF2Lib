@@ -20,14 +20,20 @@ using namespace SF2::Render::Engine;
 @property (nonatomic, retain) NSURL* audioFileURL;
 @end
 
+static void
+renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int until) {
+  while (frameIndex++ < until) {
+    engine.renderInto(mixer, frameCount);
+    mixer.shiftOver(frameCount);
+  }
+}
+
 @implementation EngineTests {
   SampleBasedContexts contexts;
-  SF2::Render::Voice::Sample::Generator::Interpolator interpolator;
 }
 
 - (void)setUp {
   // See Package.swift
-  interpolator = SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder;
 #if PLAY_AUDIO
   self.playAudio = YES;
 #else
@@ -36,13 +42,13 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testInit {
-  Engine engine(44100.0, 32, interpolator);
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
   XCTAssertEqual(engine.voiceCount(), 32);
   XCTAssertEqual(engine.activeVoiceCount(), 0);
 }
 
 - (void)testLoad {
-  Engine engine(44100.0, 32, interpolator);
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
   XCTAssertFalse(engine.hasActivePreset());
   engine.load(contexts.context0.file(), 0);
   XCTAssertEqual(engine.presetCount(), 235);
@@ -52,7 +58,7 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testUsePresetByIndex {
-  Engine engine(44100.0, 32, interpolator);
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
   engine.load(contexts.context0.file(), 0);
   XCTAssertTrue(engine.hasActivePreset());
   XCTAssertEqual("Piano 1", engine.activePresetName());
@@ -65,7 +71,7 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testUsePresetByBankProgram {
-  Engine engine(44100.0, 32, interpolator);
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
   engine.load(contexts.context0.file(), 0);
   engine.usePreset(0, 0);
   XCTAssertTrue(engine.hasActivePreset());
@@ -143,19 +149,12 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(0, engine.activeVoiceCount());
 
   int frameIndex = 0;
-  auto renderUntil = [&](int until) {
-    while (frameIndex++ < until) {
-      engine.renderInto(mixer, frameCount);
-      mixer.shiftOver(frameCount);
-    }
-  };
-
   auto playChord = [&](int note1, int note2, int note3, bool sustain) {
-    renderUntil(noteOnFrame);
+    renderUntil(engine, mixer, frameIndex, frameCount, noteOnFrame);
     engine.noteOn(note1, 64);
     engine.noteOn(note2, 64);
     engine.noteOn(note3, 64);
-    renderUntil(noteOffFrame);
+    renderUntil(engine, mixer, frameIndex, frameCount, noteOffFrame);
     if (!sustain) {
       engine.noteOff(note1);
       engine.noteOff(note2);
@@ -171,10 +170,10 @@ using namespace SF2::Render::Engine;
   playChord(59, 62, 67, false);
   playChord(60, 64, 67, true);
 
-  renderUntil(frameCount);
+  renderUntil(engine, mixer, frameIndex, frameCount, frames);
   if (remaining > 0) engine.renderInto(mixer, remaining);
 
-  XCTAssertEqual(2, engine.activeVoiceCount());
+  XCTAssertEqual(0, engine.activeVoiceCount());
 
   [self playSamples: dryBuffer count: sampleCount];
 }
@@ -225,19 +224,12 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(0, engine.activeVoiceCount());
 
   int frameIndex = 0;
-  auto renderUntil = [&](int until) {
-    while (frameIndex++ < until) {
-      engine.renderInto(mixer, frameCount);
-      mixer.shiftOver(frameCount);
-    }
-  };
-
   auto playChord = [&](int note1, int note2, int note3, bool sustain) {
-    renderUntil(noteOnFrame);
+    renderUntil(engine, mixer, frameIndex, frameCount, noteOnFrame);
     engine.noteOn(note1, 64);
     engine.noteOn(note2, 64);
     engine.noteOn(note3, 64);
-    renderUntil(noteOffFrame);
+    renderUntil(engine, mixer, frameIndex, frameCount, noteOffFrame);
     if (!sustain) {
       engine.noteOff(note1);
       engine.noteOff(note2);
@@ -253,10 +245,10 @@ using namespace SF2::Render::Engine;
   playChord(59, 62, 67, false);
   playChord(60, 64, 67, true);
 
-  renderUntil(frameCount);
+  renderUntil(engine, mixer, frameIndex, frameCount, frames);
   if (remaining > 0) engine.renderInto(mixer, remaining);
 
-  XCTAssertEqual(2, engine.activeVoiceCount());
+  XCTAssertEqual(0, engine.activeVoiceCount());
 
   [self playSamples: dryBuffer count: sampleCount];
   [self playSamples: chorusBuffer count: sampleCount];
@@ -308,19 +300,14 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(0, engine.activeVoiceCount());
 
   int frameIndex = 0;
-  auto renderUntil = [&](int until) {
-    while (frameIndex++ < until) {
-      engine.renderInto(mixer, frameCount);
-      mixer.shiftOver(frameCount);
-    }
-  };
-
+  int velocity = 127;
   auto playChord = [&](int note1, int note2, int note3, bool sustain) {
-    renderUntil(noteOnFrame);
-    engine.noteOn(note1, 64);
-    engine.noteOn(note2, 64);
-    engine.noteOn(note3, 64);
-    renderUntil(noteOffFrame);
+    renderUntil(engine, mixer, frameIndex, frameCount, noteOnFrame);
+    engine.noteOn(note1, velocity);
+    engine.noteOn(note2, velocity);
+    engine.noteOn(note3, velocity);
+    velocity -= 16;
+    renderUntil(engine, mixer, frameIndex, frameCount, noteOffFrame);
     if (!sustain) {
       engine.noteOff(note1);
       engine.noteOff(note2);
@@ -336,12 +323,13 @@ using namespace SF2::Render::Engine;
   playChord(59, 62, 67, false);
   playChord(60, 64, 67, true);
 
-  renderUntil(frameCount);
+  renderUntil(engine, mixer, frameIndex, frameCount, frames);
   if (remaining > 0) engine.renderInto(mixer, remaining);
 
   XCTAssertEqual(3, engine.activeVoiceCount());
 
   [self playSamples: dryBuffer count: sampleCount];
+  [self playSamples: chorusBuffer count: sampleCount];
 }
 
 - (void)playSamples:(AVAudioPCMBuffer*)buffer count:(int)sampleCount
@@ -409,7 +397,7 @@ using namespace SF2::Render::Engine;
 
 // Render 1 second of audio at 48000.0 sample rate using all voices of an engine and interpolating using 4th-order cubic.
 // Uses both effects buffers to account for mixing effort when they are active.
-- (void)testEngineRenderPerformance
+- (void)testEngineRenderPerformanceUsingCubic4thOrder
 {
   NSArray* metrics = @[XCTPerformanceMetric_WallClockTime];
   [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
@@ -418,6 +406,70 @@ using namespace SF2::Render::Engine;
     AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
     Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+    engine.load(contexts.context2.file(), 0);
+    engine.setRenderingFormat(3, format, frameCount);
+
+    // Set NPRN state so that voices send 20% output to the chorus channel
+    engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
+    engine.nprn().process(MIDI::ControlChange::nprnLSB, int(Entity::Generator::Index::chorusEffectSend));
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
+    engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 65);
+
+    // Set NPRN state so that voices send 10% output to the reverb channel
+    engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
+    engine.nprn().process(MIDI::ControlChange::nprnLSB, int(Entity::Generator::Index::reverbEffectSend));
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 100);
+    engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 64);
+
+    int seconds = 1;
+    int sampleCount = sampleRate * seconds;
+    int frames = sampleCount / frameCount;
+    int remaining = sampleCount - frames * frameCount;
+
+    AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+    DSPHeaders::BufferFacet dryFacet;
+    dryFacet.setChannelCount(2);
+    dryFacet.setBufferList(dryBuffer.mutableAudioBufferList);
+    DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
+
+    AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+    DSPHeaders::BufferFacet chorusFacet;
+    chorusFacet.setChannelCount(2);
+    chorusFacet.setBufferList(chorusBuffer.mutableAudioBufferList);
+    DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
+
+    AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+    DSPHeaders::BufferFacet reverbFacet;
+    reverbFacet.setChannelCount(2);
+    reverbFacet.setBufferList(reverbBuffer.mutableAudioBufferList);
+    DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
+
+    Mixer mixer{dry, chorus, reverb};
+
+    for (int voice = 0; voice < engine.voiceCount(); ++voice) {
+      engine.noteOn(32 + 2 * voice, 64);
+    }
+
+    [self startMeasuring];
+    for (auto frameIndex = 0; frameIndex < frames; ++frameIndex) {
+      engine.renderInto(mixer, frameCount);
+    }
+    if (remaining > 0) engine.renderInto(mixer, remaining);
+    [self stopMeasuring];
+  }];
+}
+
+// Render 1 second of audio at 48000.0 sample rate using all voices of an engine and interpolating using linear
+// algorithm. Uses both effects buffers to account for mixing effort when they are active.
+- (void)testEngineRenderPerformanceUsingLinearInterpolation
+{
+  NSArray* metrics = @[XCTPerformanceMetric_WallClockTime];
+  [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
+    Float sampleRate{48000.0};
+    AUAudioFrameCount frameCount = 512;
+    AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
+
+    Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
     engine.load(contexts.context2.file(), 0);
     engine.setRenderingFormat(3, format, frameCount);
 

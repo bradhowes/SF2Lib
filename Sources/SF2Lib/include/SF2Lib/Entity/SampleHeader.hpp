@@ -31,7 +31,7 @@ class SampleHeader {
 public:
   constexpr static size_t size = 46;
   
-  enum struct Type {
+  enum struct Type: uint16_t {
     monoSample = 1,
     rightSample = 2,
     leftSample = 4,
@@ -40,7 +40,7 @@ public:
   };
 
   template<typename E>
-  static constexpr auto toType(E value) noexcept { return static_cast<std::underlying_type_t<E>>(value); }
+  static constexpr auto toRawType(E value) noexcept { return static_cast<std::underlying_type_t<E>>(value); }
 
   /**
    Construct new instance from SF2 file
@@ -55,35 +55,47 @@ public:
   }
   
   /**
-   Construct instance for unit tests.
+   Constructor for unit tests.
    */
-  SampleHeader(uint32_t start, uint32_t end, uint32_t loopBegin, uint32_t loopEnd,
-               uint32_t sampleRate, uint8_t key, int8_t adjustment) noexcept :
-  dwStart{start}, dwEnd{end}, dwStartLoop{loopBegin}, dwEndLoop{loopEnd}, dwSampleRate{sampleRate}, originalKey{key},
-  correction{adjustment} {}
+  constexpr SampleHeader(uint32_t start, uint32_t end, uint32_t loopBegin, uint32_t loopEnd,
+                         uint32_t sampleRate, uint8_t key, int8_t adjustment, uint16_t link = 0,
+                         Type type = Type::monoSample) noexcept :
+  achSampleName{"blah"},
+  dwStart{start},
+  dwEnd{end},
+  dwStartLoop{loopBegin},
+  dwEndLoop{loopEnd},
+  dwSampleRate{sampleRate},
+  originalKey{key},
+  correction{adjustment},
+  sampleLink{link},
+  sampleType{toRawType<Type>(type)}
+  {}
 
-  bool sampleIsA(Type type) const noexcept {
-    return (sampleType & toType<Type>(type)) == toType<Type>(type);
+  constexpr bool sampleIsA(Type type) const noexcept {
+    return (sampleType & toRawType<Type>(type)) == toRawType<Type>(type);
   }
 
   /// @returns true if this sample only has one channel
-  bool isMono() const noexcept { return sampleIsA(Type::monoSample); }
+  constexpr bool isMono() const noexcept { return sampleIsA(Type::monoSample); }
   
   /// @returns true if these samples generate for the right channel
-  bool isRight() const noexcept { return sampleIsA(Type::rightSample); }
+  constexpr bool isRight() const noexcept { return sampleIsA(Type::rightSample); }
   
   /// @returns true if these samples generate for the left channel
-  bool isLeft() const noexcept { return sampleIsA(Type::leftSample); }
+  constexpr bool isLeft() const noexcept { return sampleIsA(Type::leftSample); }
   
   /// @returns true if samples come from a ROM
-  bool isROM() const noexcept { return sampleIsA(Type::rom); }
+  constexpr bool isROM() const noexcept { return sampleIsA(Type::rom); }
 
   /// @returns the name assigned to the sample
   const char* sampleName() const noexcept { return achSampleName; }
 
   /// @returns true if there appears to be a loop in the sample. Note that this is *not* the normal way to determine if
   /// a voice will loop while rendering -- that belongs to the `sampleModes` generator.
-  bool hasLoop() const noexcept { return dwStartLoop > dwStart && dwStartLoop < dwEndLoop && dwEndLoop <= dwEnd; }
+  constexpr bool hasLoop() const noexcept {
+    return dwStartLoop > dwStart && dwStartLoop < dwEndLoop && dwEndLoop <= dwEnd;
+  }
 
   /**
    The DWORD dwStart contains the index, in sample data points, from the beginning of the sample data field to the
@@ -91,7 +103,7 @@ public:
 
    @returns the index of the first sample to use
    */
-  size_t startIndex() const noexcept { return dwStart; }
+  constexpr size_t startIndex() const noexcept { return dwStart; }
   
   /**
    The DWORD dwEnd contains the index, in sample data points, from the beginning of the sample data field to the first
@@ -99,7 +111,7 @@ public:
 
    @returns index + 1 of the last sample to use.
    */
-  size_t endIndex() const noexcept { return dwEnd; }
+  constexpr size_t endIndex() const noexcept { return dwEnd; }
 
   /**
    The DWORD dwStartloop contains the index, in sample data points, from the beginning of the sample data field to the
@@ -107,7 +119,7 @@ public:
 
    @returns index of the first sample in a loop.
    */
-  size_t startLoopIndex() const noexcept { return dwStartLoop; }
+  constexpr size_t startLoopIndex() const noexcept { return dwStartLoop; }
 
   /**
    The DWORD dwEndloop contains the index, in sample data points, from the beginning of the sample data field to the
@@ -117,21 +129,21 @@ public:
 
    @returns index of the last + 1 of a sample in a loop.
    */
-  size_t endLoopIndex() const noexcept { return dwEndLoop; }
+  constexpr size_t endLoopIndex() const noexcept { return dwEndLoop; }
   
   /// @returns the sample rate used to record the samples in the SF2 file
-  size_t sampleRate() const noexcept { return dwSampleRate; }
+  constexpr size_t sampleRate() const noexcept { return dwSampleRate; }
   
   /// @returns the MIDI key (frequency) for the source samples
-  int originalMIDIKey() const noexcept { return originalKey; }
+  constexpr int originalMIDIKey() const noexcept { return originalKey; }
   
   /// @returns the pitch correction to apply when playing back the samples
-  int pitchCorrection() const noexcept { return correction; }
+  constexpr int pitchCorrection() const noexcept { return correction; }
 
   /// @returns number of samples between the start and end indices.
-  size_t sampleSize() const noexcept { return endIndex() - startIndex(); }
+  constexpr size_t sampleSize() const noexcept { return endIndex() - startIndex(); }
 
-  uint16_t sampleLinkIndex() const noexcept { return sampleLink; }
+  constexpr uint16_t sampleLinkIndex() const noexcept { return sampleLink; }
 
   void dump(const std::string& indent, size_t index) const noexcept;
 

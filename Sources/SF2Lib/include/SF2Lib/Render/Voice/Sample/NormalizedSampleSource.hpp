@@ -50,7 +50,8 @@ public:
   }
 
   /**
-   Obtain the sample at the given index
+   Obtain the sample at the given index. Note that due to the copying of samples from the original stream, the indexing
+   is correct from the standpoint of a Bounds instance.
 
    @param index the index to use
    @returns sample at the index

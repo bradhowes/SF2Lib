@@ -54,8 +54,9 @@ public:
    @param canLoop true if looping is allowed
    */
   void increment(Float increment, bool canLoop) noexcept {
-    if (finished()) return;
-    state_.increment(increment, canLoop);
+    if (!finished()) {
+      state_.increment(increment, canLoop);
+    }
   }
 
   /// @returns index to first sample to use for rendering
@@ -84,7 +85,7 @@ private:
       whole_ += wholeIncrement;
       partial_ += partialIncrement;
 
-      if (partial_ >= 1.0) {
+      if (unlikely(partial_ >= 1.0)) {
         auto carry = size_t(partial_);
         whole_ += carry;
         partial_ -= carry;
