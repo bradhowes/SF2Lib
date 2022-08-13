@@ -60,10 +60,3 @@ All of the code has been written by myself over the course of several years, but
 other projects, especially [FluidSynth](https://www.fluidsynth.org) and their wealth of knowledge in all things SF2.
 In particular, if there is any confusion about what the SF2 spec means, I rely on their interpretation in code. That
 said, any misrepresentations of SF2 functionality are of my own doing.
-
-There are a collection of routines in [ConstMath](Sources/SF2Lib/include/SF2Lib/ConstMath.hpp) that provide compile-time values for
-sine, natural log, and exponential function. These are used to generate the lookup tables for MIDI controller value mapping and panning.
-The functions that do this were taken from Lakshay Garg's [compile_time](https://github.com/lakshayg/compile_time) (no specific liceense) repo
-and Keith O'Hara's [GCEM](https://github.com/kthohr/gcem) (Apache license) repo. I started off with `compile_time` but I lifted the natural log function from
-`GCEM`. Note that the use of these compile-time methods are *only* for a very limited set of use-cases, all of which are not that 
-demanding in terms of precision. This *is* SF2 after all.
