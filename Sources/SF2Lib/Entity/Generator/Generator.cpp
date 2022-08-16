@@ -21,8 +21,8 @@ struct Dumper {
   }
 };
 
-void
+std::ostream&
 Generator::dump(const std::string& indent, size_t index) const noexcept
 {
-  std::cout << indent << '[' << index << "] " << name() << ' ' << Dumper(definition(), amount_) << std::endl;
+  return std::cout << indent << '[' << index << "] " << name() << ' ' << Dumper(definition(), amount_) << std::endl;
 }

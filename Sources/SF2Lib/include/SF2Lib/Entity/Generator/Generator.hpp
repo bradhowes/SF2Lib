@@ -41,7 +41,7 @@ public:
   /// @returns the configured value of a generator
   int value() const noexcept { return definition().valueOf(amount_); }
 
-  void dump(const std::string& indent, size_t index) const noexcept;
+  std::ostream& dump(const std::string& indent, size_t index) const noexcept;
 
 private:
   RawIndex index_;

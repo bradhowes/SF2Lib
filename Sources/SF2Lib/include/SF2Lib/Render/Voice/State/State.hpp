@@ -82,7 +82,7 @@ public:
    @param gen the generator to set
    @param value the value to use
    */
-  void setValue(Index gen, int value) {
+  void setValue(Index gen, int value) noexcept {
     gens_[gen].value = value;
   }
 
@@ -94,7 +94,7 @@ public:
    @param gen the generator to set
    @param value the value to use
    */
-  void setAdjustment(Index gen, int value) {
+  void setAdjustment(Index gen, int value) noexcept {
     gens_[gen].adjustment = value;
   }
 
@@ -104,7 +104,7 @@ public:
    @param gen the generator to modify
    @param value the value to set
    */
-  void setNRPNAdjustment(Index gen, Float value) {
+  void setNRPNAdjustment(Index gen, Float value) noexcept {
     gens_[gen].nrpn = value;
   }
 

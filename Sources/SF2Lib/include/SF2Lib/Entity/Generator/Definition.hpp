@@ -140,7 +140,7 @@ public:
    */
   template <typename T> T clamp(T value) const noexcept { return valueRange_.clamp(value); }
 
-  void dump(const Amount& amount) const noexcept;
+  std::ostream& dump(const Amount& amount) const noexcept;
 
 private:
   static std::array<Definition, NumDefs> const definitions_;

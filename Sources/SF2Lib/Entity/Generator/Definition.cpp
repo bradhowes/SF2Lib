@@ -7,7 +7,7 @@
 
 using namespace SF2::Entity::Generator;
 
-void
+std::ostream&
 Definition::dump(const Amount& amount) const noexcept
 {
   Float value = convertedValueOf(amount);
@@ -27,7 +27,7 @@ Definition::dump(const Amount& amount) const noexcept
     case ValueKind::range: std::cout << '[' << amount.low() << '-' << amount.high() << ']'; break;
   }
   
-  std::cout << " (" << (isUnsignedValue() ? amount.unsignedAmount() : amount.signedAmount()) << ')';
+  return std::cout << " (" << (isUnsignedValue() ? amount.unsignedAmount() : amount.signedAmount()) << ')';
 }
 
 // Allow compile-time check that A is a real Index value and then convert to string.

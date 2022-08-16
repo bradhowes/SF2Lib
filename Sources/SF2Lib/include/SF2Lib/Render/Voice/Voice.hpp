@@ -51,6 +51,11 @@ public:
   Voice(Float sampleRate, const MIDI::ChannelState& channelState, size_t voiceIndex,
         Sample::Generator::Interpolator interpolator = Sample::Generator::Interpolator::linear) noexcept;
 
+  /**
+   Move copy constructor
+
+   @param rhs the object to acquire
+   */
   Voice(Voice&& rhs) noexcept;
 
   /**
@@ -192,7 +197,7 @@ public:
   }
 
   /// @returns `State` instance for the voice.
-  State::State& state() { return state_; }
+  State::State& state() noexcept { return state_; }
 
 private:
 
