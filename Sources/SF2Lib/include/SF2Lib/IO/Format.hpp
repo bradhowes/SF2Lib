@@ -5,7 +5,7 @@
 namespace SF2::IO {
 
 /**
- We only operate with FormatRIFF.
+ We only operate with Format::RIFF containers.
  */
 enum struct Format {
   RIFF,
