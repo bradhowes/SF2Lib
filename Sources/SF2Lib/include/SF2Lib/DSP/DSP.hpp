@@ -7,19 +7,19 @@
 #include <cmath>
 #include <iosfwd>
 
-#include "DSPHeaders/DSP.hpp"
+#include "DSPHeaders/DSP.hpp" // AUv3Support include
 #include "SF2Lib/Types.hpp"
 
 // *Experimental*
-#define likely(x) __builtin_expect(!!(x), 1) gcc built-in functions, help compiler branch optimization
+#define likely(x) __builtin_expect(!!(x), 1) gcc built-in functions to assist with compiler branch optimization
 #define unlikely(x) __builtin_expect(!!(x), 0)
 
 /// Functions and constants for general-purpose signal processing specific to SF2 realm. More general-purpose routines
 /// are in the DSPHeaders::DSP namespace of AUv3Support package.
 namespace SF2::DSP {
 
+/// Number of cents in an octave
 inline constexpr Float CentsPerOctave = 1200.0f;
-inline constexpr Float CentibelsPerDecade = 200.0f;
 
 /// Attenuated samples at or below this value will be inaudible (I think).
 inline constexpr Float NoiseFloor = 2.0E-7f;
@@ -27,12 +27,14 @@ inline constexpr Float NoiseFloor = 2.0E-7f;
 /// Maximum attenuation defined by SF2 spec.
 inline constexpr Float MaximumAttenuationCentiBels = 960.0f;
 
-// 440 * pow(2.0, (N - 69) / 12)
-inline constexpr Float LowestNoteFrequency = Float(8.17579891564370697665253828745335); // C-1
+/// Lowest note frequency that we can generate. This corresponds to C-1 in MIDI nomenclature
+/// (440 * pow(2.0, (N - 69) / 12))
+inline constexpr Float LowestNoteFrequency = Float(8.17579891564370697665253828745335);
 
-inline constexpr Float clamp(Float value, Float lowerBound, Float upperBound) {
-  return std::clamp(value, lowerBound, upperBound);
-}
+/////
+//inline constexpr Float clamp(Float value, Float lowerBound, Float upperBound) {
+//  return std::clamp(value, lowerBound, upperBound);
+//}
 
 /**
  Convert cents value into a power of 2. There are 1200 cents per power of 2.
@@ -56,7 +58,7 @@ inline Float centsToSeconds(Float value) noexcept { return centsToPower2(value);
  @returns frequency in Hz
  */
 inline Float lfoCentsToFrequency(Float value) noexcept {
-  return LowestNoteFrequency * centsToPower2(clamp(value, -16000.0f, 4500.0f));
+  return LowestNoteFrequency * centsToPower2(std::clamp(value, -16000.0, 4500.0));
 }
 
 /**
@@ -74,8 +76,8 @@ extern Float attenuationLookup(int centibels) noexcept;
 
  @param centibels the value to convert
  */
-inline double centibelsToResonance(double centibels) noexcept {
-  return std::pow(10.0, (clamp(centibels, 0.0, 960.0) - 30.1) / 200.0);
+inline Float centibelsToResonance(Float centibels) noexcept {
+  return std::pow(10.0, (std::clamp(centibels, 0.0, 960.0) - 30.1) / 200.0);
 }
 
 /**
@@ -84,7 +86,7 @@ inline double centibelsToResonance(double centibels) noexcept {
  @param value cutoff value
  @returns clamped cutoff value
  */
-inline constexpr Float clampFilterCutoff(Float value) noexcept { return clamp(value, 1500.0f, 20000.0f); }
+inline constexpr Float clampFilterCutoff(Float value) noexcept { return std::clamp(value, 1500.0, 20000.0); }
 
 /**
  Convert integer from integer [0-1000] into [0.0-1.0]
@@ -92,7 +94,9 @@ inline constexpr Float clampFilterCutoff(Float value) noexcept { return clamp(va
  @param value percentage value expressed as tenths
  @returns normalized value between 0 and 1.
  */
-inline constexpr Float tenthPercentageToNormalized(Float value) noexcept { return clamp(value / 1000.0f, 0.0f, 1.0f); }
+inline constexpr Float tenthPercentageToNormalized(Float value) noexcept {
+  return std::clamp(value / 1000.0, 0.0, 1.0);
+}
 
 /**
  Calculate the amount of left and right signal gain in [0.0-1.0] for the given `pan` value which is in range
@@ -133,7 +137,7 @@ inline double centsToFrequency(Float value) noexcept {
  @returns attenuation amount
  */
 inline Float centibelsToAttenuation(Float centibels) noexcept {
-  centibels = clamp(centibels, 0.0, 1440.0);
+  centibels = std::clamp(centibels, 0.0, 1440.0);
   auto index1 = int(centibels);
   auto partial = centibels - index1;
   if (partial < std::numeric_limits<Float>::min()) return attenuationLookup(index1);

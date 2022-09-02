@@ -39,7 +39,7 @@ public:
 
       // Bounds taken from FluidSynth, where the upper bound serves as an anti-aliasing filter, just below the
       // Nyquist frequency.
-      frequency = DSP::clamp(DSP::centsToFrequency(frequency), 5.0, 0.45 * sampleRate_);
+      frequency = std::clamp(DSP::centsToFrequency(frequency), 5.0, 0.45 * sampleRate_);
       resonance = DSP::centibelsToResonance(resonance);
       filter_.setCoefficients(Coefficients::LPF2(sampleRate_, frequency, resonance));
     }
@@ -58,7 +58,7 @@ private:
 
     // Bounds taken from FluidSynth, where the upper bound serves as an anti-aliasing filter, just below the
     // Nyquist frequency.
-    frequency = DSP::clamp(DSP::centsToFrequency(frequency), 5.0, 0.45 * sampleRate_);
+    frequency = std::clamp(DSP::centsToFrequency(frequency), 5.0, 0.45 * sampleRate_);
     resonance = DSP::centibelsToResonance(resonance);
     filter_.setCoefficients(Coefficients::LPF2(sampleRate_, frequency, resonance));
   }

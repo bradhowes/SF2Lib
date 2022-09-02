@@ -79,7 +79,7 @@ public:
   size_t size() const noexcept { return presets_.size(); }
 
   /// @returns the preset at a given index.
-  const Preset& operator[](size_t index) const noexcept { return presets_[index]; }
+  const Preset& operator[](size_t index) const noexcept { return checkedVectorIndexing(presets_, index); }
 
   /**
    Locate the index of the preset based on bank/program pair.

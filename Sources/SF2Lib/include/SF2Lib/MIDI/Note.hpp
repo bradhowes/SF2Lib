@@ -36,6 +36,7 @@ public:
     return labels_[note_] + std::to_string(octave()) + (accented() ? sharpTag_ : "");
   }
 
+  /// @returns the MIDI value for the note
   int value() const noexcept { return value_; }
 
   bool operator ==(const Note& rhs) const noexcept { return value_ == rhs.value_; }

@@ -41,8 +41,8 @@ class Generator;
 class Stage
 {
 public:
-  inline static constexpr Float minimumCurvature = 1.0e-7f;
-  inline static constexpr Float maximumCurvature = 10.0f;
+  inline static constexpr Float minimumCurvature = 1.0e-7;
+  inline static constexpr Float maximumCurvature = 10.0;
 
   Stage() = default;
 
@@ -64,13 +64,13 @@ public:
   static Stage Attack(int sampleCount, Float curvature) noexcept {
     curvature = clampedCurvature(curvature);
     Float alpha = calculateAlphaCoefficient(sampleCount, curvature);
-    return Stage(0.0f, alpha, (1.0f + curvature) * (1.0f - alpha), sampleCount);
+    return Stage(0.0, alpha, (1.0 + curvature) * (1.0 - alpha), sampleCount);
   }
 
   /**
    Generate a configuration for the delay stage.
    */
-  static Stage Hold(int sampleCount) noexcept { return Constant(sampleCount, 1.0f); }
+  static Stage Hold(int sampleCount) noexcept { return Constant(sampleCount, 1.0); }
 
   /**
    Generate a configuration for the decay stage.
@@ -78,7 +78,7 @@ public:
   static Stage Decay(int sampleCount, Float curvature, Float sustainLevel) noexcept {
     curvature = clampedCurvature(curvature);
     Float alpha = calculateAlphaCoefficient(sampleCount, curvature);
-    return Stage(1.0f, alpha, (sustainLevel - curvature) * (1.0f - alpha), sampleCount);
+    return Stage(1.0f, alpha, (sustainLevel - curvature) * (1.0 - alpha), sampleCount);
   }
 
   /**
@@ -94,7 +94,7 @@ public:
   static Stage Release(int sampleCount, Float curvature, Float sustainLevel) noexcept {
     curvature = clampedCurvature(curvature);
     Float alpha = calculateAlphaCoefficient(sampleCount, curvature);
-    return Stage(sustainLevel, alpha, (0.0f - curvature) * (1.0f - alpha), sampleCount);
+    return Stage(sustainLevel, alpha, (0.0 - curvature) * (1.0 - alpha), sampleCount);
   }
 
   /**
@@ -123,12 +123,12 @@ private:
   initial_{initial}, alpha_{alpha}, beta_{beta}, durationInSamples_{durationInSamples} {}
 
   static Float clampedCurvature(Float curvature) noexcept {
-    return DSP::clamp(curvature, minimumCurvature, maximumCurvature);
+    return std::clamp(curvature, minimumCurvature, maximumCurvature);
   }
 
   static Float calculateAlphaCoefficient(Float sampleCount, Float curvature) noexcept {
     curvature = clampedCurvature(curvature);
-    return (sampleCount <= 0.0f) ? 0.0f : std::exp(-std::log((1.0f + curvature) / curvature) / sampleCount);
+    return (sampleCount <= 0.0) ? 0.0 : std::exp(-std::log((1.0 + curvature) / curvature) / sampleCount);
   }
 
   friend class Generator;

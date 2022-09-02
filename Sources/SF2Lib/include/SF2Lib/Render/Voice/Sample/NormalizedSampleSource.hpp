@@ -44,6 +44,7 @@ public:
   /// @returns number of samples in the canonical representation
   size_t size() const noexcept { return loaded_ ? samples_.size() : 0; }
 
+  /// Unload the sample.
   void unload() const noexcept {
     loaded_ = false;
     samples_.clear();

@@ -13,7 +13,7 @@ using namespace SF2;
 using namespace SF2::DSP;
 
 /**
- Lookup tables for SF2 pan values, where -500 means only left-channel, and +500 means only right channel. Other values
+ Lookup table for SF2 pan values, where -500 means only left-channel, and +500 means only right channel. Other values
  give attenuation values for the left and right channels between 0.0 and 1.0. These values come from the sine function
  for a pleasing audio experience when panning.
 

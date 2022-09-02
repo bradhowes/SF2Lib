@@ -28,6 +28,11 @@ public:
    */
   NRPN(const ChannelState& channelState) noexcept : channelState_{channelState} {}
 
+  /**
+   Apply state configuration to the NPRN controller.
+
+   @param state the state to use
+   */
   void apply(Render::Voice::State::State& state) const noexcept;
 
   /**

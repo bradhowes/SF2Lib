@@ -25,10 +25,13 @@ namespace SF2::MIDI {
 class ValueTransformer {
 public:
   using Float = SF2::Float;
+
+  /// Minimum MIDI value that controller can emit
   inline constexpr static int MinValue = 0;
+  /// Maximum MIDI value that controller can emit
   inline constexpr static int MaxValue = 127;
+
   inline constexpr static size_t TableSize = MaxValue + 1;
-  using TransformArrayType = std::array<Float, TableSize>;
 
   /**
    Kind specifies the curvature of the MIDI value transformation function.
@@ -85,6 +88,8 @@ public:
   }
 
 private:
+
+  using TransformArrayType = std::array<Float, TableSize>;
 
   /**
    Create new value transformer.

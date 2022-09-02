@@ -45,7 +45,7 @@ public:
   using Index = Entity::Generator::Index;
   using State = Render::Voice::State::State;
 
-  inline static constexpr Float defaultCurvature = 0.01f;
+  inline static constexpr Float defaultCurvature = 0.01;
 
   Generator() = default;
 
@@ -139,7 +139,9 @@ public:
     return value_;
   }
 
-  const Stage& operator[](StageIndex stageIndex) const noexcept { return stages_[static_cast<size_t>(stageIndex)]; }
+  const Stage& operator[](StageIndex stageIndex) const noexcept {
+    return checkedVectorIndexing(stages_, static_cast<size_t>(stageIndex));
+  }
 
 private:
 
@@ -191,9 +193,10 @@ private:
     return keyModEnv(state, Index::midiKeyToModulatorEnvelopeDecay);
   }
 
+  /// @returns the sustain level for the modulator envelope (gain)
   static Float envSustain(const State& state, Index gen) noexcept {
     assert(gen == Index::sustainVolumeEnvelope || gen == Index::sustainModulatorEnvelope);
-    return 1.0f - state.modulated(gen) / 1000.0f;
+    return 1.0 - state.modulated(gen) / 1000.0;
   }
 
   /// @returns the sustain level for the volume envelope (gain)
@@ -206,6 +209,13 @@ private:
     return envSustain(state, Index::sustainModulatorEnvelope);
   }
 
+  /**
+   Obtain the number of samples for a given sample rate and duration.
+
+   @param sampleRate the current sample rate being used
+   @param duration the amount of time to use in the calculation
+   @returns the number of samples
+   */
   static int samplesFor(Float sampleRate, Float duration) noexcept { return int(round(sampleRate * duration)); }
 
   void updateAndCompare(Float floor, StageIndex next) noexcept {

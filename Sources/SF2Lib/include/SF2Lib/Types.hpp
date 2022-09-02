@@ -8,7 +8,8 @@
 namespace SF2 {
 
 /**
- Type to use for all floating-point operations in SF2.
+ Type to use for all floating-point operations in SF2. For precision we do everything in 64-bit and convert at AUValue
+ (32-bit float) only when necessary.
  */
 using Float = double;
 
@@ -60,8 +61,8 @@ struct Accelerated
 
 /**
  Generic method that invokes checked or unchecked indexing on a container based on the DEBUG compile flag. When DEBUG
- is defined, invokes `at` which will validate the index prior to use. Otherwise, it invokes `operator []` which does
- unchecked indexing.
+ is defined, invokes `at` which will validate the index prior to use, and as a result is slower than just blindly
+ indexing via `operator []`.
  */
 template <typename T>
 const typename T::value_type& checkedVectorIndexing(const T& container, size_t index)

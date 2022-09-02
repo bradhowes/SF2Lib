@@ -17,11 +17,6 @@ namespace SF2::MIDI {
  */
 class ChannelState {
 public:
-  inline constexpr static int CCMin = 0;
-  inline constexpr static int CCMax = 127;
-
-  using ContinuousControllerValues = std::array<int, CCMax - CCMin + 1>;
-  using NotePressureValues = std::array<int, Note::Max + 1>;
 
   /**
    Construct new channel.
@@ -117,6 +112,12 @@ public:
   }
 
 private:
+  inline constexpr static int CCMin = 0;
+  inline constexpr static int CCMax = 127;
+
+  using ContinuousControllerValues = std::array<int, CCMax - CCMin + 1>;
+  using NotePressureValues = std::array<int, Note::Max + 1>;
+
   ContinuousControllerValues continuousControllerValues_{};
   NotePressureValues notePressureValues_{};
 
