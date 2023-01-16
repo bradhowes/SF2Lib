@@ -14,12 +14,12 @@ present it can generate audio at the right pitch. This library is currently bein
 
 Although much of the code is generic C++17, there are bits that expect an Apple platform that has
 the AudioToolbox and Accelerate frameworks available. As such, there are some code files that have the `.mm` suffix
-so that they compile as Obj-C++ instead of C++. However, such cases are fairly isolated. The goal is to be a
-simple library for reading SF2 files as well as a competent SF2 audio renderer whose output can be fed to any sort of
-audio processing chain, not just macOS and iOS systems Core Audio systems. For my own use, this will be used in AUv3
-components on iOS and macOS platforms.
+so that they compile as Obj-C++ instead of C++ -- these "bridge" files provide a means to interact with the SF2Lib from
+Swift code. However, such cases are fairly isolated. The goal is to be a simple library for reading SF2 files as well as a 
+competent SF2 audio renderer whose output can be fed to any sort of audio processing chain, not just macOS and iOS Core Audio 
+systems.
 
-This package depends on some general DSP and audio class from my [AUv3Support](https://github.com/bradhowes/AUv3Support)
+This package depends on some general DSP and audio classes from my [AUv3Support](https://github.com/bradhowes/AUv3Support)
 package.
 
 # SF2 Spec Support
@@ -52,7 +52,14 @@ very little to be found in source files.
 * [IO](Sources/SF2Lib/IO) -- performs the reading and loading of SF2 files.
 * [MIDI](Sources/SF2Lib/MIDI) -- state for a MIDI connection.
 * [Render](Sources/SF2Lib/Render) -- handles rendering of audio samples from SF2 entities.
-* [Resources](Sources/SF2Lib/Resources) -- contains a [Configuration.plist](Sources/SF2Lib/Resources/Configuration.plist) file that sets some configury options.
+* [Resources](Sources/SF2Lib/Resources) -- contains a [Configuration.plist](Sources/SF2Lib/Resources/Configuration.plist) file that sets some 
+  configury options.
+
+# Unit Tests
+
+There are quite a lot (yet not enough) unit tests that cover much of the code base (currently > 75%). There are even some rendering tests 
+that will play audio at the end if configured to do so. This option is found in the [Package.swift](SF2Lib/Package.swift#L86) file, in the
+line `.define("PLAY_AUDIO", to: "1", .none)`. Change the "1" to "0" to disable the audio output.
 
 # Credits
 
