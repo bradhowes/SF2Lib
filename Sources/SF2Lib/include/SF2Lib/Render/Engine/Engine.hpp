@@ -222,6 +222,9 @@ private:
   void setParameterFromEvent(const AUParameterEvent&) noexcept {}
 
   /// API for EventProcessor
+  void doRenderingStateChanged(bool state) noexcept { if (!state) allOff(); }
+
+  /// API for EventProcessor
   void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
 
   /// API for EventProcessor
