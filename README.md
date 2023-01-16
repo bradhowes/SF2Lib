@@ -58,7 +58,7 @@ very little to be found in source files.
 # Unit Tests
 
 There are quite a lot (yet not enough) unit tests that cover much of the code base (currently > 75%). There are even some rendering tests 
-that will play audio at the end if configured to do so. This option is found in the [Package.swift](SF2Lib/Package.swift#L86) file, in the
+that will play audio at the end if configured to do so. This option is found in the [Package.swift](Package.swift#L86) file, in the
 line `.define("PLAY_AUDIO", to: "1", .none)`. Change the "1" to "0" to disable the audio output.
 
 # Credits
