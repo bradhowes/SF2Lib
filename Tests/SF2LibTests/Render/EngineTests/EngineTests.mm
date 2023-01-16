@@ -129,19 +129,19 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   DSPHeaders::BufferFacet dryFacet;
   dryFacet.setChannelCount(2);
-  dryFacet.setBufferList(dryBuffer.mutableAudioBufferList);
+  dryFacet.assignBufferList(dryBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
 
   AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   DSPHeaders::BufferFacet chorusFacet;
   chorusFacet.setChannelCount(2);
-  chorusFacet.setBufferList(chorusBuffer.mutableAudioBufferList);
+  chorusFacet.assignBufferList(chorusBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
 
   AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   DSPHeaders::BufferFacet reverbFacet;
   reverbFacet.setChannelCount(2);
-  reverbFacet.setBufferList(reverbBuffer.mutableAudioBufferList);
+  reverbFacet.assignBufferList(reverbBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
 
   Mixer mixer{dry, chorus, reverb};
@@ -204,19 +204,19 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   DSPHeaders::BufferFacet dryFacet;
   dryFacet.setChannelCount(2);
-  dryFacet.setBufferList(dryBuffer.mutableAudioBufferList);
+  dryFacet.assignBufferList(dryBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
 
   AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   DSPHeaders::BufferFacet chorusFacet;
   chorusFacet.setChannelCount(2);
-  chorusFacet.setBufferList(chorusBuffer.mutableAudioBufferList);
+  chorusFacet.assignBufferList(chorusBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
 
   AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   DSPHeaders::BufferFacet reverbFacet;
   reverbFacet.setChannelCount(2);
-  reverbFacet.setBufferList(reverbBuffer.mutableAudioBufferList);
+  reverbFacet.assignBufferList(reverbBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
 
   Mixer mixer{dry, chorus, reverb};
@@ -280,19 +280,19 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   DSPHeaders::BufferFacet dryFacet;
   dryFacet.setChannelCount(2);
-  dryFacet.setBufferList(dryBuffer.mutableAudioBufferList);
+  dryFacet.assignBufferList(dryBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
 
   AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   DSPHeaders::BufferFacet chorusFacet;
   chorusFacet.setChannelCount(2);
-  chorusFacet.setBufferList(chorusBuffer.mutableAudioBufferList);
+  chorusFacet.assignBufferList(chorusBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
 
   AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   DSPHeaders::BufferFacet reverbFacet;
   reverbFacet.setChannelCount(2);
-  reverbFacet.setBufferList(reverbBuffer.mutableAudioBufferList);
+  reverbFacet.assignBufferList(reverbBuffer.mutableAudioBufferList);
   DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
 
   Mixer mixer{dry, chorus, reverb};
@@ -429,19 +429,19 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
     AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
     DSPHeaders::BufferFacet dryFacet;
     dryFacet.setChannelCount(2);
-    dryFacet.setBufferList(dryBuffer.mutableAudioBufferList);
+    dryFacet.assignBufferList(dryBuffer.mutableAudioBufferList);
     DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
 
     AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
     DSPHeaders::BufferFacet chorusFacet;
     chorusFacet.setChannelCount(2);
-    chorusFacet.setBufferList(chorusBuffer.mutableAudioBufferList);
+    chorusFacet.assignBufferList(chorusBuffer.mutableAudioBufferList);
     DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
 
     AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
     DSPHeaders::BufferFacet reverbFacet;
     reverbFacet.setChannelCount(2);
-    reverbFacet.setBufferList(reverbBuffer.mutableAudioBufferList);
+    reverbFacet.assignBufferList(reverbBuffer.mutableAudioBufferList);
     DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
 
     Mixer mixer{dry, chorus, reverb};
@@ -493,19 +493,19 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
     AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
     DSPHeaders::BufferFacet dryFacet;
     dryFacet.setChannelCount(2);
-    dryFacet.setBufferList(dryBuffer.mutableAudioBufferList);
+    dryFacet.assignBufferList(dryBuffer.mutableAudioBufferList);
     DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
 
     AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
     DSPHeaders::BufferFacet chorusFacet;
     chorusFacet.setChannelCount(2);
-    chorusFacet.setBufferList(chorusBuffer.mutableAudioBufferList);
+    chorusFacet.assignBufferList(chorusBuffer.mutableAudioBufferList);
     DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
 
     AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
     DSPHeaders::BufferFacet reverbFacet;
     reverbFacet.setChannelCount(2);
-    reverbFacet.setBufferList(reverbBuffer.mutableAudioBufferList);
+    reverbFacet.assignBufferList(reverbBuffer.mutableAudioBufferList);
     DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
 
     Mixer mixer{dry, chorus, reverb};
