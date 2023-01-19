@@ -23,11 +23,8 @@ Source::description() const noexcept {
       case GeneralIndex::link: os << "link"; break;
     }
   }
-  else if (isContinuousController()) {
-    os << "CC[" << continuousIndex() << ']';
-  }
   else {
-    os << "*INVALID*";
+    os << "CC[" << continuousIndex() << ']';
   }
   
   os << '(' << (isUnipolar() ? "uni" : "bi") << '/' << (isMinToMax() ? "-+" : "+-") << '/'

@@ -218,4 +218,35 @@ using namespace SF2::Entity::Modulator;
   auto s2 = Source::Builder::GeneralController(Source::GeneralIndex::pitchWheel).bipolar();
   XCTAssertEqual(s1, Source(s2.bits));
 }
+
+- (void)testDescription {
+  auto s = Source::Builder::GeneralController(Source::GeneralIndex::none).make();
+  XCTAssertEqual(s.description(), "none(uni/-+/linear)");
+  s = Source::Builder::GeneralController(Source::GeneralIndex::none).concave().make();
+  XCTAssertEqual(s.description(), "none(uni/-+/concave)");
+  s = Source::Builder::GeneralController(Source::GeneralIndex::none).convex().make();
+  XCTAssertEqual(s.description(), "none(uni/-+/convex)");
+  s = Source::Builder::GeneralController(Source::GeneralIndex::none).negative().make();
+  XCTAssertEqual(s.description(), "none(uni/+-/linear)");
+  s = Source::Builder::GeneralController(Source::GeneralIndex::none).bipolar().make();
+  XCTAssertEqual(s.description(), "none(bi/-+/linear)");
+
+  s = Source::Builder::GeneralController(Source::GeneralIndex::noteOnVelocity).make();
+  XCTAssertEqual(s.description(), "velocity(uni/-+/linear)");
+  s = Source::Builder::GeneralController(Source::GeneralIndex::noteOnKey).make();
+  XCTAssertEqual(s.description(), "key(uni/-+/linear)");
+  s = Source::Builder::GeneralController(Source::GeneralIndex::keyPressure).make();
+  XCTAssertEqual(s.description(), "keyPressure(uni/-+/linear)");
+  s = Source::Builder::GeneralController(Source::GeneralIndex::channelPressure).make();
+  XCTAssertEqual(s.description(), "channelPressure(uni/-+/linear)");
+  s = Source::Builder::GeneralController(Source::GeneralIndex::pitchWheel).make();
+  XCTAssertEqual(s.description(), "pitchWheel(uni/-+/linear)");
+  s = Source::Builder::GeneralController(Source::GeneralIndex::pitchWheelSensitivity).make();
+  XCTAssertEqual(s.description(), "pitchWheelSensitivity(uni/-+/linear)");
+  s = Source::Builder::GeneralController(Source::GeneralIndex::link).make();
+  XCTAssertEqual(s.description(), "link(uni/-+/linear)");
+
+  s = Source::Builder::ContinuousController(1).make();
+  XCTAssertEqual(s.description(), "CC[1](uni/-+/linear)");
+}
 @end

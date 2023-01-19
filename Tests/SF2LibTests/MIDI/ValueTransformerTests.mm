@@ -169,5 +169,4 @@ static VT makeVT(VT::Kind kind, VT::Polarity polarity, VT::Direction direction) 
   XCTAssertEqualWithAccuracy(-1.0, z(127), self.epsilon);
 }
 
-
 @end
