@@ -50,6 +50,7 @@ using namespace SF2::Render;
 }
 
 - (void)testRolandPianoRender {
+  SF2::Float sampleRate = contexts.context2.sampleRate();
   const auto& file = contexts.context2.file();
 
   MIDI::ChannelState channelState;
@@ -57,41 +58,47 @@ using namespace SF2::Render;
   InstrumentCollection instruments(file);
   Preset preset(file, instruments, file.presets()[0]);
 
+  // Locate preset to play A4 (69) at full velocity
   auto found = preset.find(69, 127);
   XCTAssertEqual(found.size(), 2);
-  Voice::Voice v1L{44100, channelState, 0};
+  // Assign two voices to play the L/R channels
+  Voice::Voice v1L{sampleRate, channelState, 0};
   v1L.configure(found[0], nrpn);
-  Voice::Voice v1R{44100, channelState, 1};
+  Voice::Voice v1R{sampleRate, channelState, 1};
   v1R.configure(found[1], nrpn);
 
+  // Locate preset to play C#5 (73) at full velocity
   found = preset.find(73, 127);
   XCTAssertEqual(found.size(), 2);
-  Voice::Voice v2L{44100, channelState, 2};
+  Voice::Voice v2L{sampleRate, channelState, 2};
   v2L.configure(found[0], nrpn);
-  Voice::Voice v2R{44100, channelState, 3};
+  Voice::Voice v2R{sampleRate, channelState, 3};
   v2R.configure(found[1], nrpn);
 
+  // Locate preset to play E5 (76) at full velocity
   found = preset.find(76, 127);
   XCTAssertEqual(found.size(), 2);
-  Voice::Voice v3L{44100, channelState, 4};
+  Voice::Voice v3L{sampleRate, channelState, 4};
   v3L.configure(found[0], nrpn);
-  Voice::Voice v3R{44100, channelState, 5};
+  Voice::Voice v3R{sampleRate, channelState, 5};
   v3R.configure(found[1], nrpn);
 
-  Float sampleRate = 44100.0;
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
   int seconds = 1;
   int sampleCount = sampleRate * seconds;
   AVAudioPCMBuffer* buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   AudioBufferList* bufferList = buffer.mutableAudioBufferList;
-  bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(float);
-  bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(float);
-  float* samplesLeft = (float*)(bufferList->mBuffers[0].mData);
-  float* samplesRight = (float*)(bufferList->mBuffers[1].mData);
+  bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(AUValue);
+  bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(AUValue);
+  AUValue* samplesLeft = (AUValue*)(bufferList->mBuffers[0].mData);
+  AUValue* samplesRight = (AUValue*)(bufferList->mBuffers[1].mData);
 
-  size_t keyReleaseCount{size_t(sampleCount / 4)};
+  // Each voice renders for 1/3 of a second
   size_t voiceSampleCount{size_t(sampleCount / 3)};
+  // Release the key after 80% of the voice duration
+  size_t keyReleaseCount{size_t(voiceSampleCount * 0.95)};
+
   std::vector<AUValue> samples;
 
   auto renderLR = [&](auto& left, auto& right, bool dump = false) {
@@ -111,7 +118,7 @@ using namespace SF2::Render;
     }
   };
 
-  renderLR(v1L, v1R);
+  renderLR(v1L, v1R, true);
   renderLR(v2L, v2R);
   renderLR(v3L, v3R);
 
@@ -134,43 +141,47 @@ using namespace SF2::Render;
   }
   else if constexpr (std::is_same_v<Float, double>) {
     XCTAssertEqualWithAccuracy( 0.0000000000, samples[0], epsilon);
-    XCTAssertEqualWithAccuracy(-0.1943116635, samples[1], epsilon);
-    XCTAssertEqualWithAccuracy( 0.0749582350254, samples[2], epsilon);
+    XCTAssertEqualWithAccuracy( 0.113844953477, samples[1], epsilon);
+    XCTAssertEqualWithAccuracy( 0.133395016193, samples[2], epsilon);
     XCTAssertEqualWithAccuracy( 0.00000000000, samples[3], epsilon);
-    XCTAssertEqualWithAccuracy( 0.07910773903, samples[4], epsilon);
-    XCTAssertEqualWithAccuracy( 0.0432801879942, samples[5], epsilon);
+    XCTAssertEqualWithAccuracy( 0.0180835127831, samples[4], epsilon);
+    XCTAssertEqualWithAccuracy( 0.0763173848391, samples[5], epsilon);
     XCTAssertEqualWithAccuracy( 0.00000000000, samples[6], epsilon);
-    XCTAssertEqualWithAccuracy( 0.08214084059, samples[7], epsilon);
-    XCTAssertEqualWithAccuracy( 0.0148598635569, samples[8], epsilon);
+    XCTAssertEqualWithAccuracy( 0.0206061471254, samples[7], epsilon);
+    XCTAssertEqualWithAccuracy( 0.0248849820346, samples[8], epsilon);
   }
 
   [self playSamples: buffer count: sampleCount];
 }
 
 - (void)testOrganRender {
+  SF2::Float sampleRate = contexts.context0.sampleRate();
   const auto& file = contexts.context0.file();
+  for (auto index = 0; index < file.presets().size(); ++index) {
+    std::cout << index << ' ' << file.presets()[index].name() << ' ' << file.presets()[index].bank() << '/' << file.presets()[index].program() << '\n';
+  }
 
   MIDI::ChannelState channelState;
   MIDI::NRPN nrpn{channelState};
   InstrumentCollection instruments(file);
-  Preset preset(file, instruments, file.presets()[89]);
+  Preset preset(file, instruments, file.presets()[40]);
+  std::cout << preset.name() << ' ' << preset.bank() << '/' << preset.program() << '\n';
 
   auto found = preset.find(64, 127);
-  Voice::Voice v1{44100, channelState, 0};
+  Voice::Voice v1{sampleRate, channelState, 0};
   v1.configure(found[0], nrpn);
 
   found = preset.find(68, 127);
-  Voice::Voice v2{44100, channelState, 2};
+  Voice::Voice v2{sampleRate, channelState, 2};
   v2.configure(found[0], nrpn);
 
   found = preset.find(71, 127);
-  Voice::Voice v3{44100, channelState, 4};
+  Voice::Voice v3{sampleRate, channelState, 4};
   v3.configure(found[0], nrpn);
 
-  double sampleRate = 44100.0;
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-  int seconds = 10;
+  int seconds = 3;
   int sampleCount = sampleRate * seconds;
   AVAudioPCMBuffer* buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   AudioBufferList* bufferList = buffer.mutableAudioBufferList;
@@ -194,23 +205,103 @@ using namespace SF2::Render;
       samples.push_back(s2);
       samples.push_back(s3);
     }
-    else if (index == int(sampleCount * 0.3)) {
-      // Enable vibrato
-      v1.state().setValue(Voice::State::State::Index::vibratoLFOToPitch, 100);
-      v2.state().setValue(Voice::State::State::Index::vibratoLFOToPitch, 100);
-      v3.state().setValue(Voice::State::State::Index::vibratoLFOToPitch, 100);
-    }
-    else if (index == int(sampleCount * 0.5)) {
-      // Disable vibrato
-      v1.state().setValue(Voice::State::State::Index::vibratoLFOToPitch, 0);
-      v2.state().setValue(Voice::State::State::Index::vibratoLFOToPitch, 0);
-      v3.state().setValue(Voice::State::State::Index::vibratoLFOToPitch, 0);
-    }
-    else if (index == int(sampleCount * 0.7)) {
+    else if (index == int(sampleCount * 0.95)) {
       samples.push_back(s1);
       samples.push_back(s2);
       samples.push_back(s3);
 
+      v1.releaseKey();
+      v2.releaseKey();
+      v3.releaseKey();
+    }
+  }
+
+  std::cout << std::setprecision(12);
+  for (auto index = 0; index < 9; ++index) {
+    std::cout << index << ' ' << samples[index] << '\n';
+  }
+
+  XCTAssertEqual(9, samples.size());
+  XCTAssertEqualWithAccuracy(0.0, samples[0], epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[1], epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[2], epsilon);
+
+  if constexpr (std::is_same_v<Float, float>) {
+    XCTAssertEqualWithAccuracy(-0.000216083528358, samples[3], epsilon);
+    XCTAssertEqualWithAccuracy(-0.08138652891, samples[4], epsilon);
+    XCTAssertEqualWithAccuracy(-0.00891515240073, samples[5], epsilon);
+  }
+  else if constexpr (std::is_same_v<Float, double>) {
+    XCTAssertEqualWithAccuracy(0.000216083528358, samples[3], epsilon);
+    XCTAssertEqualWithAccuracy(0.2683200538169, samples[4], epsilon);
+    XCTAssertEqualWithAccuracy(0.00891515240073, samples[5], epsilon);
+  }
+
+  XCTAssertEqualWithAccuracy(0.0, samples[6], epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[7], epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[8], epsilon);
+
+  [self playSamples: buffer count: sampleCount];
+}
+
+- (void)testViolinRender {
+  const auto& file = contexts.context0.file();
+//  for (auto index = 0; index < file.presets().size(); ++index) {
+//    std::cout << index << ' ' << file.presets()[index].name() << ' ' << file.presets()[index].bank() << '/' << file.presets()[index].program() << '\n';
+//  }
+
+  MIDI::ChannelState channelState;
+  MIDI::NRPN nrpn{channelState};
+  InstrumentCollection instruments(file);
+  Preset preset(file, instruments, file.presets()[80]);
+  std::cout << preset.name() << ' ' << preset.bank() << '/' << preset.program() << '\n';
+
+  auto found = preset.find(64, 127);
+  Voice::Voice v1{48000, channelState, 0};
+  v1.configure(found[0], nrpn);
+
+  found = preset.find(68, 127);
+  Voice::Voice v2{48000, channelState, 2};
+  v2.configure(found[0], nrpn);
+
+  found = preset.find(71, 127);
+  Voice::Voice v3{48000, channelState, 4};
+  v3.configure(found[0], nrpn);
+
+  double sampleRate = 48000.0;
+  AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
+
+  int seconds = 3;
+  int sampleCount = sampleRate * seconds;
+  AVAudioPCMBuffer* buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+  AudioBufferList* bufferList = buffer.mutableAudioBufferList;
+  bufferList->mBuffers[0].mDataByteSize = sampleCount * sizeof(Float);
+  bufferList->mBuffers[1].mDataByteSize = sampleCount * sizeof(Float);
+  float* samplesLeft = (float*)(bufferList->mBuffers[0].mData);
+  float* samplesRight = (float*)(bufferList->mBuffers[1].mData);
+
+  std::vector<AUValue> samples;
+  for (auto index = 0; index < sampleCount; ++index) {
+    auto s1 = v1.renderSample();
+    auto s2 = v2.renderSample();
+    auto s3 = v3.renderSample();
+
+    AUValue s = (s1 + s2 + s3) / 3.0;
+    *samplesLeft++ = s;
+    *samplesRight++ = s;
+
+    if (index == 0 || index == int(sampleCount * 0.5) || index == sampleCount - 1) {
+      samples.push_back(s1);
+      samples.push_back(s2);
+      samples.push_back(s3);
+    }
+
+    int vibrato = int(100.0 * index / sampleCount);
+    v1.state().setValue(Voice::State::State::Index::vibratoLFOToPitch, vibrato);
+    v2.state().setValue(Voice::State::State::Index::vibratoLFOToPitch, vibrato);
+    v3.state().setValue(Voice::State::State::Index::vibratoLFOToPitch, vibrato);
+
+    if (index == int(sampleCount * 0.95)) {
       v1.releaseKey();
       v2.releaseKey();
       v3.releaseKey();
@@ -233,14 +324,14 @@ using namespace SF2::Render;
     XCTAssertEqualWithAccuracy(-0.0973405987, samples[5], epsilon);
   }
   else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(-0.026871394366, samples[3], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0814896523952, samples[4], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0971264615655, samples[5], epsilon);
+    XCTAssertEqualWithAccuracy(-0.0285393111408, samples[3], epsilon);
+    XCTAssertEqualWithAccuracy( 0.0574225746095, samples[4], epsilon);
+    XCTAssertEqualWithAccuracy(-0.0335208065808, samples[5], epsilon);
   }
 
-  XCTAssertEqualWithAccuracy(0.0, samples[6], epsilon);
-  XCTAssertEqualWithAccuracy(0.0, samples[7], epsilon);
-  XCTAssertEqualWithAccuracy(0.0, samples[8], epsilon);
+  XCTAssertEqualWithAccuracy(-2.47968841904e-06, samples[6], epsilon);
+  XCTAssertEqualWithAccuracy( 1.00149384252e-06, samples[7], epsilon);
+  XCTAssertEqualWithAccuracy(-1.50257471887e-06, samples[8], epsilon);
 
   [self playSamples: buffer count: sampleCount];
 }

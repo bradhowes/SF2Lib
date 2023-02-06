@@ -11,7 +11,7 @@
 #include "SF2Lib/Types.hpp"
 
 // *Experimental*
-#define likely(x) __builtin_expect(!!(x), 1) gcc built-in functions to assist with compiler branch optimization
+#define likely(x) __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
 
 /// Functions and constants for general-purpose signal processing specific to SF2 realm. More general-purpose routines

@@ -28,6 +28,8 @@ struct PresetTestContext : PresetTestContextBase
   sampleRate_{sampleRate}, presetIndex_{presetIndex}
   {}
 
+  SF2::Float sampleRate() const { return sampleRate_; }
+
   /// @return URL path to the SF2 file
   const NSURL* url() const { return getUrl(UrlIndex); }
 

@@ -46,6 +46,7 @@ public:
 
    @param sampleRate the sample rate to use for generating audio
    @param channelState the MIDI state associated with the renderer
+   @param voiceIndex the unique index assigned to this voice
    @param interpolator how to interpolate sample values
    */
   Voice(Float sampleRate, const MIDI::ChannelState& channelState, size_t voiceIndex,
