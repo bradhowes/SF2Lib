@@ -73,37 +73,35 @@ public:
   int exclusiveClass() const noexcept { return state_.unmodulated(Index::exclusiveClass); }
 
   /**
-   Configure the voice for rendering.
+   Start the voice rendering. At this point, `isKeyDown()` will return `true` until `releaseKey()` is called.
 
    @param config the voice configuration to apply
    @param nrpn the MIDI NRPN values to apply
    */
-  void configure(const State::Config& config, const MIDI::NRPN& nrpn) noexcept;
+  void start(const State::Config& config, const MIDI::NRPN& nrpn) noexcept;
+
+  /**
+   Stop the voice. After this, it will just produce 0.0 if rendered.
+   */
+  void stop() noexcept { while (active_.exchange(false)) ; }
+
+  /// @returns true if this voice is still rendering interesting samples
+  bool isActive() const noexcept { return active_; }
+
+  /// @returns true if this voice is done processing and will no longer render meaningful samples.
+  bool isDone() const noexcept { return !isActive(); }
 
   /// @returns the MIDI key that started the voice. NOTE: not to be used for DSP processing.
   int initiatingKey() const noexcept { return state_.eventKey(); }
 
   /// @returns true if the key used to start the voice is still down.
-  bool isKeyDown() const noexcept { return gainEnvelope_.isGated(); }
+  bool isKeyDown() const noexcept { return keyDown_; }
 
   /**
    Signal the envelopes that the key is no longer pressed, transitioning to release phase. NOTE: this is invoked on a
    non-render thread so we need to signal the render thread that it has taken place and let the render thread handle it.
    */
-  void releaseKey() noexcept {
-    releasedKey_.test_and_set();
-    // gainEnvelope_.gate(false);
-    // modulatorEnvelope_.gate(false);
-  }
-
-  /// @returns true if this voice is still rendering interesting samples
-  bool isActive() const noexcept { return !isDone(); }
-
-  /// @returns true if this voice is done processing and will no longer render meaningful samples.
-  bool isDone() const noexcept {
-    // if (!done_) done_ = (!gainEnvelope_.isActive() || !sampleGenerator_.isActive());
-    return done_.test();
-  }
+  void releaseKey() noexcept { while (keyDown_.exchange(false)) ; }
 
   /// @returns looping mode of the sample being rendered
   LoopingMode loopingMode() const noexcept {
@@ -139,9 +137,9 @@ public:
    @returns next sample
    */
   Float renderSample() noexcept {
-    if (done_.test()) { return 0.0; }
+    if (!active_) { return 0.0; }
 
-    if (releasedKey_.test()) {
+    if (!keyDown_) {
       gainEnvelope_.gate(false);
       modulatorEnvelope_.gate(false);
     }
@@ -172,7 +170,7 @@ public:
     // Finally, calculate gain / attenuation to apply to filtered result and return attenuated value.
     auto gain = calculateGain(modLFO, volEnv);
 
-    if (!gainEnvelope_.isActive() || !sampleGenerator_.isActive()) done_.test_and_set();
+    if (!gainEnvelope_.isActive() || !sampleGenerator_.isActive()) stop();
     return filtered * gain;
   }
 
@@ -214,7 +212,7 @@ private:
     if (gainEnvelope_.stage() == Envelope::StageIndex::release) {
       auto minGain = sampleGenerator_.looped() ? noiseFloorOverMagnitudeOfLoop_ : noiseFloorOverMagnitude_;
       if (gain < minGain) {
-        done_.test_and_set();
+        stop();
       }
     }
 
@@ -234,8 +232,8 @@ private:
   Float noiseFloorOverMagnitude_;
   Float noiseFloorOverMagnitudeOfLoop_;
 
-  std::atomic_flag releasedKey_ = ATOMIC_FLAG_INIT;
-  std::atomic_flag done_ = ATOMIC_FLAG_INIT;
+  std::atomic<bool> active_ = ATOMIC_FLAG_INIT;
+  std::atomic<bool> keyDown_ = ATOMIC_FLAG_INIT;
 };
 
 } // namespace SF2::Render::Voice

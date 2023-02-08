@@ -5,16 +5,18 @@
 
 #include <memory>
 
+#include <AVFoundation/AVFoundation.h>
 #include <XCTest/XCTest.h>
 
 #include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/Render/Preset.hpp"
-// #include "SF2Lib/Render/Voice/State/State.hpp"
+#include "SF2Lib/Render/Voice/Voice.hpp"
 
 struct PresetTestContextBase
 {
   inline static SF2::Float epsilon = 1.0e-8;
   static NSURL* getUrl(int urlIndex);
+  static bool playAudioInTests();
 };
 
 /**
@@ -86,3 +88,31 @@ struct SampleBasedContexts {
   PresetTestContext<1> context1;
   PresetTestContext<2> context2;
 };
+
+@interface SamplePlayingTestCase : XCTestCase <AVAudioPlayerDelegate> {
+  SampleBasedContexts contexts;
+}
+
+@property (nonatomic, retain) AVAudioPlayer* player;
+@property (nonatomic, retain) XCTestExpectation* playedAudioExpectation;
+@property (nonatomic, retain) NSURL* audioFileURL;
+
+- (void)playSamples:(AVAudioPCMBuffer*)buffer count:(int)sampleCount;
+
+- (AVAudioPCMBuffer*)allocateBuffer:(SF2::Float)sampleRate numberOfChannels:(int)channels capacity:(int)sampleCount;
+
+- (size_t)renderInto:(AVAudioPCMBuffer*)buffer mono:(SF2::Render::Voice::Voice&)left forCount:(size_t)sampleCount startingAt:(size_t)offset;
+- (size_t)renderInto:(AVAudioPCMBuffer*)buffer left:(SF2::Render::Voice::Voice&)left right:(SF2::Render::Voice::Voice&)right forCount:(size_t)sampleCount startingAt:(size_t)offset;
+
+- (void)dumpPresets:(const SF2::IO::File&)file;
+- (void)dumpSamples:(const std::vector<AUValue>&)samples;
+
+@end
+
+@interface AVAudioPCMBuffer(Accessors)
+
+- (AUValue*)left;
+- (AUValue*)right;
+- (void)normalize:(size_t)voiceCount;
+
+@end

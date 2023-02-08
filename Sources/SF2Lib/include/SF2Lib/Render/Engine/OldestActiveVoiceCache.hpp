@@ -60,7 +60,7 @@ public:
     if (voiceIndex >= iterators_.size()) throw std::runtime_error("invalid voice index");
     if (iterators_[voiceIndex] == leastRecentlyUsed_.end()) throw std::runtime_error("voice not in cache");
 
-    // Remove voice by using the iterator that points to it. Reset iterator for voice to 'unused' state.
+    // Remove voice by using the iterator that points to it.
     leastRecentlyUsed_.erase(iterators_[voiceIndex]);
     iterators_[voiceIndex] = leastRecentlyUsed_.end();
   }

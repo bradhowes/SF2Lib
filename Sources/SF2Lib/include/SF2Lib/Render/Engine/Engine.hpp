@@ -144,6 +144,7 @@ public:
   {
     while (!oldestActive_.empty()) {
       auto voiceIndex = oldestActive_.takeOldest();
+      voices_[voiceIndex].stop();
       available_.push_back(voiceIndex);
     }
   }
@@ -248,7 +249,7 @@ private:
       for (auto voiceIndex : oldestActive_) {
         if (voices_[voiceIndex].exclusiveClass() == exclusiveClass) {
           oldestActive_.remove(voiceIndex);
-          available_.push_back(voiceIndex);
+          stopVoice(voiceIndex);
         }
       }
     }
@@ -259,7 +260,7 @@ private:
       available_.pop_back();
     }
     // Or steal the oldest voice that is active
-    else if (!oldestActive_.empty()){
+    else { // if (!oldestActive_.empty()){
       found = oldestActive_.takeOldest();
     }
 
@@ -270,9 +271,13 @@ private:
   {
     size_t index = selectVoice(config);
     if (index == voices_.size()) return;
-    Voice& voice{voices_[index]};
-    voice.configure(config, nrpn_);
+    voices_[index].start(config, nrpn_);
     oldestActive_.add(index);
+  }
+
+  void stopVoice(size_t voiceIndex) noexcept {
+    voices_[voiceIndex].stop();
+    available_.push_back(voiceIndex);
   }
 
   void processControlChange(MIDI::ControlChange cc) noexcept;

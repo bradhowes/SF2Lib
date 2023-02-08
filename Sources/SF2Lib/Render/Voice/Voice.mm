@@ -36,15 +36,14 @@ modulatorEnvelope_{std::move(rhs.modulatorEnvelope_)},
 modulatorLFO_{std::move(rhs.modulatorLFO_)},
 vibratoLFO_{std::move(rhs.vibratoLFO_)},
 filter_{std::move(rhs.filter_)},
-voiceIndex_{rhs.voiceIndex_},
-releasedKey_{},
-done_{}
+voiceIndex_{rhs.voiceIndex_}
 {
-  ;
+  if (rhs.isActive()) while (!active_.exchange(true)) ;
+  if (rhs.isKeyDown()) while (!keyDown_.exchange(true)) ;
 }
 
 void
-Voice::configure(const State::Config& config, const NRPN& nrpn) noexcept
+Voice::start(const State::Config& config, const NRPN& nrpn) noexcept
 {
   config.sampleSource().load();
 
@@ -71,7 +70,6 @@ Voice::configure(const State::Config& config, const NRPN& nrpn) noexcept
   noiseFloorOverMagnitudeOfLoop_ = config.sampleSource().noiseFloorOverMagnitudeOfLoop();
 
   filter_.reset();
-  
-  done_.clear();
-  releasedKey_.clear();
+  while (!active_.exchange(true)) ;
+  while (!keyDown_.exchange(true)) ;
 }
