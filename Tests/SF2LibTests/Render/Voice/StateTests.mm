@@ -13,15 +13,16 @@ using namespace SF2::Render;
 using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
 
-@interface StateTests : XCTestCase
+@interface StateTests : SamplePlayingTestCase
 @end
 
-@implementation StateTests {
-  SampleBasedContexts contexts;
-}
+@implementation StateTests
 
 - (void)testInit {
-  State::State state{contexts.context2.makeState(69 + 24, 64)};
+  auto voiceState{contexts.context2.makeVoiceState(0, 69 + 24, 64)};
+  auto& voice = voiceState[0];
+  auto& state = voice.state();
+
   XCTAssertEqual(      0, state.unmodulated(Index::startAddressOffset));
   XCTAssertEqual(      0, state.unmodulated(Index::endAddressOffset));
   XCTAssertEqual(  9'023, state.unmodulated(Index::initialFilterCutoff));
@@ -43,21 +44,21 @@ using namespace SF2::Entity::Generator;
 }
 
 - (void)testKey {
-  State::State state{contexts.context2.makeState(64, 32)};
+  State::State state{contexts.context2.makeState(0, 64, 32)};
   XCTAssertEqual(64, state.key());
   state.setValue(Index::forcedMIDIKey, 128);
   XCTAssertEqual(127, state.key());
 }
 
 - (void)testVelocity {
-  State::State state{contexts.context2.makeState(64, 32)};
+  State::State state{contexts.context2.makeState(0, 64, 32)};
   XCTAssertEqual(32, state.velocity());
   state.setValue(Index::forcedMIDIVelocity, 128);
   XCTAssertEqual(127, state.velocity());
 }
 
 - (void)testModulatedValue {
-  State::State state{contexts.context2.makeState(60, 32)};
+  State::State state{contexts.context2.makeState(0, 60, 32)};
   state.setValue(Index::holdVolumeEnvelope, 100);
   state.setAdjustment(Index::holdVolumeEnvelope, 0);
   XCTAssertEqualWithAccuracy(100.0, state.modulated(Index::holdVolumeEnvelope), 0.000001);

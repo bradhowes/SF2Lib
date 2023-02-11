@@ -10,11 +10,11 @@
 @end
 
 @implementation ParserTests {
-  SampleBasedContexts* contexts;
+  SampleBasedContexts contexts;
 }
 
 - (void)testParsing1 {
-  auto url = contexts->context0.url();
+  auto url = contexts.context0.url();
   auto parser{SF2::IO::Parser::parse(url.path.UTF8String)};
   XCTAssertEqual(235, parser.presets.size());
   std::cout << parser.embeddedName << '\n';
@@ -22,7 +22,7 @@
 }
 
 - (void)testParsing2 {
-  auto url = contexts->context1.url();
+  auto url = contexts.context1.url();
   auto parser{SF2::IO::Parser::parse(url.path.UTF8String)};
   XCTAssertEqual(270, parser.presets.size());
   std::cout << parser.embeddedName << '\n';
@@ -30,7 +30,7 @@
 }
 
 - (void)testParsing3 {
-  auto url = contexts->context2.url();
+  auto url = contexts.context2.url();
   auto parser{SF2::IO::Parser::parse(url.path.UTF8String)};
   XCTAssertEqual(1, parser.presets.size());
   std::cout << parser.embeddedName << '\n';

@@ -20,7 +20,17 @@ namespace SF2::Render::Envelope {
 /**
  Collection of states for all of the stages in an SF2 envelope.
  */
-using Stages = std::array<Stage, static_cast<size_t>(StageIndex::release) + 1>;
+struct Stages : public std::array<Stage, static_cast<size_t>(StageIndex::release) + 1> {
+  using super = std::array<Stage, static_cast<size_t>(StageIndex::release) + 1>;
+
+  Stage& operator[](const StageIndex& index) {
+    return super::operator[](static_cast<super::size_type>(index));
+  }
+
+  const Stage& operator[](const StageIndex& index) const {
+    return super::operator[](static_cast<super::size_type>(index));
+  }
+};
 
 /**
  Generator of values for the SF2 volume/filter envelopes. An envelope contains 6 stages:
@@ -47,34 +57,29 @@ public:
 
   inline static constexpr Float defaultCurvature = 0.01;
 
-  Generator() = default;
-
-  Generator(Generator&& rhs) noexcept
-  : stages_{std::move(rhs.stages_)}, stageIndex_{rhs.stageIndex_}, counter_{rhs.counter_}, value_{rhs.value_}
-  {}
-
-  Generator& operator=(Generator&& rhs) noexcept {
-    stages_ = std::move(rhs.stages_);
-    stageIndex_ = rhs.stageIndex_;
-    counter_ = rhs.counter_;
-    value_ = rhs.value_;
-    return *this;
-  }
+  Generator(Float sampleRate) : sampleRate_{sampleRate} {}
 
   /**
    Create new envelope for volume changes over time.
 
    @param state the state holding the generator values for the envelope definition
    */
-  static Generator forVol(const State& state) noexcept {
-    return Generator(state.sampleRate(),
-                     DSP::centsToSeconds(state.modulated(Index::delayVolumeEnvelope)),
-                     DSP::centsToSeconds(state.modulated(Index::attackVolumeEnvelope)),
-                     DSP::centsToSeconds(state.modulated(Index::holdVolumeEnvelope) + keyToVolEnvHold(state)),
-                     DSP::centsToSeconds(state.modulated(Index::decayVolumeEnvelope) + keyToVolEnvDecay(state)),
-                     volEnvSustain(state),
-                     DSP::centsToSeconds(state.modulated(Index::releaseVolumeEnvelope)),
-                     true);
+  void configureVolumeEnvelope(const State& state) noexcept {
+    Float sustainLevel = volEnvSustain(state);
+    stages_[StageIndex::delay]
+      .setDelay(samplesFor(state.modulated(Index::delayVolumeEnvelope)));
+    stages_[StageIndex::attack]
+      .setAttack(samplesFor(state.modulated(Index::attackVolumeEnvelope)), defaultCurvature);
+    stages_[StageIndex::hold]
+      .setHold(samplesFor(state.modulated(Index::holdVolumeEnvelope) + keyToVolEnvHold(state)));
+    stages_[StageIndex::decay]
+      .setDecay(samplesFor(state.modulated(Index::decayVolumeEnvelope) + keyToVolEnvDecay(state)), defaultCurvature,
+                sustainLevel);
+    stages_[StageIndex::sustain]
+      .setSustain(sustainLevel);
+    stages_[StageIndex::release]
+      .setRelease(samplesFor(state.modulated(Index::releaseVolumeEnvelope)), defaultCurvature, sustainLevel);
+    gate(true);
   }
 
   /**
@@ -82,15 +87,22 @@ public:
 
    @param state the state holding the generator values for the envelope definition
    */
-  static Generator forMod(const State& state) noexcept {
-    return Generator(state.sampleRate(),
-                     DSP::centsToSeconds(state.modulated(Index::delayModulatorEnvelope)),
-                     DSP::centsToSeconds(state.modulated(Index::attackModulatorEnvelope)),
-                     DSP::centsToSeconds(state.modulated(Index::holdModulatorEnvelope) + keyToModEnvHold(state)),
-                     DSP::centsToSeconds(state.modulated(Index::decayModulatorEnvelope) + keyToModEnvDecay(state)),
-                     modEnvSustain(state),
-                     DSP::centsToSeconds(state.modulated(Index::releaseModulatorEnvelope)),
-                     true);
+  void configureModulationEnvelope(const State& state) noexcept {
+    Float sustainLevel = modEnvSustain(state);
+    stages_[StageIndex::delay]
+      .setDelay(samplesFor(state.modulated(Index::delayModulatorEnvelope)));
+    stages_[StageIndex::attack]
+      .setAttack(samplesFor(state.modulated(Index::attackModulatorEnvelope)), defaultCurvature);
+    stages_[StageIndex::hold]
+      .setHold(samplesFor(state.modulated(Index::holdModulatorEnvelope) + keyToModEnvHold(state)));
+    stages_[StageIndex::decay]
+      .setDecay(samplesFor(state.modulated(Index::decayModulatorEnvelope) + keyToModEnvDecay(state)), defaultCurvature,
+                sustainLevel);
+    stages_[StageIndex::sustain]
+      .setSustain(sustainLevel);
+    stages_[StageIndex::release]
+      .setRelease(samplesFor(state.modulated(Index::releaseModulatorEnvelope)), defaultCurvature, sustainLevel);
+    gate(true);
   }
 
   /**
@@ -107,8 +119,14 @@ public:
     }
   }
 
+  StageIndex activeIndex() const { return stageIndex_; }
+
+  const Stage& activeStage() const noexcept { return stages_[stageIndex_]; }
+
+  const Stage& stage(StageIndex index) const { return stages_[index]; }
+  
   /// @returns the currently active stage.
-  StageIndex stage() const noexcept { return stageIndex_; }
+  // StageIndex stage() const noexcept { return stageIndex_; }
 
   /// @returns true if the generator still has values to emit
   bool isActive() const noexcept { return stageIndex_ != StageIndex::idle; }
@@ -121,6 +139,7 @@ public:
   /// @returns the current envelope value.
   Float value() const noexcept { return value_; }
 
+  Float sustain() const noexcept { return stages_[StageIndex::sustain].initial(); }
   /**
    Calculate the next envelope value. This must be called on every sample for proper timing of the stages.
 
@@ -139,23 +158,19 @@ public:
     return value_;
   }
 
-  const Stage& operator[](StageIndex stageIndex) const noexcept {
-    return checkedVectorIndexing(stages_, static_cast<size_t>(stageIndex));
-  }
-
 private:
 
-  Generator(Float sampleRate, Float delay, Float attack, Float hold, Float decay, Float sustain, Float release,
-            bool noteOn = false) noexcept : stages_{
-    Stage::Delay(samplesFor(sampleRate, delay)),
-    Stage::Attack(samplesFor(sampleRate, attack), defaultCurvature),
-    Stage::Hold(samplesFor(sampleRate, hold)),
-    Stage::Decay(samplesFor(sampleRate, decay), defaultCurvature, sustain),
-    Stage::Sustain(sustain),
-    Stage::Release(samplesFor(sampleRate, release), defaultCurvature, sustain)
-  }
+  /// NOTE: only used for testing via EnvelopeTestInjector
+  Generator(Float sampleRate, Float delay, Float attack, Float hold, Float decay, Float sustain, Float release)
+  :
+  sampleRate_{sampleRate}
   {
-    if (noteOn) gate(true);
+    stages_[StageIndex::delay].setDelay(int(round(sampleRate_ * delay)));
+    stages_[StageIndex::attack].setAttack(int(round(sampleRate_ * attack)), defaultCurvature);
+    stages_[StageIndex::hold].setHold(int(round(sampleRate_ * hold)));
+    stages_[StageIndex::decay].setDecay(int(round(sampleRate_ * decay)), defaultCurvature, sustain);
+    stages_[StageIndex::sustain].setSustain(sustain);
+    stages_[StageIndex::release].setRelease(int(round(sampleRate_ * release)), defaultCurvature, sustain);
   }
 
   /**
@@ -212,55 +227,54 @@ private:
   /**
    Obtain the number of samples for a given sample rate and duration.
 
-   @param sampleRate the current sample rate being used
-   @param duration the amount of time to use in the calculation
+   @param cents the amount of time to use in the calculation represented in timecents
    @returns the number of samples
    */
-  static int samplesFor(Float sampleRate, Float duration) noexcept { return int(round(sampleRate * duration)); }
+  int samplesFor(Float cents) noexcept { return int(round(sampleRate_ * DSP::centsToSeconds(cents))); }
 
+  /**
+   Update the envelope value and see if it is lower than the given floor. If so, transition to the next stage.
+   Otherwise, check to see if the stage duration is complete.
+   */
   void updateAndCompare(Float floor, StageIndex next) noexcept {
     updateValue();
     unlikely(value_ < floor) ? enterStage(next) : checkIfEndStage(next);
   }
 
-  const Stage& active() const noexcept { return stage(stageIndex_); }
+  Float sustainLevel() const noexcept { return stages_[StageIndex::sustain].initial(); }
 
-  const Stage& stage(StageIndex stageIndex) const noexcept { return stages_[static_cast<size_t>(stageIndex)]; }
+  void updateValue() noexcept { value_ = activeStage().next(value_); }
 
-  Float sustainLevel() const noexcept { return stage(StageIndex::sustain).initial_; }
+  void checkIfEndStage(StageIndex next) noexcept { if (unlikely(--counter_ <= 0)) enterStage(next); }
 
-  void updateValue() noexcept { value_ = active().next(value_); }
-
-  void checkIfEndStage(StageIndex next) noexcept {
-    if (unlikely(--counter_ == 0)) {
-      enterStage(next);
-    }
-  }
-
-  int activeDurationInSamples() const noexcept { return active().durationInSamples_; }
+  int activeDurationInSamples() const noexcept { return activeStage().durationInSamples(); }
 
   void enterStage(StageIndex next) noexcept {
     stageIndex_ = next;
-    switch (stageIndex_) {
+
+    // NOTE: if a stage has no duration then we move to the next one by falling thru some of the cases.
+    switch (next) {
       case StageIndex::delay:
         if (activeDurationInSamples()) break;
         stageIndex_ = StageIndex::attack;
 
       case StageIndex::attack:
+        value_ = activeStage().initial();
         if (activeDurationInSamples()) break;
         stageIndex_ = StageIndex::hold;
 
       case StageIndex::hold:
-        value_ = 1.0;
+        value_ = activeStage().initial();
         if (activeDurationInSamples()) break;
         stageIndex_ = StageIndex::decay;
 
       case StageIndex::decay:
+        value_ = activeStage().initial();
         if (activeDurationInSamples()) break;
         stageIndex_ = StageIndex::sustain;
 
       case StageIndex::sustain:
-        value_ = active().initial_;
+        value_ = activeStage().initial();
         break;
 
       case StageIndex::release:
@@ -278,6 +292,7 @@ private:
   StageIndex stageIndex_{StageIndex::idle};
   int counter_{0};
   Float value_{0.0};
+  Float sampleRate_;
 
   friend class EnvelopeTestInjector;
 };

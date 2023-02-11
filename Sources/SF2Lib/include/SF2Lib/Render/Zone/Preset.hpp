@@ -41,7 +41,8 @@ public:
    */
   void refine(Voice::State::State& state) const noexcept
   {
-    std::for_each(generators().cbegin(), generators().cend(), [&](const Entity::Generator::Generator& generator) {
+    const auto& gens{generators()};
+    std::for_each(gens.cbegin(), gens.cend(), [&](const Entity::Generator::Generator& generator) {
       if (generator.definition().isAvailableInPreset()) {
         state.setAdjustment(generator.index(), generator.value());
       }

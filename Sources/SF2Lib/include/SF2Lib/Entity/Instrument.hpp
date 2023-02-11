@@ -31,8 +31,12 @@ public:
   uint16_t firstZoneIndex() const noexcept { return wInstBagNdx; }
   
   /// @returns the number of instrument zones
-  uint16_t zoneCount() const noexcept { return calculateSize(next(this).firstZoneIndex(), firstZoneIndex()); }
-  
+  size_t zoneCount() const noexcept {
+    int value = (this + 1)->firstZoneIndex() - firstZoneIndex();
+    assert(value >= 0);
+    return static_cast<size_t>(value);
+  }
+
   void dump(const std::string& indent, size_t index) const noexcept;
   
 private:

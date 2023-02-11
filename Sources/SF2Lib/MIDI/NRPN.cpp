@@ -18,10 +18,9 @@ NRPN::apply(Render::Voice::State::State &state) const noexcept
 void
 NRPN::process(MIDI::ControlChange cc, int value) noexcept
 {
-  std::cout << "process: " << static_cast<int>(cc) << " value: " << value << '\n';
   switch (cc) {
     case MIDI::ControlChange::nprnMSB:
-      active_ = value == 120;
+      activeDecoding_ = value == 120;
       index_ = 0;
       break;
 
@@ -39,7 +38,7 @@ NRPN::process(MIDI::ControlChange cc, int value) noexcept
     case MIDI::ControlChange::dataEntryMSB:
 
       // We set new values when we see an MSB value. The LSB value comes from the current channel state.
-      if (active_) {
+      if (activeDecoding_) {
         if (index_ < nrpnValues_.size()) {
           auto msb = ((0x7F & value) << 7);
           auto lsb = 0x7F & channelState_.continuousControllerValue(static_cast<int>(MIDI::ControlChange::dataEntryLSB));
@@ -56,7 +55,7 @@ NRPN::process(MIDI::ControlChange cc, int value) noexcept
 
     case MIDI::ControlChange::rpnLSB:
     case MIDI::ControlChange::rpnMSB:
-      active_ = false;
+      activeDecoding_ = false;
       break;
 
     default:

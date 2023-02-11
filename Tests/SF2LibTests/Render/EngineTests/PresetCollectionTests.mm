@@ -39,13 +39,13 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(presets[0].bank(), 0);
   XCTAssertEqual(presets[0].program(), 0);
 
-  XCTAssertEqual(presets[1].name(), "Piano 2");
-  XCTAssertEqual(presets[1].bank(), 0);
-  XCTAssertEqual(presets[1].program(), 1);
+  XCTAssertEqual(presets[1].name(), "Piano 1");
+  XCTAssertEqual(presets[1].bank(), 8);
+  XCTAssertEqual(presets[1].program(), 0);
 
-  XCTAssertEqual(presets[2].name(), "Piano 3");
-  XCTAssertEqual(presets[2].bank(), 0);
-  XCTAssertEqual(presets[2].program(), 2);
+  XCTAssertEqual(presets[2].name(), "Piano 1d");
+  XCTAssertEqual(presets[2].bank(), 16);
+  XCTAssertEqual(presets[2].program(), 0);
 
   XCTAssertEqual(presets[presets.size() - 3].name(), "Brush");
   XCTAssertEqual(presets[presets.size() - 3].bank(), 128);

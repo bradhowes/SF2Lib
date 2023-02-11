@@ -82,9 +82,7 @@ public:
    @param gen the generator to set
    @param value the value to use
    */
-  void setValue(Index gen, int value) noexcept {
-    gens_[gen].value = value;
-  }
+  void setValue(Index gen, int value) noexcept { gens_[gen].value = value; }
 
   /**
    Set a generator's adjustment value. Should only be called with a value from a PresetZone. It can be invoked twice,
@@ -94,9 +92,7 @@ public:
    @param gen the generator to set
    @param value the value to use
    */
-  void setAdjustment(Index gen, int value) noexcept {
-    gens_[gen].adjustment = value;
-  }
+  void setAdjustment(Index gen, int value) noexcept { gens_[gen].adjustment = value; }
 
   /**
    Set a generator's NRPN adjustment value. Should only be called from NRPN::apply method.
@@ -104,9 +100,7 @@ public:
    @param gen the generator to modify
    @param value the value to set
    */
-  void setNRPNAdjustment(Index gen, Float value) noexcept {
-    gens_[gen].nrpn = value;
-  }
+  void setNRPNAdjustment(Index gen, Float value) noexcept { gens_[gen].nrpn = value; }
 
   /**
    Install a modulator.
@@ -123,9 +117,7 @@ public:
    @param gen the index of the generator
    @returns configured value of the generator
    */
-  int unmodulated(Index gen) const noexcept {
-    return Definition::definition(gen).clamp(gens_[gen].unmodulated());
-  }
+  int unmodulated(Index gen) const noexcept { return Definition::definition(gen).clamp(gens_[gen].unmodulated()); }
 
   /**
    Obtain a generator value that includes the changes added by attached modulators. Value is clamped to allowed range in
@@ -134,9 +126,7 @@ public:
    @param gen the index of the generator
    @returns current value of the generator
    */
-  Float modulated(Index gen) const noexcept {
-    return Definition::definition(gen).clamp(gens_[gen].modulated());
-  }
+  Float modulated(Index gen) const noexcept { return Definition::definition(gen).clamp(gens_[gen].modulated()); }
 
   /// @returns MIDI key that started a voice to begin emitting samples. For DSP this is *not* what is desired. See
   /// `key` method below.

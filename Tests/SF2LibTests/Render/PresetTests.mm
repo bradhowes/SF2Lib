@@ -22,7 +22,7 @@ SampleBasedContexts contexts;
   auto& file{contexts.context2.file()};
   XCTAssertEqual(1, file.presets().size());
 
-  Preset preset{contexts.context2.preset()};
+  Preset preset{contexts.context2.preset(0)};
   XCTAssertEqual(6, preset.zones().size());
   XCTAssertFalse(preset.hasGlobalZone());
 

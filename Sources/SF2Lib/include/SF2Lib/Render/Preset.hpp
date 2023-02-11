@@ -4,7 +4,7 @@
 
 #include "SF2Lib/Render/Voice/State/Config.hpp"
 #include "SF2Lib/Render/Zone/Preset.hpp"
-#include "SF2Lib/Render/Zone/WithCollectionBase.hpp"
+#include "SF2Lib/Render/WithCollectionBase.hpp"
 
 namespace SF2::IO {
 class File;
@@ -19,7 +19,7 @@ namespace SF2::Render {
  and an instrument that determines the sound to produce. Note that zones can overlap, so one MIDI key event can cause
  multiple instruments to play, each of which will require its own Voice instance to render.
  */
-class Preset : public Zone::WithCollectionBase<Zone::Preset, Entity::Preset> {
+class Preset : public WithCollectionBase<Zone::Preset, Entity::Preset> {
 public:
   using ConfigCollection = std::vector<Voice::State::Config>;
 

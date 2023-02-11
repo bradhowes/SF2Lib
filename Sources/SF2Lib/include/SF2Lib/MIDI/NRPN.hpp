@@ -13,7 +13,7 @@ namespace SF2::MIDI {
 
 /**
  Processes MIDI continuous controller (CC) messages, looking for non-registered parameter number (NRPN) messages that
- applies to SoundFont generators. When found, these messages update internal state which can then be used to revised the
+ applies to SoundFont generators. When found, these messages update internal state which can then be used to revise the
  internal state of a voice, overriding the generator values defined in a SoundFont preset and/or instrument.
  */
 class NRPN
@@ -43,8 +43,9 @@ public:
    */
   void process(MIDI::ControlChange cc, int value) noexcept;
 
-  /// @returns true if actively processing SoundFont generator changes.
-  bool isActive() const noexcept { return active_; }
+  /// @returns true if actively processing SoundFont generator changes. NOTE: this leaks internal state for testing
+  /// purposes only; there is no value gained knowing this otherwise.
+  bool isActivelyDecoding() const noexcept { return activeDecoding_; }
 
   /// @returns collection of generator values possibly set by NRPN messages.
   const NRPNValues& values() const noexcept { return nrpnValues_; }
@@ -54,7 +55,7 @@ private:
   NRPNValues nrpnValues_{0};
 
   size_t index_{0};
-  bool active_{false};
+  bool activeDecoding_{false};
 
   friend NRPNTestPoint;
 };

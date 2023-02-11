@@ -149,8 +149,8 @@ public:
     auto vibLFO = vibratoLFO_.getNextValue();
     auto modEnv = modulatorEnvelope_.getNextValue();
     auto volEnv = gainEnvelope_.getNextValue();
-
-    // According to FluidSynth this is the right think to do.
+    
+    // According to FluidSynth this is the right thing to do.
     if (gainEnvelope_.isDelayed()) return 0.0;
 
     // Calculate the pitch to render and then generate a new sample.
@@ -209,7 +209,7 @@ private:
 
     // When in the release stage, look for a magical point at which one can no longer hear the sample being generated.
     // Use that as a short-circuit to flagging the voice as done.
-    if (gainEnvelope_.stage() == Envelope::StageIndex::release) {
+    if (gainEnvelope_.activeIndex() == Envelope::StageIndex::release) {
       auto minGain = sampleGenerator_.looped() ? noiseFloorOverMagnitudeOfLoop_ : noiseFloorOverMagnitude_;
       if (gain < minGain) {
         stop();

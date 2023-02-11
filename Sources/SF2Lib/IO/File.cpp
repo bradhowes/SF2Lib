@@ -119,15 +119,15 @@ File::dump() const noexcept {
   std::cout << "|-ifil"; soundFontVersion_.dump("|-ifil");
   std::cout << "|-iver"; fileVersion_.dump("|-iver");
   
-  std::cout << "|-phdr"; presets().dump("|-phdr: ");
-  std::cout << "|-pbag"; presetZones().dump("|-pbag: ");
-  std::cout << "|-pgen"; presetZoneGenerators().dump("|-pgen: ");
-  std::cout << "|-pmod"; presetZoneModulators().dump("|-pmod: ");
-  std::cout << "|-inst"; instruments().dump("|-inst: ");
-  std::cout << "|-ibag"; instrumentZones().dump("|-ibag: ");
-  std::cout << "|-igen"; instrumentZoneGenerators().dump("|-igen: ");
-  std::cout << "|-imod"; instrumentZoneModulators().dump("|-imod: ");
-  std::cout << "|-shdr"; sampleHeaders().dump("|-shdr: ");
+  std::cout << "|-phdr"; presets_.dump("|-phdr: ");
+  std::cout << "|-pbag"; presetZones_.dump("|-pbag: ");
+  std::cout << "|-pgen"; presetZoneGenerators_.dump("|-pgen: ");
+  std::cout << "|-pmod"; presetZoneModulators_.dump("|-pmod: ");
+  std::cout << "|-inst"; instruments_.dump("|-inst: ");
+  std::cout << "|-ibag"; instrumentZones_.dump("|-ibag: ");
+  std::cout << "|-igen"; instrumentZoneGenerators_.dump("|-igen: ");
+  std::cout << "|-imod"; instrumentZoneModulators_.dump("|-imod: ");
+  std::cout << "|-shdr"; sampleHeaders_.dump("|-shdr: ");
 }
 
 void

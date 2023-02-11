@@ -80,10 +80,12 @@ public:
    @returns the sliced references
    */
   ItemRefCollection slice(size_t first, size_t count) const noexcept {
-    return (first < size() && first + count <= size())
-    ? ItemRefCollection(items_.begin() + typename ItemRefCollection::difference_type(first),
-                        items_.begin() + typename ItemRefCollection::difference_type(first + count))
-    : ItemRefCollection();
+    ItemRefCollection items;
+    items.reserve(count);
+    while (count-- > 0) {
+      items.push_back(items_[first++]);
+    }
+    return items;
   }
   
   /**

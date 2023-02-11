@@ -27,7 +27,9 @@ public:
     int bank;
     int program;
 
-    friend bool operator ==(const BankProgram& lhs, const BankProgram& rhs) noexcept { return lhs.bank == rhs.bank; }
+    friend bool operator ==(const BankProgram& lhs, const BankProgram& rhs) noexcept {
+      return lhs.bank == rhs.bank && lhs.program == rhs.program;
+    }
 
     friend bool operator <(const BankProgram& lhs, const BankProgram& rhs) noexcept {
       return lhs.bank < rhs.bank || (lhs.bank == rhs.bank && lhs.program < rhs.program);
@@ -43,35 +45,31 @@ public:
    */
   void build(const IO::File& file)
   {
-    auto count = file.presets().size();
+    clear();
+
     instruments_.build(file);
 
-    ordering_.clear();
-    presets_.clear();
+    auto& presetConfigs{file.presets()};
+    auto count = presetConfigs.size();
     if (presets_.capacity() < count) presets_.reserve(count);
 
     // The order of the presets from the file is unknown. We could order them by first-come, but here we visit each one
     // and map their bank/program numbers to their arrival read index. Then we iterate over the map and create Preset
     // entries that are sorted by increasing bank and program number.
-    for (const Entity::Preset& configuration : file.presets().slice(0, count)) {
-      BankProgram key{configuration.bank(), configuration.program()};
-      auto [pos, success] = ordering_.insert(std::pair(key, ordering_.size()));
+    for (size_t index = 0; index < count; ++index) {
+      auto& config{presetConfigs[index]};
+      BankProgram key{config.bank(), config.program()};
+      std::cout << index << ' ' << key.bank << '/' << key.program << ' ' << presetConfigs[index].name() << '\n';
+      auto [_, success] = ordering_.insert({key, index});
       if (!success) throw std::runtime_error("duplicate bank/program pair");
-    }
-
-    // Build the collection in increasing bank/program order. Replace index in the file.presets() collection with the
-    // index in the presets_ collection so we can locate the preset in future lookup requests.
-    presets_.reserve(ordering_.size());
-    const auto& presetConfigs{file.presets()};
-    for (auto& [key, value] : ordering_) {
-      presets_.emplace_back(file, instruments_, presetConfigs[value]);
-      value = presets_.size() - 1;
+      presets_.emplace_back(file, instruments_, presetConfigs[index]);
     }
   }
 
   void clear() noexcept
   {
     presets_.clear();
+    ordering_.clear();
     instruments_.clear();
   }
 
@@ -89,7 +87,8 @@ public:
    @returns index of the `Preset` if found or `size()`
    */
   size_t locatePresetIndex(int bank, int program) const noexcept {
-    const auto& pos{ordering_.find(BankProgram{bank, program})};
+    const auto& pos{ordering_.find({bank, program})};
+    std::cout << bank << '/' << program << '=' << pos->second << '\n';
     return pos == ordering_.end() ? size() : pos->second;
   }
 

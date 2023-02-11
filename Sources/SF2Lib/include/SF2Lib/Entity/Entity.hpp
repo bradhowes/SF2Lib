@@ -24,16 +24,6 @@ struct Entity {
     assert(next >= current);
     return next - current;
   }
-  
-  /**
-   Obtain reference to the next item in a collection. For a *valid* SF2 file, this is OK to do because all
-   collections contain a sentinel value to mark the end of the collection.
-   
-   @param obj the object address to calculate with
-   @returns reference to next object
-   */
-  template <typename T>
-  static const T& next(const T* obj) noexcept { return *(obj + 1); }
 };
 
 } // end namespace SF2::Entity

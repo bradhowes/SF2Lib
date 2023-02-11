@@ -9,7 +9,7 @@
 #include "SF2Lib/Render/Zone/Zone.hpp"
 #include "SF2Lib/Render/Zone/Collection.hpp"
 
-namespace SF2::Render::Zone {
+namespace SF2::Render {
 
 /**
  Base class for entities that contain a collection of zones (there are two: Render::Preset and Render::Instrument).
@@ -26,7 +26,7 @@ class WithCollectionBase
 public:
   using ZoneType = T;
   using EntityType = E;
-  using CollectionType = Collection<ZoneType>;
+  using CollectionType = Zone::Collection<ZoneType>;
 
   /// @returns true if the instrument has a global zone
   bool hasGlobalZone() const noexcept { return zones_.hasGlobal(); }

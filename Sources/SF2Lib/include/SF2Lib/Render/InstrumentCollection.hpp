@@ -19,8 +19,6 @@ public:
 
   InstrumentCollection() = default;
 
-  explicit InstrumentCollection(const IO::File& file) noexcept { build(file); }
-
   /**
    Construct a new collection using contents from the given file.
 
@@ -28,11 +26,12 @@ public:
    */
   void build(const IO::File& file) noexcept
   {
-    auto count = file.instruments().size();
-    instruments_.clear();
-    if (count > instruments_.capacity()) instruments_.reserve(count);
-    for (const Entity::Instrument& configuration : file.instruments().slice(0, count)) {
-      instruments_.emplace_back(file, configuration);
+    assert(instruments_.empty());
+    const auto& definitions = file.instruments();
+    auto count = definitions.size();
+    instruments_.reserve(count);
+    for (size_t index = 0; index < count; ++index) {
+      instruments_.emplace_back(file, definitions[index]);
     }
   }
 
@@ -41,6 +40,7 @@ public:
   const Instrument& operator[](size_t index) const noexcept { return checkedVectorIndexing(instruments_, index); }
 
 private:
+
   std::vector<Instrument> instruments_{};
 };
 

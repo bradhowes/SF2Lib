@@ -37,14 +37,20 @@ public:
   uint16_t firstGeneratorIndex() const noexcept { return wGenNdx; }
 
   /// @returns number of generators in this collection
-  uint16_t generatorCount() const noexcept { return calculateSize(next(this).firstGeneratorIndex(), firstGeneratorIndex()); }
+  size_t generatorCount() const noexcept {
+    int value = (this + 1)->firstGeneratorIndex() - firstGeneratorIndex();
+    assert(value >= 0);
+    return static_cast<size_t>(value);
+  }
   
   /// @returns first modulator index in this collection
   uint16_t firstModulatorIndex() const noexcept { return wModNdx; }
 
   /// @returns number of modulators in this collection
-  uint16_t modulatorCount() const noexcept {
-    return calculateSize(next(this).firstModulatorIndex(), firstModulatorIndex());
+  size_t modulatorCount() const noexcept {
+    int value = (this + 1)->firstModulatorIndex() - firstModulatorIndex();
+    assert(value >= 0);
+    return static_cast<size_t>(value);
   }
 
   /**

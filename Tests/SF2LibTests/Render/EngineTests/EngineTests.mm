@@ -64,7 +64,12 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   XCTAssertEqual("Piano 1", engine.activePresetName());
   engine.usePreset(1);
   XCTAssertTrue(engine.hasActivePreset());
-  XCTAssertEqual("Piano 2", engine.activePresetName());
+  std::cout << engine.activePresetName() << '\n';
+  XCTAssertEqual("Piano 1", engine.activePresetName());
+  engine.usePreset(2);
+  XCTAssertTrue(engine.hasActivePreset());
+  std::cout << engine.activePresetName() << '\n';
+  XCTAssertEqual("Piano 1d", engine.activePresetName());
   engine.usePreset(9999);
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqual("", engine.activePresetName());
@@ -78,6 +83,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   XCTAssertEqual("Piano 1", engine.activePresetName());
   engine.usePreset(0, 1);
   XCTAssertTrue(engine.hasActivePreset());
+  std::cout << engine.activePresetName() << '\n';
   XCTAssertEqual("Piano 2", engine.activePresetName());
   engine.usePreset(128, 56);
   XCTAssertTrue(engine.hasActivePreset());

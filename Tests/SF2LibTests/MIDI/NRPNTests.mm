@@ -31,17 +31,17 @@ struct NRPNTestPoint {
   ChannelState channelState;
   NRPN nrpn{channelState};
 
-  XCTAssertFalse(nrpn.isActive());
+  XCTAssertFalse(nrpn.isActivelyDecoding());
   nrpn.process(MIDI::ControlChange::nprnMSB, 119);
-  XCTAssertFalse(nrpn.isActive());
+  XCTAssertFalse(nrpn.isActivelyDecoding());
   nrpn.process(MIDI::ControlChange::nprnMSB, 120);
-  XCTAssertTrue(nrpn.isActive());
+  XCTAssertTrue(nrpn.isActivelyDecoding());
   nrpn.process(MIDI::ControlChange::nprnMSB, 119);
-  XCTAssertFalse(nrpn.isActive());
+  XCTAssertFalse(nrpn.isActivelyDecoding());
   nrpn.process(MIDI::ControlChange::nprnMSB, 120);
-  XCTAssertTrue(nrpn.isActive());
+  XCTAssertTrue(nrpn.isActivelyDecoding());
   nrpn.process(MIDI::ControlChange::rpnMSB, 120);
-  XCTAssertFalse(nrpn.isActive());
+  XCTAssertFalse(nrpn.isActivelyDecoding());
 }
 
 - (void)testIndexing {
@@ -74,7 +74,7 @@ struct NRPNTestPoint {
   NRPN nrpn{channelState};
   nrpn.process(MIDI::ControlChange::nprnMSB, 120);
   nrpn.process(MIDI::ControlChange::nprnLSB, 60);
-  XCTAssertTrue(nrpn.isActive());
+  XCTAssertTrue(nrpn.isActivelyDecoding());
   XCTAssertNoThrow(nrpn.process(MIDI::ControlChange::dataEntryMSB, 123));
 }
 

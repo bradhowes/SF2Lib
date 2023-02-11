@@ -89,7 +89,8 @@ protected:
   Zone(GeneratorCollection&& gens, ModulatorCollection&& mods, Entity::Generator::Index terminal) :
   generators_{std::move(gens)},
   modulators_{std::move(mods)},
-  keyRange_{GetKeyRange(generators_)}, velocityRange_{GetVelocityRange(generators_)},
+  keyRange_{GetKeyRange(generators_)},
+  velocityRange_{GetVelocityRange(generators_)},
   isGlobal_{IsGlobal(generators_, terminal, modulators_)},
   filterGenerators_{terminal == Entity::Generator::Index::instrument}
   {

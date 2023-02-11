@@ -108,6 +108,21 @@ bool PresetTestContextBase::playAudioInTests() {
   return buffer;
 }
 
+- (AVAudioPCMBuffer*)allocateBufferFor:(const TestVoiceState&)voices capacity:(int)sampleCount {
+  int channelCount = int(voices.count());
+  AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:voices.sampleRate()
+                                                                         channels:channelCount];
+  AVAudioPCMBuffer* buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
+  AudioBufferList* bufferList = buffer.mutableAudioBufferList;
+
+  for (int index = 0; index < channelCount; ++index) {
+    bufferList->mBuffers[index].mDataByteSize = sampleCount * sizeof(AUValue);
+    bzero(bufferList->mBuffers[index].mData, sampleCount * sizeof(AUValue));
+  }
+
+  return buffer;
+}
+
 - (size_t)renderInto:(AVAudioPCMBuffer*)buffer
                 mono:(SF2::Render::Voice::Voice&)left
             forCount:(size_t)sampleCount
@@ -116,6 +131,38 @@ bool PresetTestContextBase::playAudioInTests() {
   AUValue* samplesLeft = [buffer left] + offset;
   for (auto index = 0; index < sampleCount; ++index) {
     *samplesLeft++ += left.renderSample();
+  }
+  return offset + sampleCount;
+}
+
+- (size_t)renderInto:(AVAudioPCMBuffer*)buffer
+                voices:(TestVoiceState&)voices
+            forCount:(size_t)sampleCount
+          startingAt:(size_t)offset
+{
+  for (size_t channel = 0; channel < voices.count(); ++channel) {
+    auto into = [buffer channel:channel] + offset;
+    auto& voice{voices[channel]};
+    for (auto index = 0; index < sampleCount; ++index) {
+      *into++ += voice.renderSample();
+    }
+  }
+  return offset + sampleCount;
+}
+
+- (size_t)renderInto:(AVAudioPCMBuffer*)buffer
+              voices:(TestVoiceState&)voices
+            forCount:(size_t)sampleCount
+          startingAt:(size_t)offset
+   afterRenderSample:(void (^)(size_t))block
+{
+  for (size_t channel = 0; channel < voices.count(); ++channel) {
+    auto into = [buffer channel:channel] + offset;
+    auto& voice{voices[channel]};
+    for (auto index = 0; index < sampleCount; ++index) {
+      *into++ += voice.renderSample();
+      block(index + offset);
+    }
   }
   return offset + sampleCount;
 }
@@ -171,6 +218,10 @@ bool PresetTestContextBase::playAudioInTests() {
 
 - (AUValue*)right {
   return (AUValue*)(self.mutableAudioBufferList->mBuffers[1].mData);
+}
+
+- (AUValue*)channel:(size_t)index {
+  return (AUValue*)(self.mutableAudioBufferList->mBuffers[index].mData);
 }
 
 @end
