@@ -1,6 +1,7 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
 #include <cmath>
+#include <utility>
 
 #include "SF2Lib/Render/Envelope/Generator.hpp"
 

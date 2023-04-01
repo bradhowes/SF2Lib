@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <vector>
+#include <utility>
 
 #include "SF2Lib/Entity/Bag.hpp"
 #include "SF2Lib/Entity/Generator/Generator.hpp"
