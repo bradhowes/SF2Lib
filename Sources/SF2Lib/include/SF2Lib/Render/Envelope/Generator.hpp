@@ -23,13 +23,8 @@ namespace SF2::Render::Envelope {
 struct Stages : public std::array<Stage, static_cast<size_t>(StageIndex::release) + 1> {
   using super = std::array<Stage, static_cast<size_t>(StageIndex::release) + 1>;
 
-  Stage& operator[](const StageIndex& index) {
-    return super::operator[](static_cast<super::size_type>(index));
-  }
-
-  const Stage& operator[](const StageIndex& index) const {
-    return super::operator[](static_cast<super::size_type>(index));
-  }
+  Stage& operator[](const StageIndex& index) { return super::operator[](static_cast<super::size_type>(index)); }
+  const Stage& operator[](const StageIndex& index) const { return super::operator[](static_cast<super::size_type>(index)); }
 };
 
 /**
@@ -66,19 +61,14 @@ public:
    */
   void configureVolumeEnvelope(const State& state) noexcept {
     Float sustainLevel = volEnvSustain(state);
-    stages_[StageIndex::delay]
-      .setDelay(samplesFor(state.modulated(Index::delayVolumeEnvelope)));
-    stages_[StageIndex::attack]
-      .setAttack(samplesFor(state.modulated(Index::attackVolumeEnvelope)), defaultCurvature);
-    stages_[StageIndex::hold]
-      .setHold(samplesFor(state.modulated(Index::holdVolumeEnvelope) + keyToVolEnvHold(state)));
-    stages_[StageIndex::decay]
-      .setDecay(samplesFor(state.modulated(Index::decayVolumeEnvelope) + keyToVolEnvDecay(state)), defaultCurvature,
-                sustainLevel);
-    stages_[StageIndex::sustain]
-      .setSustain(sustainLevel);
-    stages_[StageIndex::release]
-      .setRelease(samplesFor(state.modulated(Index::releaseVolumeEnvelope)), defaultCurvature, sustainLevel);
+    stages_[StageIndex::delay].setDelay(samplesFor(state.modulated(Index::delayVolumeEnvelope)));
+    stages_[StageIndex::attack].setAttack(samplesFor(state.modulated(Index::attackVolumeEnvelope)), defaultCurvature);
+    stages_[StageIndex::hold].setHold(samplesFor(state.modulated(Index::holdVolumeEnvelope) + keyToVolEnvHold(state)));
+    stages_[StageIndex::decay].setDecay(samplesFor(state.modulated(Index::decayVolumeEnvelope) +
+                                                   keyToVolEnvDecay(state)), defaultCurvature, sustainLevel);
+    stages_[StageIndex::sustain].setSustain(sustainLevel);
+    stages_[StageIndex::release].setRelease(samplesFor(state.modulated(Index::releaseVolumeEnvelope)), defaultCurvature,
+                                            sustainLevel);
     gate(true);
   }
 
@@ -89,19 +79,17 @@ public:
    */
   void configureModulationEnvelope(const State& state) noexcept {
     Float sustainLevel = modEnvSustain(state);
-    stages_[StageIndex::delay]
-      .setDelay(samplesFor(state.modulated(Index::delayModulatorEnvelope)));
-    stages_[StageIndex::attack]
-      .setAttack(samplesFor(state.modulated(Index::attackModulatorEnvelope)), defaultCurvature);
-    stages_[StageIndex::hold]
-      .setHold(samplesFor(state.modulated(Index::holdModulatorEnvelope) + keyToModEnvHold(state)));
-    stages_[StageIndex::decay]
-      .setDecay(samplesFor(state.modulated(Index::decayModulatorEnvelope) + keyToModEnvDecay(state)), defaultCurvature,
-                sustainLevel);
-    stages_[StageIndex::sustain]
-      .setSustain(sustainLevel);
-    stages_[StageIndex::release]
-      .setRelease(samplesFor(state.modulated(Index::releaseModulatorEnvelope)), defaultCurvature, sustainLevel);
+    stages_[StageIndex::delay].setDelay(samplesFor(state.modulated(Index::delayModulatorEnvelope)));
+    stages_[StageIndex::attack].setAttack(samplesFor(state.modulated(Index::attackModulatorEnvelope)),
+                                          defaultCurvature);
+    stages_[StageIndex::hold].setHold(samplesFor(state.modulated(Index::holdModulatorEnvelope) +
+                                                 keyToModEnvHold(state)));
+    stages_[StageIndex::decay].setDecay(samplesFor(state.modulated(Index::decayModulatorEnvelope) +
+                                                   keyToModEnvDecay(state)), defaultCurvature,
+                                        sustainLevel);
+    stages_[StageIndex::sustain].setSustain(sustainLevel);
+    stages_[StageIndex::release].setRelease(samplesFor(state.modulated(Index::releaseModulatorEnvelope)),
+                                            defaultCurvature, sustainLevel);
     gate(true);
   }
 
@@ -230,7 +218,12 @@ private:
    @param cents the amount of time to use in the calculation represented in timecents
    @returns the number of samples
    */
-  int samplesFor(Float cents) noexcept { return int(round(sampleRate_ * DSP::centsToSeconds(cents))); }
+  int samplesFor(Float cents) noexcept {
+    auto seconds = DSP::centsToSeconds(cents);
+    auto samples = int(round(sampleRate_ * seconds));
+    os_log_debug(log_, "samplesFor: %g -> %g -> %d", cents, seconds, samples);
+    return samples;
+  }
 
   /**
    Update the envelope value and see if it is lower than the given floor. If so, transition to the next stage.
@@ -293,7 +286,7 @@ private:
   int counter_{0};
   Float value_{0.0};
   Float sampleRate_;
-
+  os_log_t log_{os_log_create("SF2Lib", "Envelope")};
   friend class EnvelopeTestInjector;
 };
 

@@ -69,8 +69,10 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       //   0 0xF0 - System Exclusive
       //   1 0x7E - non-realtime ID
       //   2 0x00 - unused subtype
-      //   3 ...  - N Base-64 encoded URL bytes
-      // 3+N 0xF7 - EOX
+      //   3 0xAA - MSB of the preset to load
+      //   4 0xBB - LSB of the preset to load
+      //   5 ...  - N Base-64 encoded URL bytes
+      // 5+N 0xF7 - EOX
       //
     case MIDI::CoreEvent::systemExclusive:
       os_log_info(log_, "doMIDIEvent - systemExclusive: %hhX %hhX", midiEvent.data[1], midiEvent.data[2]);
@@ -103,11 +105,12 @@ Engine::processControlChange(MIDI::ControlChange cc) noexcept
 
 void
 Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
-  size_t count = midiEvent.length - 3;
-  auto path = Utils::Base64::decode(&midiEvent.data[3], count);
+  size_t count = midiEvent.length - 5;
+  size_t index = (*(&midiEvent.data[0] + 3) * 256) + *(&midiEvent.data[0] + 4);
+  auto path = Utils::Base64::decode(&midiEvent.data[0] + 5, count);
   os_log_info(log_, "loadFromMIDI BEGIN - %{public}s", path.c_str());
   SF2::IO::File file{path.c_str()};
-  load(file, 0);
+  load(file, index);
 }
 
 void

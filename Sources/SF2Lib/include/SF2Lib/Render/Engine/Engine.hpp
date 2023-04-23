@@ -110,11 +110,13 @@ public:
    @param index the preset to use
    */
   void usePreset(size_t index) {
+    setBypass(true);
     allOff();
     if (index >= presets_.size()) {
       index = presets_.size();
     }
     activePreset_ = index;
+    setBypass(false);
   }
 
   /**
@@ -125,12 +127,14 @@ public:
    @param program the program in the bank to use
    */
   void usePreset(int bank, int program) {
+    setBypass(true);
     allOff();
     auto index = presets_.locatePresetIndex(bank, program);
     if (index >= presets_.size()) {
       index = presets_.size();
     }
     activePreset_ = index;
+    setBypass(false);
   }
 
   /// @return the number of active voices
@@ -142,11 +146,13 @@ public:
    */
   void allOff() noexcept
   {
+    setBypass(true);
     while (!oldestActive_.empty()) {
       auto voiceIndex = oldestActive_.takeOldest();
       voices_[voiceIndex].stop();
       available_.push_back(voiceIndex);
     }
+    setBypass(false);
   }
 
   /**
@@ -194,14 +200,18 @@ public:
    */
   void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
   {
-    for (auto voiceIndex : oldestActive_) {
+    auto pos = oldestActive_.begin();
+    while (pos != oldestActive_.end()) {
+      auto voiceIndex = *pos;
       auto& voice{voices_[voiceIndex]};
       if (voice.isActive()) {
         voice.renderInto(mixer, frameCount);
       }
       if (voice.isDone()) {
-        oldestActive_.remove(voiceIndex);
+        pos = oldestActive_.remove(voiceIndex);
         available_.push_back(voiceIndex);
+      } else {
+        ++pos;
       }
     }
   }
@@ -239,28 +249,29 @@ private:
     }
   }
 
-  size_t selectVoice(const Config& config) noexcept
+  size_t selectVoice(int exclusiveClass) noexcept
   {
     size_t found = voices_.size();
 
     // If dealing with an exclusive voice, stop any that have the same `exclusiveClass` value.
-    auto exclusiveClass = config.exclusiveClass();
     if (exclusiveClass > 0) {
-      for (auto voiceIndex : oldestActive_) {
+      auto pos = oldestActive_.begin();
+      while (pos != oldestActive_.end()) {
+        auto voiceIndex = *pos;
         if (voices_[voiceIndex].exclusiveClass() == exclusiveClass) {
-          oldestActive_.remove(voiceIndex);
           stopVoice(voiceIndex);
+          pos = oldestActive_.remove(voiceIndex);
+        } else {
+          ++pos;
         }
       }
     }
 
-    // Grab next available voice
+    // Grab next available voice or steal the oldest voice that is active.
     if (!available_.empty()) {
       found = available_.back();
       available_.pop_back();
-    }
-    // Or steal the oldest voice that is active
-    else { // if (!oldestActive_.empty()){
+    } else {
       found = oldestActive_.takeOldest();
     }
 
@@ -269,10 +280,11 @@ private:
 
   void startVoice(const Config& config) noexcept
   {
-    size_t index = selectVoice(config);
-    if (index == voices_.size()) return;
-    voices_[index].start(config, nrpn_);
-    oldestActive_.add(index);
+    auto voiceIndex = selectVoice(config.exclusiveClass());
+    if (voiceIndex == voices_.size()) return;
+
+    voices_[voiceIndex].start(config, nrpn_);
+    oldestActive_.add(voiceIndex);
   }
 
   void stopVoice(size_t voiceIndex) noexcept {

@@ -70,6 +70,7 @@ public:
     alpha_ = calculateAlphaCoefficient(durationInSamples, curvature);
     beta_ = (1.0 + curvature) * (1.0 - alpha_);
     durationInSamples_ = durationInSamples;
+    os_log_debug(log_, "setAttack: %d", durationInSamples_);
   }
 
   /**
@@ -86,6 +87,7 @@ public:
     alpha_ = calculateAlphaCoefficient(durationInSamples, curvature);
     beta_ = (sustainLevel - curvature) * (1.0 - alpha_);
     durationInSamples_ = durationInSamples;
+    os_log_debug(log_, "setDecay: %d", durationInSamples_);
   }
 
   /**
@@ -102,6 +104,7 @@ public:
     alpha_ = calculateAlphaCoefficient(durationInSamples, curvature);
     beta_ = (0.0 - curvature) * (1.0 - alpha_);
     durationInSamples_ = durationInSamples;
+    os_log_debug(log_, "setRelease: %d", durationInSamples_);
   }
 
   /**
@@ -141,6 +144,8 @@ private:
   Float alpha_{0.0};
   Float beta_{0.0};
   int durationInSamples_{0};
+
+  inline static os_log_t log_{os_log_create("SF2Lib", "EnvelopeStage")};
 };
 
 } // namespace SF2::Render::Envelope

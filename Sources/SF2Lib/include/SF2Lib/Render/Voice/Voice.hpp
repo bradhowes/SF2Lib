@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <atomic>
 #include <vector>
 
 #include "SF2Lib/MIDI/ChannelState.hpp"
@@ -53,13 +52,6 @@ public:
         Sample::Generator::Interpolator interpolator = Sample::Generator::Interpolator::linear) noexcept;
 
   /**
-   Move copy constructor
-
-   @param rhs the object to acquire
-   */
-  Voice(Voice&& rhs) noexcept;
-
-  /**
    Set the sample rate to use for rendering.
 
    @param sampleRate the sample rate to use
@@ -83,7 +75,7 @@ public:
   /**
    Stop the voice. After this, it will just produce 0.0 if rendered.
    */
-  void stop() noexcept { while (active_.exchange(false)) ; }
+  void stop() noexcept { active_ = false; }
 
   /// @returns true if this voice is still rendering interesting samples
   bool isActive() const noexcept { return active_; }
@@ -101,7 +93,7 @@ public:
    Signal the envelopes that the key is no longer pressed, transitioning to release phase. NOTE: this is invoked on a
    non-render thread so we need to signal the render thread that it has taken place and let the render thread handle it.
    */
-  void releaseKey() noexcept { while (keyDown_.exchange(false)) ; }
+  void releaseKey() noexcept { keyDown_ = false; }
 
   /// @returns looping mode of the sample being rendered
   LoopingMode loopingMode() const noexcept {
@@ -232,8 +224,8 @@ private:
   Float noiseFloorOverMagnitude_;
   Float noiseFloorOverMagnitudeOfLoop_;
 
-  std::atomic<bool> active_ = ATOMIC_FLAG_INIT;
-  std::atomic<bool> keyDown_ = ATOMIC_FLAG_INIT;
+  bool active_{false};
+  bool keyDown_{false};
 };
 
 } // namespace SF2::Render::Voice

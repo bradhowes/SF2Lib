@@ -31,11 +31,9 @@ public:
    @param maxVoiceCount the number of voices to support
    */
   OldestActiveVoiceCache(size_t maxVoiceCount) noexcept
-  : leastRecentlyUsed_(Allocator(maxVoiceCount))
+  : leastRecentlyUsed_(Allocator(maxVoiceCount)), log_{os_log_create("SF2Lib", "OldestActiveVoiceCache")}
   {
-    for (size_t voiceIndex = 0; voiceIndex < maxVoiceCount; ++voiceIndex) {
-      iterators_.push_back(leastRecentlyUsed_.end());
-    }
+    iterators_.assign(maxVoiceCount, leastRecentlyUsed_.end());
   }
 
   /**
@@ -44,11 +42,13 @@ public:
    @param voiceIndex the unique ID of the voice
    */
   void add(size_t voiceIndex) {
+    os_log_debug(log_, "add BEGIN - %ld", voiceIndex);
     if (voiceIndex >= iterators_.size()) throw std::runtime_error("invalid voice index");
     if (iterators_[voiceIndex] != leastRecentlyUsed_.end()) throw std::runtime_error("voice already in cache");
 
     // Insert the voice at the beginning of the linked list. Record an iterator to it.
     iterators_[voiceIndex] = leastRecentlyUsed_.insert(leastRecentlyUsed_.begin(), voiceIndex);
+    os_log_debug(log_, "add END");
   }
 
   /**
@@ -56,13 +56,16 @@ public:
 
    @param voiceIndex the unique ID of the voice
    */
-  void remove(size_t voiceIndex) {
+  iterator remove(size_t voiceIndex) {
+    os_log_debug(log_, "remove BEGIN - %ld", voiceIndex);
     if (voiceIndex >= iterators_.size()) throw std::runtime_error("invalid voice index");
     if (iterators_[voiceIndex] == leastRecentlyUsed_.end()) throw std::runtime_error("voice not in cache");
 
     // Remove voice by using the iterator that points to it.
-    leastRecentlyUsed_.erase(iterators_[voiceIndex]);
+    auto pos = leastRecentlyUsed_.erase(iterators_[voiceIndex]);
     iterators_[voiceIndex] = leastRecentlyUsed_.end();
+    os_log_debug(log_, "remove END");
+    return pos;
   }
 
   /**
@@ -72,10 +75,12 @@ public:
    @returns index of the voice that was taken from the cache
    */
   size_t takeOldest() {
+    os_log_debug(log_, "takeOldest BEGIN");
     if (leastRecentlyUsed_.empty()) throw std::runtime_error("cache is empty");
     size_t oldest = leastRecentlyUsed_.back();
     iterators_[oldest] = leastRecentlyUsed_.end();
     leastRecentlyUsed_.pop_back();
+    os_log_debug(log_, "takeOldest END - %ld", oldest);
     return oldest;
   }
 
@@ -96,6 +101,7 @@ public:
 private:
   std::list<size_t, Allocator> leastRecentlyUsed_;
   std::vector<std::list<size_t>::iterator> iterators_{};
+  os_log_t log_;
 };
 
 } // end namespace SF2::Render::Engine

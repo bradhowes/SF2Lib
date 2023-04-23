@@ -24,24 +24,10 @@ modulatorEnvelope_{sampleRate},
 modulatorLFO_{},
 vibratoLFO_{},
 filter_{sampleRate},
-voiceIndex_{voiceIndex}
+voiceIndex_{voiceIndex},
+active_{false},
+keyDown_{false}
 {}
-
-Voice::Voice(Voice&& rhs) noexcept :
-state_{std::move(rhs.state_)},
-loopingMode_{rhs.loopingMode_},
-pitch_{std::move(rhs.pitch_)},
-sampleGenerator_{std::move(rhs.sampleGenerator_)},
-gainEnvelope_{std::move(rhs.gainEnvelope_)},
-modulatorEnvelope_{std::move(rhs.modulatorEnvelope_)},
-modulatorLFO_{std::move(rhs.modulatorLFO_)},
-vibratoLFO_{std::move(rhs.vibratoLFO_)},
-filter_{std::move(rhs.filter_)},
-voiceIndex_{rhs.voiceIndex_}
-{
-  if (rhs.isActive()) while (!active_.exchange(true)) ;
-  if (rhs.isKeyDown()) while (!keyDown_.exchange(true)) ;
-}
 
 void
 Voice::start(const State::Config& config, const NRPN& nrpn) noexcept
@@ -69,6 +55,6 @@ Voice::start(const State::Config& config, const NRPN& nrpn) noexcept
   noiseFloorOverMagnitudeOfLoop_ = config.sampleSource().noiseFloorOverMagnitudeOfLoop();
 
   filter_.reset();
-  while (!active_.exchange(true)) ;
-  while (!keyDown_.exchange(true)) ;
+  active_ = true;
+  keyDown_ = true;
 }
