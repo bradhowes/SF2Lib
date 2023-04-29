@@ -39,22 +39,19 @@ Voice::start(const State::Config& config, const NRPN& nrpn) noexcept
   // All components of the Voice must properly reset their state prior to rendering a note. Many attributes are created
 
   state_.prepareForVoice(config, nrpn);
-  
   loopingMode_ = loopingMode();
-  
   pitch_.configure(sampleHeader);
+  sampleGenerator_.configure(config.sampleSource());
   gainEnvelope_.configureVolumeEnvelope(state_);
   modulatorEnvelope_.configureModulationEnvelope(state_);
-  sampleGenerator_.configure(config.sampleSource());
-
   modulatorLFO_ = LFO::forModulator(state_);
   vibratoLFO_ = LFO::forVibrato(state_);
+  filter_.reset();
 
   assert(config.sampleSource().isLoaded());
   noiseFloorOverMagnitude_ = config.sampleSource().noiseFloorOverMagnitude();
   noiseFloorOverMagnitudeOfLoop_ = config.sampleSource().noiseFloorOverMagnitudeOfLoop();
 
-  filter_.reset();
   active_ = true;
   keyDown_ = true;
 }

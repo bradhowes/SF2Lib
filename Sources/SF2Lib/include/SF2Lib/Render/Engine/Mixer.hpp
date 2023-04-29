@@ -35,14 +35,14 @@ public:
    @param frame the frame to hold the samples
    @param left the sample for the left channel
    @param right the sample for the right channel
-   @param chorus the amount of the L+R samples to send to the chorusSend bus
-   @param reverb the amount of the L+R samples to send to the reverbSend bus
+   @param chorusLevel the amount of the L+R samples to send to the chorusSend bus
+   @param reverbLevel the amount of the L+R samples to send to the reverbSend bus
    */
-  void add(AUAudioFrameCount frame, AUValue left, AUValue right, AUValue chorus, AUValue reverb) noexcept
+  void add(AUAudioFrameCount frame, AUValue left, AUValue right, AUValue chorusLevel, AUValue reverbLevel) noexcept
   {
     dry_.addStereo(frame, left, right);
-    if (chorusSend_.isValid() && chorus > 0.0) chorusSend_.addStereo(frame, left * chorus, right * chorus);
-    if (reverbSend_.isValid() && reverb > 0.0) reverbSend_.addStereo(frame, left * reverb, right * reverb);
+    if (chorusSend_.isValid()) chorusSend_.addStereo(frame, left * chorusLevel, right * chorusLevel);
+    if (reverbSend_.isValid()) reverbSend_.addStereo(frame, left * reverbLevel, right * reverbLevel);
   }
 
   /**

@@ -178,11 +178,10 @@ public:
     SF2::AUValue reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
 
     for (; index < frameCount; ++index) {
-      if (isDone()) break;
+      SF2::Float sample = isDone() ? 0.0 : renderSample();
       Float pan = state_.modulated(Index::pan);
       Float leftPan, rightPan;
       DSP::panLookup(pan, leftPan, rightPan);
-      SF2::Float sample{renderSample()};
       mixer.add(index, SF2::AUValue(leftPan * sample), SF2::AUValue(rightPan * sample), chorusSend, reverbSend);
     }
   }

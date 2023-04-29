@@ -30,12 +30,12 @@ struct Stages : public std::array<Stage, static_cast<size_t>(StageIndex::release
 /**
  Generator of values for the SF2 volume/filter envelopes. An envelope contains 6 stages:
 
- - Delay -- number of seconds to delay the beginning of the attack stage
- - Attack -- number of seconds to ramp up from 0.0 to 1.0. Also supports non-linear curvature.
- - Hold -- number of seconds to hold the envelope at 1.0 before entering the decay stage.
- - Decay -- number of seconds to lower the envelope from 1.0 to the sustain level
+ - Delay -- number of samples to delay the beginning of the attack stage
+ - Attack -- number of samples to ramp up from 0.0 to 1.0. Also supports non-linear curvature.
+ - Hold -- number of samples to hold the envelope at 1.0 before entering the decay stage.
+ - Decay -- number of samples to lower the envelope from 1.0 to the sustain level
  - Sustain -- a stage that lasts as long as a note is held down
- - Release -- number of seconds to go from sustain level to 0.0
+ - Release -- number of samples to go from sustain level to 0.0
 
  The envelope will remain in the idle state until `gate(true)` is invoked. It will remain in the sustain stage until
  `gate(false)` is invoked at which point it will enter the `release` stage. Although the stages above are listed in the
@@ -43,7 +43,7 @@ struct Stages : public std::array<Stage, static_cast<size_t>(StageIndex::release
  call.
 
  The more traditional ADSR (attack, decay, sustain, release) envelope can be achieved by setting the delay and hold
- durations to zero (0.0).
+ durations to zero.
  */
 class Generator {
 public:
@@ -109,13 +109,8 @@ public:
 
   StageIndex activeIndex() const { return stageIndex_; }
 
-  const Stage& activeStage() const noexcept { return stages_[stageIndex_]; }
-
-  const Stage& stage(StageIndex index) const { return stages_[index]; }
+  // const Stage& stage(StageIndex index) const { return stages_[index]; }
   
-  /// @returns the currently active stage.
-  // StageIndex stage() const noexcept { return stageIndex_; }
-
   /// @returns true if the generator still has values to emit
   bool isActive() const noexcept { return stageIndex_ != StageIndex::idle; }
 
@@ -148,10 +143,11 @@ public:
 
 private:
 
+  const Stage& activeStage() const noexcept { return stages_[stageIndex_]; }
+
   /// NOTE: only used for testing via EnvelopeTestInjector
   Generator(Float sampleRate, Float delay, Float attack, Float hold, Float decay, Float sustain, Float release)
-  :
-  sampleRate_{sampleRate}
+  : sampleRate_{sampleRate}
   {
     stages_[StageIndex::delay].setDelay(int(round(sampleRate_ * delay)));
     stages_[StageIndex::attack].setAttack(int(round(sampleRate_ * attack)), defaultCurvature);
