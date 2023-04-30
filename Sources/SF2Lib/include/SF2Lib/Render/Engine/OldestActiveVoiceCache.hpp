@@ -1,11 +1,11 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
 #pragma once
-
 #include <functional>
 #include <list>
 #include <vector>
 
+#include "SF2Lib/Types.hpp"
 #include "SF2Lib/Utils/ListNodeAllocator.hpp"
 
 namespace SF2::Render::Engine {

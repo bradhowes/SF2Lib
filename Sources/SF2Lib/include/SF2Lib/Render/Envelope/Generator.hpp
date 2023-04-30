@@ -107,6 +107,8 @@ public:
     }
   }
 
+  const Stage& stage(StageIndex index) const noexcept { return stages_[index]; }
+
   StageIndex activeIndex() const { return stageIndex_; }
 
   // const Stage& stage(StageIndex index) const { return stages_[index]; }
@@ -123,6 +125,7 @@ public:
   Float value() const noexcept { return value_; }
 
   Float sustain() const noexcept { return stages_[StageIndex::sustain].initial(); }
+
   /**
    Calculate the next envelope value. This must be called on every sample for proper timing of the stages.
 
@@ -269,9 +272,10 @@ private:
       case StageIndex::release:
         if (activeDurationInSamples()) break;
         stageIndex_ = StageIndex::idle;
-        value_ = 0.0;
 
-      case StageIndex::idle: return;
+      case StageIndex::idle:
+        value_ = 0.0;
+        return;
     }
 
     counter_ = activeDurationInSamples();

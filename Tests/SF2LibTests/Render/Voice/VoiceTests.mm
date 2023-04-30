@@ -30,13 +30,13 @@ using namespace SF2::Render;
 - (void)testVoiceRepeatedRenderGeneratesSameOutputRolandPiano {
   TestVoiceState voices{contexts.context2.makeVoiceState(0, 69, 127)};
 
-  int seconds = 1;
-  int repetitions = 5;
+  int seconds = 1.5;
+  int repetitions = 10;
   int sampleCount = voices.sampleRate() * seconds;
 
   AVAudioPCMBuffer* buffer = [self allocateBufferFor:voices capacity:sampleCount];
   size_t voiceSampleCount{size_t(sampleCount / repetitions)};
-  size_t keyReleaseCount{size_t(voiceSampleCount * 0.8)};
+  size_t keyReleaseCount{size_t(voiceSampleCount * 0.99)};
 
   std::vector<AUValue> samples;
 
@@ -68,9 +68,18 @@ using namespace SF2::Render;
   else if constexpr (std::is_same_v<Float, double>) {
     for (auto index = 0; index < samples.size(); ++index) {
       switch (index % 3) {
-        case 0: XCTAssertEqualWithAccuracy( 0.0000000000, samples[index], epsilon); break;
-        case 1: XCTAssertEqualWithAccuracy( 0.132379963994, samples[index], epsilon); break;
-        case 2: XCTAssertEqualWithAccuracy( -0.191177546978, samples[index], epsilon); break;
+        case 0:
+          std::cout << std::setprecision(12);
+          std::cout << index << ' ' << samples[index] << '\n';
+          XCTAssertEqualWithAccuracy( 0.0000000000, samples[index], epsilon); break;
+        case 1:
+          std::cout << std::setprecision(12);
+          std::cout << index << ' ' << samples[index] << '\n';
+          XCTAssertEqualWithAccuracy( 0.410123258829, samples[index], epsilon); break;
+        case 2:
+          std::cout << std::setprecision(12);
+          std::cout << index << ' ' << samples[index] << '\n';
+          XCTAssertEqualWithAccuracy( -0.203832432628, samples[index], epsilon); break;
       }
     }
   }

@@ -93,7 +93,13 @@ public:
    Signal the envelopes that the key is no longer pressed, transitioning to release phase. NOTE: this is invoked on a
    non-render thread so we need to signal the render thread that it has taken place and let the render thread handle it.
    */
-  void releaseKey() noexcept { keyDown_ = false; }
+  void releaseKey() noexcept {
+    if (keyDown_) {
+      keyDown_ = false;
+      gainEnvelope_.gate(false);
+      modulatorEnvelope_.gate(false);
+    }
+  }
 
   /// @returns looping mode of the sample being rendered
   LoopingMode loopingMode() const noexcept {
@@ -115,26 +121,21 @@ public:
 
    Here are the modulation connections, taken from the SoundFont spec v2.
 
-            Osc ------ Filter -- Amp -- L+R ----+-------------+-+-> Output
-             | pitch     | Fc     | Volume      |            / /
-            /|          /|        |             +- Reverb --+ /
+   Osc ------ Filter -- Amp -- L+R ----+-------------+-+-> Output
+   | pitch     | Fc     | Volume      |            / /
+   /|          /|        |             +- Reverb --+ /
    Mod Env +-----------+ |        |             |            /
-            /|           |        |             +- Chorus --+
+   /|           |        |             +- Chorus --+
    Vib LFO + |           |        |
-            /           /        /|
+   /           /        /|
    Mod LFO +-----------+--------+ |
-                                 /
+   /
    Vol Env ---------------------+
 
    @returns next sample
    */
   Float renderSample() noexcept {
     if (!active_) { return 0.0; }
-
-    if (!keyDown_) {
-      gainEnvelope_.gate(false);
-      modulatorEnvelope_.gate(false);
-    }
 
     // Capture the current state of the modulators and envelopes.
     auto modLFO = modulatorLFO_.getNextValue();
@@ -178,7 +179,7 @@ public:
     SF2::AUValue reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
 
     for (; index < frameCount; ++index) {
-      SF2::Float sample = isDone() ? 0.0 : renderSample();
+      Float sample = isDone() ? 0.0 : renderSample();
       Float pan = state_.modulated(Index::pan);
       Float leftPan, rightPan;
       DSP::panLookup(pan, leftPan, rightPan);
@@ -225,6 +226,8 @@ private:
 
   bool active_{false};
   bool keyDown_{false};
+
+  os_log_t log_{os_log_create("SF2Lib", "Voice")};
 };
 
 } // namespace SF2::Render::Voice
