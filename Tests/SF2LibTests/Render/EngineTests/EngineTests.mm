@@ -186,10 +186,10 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
 - (void)testRolandPianoChordRenderCubic4thOrder {
   Float sampleRate{48000.0};
-  AUAudioFrameCount frameCount = 512;
+  AUAudioFrameCount frameCount{512};
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-  Engine engine(sampleRate, 5, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+  Engine engine(sampleRate, 6, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
   engine.load(contexts.context2.file(), 0);
   engine.setRenderingFormat(3, format, frameCount);
 
@@ -199,8 +199,8 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
   engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 65);
 
-  int cycles = 1;
-  int seconds = 6;
+  int cycles = 5;
+  int seconds = 4.0;
   int sampleCount = sampleRate * seconds * cycles;
   int frames = sampleCount / frameCount;
   int remaining = sampleCount - frames * frameCount;
@@ -251,10 +251,10 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
     playChord(60, 65, 69, false);
     playChord(60, 64, 67, false);
     playChord(59, 62, 67, false);
-    playChord(60, 64, 67, count == 3);
+    playChord(60, 64, 67, count == cycles - 1);
   }
 
-  XCTAssertEqual(5, engine.activeVoiceCount());
+  XCTAssertEqual(6, engine.activeVoiceCount());
 
   renderUntil(engine, mixer, frameIndex, frameCount, frames);
   if (remaining > 0) engine.renderInto(mixer, remaining);

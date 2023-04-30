@@ -74,13 +74,13 @@ struct EnvelopeTestInjector {
   XCTAssertEqual(0.0, gen.value());
   XCTAssertEqual(StageIndex::attack, gen.activeIndex());
   XCTAssertEqualWithAccuracy(0.373366868371, gen.getNextValue(), epsilon);
-  XCTAssertEqualWithAccuracy(0.60871114427, gen.getNextValue(), epsilon);
+  XCTAssertEqualWithAccuracy(0.608711144270, gen.getNextValue(), epsilon);
   XCTAssertEqualWithAccuracy(0.757055662464, gen.getNextValue(), epsilon);
   XCTAssertEqualWithAccuracy(0.850561637888, gen.getNextValue(), epsilon);
   XCTAssertEqualWithAccuracy(0.909501243789, gen.getNextValue(), epsilon);
   XCTAssertEqualWithAccuracy(0.946652635751, gen.getNextValue(), epsilon);
   XCTAssertEqualWithAccuracy(0.970070266453, gen.getNextValue(), epsilon);
-  XCTAssertEqualWithAccuracy(0.98483109771, gen.getNextValue(), epsilon);
+  XCTAssertEqualWithAccuracy(0.984831097710, gen.getNextValue(), epsilon);
   XCTAssertEqualWithAccuracy(0.994135290015, gen.getNextValue(), epsilon);
   XCTAssertEqualWithAccuracy(1.0, gen.getNextValue(), epsilon);
 }

@@ -30,8 +30,8 @@ using namespace SF2::Render;
 - (void)testVoiceRepeatedRenderGeneratesSameOutputRolandPiano {
   TestVoiceState voices{contexts.context2.makeVoiceState(0, 69, 127)};
 
-  int seconds = 1.5;
-  int repetitions = 10;
+  int seconds = 10.0;
+  int repetitions = 40.0;
   int sampleCount = voices.sampleRate() * seconds;
 
   AVAudioPCMBuffer* buffer = [self allocateBufferFor:voices capacity:sampleCount];
@@ -75,11 +75,11 @@ using namespace SF2::Render;
         case 1:
           std::cout << std::setprecision(12);
           std::cout << index << ' ' << samples[index] << '\n';
-          XCTAssertEqualWithAccuracy( 0.410123258829, samples[index], epsilon); break;
+          XCTAssertEqualWithAccuracy(-0.184555262327, samples[index], epsilon); break;
         case 2:
           std::cout << std::setprecision(12);
           std::cout << index << ' ' << samples[index] << '\n';
-          XCTAssertEqualWithAccuracy( -0.203832432628, samples[index], epsilon); break;
+          XCTAssertEqualWithAccuracy(-0.165874913335, samples[index], epsilon); break;
       }
     }
   }
