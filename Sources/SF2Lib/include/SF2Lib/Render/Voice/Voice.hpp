@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Envelope/Generator.hpp"
@@ -121,16 +119,18 @@ public:
 
    Here are the modulation connections, taken from the SoundFont spec v2.
 
-   Osc ------ Filter -- Amp -- L+R ----+-------------+-+-> Output
-   | pitch     | Fc     | Volume      |            / /
-   /|          /|        |             +- Reverb --+ /
+   ```
+            Osc ------ Filter -- Amp -- L+R ----+-------------+-+-> Output
+             | pitch     | Fc     | Volume      |            / /
+            /|          /|        |             +- Reverb --+ /
    Mod Env +-----------+ |        |             |            /
-   /|           |        |             +- Chorus --+
+            /|           |        |             +- Chorus --+
    Vib LFO + |           |        |
-   /           /        /|
+            /           /        /|
    Mod LFO +-----------+--------+ |
-   /
+                                 /
    Vol Env ---------------------+
+   ```
 
    @returns next sample
    */

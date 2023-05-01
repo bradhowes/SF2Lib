@@ -53,6 +53,20 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testTiming {
+  NSArray* metrics = @[XCTPerformanceMetric_WallClockTime];
+  [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
+    OldestActiveVoiceCache cache{8};
+    [self startMeasuring];
+    for (auto iteration = 0; iteration < 1000; ++iteration) {
+      for (auto index = 0; index < 8; ++index) {
+        cache.add(index);
+      }
+      while (!cache.empty()) {
+        cache.takeOldest();
+      }
+    }
+    [self stopMeasuring];
+  }];
 }
 
 @end

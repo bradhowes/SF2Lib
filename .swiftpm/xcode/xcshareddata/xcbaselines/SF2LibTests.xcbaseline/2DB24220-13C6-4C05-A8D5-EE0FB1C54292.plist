@@ -37,6 +37,19 @@
 				</dict>
 			</dict>
 		</dict>
+		<key>OldestVoiceCacheTests</key>
+		<dict>
+			<key>testTiming</key>
+			<dict>
+				<key>com.apple.XCTPerformanceMetric_WallClockTime</key>
+				<dict>
+					<key>baselineAverage</key>
+					<real>1.058754</real>
+					<key>baselineIntegrationDisplayName</key>
+					<string>Local Baseline</string>
+				</dict>
+			</dict>
+		</dict>
 	</dict>
 </dict>
 </plist>

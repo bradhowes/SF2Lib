@@ -99,6 +99,7 @@ public:
    */
   void gate(bool noteOn) noexcept {
     if (noteOn) {
+      counter_ = 0;
       value_ = 0.0;
       enterStage(StageIndex::delay);
     }

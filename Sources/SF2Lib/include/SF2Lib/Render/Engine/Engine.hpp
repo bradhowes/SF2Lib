@@ -164,14 +164,18 @@ public:
    */
   void noteOff(int key) noexcept
   {
-    for (auto voiceIndex : oldestActive_) {
+    auto pos = oldestActive_.begin();
+    while (pos != oldestActive_.end()) {
+      auto voiceIndex = *pos;
       const auto& voice{voices_[voiceIndex]};
       if (!voice.isActive()) {
-        oldestActive_.remove(voiceIndex);
+        pos = oldestActive_.remove(voiceIndex);
         available_.push_back(voiceIndex);
-      }
-      else if (voices_[voiceIndex].initiatingKey() == key) {
-        voices_[voiceIndex].releaseKey();
+      } else {
+        if (voices_[voiceIndex].initiatingKey() == key) {
+          voices_[voiceIndex].releaseKey();
+        }
+        ++pos;
       }
     }
   }
@@ -259,8 +263,7 @@ private:
       while (pos != oldestActive_.end()) {
         auto voiceIndex = *pos;
         if (voices_[voiceIndex].exclusiveClass() == exclusiveClass) {
-          stopVoice(voiceIndex);
-          pos = oldestActive_.remove(voiceIndex);
+          pos = stopVoice(voiceIndex);
         } else {
           ++pos;
         }
@@ -287,9 +290,11 @@ private:
     oldestActive_.add(voiceIndex);
   }
 
-  void stopVoice(size_t voiceIndex) noexcept {
+  OldestActiveVoiceCache::iterator stopVoice(size_t voiceIndex) noexcept {
     voices_[voiceIndex].stop();
+    auto pos = oldestActive_.remove(voiceIndex);
     available_.push_back(voiceIndex);
+    return pos;
   }
 
   void processControlChange(MIDI::ControlChange cc) noexcept;
