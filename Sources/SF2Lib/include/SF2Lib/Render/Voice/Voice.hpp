@@ -54,7 +54,12 @@ public:
 
    @param sampleRate the sample rate to use
    */
-  void setSampleRate(Float sampleRate) noexcept { state_.setSampleRate(sampleRate); }
+  void setSampleRate(Float sampleRate) noexcept {
+    state_.setSampleRate(sampleRate);
+    gainEnvelope_.setSampleRate(sampleRate);
+    modulatorEnvelope_.setSampleRate(sampleRate);
+    filter_.setSampleRate(sampleRate);
+  }
 
   /// @returns the unique index assigned to this voice instance.
   size_t voiceIndex() const noexcept { return voiceIndex_; }
@@ -164,6 +169,7 @@ public:
     auto gain = calculateGain(modLFO, volEnv);
 
     if (!gainEnvelope_.isActive() || !sampleGenerator_.isActive()) stop();
+
     return filtered * gain;
   }
 

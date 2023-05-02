@@ -69,7 +69,7 @@ public:
    */
   void setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept {
     super::setRenderingFormat(busCount, format, maxFramesToRender);
-    initialize(format.channelCount, format.sampleRate);
+    initialize(format.sampleRate);
   }
 
   /// @returns the current sample rate
@@ -164,8 +164,7 @@ public:
    */
   void noteOff(int key) noexcept
   {
-    auto pos = oldestActive_.begin();
-    while (pos != oldestActive_.end()) {
+    for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
       auto voiceIndex = *pos;
       const auto& voice{voices_[voiceIndex]};
       if (!voice.isActive()) {
@@ -204,8 +203,8 @@ public:
    */
   void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
   {
-    auto pos = oldestActive_.begin();
-    while (pos != oldestActive_.end()) {
+    os_signpost_interval_begin(log_, OS_SIGNPOST_ID_EXCLUSIVE, "renderInto", "frameCount: %d", frameCount);
+    for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
       auto voiceIndex = *pos;
       auto& voice{voices_[voiceIndex]};
       if (voice.isActive()) {
@@ -218,13 +217,14 @@ public:
         ++pos;
       }
     }
+    os_signpost_interval_end(log_, OS_SIGNPOST_ID_EXCLUSIVE, "renderInto", "frameCount: %d", frameCount);
   }
 
   MIDI::NRPN& nprn() { return nrpn_; }
 
 private:
 
-  void initialize(AVAudioChannelCount, double sampleRate) noexcept
+  void initialize(double sampleRate) noexcept
   {
     sampleRate_ = sampleRate;
     allOff();
@@ -253,28 +253,25 @@ private:
     }
   }
 
-  size_t selectVoice(int exclusiveClass) noexcept
+  void stopAllExclusiveVoices(int exclusiveClass) noexcept
   {
-    size_t found = voices_.size();
-
-    // If dealing with an exclusive voice, stop any that have the same `exclusiveClass` value.
-    if (exclusiveClass > 0) {
-      auto pos = oldestActive_.begin();
-      while (pos != oldestActive_.end()) {
-        auto voiceIndex = *pos;
-        if (voices_[voiceIndex].exclusiveClass() == exclusiveClass) {
-          pos = stopVoice(voiceIndex);
-        } else {
-          ++pos;
-        }
+    for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
+      auto voiceIndex = *pos;
+      if (voices_[voiceIndex].exclusiveClass() == exclusiveClass) {
+        pos = stopVoice(voiceIndex);
+      } else {
+        ++pos;
       }
     }
+  }
 
-    // Grab next available voice or steal the oldest voice that is active.
+  size_t getVoice() noexcept
+  {
+    size_t found = voices_.size();
     if (!available_.empty()) {
       found = available_.back();
       available_.pop_back();
-    } else {
+    } else if (!oldestActive_.empty()) {
       found = oldestActive_.takeOldest();
     }
 
@@ -283,7 +280,12 @@ private:
 
   void startVoice(const Config& config) noexcept
   {
-    auto voiceIndex = selectVoice(config.exclusiveClass());
+    auto exclusiveClass{config.exclusiveClass()};
+    if (exclusiveClass > 0) {
+      stopAllExclusiveVoices(exclusiveClass);
+    }
+
+    auto voiceIndex = getVoice();
     if (voiceIndex == voices_.size()) return;
 
     voices_[voiceIndex].start(config, nrpn_);

@@ -16,7 +16,7 @@ namespace SF2::Entity {
  */
 class Instrument : Entity {
 public:
-  constexpr static size_t size = 22;
+  static constexpr size_t size = 22;
   
   explicit Instrument(IO::Pos& pos) noexcept {
     assert(sizeof(*this) == size);

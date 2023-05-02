@@ -145,6 +145,10 @@ public:
     return value_;
   }
 
+  void setSampleRate(Float sampleRate) noexcept {
+    sampleRate_ = sampleRate;
+  }
+  
 private:
 
   const Stage& activeStage() const noexcept { return stages_[stageIndex_]; }

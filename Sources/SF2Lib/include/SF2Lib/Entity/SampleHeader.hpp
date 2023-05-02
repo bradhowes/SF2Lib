@@ -29,7 +29,7 @@ namespace SF2::Entity {
  */
 class SampleHeader {
 public:
-  constexpr static size_t size = 46;
+  static constexpr size_t size = 46;
   
   enum struct Type: uint16_t {
     monoSample = 1,

@@ -9,7 +9,6 @@ using namespace SF2::Render::Engine;
 void
 Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 {
-  os_log_info(log_, "doMIDIEvent BEGIN - %hd %hhX", midiEvent.length, midiEvent.data[0]);
   switch (MIDI::CoreEvent(midiEvent.data[0] & 0xF0)) {
 
     case MIDI::CoreEvent::noteOff:

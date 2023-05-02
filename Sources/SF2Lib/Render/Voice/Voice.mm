@@ -32,7 +32,10 @@ keyDown_{false}
 void
 Voice::start(const State::Config& config, const NRPN& nrpn) noexcept
 {
+  os_signpost_interval_begin(log_, OS_SIGNPOST_ID_EXCLUSIVE, "start", "");
+
   config.sampleSource().load();
+  assert(config.sampleSource().isLoaded());
 
   const auto& sampleHeader{config.sampleSource().header()};
 
@@ -48,10 +51,11 @@ Voice::start(const State::Config& config, const NRPN& nrpn) noexcept
   vibratoLFO_ = LFO::forVibrato(state_);
   filter_.reset();
 
-  assert(config.sampleSource().isLoaded());
   noiseFloorOverMagnitude_ = config.sampleSource().noiseFloorOverMagnitude();
   noiseFloorOverMagnitudeOfLoop_ = config.sampleSource().noiseFloorOverMagnitudeOfLoop();
 
   active_ = true;
   keyDown_ = true;
+
+  os_signpost_interval_end(log_, OS_SIGNPOST_ID_EXCLUSIVE, "start", "");
 }

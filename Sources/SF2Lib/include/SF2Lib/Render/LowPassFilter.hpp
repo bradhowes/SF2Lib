@@ -49,6 +49,11 @@ public:
 
   void reset() noexcept { filter_.reset(); }
 
+  void setSampleRate(Float sampleRate) noexcept {
+    sampleRate_ = sampleRate;
+    updateSettings(lastFrequency_, lastResonance_);
+  }
+
 private:
 
   void updateSettings(Float frequency, Float resonance) noexcept

@@ -15,7 +15,7 @@ namespace SF2::Entity {
  */
 class Preset : Entity {
 public:
-  constexpr static size_t size = 38;
+  static constexpr size_t size = 38;
   
   /**
    Construct from contents of file.

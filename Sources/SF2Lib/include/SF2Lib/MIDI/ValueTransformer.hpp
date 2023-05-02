@@ -31,7 +31,7 @@ public:
   /// Maximum MIDI value that controller can emit
   inline constexpr static int MaxValue = 127;
 
-  inline constexpr static size_t TableSize = MaxValue + 1;
+  static constexpr size_t TableSize = MaxValue + 1;
 
   /**
    Kind specifies the curvature of the MIDI value transformation function.
