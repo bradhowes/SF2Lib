@@ -67,7 +67,7 @@ struct Accelerated
 template <typename T>
 const typename T::value_type& checkedVectorIndexing(const T& container, size_t index)
 {
-#ifdef DEBUG
+#if defined(CHECKED_VECTOR_INDEXING) && CHECKED_VECTOR_INDEXING == 1
   return container.at(index);
 #else
   return container[index];

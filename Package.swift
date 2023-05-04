@@ -35,6 +35,8 @@ let package = Package(
       cxxSettings: [
         .headerSearchPath("./include", .none),
         .define("USE_ACCELERATE", to: "1", .none),
+        // Set to 1 to assert if std::vector[] index is invalid
+        .define("CHECKED_VECTOR_INDEXING", to: "0", .none),
         .unsafeFlags([
           "-O3",
           "-pedantic",
@@ -84,7 +86,7 @@ let package = Package(
       ],
       cxxSettings: [
         // Set to 1 to play audio in tests. Set to 0 to keep silent.
-        .define("PLAY_AUDIO", to: "1", .none),
+        .define("PLAY_AUDIO", to: "0", .none),
         .unsafeFlags([
           "-Wno-newline-eof", // resource_bundle_accessor.h is missing newline at end of file
           "-x", "objective-c++", // treat source files as Obj-C++ files

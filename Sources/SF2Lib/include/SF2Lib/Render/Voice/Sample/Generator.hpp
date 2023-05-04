@@ -39,8 +39,7 @@ public:
    @param state the voice state to work with
    @param kind the interpolation to apply to the samples
    */
-  Generator(State& state, Interpolator kind) noexcept :
-  state_{state}, interpolatorProc_{interpolator(kind)} {}
+  Generator(State& state, Interpolator kind) noexcept : state_{state}, interpolatorProc_{interpolator(kind)} {}
 
   /**
    Configure instance to use the given sample source. NOTE: this is invoked before start of rendering a note. This
@@ -65,7 +64,7 @@ public:
    */
   Float generate(Float increment, bool canLoop) noexcept
   {
-    if (index_.finished()) return 0.0;
+    if (index_.finished()) [[unlikely]] return 0.0;
     auto whole = index_.whole();
     auto partial = index_.partial();
     index_.increment(increment, canLoop);
@@ -111,13 +110,13 @@ private:
   }
 
   Float sample(size_t whole, bool canLoop) const noexcept {
-    if (whole == bounds_.endLoopPos() && canLoop) whole = bounds_.startLoopPos();
+    if (whole == bounds_.endLoopPos() && canLoop) [[unlikely]] whole = bounds_.startLoopPos();
     return whole < sampleSource_->size() ? (*sampleSource_)[whole] : 0.0;
   }
 
   Float before(size_t whole, bool canLoop) const noexcept {
-    if (whole == 0) return 0.0;
-    if (whole == bounds_.startLoopPos() && canLoop) whole = bounds_.endLoopPos();
+    if (whole == 0) [[unlikely]] return 0.0;
+    if (whole == bounds_.startLoopPos() && canLoop) [[unlikely]] whole = bounds_.endLoopPos();
     return (*sampleSource_)[whole - 1];
   }
 
