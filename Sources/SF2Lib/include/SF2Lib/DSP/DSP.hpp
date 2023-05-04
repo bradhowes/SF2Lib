@@ -10,10 +10,6 @@
 #include "DSPHeaders/DSP.hpp" // AUv3Support include
 #include "SF2Lib/Types.hpp"
 
-// *Experimental*
-#define likely(x) __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
-
 /// Functions and constants for general-purpose signal processing specific to SF2 realm. More general-purpose routines
 /// are in the DSPHeaders::DSP namespace of AUv3Support package.
 namespace SF2::DSP {
@@ -117,7 +113,7 @@ extern double centsPartialLookup(int partial) noexcept;
  0 - 1199 into the proper multiplier.
  */
 inline double centsToFrequency(Float value) noexcept {
-  if (unlikely(value < 0.0f)) return 1.0f;
+  if (value < 0.0f) [[unlikely]] return 1.0f;
 
   // This seems to be the fastest way to do the following. Curiously, the operation `cents % 1200` is faster than doing
   // `cents - whole * 1200` in optimized build.

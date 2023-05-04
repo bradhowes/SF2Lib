@@ -17,7 +17,7 @@ public:
   /**
    Construct new mixer that consists of three output busses. The arguments take a value type so that they may be
    constructed at the call site or used directly from a function return. Alternative would be to define move operations
-   but `BufferPair` just holds two AUValue pointers so there is no cost to doing a copy.
+   but `BusBuffers` just holds a (shared) reference to a vector, so copies are quick.
 
    @param dry the dry (original) output samples
    @param chorusSend the samples that will go to the first effects channel
@@ -46,7 +46,7 @@ public:
   }
 
   /**
-   Command the individual BufferPair instances to shift forward by `frames` frames.
+   Command the individual BusBuffer instances to shift forward by `frames` frames.
 
    @param frames the number of frames to shift over
    */

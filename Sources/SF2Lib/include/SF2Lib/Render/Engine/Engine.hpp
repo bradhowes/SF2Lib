@@ -50,6 +50,7 @@ public:
   Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator) noexcept :
   super(), sampleRate_{sampleRate}, oldestActive_{voiceCount}, log_{os_log_create("SF2Lib", "Engine")}
   {
+    // Voice::State::GenValue::Allocator
     available_.reserve(voiceCount);
     voices_.reserve(voiceCount);
     for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex) {
@@ -234,7 +235,9 @@ private:
   }
 
   /// API for EventProcessor
-  void setParameterFromEvent(const AUParameterEvent&) noexcept {}
+  void setParameterFromEvent(const AUParameterEvent& event) noexcept {
+    os_log_debug(log_, "setParameterEvent - address: %llu value: %f", event.parameterAddress, event.value);
+  }
 
   /// API for EventProcessor
   void doRenderingStateChanged(bool state) noexcept { if (!state) allOff(); }

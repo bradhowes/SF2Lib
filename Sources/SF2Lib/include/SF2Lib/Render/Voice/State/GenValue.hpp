@@ -20,7 +20,15 @@ namespace SF2::Render::Voice::State {
 struct GenValue {
   using Allocator = Utils::ListNodeAllocator<size_t>;
   using ModulatorIndexLinkedList = std::list<size_t, Allocator>;
-  inline static Allocator allocator = Allocator(128);
+
+  // Theoretically, G generators can have M linked modulators, and each of these can appear in V voices, so worst-case
+  // is we have to allow for G * M * V links. We do not want to allocate these in the render thread so we do so at start
+  // but this is a waste of bytes. Also, we do not know the number of voices to support until `Render::Engine` is
+  // constructed, so we make due with hard-coded values.
+  static constexpr auto V = 256;
+  static constexpr auto G = int(SF2::Entity::Generator::Index::numValues);
+  static constexpr auto M = 16;
+  inline static Allocator allocator = Allocator(V * G * M);
 
   /**
    Construct a new value
@@ -38,7 +46,7 @@ struct GenValue {
   Float sumMods{0.0};
   Float nrpn{0};
 
-  ModulatorIndexLinkedList mods;
+  ModulatorIndexLinkedList mods{allocator};
 };
 
 }

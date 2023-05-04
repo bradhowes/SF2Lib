@@ -23,7 +23,7 @@ using MIDIRange = Range<int>;
  values. There are two types: instrument zones and preset zones. Generator settings for the former specify actual values
  to use, while those in preset zones define adjustments to values set by the instrument.
 
- Must be derived from.
+ Must be derived from, but it defines no virtual functions.
  */
 class Zone
 {

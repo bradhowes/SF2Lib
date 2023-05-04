@@ -1,16 +1,14 @@
 #pragma once
 
 #include <cstddef>
-#include <iostream>
 #include <memory>
 #include <limits>
 
 namespace SF2::Utils {
 
 /**
- Custom allocator for the OldestActiveVoiceCache for the list nodes. We allocate all nodes that we will
- ever need and then keep them when list deallocates them. This is so that we do not incur any memory
- allocations when voices change while we are rendering.
+ Custom allocator for std::list nodes. We allocate all nodes that we will ever need and then keep them when list
+ deallocates them. This is so that we do not incur any memory allocations when voices change while we are rendering.
  */
 template <typename T>
 class ListNodeAllocator {
@@ -60,13 +58,13 @@ public:
 
    @param num the number of items to allocate. Asserts if not 1.
    */
-  value_type* allocate(std::size_t num, const void* = 0)
+  [[nodiscard]] constexpr value_type* allocate(std::size_t num)
   {
     assert(num == 1);
 
-    // Allocate our nodes first time asked for one. A better way would be to grab a block of memory and then carve out
-    // the individual nodes from it. However, since these allocations happen all at once here, there is a good chance
-    // that they are all close together.
+    // Allocate our nodes first time we are asked for one. This makes the first allocation the most costly, but we
+    // assume that this is done at some time where this cost is not an issue. One can force the allocation at a certain
+    // time by doing a std::list operation to trigger an allocation/deallocation at a time that is most appropriate.
     if (memoryBlock_ == nullptr) {
       size_t elementSize = sizeof(Node);
       size_t totalSize = elementSize * maxNodeCount_;
@@ -94,7 +92,7 @@ public:
    @param p pointer to node to deallocate.
    @param num number of items to be deallocated. Must be 1.
    */
-  void deallocate(value_type* p, std::size_t num) noexcept
+  constexpr void deallocate(value_type* p, std::size_t num) noexcept
   {
     assert(num == 1);
     auto ptr = reinterpret_cast<Node*>(p);

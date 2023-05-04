@@ -36,6 +36,7 @@ let package = Package(
         .headerSearchPath("./include", .none),
         .define("USE_ACCELERATE", to: "1", .none),
         .unsafeFlags([
+          "-O3",
           "-pedantic",
           "-Wmissing-braces",
           "-Wparentheses",
@@ -99,5 +100,5 @@ let package = Package(
       ]
     )
   ],
-  cxxLanguageStandard: .cxx17
+  cxxLanguageStandard: .cxx20
 )

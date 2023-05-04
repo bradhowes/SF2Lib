@@ -9,7 +9,8 @@
 namespace SF2::Render::Zone {
 
 /**
- A specialization of a Zone for an Instrument. Non-global instrument zones must have a sample source.
+ A specialization of a Zone for an Instrument. Non-global instrument zones must have a sample source which provides the
+ raw samples used for rendering.
  */
 class Instrument : public Zone {
 public:
@@ -19,7 +20,7 @@ public:
 
    @param gens the vector of generators that define the zone
    @param mods the vector of modulators that define the zone
-   @param sampleSources the source fo
+   @param sampleSources the samples for all of the instruments in the SF2 file
    */
   Instrument(GeneratorCollection&& gens, ModulatorCollection&& mods,
              const SampleSourceCollection& sampleSources) noexcept :

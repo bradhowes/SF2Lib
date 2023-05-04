@@ -235,14 +235,14 @@ private:
    */
   void updateAndCompare(Float floor, StageIndex next) noexcept {
     updateValue();
-    unlikely(value_ < floor) ? enterStage(next) : checkIfEndStage(next);
+    value_ < floor ? enterStage(next) : checkIfEndStage(next);
   }
 
   Float sustainLevel() const noexcept { return stages_[StageIndex::sustain].initial(); }
 
   void updateValue() noexcept { value_ = activeStage().next(value_); }
 
-  void checkIfEndStage(StageIndex next) noexcept { if (unlikely(--counter_ <= 0)) enterStage(next); }
+  void checkIfEndStage(StageIndex next) noexcept { if (--counter_ <= 0) [[unlikely]] enterStage(next); }
 
   int activeDurationInSamples() const noexcept { return activeStage().durationInSamples(); }
 
