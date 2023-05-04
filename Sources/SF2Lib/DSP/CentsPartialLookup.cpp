@@ -16,11 +16,11 @@ using namespace SF2::DSP;
 static constexpr int MaxCentsValue = 1200;
 static constexpr size_t TableSize = MaxCentsValue;
 
-static constexpr double generator(size_t index) {
-  return 6.875 * ConstMath::exp(index / 1200.0 * ConstMath::Constants<double>::ln2);
+static constexpr Float generator(size_t index) {
+  return 6.875 * ConstMath::exp(index / 1200.0 * ConstMath::Constants<Float>::ln2);
 }
 
-static constexpr auto lookup_ = ConstMath::make_array<double, TableSize>(generator);
+static constexpr auto lookup_ = ConstMath::make_array<Float, TableSize>(generator);
 
 /**
  Convert a value between 0 and 1200 into a frequency multiplier. See DSP::centsToFrequency for details on how it is
@@ -29,7 +29,7 @@ static constexpr auto lookup_ = ConstMath::make_array<double, TableSize>(generat
  @param partial a value between 0 and MaxCentsValue - 1
  @returns frequency multiplier
  */
-double
+Float
 SF2::DSP::centsPartialLookup(int partial) noexcept {
   return lookup_[static_cast<size_t>(std::clamp(partial, 0, MaxCentsValue - 1))];
 }

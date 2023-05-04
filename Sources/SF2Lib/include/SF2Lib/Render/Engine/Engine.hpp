@@ -225,7 +225,7 @@ public:
 
 private:
 
-  void initialize(double sampleRate) noexcept
+  void initialize(Float sampleRate) noexcept
   {
     sampleRate_ = sampleRate;
     allOff();

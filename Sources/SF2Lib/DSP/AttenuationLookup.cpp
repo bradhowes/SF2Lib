@@ -11,11 +11,11 @@ using namespace SF2::DSP;
 
 static constexpr size_t TableSize = 1441;
 
-static constexpr double generator(size_t index) {
-  return ConstMath::exp(double(index) / -200.0 * ConstMath::Constants<double>::ln10);
+static constexpr Float generator(size_t index) {
+  return ConstMath::exp(Float(index) / -200.0 * ConstMath::Constants<Float>::ln10);
 }
 
-static constexpr auto lookup_ = ConstMath::make_array<double, TableSize>(generator);
+static constexpr auto lookup_ = ConstMath::make_array<Float, TableSize>(generator);
 
 /**
  Convert a value between 0 and 1440 into an attenuation.

@@ -33,9 +33,9 @@ struct Accelerated
    floating-point values.
    */
   using ConversionProc = void (*)(const int16_t*, vDSP_Stride, T*, vDSP_Stride, vDSP_Length);
-  inline static ConversionProc conversionProc = []() {
+  inline static ConversionProc conversionProc = []() noexcept {
     if constexpr (std::is_same_v<T, float>) return vDSP_vflt16;
-    if constexpr (std::is_same_v<T, double>) return vDSP_vflt16D;
+    if constexpr (std::is_same_v<T, Float>) return vDSP_vflt16D;
   }();
 
   /**
@@ -43,9 +43,9 @@ struct Accelerated
    This is used to obtain normalized values (-1.0 - +1.0) after converting from 16-bit integers to floats or doubles.
    */
   using ScaleProc = void (*)(const T*, vDSP_Stride, const T*, T*, vDSP_Stride, vDSP_Length);
-  inline static ScaleProc scaleProc = []() {
+  inline static ScaleProc scaleProc = []() noexcept {
     if constexpr (std::is_same_v<T, float>) return vDSP_vsdiv;
-    if constexpr (std::is_same_v<T, double>) return vDSP_vsdivD;
+    if constexpr (std::is_same_v<T, Float>) return vDSP_vsdivD;
   }();
 
   /**
@@ -53,9 +53,9 @@ struct Accelerated
    floating-point values.
    */
   using MagnitudeProc = void (*)(const T*, vDSP_Stride, T*, vDSP_Length);
-  inline static MagnitudeProc magnitudeProc = []() {
+  inline static MagnitudeProc magnitudeProc = []() noexcept {
     if constexpr (std::is_same_v<T, float>) return vDSP_maxmgv;
-    if constexpr (std::is_same_v<T, double>) return vDSP_maxmgvD;
+    if constexpr (std::is_same_v<T, Float>) return vDSP_maxmgvD;
   }();
 };
 
@@ -65,9 +65,10 @@ struct Accelerated
  indexing via `operator []`.
  */
 template <typename T>
-const typename T::value_type& checkedVectorIndexing(const T& container, size_t index)
+const typename T::value_type& checkedVectorIndexing(const T& container, size_t index) noexcept
 {
 #if defined(CHECKED_VECTOR_INDEXING) && CHECKED_VECTOR_INDEXING == 1
+  error "Blah"
   return container.at(index);
 #else
   return container[index];

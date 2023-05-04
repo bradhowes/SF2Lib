@@ -161,14 +161,14 @@ using namespace SF2::DSP;
 }
 
 // Copied with small modifications from FluidSynth.
-static double fluid_iir_filter_q_from_dB(double q_dB)
+static Float fluid_iir_filter_q_from_dB(Float q_dB)
 {
   /* The generator contains 'centibels' (1/10 dB) => divide by 10 to
    * obtain dB */
   q_dB /= 10.0f;
 
   /* Range: SF2.01 section 8.1.3 # 8 (convert from cB to dB => /10) */
-  q_dB = std::min<double>(std::max<double>(q_dB, 0.0f), 96.0f);
+  q_dB = std::min<Float>(std::max<Float>(q_dB, 0.0f), 96.0f);
 
   /* Short version: Modify the Q definition in a way, that a Q of 0
    * dB leads to no resonance hump in the freq. response.

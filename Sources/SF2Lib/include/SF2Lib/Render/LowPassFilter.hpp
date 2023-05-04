@@ -32,9 +32,7 @@ public:
    @param resonance resonance in centiBels
    */
   Float transform(Float frequency, Float resonance, Float sample) noexcept {
-    // return sample;
-    
-    if (lastFrequency_ != frequency || lastResonance_ != resonance) {
+    if (lastFrequency_ != frequency || lastResonance_ != resonance) [[unlikely]] {
       updateSettings(frequency, resonance);
 
       // Bounds taken from FluidSynth, where the upper bound serves as an anti-aliasing filter, just below the

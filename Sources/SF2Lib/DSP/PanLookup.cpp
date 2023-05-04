@@ -22,11 +22,11 @@ using namespace SF2::DSP;
  */
 static constexpr size_t TableSize = 500 + 500 + 1;
 
-static constexpr double Scaling = ConstMath::Constants<double>::HalfPI / (TableSize - 1);
+static constexpr Float Scaling = ConstMath::Constants<Float>::HalfPI / (TableSize - 1);
 
-static constexpr double generator(size_t index) { return ConstMath::sin(index * Scaling); }
+static constexpr Float generator(size_t index) { return ConstMath::sin(index * Scaling); }
 
-static constexpr auto lookup_ = ConstMath::make_array<double, TableSize>(generator);
+static constexpr auto lookup_ = ConstMath::make_array<Float, TableSize>(generator);
 
 void
 SF2::DSP::panLookup(Float pan, Float& left, Float& right) noexcept {

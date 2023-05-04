@@ -20,13 +20,13 @@ namespace SF2::Render {
 class LFO {
 public:
 
-  static LFO forModulator(Voice::State::State& state) {
+  static LFO forModulator(Voice::State::State& state) noexcept {
     return LFO(state.sampleRate(),
                DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyModulatorLFO)),
                DSP::centsToSeconds(state.modulated(Entity::Generator::Index::delayModulatorLFO)));
   }
 
-  static LFO forVibrato(Voice::State::State& state) {
+  static LFO forVibrato(Voice::State::State& state) noexcept {
     return LFO(state.sampleRate(),
                DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyVibratoLFO)),
                DSP::centsToSeconds(state.modulated(Entity::Generator::Index::delayVibratoLFO)));
@@ -37,7 +37,7 @@ public:
   /**
    Restart from a known zero state.
    */
-  void reset() {
+  void reset() noexcept {
     counter_ = 0.0;
     if (increment_ < 0) increment_ = -increment_;
   }
@@ -47,7 +47,7 @@ public:
 
    @returns next waveform value to use
    */
-  Float getNextValue() {
+  Float getNextValue() noexcept {
     auto counter = counter_;
     increment();
     return counter;
@@ -58,22 +58,20 @@ public:
 
    @returns current waveform value
    */
-  Float value() const { return counter_; }
+  constexpr Float value() const noexcept { return counter_; }
 
-  void increment() {
-    if (delaySampleCount_ > 0) {
+  void increment() noexcept {
+    if (delaySampleCount_ > 0) [[unlikely]] {
       --delaySampleCount_;
       return;
     }
 
     counter_ += increment_;
-
-    // For triangle waveform, the increment is the slope, so to just negate current value when changing directions.
-    if (counter_ >= 1.0) {
+    if (counter_ >= 1.0) [[unlikely]] {
       increment_ = -increment_;
       counter_ = 2.0f - counter_;
     }
-    else if (counter_ <= -1.0) {
+    else if (counter_ <= -1.0) [[unlikely]] {
       increment_ = -increment_;
       counter_ = -2.0f - counter_;
     }
@@ -84,7 +82,7 @@ private:
   /**
    Create a new instance.
    */
-  LFO(Float sampleRate, Float frequency, Float delay) :
+  LFO(Float sampleRate, Float frequency, Float delay) noexcept :
   sampleRate_{sampleRate}, frequency_{frequency}, delaySampleCount_{size_t(sampleRate_ * delay)},
   increment_{frequency / sampleRate * 4.0f} {}
 
