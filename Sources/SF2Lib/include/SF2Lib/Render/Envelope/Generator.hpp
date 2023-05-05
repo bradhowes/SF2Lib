@@ -207,14 +207,10 @@ private:
   }
 
   /// @returns the sustain level for the volume envelope (gain)
-  static Float volEnvSustain(const State& state) noexcept {
-    return envSustain(state, Index::sustainVolumeEnvelope);
-  }
+  static Float volEnvSustain(const State& state) noexcept { return envSustain(state, Index::sustainVolumeEnvelope); }
 
   /// @returns the sustain level for the modulator envelope
-  static Float modEnvSustain(const State& state) noexcept {
-    return envSustain(state, Index::sustainModulatorEnvelope);
-  }
+  static Float modEnvSustain(const State& state) noexcept { return envSustain(state, Index::sustainModulatorEnvelope); }
 
   /**
    Obtain the number of samples for a given sample rate and duration.
@@ -222,12 +218,7 @@ private:
    @param cents the amount of time to use in the calculation represented in timecents
    @returns the number of samples
    */
-  int samplesFor(Float cents) noexcept {
-    auto seconds = DSP::centsToSeconds(cents);
-    auto samples = int(round(sampleRate_ * seconds));
-    os_log_debug(log_, "samplesFor: %g -> %g -> %d", cents, seconds, samples);
-    return samples;
-  }
+  int samplesFor(Float cents) noexcept { return int(round(sampleRate_ * DSP::centsToSeconds(cents))); }
 
   /**
    Update the envelope value and see if it is lower than the given floor. If so, transition to the next stage.
@@ -291,7 +282,6 @@ private:
   int counter_{0};
   Float value_{0.0};
   Float sampleRate_;
-  os_log_t log_{os_log_create("SF2Lib", "Envelope")};
   friend class EnvelopeTestInjector;
 };
 
