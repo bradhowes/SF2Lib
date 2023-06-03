@@ -246,7 +246,7 @@ private:
   }
 
   /// API for EventProcessor
-  void setParameterFromEvent(const AUParameterEvent& event) noexcept {
+  void doParameterEvent(const AUParameterEvent& event) noexcept {
     os_log_debug(log_, "setParameterEvent - address: %llu value: %f", event.parameterAddress, event.value);
   }
 
