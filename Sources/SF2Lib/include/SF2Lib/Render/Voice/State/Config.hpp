@@ -58,7 +58,7 @@ private:
 
   /// Grant access to `apply`.
   friend State;
-  
+
   /**
    Update a state with the various zone configurations. This is done once during the initialization of a Voice with a
    Config instance.

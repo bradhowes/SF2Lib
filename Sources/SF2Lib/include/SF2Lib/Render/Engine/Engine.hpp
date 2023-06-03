@@ -48,7 +48,12 @@ public:
    @param interpolator the type of interpolation to use when rendering samples
    */
   Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator) noexcept :
-  super(), sampleRate_{sampleRate}, oldestActive_{voiceCount}, log_{os_log_create("SF2Lib", "Engine")}
+  super(), sampleRate_{sampleRate}, oldestActive_{voiceCount}, log_{os_log_create("SF2Lib", "Engine")},
+  renderSignpost_{os_signpost_id_generate(log_)},
+  noteOnSignpost_{os_signpost_id_generate(log_)},
+  noteOffSignpost_{os_signpost_id_generate(log_)},
+  startVoiceSignpost_{os_signpost_id_generate(log_)},
+  stopForExclusiveVoiceSignpost_{os_signpost_id_generate(log_)}
   {
     // Voice::State::GenValue::Allocator
     available_.reserve(voiceCount);
@@ -165,6 +170,7 @@ public:
    */
   void noteOff(int key) noexcept
   {
+    os_signpost_interval_begin(log_, noteOffSignpost_, "noteOff", "key: %d", key);
     for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
       auto voiceIndex = *pos;
       const auto& voice{voices_[voiceIndex]};
@@ -178,6 +184,7 @@ public:
         ++pos;
       }
     }
+    os_signpost_interval_end(log_, noteOffSignpost_, "noteOff", "key: %d", key);
   }
 
   /**
@@ -189,10 +196,12 @@ public:
    */
   void noteOn(int key, int velocity) noexcept
   {
+    os_signpost_interval_begin(log_, noteOnSignpost_, "noteOn", "key: %d vel: %d", key, velocity);
     if (! hasActivePreset()) return;
     for (const Config& config : presets_[activePreset_].find(key, velocity)) {
       startVoice(config);
     }
+    os_signpost_interval_end(log_, noteOnSignpost_, "noteOn", "key: %d vel: %d", key, velocity);
   }
 
   /**
@@ -204,7 +213,8 @@ public:
    */
   void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
   {
-    os_signpost_interval_begin(log_, OS_SIGNPOST_ID_EXCLUSIVE, "renderInto", "frameCount: %d", frameCount);
+    os_signpost_interval_begin(log_, renderSignpost_, "renderInto", "voices: %lu frameCount: %d",
+                               oldestActive_.size(), frameCount);
     for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
       auto voiceIndex = *pos;
       auto& voice{voices_[voiceIndex]};
@@ -218,7 +228,8 @@ public:
         ++pos;
       }
     }
-    os_signpost_interval_end(log_, OS_SIGNPOST_ID_EXCLUSIVE, "renderInto", "frameCount: %d", frameCount);
+    os_signpost_interval_end(log_, renderSignpost_, "renderInto", "voices: %lu frameCount: %d",
+                             oldestActive_.size(), frameCount);
   }
 
   MIDI::NRPN& nprn() { return nrpn_; }
@@ -261,7 +272,7 @@ private:
     for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
       auto voiceIndex = *pos;
       if (voices_[voiceIndex].exclusiveClass() == exclusiveClass) {
-        pos = stopVoice(voiceIndex);
+        pos = stopForExclusiveVoice(voiceIndex);
       } else {
         ++pos;
       }
@@ -283,22 +294,25 @@ private:
 
   void startVoice(const Config& config) noexcept
   {
+    os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice");
     auto exclusiveClass{config.exclusiveClass()};
     if (exclusiveClass > 0) {
       stopAllExclusiveVoices(exclusiveClass);
     }
-
     auto voiceIndex = getVoice();
-    if (voiceIndex == voices_.size()) return;
-
-    voices_[voiceIndex].start(config, nrpn_);
-    oldestActive_.add(voiceIndex);
+    if (voiceIndex != voices_.size()) {
+      voices_[voiceIndex].start(config, nrpn_);
+      oldestActive_.add(voiceIndex);
+    }
+    os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice");
   }
 
-  OldestActiveVoiceCache::iterator stopVoice(size_t voiceIndex) noexcept {
+  OldestActiveVoiceCache::iterator stopForExclusiveVoice(size_t voiceIndex) noexcept {
+    os_signpost_interval_begin(log_, stopForExclusiveVoiceSignpost_, "stopForExclusiveVoice");
     voices_[voiceIndex].stop();
     auto pos = oldestActive_.remove(voiceIndex);
     available_.push_back(voiceIndex);
+    os_signpost_interval_end(log_, stopForExclusiveVoiceSignpost_, "stopForExclusiveVoice");
     return pos;
   }
 
@@ -316,7 +330,13 @@ private:
 
   PresetCollection presets_{};
   size_t activePreset_{0};
+
   os_log_t log_;
+  os_signpost_id_t renderSignpost_;
+  os_signpost_id_t noteOnSignpost_;
+  os_signpost_id_t noteOffSignpost_;
+  os_signpost_id_t startVoiceSignpost_;
+  os_signpost_id_t stopForExclusiveVoiceSignpost_;
 };
 
 } // end namespace SF2::Render

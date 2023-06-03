@@ -18,18 +18,20 @@ using namespace SF2::Render::Envelope;
 namespace SF2::Render::Envelope {
 struct EnvelopeTestInjector {
   static Generator make(Float sampleRate, Float delay, Float attack, Float hold, Float decay, Float sustain, Float release) {
-    return Generator(sampleRate, delay, attack, hold, decay, sustain, release);
+    return Generator(sampleRate, Generator::Kind::gain, delay, attack, hold, decay, sustain, release);
   }
+  static AUValue sustain(const Generator& gen) { return gen.sustain(); }
 };
 }
 
 @interface EnvelopeTests : SamplePlayingTestCase
+
 @end
 
 @implementation EnvelopeTests
 
 - (void)testGateOnOff {
-  auto gen = Generator(48000.0);
+  auto gen = Generator(48000.0, Generator::Kind::gain);
   XCTAssertEqual(0.0, gen.value());
   XCTAssertEqual(StageIndex::idle, gen.activeIndex());
   XCTAssertEqual(0.0, gen.getNextValue());
@@ -154,36 +156,37 @@ struct EnvelopeTestInjector {
 - (void)testEnvelopeSustainLevel {
   Float epsilon = 0.000001;
   State::State state{contexts.context2.makeState(0, 64, 32)};
-  Generator gen{state.sampleRate()};
+  auto gen = Generator(state.sampleRate(), Generator::Kind::modulator);
+  gen.configure(state);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 0);
-  gen.configureVolumeEnvelope(state);
-  XCTAssertEqualWithAccuracy(1.0, gen.sustain(), epsilon);
+  gen.configure(state);
+  XCTAssertEqualWithAccuracy(1.0, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 100);
-  gen.configureVolumeEnvelope(state);
-  XCTAssertEqualWithAccuracy(0.9, gen.sustain(), epsilon);
+  gen.configure(state);
+  XCTAssertEqualWithAccuracy(0.9, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 500);
-  gen.configureVolumeEnvelope(state);
-  XCTAssertEqualWithAccuracy(0.5, gen.sustain(), epsilon);
+  gen.configure(state);
+  XCTAssertEqualWithAccuracy(0.5, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 900);
-  gen.configureVolumeEnvelope(state);
-  XCTAssertEqualWithAccuracy(0.1, gen.sustain(), epsilon);
+  gen.configure(state);
+  XCTAssertEqualWithAccuracy(0.1, EnvelopeTestInjector::sustain(gen), epsilon);
 }
 
 - (void)testKeyToMod {
   Float epsilon = 0.000001;
   auto s1 = contexts.context2.makeState(0, 60, 32);
-  Generator gen{s1.sampleRate()};
+  auto gen = Generator(s1.sampleRate(), Generator::Kind::modulator);
 
   // 1s hold duration
   s1.setValue(State::State::Index::holdVolumeEnvelope, 0);
   // Track keyboard such that octave increase results in 0.5 x hold duration
   s1.setValue(State::State::Index::midiKeyToVolumeEnvelopeHold, 100);
   // For key 60 there is no scaling so no adjustment to hold duration
-  gen.configureVolumeEnvelope(s1);
+  gen.configure(s1);
   auto duration = gen.stage(StageIndex::hold).durationInSamples();
   XCTAssertEqualWithAccuracy(s1.sampleRate(), duration, epsilon);
 
@@ -191,7 +194,7 @@ struct EnvelopeTestInjector {
   auto s2 = contexts.context2.makeState(0, 72, 32);
   s2.setValue(State::State::Index::holdVolumeEnvelope, 0);
   s2.setValue(State::State::Index::midiKeyToVolumeEnvelopeHold, 100);
-  gen.configureVolumeEnvelope(s2);
+  gen.configure(s2);
   duration = gen.stage(StageIndex::hold).durationInSamples();
   XCTAssertEqualWithAccuracy(s2.sampleRate() / 2.0, duration, epsilon);
 
@@ -199,7 +202,7 @@ struct EnvelopeTestInjector {
   auto s3 = contexts.context2.makeState(0, 48, 32);
   s3.setValue(State::State::Index::holdVolumeEnvelope, 0);
   s3.setValue(State::State::Index::midiKeyToVolumeEnvelopeHold, 100);
-  gen.configureVolumeEnvelope(s3);
+  gen.configure(s3);
   duration = gen.stage(StageIndex::hold).durationInSamples();
   XCTAssertEqualWithAccuracy(s3.sampleRate() * 2.0, duration, epsilon);
 
@@ -207,7 +210,7 @@ struct EnvelopeTestInjector {
   auto s4 = contexts.context2.makeState(0, 36, 32);
   s4.setValue(State::State::Index::midiKeyToVolumeEnvelopeHold, 50);
   s4.setValue(State::State::Index::holdVolumeEnvelope, -7973);
-  gen.configureVolumeEnvelope(s4);
+  gen.configure(s4);
   duration = gen.stage(StageIndex::hold).durationInSamples();
   XCTAssertEqualWithAccuracy(960, duration, 0.000001);
 }

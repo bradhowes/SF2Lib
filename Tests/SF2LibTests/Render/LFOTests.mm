@@ -11,7 +11,7 @@ using namespace SF2::Render;
 namespace SF2::Render {
 struct LFOTestInjector {
   static LFO make(Float sampleRate, Float frequency, Float delay) {
-    return LFO(sampleRate, frequency, delay);
+    return LFO(sampleRate, LFO::Kind::modulator, frequency, delay);
   }
 };
 }

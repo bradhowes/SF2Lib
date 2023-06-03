@@ -45,7 +45,10 @@ public:
    @param channelState the MIDI channel that is in control
    */
   State(Float sampleRate, const MIDI::ChannelState& channelState) noexcept :
-  sampleRate_{sampleRate}, channelState_{channelState} {}
+  sampleRate_{sampleRate}, channelState_{channelState}, eventKey_{}, eventVelocity_{}
+  {
+    setDefaults();
+  }
 
   /** Create new state vector for testing purposes.
    @param sampleRate the sample rate of audio being rendered
@@ -152,8 +155,8 @@ public:
 
 private:
 
-  void setDefaults() noexcept ;
-  void linkModulators() noexcept ;
+  void setDefaults() noexcept;
+  void linkModulators() noexcept;
 
   const MIDI::ChannelState& channelState_;
   GenValueCollection gens_{};

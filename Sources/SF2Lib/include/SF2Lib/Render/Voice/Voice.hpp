@@ -234,6 +234,7 @@ private:
   bool keyDown_{false};
 
   os_log_t log_{os_log_create("SF2Lib", "Voice")};
+  os_signpost_id_t startSignpost_{os_signpost_id_generate(log_)};
 };
 
 } // namespace SF2::Render::Voice

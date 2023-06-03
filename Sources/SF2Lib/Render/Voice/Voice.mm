@@ -19,10 +19,10 @@ state_{sampleRate, channelState},
 loopingMode_{LoopingMode::none},
 pitch_{state_},
 sampleGenerator_{state_, interpolator},
-gainEnvelope_{sampleRate},
-modulatorEnvelope_{sampleRate},
-modulatorLFO_{},
-vibratoLFO_{},
+gainEnvelope_{sampleRate, Envelope::Generator::Kind::gain},
+modulatorEnvelope_{sampleRate, Envelope::Generator::Kind::modulator},
+modulatorLFO_{sampleRate, LFO::Kind::modulator},
+vibratoLFO_{sampleRate, LFO::Kind::vibrato},
 filter_{sampleRate},
 voiceIndex_{voiceIndex},
 active_{false},
@@ -32,30 +32,31 @@ keyDown_{false}
 void
 Voice::start(const State::Config& config, const NRPN& nrpn) noexcept
 {
-  os_signpost_interval_begin(log_, OS_SIGNPOST_ID_EXCLUSIVE, "start", "");
+  os_signpost_interval_begin(log_, startSignpost_, "start");
 
   config.sampleSource().load();
   assert(config.sampleSource().isLoaded());
-
-  const auto& sampleHeader{config.sampleSource().header()};
 
   // All components of the Voice must properly reset their state prior to rendering a note. Many attributes are created
 
   state_.prepareForVoice(config, nrpn);
   loopingMode_ = loopingMode();
-  pitch_.configure(sampleHeader);
-  sampleGenerator_.configure(config.sampleSource());
-  gainEnvelope_.configureVolumeEnvelope(state_);
-  modulatorEnvelope_.configureModulationEnvelope(state_);
-  modulatorLFO_ = LFO::forModulator(state_);
-  vibratoLFO_ = LFO::forVibrato(state_);
-  filter_.reset();
 
-  noiseFloorOverMagnitude_ = config.sampleSource().noiseFloorOverMagnitude();
-  noiseFloorOverMagnitudeOfLoop_ = config.sampleSource().noiseFloorOverMagnitudeOfLoop();
+  const auto& sampleSource{config.sampleSource()};
+
+  sampleGenerator_.configure(sampleSource);
+  pitch_.configure(sampleSource.header());
+
+  gainEnvelope_.configure(state_);
+  modulatorEnvelope_.configure(state_);
+
+  modulatorLFO_.configure(state_);
+  vibratoLFO_.configure(state_);
+
+  filter_.reset();
 
   active_ = true;
   keyDown_ = true;
 
-  os_signpost_interval_end(log_, OS_SIGNPOST_ID_EXCLUSIVE, "start", "");
+  os_signpost_interval_end(log_, startSignpost_, "start");
 }

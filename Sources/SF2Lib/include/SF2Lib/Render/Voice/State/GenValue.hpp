@@ -33,7 +33,7 @@ struct GenValue {
   /**
    Construct a new value
    */
-  GenValue() noexcept : mods{allocator} {}
+  GenValue() = default;
 
   /// @returns generator value as defined by zones (no modulators).
   int unmodulated() const noexcept { return value + adjustment; }

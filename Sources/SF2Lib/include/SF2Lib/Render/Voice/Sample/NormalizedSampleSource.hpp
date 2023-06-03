@@ -62,16 +62,6 @@ public:
   /// @returns the sample header ('shdr') of the sample stream being rendered
   const Entity::SampleHeader& header() const noexcept { return header_; }
 
-  /**
-   Obtain the max magnitude seen in the samples.
-   */
-  Float noiseFloorOverMagnitude() const noexcept { return loaded_ ? noiseFloorOverMagnitude_ : 0.0; }
-
-  /**
-   Obtain the max magnitude seen in the samples of the loop specified by the given bounds.
-   */
-  Float noiseFloorOverMagnitudeOfLoop() const noexcept { return loaded_ ? noiseFloorOverMagnitudeOfLoop_ : 0.0; }
-
 private:
 
   template <typename T>
@@ -83,28 +73,13 @@ private:
     const size_t size = header_.endIndex() - startIndex;
     samples_.resize(size + sizePaddingAfterEnd);
 
+    // Read in the 16-bit sample values and convert into normalized values.
     auto pos = allSamples_ + header_.startIndex();
     constexpr T scale = (1 << 15);
     Accelerated<T>::conversionProc(pos, 1, samples_.data(), 1, size);
     Accelerated<T>::scaleProc(samples_.data(), 1, &scale, samples_.data(), 1, size);
 
-    auto bounds{Sample::Bounds::make(header_)};
-
-    noiseFloorOverMagnitude_ = DSP::NoiseFloor / getMaxMagnitude<T>(0, size);
-    noiseFloorOverMagnitudeOfLoop_ = DSP::NoiseFloor / (bounds.hasLoop() ?
-                                                        getMaxMagnitude<T>(bounds.startLoopPos(), bounds.endLoopPos()) :
-                                                        getMaxMagnitude<T>(0, 0));
     loaded_ = true;
-  }
-
-  template <typename T>
-  T getMaxMagnitude(size_t startPos, size_t endPos) const noexcept
-  {
-    T value{0.0f};
-    if (samples_.size() > startPos && samples_.size() >= endPos) {
-      Accelerated<T>::magnitudeProc(samples_.data() + startPos, 1, &value, endPos - startPos);
-    }
-    return std::max<T>(value, 1.0e-7f);
   }
 
   using SampleVector = std::vector<Float>;
