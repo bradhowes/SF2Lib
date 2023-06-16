@@ -20,19 +20,48 @@ namespace SF2::Render {
 class LFO {
 public:
 
-  static LFO forModulator(Voice::State::State& state) noexcept {
-    return LFO(state.sampleRate(),
-               DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyModulatorLFO)),
-               DSP::centsToSeconds(state.modulated(Entity::Generator::Index::delayModulatorLFO)));
+  /**
+   There are two kinds of LFOs in the SF2 universe:
+   - modulator -- affects the modulation of the signal
+   - vibrato -- provides a slight pitch change of a note
+   */
+  enum struct Kind {
+    modulator = 1,
+    vibrato = 2
+  };
+
+  static constexpr const char* logTag(Kind kind) {
+    switch (kind) {
+      case Kind::modulator: return "LFO<Mod>";
+      case Kind::vibrato: return "LFO<Vib>";
+      default: throw "invalid Kind";
+    }
   }
 
-  static LFO forVibrato(Voice::State::State& state) noexcept {
-    return LFO(state.sampleRate(),
-               DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyVibratoLFO)),
-               DSP::centsToSeconds(state.modulated(Entity::Generator::Index::delayVibratoLFO)));
+  /**
+   Construct new LFO. It will have no frequency so it will never return a non-zero value.
+
+   @param sampleRate the sample rate being used
+   @param kind the kind of LFO
+   */
+  LFO(Float sampleRate, Kind kind) : kind_{kind}, log_{os_log_create("SF2Lib", logTag(kind))}
+  {
+    configure(sampleRate, 0.0, -12'000.0);
   }
 
-  LFO() = default;
+  /**
+   Construct new LFO.
+
+   @param sampleRate the sample rate being used
+   @param kind the kind of LFO
+   @param frequency the frequency of the LFO in cycles per second (Hz)
+   @param delay the number of seconds to delay the start of the LFO
+   */
+  LFO(Float sampleRate, Kind kind, Float frequency, Float delay)
+  : kind_{kind}, log_{os_log_create("SF2Lib", logTag(kind))}
+  {
+    configure(sampleRate, frequency, delay);
+  }
 
   /**
    Restart from a known zero state.
@@ -40,6 +69,30 @@ public:
   void reset() noexcept {
     counter_ = 0.0;
     if (increment_ < 0) increment_ = -increment_;
+  }
+
+  /**
+   Configure the LFO using values from a voice State.
+
+   @param state the collection of SF2 generators to use for the frequency and delay parameters.
+   */
+  void configure(Voice::State::State& state) noexcept {
+    switch (kind_) {
+      case Kind::modulator:
+        configure(state.sampleRate(),
+                  DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyModulatorLFO)),
+                  DSP::centsToSeconds(state.modulated(Entity::Generator::Index::delayModulatorLFO)));
+        break;
+
+      case Kind::vibrato:
+        configure(state.sampleRate(),
+                  DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyVibratoLFO)),
+                  DSP::centsToSeconds(state.modulated(Entity::Generator::Index::delayVibratoLFO)));
+        break;
+
+      default:
+        throw "unknown kind";
+    }
   }
 
   /**
@@ -79,20 +132,18 @@ public:
 
 private:
 
-  /**
-   Create a new instance.
-   */
-  LFO(Float sampleRate, Float frequency, Float delay) noexcept :
-  sampleRate_{sampleRate}, frequency_{frequency}, delaySampleCount_{size_t(sampleRate_ * delay)},
-  increment_{frequency / sampleRate * 4.0f} {}
+  void configure(Float sampleRate, Float frequency, Float delay) {
+    delaySampleCount_ = size_t(sampleRate * delay);
+    increment_ = frequency / sampleRate * 4.0f;
+  }
+
+  Kind kind_;
+  Float counter_{0.0};
+  Float increment_{0.0};
+  size_t delaySampleCount_{0};
+  os_log_t log_;
 
   friend class LFOTestInjector;
-  
-  Float sampleRate_;
-  Float frequency_;
-  Float counter_{0.0};
-  Float increment_;
-  size_t delaySampleCount_;
 };
 
 } // namespace SF2::Render

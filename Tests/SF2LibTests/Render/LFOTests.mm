@@ -11,7 +11,7 @@ using namespace SF2::Render;
 namespace SF2::Render {
 struct LFOTestInjector {
   static LFO make(Float sampleRate, Float frequency, Float delay) {
-    return LFO(sampleRate, frequency, delay);
+    return LFO(sampleRate, LFO::Kind::modulator, frequency, delay);
   }
 };
 }
@@ -33,7 +33,7 @@ struct LFOTestInjector {
 }
 
 - (void)testSamples {
-  auto osc = LFOTestInjector::make(8.0, 1.0, 0.0);
+  auto osc = LFOTestInjector::make(8.0, 1.0, -12'000.0);
   XCTAssertEqualWithAccuracy(osc.value(), 0.0, epsilon);
   XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
   XCTAssertEqualWithAccuracy(osc.value(), 0.5, epsilon);
