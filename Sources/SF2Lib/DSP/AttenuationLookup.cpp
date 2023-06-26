@@ -9,20 +9,15 @@ using namespace DSPHeaders;
 using namespace SF2;
 using namespace SF2::DSP;
 
-static constexpr size_t TableSize = 1441;
+static constexpr size_t TableSize = size_t(MaximumAttenuationCentiBels + 1);
 
 static constexpr Float generator(size_t index) {
+  // Equivalent to pow(10.0, Float(index) / -200.0)
   return ConstMath::exp(Float(index) / -200.0 * ConstMath::Constants<Float>::ln10);
 }
 
 static constexpr auto lookup_ = ConstMath::make_array<Float, TableSize>(generator);
 
-/**
- Convert a value between 0 and 1440 into an attenuation.
-
- @param centibels a value between 0 and 1440
- @returns attenuation
- */
 Float
 SF2::DSP::attenuationLookup(int centibels) noexcept {
   return Float(lookup_[static_cast<size_t>(std::clamp<int>(centibels, 0, TableSize - 1))]);

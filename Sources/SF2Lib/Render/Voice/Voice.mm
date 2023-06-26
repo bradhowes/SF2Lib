@@ -19,8 +19,8 @@ state_{sampleRate, channelState},
 loopingMode_{LoopingMode::none},
 pitch_{state_},
 sampleGenerator_{state_, interpolator},
-gainEnvelope_{sampleRate},
-modulatorEnvelope_{sampleRate},
+gainEnvelope_{sampleRate, Envelope::Generator::Kind::volume},
+modulatorEnvelope_{sampleRate, Envelope::Generator::Kind::modulation},
 modulatorLFO_{sampleRate, LFO::Kind::modulator},
 vibratoLFO_{sampleRate, LFO::Kind::vibrato},
 filter_{sampleRate},
@@ -45,8 +45,8 @@ Voice::start(const State::Config& config, const NRPN& nrpn) noexcept
 
   pitch_.configure(sampleHeader);
   sampleGenerator_.configure(config.sampleSource());
-  gainEnvelope_.configureVolumeEnvelope(state_);
-  modulatorEnvelope_.configureModulationEnvelope(state_);
+  gainEnvelope_.configure(state_);
+  modulatorEnvelope_.configure(state_);
   modulatorLFO_.configure(state_);
   vibratoLFO_.configure(state_);
   filter_.reset();

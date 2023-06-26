@@ -41,67 +41,94 @@ class Generator;
 class Stage
 {
 public:
-  inline static constexpr Float minimumCurvature = 1.0e-7;
-  inline static constexpr Float maximumCurvature = 10.0;
-
   Stage() = default;
 
   /**
    Generate a configuration that will emit a constant value for a fixed or indefinite time.
+
+   @param durationInSamples number of samples to report out the constant value.
+   @param value the constant value to use
    */
   void setConstant(int durationInSamples, Float value) noexcept {
-    initial_ = value;
-    alpha_ = 1.0;
-    beta_ = 0.0;
+    assert(durationInSamples >= 0 && value >= 0.0 and value <= 1.0);
     durationInSamples_ = durationInSamples;
+    initial_ = value;
+    increment_ = 0.0;
   }
 
   /**
    Generate a configuration for the delay stage.
+
+   @param durationInSamples number of samples to spend in this stage
    */
   void setDelay(int durationInSamples) noexcept { setConstant(durationInSamples, 0.0); }
 
   /**
-   Generate a configuration for the attack stage.
+   Generate a configuration for the attack stage. The spec implies that this is a transition from -100dB to 0dB
+   attenuation. Here, it is a transition of 0.0 to 1.0. However, the Generator will square the resulting value for
+   the attack stage which will result in an exponential curve for the attack.
+
+   @param durationInSamples number of samples to spend in this stage
    */
-  void setAttack(int durationInSamples, Float curvature) noexcept {
-    curvature = clampedCurvature(curvature);
-    initial_ = 0.0;
-    alpha_ = calculateAlphaCoefficient(durationInSamples, curvature);
-    beta_ = (1.0 + curvature) * (1.0 - alpha_);
+  void setAttack(int durationInSamples) noexcept {
+    assert(durationInSamples >= 0);
     durationInSamples_ = durationInSamples;
+    initial_ = 0.0;
+    increment_ = calcIncrement(0.0, 1.0, durationInSamples);
+  }
+
+  inline static Float calcIncrement(Float start, Float end, int durationInSamples) noexcept {
+    return durationInSamples ? ((end - start) / Float(durationInSamples)) : 0.0;
+  }
+
+  inline static int calcDuration(Float start, Float end, Float increment) noexcept {
+    return increment != 0.0 ? static_cast<int>(std::nearbyint((end - start) / increment)) : 0;
   }
 
   /**
-   Generate a configuration for the delay stage.
+   Generate a configuration for the hold stage. This "holds" the envelope at a 1.0 value for a given number of samples
+   before entering the decay stage.
+
+   @param durationInSamples number of samples to spend in this stage
    */
   void setHold(int durationInSamples) noexcept { setConstant(durationInSamples, 1.0); }
 
   /**
-   Generate a configuration for the decay stage.
+   Generate a configuration for the decay stage. The spec says that this is a 100% change in the volume envelope, going
+   from 0 to -100dB attenuation if the sustain level is set to 0. Thus if sustainLevel (0.0-1.0) is non-zero,
+   calculate the actual number of samples to spend in the stage to reach the given sustain level.
+
+   @param durationInSamples number of samples to spend in this stage
+   @param sustainLevel the sustain level to descend to from 1.0 peak.
    */
-  void setDecay(int durationInSamples, Float curvature, Float sustainLevel) noexcept {
-    curvature = clampedCurvature(curvature);
+  void setDecay(int durationInSamples, Float sustainLevel) noexcept {
+    assert(durationInSamples >= 0 && sustainLevel >= 0.0 && sustainLevel <= 1.0);
     initial_ = 1.0;
-    alpha_ = calculateAlphaCoefficient(durationInSamples, curvature);
-    beta_ = (sustainLevel - curvature) * (1.0 - alpha_);
-    durationInSamples_ = durationInSamples;
+    increment_ = calcIncrement(1.0, sustainLevel, durationInSamples);
+    durationInSamples_ = calcDuration(1.0, sustainLevel, increment_);
   }
 
   /**
-   Generate a configuration for the sustain stage.
+   Generate a configuration for the sustain stage. This is the envelope level to report out while the envelope gate is
+   true (MIDI key is down).
+
+   @param level the envelope value to report out during while the gate is active
    */
   void setSustain(Float level) noexcept { setConstant(std::numeric_limits<int>::max(), level); }
 
   /**
-   Generate a configuration for the release stage.
+   Generate a configuration for the release stage. The spec says that this is a 100% change in the volume envelope,
+   going from 0 to -100dB attenuation if the sustain level is set to 0. Thus if sustainLevel (0.0-1.0) is non-zero,
+   calculate the actual number of samples to spend in the stage to reach 0.0 envelope.
+
+   @param durationInSamples number of samples to spend in this stage
+   @param sustainLevel the sustain level to descend from
    */
-  void setRelease(int durationInSamples, Float curvature, Float sustainLevel) noexcept {
-    curvature = clampedCurvature(curvature);
+  void setRelease(int durationInSamples, Float sustainLevel) noexcept {
+    assert(durationInSamples >= 0 && sustainLevel >= 0.0 && sustainLevel <= 1.0);
     initial_ = sustainLevel;
-    alpha_ = calculateAlphaCoefficient(durationInSamples, curvature);
-    beta_ = (0.0 - curvature) * (1.0 - alpha_);
-    durationInSamples_ = durationInSamples;
+    increment_ = calcIncrement(sustainLevel, 0.0, durationInSamples);
+    durationInSamples_ = calcDuration(sustainLevel, 0.0, increment_);
   }
 
   /**
@@ -110,36 +137,20 @@ public:
    @param last last value generated by a stage
    @returns new value
    */
-  Float next(Float last) const noexcept { return std::max(std::min(last * alpha_ + beta_, 1.0), 0.0); }
+  Float next(Float last) const noexcept { return std::clamp(last + increment_, 0.0, 1.0); }
 
   /// @returns initial envelope value for the stage
   Float initial() const noexcept { return initial_; }
 
-  /// @returns the alpha curve parameter
-  Float alpha() const noexcept { return alpha_; }
-
-  /// @returns the beta curve parameter
-  Float beta() const noexcept { return beta_; }
-
-  /// @returns the duration of the stage in seconds
+  /// @returns the duration of the stage in samples
   int durationInSamples() const noexcept { return durationInSamples_; }
 
 private:
 
-  static Float clampedCurvature(Float curvature) noexcept {
-    return std::clamp(curvature, minimumCurvature, maximumCurvature);
-  }
-
-  static Float calculateAlphaCoefficient(int sampleCount, Float curvature) noexcept {
-    curvature = clampedCurvature(curvature);
-    return std::exp(-std::log((1.0 + curvature) / curvature) / sampleCount);
-  }
-
   // friend class Generator;
 
   Float initial_{0.0};
-  Float alpha_{0.0};
-  Float beta_{0.0};
+  Float increment_{0.0};
   int durationInSamples_{0};
 };
 

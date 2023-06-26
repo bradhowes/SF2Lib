@@ -10,13 +10,13 @@ using namespace SF2;
 using namespace SF2::DSP;
 
 /**
- Convert cents [0-1200) into frequency multiplier. This is used by the centsToFrequency() function to perform a fast
+ Convert cents [0-1199) into frequency multiplier. This is used by the centsToFrequency() function to perform a fast
  conversion between cents and frequency.
  */
-static constexpr int MaxCentsValue = 1200;
-static constexpr size_t TableSize = MaxCentsValue;
+static constexpr size_t TableSize = size_t(CentsPerOctave);
 
 static constexpr Float generator(size_t index) {
+  // 6.875 x 2^(index / 1200) ==> 6.875 x e^(index / 1200 * ln(2))
   return 6.875 * ConstMath::exp(index / 1200.0 * ConstMath::Constants<Float>::ln2);
 }
 
@@ -31,5 +31,5 @@ static constexpr auto lookup_ = ConstMath::make_array<Float, TableSize>(generato
  */
 Float
 SF2::DSP::centsPartialLookup(int partial) noexcept {
-  return lookup_[static_cast<size_t>(std::clamp(partial, 0, MaxCentsValue - 1))];
+  return lookup_[static_cast<size_t>(std::clamp<size_t>(size_t(partial), 0, TableSize - 1))];
 }
