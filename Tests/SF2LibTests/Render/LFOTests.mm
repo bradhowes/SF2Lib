@@ -33,7 +33,7 @@ struct LFOTestInjector {
 }
 
 - (void)testSamples {
-  auto osc = LFOTestInjector::make(8.0, 1.0, -12'000.0);
+  auto osc = LFOTestInjector::make(8.0, 1.0, 0.0);
   XCTAssertEqualWithAccuracy(osc.value(), 0.0, epsilon);
   XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
   XCTAssertEqualWithAccuracy(osc.value(), 0.5, epsilon);
