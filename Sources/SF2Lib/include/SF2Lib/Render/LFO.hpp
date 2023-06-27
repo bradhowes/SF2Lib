@@ -114,17 +114,17 @@ public:
   constexpr Float value() const noexcept { return counter_; }
 
   void increment() noexcept {
-    if (delaySampleCount_ > 0) [[unlikely]] {
+    if (delaySampleCount_ > 0) {
       --delaySampleCount_;
       return;
     }
 
     counter_ += increment_;
-    if (counter_ >= 1.0) [[unlikely]] {
+    if (counter_ >= 1.0) {
       increment_ = -increment_;
       counter_ = 2.0f - counter_;
     }
-    else if (counter_ <= -1.0) [[unlikely]] {
+    else if (counter_ <= -1.0) {
       increment_ = -increment_;
       counter_ = -2.0f - counter_;
     }

@@ -83,7 +83,7 @@ private:
       whole_ += wholeIncrement;
       partial_ += partialIncrement;
 
-      if (partial_ >= 1.0) [[unlikely]] {
+      if (partial_ >= 1.0) {
         auto carry = size_t(partial_);
         whole_ += carry;
         partial_ -= carry;

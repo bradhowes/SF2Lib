@@ -71,12 +71,12 @@ inline Float lfoCentsToFrequency(Float value) noexcept {
  @param value value in centibels to convert
  @returns attenuation value
  */
-inline Float centibelsToAttenuation(int value) noexcept {
+inline Float centibelsToAttenuation(Float value) noexcept {
   extern Float attenuationLookup(int centibels) noexcept;
 
   if (value >= MaximumAttenuationCentiBels) return 0.0;
   if (value <= 0.0) return 1.0;
-  return attenuationLookup(value);
+  return attenuationLookup(int(nearbyint(value)));
 }
 
 inline Float centibelsToAttenuationInterpolated(Float centibels) noexcept {
