@@ -120,7 +120,11 @@ public:
    @param gen the index of the generator
    @returns configured value of the generator
    */
-  int unmodulated(Index gen) const noexcept { return Definition::definition(gen).clamp(gens_[gen].unmodulated()); }
+  int unmodulated(Index gen) const noexcept {
+    auto raw = gens_[gen].unmodulated();
+    auto clamped = Definition::definition(gen).clamp(raw);
+    return clamped;
+  }
 
   /**
    Obtain a generator value that includes the changes added by attached modulators. Value is clamped to allowed range in

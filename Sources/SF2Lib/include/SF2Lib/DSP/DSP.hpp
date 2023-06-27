@@ -14,6 +14,9 @@
 /// are in the DSPHeaders::DSP namespace of AUv3Support package.
 namespace SF2::DSP {
 
+/// Maximum absolute cents that will be used for frequencies. This corresponds to 20 kHz.
+inline constexpr Float MaximumAbsoluteCents = 13508.0f;
+
 /// Number of cents in an octave
 inline constexpr Float CentsPerOctave = 1200.0f;
 
@@ -21,16 +24,11 @@ inline constexpr Float CentsPerOctave = 1200.0f;
 inline constexpr Float NoiseFloor = 2.0E-7f;
 
 /// Maximum attenuation defined by SF2 spec.
-inline constexpr Float MaximumAttenuationCentiBels = 960.0f;
+inline constexpr Float MaximumAttenuationCentiBels = 1440.0f;
 
 /// Lowest note frequency that we can generate. This corresponds to C-1 in MIDI nomenclature
 /// (440 * pow(2.0, (N - 69) / 12))
 inline constexpr Float LowestNoteFrequency = Float(8.17579891564370697665253828745335);
-
-/////
-//inline constexpr Float clamp(Float value, Float lowerBound, Float upperBound) {
-//  return std::clamp(value, lowerBound, upperBound);
-//}
 
 /**
  Convert cents value into a power of 2. There are 1200 cents per power of 2.
@@ -41,9 +39,10 @@ inline constexpr Float LowestNoteFrequency = Float(8.175798915643706976652538287
 inline Float centsToPower2(Float value) noexcept { return std::exp2(value / CentsPerOctave); }
 
 /**
- Convert cents value into seconds, where There are 1200 cents per power of 2.
+ Convert cents value into seconds, where there are 1200 cents per power of 2.
 
- @param value the number to convert
+ @param value the number to convert in time cents
+ @returns duration in seconds
  */
 inline Float centsToSeconds(Float value) noexcept { return centsToPower2(value); }
 
@@ -58,13 +57,33 @@ inline Float lfoCentsToFrequency(Float value) noexcept {
 }
 
 /**
- Convert centibels [0-1440] into an attenuation value from [1.0-0.0]. Zero indicates no attenuation (1.0), 60 is 0.5,
- and every 200 is a reduction by 10 (0.1, 0.001, etc.)
+ Convert centibels [0-1440] into an attenuation value from [1.0-0.0].
 
- @param centibels value to convert
- @returns gain value
+ - Zero indicates no attenuation (1.0)
+ -  20 centibels (-2 dB) gives 0.1 attenuation (10% reduction of original signal)
+ -  60 centibels (-6 dB) gives 0.5 attenuation (50% reduction of original signal)
+ - 120 centibels (-12 dB) gives 0.25 attenuation
+
+ and every 200 is a reduction by a power of 10 (200 = 0.1, 400 = 0.001, etc.)
+
+ NOTE: attenuation greater than 96 dB is in the noise floor for 16-bit samples.
+
+ @param value value in centibels to convert
+ @returns attenuation value
  */
-extern Float attenuationLookup(int centibels) noexcept;
+inline Float centibelsToAttenuation(int value) noexcept {
+  extern Float attenuationLookup(int centibels) noexcept;
+
+  if (value >= MaximumAttenuationCentiBels) return 0.0;
+  if (value <= 0.0) return 1.0;
+  return attenuationLookup(value);
+}
+
+inline Float centibelsToAttenuationInterpolated(Float centibels) noexcept {
+  auto index = int(centibels);
+  auto partial = centibels - index;
+  return DSPHeaders::DSP::Interpolation::linear(partial, centibelsToAttenuation(index), centibelsToAttenuation(index + 1));
+}
 
 /**
  Convert centiBels to resonance (Q) value for use in low-pass filter calculations. The input is clamped to the range
@@ -78,7 +97,7 @@ inline Float centibelsToResonance(Float centibels) noexcept {
 
 /**
  Restrict lowpass filter cutoff value to be between 1500 and 13500, inclusive.
- 
+
  @param value cutoff value
  @returns clamped cutoff value
  */
@@ -108,37 +127,21 @@ extern void panLookup(Float pan, Float& left, Float& right) noexcept;
 extern Float centsPartialLookup(int partial) noexcept;
 
 /**
- Quickly convert cent value into a frequency using a table lookup. These calculations are taken from the Fluid Synth
- fluid_conv.c file, in particular the fluid_ct2hz_real function. Uses CentPartialLookup above to convert values from
- 0 - 1199 into the proper multiplier.
+ Quickly convert absolute cents value into a frequency. Valid inputs are 0 - 13,508 which translates to
+ 6.875 Hz - 28 kHz (20,004.35). Higher values could be supported but for no real reason in SF2Lib.
+
+ @param value the value in cents to convert
+ @returns frequency of the given cents value
  */
 inline Float centsToFrequency(Float value) noexcept {
-  if (value < 0.0f) [[unlikely]] return 1.0f;
-
-  // This seems to be the fastest way to do the following. Curiously, the operation `cents % 1200` is faster than doing
-  // `cents - whole * 1200` in optimized build.
+  if (value < 0.0f) return 1.0f;
+  if (value > MaximumAbsoluteCents) value = MaximumAbsoluteCents;
   auto cents = int(value + 300);
   auto whole = cents / 1200;
   auto partial = cents % 1200;
+  // Limit of 13508 means that `whole` will not be larger than 11, so this should be safe on all machines that we will
+  // run on.
   return (1u << whole) * centsPartialLookup(partial);
-}
-
-/**
- Convert centiBels to attenuation, where 60 corresponds to a drop of 6dB or 0.5 reduction of audio samples. Note that
- for raw generator values in an SF2 file, better to use the attenuationLookup(int) method above. However, this
- method uses it as well, though with an additional step of performing linear interpolation to arrive at the
- final value.
-
- @param centibels the value to convert
- @returns attenuation amount
- */
-inline Float centibelsToAttenuation(Float centibels) noexcept {
-  centibels = std::clamp(centibels, 0.0, 1440.0);
-  auto index1 = int(centibels);
-  auto partial = centibels - index1;
-  if (partial < std::numeric_limits<Float>::min()) return attenuationLookup(index1);
-  auto index2 = std::min<int>(index1 + 1, 1440);
-  return DSPHeaders::DSP::Interpolation::linear(partial, attenuationLookup(index1), attenuationLookup(index2));
 }
 
 } // SF2::DSP namespaces

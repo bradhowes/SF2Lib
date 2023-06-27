@@ -19,8 +19,8 @@ state_{sampleRate, channelState},
 loopingMode_{LoopingMode::none},
 pitch_{state_},
 sampleGenerator_{state_, interpolator},
-gainEnvelope_{sampleRate, Envelope::Generator::Kind::gain},
-modulatorEnvelope_{sampleRate, Envelope::Generator::Kind::modulator},
+gainEnvelope_{sampleRate, Envelope::Generator::Kind::volume},
+modulatorEnvelope_{sampleRate, Envelope::Generator::Kind::modulation},
 modulatorLFO_{sampleRate, LFO::Kind::modulator},
 vibratoLFO_{sampleRate, LFO::Kind::vibrato},
 filter_{sampleRate},
@@ -38,7 +38,6 @@ Voice::start(const State::Config& config, const NRPN& nrpn) noexcept
   assert(config.sampleSource().isLoaded());
 
   // All components of the Voice must properly reset their state prior to rendering a note. Many attributes are created
-
   state_.prepareForVoice(config, nrpn);
   loopingMode_ = loopingMode();
 

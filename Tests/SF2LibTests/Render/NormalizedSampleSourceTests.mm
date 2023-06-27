@@ -68,9 +68,9 @@ static SF2::Float epsilon = 1e-6;
   pitch.configure(source.header());
   auto inc = pitch.samplePhaseIncrement(0.0, 0.0, 0.0);
   XCTAssertEqualWithAccuracy(0.30517578125, gen.generate(inc, true), 0.0000001);
-  XCTAssertEqualWithAccuracy(-0.6103515625, gen.generate(inc, true), epsilon);
-  XCTAssertEqualWithAccuracy(0.91552734375, gen.generate(inc, true), epsilon);
-  XCTAssertEqualWithAccuracy(0.6103515625, gen.generate(inc, true), epsilon);
+  XCTAssertEqualWithAccuracy(0.288164037013, gen.generate(inc, true), epsilon);
+  XCTAssertEqualWithAccuracy(0.271152292776, gen.generate(inc, true), epsilon);
+  XCTAssertEqualWithAccuracy(0.254140548539, gen.generate(inc, true), epsilon);
 }
 
 - (void)testLoadSamplesPerformance0 {

@@ -75,11 +75,11 @@ using namespace SF2::Render;
         case 1:
           std::cout << std::setprecision(12);
           std::cout << index << ' ' << samples[index] << '\n';
-          XCTAssertEqualWithAccuracy(-0.184555262327, samples[index], epsilon); break;
+          XCTAssertEqualWithAccuracy(-0.184589236975, samples[index], epsilon); break;
         case 2:
           std::cout << std::setprecision(12);
           std::cout << index << ' ' << samples[index] << '\n';
-          XCTAssertEqualWithAccuracy(-0.165874913335, samples[index], epsilon); break;
+          XCTAssertEqualWithAccuracy(-0.169595628977, samples[index], epsilon); break;
       }
     }
   }
@@ -129,8 +129,8 @@ using namespace SF2::Render;
     for (auto index = 0; index < samples.size(); ++index) {
       switch (index % 3) {
         case 0: XCTAssertEqualWithAccuracy( 0.0000000000, samples[index], epsilon); break;
-        case 1: XCTAssertEqualWithAccuracy( 0.0468054898083, samples[index], epsilon); break;
-        case 2: XCTAssertEqualWithAccuracy( 0.0177693832666, samples[index], epsilon); break;
+        case 1: XCTAssertEqualWithAccuracy( 0.0468283109367, samples[index], epsilon); break;
+        case 2: XCTAssertEqualWithAccuracy( 0.037543527782, samples[index], epsilon); break;
       }
     }
   }
@@ -180,14 +180,14 @@ using namespace SF2::Render;
   }
   else if constexpr (std::is_same_v<Float, double>) {
     XCTAssertEqualWithAccuracy( 0.0, samples[0], epsilon);
-    XCTAssertEqualWithAccuracy( 0.113824002445, samples[1], epsilon);
-    XCTAssertEqualWithAccuracy( 0.133370578289, samples[2], epsilon);
+    XCTAssertEqualWithAccuracy( 0.113844953477, samples[1], epsilon);
+    XCTAssertEqualWithAccuracy( 0.147548079491, samples[2], epsilon);
     XCTAssertEqualWithAccuracy( 0.0, samples[3], epsilon);
-    XCTAssertEqualWithAccuracy( 0.0180801860988, samples[4], epsilon);
-    XCTAssertEqualWithAccuracy( 0.0763034075499, samples[5], epsilon);
+    XCTAssertEqualWithAccuracy( 0.0180835127831, samples[4], epsilon);
+    XCTAssertEqualWithAccuracy( 0.0844145715237, samples[5], epsilon);
     XCTAssertEqualWithAccuracy( 0.0, samples[6], epsilon);
-    XCTAssertEqualWithAccuracy( 0.0206023547798, samples[7], epsilon);
-    XCTAssertEqualWithAccuracy( 0.0248804222792, samples[8], epsilon);
+    XCTAssertEqualWithAccuracy( 0.0206061471254, samples[7], epsilon);
+    XCTAssertEqualWithAccuracy( 0.0275252498686, samples[8], epsilon);
   }
 
   [self playSamples: buffer count: sampleCount];
@@ -217,8 +217,8 @@ using namespace SF2::Render;
   std::cout << 3 << ' ' << samples[sampleCount - 1] << '\n';
 
   XCTAssertEqualWithAccuracy(0.0, samples[0], epsilon);
-  XCTAssertEqualWithAccuracy(0.214962333441, samples[keyReleaseCount], epsilon);
-  XCTAssertEqualWithAccuracy(0.187625363469, samples[keyReleaseCount + 1], epsilon);
+  XCTAssertEqualWithAccuracy(0.192997559905, samples[keyReleaseCount], epsilon);
+  XCTAssertEqualWithAccuracy(0.171422511339, samples[keyReleaseCount + 1], epsilon);
   XCTAssertEqualWithAccuracy(0.0, samples[sampleCount - 1], epsilon);
 
   [self playSamples: buffer count: sampleCount];
@@ -271,14 +271,14 @@ using namespace SF2::Render;
   }
   else if constexpr (std::is_same_v<Float, double>) {
     XCTAssertEqualWithAccuracy( 0.0, samples[0], epsilon);
-    XCTAssertEqualWithAccuracy( -0.049783244729, samples[1], epsilon);
-    XCTAssertEqualWithAccuracy( -2.47873504122e-06, samples[2], epsilon);
+    XCTAssertEqualWithAccuracy(-0.022621685639, samples[1], epsilon);
+    XCTAssertEqualWithAccuracy( 1.60971831065e-05, samples[2], epsilon);
     XCTAssertEqualWithAccuracy( 0.0, samples[3], epsilon);
-    XCTAssertEqualWithAccuracy( -0.0787686631083, samples[4], epsilon);
-    XCTAssertEqualWithAccuracy( -1.47762625602e-06, samples[5], epsilon);
+    XCTAssertEqualWithAccuracy(-0.0469838045537, samples[4], epsilon);
+    XCTAssertEqualWithAccuracy( 5.33150523552e-05, samples[5], epsilon);
     XCTAssertEqualWithAccuracy( 0.0, samples[6], epsilon);
-    XCTAssertEqualWithAccuracy( -0.0634895786643, samples[7], epsilon);
-    XCTAssertEqualWithAccuracy( -2.97962333207e-06, samples[8], epsilon);
+    XCTAssertEqualWithAccuracy(-0.176755294204, samples[7], epsilon);
+    XCTAssertEqualWithAccuracy( 0.000122439145343, samples[8], epsilon);
   }
 
   [self playSamples: buffer count: sampleCount];
