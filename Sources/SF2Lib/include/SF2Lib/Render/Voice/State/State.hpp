@@ -12,9 +12,9 @@
 
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/Entity/Generator/Generator.hpp"
-#include "SF2Lib/MIDI/NRPN.hpp"
+#include "SF2Lib/Entity/Generator/Index.hpp"
+#include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Voice/State/GenValue.hpp"
-#include "SF2Lib/Render/Voice/State/GenValueCollection.hpp"
 #include "SF2Lib/Render/Voice/State/Modulator.hpp"
 
 namespace SF2::Render::Voice::State {
@@ -45,7 +45,7 @@ public:
    @param channelState the MIDI channel that is in control
    */
   State(Float sampleRate, const MIDI::ChannelState& channelState) noexcept :
-  sampleRate_{sampleRate}, channelState_{channelState}, eventKey_{}, eventVelocity_{}
+  sampleRate_{sampleRate}, eventKey_{}, eventVelocity_{}, channelState_{channelState}
   {
     setDefaults();
   }
@@ -57,7 +57,7 @@ public:
    @param velocity the MIDI velocity to use
    */
   State(Float sampleRate, const MIDI::ChannelState& channelState, int key, int velocity = 64) noexcept :
-  sampleRate_{sampleRate}, channelState_{channelState}, eventKey_{key}, eventVelocity_{velocity}
+  sampleRate_{sampleRate}, eventKey_{key}, eventVelocity_{velocity}, channelState_{channelState}
   {
     setDefaults();
   }
@@ -73,9 +73,8 @@ public:
    Configure the state to be used by a voice for sample rendering.
 
    @param config the preset / instrument configuration to apply to the state
-   @param nrpn the MIDI NRPN controller values to apply to the state
    */
-  void prepareForVoice(const Config& config, const MIDI::NRPN& nrpn) noexcept;
+  void prepareForVoice(const Config& config) noexcept;
 
   /**
    Set a generator value. Should only be called with a value from an InstrumentZone. It can be set twice, once by a
@@ -85,7 +84,7 @@ public:
    @param gen the generator to set
    @param value the value to use
    */
-  void setValue(Index gen, int value) noexcept { gens_[gen].value = value; }
+  void setValue(Index gen, int value) noexcept { gens_[gen].setValue(value); }
 
   /**
    Set a generator's adjustment value. Should only be called with a value from a PresetZone. It can be invoked twice,
@@ -95,15 +94,7 @@ public:
    @param gen the generator to set
    @param value the value to use
    */
-  void setAdjustment(Index gen, int value) noexcept { gens_[gen].adjustment = value; }
-
-  /**
-   Set a generator's NRPN adjustment value. Should only be called from NRPN::apply method.
-
-   @param gen the generator to modify
-   @param value the value to set
-   */
-  void setNRPNAdjustment(Index gen, Float value) noexcept { gens_[gen].nrpn = value; }
+  void setAdjustment(Index gen, int value) noexcept { gens_[gen].setAdjustment(value); }
 
   /**
    Install a modulator.
@@ -114,26 +105,28 @@ public:
 
   /**
    Obtain a generator value without any adjustments from modulators. This is the sum of values set by zone generator
-   definitions and so it is expressed as an integer. Most of the time, the `modulated` method is what is desired in
-   order to account for any MIDI controller values.
+   definitions and so it is expressed as an integer.
+
+   NOTE: no range checking is done here.
 
    @param gen the index of the generator
    @returns configured value of the generator
    */
-  int unmodulated(Index gen) const noexcept {
-    auto raw = gens_[gen].unmodulated();
-    auto clamped = Definition::definition(gen).clamp(raw);
-    return clamped;
-  }
+  int unmodulated(Index gen) const noexcept { return gens_[gen].value(); }
 
   /**
-   Obtain a generator value that includes the changes added by attached modulators. Value is clamped to allowed range in
-   spec.
+   Obtain a generator value that includes the changes added by attached modulators.
+
+   NOTE: no range checking is done here.
 
    @param gen the index of the generator
    @returns current value of the generator
    */
-  Float modulated(Index gen) const noexcept { return Definition::definition(gen).clamp(gens_[gen].modulated()); }
+  int modulated(Index gen) const noexcept {
+    auto value = gens_[gen].value();
+    auto modulation = channelState_.nrpnValue(gen);
+    return value + modulation;
+  }
 
   /// @returns MIDI key that started a voice to begin emitting samples. For DSP this is *not* what is desired. See
   /// `key` method below.
@@ -162,13 +155,13 @@ private:
   void setDefaults() noexcept;
   void linkModulators() noexcept;
 
-  const MIDI::ChannelState& channelState_;
-  GenValueCollection gens_{};
+  Entity::Generator::GeneratorValueArray<GenValue> gens_{};
   std::vector<Modulator> modulators_{};
 
   Float sampleRate_;
   int eventKey_;
   int eventVelocity_;
+  const MIDI::ChannelState& channelState_;
 };
 
 } // namespace SF2::Render

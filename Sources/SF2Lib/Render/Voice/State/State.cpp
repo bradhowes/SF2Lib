@@ -8,21 +8,12 @@
 using namespace SF2::Render::Voice::State;
 
 void
-State::prepareForVoice(const Config& config, const MIDI::NRPN& nrpn) noexcept
+State::prepareForVoice(const Config& config) noexcept
 {
-  // (1) Initialize to default values
   setDefaults();
-
-  // (2) Set values from preset and instrument zone configurations that matched the MIDI key/velocity combination.
   config.apply(*this);
-
-  // (3) Set values from NRPN channel messages
-  nrpn.apply(*this);
-
   eventKey_ = config.eventKey();
   eventVelocity_ = config.eventVelocity();
-
-  // (4) Now finish configuring the modulators by resolving any links between them.
   Modulator::resolveLinks(modulators_);
 }
 

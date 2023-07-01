@@ -30,15 +30,14 @@ keyDown_{false}
 {}
 
 void
-Voice::start(const State::Config& config, const NRPN& nrpn) noexcept
+Voice::start(const State::Config& config) noexcept
 {
   os_signpost_interval_begin(log_, startSignpost_, "start");
 
   config.sampleSource().load();
   assert(config.sampleSource().isLoaded());
 
-  // All components of the Voice must properly reset their state prior to rendering a note. Many attributes are created
-  state_.prepareForVoice(config, nrpn);
+  state_.prepareForVoice(config);
   loopingMode_ = loopingMode();
 
   const auto& sampleSource{config.sampleSource()};

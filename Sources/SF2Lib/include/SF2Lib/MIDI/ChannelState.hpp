@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include "SF2Lib/Types.hpp"
+#include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/MIDI/MIDI.hpp"
 
 namespace SF2::MIDI {
@@ -18,12 +19,16 @@ namespace SF2::MIDI {
 class ChannelState {
 public:
 
+  inline constexpr static int CCMin = 0;
+  inline constexpr static int CCMax = 127;
+
   /**
    Construct new channel.
    */
   ChannelState() noexcept : continuousControllerValues_{}, notePressureValues_{} {
     continuousControllerValues_.fill(0);
     notePressureValues_.fill(0);
+    nrpnValues_.zero();
   }
 
   /**
@@ -85,10 +90,7 @@ public:
    @param id the controller ID
    @param value the value to set for the controller
    */
-  void setContinuousControllerValue(MIDI::ControlChange id, int value) noexcept {
-    assert(static_cast<int>(id) >= CCMin && static_cast<int>(id) <= CCMax);
-    continuousControllerValues_[static_cast<size_t>(id) - CCMin] = value;
-  }
+  void setContinuousControllerValue(MIDI::ControlChange id, int value) noexcept;
 
   /**
    Get a continuous controller value.
@@ -111,22 +113,28 @@ public:
     return continuousControllerValue(static_cast<int>(id));
   }
 
-private:
-  inline constexpr static int CCMin = 0;
-  inline constexpr static int CCMax = 127;
+  int nrpnValue(Entity::Generator::Index index) const noexcept { return nrpnValues_[index]; }
 
+  bool isActivelyDecoding() const noexcept { return activeDecoding_; }
+
+  size_t nrpnIndex() const noexcept { return nrpnIndex_; }
+
+private:
   using ContinuousControllerValues = std::array<int, CCMax - CCMin + 1>;
   using NotePressureValues = std::array<int, Note::Max + 1>;
 
   ContinuousControllerValues continuousControllerValues_{};
   NotePressureValues notePressureValues_{};
+  Entity::Generator::GeneratorValueArray<int> nrpnValues_{};
 
   int channelPressure_{0};
   int pitchWheelValue_{0};
   int pitchWheelSensitivity_{200};
-
+  size_t nrpnIndex_{0};
+  
   bool sustainActive_{false};
   bool sostenutoActive_{false};
+  bool activeDecoding_{false};
 };
 
 } // namespace SF2::MIDI

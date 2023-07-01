@@ -109,8 +109,8 @@ enum struct ControlChange {
   dataEntryIncrement = 0x60,
   dataEntryDecrement = 0x61,
 
-  nprnLSB = 0x62,
-  nprnMSB = 0x63,
+  nrpnLSB = 0x62,
+  nrpnMSB = 0x63,
   rpnLSB = 0x64,
   rpnMSB = 0x65,
 

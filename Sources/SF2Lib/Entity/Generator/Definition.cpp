@@ -23,7 +23,6 @@ Definition::dump(const Amount& amount) const noexcept
     case ValueKind::signedFrequencyCents: std::cout << value << " Hz"; break;
     case ValueKind::signedTimeCents: std::cout << value << " seconds"; break;
     case ValueKind::signedSemitones: std::cout << value << " notes"; break;
-      
     case ValueKind::range: std::cout << '[' << amount.low() << '-' << amount.high() << ']'; break;
   }
   
@@ -34,80 +33,84 @@ Definition::dump(const Amount& amount) const noexcept
 #define N(A) (Index::A != Index::numValues) ? (# A) : nullptr
 
 inline constexpr Definition::ValueRange unusedRange{0, 0};
-inline constexpr Definition::ValueRange keyRange{0, 127};
+inline constexpr Definition::ValueRange keyRange{0, 127 * 256 + 127};
 inline constexpr Definition::ValueRange neg1KeyRange{-1, 127};
 inline constexpr Definition::ValueRange shortIntRange{-32'768, 32'767};
 inline constexpr Definition::ValueRange ushortIntRange{0, 65'535};
 
-std::array<Definition, Definition::NumDefs> const Definition::definitions_{
-  Definition(N(startAddressOffset), ValueKind::offset, 															    shortIntRange, false, 1),
-  Definition(N(endAddressOffset), ValueKind::offset, 																    shortIntRange, false, 1),
-  Definition(N(startLoopAddressOffset), ValueKind::offset, 													    shortIntRange, false, 1),
-  Definition(N(endLoopAddressOffset), ValueKind::offset, 														    shortIntRange, false, 1),
-  Definition(N(startAddressCoarseOffset), ValueKind::coarseOffset, 									    shortIntRange, false, 1),
+using D = class Definition;
+
+GeneratorValueArray<Definition> const Definition::definitions_{
+  //  Name               Kind                                  Value Range        Preset? NRPN Multiplier
+  //  ------------------ ------------------------------------- ------------------ ------- -------------------
+  D(N(startAddressOffset), ValueKind::offset, 									    shortIntRange, false, NRPNMultiplier::x1),
+  D(N(endAddressOffset), ValueKind::offset, 										    shortIntRange, false, NRPNMultiplier::x1),
+  D(N(startLoopAddressOffset), ValueKind::offset, 							    shortIntRange, false, NRPNMultiplier::x1),
+  D(N(endLoopAddressOffset), ValueKind::offset, 								    shortIntRange, false, NRPNMultiplier::x1),
+  D(N(startAddressCoarseOffset), ValueKind::coarseOffset, 			    shortIntRange, false, NRPNMultiplier::x1),
   // 5
-  Definition(N(modulatorLFOToPitch), ValueKind::signedCents,												{-12'000, 12'000}, true,  2),
-  Definition(N(vibratoLFOToPitch), ValueKind::signedCents, 													{-12'000, 12'000}, true,  2),
-  Definition(N(modulatorEnvelopeToPitch), ValueKind::signedCents, 									{-12'000, 12'000}, true,  2),
-  Definition(N(initialFilterCutoff), ValueKind::signedFrequencyCents, 							{  1'500, 13'500}, true,  2),
-  Definition(N(initialFilterResonance), ValueKind::signedCentsBel, 									{      0,    960}, true,  1),
+  D(N(modulatorLFOToPitch), ValueKind::signedCents,							{-12'000, 12'000}, true,  NRPNMultiplier::x2),
+  D(N(vibratoLFOToPitch), ValueKind::signedCents, 							{-12'000, 12'000}, true,  NRPNMultiplier::x2),
+  D(N(modulatorEnvelopeToPitch), ValueKind::signedCents, 				{-12'000, 12'000}, true,  NRPNMultiplier::x2),
+  D(N(initialFilterCutoff), ValueKind::signedFrequencyCents, 		{  1'500, 13'500}, true,  NRPNMultiplier::x2),
+  D(N(initialFilterResonance), ValueKind::signedCentsBel, 			{      0,    960}, true,  NRPNMultiplier::x1),
   // 10
-  Definition(N(modulatorLFOToFilterCutoff), ValueKind::signedShort, 								{-12'000, 12'000}, true,  2),
-  Definition(N(modulatorEnvelopeToFilterCutoff), ValueKind::signedShort, 						{-12'000, 12'000}, true,  2),
-  Definition(N(endAddressCoarseOffset), ValueKind::coarseOffset, 										    shortIntRange, false, 1),
-  Definition(N(modulatorLFOToVolume), ValueKind::signedCentsBel, 										{   -960,    960}, true,  1),
-  Definition(N(unused1), ValueKind::signedShort, 																		      unusedRange, false, 0),
+  D(N(modulatorLFOToFilterCutoff), ValueKind::signedShort, 			{-12'000, 12'000}, true,  NRPNMultiplier::x2),
+  D(N(modulatorEnvelopeToFilterCutoff), ValueKind::signedShort, {-12'000, 12'000}, true,  NRPNMultiplier::x2),
+  D(N(endAddressCoarseOffset), ValueKind::coarseOffset, 				    shortIntRange, false, NRPNMultiplier::x1),
+  D(N(modulatorLFOToVolume), ValueKind::signedCentsBel, 				{   -960,    960}, true,  NRPNMultiplier::x1),
+  D(N(unused1), ValueKind::signedShort, 												      unusedRange, false, NRPNMultiplier::x1),
   // 15
-  Definition(N(chorusEffectSend), ValueKind::unsignedPercent, 											{      0,  1'000}, true,  1),
-  Definition(N(reverbEffectSend), ValueKind::unsignedPercent, 											{      0,  1'000}, true,  1),
-  Definition(N(pan), ValueKind::signedPercent, 																			{   -500,    500}, true,  1),
-  Definition(N(unused2), ValueKind::unsignedShort, 																	      unusedRange, false, 0),
-  Definition(N(unused3), ValueKind::unsignedShort, 																	      unusedRange, false, 0),
+  D(N(chorusEffectSend), ValueKind::unsignedPercent, 						{      0,  1'000}, true,  NRPNMultiplier::x1),
+  D(N(reverbEffectSend), ValueKind::unsignedPercent, 						{      0,  1'000}, true,  NRPNMultiplier::x1),
+  D(N(pan), ValueKind::signedPercent, 													{   -500,    500}, true,  NRPNMultiplier::x1),
+  D(N(unused2), ValueKind::unsignedShort, 											      unusedRange, false, NRPNMultiplier::x1),
+  D(N(unused3), ValueKind::unsignedShort, 											      unusedRange, false, NRPNMultiplier::x1),
   // 20
-  Definition(N(unused4), ValueKind::unsignedShort, 																	      unusedRange, false, 0),
-  Definition(N(delayModulatorLFO), ValueKind::signedTimeCents, 											{-12'000,  5'000}, true,  2),
-  Definition(N(frequencyModulatorLFO), ValueKind::signedFrequencyCents, 						{-16'000,  4'500}, true,  4),
-  Definition(N(delayVibratoLFO), ValueKind::signedTimeCents, 												{-12'000,  5'000}, true,  2),
-  Definition(N(frequencyVibratoLFO), ValueKind::signedFrequencyCents, 							{-16'000,  4'500}, true,  4),
+  D(N(unused4), ValueKind::unsignedShort, 												    unusedRange, false, NRPNMultiplier::x1),
+  D(N(delayModulatorLFO), ValueKind::signedTimeCents, 					{-12'000,  5'000}, true,  NRPNMultiplier::x2),
+  D(N(frequencyModulatorLFO), ValueKind::signedFrequencyCents, 	{-16'000,  4'500}, true,  NRPNMultiplier::x4),
+  D(N(delayVibratoLFO), ValueKind::signedTimeCents, 						{-12'000,  5'000}, true,  NRPNMultiplier::x2),
+  D(N(frequencyVibratoLFO), ValueKind::signedFrequencyCents, 		{-16'000,  4'500}, true,  NRPNMultiplier::x4),
   // 25
-  Definition(N(delayModulatorEnvelope), ValueKind::signedTimeCents, 								{-12'000,  5'000}, true,  2),
-  Definition(N(attackModulatorEnvelope), ValueKind::signedTimeCents, 								{-12'000,  8'000}, true,  2),
-  Definition(N(holdModulatorEnvelope), ValueKind::signedTimeCents, 									{-12'000,  5'000}, true,  2),
-  Definition(N(decayModulatorEnvelope), ValueKind::signedTimeCents, 								{-12'000,  8'000}, true,  2),
-  Definition(N(sustainModulatorEnvelope), ValueKind::unsignedPercent, 							{      0,  1'000}, true,  1),
+  D(N(delayModulatorEnvelope), ValueKind::signedTimeCents, 			{-12'000,  5'000}, true,  NRPNMultiplier::x2),
+  D(N(attackModulatorEnvelope), ValueKind::signedTimeCents, 		{-12'000,  8'000}, true,  NRPNMultiplier::x2),
+  D(N(holdModulatorEnvelope), ValueKind::signedTimeCents, 			{-12'000,  5'000}, true,  NRPNMultiplier::x2),
+  D(N(decayModulatorEnvelope), ValueKind::signedTimeCents, 			{-12'000,  8'000}, true,  NRPNMultiplier::x2),
+  D(N(sustainModulatorEnvelope), ValueKind::unsignedPercent, 		{      0,  1'000}, true,  NRPNMultiplier::x1),
   // 30
-  Definition(N(releaseModulatorEnvelope), ValueKind::signedTimeCents, 							{-12'000,  8'000}, true,  2),
-  Definition(N(midiKeyToModulatorEnvelopeHold), ValueKind::signedShort, 						{ -1'200,  1'200}, true,  1),
-  Definition(N(midiKeyToModulatorEnvelopeDecay), ValueKind::signedShort, 						{ -1'200,  1'200}, true,  1),
-  Definition(N(delayVolumeEnvelope), ValueKind::signedTimeCents, 										{-12'000,  5'000}, true,  2),
-  Definition(N(attackVolumeEnvelope), ValueKind::signedTimeCents, 									{-12'000,  8'000}, true,  2),
+  D(N(releaseModulatorEnvelope), ValueKind::signedTimeCents, 		{-12'000,  8'000}, true,  NRPNMultiplier::x2),
+  D(N(midiKeyToModulatorEnvelopeHold), ValueKind::signedShort, 	{ -1'200,  1'200}, true,  NRPNMultiplier::x1),
+  D(N(midiKeyToModulatorEnvelopeDecay), ValueKind::signedShort, { -1'200,  1'200}, true,  NRPNMultiplier::x1),
+  D(N(delayVolumeEnvelope), ValueKind::signedTimeCents, 				{-12'000,  5'000}, true,  NRPNMultiplier::x2),
+  D(N(attackVolumeEnvelope), ValueKind::signedTimeCents, 				{-12'000,  8'000}, true,  NRPNMultiplier::x2),
   // 35
-  Definition(N(holdVolumeEnvelope), ValueKind::signedTimeCents, 										{-12'000,  5'000}, true,  2),
-  Definition(N(decayVolumeEnvelope), ValueKind::signedTimeCents, 										{-12'000,  8'000}, true,  2),
-  Definition(N(sustainVolumeEnvelope), ValueKind::signedCentsBel, 									{      0,  1'440}, true,  1),
-  Definition(N(releaseVolumeEnvelope), ValueKind::signedTimeCents, 									{-12'000,  8'000}, true,  2),
-  Definition(N(midiKeyToVolumeEnvelopeHold), ValueKind::signedShort, 								{ -1'200,  1'200}, true,  1),
+  D(N(holdVolumeEnvelope), ValueKind::signedTimeCents, 					{-12'000,  5'000}, true,  NRPNMultiplier::x2),
+  D(N(decayVolumeEnvelope), ValueKind::signedTimeCents, 				{-12'000,  8'000}, true,  NRPNMultiplier::x2),
+  D(N(sustainVolumeEnvelope), ValueKind::signedCentsBel, 				{      0,  1'440}, true,  NRPNMultiplier::x1),
+  D(N(releaseVolumeEnvelope), ValueKind::signedTimeCents, 			{-12'000,  8'000}, true,  NRPNMultiplier::x2),
+  D(N(midiKeyToVolumeEnvelopeHold), ValueKind::signedShort, 		{ -1'200,  1'200}, true,  NRPNMultiplier::x1),
   // 40
-  Definition(N(midiKeyToVolumeEnvelopeDecay), ValueKind::signedShort, 							{ -1'200,  1'200}, true,  1),
-  Definition(N(instrument), ValueKind::unsignedShort, 															   ushortIntRange, true,  0),
-  Definition(N(reserved1), ValueKind::signedShort, 																	      unusedRange, false, 0),
-  Definition(N(keyRange), ValueKind::range, 																				         keyRange, true,  0),
-  Definition(N(velocityRange), ValueKind::range, 																		         keyRange, true,  0),
+  D(N(midiKeyToVolumeEnvelopeDecay), ValueKind::signedShort, 		{ -1'200,  1'200}, true,  NRPNMultiplier::x1),
+  D(N(instrument), ValueKind::unsignedShort, 										   ushortIntRange, true,  NRPNMultiplier::x1),
+  D(N(reserved1), ValueKind::signedShort, 											      unusedRange, false, NRPNMultiplier::x1),
+  D(N(keyRange), ValueKind::range, 															         keyRange, true,  NRPNMultiplier::x1),
+  D(N(velocityRange), ValueKind::range, 												         keyRange, true,  NRPNMultiplier::x1),
   // 45
-  Definition(N(startLoopAddressCoarseOffset), ValueKind::coarseOffset, 							    shortIntRange, false, 1),
-  Definition(N(forcedMIDIKey), ValueKind::signedShort, 															     neg1KeyRange, false, 0),
-  Definition(N(forcedMIDIVelocity), ValueKind::signedShort, 												     neg1KeyRange, false, 1),
-  Definition(N(initialAttenuation), ValueKind::signedCentsBel, 											{      0,  1'440}, true,  1),
-  Definition(N(reserved2), ValueKind::unsignedShort, 																      unusedRange, false, 0),
+  D(N(startLoopAddressCoarseOffset), ValueKind::coarseOffset, 	    shortIntRange, false, NRPNMultiplier::x1),
+  D(N(forcedMIDIKey), ValueKind::signedShort, 									     neg1KeyRange, false, NRPNMultiplier::x1),
+  D(N(forcedMIDIVelocity), ValueKind::signedShort, 							     neg1KeyRange, false, NRPNMultiplier::x1),
+  D(N(initialAttenuation), ValueKind::signedCentsBel, 					{      0,  1'440}, true,  NRPNMultiplier::x1),
+  D(N(reserved2), ValueKind::unsignedShort, 										      unusedRange, false, NRPNMultiplier::x1),
   // 50
-  Definition(N(endLoopAddressCoarseOffset), ValueKind::coarseOffset, 								    shortIntRange, false, 1),
-  Definition(N(coarseTune), ValueKind::signedSemitones, 														{   -120,    120}, true,  1),
-  Definition(N(fineTune), ValueKind::signedCents, 																	{    -99,     99}, true,  1),
-  Definition(N(sampleID), ValueKind::unsignedShort, 																   ushortIntRange, false, 0),
-  Definition(N(sampleModes), ValueKind::unsignedShort, 															   ushortIntRange, false, 0),
+  D(N(endLoopAddressCoarseOffset), ValueKind::coarseOffset, 		    shortIntRange, false, NRPNMultiplier::x1),
+  D(N(coarseTune), ValueKind::signedSemitones, 									{   -120,    120}, true,  NRPNMultiplier::x1),
+  D(N(fineTune), ValueKind::signedCents, 												{    -99,     99}, true,  NRPNMultiplier::x1),
+  D(N(sampleID), ValueKind::unsignedShort, 											   ushortIntRange, false, NRPNMultiplier::x1),
+  D(N(sampleModes), ValueKind::unsignedShort, 									   ushortIntRange, false, NRPNMultiplier::x1),
   // 55
-  Definition(N(reserved3), ValueKind::signedShort, 																	      unusedRange, false, 0),
-  Definition(N(scaleTuning), ValueKind::unsignedShort, 															{      0,   1200}, true,  1),
-  Definition(N(exclusiveClass), ValueKind::unsignedShort, 													         keyRange, false, 0),
-  Definition(N(overridingRootKey), ValueKind::signedShort, 													     neg1KeyRange, false, 0),
+  D(N(reserved3), ValueKind::signedShort, 											      unusedRange, false, NRPNMultiplier::x1),
+  D(N(scaleTuning), ValueKind::unsignedShort, 									{      0,   1200}, true,  NRPNMultiplier::x1),
+  D(N(exclusiveClass), ValueKind::unsignedShort, 								         keyRange, false, NRPNMultiplier::x1),
+  D(N(overridingRootKey), ValueKind::signedShort, 							     neg1KeyRange, false, NRPNMultiplier::x1),
 };

@@ -38,16 +38,15 @@ using namespace SF2::Render::Voice;
   auto found = preset.find(64, 64);
 
   MIDI::ChannelState channelState;
-  MIDI::NRPN nrpn{channelState};
   State::State left{44100, channelState};
-  left.prepareForVoice(found[0], nrpn);
+  left.prepareForVoice(found[0]);
   XCTAssertEqual(-500, left.unmodulated(Entity::Generator::Index::pan));
   XCTAssertEqual(2041, left.unmodulated(Entity::Generator::Index::releaseVolumeEnvelope));
   XCTAssertEqual(9023, left.unmodulated(Entity::Generator::Index::initialFilterCutoff));
   XCTAssertEqual(23, left.unmodulated(Entity::Generator::Index::sampleID));
 
   State::State right{44100.0, channelState};
-  right.prepareForVoice(found[1], nrpn);
+  right.prepareForVoice(found[1]);
   XCTAssertEqual(500, right.unmodulated(Entity::Generator::Index::pan));
   XCTAssertEqual(2041, right.unmodulated(Entity::Generator::Index::releaseVolumeEnvelope));
   XCTAssertEqual(9023, right.unmodulated(Entity::Generator::Index::initialFilterCutoff));

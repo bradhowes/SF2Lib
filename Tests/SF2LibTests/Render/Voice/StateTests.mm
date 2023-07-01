@@ -46,15 +46,15 @@ using namespace SF2::Entity::Generator;
 - (void)testKey {
   State::State state{contexts.context2.makeState(0, 64, 32)};
   XCTAssertEqual(64, state.key());
-  state.setValue(Index::forcedMIDIKey, 128);
-  XCTAssertEqual(127, state.key());
+  state.setValue(Index::forcedMIDIKey, 1);
+  XCTAssertEqual(1, state.key());
 }
 
 - (void)testVelocity {
   State::State state{contexts.context2.makeState(0, 64, 32)};
   XCTAssertEqual(32, state.velocity());
-  state.setValue(Index::forcedMIDIVelocity, 128);
-  XCTAssertEqual(127, state.velocity());
+  state.setValue(Index::forcedMIDIVelocity, 0);
+  XCTAssertEqual(0, state.velocity());
 }
 
 - (void)testModulatedValue {

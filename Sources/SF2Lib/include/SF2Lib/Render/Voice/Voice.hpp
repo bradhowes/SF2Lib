@@ -71,9 +71,8 @@ public:
    Start the voice rendering. At this point, `isKeyDown()` will return `true` until `releaseKey()` is called.
 
    @param config the voice configuration to apply
-   @param nrpn the MIDI NRPN values to apply
    */
-  void start(const State::Config& config, const MIDI::NRPN& nrpn) noexcept;
+  void start(const State::Config& config) noexcept;
 
   /**
    Stop the voice. After this, it will just produce 0.0 if rendered.

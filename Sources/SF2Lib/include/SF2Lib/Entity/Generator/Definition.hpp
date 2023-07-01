@@ -15,6 +15,14 @@ namespace SF2::Entity::Generator {
  Meta data for SF2 generators. These are attributes associated with a generator but that are not found in an SF2 file.
  Rather these are attributes called out in the SF2 specification or to make the rendering implementation easier to
  understand.
+
+ Each entry as the following attributes
+
+ - name -- the name of the generator (based off its Generator::Index enum value)
+ - valueKind -- describes the underlying value held by the generator when it comes from the SF2 file
+ - isAvailableInPreset -- `true` if the value can be provided in a preset; `false` if only from an instrument
+ - nrpnMultiplier -- the scaling factor to apply to an MIDI NRPN value that is mapped to the generator
+
  */
 class Definition {
 public:
@@ -36,6 +44,7 @@ public:
     const int max;
   };
 
+  /// Number of definitions. This is the same as the number of generators defined in the SF2 spec.
   static constexpr size_t NumDefs = static_cast<size_t>(Index::numValues);
 
   /// The kind of value held by the generator
@@ -45,12 +54,12 @@ public:
     unsignedShort = 1,
     offset,
     coarseOffset,
+    unsignedPercent,
 
     // These have isUnsignedValue() == false
     signedShort,
     signedCents,
     signedCentsBel,
-    unsignedPercent,
     signedPercent,
     signedFrequencyCents,
     signedTimeCents,
@@ -60,13 +69,21 @@ public:
     range
   };
 
+  /// Scaling factor for NRPN values that affect a generator. This is for MIDI 1.0 messages where the range of an
+  /// NRPN controller is -/+ 8192 (14 bits). See below for the `nrpnMultiplier` method.
+  enum struct NRPNMultiplier {
+    x1 = 1,
+    x2 = 2,
+    x4 = 4
+  };
+
   /**
    Obtain the Definition entry for a given Index value
 
    @param index value to lookup
    @returns Definition entry
    */
-  static const Definition& definition(Index index) { return definitions_[static_cast<size_t>(index)]; }
+  static const Definition& definition(Index index) { return definitions_[index]; }
 
   /// @returns name of the definition
   const std::string& name() const noexcept { return name_; }
@@ -94,7 +111,7 @@ public:
 
    @returns multiplier for NRPN values.
   */
-  uint8_t nrpnMultiplier() const noexcept { return nrpnMultiplier_; }
+  int nrpnMultiplier() const noexcept { return static_cast<int>(nrpnMultiplier_); }
 
   /// @returns true if the generator amount value is unsigned or signed
   bool isUnsignedValue() const noexcept { return valueKind_ < ValueKind::signedShort; }
@@ -143,10 +160,10 @@ public:
   std::ostream& dump(const Amount& amount) const noexcept;
 
 private:
-  static std::array<Definition, NumDefs> const definitions_;
+  static GeneratorValueArray<Definition> const definitions_;
 
   Definition(const char* name, ValueKind valueKind, ValueRange minMax, bool availableInPreset,
-             uint8_t nrpnMultiplier) noexcept :
+             NRPNMultiplier nrpnMultiplier) noexcept :
   name_{name}, valueKind_{valueKind}, valueRange_{minMax}, availableInPreset_{availableInPreset},
   nrpnMultiplier_{nrpnMultiplier} {}
 
@@ -154,7 +171,7 @@ private:
   ValueKind valueKind_;
   ValueRange valueRange_;
   bool availableInPreset_;
-  uint8_t nrpnMultiplier_;
+  NRPNMultiplier nrpnMultiplier_;
 };
 
 } // end namespace SF2::Entity::Generator

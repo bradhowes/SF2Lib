@@ -19,7 +19,6 @@ struct TestVoiceState {
   sampleRate_{sampleRate},
   preset_{preset},
   channelState_{new SF2::MIDI::ChannelState()},
-  nrpn_{new SF2::MIDI::NRPN(*channelState_.get())},
   state_{sampleRate_, *channelState_.get(), midiKey, midiVelocity},
   found_{preset_.find(midiKey, midiVelocity)},
   voices_{}
@@ -50,7 +49,6 @@ private:
   sampleRate_{parent.sampleRate_},
   preset_{parent.preset_},
   channelState_{parent.channelState_},
-  nrpn_{parent.nrpn_},
   state_{sampleRate_, *channelState_.get(), midiKey, midiVelocity},
   found_{parent.found_},
   voices_{}
@@ -59,7 +57,7 @@ private:
   void makeVoices() {
     for (size_t index = 0; index < found_.size(); ++index) {
       voices_.emplace_back(sampleRate_, *channelState_.get(), index);
-      voices_.back().start(found_[index], *nrpn_.get());
+      voices_.back().start(found_[index]);
     }
   }
 
@@ -67,8 +65,6 @@ private:
   SF2::Render::Preset preset_;
 
   std::shared_ptr<SF2::MIDI::ChannelState> channelState_;
-  std::shared_ptr<SF2::MIDI::NRPN> nrpn_;
-
   SF2::Render::Voice::State::State state_;
   SF2::Render::Preset::ConfigCollection found_;
   std::vector<SF2::Render::Voice::Voice> voices_;
@@ -109,10 +105,8 @@ struct PresetTestContextBase
   }
 
   SF2::Render::Voice::State::State makeState(const SF2::Render::Voice::State::Config& config) const {
-    SF2::MIDI::ChannelState channelState;
-    SF2::MIDI::NRPN nrpn{channelState};
-    SF2::Render::Voice::State::State state(sampleRate_, channelState);
-    state.prepareForVoice(config, nrpn);
+    SF2::Render::Voice::State::State state(sampleRate_, channelState_);
+    state.prepareForVoice(config);
     return state;
   }
 
@@ -132,6 +126,7 @@ struct PresetTestContextBase
   NSURL* url_;
   SF2::IO::File file_;
   SF2::Render::Engine::PresetCollection presets_;
+  SF2::MIDI::ChannelState channelState_;
   SF2::Float sampleRate_;
 };
 

@@ -37,7 +37,6 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       if (midiEvent.length == 3 && midiEvent.data[1] <= 127 && midiEvent.data[2] <= 127) {
         auto cc{MIDI::ControlChange(midiEvent.data[1])};
         channelState_.setContinuousControllerValue(cc, midiEvent.data[2]);
-        nrpn_.process(cc, midiEvent.data[2]);
       }
       break;
 

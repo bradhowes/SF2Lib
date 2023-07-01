@@ -116,7 +116,7 @@ struct Pos {
   /// Function to call to read from current position in a file
   static ReadProcType ReadProc;
 
-  /// RAII struct for handling mocking of the Pos file IO methods
+  /// RAII struct for handling mocking of the Pos file IO methods. Only used for testing.
   struct Mockery {
     Mockery(SeekProcType seeker, ReadProcType reader) : seeker_{Pos::SeekProc}, reader_{Pos::ReadProc} {
       Pos::SeekProc = seeker;
@@ -134,7 +134,6 @@ struct Pos {
   };
 
 private:
-
   static off_t seek(int fd, off_t offset, int whence) noexcept { return (*SeekProc)(fd, offset, whence); }
   static ssize_t read(int fd, void* buffer, size_t size) noexcept { return (*ReadProc)(fd, buffer, size); }
 

@@ -13,9 +13,10 @@ namespace SF2::Render {
 
 /**
  Implementation of a low-frequency triangular oscillator. By design, this LFO emits bipolar values from -1.0 to 1.0 in
- order to be useful in SF2 processing. One can obtain unipolar values via the DSP::bipolarToUnipolar method. An LFO
- will start emitting with value 0.0, again by design, in order to smoothly transition from a paused LFO into a running
- one. An LFO can be configured to delay oscillating for N samples. During that time it will emit 0.0.
+ order to be useful in SF2 processing. One can obtain unipolar values via the DSP::bipolarToUnipolar method.
+ An LFO can be configured to delay oscillating for N samples. During that time it will emit 0.0. After the optional
+ delay setting, the LFO will start emitting the positive edge ascending edge of the waveform, starting at 0.0, in order
+ to smoothly transition from a paused LFO into a running one. This is by design and per SF2 spec.
  */
 class LFO {
 public:
@@ -42,25 +43,11 @@ public:
    Construct new LFO. It will have no frequency so it will never return a non-zero value.
 
    @param sampleRate the sample rate being used
-   @param kind the kind of LFO
+   @param kind the kind of LFO to create
    */
   LFO(Float sampleRate, Kind kind) : kind_{kind}, log_{os_log_create("SF2Lib", logTag(kind))}
   {
     configure(sampleRate, 0.0, -12'000.0);
-  }
-
-  /**
-   Construct new LFO.
-
-   @param sampleRate the sample rate being used
-   @param kind the kind of LFO
-   @param frequency the frequency of the LFO in cycles per second (Hz)
-   @param delay the number of seconds to delay the start of the LFO
-   */
-  LFO(Float sampleRate, Kind kind, Float frequency, Float delay)
-  : kind_{kind}, log_{os_log_create("SF2Lib", logTag(kind))}
-  {
-    configure(sampleRate, frequency, delay);
   }
 
   /**
@@ -131,6 +118,20 @@ public:
   }
 
 private:
+
+  /**
+   Construct new LFO. NOTE: this is only used in tests.
+
+   @param sampleRate the sample rate being used
+   @param kind the kind of LFO to create
+   @param frequency the frequency of the LFO in cycles per second (Hz)
+   @param delay the number of seconds to delay the start of the LFO
+   */
+  LFO(Float sampleRate, Kind kind, Float frequency, Float delay)
+  : kind_{kind}, log_{os_log_create("SF2Lib", logTag(kind))}
+  {
+    configure(sampleRate, frequency, delay);
+  }
 
   void configure(Float sampleRate, Float frequency, Float delay) {
     delaySampleCount_ = size_t(sampleRate * delay);

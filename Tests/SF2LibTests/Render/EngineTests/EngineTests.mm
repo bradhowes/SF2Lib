@@ -194,10 +194,10 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   engine.setRenderingFormat(3, format, frameCount);
 
   // Set NPRN state so that voices send 20% output to the chorus channel
-  engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
-  engine.nprn().process(MIDI::ControlChange::nprnLSB, int(Entity::Generator::Index::chorusEffectSend));
+  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, 120);
+  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Entity::Generator::Index::chorusEffectSend));
   engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
-  engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 65);
+  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 65);
 
   int cycles = 5;
   int seconds = 4.0;
@@ -275,10 +275,10 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   engine.setRenderingFormat(3, format, frameCount);
 
   // Set NPRN state so that voices send 20% output to the chorus channel
-  engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
-  engine.nprn().process(MIDI::ControlChange::nprnLSB, int(Entity::Generator::Index::chorusEffectSend));
+  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
+  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Entity::Generator::Index::chorusEffectSend));
   engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
-  engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 65);
+  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 65);
 
   int seconds = 6;
   int sampleCount = sampleRate * seconds;
@@ -420,16 +420,16 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
     engine.setRenderingFormat(3, format, frameCount);
 
     // Set NPRN state so that voices send 20% output to the chorus channel
-    engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
-    engine.nprn().process(MIDI::ControlChange::nprnLSB, int(Entity::Generator::Index::chorusEffectSend));
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Entity::Generator::Index::chorusEffectSend));
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
-    engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 65);
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 65);
 
     // Set NPRN state so that voices send 10% output to the reverb channel
-    engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
-    engine.nprn().process(MIDI::ControlChange::nprnLSB, int(Entity::Generator::Index::reverbEffectSend));
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Entity::Generator::Index::reverbEffectSend));
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 100);
-    engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 64);
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 64);
 
     int seconds = 1;
     int sampleCount = sampleRate * seconds;
@@ -484,16 +484,16 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
     engine.setRenderingFormat(3, format, frameCount);
 
     // Set NPRN state so that voices send 20% output to the chorus channel
-    engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
-    engine.nprn().process(MIDI::ControlChange::nprnLSB, int(Entity::Generator::Index::chorusEffectSend));
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Entity::Generator::Index::chorusEffectSend));
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
-    engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 65);
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 65);
 
     // Set NPRN state so that voices send 10% output to the reverb channel
-    engine.nprn().process(MIDI::ControlChange::nprnMSB, 120);
-    engine.nprn().process(MIDI::ControlChange::nprnLSB, int(Entity::Generator::Index::reverbEffectSend));
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Entity::Generator::Index::reverbEffectSend));
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 100);
-    engine.nprn().process(MIDI::ControlChange::dataEntryMSB, 64);
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 64);
 
     int seconds = 1;
     int sampleCount = sampleRate * seconds;

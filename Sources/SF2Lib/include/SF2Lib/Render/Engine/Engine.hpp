@@ -11,7 +11,7 @@
 
 #include "DSPHeaders/EventProcessor.hpp"
 
-#include "SF2Lib/MIDI/NRPN.hpp"
+#include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Engine/OldestActiveVoiceCache.hpp"
 #include "SF2Lib/Render/Engine/PresetCollection.hpp"
@@ -232,8 +232,6 @@ public:
                              oldestActive_.size(), frameCount);
   }
 
-  MIDI::NRPN& nprn() { return nrpn_; }
-
 private:
 
   void initialize(Float sampleRate) noexcept
@@ -301,7 +299,7 @@ private:
     }
     auto voiceIndex = getVoice();
     if (voiceIndex != voices_.size()) {
-      voices_[voiceIndex].start(config, nrpn_);
+      voices_[voiceIndex].start(config);
       oldestActive_.add(voiceIndex);
     }
     os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice");
@@ -322,7 +320,6 @@ private:
 
   Float sampleRate_;
   MIDI::ChannelState channelState_{};
-  MIDI::NRPN nrpn_{channelState_};
 
   std::vector<Voice> voices_{};
   std::vector<size_t> available_{};

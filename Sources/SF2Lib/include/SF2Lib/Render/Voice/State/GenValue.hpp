@@ -11,11 +11,10 @@
 namespace SF2::Render::Voice::State {
 
 /**
- A runtime generator value. Contains three components:
+ A runtime generator value. Contains four components:
 
  - value -- set by an instrument zone generator
  - adjustment -- added to by a preset zone generator
- - sumMods -- contributions from modulators
  */
 struct GenValue {
   using Allocator = Utils::ListNodeAllocator<size_t>;
@@ -25,7 +24,7 @@ struct GenValue {
   // is we have to allow for G * M * V links. We do not want to allocate these in the render thread so we do so at start
   // but this is a waste of bytes. Also, we do not know the number of voices to support until `Render::Engine` is
   // constructed, so we make due with hard-coded values.
-  static constexpr auto V = 256;
+  static constexpr auto V = 256; // Use value from engine
   static constexpr auto G = int(SF2::Entity::Generator::Index::numValues);
   static constexpr auto M = 16;
   inline static Allocator allocator = Allocator(V * G * M);
@@ -35,18 +34,23 @@ struct GenValue {
    */
   GenValue() = default;
 
-  /// @returns generator value as defined by zones (no modulators).
-  int unmodulated() const noexcept { return value + adjustment; }
+  void setValue(int value) noexcept { value_ = value; }
 
-  /// @returns generator value that includes modulator contributions
-  Float modulated() const noexcept { return unmodulated() + sumMods + nrpn; }
+  void setAdjustment(int adjustment) noexcept { adjustment_ = adjustment; }
 
-  int value{0};
-  int adjustment{0};
-  Float sumMods{0.0};
-  Float nrpn{0};
+  /// @returns generator value as defined by instrument zone (value) and preset zone (adjustment).
+  int value() const noexcept { return value_ + adjustment_; }
 
-  ModulatorIndexLinkedList mods{allocator};
+private:
+  int value_{0};
+  int adjustment_{0};
+
+  // Float sumMods{0.0};
+  // Float nrpn{0};
+
+  /// Allocator to use for std::list nodes. The allocator will create all of the nodes at once and recycle them as
+  /// needed.
+  // ModulatorIndexLinkedList mods{allocator};
 };
 
 }

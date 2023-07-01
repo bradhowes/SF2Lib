@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <array>
 #include <cstdint>
 
 namespace SF2::Entity::Generator {
@@ -10,7 +11,7 @@ namespace SF2::Entity::Generator {
  Enumeration of valid SF2 generators. This is a strongly-typed version of the integer values found in the spec. The
  comments below come from the spec (with some editing -- see section 8.1.3)
  */
-enum struct Index : uint16_t {
+enum struct Index : size_t {
   /**
    The offset, in sample data points, beyond the Start sample header parameter to the first sample data point to be
    played for this instrument. For example, if Start were 7 and startAddressOffset were 2, the first sample data point
@@ -427,6 +428,32 @@ enum struct Index : uint16_t {
   numValues
 };
 
+class IndexIterator {
+public:
+
+  IndexIterator() noexcept : value_{0} {}
+
+  IndexIterator(Index value) noexcept : value_{static_cast<size_t>(value)} {}
+
+  IndexIterator operator++() noexcept {
+    ++value_;
+    return *this;
+  }
+
+  Index operator*() const noexcept { return static_cast<Index>(value_); }
+
+  IndexIterator begin() const noexcept { return *this; }
+  IndexIterator end() const noexcept { return IndexIterator(Index::numValues); }
+
+  bool operator!=(const IndexIterator& other) const noexcept {
+    return value_ != other.value_;
+  }
+
+private:
+  using val_t = typename std::underlying_type<Index>::type;
+  val_t value_;
+};
+
 inline size_t indexValue(Index index) noexcept { return static_cast<size_t>(index); }
 
 /**
@@ -450,6 +477,38 @@ public:
 
 private:
   uint16_t const value_;
+};
+
+/**
+ Fixed-size array with template value type that uses Index enums for indices.
+ */
+template <typename T>
+class GeneratorValueArray : public std::array<T, size_t(Index::numValues)>
+{
+  using super = std::array<T, size_t(Index::numValues)>;
+
+public:
+
+  /**
+   Set all values in the array to the default value for the template type.
+   */
+  void zero() { this->fill(T()); }
+
+  /**
+   Obtain the value at the given index
+
+   @param index the location of the value to return
+   @returns the value at the give index
+   */
+  const T& operator[](Index index) const noexcept { return super::operator[](indexValue(index)); }
+
+  /**
+   Obtain a reference to the value at the given index
+
+   @param index the location of the value to return
+   @returns an updatable reference for the given index
+   */
+  T& operator[](Index index) noexcept { return super::operator[](indexValue(index)); }
 };
 
 } // end namespace SF2::Entity::Generator
