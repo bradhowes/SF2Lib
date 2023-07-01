@@ -305,7 +305,7 @@ private:
    */
   int samplesFor(Float seconds) noexcept {
     auto samples = int(round(sampleRate_ * seconds));
-    os_log_debug(log_, "samplesFor seconds: %f samples: %d", seconds, samples);
+    // os_log_debug(log_, "samplesFor seconds: %f samples: %d", seconds, samples);
     return samples;
   }
 

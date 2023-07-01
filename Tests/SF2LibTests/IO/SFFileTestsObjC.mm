@@ -100,7 +100,7 @@ using namespace SF2::Render::Voice::Sample;
   XCTAssertEqualWithAccuracy(rawSamples[2] * NormalizedSampleSource::normalizationScale, samples[2], epsilon);
   XCTAssertEqualWithAccuracy(rawSamples[3] * NormalizedSampleSource::normalizationScale, samples[3], epsilon);
 
-  file.dumpThreaded();
+  // file.dumpThreaded();
 }
 
 - (void)testDump {

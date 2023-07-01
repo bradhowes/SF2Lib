@@ -59,7 +59,7 @@ public:
     for (size_t index = 0; index < count; ++index) {
       auto& config{presetConfigs[index]};
       BankProgram key{config.bank(), config.program()};
-      std::cout << index << ' ' << key.bank << '/' << key.program << ' ' << presetConfigs[index].name() << '\n';
+      // std::cout << index << ' ' << key.bank << '/' << key.program << ' ' << presetConfigs[index].name() << '\n';
       auto [_, success] = ordering_.insert({key, index});
       if (!success) throw std::runtime_error("duplicate bank/program pair");
       presets_.emplace_back(file, instruments_, presetConfigs[index]);
