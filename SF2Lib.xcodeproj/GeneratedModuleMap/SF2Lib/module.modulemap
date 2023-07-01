@@ -1,4 +1,0 @@
-module SF2Lib {
-    umbrella "/Users/howes/src/Mine/SF2Lib/Sources/SF2Lib/include"
-    export *
-}

@@ -27,10 +27,8 @@ cov.txt: test.run
 coverage: cov.txt
 	@cat cov.txt
 
-PATTERN = SF2Lib.framework
-
 percentage.txt: cov.txt
-	awk '/$(PATTERN)/ {s+=$$4;++c} END {print s/c;}' < cov.txt > percentage.txt
+	awk '/ SF2Lib / {print $$4;}' < cov.txt > percentage.txt
 	@cat percentage.txt
 
 percentage: percentage.txt
