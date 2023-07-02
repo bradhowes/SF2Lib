@@ -94,61 +94,6 @@ public:
     } else {
       configureModulationEnvelope(state);
     }
-  }
-
-  /**
-   Create new envelope for volume changes over time.
-
-   @param state the state holding the generator values for the envelope definition
-   */
-  void configureVolumeEnvelope(const State& state) noexcept {
-    Float sustainLevel = volEnvSustain(state);
-
-    auto delayTimecents = state.modulated(Index::delayVolumeEnvelope);
-    stages_[StageIndex::delay].setDelay(samplesFor(delayTimecentsToSeconds(delayTimecents)));
-
-    auto attackTimecents = state.modulated(Index::attackVolumeEnvelope);
-    stages_[StageIndex::attack].setAttack(samplesFor(attackTimecentsToSeconds(attackTimecents)));
-
-    auto holdTimecents = state.modulated(Index::holdVolumeEnvelope) + midiKeyVolumeEnvelopeHoldAdjustment(state);
-    stages_[StageIndex::hold].setHold(samplesFor(holdTimecentsToSeconds(holdTimecents)));
-
-    auto decayTimecents = state.modulated(Index::decayVolumeEnvelope) + midiKeyVolumeEnvelopeDecayAdjustment(state);
-    stages_[StageIndex::decay].setDecay(samplesFor(decayTimecentsToSeconds(decayTimecents)), sustainLevel);
-
-    stages_[StageIndex::sustain].setSustain(sustainLevel);
-
-    auto releaseTimecents = state.modulated(Index::releaseVolumeEnvelope);
-    stages_[StageIndex::release].setRelease(samplesFor(releaseTimecentsToSeconds(releaseTimecents)), sustainLevel);
-
-    gate(true);
-  }
-
-  /**
-   Create new envelope for modulation changes over time.
-
-   @param state the state holding the generator values for the envelope definition
-   */
-  void configureModulationEnvelope(const State& state) noexcept {
-    Float sustainLevel = modEnvSustain(state);
-
-    auto delayTimecents = state.modulated(Index::delayModulatorEnvelope);
-    stages_[StageIndex::delay].setDelay(samplesFor(delayTimecentsToSeconds(delayTimecents)));
-
-    auto attackTimecents = state.modulated(Index::attackModulatorEnvelope);
-    stages_[StageIndex::attack].setAttack(samplesFor(attackTimecentsToSeconds(attackTimecents)));
-
-    auto holdTimecents = state.modulated(Index::holdModulatorEnvelope) + midiKeyModulatorEnvelopeHoldAdjustment(state);
-    stages_[StageIndex::hold].setHold(samplesFor(holdTimecentsToSeconds(holdTimecents)));
-
-    auto decayTimecents = state.modulated(Index::decayModulatorEnvelope) + midiKeyModulatorEnvelopeDecayAdjustment(state);
-    stages_[StageIndex::decay].setDecay(samplesFor(decayTimecentsToSeconds(decayTimecents)), sustainLevel);
-
-    stages_[StageIndex::sustain].setSustain(sustainLevel);
-
-    auto releaseTimecents = state.modulated(Index::releaseModulatorEnvelope);
-    stages_[StageIndex::release].setRelease(samplesFor(releaseTimecentsToSeconds(releaseTimecents)), sustainLevel);
-
     gate(true);
   }
 
@@ -207,6 +152,63 @@ public:
   void setSampleRate(Float sampleRate) noexcept { sampleRate_ = sampleRate; }
   
 private:
+
+  /**
+   Create new envelope for volume changes over time.
+
+   @param state the state holding the generator values for the envelope definition
+   */
+  void configureVolumeEnvelope(const State& state) noexcept {
+    Float sustainLevel = volEnvSustain(state);
+
+    auto delayTimecents = state.modulated(Index::delayVolumeEnvelope);
+    stages_[StageIndex::delay].setDelay(samplesFor(delayTimecentsToSeconds(delayTimecents)));
+
+    auto attackTimecents = state.modulated(Index::attackVolumeEnvelope);
+    stages_[StageIndex::attack].setAttack(samplesFor(attackTimecentsToSeconds(attackTimecents)));
+
+    auto holdTimecents = state.modulated(Index::holdVolumeEnvelope) + midiKeyVolumeEnvelopeHoldAdjustment(state);
+    stages_[StageIndex::hold].setHold(samplesFor(holdTimecentsToSeconds(holdTimecents)));
+
+    auto decayTimecents = state.modulated(Index::decayVolumeEnvelope) + midiKeyVolumeEnvelopeDecayAdjustment(state);
+    stages_[StageIndex::decay].setDecay(samplesFor(decayTimecentsToSeconds(decayTimecents)), sustainLevel);
+
+    stages_[StageIndex::sustain].setSustain(sustainLevel);
+
+    auto releaseTimecents = state.modulated(Index::releaseVolumeEnvelope);
+    stages_[StageIndex::release].setRelease(samplesFor(releaseTimecentsToSeconds(releaseTimecents)), sustainLevel);
+
+    gate(true);
+  }
+
+  /**
+   Create new envelope for modulation changes over time.
+
+   @param state the state holding the generator values for the envelope definition
+   */
+  void configureModulationEnvelope(const State& state) noexcept {
+    Float sustainLevel = modEnvSustain(state);
+
+    auto delayTimecents = state.modulated(Index::delayModulatorEnvelope);
+    stages_[StageIndex::delay].setDelay(samplesFor(delayTimecentsToSeconds(delayTimecents)));
+
+    auto attackTimecents = state.modulated(Index::attackModulatorEnvelope);
+    stages_[StageIndex::attack].setAttack(samplesFor(attackTimecentsToSeconds(attackTimecents)));
+
+    auto holdTimecents = state.modulated(Index::holdModulatorEnvelope) + midiKeyModulatorEnvelopeHoldAdjustment(state);
+    stages_[StageIndex::hold].setHold(samplesFor(holdTimecentsToSeconds(holdTimecents)));
+
+    auto decayTimecents = state.modulated(Index::decayModulatorEnvelope) + midiKeyModulatorEnvelopeDecayAdjustment(state);
+    stages_[StageIndex::decay].setDecay(samplesFor(decayTimecentsToSeconds(decayTimecents)), sustainLevel);
+
+    stages_[StageIndex::sustain].setSustain(sustainLevel);
+
+    auto releaseTimecents = state.modulated(Index::releaseModulatorEnvelope);
+    stages_[StageIndex::release].setRelease(samplesFor(releaseTimecentsToSeconds(releaseTimecents)), sustainLevel);
+
+    gate(true);
+  }
+
   inline static constexpr Float lowerBoundTimecents = -12'000.0;
 
   static inline Float delayTimecentsToSeconds(Float value) noexcept {
@@ -362,8 +364,8 @@ private:
   int counter_{0};
   Float value_{0.0};
   Float sampleRate_;
-  Kind kind_;
-  os_log_t log_;
+  const Kind kind_;
+  const os_log_t log_;
   friend class EnvelopeTestInjector;
 };
 

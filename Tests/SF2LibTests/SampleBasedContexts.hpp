@@ -12,21 +12,27 @@
 #include "SF2Lib/Render/Voice/Voice.hpp"
 
 struct TestVoiceCollection {
-  TestVoiceCollection(int midiKey, int midiVelocity, SF2::Render::Preset preset, SF2::Float sampleRate)
+  TestVoiceCollection(int midiKey, int midiVelocity, SF2::Render::Preset preset, SF2::Float sampleRate,
+                      const SF2::MIDI::ChannelState& channelState)
   :
   sampleRate_{sampleRate},
   preset_{preset},
   presetConfigs_{preset_.find(midiKey, midiVelocity)},
+  channelState_{channelState},
   voices_{}
   {
-    makeVoices();
+    voices_.reserve(presetConfigs_.size());
+    for (size_t index = 0; index < presetConfigs_.size(); ++index) {
+      voices_.emplace_back(sampleRate_, channelState_, index);
+      voices_.back().start(presetConfigs_[index]);
+    }
   }
 
   SF2::Float sampleRate() const { return sampleRate_; }
   size_t count() const { return presetConfigs_.size(); }
 
   TestVoiceCollection voiceCollection(int midiKey, int midiVelocity) {
-    return TestVoiceCollection(midiKey, midiVelocity, preset_, sampleRate_);
+    return TestVoiceCollection(midiKey, midiVelocity, preset_, sampleRate_, channelState_);
   }
 
   void start() {
@@ -41,20 +47,10 @@ struct TestVoiceCollection {
   SF2::Render::Voice::Voice& operator[](size_t index) { return voices_[index]; }
 
 private:
-
-  void makeVoices() {
-    voices_.clear();
-    for (size_t index = 0; index < presetConfigs_.size(); ++index) {
-      voices_.emplace_back(sampleRate_, channelState_, index);
-      voices_.back().start(presetConfigs_[index]);
-    }
-  }
-
   SF2::Float sampleRate_;
   SF2::Render::Preset preset_;
-
-  inline static SF2::MIDI::ChannelState channelState_{};
   SF2::Render::Preset::ConfigCollection presetConfigs_;
+  const SF2::MIDI::ChannelState& channelState_;
   std::vector<SF2::Render::Voice::Voice> voices_;
 };
 
@@ -71,17 +67,17 @@ struct PresetTestContextBase
   presets_{},
   sampleRate_{sampleRate}
   {
-//    std::cout << "PresetTestContextBase::init "
-//    << urlIndex << ' '
-//    << url_
-//    << '\n';
+    std::cout << "PresetTestContextBase::init "
+    << urlIndex << ' '
+    << [[url_ description] UTF8String]
+    << '\n';
     presets_.build(file_);
   }
 
   const SF2::Render::Preset& preset(int presetIndex) const { return presets_[presetIndex]; }
 
   TestVoiceCollection makeVoiceCollection(int presetIndex, int midiNote, int midiVelocity) const {
-    return {midiNote, midiVelocity, preset(presetIndex), sampleRate_};
+    return {midiNote, midiVelocity, preset(presetIndex), sampleRate_, channelState_};
   }
 
   std::vector<TestVoiceCollection> makeVoicesCollection(int presetIndex, const std::vector<int>& midiNotes, int midiVelocity) const {
@@ -135,9 +131,9 @@ struct PresetTestContext : PresetTestContextBase
 };
 
 struct SampleBasedContexts {
-  PresetTestContext<0> context0{};
-  PresetTestContext<1> context1{};
-  PresetTestContext<2> context2{};
+  PresetTestContext<0> context0;
+  PresetTestContext<1> context1;
+  PresetTestContext<2> context2;
 };
 
 @interface SamplePlayingTestCase : XCTestCase <AVAudioPlayerDelegate> {

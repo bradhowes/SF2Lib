@@ -13,11 +13,7 @@
 using namespace SF2;
 using namespace SF2::Render::Engine;
 
-@interface EngineTests : XCTestCase <AVAudioPlayerDelegate>
-@property (nonatomic) bool playAudio;
-@property (nonatomic, retain) AVAudioPlayer* player;
-@property (nonatomic, retain) XCTestExpectation* expectation;
-@property (nonatomic, retain) NSURL* audioFileURL;
+@interface EngineTests : SamplePlayingTestCase
 @end
 
 static void
@@ -28,18 +24,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   }
 }
 
-@implementation EngineTests {
-  SampleBasedContexts contexts;
-}
-
-- (void)setUp {
-  // See Package.swift
-#if PLAY_AUDIO
-  self.playAudio = YES;
-#else
-  self.playAudio = Configuration.shared.testsPlayAudio;
-#endif
-}
+@implementation EngineTests
 
 - (void)testInit {
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
@@ -103,15 +88,6 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   engine.usePreset(0, 128);
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqual("", engine.activePresetName());
-}
-
-- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
-  [[NSFileManager defaultManager] removeItemAtPath:[self.audioFileURL path]  error:NULL];
-  [self.expectation fulfill];
-}
-
-- (void)audioPlayerDecodeErrorDidOccur:(AVAudioPlayer *)player error:(NSError * __nullable)error {
-  [[NSFileManager defaultManager] removeItemAtPath:[self.audioFileURL path]  error:NULL];
 }
 
 - (void)testRolandPianoChordRenderLinear {
@@ -340,69 +316,6 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   XCTAssertEqual(3, engine.activeVoiceCount());
 
   [self playSamples: dryBuffer count: sampleCount];
-}
-
-- (void)playSamples:(AVAudioPCMBuffer*)buffer count:(int)sampleCount
-{
-  if (!self.playAudio) return;
-
-  buffer.frameLength = sampleCount;
-
-  NSError* error = nil;
-  self.audioFileURL = [NSURL fileURLWithPath: [self pathForTemporaryFile] isDirectory:NO];
-  AVAudioFile* audioFile = [[AVAudioFile alloc] initForWriting:self.audioFileURL
-                                                      settings:[[buffer format] settings]
-                                                  commonFormat:AVAudioPCMFormatFloat32
-                                                   interleaved:false
-                                                         error:&error];
-  if (error) {
-    XCTFail(@"failed with error: %@", error);
-    return;
-  }
-
-  [audioFile writeFromBuffer:buffer error:&error];
-  if (error) {
-    XCTFail(@"failed with error: %@", error);
-    return;
-  }
-
-  audioFile = nil;
-
-  self.player = [[AVAudioPlayer alloc] initWithContentsOfURL:self.audioFileURL error:&error];
-  if (self.player == nullptr && error != nullptr) {
-    XCTFail(@"Expectation Failed with error: %@", error);
-    return;
-  }
-
-  self.player.delegate = self;
-  self.expectation = [self expectationWithDescription:@"AVAudioPlayer finished"];
-  [self.player play];
-  [self waitForExpectationsWithTimeout:30.0 handler:^(NSError *err) {
-    if (err) {
-      XCTFail(@"Expectation Failed with error: %@", err);
-    }
-  }];
-}
-
-- (NSString *)pathForTemporaryFile
-{
-  NSString *  result;
-  CFUUIDRef   uuid;
-  CFStringRef uuidStr;
-
-  uuid = CFUUIDCreate(NULL);
-  assert(uuid != NULL);
-
-  uuidStr = CFUUIDCreateString(NULL, uuid);
-  assert(uuidStr != NULL);
-
-  result = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.caf", uuidStr]];
-  assert(result != nil);
-
-  CFRelease(uuidStr);
-  CFRelease(uuid);
-
-  return result;
 }
 
 // Render 1 second of audio at 48000.0 sample rate using all voices of an engine and interpolating using 4th-order cubic.

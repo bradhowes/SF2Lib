@@ -39,17 +39,18 @@ public:
    @param state the voice state to work with
    @param kind the interpolation to apply to the samples
    */
-  Generator(State& state, Interpolator kind) noexcept : state_{state}, interpolatorProc_{interpolator(kind)} {}
+  Generator(Interpolator kind) noexcept : interpolatorProc_{interpolator(kind)} {}
 
   /**
    Configure instance to use the given sample source. NOTE: this is invoked before start of rendering a note. This
    routine *must* ensure that the state is properly setup to do so, just as if it was created from scratch.
 
    @param sampleSource the samples to use for rendering
+   @param state the state configuration for the voice
    */
-  void configure(const NormalizedSampleSource& sampleSource) noexcept
+  void configure(const NormalizedSampleSource& sampleSource, const State& state) noexcept
   {
-    bounds_ = Bounds::make(sampleSource.header(), state_);
+    bounds_ = Bounds::make(sampleSource.header(), state);
     index_.configure(bounds_);
     sampleSource_ = &sampleSource;
     sampleSource_->load();
@@ -120,10 +121,9 @@ private:
     return (*sampleSource_)[whole - 1];
   }
 
-  State& state_;
   Bounds bounds_;
   Index index_;
-  InterpolatorProc interpolatorProc_;
+  const InterpolatorProc interpolatorProc_;
   const NormalizedSampleSource* sampleSource_{nullptr};
 };
 

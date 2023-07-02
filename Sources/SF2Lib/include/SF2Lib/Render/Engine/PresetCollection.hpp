@@ -88,7 +88,11 @@ public:
    */
   size_t locatePresetIndex(int bank, int program) const noexcept {
     const auto& pos{ordering_.find({bank, program})};
-    std::cout << bank << '/' << program << '=' << pos->second << '\n';
+    if (pos != ordering_.end()) {
+      std::cout << bank << '/' << program << '=' << pos->second << '\n';
+    } else {
+      std::cout << bank << '/' << program << "= NOT FOUND\n";
+    }
     return pos == ordering_.end() ? size() : pos->second;
   }
 

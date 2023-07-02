@@ -49,6 +49,22 @@ public:
   Voice(Float sampleRate, const MIDI::ChannelState& channelState, size_t voiceIndex,
         Sample::Generator::Interpolator interpolator = Sample::Generator::Interpolator::linear) noexcept;
 
+  /// Allow move operations during construction to support std::vector
+  Voice(Voice&&) noexcept = default;
+
+  /// Disallow copy construction -- not needed
+  Voice(const Voice&) = delete;
+
+  /// Disallow copy assignment -- not needed
+  Voice& operator=(const Voice&) noexcept = delete;
+
+  /// Disallow move assignment -- not needed
+  Voice& operator=(Voice&&) noexcept = delete;
+
+  /// Ensure use of default destructor
+  ~Voice() noexcept = default;
+  // ~Voice() { std::cout << "~Voice " << voiceIndex_ << '\n'; };
+
   /**
    Set the sample rate to use for rendering.
 
@@ -225,15 +241,15 @@ private:
   LFO modulatorLFO_;
   LFO vibratoLFO_;
   LowPassFilter filter_;
-  size_t voiceIndex_;
   Float noiseFloorOverMagnitude_;
   Float noiseFloorOverMagnitudeOfLoop_;
 
   bool active_{false};
   bool keyDown_{false};
 
-  os_log_t log_{os_log_create("SF2Lib", "Voice")};
-  os_signpost_id_t startSignpost_{os_signpost_id_generate(log_)};
+  const size_t voiceIndex_;
+  const os_log_t log_{os_log_create("SF2Lib", "Voice")};
+  const os_signpost_id_t startSignpost_{os_signpost_id_generate(log_)};
 };
 
 } // namespace SF2::Render::Voice

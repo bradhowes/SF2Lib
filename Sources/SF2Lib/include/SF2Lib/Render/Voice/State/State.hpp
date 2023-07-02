@@ -62,6 +62,23 @@ public:
     setDefaults();
   }
 
+  /// Allow move operations during construction to support std::vector
+  State(State&&) noexcept = default;
+
+  /// Disallow copy construction -- not needed
+  State(const State&) = delete;
+
+  /// Disallow copy assignment -- not needed
+  State& operator=(const State&) noexcept = delete;
+
+  /// Disallow move assignment -- not needed
+  State& operator=(State&&) noexcept = delete;
+
+  /// Ensure use of default destructor
+  ~State() noexcept = default;
+
+  // ~State() noexcept { std::cout << "~State " << this << std::endl; }
+
   /**
    Set the sample rate to use for rendering
 
@@ -155,8 +172,8 @@ private:
   void setDefaults() noexcept;
   void linkModulators() noexcept;
 
-  Entity::Generator::GeneratorValueArray<GenValue> gens_{};
-  std::vector<Modulator> modulators_{};
+  Entity::Generator::GeneratorValueArray<GenValue> gens_;
+  std::vector<Modulator> modulators_;
 
   Float sampleRate_;
   int eventKey_;

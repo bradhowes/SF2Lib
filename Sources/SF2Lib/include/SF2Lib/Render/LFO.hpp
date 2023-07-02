@@ -138,11 +138,12 @@ private:
     increment_ = frequency / sampleRate * 4.0f;
   }
 
-  Kind kind_;
   Float counter_{0.0};
   Float increment_{0.0};
   size_t delaySampleCount_{0};
-  os_log_t log_;
+
+  const Kind kind_;
+  const os_log_t log_;
 
   friend class LFOTestInjector;
 };

@@ -50,7 +50,10 @@ public:
 
    @param state the state to use for pitch calculations
    */
-  Pitch(const State::State& state) noexcept : state_{state} {}
+  Pitch(const State::State& state) noexcept : state_{state}
+  {
+    std::cout << "Pitch init state_ " << &state << '\n';
+  }
 
   /**
    Configure instance to use the given sample definition. NOTE: this is invoked before start of rendering a note. This
@@ -60,7 +63,7 @@ public:
    */
   void configure(const Entity::SampleHeader& header) noexcept
   {
-    key_ = state_.key();
+    std::cout << "Pitch configure state_ " << &state_ << '\n';
     initialize(header.originalMIDIKey(), header.pitchCorrection(), header.sampleRate());
   }
 
@@ -92,7 +95,7 @@ public:
 
 private:
 
-  int rootKey(int originalMIDIKey) const noexcept
+  int realRootKey(int originalMIDIKey) const noexcept
   {
     auto value = state_.unmodulated(Index::overridingRootKey);
     if (value == -1) value = originalMIDIKey;
@@ -100,15 +103,14 @@ private:
   }
 
   void initialize(int originalMIDIKey, int pitchCorrection, Float originalSampleRate) noexcept {
-    auto rootKey = this->rootKey(originalMIDIKey);
+    auto rootKey = realRootKey(originalMIDIKey);
     auto rootPitch = rootKey * 100.0f - pitchCorrection;
     rootFrequency_ = Float(DSP::centsToFrequency(rootPitch) * state_.sampleRate() / originalSampleRate);
-    pitch_ = state_.unmodulated(Index::scaleTuning) * (key_ - rootPitch / 100.0f) + rootPitch;
+    pitch_ = state_.unmodulated(Index::scaleTuning) * (state_.key() - rootPitch / 100.0f) + rootPitch;
     updatePitchOffset();
   }
 
   const State::State& state_;
-  int key_;
   Float pitch_;
   Float pitchOffset_{0.0};
   Float rootFrequency_;

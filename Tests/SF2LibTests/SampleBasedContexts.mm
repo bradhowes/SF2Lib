@@ -60,8 +60,11 @@ bool PresetTestContextBase::playAudioInTests() {
 
   NSError* error = nil;
   self.audioFileURL = [NSURL fileURLWithPath: [self pathForTemporaryFile] isDirectory:NO];
+  NSDictionary* settings = [[buffer format] settings];
+  // NSLog(@"%@", [settings description]);
+  [settings setValue:0 forKey:@"AVLinearPCMIsNonInterleaved"];
   AVAudioFile* audioFile = [[AVAudioFile alloc] initForWriting:self.audioFileURL
-                                                      settings:[[buffer format] settings]
+                                                      settings:settings
                                                   commonFormat:AVAudioPCMFormatFloat32
                                                    interleaved:false
                                                          error:&error];
@@ -94,54 +97,50 @@ bool PresetTestContextBase::playAudioInTests() {
   }];
 }
 
-- (AVAudioPCMBuffer*)allocateBuffer:(SF2::Float)sampleRate numberOfChannels:(int)channels capacity:(int)sampleCount {
-
-  AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:channels];
+AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount) {
   AVAudioPCMBuffer* buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   AudioBufferList* bufferList = buffer.mutableAudioBufferList;
 
-  for (int index = 0; index < channels; ++index) {
-    bufferList->mBuffers[index].mDataByteSize = sampleCount * sizeof(AUValue);
-    bzero(bufferList->mBuffers[index].mData, sampleCount * sizeof(AUValue));
+  for (int index = 0; index < format.channelCount; ++index) {
+    UInt32 byteCount = sampleCount * sizeof(AUValue);
+    bufferList->mBuffers[index].mDataByteSize = byteCount;
+    bzero(bufferList->mBuffers[index].mData, byteCount);
   }
 
   return buffer;
+}
+
+- (AVAudioPCMBuffer*)allocateBuffer:(SF2::Float)sampleRate numberOfChannels:(int)channels capacity:(int)sampleCount {
+  AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:channels];
+  return makeBuffer(format, sampleCount);
 }
 
 - (AVAudioPCMBuffer*)allocateBufferFor:(const TestVoiceCollection&)voices capacity:(int)sampleCount {
   int channelCount = int(voices.count());
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:voices.sampleRate()
                                                                          channels:channelCount];
-  AVAudioPCMBuffer* buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  AudioBufferList* bufferList = buffer.mutableAudioBufferList;
-
-  for (int index = 0; index < channelCount; ++index) {
-    bufferList->mBuffers[index].mDataByteSize = sampleCount * sizeof(AUValue);
-    bzero(bufferList->mBuffers[index].mData, sampleCount * sizeof(AUValue));
-  }
-
-  return buffer;
+  return makeBuffer(format, sampleCount);
 }
 
 - (size_t)renderInto:(AVAudioPCMBuffer*)buffer
-                mono:(SF2::Render::Voice::Voice&)left
+                mono:(SF2::Render::Voice::Voice&)voice
             forCount:(size_t)sampleCount
           startingAt:(size_t)offset
 {
-  AUValue* samplesLeft = [buffer left] + offset;
+  AUValue* ptr = [buffer left] + offset;
   for (auto index = 0; index < sampleCount; ++index) {
-    *samplesLeft++ += left.renderSample();
+    *ptr++ += voice.renderSample();
   }
   return offset + sampleCount;
 }
 
 - (size_t)renderInto:(AVAudioPCMBuffer*)buffer
-                voices:(TestVoiceCollection&)voices
+              voices:(TestVoiceCollection&)voices
             forCount:(size_t)sampleCount
           startingAt:(size_t)offset
 {
   for (size_t channel = 0; channel < voices.count(); ++channel) {
-    auto into = [buffer channel:channel] + offset;
+    auto into = [buffer channel: channel] + offset;
     auto& voice{voices[channel]};
     for (auto index = 0; index < sampleCount; ++index) {
       *into++ += voice.renderSample();
@@ -203,7 +202,7 @@ bool PresetTestContextBase::playAudioInTests() {
 @implementation AVAudioPCMBuffer(Accessors)
 
 - (void)normalize:(size_t)voices {
-  for (int channel = 0; channel < [[self format] channelCount]; ++channel) {
+  for (int channel = 0; channel < self.format.channelCount; ++channel) {
     auto count = self.mutableAudioBufferList->mBuffers[channel].mDataByteSize / sizeof(AUValue);
     auto ptr = (AUValue*)(self.mutableAudioBufferList->mBuffers[channel].mData);
     while (count-- > 0) {

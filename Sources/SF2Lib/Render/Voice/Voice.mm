@@ -18,7 +18,7 @@ Voice::Voice(Float sampleRate, const ChannelState& channelState, size_t voiceInd
 state_{sampleRate, channelState},
 loopingMode_{LoopingMode::none},
 pitch_{state_},
-sampleGenerator_{state_, interpolator},
+sampleGenerator_{interpolator},
 gainEnvelope_{sampleRate, Envelope::Generator::Kind::volume},
 modulatorEnvelope_{sampleRate, Envelope::Generator::Kind::modulation},
 modulatorLFO_{sampleRate, LFO::Kind::modulator},
@@ -27,11 +27,15 @@ filter_{sampleRate},
 voiceIndex_{voiceIndex},
 active_{false},
 keyDown_{false}
-{}
+{
+  // std::cout << "Voice " << voiceIndex << " init state_ " << &state_ << '\n';
+}
 
 void
 Voice::start(const State::Config& config) noexcept
 {
+  // std::cout << "Voice " << voiceIndex_ << " start state_ " << &state_ << '\n';
+
   os_signpost_interval_begin(log_, startSignpost_, "start");
 
   config.sampleSource().load();
@@ -42,7 +46,7 @@ Voice::start(const State::Config& config) noexcept
 
   const auto& sampleSource{config.sampleSource()};
 
-  sampleGenerator_.configure(sampleSource);
+  sampleGenerator_.configure(sampleSource, state_);
   pitch_.configure(sampleSource.header());
 
   gainEnvelope_.configure(state_);

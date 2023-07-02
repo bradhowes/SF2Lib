@@ -13,13 +13,16 @@ using namespace SF2::Render::Voice;
 using namespace SF2::Render::Voice::Sample;
 
 @interface GeneratorIndexTests : XCTestCase
+@property(assign, nonatomic) Bounds bounds;
 @end
 
 @implementation GeneratorIndexTests
 
-static SF2::Entity::SampleHeader header(0, 6, 2, 5, 100, 69, 0);
-static SF2::MIDI::ChannelState channelState;
-static Bounds bounds{Bounds::make(header, State::State(44100.0, channelState))};
+- (void)setUp {
+  SF2::Entity::SampleHeader header(0, 6, 2, 5, 100, 69, 0);
+  SF2::MIDI::ChannelState channelState;
+  _bounds = Bounds::make(header, State::State(44100.0, channelState));
+}
 
 - (void)testConstruction {
   auto index = Index();
@@ -30,7 +33,7 @@ static Bounds bounds{Bounds::make(header, State::State(44100.0, channelState))};
 - (void)testIncrement {
   auto index = Index();
   auto increment = 1.3;
-  index.configure(bounds);
+  index.configure(self.bounds);
   index.increment(increment, true);
   XCTAssertEqual(1, index.whole());
   index.increment(increment, true);
@@ -41,7 +44,7 @@ static Bounds bounds{Bounds::make(header, State::State(44100.0, channelState))};
 - (void)testLooping {
   auto index = Index();
   auto increment = 1.3;
-  index.configure(bounds);
+  index.configure(self.bounds);
   index.increment(increment, true);
   XCTAssertEqual(1, index.whole());
   index.increment(increment, true);
@@ -65,7 +68,7 @@ static Bounds bounds{Bounds::make(header, State::State(44100.0, channelState))};
 - (void)testEndLooping {
   auto index = Index();
   auto increment = 1.3;
-  index.configure(bounds);
+  index.configure(self.bounds);
   index.increment(increment, true);
   index.increment(increment, true);
   index.increment(increment, true);
@@ -83,7 +86,7 @@ static Bounds bounds{Bounds::make(header, State::State(44100.0, channelState))};
 - (void)testFinished {
   auto index = Index();
   auto increment = 1.3;
-  index.configure(bounds);
+  index.configure(self.bounds);
   index.increment(increment, false);
   XCTAssertEqual(1, index.whole());
   index.increment(increment, false);

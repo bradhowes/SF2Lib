@@ -500,7 +500,9 @@ public:
    @param index the location of the value to return
    @returns the value at the give index
    */
-  const T& operator[](Index index) const noexcept { return super::operator[](indexValue(index)); }
+  typename super::const_reference operator[](Index index) const noexcept {
+    return super::operator[](indexValue(index));
+  }
 
   /**
    Obtain a reference to the value at the given index
@@ -508,7 +510,9 @@ public:
    @param index the location of the value to return
    @returns an updatable reference for the given index
    */
-  T& operator[](Index index) noexcept { return super::operator[](indexValue(index)); }
+  typename super::reference& operator[](Index index) noexcept {
+    return super::operator[](indexValue(index));
+  }
 };
 
 } // end namespace SF2::Entity::Generator

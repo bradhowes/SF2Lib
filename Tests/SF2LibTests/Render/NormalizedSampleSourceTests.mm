@@ -60,10 +60,10 @@ static SF2::Float epsilon = 1e-6;
 
 - (void)testLinearInterpolation {
   State::State state{100, channelState};
-  Sample::Generator gen{state, Sample::Generator::Interpolator::linear};
+  Sample::Generator gen{Sample::Generator::Interpolator::linear};
   NormalizedSampleSource source{values, header};
   source.load();
-  gen.configure(source);
+  gen.configure(source, state);
   Sample::Pitch pitch{state};
   pitch.configure(source.header());
   auto inc = pitch.samplePhaseIncrement(0.0, 0.0, 0.0);
