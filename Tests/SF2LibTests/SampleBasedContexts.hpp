@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <memory>
-
 #include <AVFoundation/AVFoundation.h>
 #include <XCTest/XCTest.h>
 
@@ -13,60 +11,50 @@
 #include "SF2Lib/Render/Preset.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
 
-struct TestVoiceState {
-  TestVoiceState(int midiKey, int midiVelocity, SF2::Render::Preset preset, SF2::Float sampleRate)
+struct TestVoiceCollection {
+  TestVoiceCollection(int midiKey, int midiVelocity, SF2::Render::Preset preset, SF2::Float sampleRate)
   :
   sampleRate_{sampleRate},
   preset_{preset},
-  channelState_{new SF2::MIDI::ChannelState()},
-  state_{sampleRate_, *channelState_.get(), midiKey, midiVelocity},
-  found_{preset_.find(midiKey, midiVelocity)},
+  presetConfigs_{preset_.find(midiKey, midiVelocity)},
   voices_{}
-  {}
+  {
+    makeVoices();
+  }
 
   SF2::Float sampleRate() const { return sampleRate_; }
-  size_t count() const { return found_.size(); }
-  SF2::Render::Voice::State::State& state() { return state_; }
-  SF2::MIDI::ChannelState& channelState() { return *channelState_.get(); }
-  TestVoiceState newVoiceState(int midiKey, int midiVelocity) { return TestVoiceState(midiKey, midiVelocity, *this); }
-  void start() { makeVoices(); }
+  size_t count() const { return presetConfigs_.size(); }
+
+  TestVoiceCollection voiceCollection(int midiKey, int midiVelocity) {
+    return TestVoiceCollection(midiKey, midiVelocity, preset_, sampleRate_);
+  }
+
+  void start() {
+    for (size_t index = 0; index < presetConfigs_.size(); ++index) {
+      voices_[index].start(presetConfigs_[index]);
+    }
+  }
+
   void releaseKey() { for (auto& voice : voices_) voice.releaseKey(); }
+  void stop() { for (auto& voice : voices_) voice.stop(); }
 
-  void stop() {
-    for (auto& voice : voices_) voice.stop();
-    voices_.clear();
-  }
-
-  SF2::Render::Voice::Voice& operator[](size_t index) {
-    if (voices_.empty()) makeVoices();
-    return voices_[index];
-  }
+  SF2::Render::Voice::Voice& operator[](size_t index) { return voices_[index]; }
 
 private:
 
-  TestVoiceState(int midiKey, int midiVelocity, TestVoiceState& parent)
-  :
-  sampleRate_{parent.sampleRate_},
-  preset_{parent.preset_},
-  channelState_{parent.channelState_},
-  state_{sampleRate_, *channelState_.get(), midiKey, midiVelocity},
-  found_{parent.found_},
-  voices_{}
-  {}
-
   void makeVoices() {
-    for (size_t index = 0; index < found_.size(); ++index) {
-      voices_.emplace_back(sampleRate_, *channelState_.get(), index);
-      voices_.back().start(found_[index]);
+    voices_.clear();
+    for (size_t index = 0; index < presetConfigs_.size(); ++index) {
+      voices_.emplace_back(sampleRate_, channelState_, index);
+      voices_.back().start(presetConfigs_[index]);
     }
   }
 
   SF2::Float sampleRate_;
   SF2::Render::Preset preset_;
 
-  std::shared_ptr<SF2::MIDI::ChannelState> channelState_;
-  SF2::Render::Voice::State::State state_;
-  SF2::Render::Preset::ConfigCollection found_;
+  inline static SF2::MIDI::ChannelState channelState_{};
+  SF2::Render::Preset::ConfigCollection presetConfigs_;
   std::vector<SF2::Render::Voice::Voice> voices_;
 };
 
@@ -92,14 +80,14 @@ struct PresetTestContextBase
 
   const SF2::Render::Preset& preset(int presetIndex) const { return presets_[presetIndex]; }
 
-  TestVoiceState makeVoiceState(int presetIndex, int midiNote, int midiVelocity) const {
+  TestVoiceCollection makeVoiceCollection(int presetIndex, int midiNote, int midiVelocity) const {
     return {midiNote, midiVelocity, preset(presetIndex), sampleRate_};
   }
 
-  std::vector<TestVoiceState> makeVoiceStates(int presetIndex, const std::vector<int>& midiNotes, int midiVelocity) const {
-    std::vector<TestVoiceState> notes;
+  std::vector<TestVoiceCollection> makeVoicesCollection(int presetIndex, const std::vector<int>& midiNotes, int midiVelocity) const {
+    std::vector<TestVoiceCollection> notes;
     for (auto midiNote : midiNotes) {
-      notes.emplace_back(makeVoiceState(presetIndex, midiNote, midiVelocity));
+      notes.emplace_back(makeVoiceCollection(presetIndex, midiNote, midiVelocity));
     }
     return notes;
   }
@@ -163,13 +151,13 @@ struct SampleBasedContexts {
 
 - (void)playSamples:(AVAudioPCMBuffer*)buffer count:(int)sampleCount;
 
-- (AVAudioPCMBuffer*)allocateBufferFor:(const TestVoiceState&)voices capacity:(int)sampleCount;
+- (AVAudioPCMBuffer*)allocateBufferFor:(const TestVoiceCollection&)voices capacity:(int)sampleCount;
 - (AVAudioPCMBuffer*)allocateBuffer:(SF2::Float)sampleRate numberOfChannels:(int)channels capacity:(int)sampleCount;
 
 - (size_t)renderInto:(AVAudioPCMBuffer*)buffer mono:(SF2::Render::Voice::Voice&)left forCount:(size_t)sampleCount startingAt:(size_t)offset;
 - (size_t)renderInto:(AVAudioPCMBuffer*)buffer left:(SF2::Render::Voice::Voice&)left right:(SF2::Render::Voice::Voice&)right forCount:(size_t)sampleCount startingAt:(size_t)offset;
-- (size_t)renderInto:(AVAudioPCMBuffer*)buffer voices:(TestVoiceState&)voices forCount:(size_t)sampleCount startingAt:(size_t)offset;
-- (size_t)renderInto:(AVAudioPCMBuffer*)buffer voices:(TestVoiceState&)voices forCount:(size_t)sampleCount startingAt:(size_t)offset afterRenderSample:(void (^)(size_t))block;
+- (size_t)renderInto:(AVAudioPCMBuffer*)buffer voices:(TestVoiceCollection&)voices forCount:(size_t)sampleCount startingAt:(size_t)offset;
+- (size_t)renderInto:(AVAudioPCMBuffer*)buffer voices:(TestVoiceCollection&)voices forCount:(size_t)sampleCount startingAt:(size_t)offset afterRenderSample:(void (^)(size_t))block;
 
 - (void)dumpPresets:(const SF2::IO::File&)file;
 - (void)dumpSamples:(const std::vector<AUValue>&)samples;

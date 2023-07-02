@@ -28,7 +28,7 @@ using namespace SF2::Render;
 }
 
 - (void)testVoiceRepeatedRenderGeneratesSameOutputRolandPiano {
-  TestVoiceState voices{contexts.context2.makeVoiceState(0, 69, 127)};
+  TestVoiceCollection voices{contexts.context2.makeVoiceCollection(0, 69, 127)};
 
   int seconds = 10.0;
   int repetitions = 40.0;
@@ -88,7 +88,7 @@ using namespace SF2::Render;
 }
 
 - (void)testVoiceRepeatedRenderGeneratesSameOutputChimes {
-  TestVoiceState voices{contexts.context0.makeVoiceState(205, 69, 127)};
+  TestVoiceCollection voices{contexts.context0.makeVoiceCollection(205, 69, 127)};
 
   int seconds = 5;
   int repetitions = 5;
@@ -140,7 +140,7 @@ using namespace SF2::Render;
 
 - (void)testRolandPianoRender {
   // Play A Maj chord notes
-  auto notes = contexts.context2.makeVoiceStates(0, {69, 73, 76}, 127);
+  auto notes = contexts.context2.makeVoicesCollection(0, {69, 73, 76}, 127);
   int seconds = 1;
   int sampleCount = notes.front().sampleRate() * seconds;
   AVAudioPCMBuffer* buffer = [self allocateBufferFor:notes.front() capacity:sampleCount];
@@ -194,7 +194,7 @@ using namespace SF2::Render;
 }
 
 - (void)testOrganRender {
-  auto notes = contexts.context0.makeVoiceStates(40, {69, 73, 76}, 127);
+  auto notes = contexts.context0.makeVoicesCollection(40, {69, 73, 76}, 127);
   int seconds = 3;
   int sampleCount = notes.front().sampleRate() * seconds;
   AVAudioPCMBuffer* buffer = [self allocateBufferFor:notes.front() capacity:sampleCount];
@@ -225,7 +225,7 @@ using namespace SF2::Render;
 }
 
 - (void)testViolinRender {
-  auto notes = contexts.context0.makeVoiceStates(80, {64, 68, 71}, 127);
+  auto notes = contexts.context0.makeVoicesCollection(80, {64, 68, 71}, 127);
   int seconds = 3;
   int sampleCount = notes.front().sampleRate() * seconds;
   int keyReleaseCount = sampleCount * 0.95;
@@ -286,7 +286,7 @@ using namespace SF2::Render;
 
 - (void)testViolinRenderWithSlowAttack {
   // auto notes = contexts.context0.makeVoiceStates(80, {64, 68, 71}, 127);
-  auto notes = contexts.context0.makeVoiceStates(80, {64}, 127);
+  auto notes = contexts.context0.makeVoicesCollection(80, {64}, 127);
 
   int seconds = 5;
   int sampleCount = notes.front().sampleRate() * seconds;
@@ -295,12 +295,17 @@ using namespace SF2::Render;
 
   // Configure note to take 2.5s to attack and 2.5s to release
   for (auto& note : notes) {
-    note.state().setValue(Voice::State::State::Index::attackVolumeEnvelope, 1586);
-    note.state().setValue(Voice::State::State::Index::releaseVolumeEnvelope, 1586);
+    for (auto index = 0; index < note.count(); ++index) {
+      note[index].state().setValue(Voice::State::State::Index::attackVolumeEnvelope, 1586);
+      note[index].state().setValue(Voice::State::State::Index::releaseVolumeEnvelope, 1586);
+    }
   }
 
   std::vector<AUValue> samples;
+
   for (auto& note : notes) {
+    note.start();
+
     [self renderInto:buffer voices:note forCount: keyReleaseCount startingAt: 0];
 
     samples.push_back([buffer left][0]);
@@ -321,7 +326,7 @@ using namespace SF2::Render;
 }
 
 - (void)testLoopingModes {
-  auto state = contexts.context2.makeVoiceState(0, 60, 32);
+  auto state = contexts.context2.makeVoiceCollection(0, 60, 32);
   auto& voice = state[0];
 
   XCTAssertEqual(Voice::Voice::LoopingMode::none, voice.loopingMode());

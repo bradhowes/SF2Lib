@@ -19,9 +19,7 @@ using namespace SF2::Entity::Generator;
 @implementation StateTests
 
 - (void)testInit {
-  auto voiceState{contexts.context2.makeVoiceState(0, 69 + 24, 64)};
-  auto& voice = voiceState[0];
-  auto& state = voice.state();
+  auto state{contexts.context2.makeState(0, 69 + 24, 64)};
 
   XCTAssertEqual(      0, state.unmodulated(Index::startAddressOffset));
   XCTAssertEqual(      0, state.unmodulated(Index::endAddressOffset));

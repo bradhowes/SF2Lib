@@ -25,10 +25,22 @@ public:
   /**
    Construct new channel.
    */
-  ChannelState() noexcept : continuousControllerValues_{}, notePressureValues_{} {
+  ChannelState() noexcept {
+    reset();
+  }
+
+  void reset() {
     continuousControllerValues_.fill(0);
     notePressureValues_.fill(0);
     nrpnValues_.zero();
+    channelPressure_ = 0;
+    pitchWheelValue_ = 0;
+    pitchWheelSensitivity_ = 200;
+    nrpnIndex_ = 0;
+
+    sustainActive_ = false;
+    sostenutoActive_ = false;
+    activeDecoding_ = false;
   }
 
   /**

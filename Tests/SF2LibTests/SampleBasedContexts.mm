@@ -108,7 +108,7 @@ bool PresetTestContextBase::playAudioInTests() {
   return buffer;
 }
 
-- (AVAudioPCMBuffer*)allocateBufferFor:(const TestVoiceState&)voices capacity:(int)sampleCount {
+- (AVAudioPCMBuffer*)allocateBufferFor:(const TestVoiceCollection&)voices capacity:(int)sampleCount {
   int channelCount = int(voices.count());
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:voices.sampleRate()
                                                                          channels:channelCount];
@@ -136,7 +136,7 @@ bool PresetTestContextBase::playAudioInTests() {
 }
 
 - (size_t)renderInto:(AVAudioPCMBuffer*)buffer
-                voices:(TestVoiceState&)voices
+                voices:(TestVoiceCollection&)voices
             forCount:(size_t)sampleCount
           startingAt:(size_t)offset
 {
@@ -151,7 +151,7 @@ bool PresetTestContextBase::playAudioInTests() {
 }
 
 - (size_t)renderInto:(AVAudioPCMBuffer*)buffer
-              voices:(TestVoiceState&)voices
+              voices:(TestVoiceCollection&)voices
             forCount:(size_t)sampleCount
           startingAt:(size_t)offset
    afterRenderSample:(void (^)(size_t))block
