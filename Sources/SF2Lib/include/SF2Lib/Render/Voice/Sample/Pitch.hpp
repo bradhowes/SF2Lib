@@ -52,7 +52,7 @@ public:
    */
   Pitch(const State::State& state) noexcept : state_{state}
   {
-    std::cout << "Pitch init state_ " << &state << '\n';
+    // std::cout << "Pitch init state_ " << &state << '\n';
   }
 
   /**
@@ -63,7 +63,7 @@ public:
    */
   void configure(const Entity::SampleHeader& header) noexcept
   {
-    std::cout << "Pitch configure state_ " << &state_ << '\n';
+    // std::cout << "Pitch configure state_ " << &state_ << '\n';
     initialize(header.originalMIDIKey(), header.pitchCorrection(), header.sampleRate());
   }
 
