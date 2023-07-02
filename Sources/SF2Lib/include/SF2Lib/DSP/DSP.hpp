@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iosfwd>
 
+#include "DSPHeaders/ConstMath.hpp"
 #include "DSPHeaders/DSP.hpp" // AUv3Support include
 #include "SF2Lib/Types.hpp"
 
@@ -29,6 +30,22 @@ inline constexpr Float MaximumAttenuationCentiBels = 1440.0f;
 /// Lowest note frequency that we can generate. This corresponds to C-1 in MIDI nomenclature
 /// (440 * pow(2.0, (N - 69) / 12))
 inline constexpr Float LowestNoteFrequency = Float(8.17579891564370697665253828745335);
+
+namespace AttenuationLookup {
+inline constexpr size_t TableSize = size_t(MaximumAttenuationCentiBels + 1);
+inline constexpr Float generator(size_t index) {
+  // Equivalent to pow(10.0, Float(index) / -200.0)
+  return DSPHeaders::ConstMath::exp(Float(index) / -200.0 * DSPHeaders::ConstMath::Constants<Float>::ln10);
+}
+}
+
+namespace CentsPartialLookup {
+inline constexpr size_t TableSize = size_t(CentsPerOctave);
+inline constexpr Float generator(size_t index) {
+  // 6.875 x 2^(index / 1200) ==> 6.875 x e^(index / 1200 * ln(2))
+  return 6.875 * DSPHeaders::ConstMath::exp(index / 1200.0 * DSPHeaders::ConstMath::Constants<Float>::ln2);
+}
+}
 
 /**
  Convert cents value into a power of 2. There are 1200 cents per power of 2.

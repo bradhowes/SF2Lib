@@ -11,69 +11,29 @@
 
 using namespace SF2;
 using namespace SF2::MIDI;
-static constexpr size_t TableSize = ValueTransformer::TableSize;
+using VT = ValueTransformer;
+using TL = VT::TransformLookup;
 
-static constexpr Float positiveLinear(size_t index) noexcept { return Float(index) / TableSize; }
+TL VT::positiveLinear_ = VT::Make(VT::positiveLinear);
+TL VT::positiveConcave_ = VT::Make(VT::positiveConcave);
+TL VT::positiveConvex_ = VT::Make(VT::positiveConvex);
+TL VT::positiveSwitched_ = VT::Make(VT::positiveSwitched);
 
-static constexpr Float positiveConcave(size_t index) noexcept {
-  return index == (TableSize - 1) ? 1.0 : -40.0 / 96.0 * DSPHeaders::ConstMath::log10((127.0 - index) / 127.0);
-}
+TL VT::negativeLinear_ = VT::Make(VT::negativeLinear);
+TL VT::negativeConcave_ = VT::Make(VT::negativeConcave);
+TL VT::negativeConvex_ = VT::Make(VT::negativeConvex);
+TL VT::negativeSwitched_ = VT::Make(VT::negativeSwitched);
 
-static constexpr Float positiveConvex(size_t index) noexcept {
-  return index == 0.0 ? 0.0 : 1.0 - -40.0 / 96.0 * DSPHeaders::ConstMath::log10(index / 127.0);
-}
+TL VT::positiveLinearBipolar_ = VT::Make(VT::positiveLinear, true);
+TL VT::positiveConcaveBipolar_ = VT::Make(VT::positiveConcave, true);
+TL VT::positiveConvexBipolar_ = VT::Make(VT::positiveConvex, true);
+TL VT::positiveSwitchedBipolar_ = VT::Make(VT::positiveSwitched, true);
 
-static constexpr Float positiveSwitched(size_t index) noexcept { return index < TableSize / 2 ? 0.0 : 1.0; }
+TL VT::negativeLinearBipolar_ = VT::Make(VT::negativeLinear, true);
+TL VT::negativeConcaveBipolar_ = VT::Make(VT::negativeConcave, true);
+TL VT::negativeConvexBipolar_ = VT::Make(VT::negativeConvex, true);
+TL VT::negativeSwitchedBipolar_ = VT::Make(VT::negativeSwitched, true);
 
-static constexpr Float negativeLinear(size_t index) noexcept { return 1.0f - positiveLinear(index); }
-
-static constexpr Float negativeConcave(size_t index) noexcept {
-  return index == 0.0 ? 1.0 : -40.0 / 96.0 * DSPHeaders::ConstMath::log10(index / 127.0);
-}
-
-static constexpr Float negativeConvex(size_t index) noexcept {
-  return index == (TableSize - 1) ? 0.0 : 1.0 - -40.0 / 96.0 * DSPHeaders::ConstMath::log10((127.0 - index) / 127.0);
-}
-
-static constexpr Float negativeSwitched(size_t index) noexcept { return index < TableSize / 2 ? 1.0 : 0.0; }
-
-// Generate lookup tables for the various transforms defined in SF2 spec. Each function is used twice, once to generate
-// a table of unipolar (0-1) values, and again with the `bipolar` adapter to generate values from -1 to +1.
-
-namespace {
-
-using Generator = Float(*)(size_t);
-
-static constexpr std::array<Float, TableSize> make_array(Generator gen, bool is_bipolar = false) noexcept {
-  std::array<Float, TableSize> table = {};
-  for (std::size_t i = 0; i != TableSize; ++i) {
-    Float value = gen(i);
-    if (is_bipolar) value = DSPHeaders::DSP::unipolarToBipolar(value);
-    table[i] = value;
-  }
-  return table;
-}
-}
-
-static constexpr auto positiveLinear_ = make_array(positiveLinear);
-static constexpr auto positiveConcave_ = make_array(positiveConcave);
-static constexpr auto positiveConvex_ = make_array(positiveConvex);
-static constexpr auto positiveSwitched_ = make_array(positiveSwitched);
-
-static constexpr auto negativeLinear_ = make_array(negativeLinear);
-static constexpr auto negativeConcave_ = make_array(negativeConcave);
-static constexpr auto negativeConvex_ = make_array(negativeConvex);
-static constexpr auto negativeSwitched_ = make_array(negativeSwitched);
-
-static constexpr auto positiveLinearBipolar_ = make_array(positiveLinear, true);
-static constexpr auto positiveConcaveBipolar_ = make_array(positiveConcave, true);
-static constexpr auto positiveConvexBipolar_ = make_array(positiveConvex, true);
-static constexpr auto positiveSwitchedBipolar_ = make_array(positiveSwitched, true);
-
-static constexpr auto negativeLinearBipolar_ = make_array(negativeLinear, true);
-static constexpr auto negativeConcaveBipolar_ = make_array(negativeConcave, true);
-static constexpr auto negativeConvexBipolar_ = make_array(negativeConvex, true);
-static constexpr auto negativeSwitchedBipolar_ = make_array(negativeSwitched, true);
 
 const ValueTransformer::TransformArrayType&
 ValueTransformer::selectActive(Kind kind, Direction dir, Polarity pol) noexcept {

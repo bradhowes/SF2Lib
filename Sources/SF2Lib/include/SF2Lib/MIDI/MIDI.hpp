@@ -13,7 +13,7 @@
 #include "SF2Lib/MIDI/Note.hpp"
 
 /**
- Collection of enums and types used to represent MIDI values and state.
+ Collection of enums and types used to represent MIDI v1 values and state.
  */
 namespace SF2::MIDI {
 

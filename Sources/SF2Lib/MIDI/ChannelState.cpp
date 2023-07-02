@@ -8,9 +8,10 @@
 using namespace SF2::MIDI;
 
 void
-ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, int value) noexcept
+ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, int value) 
 {
-  assert(static_cast<int>(cc) >= CCMin && static_cast<int>(cc) <= CCMax);
+  auto rawCC = static_cast<size_t>(cc);
+  if (rawCC < CCMin || rawCC > CCMax) throw std::runtime_error("invalid CC ID");
   continuousControllerValues_[static_cast<size_t>(cc) - CCMin] = value;
 
   switch (cc) {

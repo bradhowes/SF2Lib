@@ -47,12 +47,12 @@ public:
    Set the pressure for a given note. This should only apply for an actively-playing note, and not a new one which
    should use the velocity component.
 
-   @param note the note to set
+   @param key the key (note) to set
    @param value the pressure value to record
    */
-  void setNotePressure(int note, int value) noexcept {
-    assert(note <= Note::Max);
-    notePressureValues_[static_cast<size_t>(note)] = value;
+  void setNotePressure(int key, int value) {
+    if (key < 0 || key > Note::Max) throw std::runtime_error("invalid key");
+    notePressureValues_[static_cast<size_t>(key)] = value;
   }
 
   /**
@@ -61,8 +61,8 @@ public:
    @param key the key to get
    @returns the current pressure value for a key
    */
-  int notePressure(int key) const noexcept {
-    assert(key <= Note::Max);
+  int notePressure(int key) const {
+    if (key < 0 or key > Note::Max) throw std::runtime_error("invalid key");
     return notePressureValues_[static_cast<size_t>(key)];
   }
 
@@ -102,7 +102,12 @@ public:
    @param id the controller ID
    @param value the value to set for the controller
    */
-  void setContinuousControllerValue(MIDI::ControlChange id, int value) noexcept;
+  void setContinuousControllerValue(size_t id, int value) {
+    if (id > 127) throw std::runtime_error("invalid CC ID");
+    continuousControllerValues_[id] = value;
+  }
+
+  void setContinuousControllerValue(MIDI::ControlChange id, int value);
 
   /**
    Get a continuous controller value.
@@ -110,8 +115,8 @@ public:
    @param id the controller ID to get
    @returns the controller value
    */
-  int continuousControllerValue(int id) const noexcept {
-    assert(id >= CCMin && id <= CCMax);
+  int continuousControllerValue(int id) const {
+    if (id < CCMin || id > CCMax) throw std::runtime_error("invalid CC ID");
     return continuousControllerValues_[static_cast<size_t>(id - CCMin)];
   }
 

@@ -1,6 +1,7 @@
 // Copyright © 2020 Brad Howes. All rights reserved.
 
 #include <iostream>
+#include <ranges>
 
 #include <XCTest/XCTest.h>
 
@@ -68,7 +69,11 @@ using namespace SF2::MIDI;
 
 - (void)testContinuousControllerValues {
   ChannelState channel;
-  for (int index = 0; index < 127; index += 10) XCTAssertEqual(0, channel.continuousControllerValue(index));
+  for (int index = ChannelState::CCMin; index <= ChannelState::CCMax; ++index)
+    XCTAssertEqual(0, channel.continuousControllerValue(index));
+
+  XCTAssertThrows(channel.setContinuousControllerValue(ChannelState::CCMax + 1, 123));
+  XCTAssertThrows(channel.continuousControllerValue(ChannelState::CCMin - 1));
 
   channel.setContinuousControllerValue(SF2::MIDI::ControlChange::bankSelectMSB, 123);
   XCTAssertEqual(123, channel.continuousControllerValue(0));
@@ -85,23 +90,47 @@ using namespace SF2::MIDI;
   }
 }
 
-- (void)testActivation {
+- (void)testNRPNActivation {
   ChannelState channelState;
 
   XCTAssertFalse(channelState.isActivelyDecoding());
+
+  // Only activate on 120 nrpnMSB
+  for (auto value : std::ranges::iota_view(0, 128)) {
+    channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, value);
+    XCTAssertEqual(channelState.isActivelyDecoding(), value == 120);
+  }
+
+  // Deactivate on non-120 nrpnMSB
+  channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, 120);
   channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, 119);
   XCTAssertFalse(channelState.isActivelyDecoding());
+
+  // Deactivate on any rpnMSB
   channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, 120);
-  XCTAssertTrue(channelState.isActivelyDecoding());
-  channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, 119);
-  XCTAssertFalse(channelState.isActivelyDecoding());
-  channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, 120);
-  XCTAssertTrue(channelState.isActivelyDecoding());
   channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::rpnMSB, 120);
   XCTAssertFalse(channelState.isActivelyDecoding());
+
+  // Deactivate on any rpnLSB
+  channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, 120);
+  channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::rpnLSB, 120);
+  XCTAssertFalse(channelState.isActivelyDecoding());
+
+  channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, 120);
+  channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::dataEntryLSB, 120);
+  XCTAssertTrue(channelState.isActivelyDecoding());
+
+  // Data entry LSB does not affect activation
+  channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, 120);
+  channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::dataEntryLSB, 120);
+  XCTAssertTrue(channelState.isActivelyDecoding());
+
+  // Data entry MSB does not affect activateion
+  channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::dataEntryLSB, 120);
+  XCTAssertTrue(channelState.isActivelyDecoding());
 }
 
-- (void)testIndexing {
+- (void)testNRPNIndexing {
   ChannelState channelState;
 
   channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, 120);
@@ -124,7 +153,7 @@ using namespace SF2::MIDI;
   XCTAssertEqual(22260, channelState.nrpnIndex());
 }
 
-- (void)testOutOfRangeIndexing {
+- (void)testOutOfRangeNRPNIndexing {
   ChannelState channelState;
   channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, 120);
   channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnLSB, 60);
@@ -132,10 +161,12 @@ using namespace SF2::MIDI;
   XCTAssertNoThrow(channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::dataEntryMSB, 123));
 }
 
-- (void)testSetValue {
+- (void)testNRPNSetValue {
   ChannelState channelState;
   channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, 120);
+
   channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnLSB, 56);
+  channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::dataEntryLSB, 0);
   channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::dataEntryMSB, 123);
   auto z = (123 << 7) - 8192;
   XCTAssertEqual(channelState.nrpnValue(SF2::Entity::Generator::Index(56)), z);

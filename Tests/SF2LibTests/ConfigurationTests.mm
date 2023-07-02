@@ -28,4 +28,16 @@
   XCTAssertEqualObjects(@"foo.bar.blah", Configuration.shared.loggingBase);
 }
 
+- (void)testPrimary {
+  auto z = [Configuration getConfigurationPath];
+  XCTAssertNotNil(z);
+}
+
+- (void)testAlternate {
+  auto z = [Configuration getConfigurationPath: @"Configuration" from: (NSBundle*)(self)];
+  XCTAssertNotNil(z);
+  z = [Configuration getConfigurationPath: @"Blah" from: (NSBundle*)(self)];
+  XCTAssertNil(z);
+}
+
 @end

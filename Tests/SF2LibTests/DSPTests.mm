@@ -2,7 +2,10 @@
 
 #include <XCTest/XCTest.h>
 #include <cmath>
+#include <iostream>
+#include <iomanip>
 
+#include "DSPHeaders/ConstMath.hpp"
 #include "DSPHeaders/DSP.hpp"
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/DSP/DSP.hpp"
@@ -18,7 +21,7 @@ using namespace SF2::DSP;
 @implementation DSPTests
 
 - (void)setUp {
-  self.epsilon = 1.0e-3; // 0.0000001;
+  self.epsilon = 1.0e-12;
 }
 
 - (void)tearDown {
@@ -96,9 +99,15 @@ using namespace SF2::DSP;
 
 - (void)testCentsPartialLookup {
   XCTAssertEqualWithAccuracy(6.875, centsPartialLookup(0), self.epsilon);
-  XCTAssertEqualWithAccuracy(9.72271824132, centsPartialLookup(600), self.epsilon);
-  XCTAssertEqualWithAccuracy(13.7420599819, centsPartialLookup(1199), self.epsilon);
+  XCTAssertEqualWithAccuracy(9.722718241315, centsPartialLookup(600), self.epsilon);
+  XCTAssertEqualWithAccuracy(13.742059981944, centsPartialLookup(1199), self.epsilon);
+
+  constexpr auto lookup_ = DSPHeaders::ConstMath::make_array<Float, DSP::CentsPartialLookup::TableSize>(DSP::CentsPartialLookup::generator);
+  XCTAssertEqualWithAccuracy(6.875, lookup_[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(9.722718241315, lookup_[600], self.epsilon);
+  XCTAssertEqualWithAccuracy(13.742059981944, lookup_[1199], self.epsilon);
 }
+
 
 - (void)testParabolicSineAccuracy {
   for (int index = 0; index < 36000.0; ++index) {
@@ -110,20 +119,19 @@ using namespace SF2::DSP;
 
 - (void)testCentToFrequency {
   XCTAssertEqualWithAccuracy(1.0, centsToFrequency(-1), self.epsilon); // A0
-  XCTAssertEqualWithAccuracy(8.17579891564, centsToFrequency(0), self.epsilon); // A0
+  XCTAssertEqualWithAccuracy(8.1757989156437, centsToFrequency(0), self.epsilon); // A0
   XCTAssertEqualWithAccuracy(55.0, centsToFrequency(3300), self.epsilon); // A1
   XCTAssertEqualWithAccuracy(110.0, centsToFrequency(4500), self.epsilon); // A2
   XCTAssertEqualWithAccuracy(220.0, centsToFrequency(5700), self.epsilon); // A3
-  XCTAssertEqualWithAccuracy(329.627556913, centsToFrequency(6400), self.epsilon); // C4
+  XCTAssertEqualWithAccuracy(329.62755691287, centsToFrequency(6400), self.epsilon); // C4
   XCTAssertEqualWithAccuracy(440.0, centsToFrequency(6900), self.epsilon); // A4
   XCTAssertEqualWithAccuracy(880.0, centsToFrequency(8100), self.epsilon); // A5
   XCTAssertEqualWithAccuracy(1760.0, centsToFrequency(9300), self.epsilon); // A6
   XCTAssertEqualWithAccuracy(3520.0, centsToFrequency(10500), self.epsilon); // A7
-  XCTAssertEqualWithAccuracy(4186.00904481, centsToFrequency(10800), self.epsilon); // C8
+  XCTAssertEqualWithAccuracy(4186.009044809578, centsToFrequency(10800), self.epsilon); // C8
 }
 
 - (void)testCentibelsToAttenuationLookup {
-  self.epsilon = 1.0e-12; // 0.0000001;
   XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuation(-1), self.epsilon);
   XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuation(0), self.epsilon);
   XCTAssertEqualWithAccuracy(0.891250938134, centibelsToAttenuation(10), self.epsilon);
@@ -134,8 +142,13 @@ using namespace SF2::DSP;
   XCTAssertEqualWithAccuracy(0.0, centibelsToAttenuation(1441), self.epsilon);
 }
 
+- (void)testAttenuationLookup {
+  constexpr auto lookup_ = DSPHeaders::ConstMath::make_array<Float, DSP::AttenuationLookup::TableSize>(DSP::AttenuationLookup::generator);
+  XCTAssertEqualWithAccuracy(1.0, lookup_[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(6.3095734448e-08, lookup_[DSP::AttenuationLookup::TableSize - 1], self.epsilon);
+}
+
 - (void)testCentibelsToAttenuattionInterpolated {
-  self.epsilon = 1.0e-12; // 0.0000001;
   XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuationInterpolated(-1.0), self.epsilon);
   XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuationInterpolated(0.0), self.epsilon);
   XCTAssertEqualWithAccuracy(0.891250938134, centibelsToAttenuationInterpolated(10.0), self.epsilon);

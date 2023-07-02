@@ -9,7 +9,7 @@
 #include <iosfwd>
 
 #include "DSPHeaders/ConstMath.hpp"
-
+#include "DSPHeaders/DSP.hpp"
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
 
@@ -30,8 +30,6 @@ public:
   inline constexpr static int MinValue = 0;
   /// Maximum MIDI value that controller can emit
   inline constexpr static int MaxValue = 127;
-
-  static constexpr size_t TableSize = MaxValue + 1;
 
   /**
    Kind specifies the curvature of the MIDI value transformation function.
@@ -87,8 +85,54 @@ public:
     return Float(active_[size_t(std::clamp(controllerValue, MinValue, MaxValue))]);
   }
 
-private:
+  static constexpr size_t TableSize = MaxValue + 1;
 
+  static constexpr Float positiveLinear(size_t index) noexcept {
+    return Float(index) / TableSize;
+  }
+
+  static constexpr Float positiveConcave(size_t index) noexcept {
+    return index == (TableSize - 1) ? 1.0 : -40.0 / 96.0 * DSPHeaders::ConstMath::log10((127.0 - index) / 127.0);
+  }
+
+  static constexpr Float positiveConvex(size_t index) noexcept {
+    return index == 0.0 ? 0.0 : 1.0 - -40.0 / 96.0 * DSPHeaders::ConstMath::log10(index / 127.0);
+  }
+
+  static constexpr Float positiveSwitched(size_t index) noexcept {
+    return index < TableSize / 2 ? 0.0 : 1.0;
+  }
+
+  static constexpr Float negativeLinear(size_t index) noexcept {
+    return 1.0f - positiveLinear(index);
+  }
+
+  static constexpr Float negativeConcave(size_t index) noexcept {
+    return index == 0.0 ? 1.0 : -40.0 / 96.0 * DSPHeaders::ConstMath::log10(index / 127.0);
+  }
+
+  static constexpr Float negativeConvex(size_t index) noexcept {
+    return index == (TableSize - 1) ? 0.0 : 1.0 - -40.0 / 96.0 * DSPHeaders::ConstMath::log10((127.0 - index) / 127.0);
+  }
+
+  static constexpr Float negativeSwitched(size_t index) noexcept {
+    return index < TableSize / 2 ? 1.0 : 0.0;
+  }
+
+  using Generator = Float(*)(size_t);
+  using TransformLookup = std::array<Float, TableSize>;
+
+  static constexpr TransformLookup Make(Generator gen, bool is_bipolar = false) noexcept {
+    TransformLookup table = {};
+    for (std::size_t i = 0; i != TableSize; ++i) {
+      Float value = gen(i);
+      if (is_bipolar) value = ::DSPHeaders::DSP::unipolarToBipolar(value);
+      table[i] = value;
+    }
+    return table;
+  }
+
+private:
   using TransformArrayType = std::array<Float, TableSize>;
 
   /**
@@ -111,6 +155,27 @@ private:
   static const TransformArrayType& selectActive(Kind kind, Direction direction, Polarity polarity) noexcept;
 
   const TransformArrayType& active_;
+
+  static TransformLookup positiveLinear_;
+  static TransformLookup positiveConcave_;
+  static TransformLookup positiveConvex_;
+  static TransformLookup positiveSwitched_;
+
+  static TransformLookup negativeLinear_;
+  static TransformLookup negativeConcave_;
+  static TransformLookup negativeConvex_;
+  static TransformLookup negativeSwitched_;
+
+  static TransformLookup positiveLinearBipolar_;
+  static TransformLookup positiveConcaveBipolar_;
+  static TransformLookup positiveConvexBipolar_;
+  static TransformLookup positiveSwitchedBipolar_;
+
+  static TransformLookup negativeLinearBipolar_;
+  static TransformLookup negativeConcaveBipolar_;
+  static TransformLookup negativeConvexBipolar_;
+  static TransformLookup negativeSwitchedBipolar_;
+
 };
 
 } // namespace SF2::MIDI

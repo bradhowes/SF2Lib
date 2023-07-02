@@ -1,7 +1,5 @@
 // Copyright © 2020 Brad Howes. All rights reserved.
 
-#include <iostream>
-
 #include "SF2Lib/Types.hpp"
 
 static SF2::Float epsilon = 1.0e-8;

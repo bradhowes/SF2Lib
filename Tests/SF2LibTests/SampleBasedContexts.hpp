@@ -31,10 +31,6 @@ struct TestVoiceCollection {
   SF2::Float sampleRate() const { return sampleRate_; }
   size_t count() const { return presetConfigs_.size(); }
 
-  TestVoiceCollection voiceCollection(int midiKey, int midiVelocity) {
-    return TestVoiceCollection(midiKey, midiVelocity, preset_, sampleRate_, channelState_);
-  }
-
   void start() {
     for (size_t index = 0; index < presetConfigs_.size(); ++index) {
       voices_[index].start(presetConfigs_[index]);
@@ -76,11 +72,12 @@ struct PresetTestContextBase
 
   const SF2::Render::Preset& preset(int presetIndex) const { return presets_[presetIndex]; }
 
-  TestVoiceCollection makeVoiceCollection(int presetIndex, int midiNote, int midiVelocity) const {
+  TestVoiceCollection makeVoiceCollection(int presetIndex, int midiNote, int midiVelocity) {
+    channelState_.reset();
     return {midiNote, midiVelocity, preset(presetIndex), sampleRate_, channelState_};
   }
 
-  std::vector<TestVoiceCollection> makeVoicesCollection(int presetIndex, const std::vector<int>& midiNotes, int midiVelocity) const {
+  std::vector<TestVoiceCollection> makeVoicesCollection(int presetIndex, const std::vector<int>& midiNotes, int midiVelocity) {
     std::vector<TestVoiceCollection> notes;
     for (auto midiNote : midiNotes) {
       notes.emplace_back(makeVoiceCollection(presetIndex, midiNote, midiVelocity));

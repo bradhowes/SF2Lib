@@ -39,8 +39,6 @@ Voice::start(const State::Config& config) noexcept
   os_signpost_interval_begin(log_, startSignpost_, "start");
 
   config.sampleSource().load();
-  assert(config.sampleSource().isLoaded());
-
   state_.prepareForVoice(config);
   loopingMode_ = loopingMode();
 
