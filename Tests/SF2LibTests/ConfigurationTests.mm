@@ -36,7 +36,7 @@
 - (void)testAlternate {
   auto z = [Configuration getConfigurationPath: @"Configuration" from: (NSBundle*)(self)];
   XCTAssertNotNil(z);
-  z = [Configuration getConfigurationPath: @"Blah" from: (NSBundle*)(self)];
+  z = [Configuration getConfigurationPath: @"Blah" from: NULL];
   XCTAssertNil(z);
 }
 

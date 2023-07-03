@@ -26,15 +26,7 @@ static dispatch_once_t onceToken;
   onceToken = NULL;
 }
 
-#if defined(SWIFTPM_MODULE_BUNDLE)
-
-+ (NSString*)getConfigurationPath:(NSString*)name from:(NSBundle*)bundle {
-  @try {
-    return [bundle pathForResource:name ofType:@"plist"];
-  } @catch (NSException *exception) {
-  }
-  // Most likely we are in a unit test for something that depends on SF2Lib -- either the build system is not putting
-  // stuff in the right location, or the code for SWIFTPM_MODULE_BUNDLE is not accounting for the test case.
++ (NSString*)locate:(NSString*)name ofType:(NSString*)type {
   NSArray<NSBundle*>* allBundles = [NSBundle allBundles];
   for (int index = 0; index < [allBundles count]; ++index) {
     NSBundle* bundle = [allBundles objectAtIndex:index];
@@ -50,6 +42,18 @@ static dispatch_once_t onceToken;
     }
   }
   return NULL;
+}
+
+#if defined(SWIFTPM_MODULE_BUNDLE)
+
++ (NSString*)getConfigurationPath:(NSString*)name from:(nullable NSBundle*)bundle {
+  if (bundle) {
+    @try {
+      return [bundle pathForResource:name ofType:@"plist"];
+    } @catch (NSException *exception) {
+    }
+  }
+  return [Configuration locate:name ofType:@"plist"];
 }
 
 + (NSString*)getConfigurationPath {

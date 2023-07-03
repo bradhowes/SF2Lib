@@ -5,23 +5,17 @@ DEST = -scheme SF2Lib-Package -destination platform="$(PLATFORM_MACOS)"
 
 default: post
 
-build.run:
-#   swift package generate-xcodeproj
+build:
 	swift package resolve
 	xcodebuild build $(DEST)
-	touch build.run
 
-build: build.run
-
-test.run: build.run
+test:
+	rm -rf WD.xcresult WD
 	xcodebuild test $(DEST) -enableCodeCoverage YES ENABLE_TESTING_SEARCH_PATHS=YES -resultBundlePath $PWD
-	touch test.run
-
-test: test.run
 
 # Extract coverage info for SF2Lib -- expects defintion of env variable GITHUB_ENV
 
-cov.txt: test.run
+cov.txt: test
 	xcrun xccov view --report --only-targets WD.xcresult > cov.txt
 
 coverage: cov.txt

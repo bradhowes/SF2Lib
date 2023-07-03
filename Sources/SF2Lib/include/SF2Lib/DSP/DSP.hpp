@@ -48,6 +48,20 @@ inline constexpr Float generator(size_t index) {
 }
 
 /**
+ Lookup table for SF2 pan values, where -500 means only left-channel, and +500 means only right channel. Other values
+ give attenuation values for the left and right channels between 0.0 and 1.0. These values come from the sine function
+ for a pleasing audio experience when panning.
+
+ NOTE: FluidSynth has a table size of 1002 for some reason. Thus its values are slightly off from what this table
+ contains. I don't see a reason for the one extra element.
+ */
+namespace PanLookup {
+inline constexpr size_t TableSize = 500 + 500 + 1;
+inline constexpr Float Scaling = DSPHeaders::ConstMath::Constants<Float>::HalfPI / (TableSize - 1);
+static constexpr Float generator(size_t index) { return DSPHeaders::ConstMath::sin(index * Scaling); }
+}
+
+/**
  Convert cents value into a power of 2. There are 1200 cents per power of 2.
  
  @param value the value to convert

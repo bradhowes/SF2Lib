@@ -32,7 +32,14 @@
 
 + (NSURL*)getResourceUrl:(int)urlIndex
 {
-  return [[TestResources getSoundFontUrls] objectAtIndex:urlIndex];
+  NSPredicate* onlyGood = [NSPredicate predicateWithFormat: @"not absoluteString contains %@", @"ZZZ"];
+  return [[[TestResources getSoundFontUrls] filteredArrayUsingPredicate:onlyGood] objectAtIndex:urlIndex];
+}
+
++ (NSURL*)getBadResourceUrl:(int)urlIndex
+{
+  NSPredicate* onlyBad = [NSPredicate predicateWithFormat: @"absoluteString contains %@", @"ZZZ"];
+  return [[[TestResources getSoundFontUrls] filteredArrayUsingPredicate:onlyBad] objectAtIndex:urlIndex];
 }
 
 @end

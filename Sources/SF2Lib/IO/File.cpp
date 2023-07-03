@@ -14,7 +14,7 @@ File::LoadResponse
 File::load()
 {
   off_t fileSize = ::lseek(fd_, 0, SEEK_END);
-  if (fileSize == off_t(-1)) return LoadResponse::invalidFormat;
+  if (fileSize < 4) return LoadResponse::invalidFormat;
 
   size_ = fileSize;
   sampleDataBegin_ = 0;
@@ -22,8 +22,11 @@ File::load()
   rawSamples_.clear();
 
   auto riff = Pos(fd_, 0, size_).makeChunkList();
-  if (riff.tag() != Tags::riff) return LoadResponse::invalidFormat;
-  if (riff.kind() != Tags::sfbk) throw LoadResponse::invalidFormat;
+  if (riff.tag() != Tags::riff)
+    return LoadResponse::invalidFormat;
+
+  if (riff.kind() != Tags::sfbk)
+    throw LoadResponse::invalidFormat;
 
   try {
     auto p0 = riff.begin();
@@ -39,7 +42,6 @@ File::load()
         switch (Tags(chunk.tag().rawValue())) {
           case Tags::ifil: soundFontVersion_.load(chunk.begin()); break;
           case Tags::isng: soundEngine_ = chunk.extract(); break;
-          case Tags::irom: rom_ = chunk.extract(); break;
           case Tags::iver: fileVersion_.load(chunk.begin()); break;
           case Tags::inam: embeddedName_ = chunk.extract(); break;
           case Tags::icrd: embeddedCreationDate_ = chunk.extract(); break;

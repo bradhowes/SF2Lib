@@ -55,7 +55,6 @@ public:
   startVoiceSignpost_{os_signpost_id_generate(log_)},
   stopForExclusiveVoiceSignpost_{os_signpost_id_generate(log_)}
   {
-    // Voice::State::GenValue::Allocator
     available_.reserve(voiceCount);
     voices_.reserve(voiceCount);
     for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex) {
@@ -334,6 +333,7 @@ private:
   os_signpost_id_t noteOffSignpost_;
   os_signpost_id_t startVoiceSignpost_;
   os_signpost_id_t stopForExclusiveVoiceSignpost_;
+  friend class EngineTestInjector;
 };
 
 } // end namespace SF2::Render

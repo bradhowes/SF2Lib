@@ -16,6 +16,17 @@ using namespace SF2::Render::Engine;
 @interface EngineTests : SamplePlayingTestCase
 @end
 
+namespace SF2::Render::Engine {
+struct EngineTestInjector {
+  void testDoMIDIEvent(Engine& engine, const AUMIDIEvent& midiEvent) {
+    engine.doMIDIEvent(midiEvent);
+  }
+  void testChangeProgram(Engine& engine, int program) {
+    engine.changeProgram(program);
+  }
+};
+}
+
 static void
 renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int until) {
   while (frameIndex++ < until) {
@@ -239,6 +250,40 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
   [self playSamples: dryBuffer count: sampleCount];
   // [self playSamples: chorusBuffer count: sampleCount];
+}
+
+//- (void)testDoMIDIEvent {
+//  Float sampleRate{48000.0};
+//  AUAudioFrameCount frameCount = 512;
+//  AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
+//  Engine engine(sampleRate, 6, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+//  engine.load(contexts.context0.file(), 1);
+//  NSString* name = [NSString stringWithCString:engine.activePresetName().c_str() encoding:NSUTF8StringEncoding];
+//  NSLog(@"name: |%@|", name);
+//  XCTAssertTrue([name isEqualToString:@"Piano 1"]);
+//
+//  const NSURL* other = contexts.context1.url();
+//
+//  NSMutableData* data = [[NSMutableData alloc] initWithLength:
+//
+//  AUMIDIEvent mi;
+//
+//}
+
+- (void)testChangeProgram {
+  Float sampleRate{48000.0};
+  AUAudioFrameCount frameCount = 512;
+  AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
+  Engine engine(sampleRate, 6, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+  engine.load(contexts.context0.file(), 1);
+  NSString* name = [NSString stringWithCString:engine.activePresetName().c_str() encoding:NSUTF8StringEncoding];
+  NSLog(@"name: |%@|", name);
+  XCTAssertTrue([name isEqualToString:@"Piano 1"]);
+  EngineTestInjector eti;
+  eti.testChangeProgram(engine, 2);
+  name = [NSString stringWithCString:engine.activePresetName().c_str() encoding:NSUTF8StringEncoding];
+  NSLog(@"name: |%@|", name);
+  XCTAssertTrue([name isEqualToString:@"Piano 3"]);
 }
 
 - (void)testYamahaPianoChordRender {

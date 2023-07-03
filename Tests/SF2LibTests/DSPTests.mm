@@ -95,6 +95,11 @@ using namespace SF2::DSP;
   SF2::DSP::panLookup(501, left, right);
   XCTAssertEqualWithAccuracy(0.0, left, self.epsilon);
   XCTAssertEqualWithAccuracy(1.0, right, self.epsilon);
+
+  constexpr auto lookup_ = DSPHeaders::ConstMath::make_array<Float, DSP::PanLookup::TableSize>(DSP::PanLookup::generator);
+  XCTAssertEqualWithAccuracy(0.0, lookup_[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.707106781187, lookup_[500], self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0, lookup_[DSP::PanLookup::TableSize - 1], self.epsilon);
 }
 
 - (void)testCentsPartialLookup {

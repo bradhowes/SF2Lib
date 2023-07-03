@@ -5,6 +5,7 @@
 #include <XCTest/XCTest.h>
 
 #include "../SampleBasedContexts.hpp"
+#include "../TestResources.h"
 
 #include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/Render/Voice/Sample/NormalizedSampleSource.hpp"
@@ -106,6 +107,16 @@ using namespace SF2::Render::Voice::Sample;
 - (void)testDump {
   const auto& file = contexts->context0.file();
   XCTAssertNoThrow(file.dump());
+  XCTAssertNoThrow(file.dumpThreaded());
 }
 
+- (void)testLoad {
+  XCTAssertThrows(SF2::IO::File("/dev/null"));
+  XCTAssertThrows(SF2::IO::File("/dev/zero"));
+  XCTAssertThrows(SF2::IO::File("/dev/urandom"));
+  NSURL* b1 = [TestResources getBadResourceUrl:0];
+  XCTAssertThrows(SF2::IO::File([[b1 absoluteString] UTF8String]));
+  NSURL* b2 = [TestResources getBadResourceUrl:1];
+  XCTAssertThrows(SF2::IO::File([[b2 absoluteString] UTF8String]));
+}
 @end

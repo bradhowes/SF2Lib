@@ -40,7 +40,11 @@ public:
   {
     fd_ = ::open(path, O_RDONLY);
     if (fd_ == -1) throw std::runtime_error("file not found");
-    if (load() != LoadResponse::ok) throw Format::error;
+    if (load() != LoadResponse::ok) {
+      ::close(fd_);
+      fd_ = -1;
+      throw Format::error;
+    }
   }
 
   /**
@@ -132,7 +136,6 @@ private:
   Entity::Version fileVersion_;
 
   std::string soundEngine_;
-  std::string rom_;
   std::string embeddedName_;
   std::string embeddedCreationDate_;
   std::string embeddedAuthor_;
