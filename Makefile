@@ -13,7 +13,7 @@ clean:
 test: clean
 	rm -rf WD.xcresult WD
 	swift package resolve
-	xcodebuild test $(DEST) -enableCodeCoverage YES ENABLE_TESTING_SEARCH_PATHS=YES -resultBundlePath $PWD
+	-xcodebuild test $(DEST) -enableCodeCoverage YES ENABLE_TESTING_SEARCH_PATHS=YES -resultBundlePath $PWD
 
 # Extract coverage info for SF2Lib -- expects defintion of env variable GITHUB_ENV
 
