@@ -5,12 +5,14 @@ DEST = -scheme SF2Lib-Package -destination platform="$(PLATFORM_MACOS)"
 
 default: post
 
-build:
-	swift package resolve
-	xcodebuild build $(DEST)
+clean:
+	@echo "-- removing cov.txt percentage.txt"
+	@-rm -rf cov.txt percentage.txt WD WD.xcresult build.run test.run
+	@xcodebuild clean $(DEST)
 
-test:
+test: clean
 	rm -rf WD.xcresult WD
+	swift package resolve
 	xcodebuild test $(DEST) -enableCodeCoverage YES ENABLE_TESTING_SEARCH_PATHS=YES -resultBundlePath $PWD
 
 # Extract coverage info for SF2Lib -- expects defintion of env variable GITHUB_ENV
@@ -32,10 +34,5 @@ post: percentage
 	@if [[ -n "$$GITHUB_ENV" ]]; then \
 		echo "PERCENTAGE=$$(< percentage.txt)" >> $$GITHUB_ENV; \
 	fi
-
-clean:
-	@echo "-- removing cov.txt percentage.txt"
-	@-rm -rf cov.txt percentage.txt WD WD.xcresult build.run test.run
-	@xcodebuild clean $(DEST)
 
 .PHONY: coverage clean build test post percentage coverage

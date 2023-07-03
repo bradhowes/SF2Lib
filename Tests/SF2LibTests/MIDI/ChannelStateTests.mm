@@ -1,7 +1,6 @@
 // Copyright © 2020 Brad Howes. All rights reserved.
 
 #include <iostream>
-#include <ranges>
 
 #include <XCTest/XCTest.h>
 
@@ -96,7 +95,7 @@ using namespace SF2::MIDI;
   XCTAssertFalse(channelState.isActivelyDecoding());
 
   // Only activate on 120 nrpnMSB
-  for (auto value : std::ranges::iota_view(0, 128)) {
+  for (auto value = 0; value < 128; ++ value) {
     channelState.setContinuousControllerValue(SF2::MIDI::ControlChange::nrpnMSB, value);
     XCTAssertEqual(channelState.isActivelyDecoding(), value == 120);
   }
