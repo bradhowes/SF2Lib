@@ -4,10 +4,12 @@
 /*.xcodeproj
 xcuserdata/
 DerivedData/
+.DerivedData-macos/
+.workspace/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 build.run
 test.run
-cov.txt
+coverage.txt
 percentage.txt
 WD
 WD.xcresult/
