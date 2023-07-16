@@ -17,8 +17,9 @@ using namespace SF2::Render::Envelope;
 
 namespace SF2::Render::Envelope {
 struct EnvelopeTestInjector {
-  static Generator make(Float sampleRate, Float delay, Float attack, Float hold, Float decay, int sustain, Float release) {
-    return Generator(sampleRate, Generator::Kind::volume, delay, attack, hold, decay, sustain, release);
+  static Generator make(Float sampleRate, size_t voiceIndex, Float delay, Float attack, Float hold, Float decay,
+                        int sustain, Float release) {
+    return Generator(sampleRate, Generator::Kind::volume, voiceIndex, delay, attack, hold, decay, sustain, release);
   }
   static AUValue sustain(const Generator& gen) { return gen.sustain(); }
 };
@@ -31,7 +32,7 @@ struct EnvelopeTestInjector {
 @implementation EnvelopeTests
 
 - (void)testGateOnOff {
-  auto gen = Generator(48000.0, Generator::Kind::volume);
+  auto gen = Generator(48000.0, Generator::Kind::volume, 1);
   XCTAssertEqual(0.0, gen.value());
   XCTAssertEqual(StageIndex::idle, gen.activeIndex());
   XCTAssertEqual(0.0, gen.getNextValue());
@@ -50,7 +51,7 @@ struct EnvelopeTestInjector {
 
 - (void)testDelay {
   auto epsilon = 0.002;
-  auto gen = EnvelopeTestInjector::make(1.0, 3, 0, 0, 0, 0, 0);
+  auto gen = EnvelopeTestInjector::make(1.0, 1, 3, 0, 0, 0, 0, 0);
   XCTAssertEqual(0.0, gen.value());
   XCTAssertEqual(StageIndex::idle, gen.activeIndex());
   XCTAssertEqual(0.0, gen.getNextValue());
@@ -64,7 +65,7 @@ struct EnvelopeTestInjector {
 
 - (void)testNoDelayNoAttack {
   auto epsilon = 0.002;
-  auto gen = EnvelopeTestInjector::make(1.0, 0, 0, 1, 0, 0, 0);
+  auto gen = EnvelopeTestInjector::make(1.0, 1, 0, 0, 1, 0, 0, 0);
   gen.gate(true);
   XCTAssertEqual(StageIndex::hold, gen.activeIndex());
   XCTAssertEqualWithAccuracy(1.0, gen.getNextValue(), epsilon);
@@ -73,7 +74,7 @@ struct EnvelopeTestInjector {
 
 - (void)testAttackCurvature {
   auto epsilon = 0.001;
-  auto gen = EnvelopeTestInjector::make(1.0, 0, 10, 0, 0, 0, 0);
+  auto gen = EnvelopeTestInjector::make(1.0, 1, 0, 10, 0, 0, 0, 0);
   gen.gate(true);
   XCTAssertEqual(0.0, gen.value());
   XCTAssertEqual(StageIndex::attack, gen.activeIndex());
@@ -93,7 +94,7 @@ struct EnvelopeTestInjector {
 
 - (void)testHold {
   auto epsilon = 0.002;
-  auto gen = EnvelopeTestInjector::make(1.0, 0, 0, 3, 0, 200, 0);
+  auto gen = EnvelopeTestInjector::make(1.0, 1, 0, 0, 3, 0, 200, 0);
   gen.gate(true);
   XCTAssertEqualWithAccuracy(1.0, gen.value(), epsilon);
   XCTAssertEqual(StageIndex::hold, gen.activeIndex());
@@ -105,7 +106,7 @@ struct EnvelopeTestInjector {
 
 - (void)testDecay {
   auto epsilon = 0.001;
-  auto gen = EnvelopeTestInjector::make(1.0, 0, 0, 0, 5, 500, 0);
+  auto gen = EnvelopeTestInjector::make(1.0, 1, 0, 0, 0, 5, 500, 0);
   gen.gate(true);
   XCTAssertEqual(StageIndex::decay, gen.activeIndex());
   XCTAssertEqualWithAccuracy(0.9, gen.getNextValue(), epsilon);
@@ -120,7 +121,7 @@ struct EnvelopeTestInjector {
 
 - (void)testDecayAborted {
   auto epsilon = 0.001;
-  auto gen = EnvelopeTestInjector::make(1.0, 0, 0, 0, 5, 500, 0);
+  auto gen = EnvelopeTestInjector::make(1.0, 1, 0, 0, 0, 5, 500, 0);
   gen.gate(true);
   XCTAssertEqual(StageIndex::decay, gen.activeIndex());
   XCTAssertEqualWithAccuracy(0.9, gen.getNextValue(), epsilon);
@@ -131,7 +132,7 @@ struct EnvelopeTestInjector {
 }
 
 - (void)testSustain {
-  auto gen = EnvelopeTestInjector::make(1.0, 0, 0, 0, 0, 750, 0);
+  auto gen = EnvelopeTestInjector::make(1.0, 1, 0, 0, 0, 0, 750, 0);
   gen.gate(true);
   XCTAssertEqual(0.25, gen.value());
   XCTAssertEqual(StageIndex::sustain, gen.activeIndex());
@@ -143,7 +144,7 @@ struct EnvelopeTestInjector {
 
 - (void)testRelease {
   auto epsilon = 0.001;
-  auto gen = EnvelopeTestInjector::make(1.0, 0, 0, 0, 0, 500, 5);
+  auto gen = EnvelopeTestInjector::make(1.0, 1, 0, 0, 0, 0, 500, 5);
   gen.gate(true);
   XCTAssertEqual(0.5, gen.value());
   XCTAssertEqual(StageIndex::sustain, gen.activeIndex());
@@ -161,7 +162,7 @@ struct EnvelopeTestInjector {
 - (void)testVolumeEnvelopeSustainLevel {
   Float epsilon = 0.000001;
   State::State state{contexts.context2.makeState(0, 64, 32)};
-  auto gen = Generator(state.sampleRate(), Generator::Kind::volume);
+  auto gen = Generator(state.sampleRate(), Generator::Kind::volume, 1);
   gen.configure(state);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 0);
@@ -184,7 +185,7 @@ struct EnvelopeTestInjector {
 - (void)testModulationEnvelopeSustainLevel {
   Float epsilon = 0.000001;
   State::State state{contexts.context2.makeState(0, 64, 32)};
-  auto gen = Generator(state.sampleRate(), Generator::Kind::modulation);
+  auto gen = Generator(state.sampleRate(), Generator::Kind::modulation, 1);
   gen.configure(state);
 
   state.setValue(State::State::Index::sustainModulatorEnvelope, 0);
@@ -207,7 +208,7 @@ struct EnvelopeTestInjector {
 - (void)testKeyToMod {
   Float epsilon = 0.000001;
   auto s1 = contexts.context2.makeState(0, 60, 32);
-  auto gen = Generator(s1.sampleRate(), Generator::Kind::volume);
+  auto gen = Generator(s1.sampleRate(), Generator::Kind::volume, 1);
 
   // 1s hold duration
   s1.setValue(State::State::Index::holdVolumeEnvelope, 0);

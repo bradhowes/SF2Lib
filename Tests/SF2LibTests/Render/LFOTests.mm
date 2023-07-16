@@ -13,13 +13,17 @@ using namespace SF2::Render;
 using namespace SF2::Render::Voice;
 
 namespace SF2::Render {
+
+template <enum struct LFOKind Kind>
 struct LFOTestInjector {
-  static LFO make(Float sampleRate, Float frequency, Float delay) {
-    return LFO(sampleRate, LFO::Kind::modulator, frequency, delay);
+  using Value = typename LFO<Kind>::Value;
+
+  static LFO<Kind> make(Float sampleRate, Float frequency, Float delay) {
+    return LFO<Kind>(sampleRate, frequency, delay);
   }
   
-  Float delaySampleCount(LFO& lfo) const { return lfo.delaySampleCount_; }
-  Float increment(LFO& lfo) const noexcept { return lfo.increment_; }
+  Value delaySampleCount(LFO<Kind>& lfo) const noexcept { return Value(lfo.delaySampleCount_); }
+  Value increment(LFO<Kind>& lfo) const noexcept { return Value(lfo.increment_); }
 };
 }
 
@@ -40,78 +44,80 @@ struct LFOTestInjector {
 }
 
 - (void)testSamples {
-  auto osc = LFOTestInjector::make(8.0, 1.0, 0.0);
-  XCTAssertEqualWithAccuracy(osc.value(), 0.0, epsilon);
-  XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
-  XCTAssertEqualWithAccuracy(osc.value(), 0.5, epsilon);
-  XCTAssertEqualWithAccuracy(osc.value(), 0.5, epsilon);
-  XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.5, epsilon);
-  XCTAssertEqualWithAccuracy(osc.value(), 1.0, epsilon);
-  XCTAssertEqualWithAccuracy(osc.value(), 1.0, epsilon);
-  XCTAssertEqualWithAccuracy(osc.getNextValue(), 1.0, epsilon);
-  XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.5, epsilon);
-  XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
-  XCTAssertEqualWithAccuracy(osc.getNextValue(), -0.5, epsilon);
-  XCTAssertEqualWithAccuracy(osc.getNextValue(), -1.0, epsilon);
-  XCTAssertEqualWithAccuracy(osc.getNextValue(), -0.5, epsilon);
-  XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
+  auto osc = LFOTestInjector<LFOKind::modulator>::make(8.0, 1.0, 0.0);
+  XCTAssertEqualWithAccuracy(osc.value().val, 0.0, epsilon);
+  XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
+  XCTAssertEqualWithAccuracy(osc.value().val, 0.5, epsilon);
+  XCTAssertEqualWithAccuracy(osc.value().val, 0.5, epsilon);
+  XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.5, epsilon);
+  XCTAssertEqualWithAccuracy(osc.value().val, 1.0, epsilon);
+  XCTAssertEqualWithAccuracy(osc.value().val, 1.0, epsilon);
+  XCTAssertEqualWithAccuracy(osc.getNextValue().val, 1.0, epsilon);
+  XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.5, epsilon);
+  XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
+  XCTAssertEqualWithAccuracy(osc.getNextValue().val, -0.5, epsilon);
+  XCTAssertEqualWithAccuracy(osc.getNextValue().val, -1.0, epsilon);
+  XCTAssertEqualWithAccuracy(osc.getNextValue().val, -0.5, epsilon);
+  XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
 }
 
 - (void)testDelay {
   {
-    auto osc = LFOTestInjector::make(8.0, 1.0, 0.125);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.5, epsilon);
+    auto osc = LFOTestInjector<LFOKind::modulator>::make(8.0, 1.0, 0.125);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.5, epsilon);
   }
   {
-    auto osc = LFOTestInjector::make(8.0, 1.0, 0.25);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.5, epsilon);
+    auto osc = LFOTestInjector<LFOKind::modulator>::make(8.0, 1.0, 0.25);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.5, epsilon);
   }
 }
 
 - (void)testConfig {
   {
-    auto osc = LFOTestInjector::make(8.0, 1.0, 0.125);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.5, epsilon);
+    auto osc = LFOTestInjector<LFOKind::modulator>::make(8.0, 1.0, 0.125);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.5, epsilon);
   }
   {
-    auto osc = LFOTestInjector::make(8.0, 1.0, 0.0);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.5, epsilon);
+    auto osc = LFOTestInjector<LFOKind::modulator>::make(8.0, 1.0, 0.0);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.5, epsilon);
   }
   {
-    auto osc = LFOTestInjector::make(8.0, 2.0, 0.0);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 1.0, epsilon);
+    auto osc = LFOTestInjector<LFOKind::modulator>::make(8.0, 2.0, 0.0);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 1.0, epsilon);
   }
   {
-    auto osc = LFOTestInjector::make(8.0, 1.0, 0.0);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.0, epsilon);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 0.5, epsilon);
-    XCTAssertEqualWithAccuracy(osc.getNextValue(), 1.0, epsilon);
+    auto osc = LFOTestInjector<LFOKind::modulator>::make(8.0, 1.0, 0.0);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.0, epsilon);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 0.5, epsilon);
+    XCTAssertEqualWithAccuracy(osc.getNextValue().val, 1.0, epsilon);
   }
 }
 
 - (void)testConfigFromState {
-  LFOTestInjector lti;
+  LFOTestInjector<LFOKind::vibrato> lti;
   State::State state{contexts.context2.makeState(0, 64, 32)};
-  auto osc = LFO(state.sampleRate(), LFO::Kind::vibrato);
+  auto osc = VibLFO(state.sampleRate());
   
   state.setValue(Generator::Index::delayVibratoLFO, -32768);
   state.setValue(Generator::Index::frequencyVibratoLFO, 0);
   osc.configure(state);
-  XCTAssertEqual(lti.delaySampleCount(osc), 0);
-  XCTAssertEqualWithAccuracy(lti.increment(osc), 0.000681316576304, epsilon);
+
+  XCTAssertEqual(lti.delaySampleCount(osc).val, 0);
+  XCTAssertEqualWithAccuracy(lti.increment(osc).val, 0.000681316576304, epsilon);
   
   state.setValue(Generator::Index::delayVibratoLFO, -7972); // ~10 msec
   osc.configure(state);
-  XCTAssertEqual(lti.delaySampleCount(osc), 480);
+
+  XCTAssertEqual(lti.delaySampleCount(osc).val, 480);
   state.setValue(Generator::Index::delayVibratoLFO, 0);
 }
 

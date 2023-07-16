@@ -93,7 +93,12 @@ public:
   /**
    Stop the voice. After this, it will just produce 0.0 if rendered.
    */
-  void stop() noexcept { active_ = false; }
+  void stop() noexcept {
+    os_log_debug(log_, "stop voice: %zu", voiceIndex_);
+    active_ = false;
+    gainEnvelope_.stop();
+    sampleGenerator_.stop();
+  }
 
   /// @returns true if this voice is still rendering interesting samples
   bool isActive() const noexcept { return active_; }
@@ -154,15 +159,18 @@ public:
 
    @returns next sample
    */
-  Float renderSample() noexcept {
-    if (!active_) { return 0.0; }
+  Float renderSample(bool debug = false) noexcept {
+    if (!active_) {
+      assert(!gainEnvelope_.isActive() && !sampleGenerator_.isActive());
+      return 0.0;
+    }
 
     // Capture the current state of the modulators and envelopes.
     auto modLFO = modulatorLFO_.getNextValue();
     auto vibLFO = vibratoLFO_.getNextValue();
     auto modEnv = modulatorEnvelope_.getNextValue();
     auto volEnv = gainEnvelope_.getNextValue();
-    
+
     // According to FluidSynth this is the right thing to do.
     if (gainEnvelope_.isDelayed()) return 0.0;
 
@@ -173,7 +181,7 @@ public:
     // Calculate the low-pass filter parameters. Only the frequency can be affected by an LFO or mod envelope, but both
     // can have external modulators attached to their primary state value.
     auto frequency = (state_.modulated(Index::initialFilterCutoff) +
-                      state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO +
+                      state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO.val +
                       state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv);
     auto resonance = state_.modulated(Index::initialFilterResonance);
 
@@ -182,6 +190,9 @@ public:
 
     // Finally, calculate gain / attenuation to apply to filtered result and return attenuated value.
     auto gain = calculateGain(modLFO, volEnv);
+    if (debug) {
+      os_log_debug(log_, "renderSample modEnv: %f volEnv: %f gain: %f sample: %f", modEnv, volEnv, gain, sample);
+    }
 
     if (!gainEnvelope_.isActive() || !sampleGenerator_.isActive()) stop();
 
@@ -200,7 +211,7 @@ public:
     SF2::AUValue reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
 
     for (; index < frameCount; ++index) {
-      Float sample = isDone() ? 0.0 : renderSample();
+      Float sample = isDone() ? 0.0 : renderSample(false);
       Float pan = state_.modulated(Index::pan);
       Float leftPan, rightPan;
       DSP::panLookup(pan, leftPan, rightPan);
@@ -213,21 +224,24 @@ public:
 
 private:
 
-  Float calculateGain(Float modLFO, Float volEnv) noexcept
+  Float calculateGain(ModLFO::Value modLFO, Float volEnv) noexcept
   {
     // This formula follows what FluidSynth is doing for attenuation/gain.
     auto gain = (DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation)) *
                  DSP::centibelsToAttenuation(DSP::MaximumAttenuationCentiBels * (1.0f - volEnv) +
-                                             modLFO * -state_.modulated(Index::modulatorLFOToVolume)));
+                                             modLFO.val * -state_.modulated(Index::modulatorLFOToVolume)));
 
     // When in the release stage, look for a magical point at which one can no longer hear the sample being generated.
     // Use that as a short-circuit to flagging the voice as done.
-    if (gainEnvelope_.activeIndex() == Envelope::StageIndex::release) {
-      auto minGain = sampleGenerator_.looped() ? noiseFloorOverMagnitudeOfLoop_ : noiseFloorOverMagnitude_;
-      if (gain < minGain) {
-        stop();
-      }
-    }
+    // FIXME: this is busted, sporadically returning very large values.
+//    if (gainEnvelope_.activeIndex() == Envelope::StageIndex::release) {
+//      auto minGain = sampleGenerator_.looped() ? noiseFloorOverMagnitudeOfLoop_ : noiseFloorOverMagnitude_;
+//      if (gain < minGain) {
+//        os_log_debug(log_, "calculateGain modLFO: %f volEnv: %f minGain: %f gain: %f",
+//                     modLFO.val, volEnv, minGain, gain);
+//        stop();
+//      }
+//    }
 
     return gain;
   }
@@ -238,8 +252,8 @@ private:
   Sample::Generator sampleGenerator_;
   Envelope::Generator gainEnvelope_;
   Envelope::Generator modulatorEnvelope_;
-  LFO modulatorLFO_;
-  LFO vibratoLFO_;
+  ModLFO modulatorLFO_;
+  VibLFO vibratoLFO_;
   LowPassFilter filter_;
   Float noiseFloorOverMagnitude_;
   Float noiseFloorOverMagnitudeOfLoop_;

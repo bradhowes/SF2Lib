@@ -76,11 +76,11 @@ public:
    @param vibLFO the current vibrato LFO value
    @param modEnv the current modulation envelope value
    */
-  Float samplePhaseIncrement(Float modLFO, Float vibLFO, Float modEnv) const noexcept
+  Float samplePhaseIncrement(ModLFO::Value modLFO, VibLFO::Value vibLFO, Float modEnv) const noexcept
   {
     auto value = DSP::centsToFrequency(pitch_ + pitchOffset_ +
-                                       modLFO * state_.modulated(Index::modulatorLFOToPitch) +
-                                       vibLFO * state_.modulated(Index::vibratoLFOToPitch) +
+                                       modLFO.val * state_.modulated(Index::modulatorLFOToPitch) +
+                                       vibLFO.val * state_.modulated(Index::vibratoLFOToPitch) +
                                        modEnv * state_.modulated(Index::modulatorEnvelopeToPitch)) / rootFrequency_;
     return Float(value);
   }

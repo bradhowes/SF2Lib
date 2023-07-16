@@ -37,8 +37,9 @@ struct TestVoiceCollection {
     }
   }
 
-  void releaseKey() { for (auto& voice : voices_) voice.releaseKey(); }
   void stop() { for (auto& voice : voices_) voice.stop(); }
+
+  void releaseKey() { for (auto& voice : voices_) voice.releaseKey(); }
 
   SF2::Render::Voice::Voice& operator[](size_t index) { return voices_[index]; }
 

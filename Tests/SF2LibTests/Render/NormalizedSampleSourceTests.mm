@@ -7,8 +7,10 @@
 
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
+#include "SF2Lib/Render/LFO.hpp"
 #include "SF2Lib/Render/Voice/Sample/Generator.hpp"
 
+using namespace SF2::Render;
 using namespace SF2::Render::Voice;
 using namespace SF2::Render::Voice::Sample;
 
@@ -66,7 +68,7 @@ static SF2::Float epsilon = 1e-6;
   gen.configure(source, state);
   Sample::Pitch pitch{state};
   pitch.configure(source.header());
-  auto inc = pitch.samplePhaseIncrement(0.0, 0.0, 0.0);
+  auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), 0.0);
   XCTAssertEqualWithAccuracy(0.30517578125, gen.generate(inc, true), 0.0000001);
   XCTAssertEqualWithAccuracy(0.288164037013, gen.generate(inc, true), epsilon);
   XCTAssertEqualWithAccuracy(0.271152292776, gen.generate(inc, true), epsilon);

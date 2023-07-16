@@ -19,10 +19,10 @@ state_{sampleRate, channelState},
 loopingMode_{LoopingMode::none},
 pitch_{state_},
 sampleGenerator_{interpolator},
-gainEnvelope_{sampleRate, Envelope::Generator::Kind::volume},
-modulatorEnvelope_{sampleRate, Envelope::Generator::Kind::modulation},
-modulatorLFO_{sampleRate, LFO::Kind::modulator},
-vibratoLFO_{sampleRate, LFO::Kind::vibrato},
+gainEnvelope_{sampleRate, Envelope::Generator::Kind::volume, voiceIndex},
+modulatorEnvelope_{sampleRate, Envelope::Generator::Kind::modulation, voiceIndex},
+modulatorLFO_{sampleRate},
+vibratoLFO_{sampleRate},
 filter_{sampleRate},
 voiceIndex_{voiceIndex},
 active_{false},
@@ -35,6 +35,7 @@ void
 Voice::start(const State::Config& config) noexcept
 {
   // std::cout << "Voice " << voiceIndex_ << " start state_ " << &state_ << '\n';
+  os_log_debug(log_, "starting voice: %zu", voiceIndex_);
 
   os_signpost_interval_begin(log_, startSignpost_, "start");
 

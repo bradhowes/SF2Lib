@@ -12,29 +12,30 @@
 namespace SF2::Render {
 
 /**
+ There are two kinds of LFOs in the SF2 universe:
+ - modulator -- affects the modulation of the signal
+ - vibrato -- provides a slight pitch change of a note
+ */
+enum struct LFOKind {
+  modulator = 1,
+  vibrato = 2
+};
+
+/**
  Implementation of a low-frequency triangular oscillator. By design, this LFO emits bipolar values from -1.0 to 1.0 in
  order to be useful in SF2 processing. One can obtain unipolar values via the DSP::bipolarToUnipolar method.
  An LFO can be configured to delay oscillating for N samples. During that time it will emit 0.0. After the optional
  delay setting, the LFO will start emitting the positive edge ascending edge of the waveform, starting at 0.0, in order
  to smoothly transition from a paused LFO into a running one. This is by design and per SF2 spec.
  */
+template <enum struct LFOKind Kind>
 class LFO {
 public:
 
-  /**
-   There are two kinds of LFOs in the SF2 universe:
-   - modulator -- affects the modulation of the signal
-   - vibrato -- provides a slight pitch change of a note
-   */
-  enum struct Kind {
-    modulator = 1,
-    vibrato = 2
-  };
-
-  static constexpr const char* logTag(Kind kind) {
+  static constexpr const char* logTag(LFOKind kind) {
     switch (kind) {
-      case Kind::modulator: return "LFO<Mod>";
-      case Kind::vibrato: return "LFO<Vib>";
+      case LFOKind::modulator: return "LFO<Mod>";
+      case LFOKind::vibrato: return "LFO<Vib>";
       default: throw "invalid Kind";
     }
   }
@@ -45,7 +46,7 @@ public:
    @param sampleRate the sample rate being used
    @param kind the kind of LFO to create
    */
-  LFO(Float sampleRate, Kind kind) : kind_{kind}, log_{os_log_create("SF2Lib", logTag(kind))}
+  LFO(Float sampleRate) : log_{os_log_create("SF2Lib", logTag(Kind))}
   {
     configure(sampleRate, 0.0, -12'000.0);
   }
@@ -64,14 +65,14 @@ public:
    @param state the collection of SF2 generators to use for the frequency and delay parameters.
    */
   void configure(Voice::State::State& state) noexcept {
-    switch (kind_) {
-      case Kind::modulator:
+    switch (Kind) {
+      case LFOKind::modulator:
         configure(state.sampleRate(),
                   DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyModulatorLFO)),
                   DSP::centsToSeconds(state.modulated(Entity::Generator::Index::delayModulatorLFO)));
         break;
 
-      case Kind::vibrato:
+      case LFOKind::vibrato:
         configure(state.sampleRate(),
                   DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyVibratoLFO)),
                   DSP::centsToSeconds(state.modulated(Entity::Generator::Index::delayVibratoLFO)));
@@ -81,24 +82,6 @@ public:
         throw "unknown kind";
     }
   }
-
-  /**
-   Obtain the value of the oscillator and advance it before returning.
-
-   @returns next waveform value to use
-   */
-  Float getNextValue() noexcept {
-    auto counter = counter_;
-    increment();
-    return counter;
-  }
-
-  /**
-   Obtain the current value of the oscillator.
-
-   @returns current waveform value
-   */
-  constexpr Float value() const noexcept { return counter_; }
 
   void increment() noexcept {
     if (delaySampleCount_ > 0) {
@@ -117,6 +100,29 @@ public:
     }
   }
 
+  struct Value {
+    Float val;
+    explicit Value(Float v) : val{v} {}
+  };
+
+  /**
+   Obtain the value of the oscillator and advance it before returning.
+
+   @returns next waveform value to use
+   */
+  Value getNextValue() noexcept {
+    auto counter = counter_;
+    increment();
+    return Value(counter);
+  }
+
+  /**
+   Obtain the current value of the oscillator.
+
+   @returns current waveform value
+   */
+  Value value() const noexcept { return Value(counter_); }
+
 private:
 
   /**
@@ -127,8 +133,7 @@ private:
    @param frequency the frequency of the LFO in cycles per second (Hz)
    @param delay the number of seconds to delay the start of the LFO
    */
-  LFO(Float sampleRate, Kind kind, Float frequency, Float delay)
-  : kind_{kind}, log_{os_log_create("SF2Lib", logTag(kind))}
+  LFO(Float sampleRate, Float frequency, Float delay) : log_{os_log_create("SF2Lib", logTag(Kind))}
   {
     configure(sampleRate, frequency, delay);
   }
@@ -142,10 +147,12 @@ private:
   Float increment_{0.0};
   size_t delaySampleCount_{0};
 
-  const Kind kind_;
   const os_log_t log_;
 
-  friend class LFOTestInjector;
+  template<enum struct LFOKind> friend struct LFOTestInjector;
 };
+
+using ModLFO = LFO<LFOKind::modulator>;
+using VibLFO = LFO<LFOKind::vibrato>;
 
 } // namespace SF2::Render

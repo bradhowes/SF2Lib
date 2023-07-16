@@ -78,6 +78,8 @@ public:
   /// @returns true if generator has looped during rendering.
   bool looped() const noexcept { return index_.looped(); }
 
+  void stop() noexcept { index_.stop(); }
+
 private:
   using InterpolatorProc = Float (Generator::*)(size_t, Float, bool) const;
 

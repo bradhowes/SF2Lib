@@ -79,8 +79,8 @@ public:
    @param sampleRate the number of samples per second to be processed
    @param kind which kind of envelope to be generated, volume or modulation.
    */
-  Generator(Float sampleRate, Kind kind) : sampleRate_{sampleRate}, kind_{kind},
-  log_{os_log_create("SF2Lib", logTag(kind))}
+  Generator(Float sampleRate, Kind kind, size_t voiceIndex) : sampleRate_{sampleRate}, kind_{kind},
+  voiceIndex_{voiceIndex}, log_{os_log_create("SF2Lib", logTag(kind))}
   {}
 
   /**
@@ -94,7 +94,6 @@ public:
     } else {
       configureModulationEnvelope(state);
     }
-    gate(true);
   }
 
   /**
@@ -103,13 +102,27 @@ public:
    */
   void gate(bool noteOn) noexcept {
     if (noteOn) {
+      os_log_debug(log_, "%s gate ON voice: %zu", kind_ == Kind::volume ? "volume" : "modulation", voiceIndex_);
       counter_ = 0;
       value_ = 0.0;
       enterStage(StageIndex::delay);
     }
-    else if (stageIndex_ != StageIndex::idle) {
-      enterStage(StageIndex::release);
+    else {
+      if (stageIndex_ != StageIndex::idle) {
+        os_log_debug(log_, "%s gate OFF voice: %zu stage: %s releaseDurationInSamples: %d value: %f",
+                     kind_ == Kind::volume ? "volume" : "modulation",
+                     voiceIndex_,
+                     StageName(stageIndex_),
+                     stages_[StageIndex::release].durationInSamples(),
+                     value_);
+        enterStage(StageIndex::release);
+      }
     }
+  }
+
+  void stop() noexcept {
+    stageIndex_ = StageIndex::idle;
+    value_ = 0.0;
   }
 
   const Stage& stage(StageIndex index) const noexcept { return stages_[index]; }
@@ -237,9 +250,9 @@ private:
   const Stage& activeStage() const noexcept { return stages_[stageIndex_]; }
 
   /// NOTE: only used for testing via EnvelopeTestInjector
-  Generator(Float sampleRate, Kind kind, Float delay, Float attack, Float hold, Float decay, int sustain,
-            Float release)
-  : sampleRate_{sampleRate}, kind_{kind}, log_{os_log_create("SF2Lib", logTag(kind))}
+  Generator(Float sampleRate, Kind kind, size_t voiceIndex, Float delay, Float attack, Float hold, Float decay,
+            int sustain, Float release)
+  : sampleRate_{sampleRate}, kind_{kind}, voiceIndex_{voiceIndex}, log_{os_log_create("SF2Lib", logTag(kind))}
   {
     auto normSustain = 1.0 - sustain / 1000.0;
     stages_[StageIndex::delay].setDelay(int(round(sampleRate_ * delay)));
@@ -320,6 +333,9 @@ private:
   int activeDurationInSamples() const noexcept { return activeStage().durationInSamples(); }
 
   void enterStage(StageIndex next) noexcept {
+    os_log_debug(log_, "enterStage %s voice: %zu next: %s prev: %s",
+                 kind_ == Kind::volume ? "volume" : "modulation", voiceIndex_,
+                 StageName(next), StageName(stageIndex_));
     stageIndex_ = next;
 
     // NOTE: if a stage has no duration then we move to the next one by falling thru some of the cases.
@@ -357,6 +373,10 @@ private:
     }
 
     counter_ = activeDurationInSamples();
+
+    os_log_debug(log_, "enterStage %s voice: %zu active: %s counter: %d",
+                 kind_ == Kind::volume ? "volume" : "modulation", voiceIndex_,
+                 StageName(stageIndex_), counter_);
   }
 
   Stages stages_{};
@@ -365,6 +385,7 @@ private:
   Float value_{0.0};
   Float sampleRate_;
   const Kind kind_;
+  const size_t voiceIndex_;
   const os_log_t log_;
   friend class EnvelopeTestInjector;
 };

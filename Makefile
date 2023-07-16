@@ -1,38 +1,70 @@
 PLATFORM_IOS = iOS Simulator,name=iPad mini (6th generation)
 PLATFORM_MACOS = macOS
-
+TARGET = SF2Lib
+DOCC_DIR = ./docs
+QUIET = -quiet
+WORKSPACE = $(PWD)/.workspace
 DEST = -scheme SF2Lib-Package -destination platform="$(PLATFORM_MACOS)"
 
-default: post
+default: percentage
 
 clean:
-	@echo "-- removing cov.txt percentage.txt"
-	@-rm -rf cov.txt percentage.txt WD WD.xcresult build.run test.run
-	@xcodebuild clean $(DEST)
+	rm -rf "$(PWD)/.DerivedData-macos" "$(PWD)/.DerivedData-ios" "$(WORKSPACE)"
 
-test: clean
-	rm -rf WD.xcresult WD
-	swift package resolve
-	-xcodebuild test $(DEST) -enableCodeCoverage YES ENABLE_TESTING_SEARCH_PATHS=YES -resultBundlePath $PWD
+docc:
+	DOCC_JSON_PRETTYPRINT="YES" \
+	swift package \
+		--allow-writing-to-directory $(DOCC_DIR) \
+		generate-documentation \
+		--target $(TARGET) \
+		--disable-indexing \
+		--transform-for-static-hosting \
+		--hosting-base-path swift-math-parser \
+		--output-path $(DOCC_DIR)
 
-# Extract coverage info for SF2Lib -- expects defintion of env variable GITHUB_ENV
+resolve-deps: clean
+	xcodebuild \
+		$(QUIET) \
+		-resolvePackageDependencies \
+		-clonedSourcePackagesDirPath "$(WORKSPACE)" \
+		-scheme $(TARGET)
 
-cov.txt: test
-	xcrun xccov view --report --only-targets WD.xcresult > cov.txt
+test-ios: resolve-deps
+	xcodebuild test \
+		$(QUIET) \
+		-clonedSourcePackagesDirPath "$(WORKSPACE)" \
+		-scheme $(TARGET) \
+		-derivedDataPath "$(PWD)/.DerivedData-ios" \
+		-destination platform="$(PLATFORM_IOS)"
 
-coverage: cov.txt
-	@cat cov.txt
+test-macos: resolve-deps
+	xcodebuild build-for-testing \
+		$(QUIET) \
+		-clonedSourcePackagesDirPath "$(WORKSPACE)" \
+		-scheme $(TARGET) \
+		-derivedDataPath "$(PWD)/.DerivedData-macos" \
+		-destination platform="$(PLATFORM_MACOS)"
+	xcodebuild test-without-building \
+		$(QUIET) \
+		-clonedSourcePackagesDirPath "$(WORKSPACE)" \
+		-scheme $(TARGET) \
+		-derivedDataPath "$(PWD)/.DerivedData-macos" \
+		-destination platform="$(PLATFORM_MACOS)" \
+		-enableCodeCoverage YES
 
-percentage.txt: cov.txt
-	awk '/ SF2Lib / {print $$4;}' < cov.txt > percentage.txt
-	@cat percentage.txt
+coverage: test-macos
+	xcrun xccov view --report --only-targets $(PWD)/.DerivedData-macos/Logs/Test/*.xcresult > coverage.txt
+	cat coverage.txt
 
-percentage: percentage.txt
-	@cat percentage.txt
+percentage: coverage
+	awk '/ $(TARGET) / { if ($$3 > 0) print $$4; }' coverage.txt > percentage.txt
+	cat percentage.txt
 
 post: percentage
 	@if [[ -n "$$GITHUB_ENV" ]]; then \
 		echo "PERCENTAGE=$$(< percentage.txt)" >> $$GITHUB_ENV; \
 	fi
+
+test: test-io percentage
 
 .PHONY: coverage clean build test post percentage coverage

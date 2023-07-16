@@ -104,7 +104,7 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount) {
   for (int index = 0; index < format.channelCount; ++index) {
     UInt32 byteCount = sampleCount * sizeof(AUValue);
     bufferList->mBuffers[index].mDataByteSize = byteCount;
-    bzero(bufferList->mBuffers[index].mData, byteCount);
+    memset(bufferList->mBuffers[index].mData, 0, byteCount);
   }
 
   return buffer;
@@ -129,7 +129,8 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount) {
 {
   AUValue* ptr = [buffer left] + offset;
   for (auto index = 0; index < sampleCount; ++index) {
-    *ptr++ += voice.renderSample();
+    auto sample = voice.renderSample(offset == 45600 && index < 3);
+    *ptr++ += sample;
   }
   return offset + sampleCount;
 }
