@@ -1,53 +1,49 @@
 PLATFORM_IOS = iOS Simulator,name=iPad mini (6th generation)
+DERIVED_DATA_IOS = $(PWD)/.DerivedData-ios
 PLATFORM_MACOS = macOS
-TARGET = SF2Lib
-DOCC_DIR = ./docs
-QUIET = -quiet
-WORKSPACE = $(PWD)/.workspace
-DEST = -scheme SF2Lib-Package -destination platform="$(PLATFORM_MACOS)"
+DERIVED_DATA_MACOS = $(PWD)/.DerivedData-macos
 
-default: percentage
+TARGET = SF2Lib
+QUIET = -quiet
+SCHEME = -scheme SF2Lib-Package
+
+default: test
 
 clean:
-	rm -rf "$(PWD)/.DerivedData-macos" "$(PWD)/.DerivedData-ios" "$(WORKSPACE)"
+	@echo "-- removing coverage.txt percentage.txt "$(DERIVED_DATA_MACOS)" "$(DERIVED_DATA_IOS)""
+	@-rm -rf coverage.txt percentage.txt "$(DERIVED_DATA_MACOS)" "$(DERIVED_DATA_IOS)"
 
 resolve-deps: clean
-	xcodebuild \
-		$(QUIET) \
-		-resolvePackageDependencies \
-		-clonedSourcePackagesDirPath "$(WORKSPACE)" \
-		-scheme $(TARGET)
+	swift package resolve
 
 test-ios: resolve-deps
 	xcodebuild test \
 		$(QUIET) \
-		-clonedSourcePackagesDirPath "$(WORKSPACE)" \
-		-scheme $(TARGET) \
-		-derivedDataPath "$(PWD)/.DerivedData-ios" \
+		$(SCHEME) \
+		-derivedDataPath "$(DERIVED_DATA_IOS)" \
 		-destination platform="$(PLATFORM_IOS)"
 
 test-macos: resolve-deps
 	xcodebuild test \
 		$(QUIET) \
-		-clonedSourcePackagesDirPath "$(WORKSPACE)" \
-		-scheme $(TARGET) \
-		-derivedDataPath "$(PWD)/.DerivedData-macos" \
+		$(SCHEME) \
+		-derivedDataPath "$(DERIVED_DATA_MACOS)" \
 		-destination platform="$(PLATFORM_MACOS)" \
 		-enableCodeCoverage YES
 
 coverage: test-macos
-	xcrun xccov view --report --only-targets $(PWD)/.DerivedData-macos/Logs/Test/*.xcresult > coverage.txt
-	cat coverage.txt
+	@xcrun xccov view --report --only-targets $(DERIVED_DATA_MACOS)/Logs/Test/*.xcresult > coverage.txt
+	@cat coverage.txt
 
 percentage: coverage
-	awk '/ $(TARGET) / { if ($$3 > 0) print $$4; }' coverage.txt > percentage.txt
-	cat percentage.txt
+	@awk '/ $(TARGET) / { if ($$3 > 0) print $$4; }' coverage.txt > percentage.txt
+	@cat percentage.txt
 
 post: percentage
 	@if [[ -n "$$GITHUB_ENV" ]]; then \
 		echo "PERCENTAGE=$$(< percentage.txt)" >> $$GITHUB_ENV; \
 	fi
 
-test: test-io percentage
+test: test-ios post
 
-.PHONY: coverage clean build test post percentage coverage
+.PHONY: post percentage coverage clean build test test-ios test-macos resolve-deps
