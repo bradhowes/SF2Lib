@@ -1,5 +1,6 @@
 PLATFORM_IOS = iOS Simulator,name=iPad mini (6th generation)
 DERIVED_DATA_IOS = $(PWD)/.DerivedData-ios
+
 PLATFORM_MACOS = macOS
 DERIVED_DATA_MACOS = $(PWD)/.DerivedData-macos
 
@@ -46,4 +47,4 @@ post: percentage
 
 test: test-ios post
 
-.PHONY: post percentage coverage clean build test test-ios test-macos resolve-deps
+.PHONY: test post percentage coverage test-macos test-ios resolve-deps clean
