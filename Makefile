@@ -11,17 +11,6 @@ default: percentage
 clean:
 	rm -rf "$(PWD)/.DerivedData-macos" "$(PWD)/.DerivedData-ios" "$(WORKSPACE)"
 
-docc:
-	DOCC_JSON_PRETTYPRINT="YES" \
-	swift package \
-		--allow-writing-to-directory $(DOCC_DIR) \
-		generate-documentation \
-		--target $(TARGET) \
-		--disable-indexing \
-		--transform-for-static-hosting \
-		--hosting-base-path swift-math-parser \
-		--output-path $(DOCC_DIR)
-
 resolve-deps: clean
 	xcodebuild \
 		$(QUIET) \
@@ -38,13 +27,7 @@ test-ios: resolve-deps
 		-destination platform="$(PLATFORM_IOS)"
 
 test-macos: resolve-deps
-	xcodebuild build-for-testing \
-		$(QUIET) \
-		-clonedSourcePackagesDirPath "$(WORKSPACE)" \
-		-scheme $(TARGET) \
-		-derivedDataPath "$(PWD)/.DerivedData-macos" \
-		-destination platform="$(PLATFORM_MACOS)"
-	xcodebuild test-without-building \
+	xcodebuild test \
 		$(QUIET) \
 		-clonedSourcePackagesDirPath "$(WORKSPACE)" \
 		-scheme $(TARGET) \

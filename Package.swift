@@ -104,10 +104,3 @@ let package = Package(
   ],
   cxxLanguageStandard: .cxx20
 )
-
-#if swift(>=5.6)
-// Add the documentation compiler plugin if possible
-package.dependencies.append(
-  .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0")
-)
-#endif
