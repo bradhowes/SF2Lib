@@ -12,11 +12,12 @@
 namespace SF2::Entity::Generator {
 
 /**
- Meta data for SF2 generators. These are attributes associated with a generator but that are not found in an SF2 file.
- Rather these are attributes called out in the SF2 specification or to make the rendering implementation easier to
- understand.
+ Meta data for SF2 generators.
 
- Each entry as the following attributes
+ These are the attributes associated with a generator but that are not found in an SF2 file. Rather they are those
+ spelled out in the SoundFont spec or to make the rendering implementation easier to understand.
+
+ Each entry has the following attributes
 
  - name -- the name of the generator (based off its Generator::Index enum value)
  - valueKind -- describes the underlying value held by the generator when it comes from the SF2 file
@@ -117,7 +118,7 @@ public:
   bool isUnsignedValue() const noexcept { return valueKind_ < ValueKind::signedShort; }
 
   /**
-   Obtain the value from a generator Amount instance. Properly handles unsigned integer values.
+   Obtain the value from a generator Amount instance.
 
    @param amount the container holding the value to extract
    @returns extracted value

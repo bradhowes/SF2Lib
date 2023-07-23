@@ -10,7 +10,7 @@ namespace SF2::Entity::Generator {
  Holds the amount to apply to a generator. Note that this is an immutable value that comes straight from an SF2 file.
  It exists as a C union of three value types: unsigned 16-bit int, signed 16-bit int, and pair of 2 unsigned 8-bit
  values used for MIDI key/velocity ranges. As such, it is important to pull out the right value with the right
- method. The associated `Definition` metadata class has methods that can be used to do this correctly and safely.
+ method.
  */
 class Amount {
 public:

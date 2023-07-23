@@ -428,33 +428,62 @@ enum struct Index : size_t {
   numValues
 };
 
+/**
+ Convert an Index num value into its underlying integral type.
+ */
+inline typename std::underlying_type<Index>::type indexValue(Index index) noexcept {
+  return static_cast<typename std::underlying_type<Index>::type>(index);
+}
+
+/**
+ Iterator that covers all of the Index enum values.
+ */
 class IndexIterator {
 public:
 
-  IndexIterator() noexcept : value_{0} {}
+  /**
+   Constructor of a new iterator that points to the first enum value.
+   */
+  IndexIterator() noexcept = default;
 
-  IndexIterator(Index value) noexcept : value_{static_cast<size_t>(value)} {}
+  /**
+   Constructor of a new iterator that starts at the given Index enum value.
 
+   @param value the starting value
+   */
+  IndexIterator(Index value) noexcept : value_{indexValue(value)} {}
+
+  /**
+   Increment the iterator.
+
+   @returns this iterator
+   */
   IndexIterator operator++() noexcept {
     ++value_;
     return *this;
   }
 
-  Index operator*() const noexcept { return static_cast<Index>(value_); }
+  /**
+   Obtain the current value of the iterator.
 
-  IndexIterator begin() const noexcept { return *this; }
-  IndexIterator end() const noexcept { return IndexIterator(Index::numValues); }
-
-  bool operator!=(const IndexIterator& other) const noexcept {
-    return value_ != other.value_;
+   @returns Index enum value
+   */
+  Index operator*() const noexcept {
+    assert(*this < end());
+    return static_cast<Index>(value_);
   }
 
-private:
-  using val_t = typename std::underlying_type<Index>::type;
-  val_t value_;
-};
+  /// @return iterator that points to first Index enum value.
+  static IndexIterator begin() noexcept { return {}; }
 
-inline size_t indexValue(Index index) noexcept { return static_cast<size_t>(index); }
+  /// @return iterator that points to last Index enum value + 1.
+  static IndexIterator end() noexcept { return {Index::numValues}; }
+
+  friend std::strong_ordering operator<=>(const IndexIterator& lhs, const IndexIterator& rhs) noexcept = default;
+
+private:
+  typename std::underlying_type<Index>::type value_;
+};
 
 /**
  Representation of the 2-byte generator index found in SF2 files. Provides conversion from raw value to the nicer

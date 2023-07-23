@@ -22,16 +22,30 @@ enum struct LFOKind {
 };
 
 /**
- Implementation of a low-frequency triangular oscillator. By design, this LFO emits bipolar values from -1.0 to 1.0 in
+ Implementation of a low-frequency triangular oscillator.
+
+ By design, this LFO emits bipolar values from -1.0 to 1.0 in
  order to be useful in SF2 processing. One can obtain unipolar values via the DSP::bipolarToUnipolar method.
  An LFO can be configured to delay oscillating for N samples. During that time it will emit 0.0. After the optional
  delay setting, the LFO will start emitting the positive edge ascending edge of the waveform, starting at 0.0, in order
  to smoothly transition from a paused LFO into a running one. This is by design and per SF2 spec.
+
+ The `Kind` template argument defines which kind of LFO that is being used, general-purpose modulation or vibrato.
  */
 template <enum struct LFOKind Kind>
 class LFO {
 public:
 
+  /**
+   Custom type for values from this LFO. Each LFO "kind" has its own value type in order to catch mistakes wiring with
+   the wrong one.
+   */
+  struct Value {
+    Float val;
+    explicit Value(Float v) noexcept : val{v} {}
+  };
+
+  /// Obtain a log tag to use based on the LFOKind enum value.
   static constexpr const char* logTag(LFOKind kind) {
     switch (kind) {
       case LFOKind::modulator: return "LFO<Mod>";
@@ -83,6 +97,9 @@ public:
     }
   }
 
+  /**
+   Advance the current value of the LFO to the next value. NOTE: this is automatically done by `getNextValue` method.
+   */
   void increment() noexcept {
     if (delaySampleCount_ > 0) {
       --delaySampleCount_;
@@ -99,11 +116,6 @@ public:
       counter_ = -2.0f - counter_;
     }
   }
-
-  struct Value {
-    Float val;
-    explicit Value(Float v) : val{v} {}
-  };
 
   /**
    Obtain the value of the oscillator and advance it before returning.
@@ -129,7 +141,6 @@ private:
    Construct new LFO. NOTE: this is only used in tests.
 
    @param sampleRate the sample rate being used
-   @param kind the kind of LFO to create
    @param frequency the frequency of the LFO in cycles per second (Hz)
    @param delay the number of seconds to delay the start of the LFO
    */
