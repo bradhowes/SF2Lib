@@ -39,6 +39,42 @@ inline constexpr Float generator(size_t index) {
 }
 }
 
+/**
+ Convert centibels [0-1440] into an attenuation value from [1.0-0.0].
+
+ - Zero indicates no attenuation (1.0)
+ -  20 centibels (-2 dB) gives 0.1 attenuation (10% reduction of original signal)
+ -  60 centibels (-6 dB) gives 0.5 attenuation (50% reduction of original signal)
+ - 120 centibels (-12 dB) gives 0.25 attenuation
+
+ and every 200 is a reduction by a power of 10 (200 = 0.1, 400 = 0.001, etc.)
+
+ NOTE: attenuation greater than 96 dB is in the noise floor for 16-bit samples.
+
+ @param value value in centibels to convert
+ @returns attenuation value
+ */
+inline Float centibelsToAttenuation(Float value) noexcept {
+  extern Float attenuationLookup(int centibels) noexcept;
+  if (value >= MaximumAttenuationCentiBels) return 0.0;
+  if (value <= 0.0) return 1.0;
+  return attenuationLookup(int(nearbyint(value)));
+}
+
+/**
+ Convert a floating-point centibels value into an attenuation.
+
+ @param value value in centibels to convert
+ @returns attenuation value
+ */
+inline Float centibelsToAttenuationInterpolated(Float value) noexcept {
+  auto index = int(value);
+  auto partial = value - index;
+  return DSPHeaders::DSP::Interpolation::linear(partial,
+                                                centibelsToAttenuation(index),
+                                                centibelsToAttenuation(index + 1));
+}
+
 namespace CentsPartialLookup {
 inline constexpr size_t TableSize = size_t(CentsPerOctave);
 inline constexpr Float generator(size_t index) {
@@ -46,6 +82,14 @@ inline constexpr Float generator(size_t index) {
   return 6.875 * DSPHeaders::ConstMath::exp(index / 1200.0 * DSPHeaders::ConstMath::Constants<Float>::ln2);
 }
 }
+
+/**
+ Convert a cents value in range [0-1200) into `6.875 x 2^(value / 1200)`
+
+ @param value value to convert
+ @returns converted value
+ */
+extern Float centsPartialLookup(int value) noexcept;
 
 /**
  Lookup table for SF2 pan values, where -500 means only left-channel, and +500 means only right channel. Other values
@@ -60,6 +104,17 @@ inline constexpr size_t TableSize = 500 + 500 + 1;
 inline constexpr Float Scaling = DSPHeaders::ConstMath::Constants<Float>::HalfPI / (TableSize - 1);
 static constexpr Float generator(size_t index) { return DSPHeaders::ConstMath::sin(index * Scaling); }
 }
+
+/**
+ Calculate the amount of left and right signal gain in [0.0-1.0] for the given `pan` value which is in range
+ [-500, +500]. A `pan` of -500 is only left, and +500 is only right. A `pan` of 0 should result in ~0.7078 for both,
+ but moving left/right will increase one channel to 1.0 while the other falls off to 0.0.
+
+ @param value the value to convert
+ @param left reference to storage for the left gain
+ @param right reference to storage for the right gain
+ */
+extern void panLookup(Float value, Float& left, Float& right) noexcept;
 
 /**
  Convert cents value into a power of 2. There are 1200 cents per power of 2.
@@ -88,42 +143,13 @@ inline Float lfoCentsToFrequency(Float value) noexcept {
 }
 
 /**
- Convert centibels [0-1440] into an attenuation value from [1.0-0.0].
-
- - Zero indicates no attenuation (1.0)
- -  20 centibels (-2 dB) gives 0.1 attenuation (10% reduction of original signal)
- -  60 centibels (-6 dB) gives 0.5 attenuation (50% reduction of original signal)
- - 120 centibels (-12 dB) gives 0.25 attenuation
-
- and every 200 is a reduction by a power of 10 (200 = 0.1, 400 = 0.001, etc.)
-
- NOTE: attenuation greater than 96 dB is in the noise floor for 16-bit samples.
-
- @param value value in centibels to convert
- @returns attenuation value
- */
-inline Float centibelsToAttenuation(Float value) noexcept {
-  extern Float attenuationLookup(int centibels) noexcept;
-
-  if (value >= MaximumAttenuationCentiBels) return 0.0;
-  if (value <= 0.0) return 1.0;
-  return attenuationLookup(int(nearbyint(value)));
-}
-
-inline Float centibelsToAttenuationInterpolated(Float centibels) noexcept {
-  auto index = int(centibels);
-  auto partial = centibels - index;
-  return DSPHeaders::DSP::Interpolation::linear(partial, centibelsToAttenuation(index), centibelsToAttenuation(index + 1));
-}
-
-/**
  Convert centiBels to resonance (Q) value for use in low-pass filter calculations. The input is clamped to the range
  given in SF2.01 spec #8.1.3. The factor being subtracted comes from FluidSynth code to conform to spec.
 
- @param centibels the value to convert
+ @param value the value to convert
  */
-inline Float centibelsToResonance(Float centibels) noexcept {
-  return std::pow(10.0, (std::clamp(centibels, 0.0, 960.0) - 30.1) / 200.0);
+inline Float centibelsToResonance(Float value) noexcept {
+  return std::pow(10.0, (std::clamp(value, 0.0, 960.0) - 30.1) / 200.0);
 }
 
 /**
@@ -143,19 +169,6 @@ inline constexpr Float clampFilterCutoff(Float value) noexcept { return std::cla
 inline constexpr Float tenthPercentageToNormalized(Float value) noexcept {
   return std::clamp(value / 1000.0, 0.0, 1.0);
 }
-
-/**
- Calculate the amount of left and right signal gain in [0.0-1.0] for the given `pan` value which is in range
- [-500, +500]. A `pan` of -500 is only left, and +500 is only right. A `pan` of 0 should result in ~0.7078 for both,
- but moving left/right will increase one channel to 1.0 while the other falls off to 0.0.
- 
- @param pan the value to convert
- @param left reference to storage for the left gain
- @param right reference to storage for the right gain
- */
-extern void panLookup(Float pan, Float& left, Float& right) noexcept;
-
-extern Float centsPartialLookup(int partial) noexcept;
 
 /**
  Quickly convert absolute cents value into a frequency. Valid inputs are 0 - 13,508 which translates to

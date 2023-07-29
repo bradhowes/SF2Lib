@@ -492,20 +492,16 @@ private:
 class RawIndex {
 public:
 
-  RawIndex() noexcept : value_{0} {}
+  RawIndex() noexcept = default;
 
-  /**
-   Obtain the raw index value.
-   */
+  /// @returns boxed value
   uint16_t value() const noexcept { return value_; }
 
-  /**
-   Obtain the Index value that corresponds to a raw index value.
-   */
+  /// @returns Index value
   Index index() const noexcept { return Index(value_); }
 
 private:
-  uint16_t const value_;
+  uint16_t const value_{0};
 };
 
 /**

@@ -10,14 +10,14 @@
 namespace SF2::Entity::Modulator {
 
 /**
- Modulator value transform. The spec defines two types:
+ Modulator value transformer. The spec defines two types:
 
  - linear: value is used as-is
  - absolute: negative values are made positive before being used
 
  Currently, all modulators seem to use `linear`.
  */
-class Transform {
+class Transformer {
 public:
 
   enum struct Kind {
@@ -25,17 +25,14 @@ public:
     absolute = 2
   };
 
+  Transformer() noexcept : bits_{0} {}
+
   /**
    Constructor
 
    @param bits the value that determines the type of transform to apply
    */
-  explicit Transform(uint16_t bits) noexcept : bits_{bits} {}
-
-  /**
-   Default constructor.
-   */
-  Transform() : Transform(0) {}
+  explicit Transformer(uint16_t bits) noexcept : bits_{bits} {}
 
   /// @returns the kind of transform to apply
   Kind kind() const noexcept { return bits_ == 0 ? Kind::linear : Kind::absolute; }
@@ -55,7 +52,7 @@ public:
     }
   }
 
-  friend std::ostream& operator<<(std::ostream& os, const Transform& value) noexcept;
+  friend std::ostream& operator<<(std::ostream& os, const Transformer& value) noexcept;
 
 private:
   const uint16_t bits_;

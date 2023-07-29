@@ -7,9 +7,9 @@
 namespace SF2::Entity::Modulator {
 
 std::ostream&
-operator<<(std::ostream& os, const Transform& value) noexcept
+operator<<(std::ostream& os, const Transformer& value) noexcept
 {
-  return os << (value.kind() == Transform::Kind::linear ? "linear" : "absolute");
+  return os << (value.kind() == Transformer::Kind::linear ? "linear" : "absolute");
 }
 
 }

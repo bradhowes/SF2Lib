@@ -204,10 +204,10 @@ using namespace SF2::Entity::Generator;
 
 - (void)testLinking {
   auto src1 = Source::Builder::GeneralController(Source::GeneralIndex::link).make();
-  auto mod1 = Modulator(src1, Index::sustainVolumeEnvelope, 3.0, Source(0), Transform());
+  auto mod1 = Modulator(src1, Index::sustainVolumeEnvelope, 3.0, Source(0), Transformer());
 
   auto src2 = Source::Builder::GeneralController(Source::GeneralIndex::channelPressure).make();
-  auto mod2 = Modulator(src2, 0, 2.0, Source(0), Transform());
+  auto mod2 = Modulator(src2, 0, 2.0, Source(0), Transformer());
 
   XCTAssertTrue(mod1.source().isValid());
   XCTAssertTrue(mod1.source().isLinked());
@@ -234,7 +234,7 @@ using namespace SF2::Entity::Generator;
 
 - (void)testKeyValueProvider {
   auto src = Source::Builder::GeneralController(Source::GeneralIndex::noteOnKey).make();
-  State::Modulator mod{0, Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(0), Transform()), *state};
+  State::Modulator mod{0, Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(0), Transformer()), *state};
   XCTAssertEqualWithAccuracy(0.0, mod.value(), epsilon);
   state->setValue(Index::forcedMIDIKey, 64);
   XCTAssertEqualWithAccuracy(1.5, mod.value(), epsilon);
@@ -244,7 +244,7 @@ using namespace SF2::Entity::Generator;
 
 - (void)testVelocityValueProvider {
   auto src = Source::Builder::GeneralController(Source::GeneralIndex::noteOnVelocity).make();
-  State::Modulator mod{0, Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(0), Transform()), *state};
+  State::Modulator mod{0, Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(0), Transformer()), *state};
   XCTAssertEqualWithAccuracy(0.0, mod.value(), epsilon);
   state->setValue(Index::forcedMIDIVelocity, 64);
   XCTAssertEqualWithAccuracy(1.5, mod.value(), epsilon);
@@ -254,7 +254,7 @@ using namespace SF2::Entity::Generator;
 
 - (void)testKeyPressureValueProvider {
   auto src = Source::Builder::GeneralController(Source::GeneralIndex::keyPressure).make();
-  State::Modulator mod{0, Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(0), Transform()), *state};
+  State::Modulator mod{0, Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(0), Transformer()), *state};
   XCTAssertEqualWithAccuracy(0.0, mod.value(), epsilon);
   state->setValue(Index::forcedMIDIKey, 100);
   channelState->setNotePressure(100, 64);
