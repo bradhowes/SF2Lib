@@ -27,14 +27,11 @@ filter_{sampleRate},
 voiceIndex_{voiceIndex},
 active_{false},
 keyDown_{false}
-{
-  // std::cout << "Voice " << voiceIndex << " init state_ " << &state_ << '\n';
-}
+{}
 
 void
 Voice::start(const State::Config& config) noexcept
 {
-  // std::cout << "Voice " << voiceIndex_ << " start state_ " << &state_ << '\n';
   os_log_debug(log_, "starting voice: %zu", voiceIndex_);
 
   os_signpost_interval_begin(log_, startSignpost_, "start");

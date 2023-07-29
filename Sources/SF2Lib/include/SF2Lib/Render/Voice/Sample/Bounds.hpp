@@ -27,6 +27,7 @@ public:
 
    @param header the 'shdr' header to use
    @param state the generator values to use
+   @returns new Bounds instance
    */
   static Bounds make(const Entity::SampleHeader& header, const State::State& state) noexcept {
     constexpr int coarse = 1 << 15;
@@ -43,15 +44,7 @@ public:
     // Don't trust values above. Clamp them to valid ranges before using.
     auto lower = int(header.startIndex());
     auto upper = int(header.endIndex());
-    auto clampPos = [lower, upper](int value) -> size_t {
-      if (value < lower) {
-        value = lower;
-      }
-      else if (value > upper) {
-        value = upper;
-      }
-      return size_t(value - lower);
-    };
+    auto clampPos = [lower, upper](int value) -> size_t { return size_t(std::clamp(value, lower, upper) - lower); };
 
     return Bounds(clampPos(lower + startOffset),
                   clampPos(int(header.startLoopIndex()) + startLoopOffset),
@@ -59,28 +52,7 @@ public:
                   clampPos(upper + endOffset));
   }
 
-  /**
-   Construct Bounds using information from 'shdr' only.
-
-   @param header the 'shdr' header to use
-   */
-  static Bounds make(const Entity::SampleHeader& header) noexcept {
-    auto lower = header.startIndex();
-    auto upper = std::max(lower, header.endIndex());
-    auto clampPos = [header, lower, upper](size_t value) -> size_t {
-      if (value < lower) {
-        value = lower;
-      }
-      else if (value > upper) {
-        value = upper;
-      }
-      return value - lower;
-    };
-
-    return Bounds(0, clampPos(header.startLoopIndex()), clampPos(header.endLoopIndex()), upper - lower);
-  }
-
-  Bounds() = default;
+  Bounds() noexcept = default;
 
   /// @returns the index of the first sample to use for rendering
   constexpr size_t startPos() const noexcept { return startPos_; }
