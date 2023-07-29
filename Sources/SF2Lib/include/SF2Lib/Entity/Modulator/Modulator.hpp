@@ -10,7 +10,7 @@
 #include "SF2Lib/Entity/Generator/Definition.hpp"
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
-#include "SF2Lib/Entity/Modulator/Transform.hpp"
+#include "SF2Lib/Entity/Modulator/Transformer.hpp"
 
 /**
  Classes involved in describing an SF2 modulator. A modulator uses a value from a source to modulate a specific
