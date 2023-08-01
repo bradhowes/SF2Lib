@@ -198,7 +198,7 @@ using namespace SF2::Entity::Generator;
   channelState->setPitchWheelValue(4096);
   XCTAssertEqualWithAccuracy( modulator.value(), 0.0, epsilon);
 
-  channelState->setPitchWheelValue(8191);
+  channelState->setPitchWheelValue(SF2::MIDI::ChannelState::maxPitchWheelValue);
   XCTAssertEqualWithAccuracy( modulator.value(), 12597.7048874, epsilon);
 }
 

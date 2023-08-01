@@ -7,6 +7,7 @@
 
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/DSP/DSP.hpp"
+#include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/MIDI/ValueTransformer.hpp"
 
 using namespace SF2;
@@ -63,7 +64,7 @@ Generator proc(ValueTransformer::Kind kind, ValueTransformer::Direction dir) noe
 size_t transformArrayIndex(size_t maxValue, ValueTransformer::Kind kind, ValueTransformer::Direction dir,
                            ValueTransformer::Polarity pol) noexcept {
   // 16 x size + 8 x polarity + 4 x direction + continuity
-  return (16 * (maxValue == 8191) +
+  return (16 * (maxValue == ChannelState::maxPitchWheelValue) +
           8 * (pol == ValueTransformer::Polarity::bipolar) +
           4 * (dir == ValueTransformer::Direction::descending) +
           static_cast<size_t>(kind));
@@ -82,7 +83,7 @@ size_t transformsSize_ = 16 * 8 * 4 * 3;
 std::vector<ValueTransformer::TransformArray> transforms_{transformsSize_};
 
 const ValueTransformer::TransformArray&
-ValueTransformer::selectActive(size_t maxValue, Kind kind, Direction dir, Polarity pol) noexcept {
+ValueTransformer::selectTransformArray(size_t maxValue, Kind kind, Direction dir, Polarity pol) noexcept {
   auto index = transformArrayIndex(maxValue, kind, dir, pol);
   if (transforms_[index].empty()) {
     fill(transforms_[index], maxValue, proc(kind, dir), pol == ValueTransformer::Polarity::bipolar);

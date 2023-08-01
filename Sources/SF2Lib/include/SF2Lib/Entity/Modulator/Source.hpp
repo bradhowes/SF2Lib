@@ -40,6 +40,11 @@ public:
     switched
   };
 
+  enum struct ControllerRange: uint16_t {
+    _128 = 128,
+    _8192 = 8192
+  };
+
   /// Continuous Controller (CC) designation
   struct CC {
     explicit CC(uint16_t v) : value{v} {}
@@ -120,9 +125,10 @@ public:
     return GeneralIndex(rawIndex());
   }
 
-  int maxControllerValue() const noexcept {
-    if (!isContinuousController() && generalIndex() == GeneralIndex::pitchWheel) return 8191;
-    return 127;
+  /// @returns largest value the controller will return.
+  ControllerRange controllerRange() const noexcept {
+    if (!isContinuousController() && generalIndex() == GeneralIndex::pitchWheel) return ControllerRange::_8192;
+    return ControllerRange::_128;
   }
   
   /// @returns the index of the continuous controller

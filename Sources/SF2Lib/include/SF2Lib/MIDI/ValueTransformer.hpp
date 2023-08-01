@@ -57,9 +57,9 @@ public:
    @param source the source definition to use
    */
   explicit ValueTransformer(const Entity::Modulator::Source& source) noexcept :
-  active_{selectActive(size_t(source.maxControllerValue()), Kind(source.type()),
-                       source.isPositive() ? Direction::ascending : Direction::descending,
-                       source.isUnipolar() ? Polarity::unipolar : Polarity::bipolar)}
+  active_{selectTransformArray(size_t(source.controllerRange()) - 1, Kind(source.type()),
+                               source.isPositive() ? Direction::ascending : Direction::descending,
+                               source.isUnipolar() ? Polarity::unipolar : Polarity::bipolar)}
   {}
 
   /**
@@ -77,13 +77,14 @@ private:
   /**
    Locate the right table to use based on the transformation, direction, and polarity.
 
+   @param maxValue the largest value that the controller will provide (127 or 8191 for MIDI v1)
    @param kind the transformation function to apply
    @param direction the min/max ordering to use
    @param polarity the lower bound of the transformed result
    @returns reference to table to use for MIDI value transformations.
    */
-  static const TransformArray& selectActive(size_t maxValue, Kind kind, Direction direction,
-                                            Polarity polarity) noexcept;
+  static const TransformArray& selectTransformArray(size_t maxValue, Kind kind, Direction direction,
+                                                    Polarity polarity) noexcept;
 
   const TransformArray& active_;
 };

@@ -21,6 +21,7 @@ public:
 
   inline constexpr static int CCMin = 0;
   inline constexpr static int CCMax = 127;
+  inline constexpr static int maxPitchWheelValue = 8191;
 
   /**
    Construct new channel.
@@ -34,7 +35,7 @@ public:
     notePressureValues_.fill(0);
     nrpnValues_.zero();
     channelPressure_ = 0;
-    pitchWheelValue_ = 4096; // this is the middle of the wheel at rest
+    pitchWheelValue_ = (maxPitchWheelValue + 1) / 2; // this is the middle of the wheel at rest
     pitchWheelSensitivity_ = 200;
     nrpnIndex_ = 0;
 
@@ -83,7 +84,7 @@ public:
    @param value the pitch wheel value
    */
   void setPitchWheelValue(int value) noexcept {
-    pitchWheelValue_ = std::clamp(value, 0, 8191);
+    pitchWheelValue_ = std::clamp(value, 0, maxPitchWheelValue);
   }
 
   /// @returns the current pitch wheel value
