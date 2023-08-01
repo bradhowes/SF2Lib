@@ -35,7 +35,7 @@ struct GenValue {
   /**
    Set the generator's adjustment. This should only come from a preset zone.
 
-   @param value the value to store
+   @param adjustment the value to store
    */
   void setAdjustment(int adjustment) noexcept { adjustment_ = adjustment; }
 

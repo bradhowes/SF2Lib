@@ -36,7 +36,6 @@ public:
    Construct new instance. NOTE: the instance is not usable for audio rendering at this point. One must call
    `configure` in order to be useable for rendering purposes.
 
-   @param state the voice state to work with
    @param kind the interpolation to apply to the samples
    */
   Generator(Interpolator kind) noexcept : interpolatorProc_{interpolator(kind)} {}

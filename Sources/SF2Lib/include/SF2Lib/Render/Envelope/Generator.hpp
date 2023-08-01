@@ -305,7 +305,7 @@ private:
   /**
    Obtain the number of samples for a given sample rate and duration.
 
-   @param cents the amount of time to use in the calculation represented in timecents
+   @param seconds the amount of time to use in the calculation represented in timecents
    @returns the number of samples
    */
   int samplesFor(Float seconds) noexcept {

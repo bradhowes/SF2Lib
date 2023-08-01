@@ -58,7 +58,6 @@ public:
    Construct new LFO. It will have no frequency so it will never return a non-zero value.
 
    @param sampleRate the sample rate being used
-   @param kind the kind of LFO to create
    */
   LFO(Float sampleRate) : log_{os_log_create("SF2Lib", logTag(Kind))}
   {
