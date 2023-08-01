@@ -142,7 +142,7 @@ enum struct Index : size_t {
    of zero places the signal centered between left and right. For example, a value of -250 indicates that the signal
    is sent at 75% of full level to the left output and 25% of full level to the right output.
    */
-  pan,
+  pan, // USED
   unused2,
   unused3,
   // 20
@@ -320,7 +320,7 @@ enum struct Index : size_t {
    instrument list. The instrument enumerator is the terminal generator for PGEN zones. As such, it should only appear
    in the PGEN sub-chunk, and it must appear as the last generator enumerator in all but the global preset zone.
    */
-  instrument,
+  instrument, // USED
   reserved1,
   /**
    This is the minimum and maximum MIDI key number values for which this preset zone or instrument zone is active.

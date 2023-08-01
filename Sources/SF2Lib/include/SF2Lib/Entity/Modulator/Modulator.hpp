@@ -27,19 +27,21 @@ namespace SF2::Entity::Modulator {
  acts as if the source returned 1.0.
 
  Per the spec, modulators are unique if they do not share the same sfModSrcOper, sfModDestOper, sfModAmtSrcOper values.
- If there are duplicates, the second occurrence wins.
+ If there are duplicates, the second occurrence wins. This is also how modulators can override those that were defined
+ either by default or in an instrument or preset zone.
  */
 class Modulator {
 public:
-  static constexpr size_t size = 10;
+  inline static constexpr size_t size = 10;
 
-  inline static constexpr uint16_t modulatorDestinationBit = 1 << 15;
+  /// Number of default modulators
+  inline static constexpr size_t DefaultsSize = 10;
 
   /**
    Default modulators that are predefined for every instrument. These get copied over to each voice's State before the
    preset/instrument configurations are applied.
    */
-  static const std::array<Modulator, size> defaults;
+  static const std::array<Modulator, DefaultsSize> defaults;
 
   /**
    Construct instance from contents of SF2 file.
@@ -60,38 +62,18 @@ public:
    @param modAmtSrcOper the source of the modulation of the amount value
    @param transform the transformation to apply to modulated values.
    */
-  Modulator(Source modSrcOper, Generator::Index dest, int16_t amount, Source modAmtSrcOper,
-            Transformer transform) noexcept :
+  Modulator(Source modSrcOper, Generator::Index dest, int16_t amount, Source modAmtSrcOper = Source(),
+            Transformer transform = Transformer()) noexcept :
   sfModSrcOper{modSrcOper}, sfModDestOper{static_cast<uint16_t>(dest)}, modAmount{amount},
-  sfModAmtSrcOper{modAmtSrcOper}, sfModTransOper{transform} {}
-
-  /**
-   Construct instance from values. Used to support unit tests.
-   */
-  Modulator(Source modSrcOper, int link, int16_t amount, Source modAmtSrcOper,
-            Transformer transform) noexcept :
-  sfModSrcOper{modSrcOper}, sfModDestOper{static_cast<uint16_t>(link | modulatorDestinationBit)}, modAmount{amount},
   sfModAmtSrcOper{modAmtSrcOper}, sfModTransOper{transform} {}
 
   /// @returns the source of data for the modulator
   const Source& source() const noexcept { return sfModSrcOper; }
 
-  /// @returns true if this modulator is the source of a value for another modulator
-  bool hasModulatorDestination() const noexcept { return (sfModDestOper & modulatorDestinationBit) != 0; }
-
-  /// @returns true if this modulator directly affects a generator value
-  bool hasGeneratorDestination() const noexcept { return !hasModulatorDestination(); }
-
   /// @returns the destination (generator) for the modulator
   Generator::Index generatorDestination() const noexcept {
-    assert(hasGeneratorDestination() && sfModDestOper < size_t(Generator::Index::numValues));
+    assert(sfModDestOper < size_t(Generator::Index::numValues));
     return Generator::Index(sfModDestOper);
-  }
-
-  /// @returns the index of the destination modulator. This is the index in the pmod/imod bag.
-  size_t linkDestination() const noexcept {
-    assert(hasModulatorDestination());
-    return size_t(sfModDestOper ^ modulatorDestinationBit);
   }
 
   /// @returns the maximum deviation that a modulator can apply to a generator
@@ -107,13 +89,14 @@ public:
   std::string description() const noexcept;
 
   /**
-   Compare two instances for equality.
+   Compare two instances for equality. Per the SF2 spec, the `modAmount` and `sfModTransOper` are not involved in this.
 
    @param rhs the modulator to compare with
    @returns true if this modulator is equivalent to `rhs`
    */
   bool operator ==(const Modulator& rhs) const noexcept {
-    return (sfModSrcOper == rhs.sfModSrcOper && sfModDestOper == rhs.sfModDestOper &&
+    return (sfModSrcOper == rhs.sfModSrcOper &&
+            sfModDestOper == rhs.sfModDestOper &&
             sfModAmtSrcOper == rhs.sfModAmtSrcOper);
   }
 
@@ -123,7 +106,7 @@ public:
    @param rhs the modulator to compare with
    @return true if this modulator is not equivalent to `rhs`
    */
-  bool operator !=(const Modulator& rhs) const noexcept {  return !operator==(rhs); }
+  bool operator !=(const Modulator& rhs) const noexcept { return !operator==(rhs); }
 
   void dump(const std::string& indent, size_t index) const noexcept;
 

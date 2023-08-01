@@ -64,10 +64,6 @@ struct PresetTestContextBase
   presets_{},
   sampleRate_{sampleRate}
   {
-    std::cout << "PresetTestContextBase::init "
-    << urlIndex << ' '
-    << [[url_ description] UTF8String]
-    << '\n';
     presets_.build(file_);
   }
 

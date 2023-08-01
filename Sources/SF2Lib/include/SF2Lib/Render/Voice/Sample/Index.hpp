@@ -19,7 +19,6 @@ namespace SF2::Render::Voice::Sample {
  end of the sample stream via its `finished` method.
  */
 class Index {
-  struct InternalState;
 public:
 
   /**
@@ -34,16 +33,21 @@ public:
 
    @param bounds the sample bounds to work with
    */
-  void configure(Bounds bounds) noexcept { state_ = InternalState(std::forward<Bounds>(bounds)); }
+  void configure(const Bounds& bounds) noexcept {
+    whole_ = 0;
+    partial_ = 0.0;
+    looped_ = false;
+    bounds_ = bounds;
+  }
 
   /// Signal that no further operations will take place using this index.
-  void stop() noexcept { state_.stop(); }
+  void stop() noexcept { whole_ = bounds_.endPos(); }
 
   /// @returns true if the index has been stopped.
-  bool finished() const noexcept { return state_.whole_ >= state_.bounds_.endPos(); }
+  bool finished() const noexcept { return whole_ >= bounds_.endPos(); }
 
   /// @returns true if the index has looped.
-  bool looped() const noexcept { return state_.looped_; }
+  bool looped() const noexcept { return looped_; }
 
   /**
    Increment the index to the next location. Properly handles looping and buffer end.
@@ -52,54 +56,40 @@ public:
    @param canLoop true if looping is allowed
    */
   void increment(Float increment, bool canLoop) noexcept {
-    if (!finished()) {
-      state_.increment(increment, canLoop);
+    if (finished()) return;
+
+    auto wholeIncrement = size_t(increment);
+    auto partialIncrement = increment - Float(wholeIncrement);
+
+    whole_ += wholeIncrement;
+    partial_ += partialIncrement;
+
+    if (partial_ >= 1.0) {
+      auto carry = size_t(partial_);
+      whole_ += carry;
+      partial_ -= carry;
+    }
+
+    if (canLoop && bounds_.hasLoop() && whole_ >= bounds_.endLoopPos()) {
+      whole_ -= bounds_.loopSize();
+      looped_ = true;
+    }
+    else if (whole_ >= bounds_.endPos()) {
+      stop();
     }
   }
 
   /// @returns index to first sample to use for rendering
-  size_t whole() const noexcept { return state_.whole_; }
+  size_t whole() const noexcept { return whole_; }
 
   /// @returns normalized position between 2 samples. For instance, 0.5 indicates half-way between two samples.
-  Float partial() const noexcept { return state_.partial_; }
+  Float partial() const noexcept { return partial_; }
 
 private:
-
-  struct InternalState {
-    size_t whole_{0};
-    Float partial_{0.0};
-    Bounds bounds_{};
-    bool looped_{false};
-
-    InternalState() = default;
-    InternalState(Bounds&& bounds) noexcept : bounds_{std::move(bounds)} {}
-
-    void stop() noexcept { whole_ = bounds_.endPos(); }
-
-    void increment(Float increment, bool canLoop) noexcept {
-      auto wholeIncrement = size_t(increment);
-      auto partialIncrement = increment - Float(wholeIncrement);
-
-      whole_ += wholeIncrement;
-      partial_ += partialIncrement;
-
-      if (partial_ >= 1.0) {
-        auto carry = size_t(partial_);
-        whole_ += carry;
-        partial_ -= carry;
-      }
-
-      if (canLoop && bounds_.hasLoop() && whole_ >= bounds_.endLoopPos()) {
-        whole_ -= bounds_.loopSize();
-        looped_ = true;
-      }
-      else if (whole_ >= bounds_.endPos()) {
-        stop();
-      }
-    }
-  };
-
-  InternalState state_{};
+  size_t whole_{0};
+  Float partial_{0.0};
+  Bounds bounds_{};
+  bool looped_{false};
 };
 
 } // namespace Sf2::Render::Sample

@@ -20,14 +20,13 @@ Source::description() const noexcept {
       case GeneralIndex::channelPressure: os << "channelPressure"; break;
       case GeneralIndex::pitchWheel: os << "pitchWheel"; break;
       case GeneralIndex::pitchWheelSensitivity: os << "pitchWheelSensitivity"; break;
-      case GeneralIndex::link: os << "link"; break;
     }
   }
   else {
-    os << "CC[" << continuousIndex() << ']';
+    os << "CC[" << ccIndex() << ']';
   }
   
-  os << '(' << (isUnipolar() ? "uni" : "bi") << '/' << (isMinToMax() ? "-+" : "+-") << '/'
+  os << '(' << (isUnipolar() ? "uni" : "bi") << '/' << (isPositive() ? "-+" : "+-") << '/'
   << continuityTypeName() << ')';
   
   return os.str();

@@ -78,6 +78,7 @@ public:
   /// @returns true if generator has looped during rendering.
   bool looped() const noexcept { return index_.looped(); }
 
+  /// Tell the generator that there will be no more samples generated.
   void stop() noexcept { index_.stop(); }
 
 private:

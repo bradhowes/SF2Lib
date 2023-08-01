@@ -27,11 +27,10 @@ using namespace SF2::Render::Voice::Sample;
 - (void)testUnity {
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0);
+  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
   State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
-
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), 0.0);
   XCTAssertEqualWithAccuracy(inc, 1.0, epsilon);
 }
@@ -39,7 +38,7 @@ using namespace SF2::Render::Voice::Sample;
 - (void)test2x {
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey + 12; // A5
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0);
+  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
   State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
@@ -51,7 +50,7 @@ using namespace SF2::Render::Voice::Sample;
 - (void)test4x {
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey + 24; // A6
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0);
+  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
   State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
@@ -63,7 +62,7 @@ using namespace SF2::Render::Voice::Sample;
 - (void)testOverrideRoot {
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0);
+  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
   State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
 
@@ -77,7 +76,7 @@ using namespace SF2::Render::Voice::Sample;
 - (void)testGeneratorKey {
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey + 12;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0);
+  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
 
   State::State state{44100.0, channelState, eventKey};
 
@@ -93,7 +92,7 @@ using namespace SF2::Render::Voice::Sample;
 - (void)testDoubleSampleRate {
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
-  Entity::SampleHeader header(0, 100, 80, 90, 22050.0, sourceKey, 0);
+  Entity::SampleHeader header(0, 100, 80, 90, 22050.0, sourceKey);
   State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
@@ -129,7 +128,7 @@ using namespace SF2::Render::Voice::Sample;
 - (void)testScaleTuning {
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey + 1;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0.0);
+  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
   State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
 
@@ -151,7 +150,7 @@ using namespace SF2::Render::Voice::Sample;
 - (void)testModLFOEffect {
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0.0);
+  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
   State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
@@ -179,7 +178,7 @@ using namespace SF2::Render::Voice::Sample;
 - (void)testVibLFOEffect {
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0.0);
+  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
   State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
@@ -207,7 +206,7 @@ using namespace SF2::Render::Voice::Sample;
 - (void)testModEnvEffect {
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 0.0);
+  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
   State::State state{44100.0, channelState, eventKey};
   Pitch pitch{state};
   pitch.configure(header);

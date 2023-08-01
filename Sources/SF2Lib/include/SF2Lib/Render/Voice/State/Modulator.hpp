@@ -7,9 +7,9 @@
 #include <functional>
 #include <limits>
 
+#include "SF2Lib/Entity/Modulator/Modulator.hpp"
+#include "SF2Lib/Entity/Modulator/Source.hpp"
 #include "SF2Lib/MIDI/ValueTransformer.hpp"
-
-namespace SF2::Entity::Modulator { class Modulator; class Source; }
 
 namespace SF2::MIDI { class Channel; }
 
@@ -25,66 +25,54 @@ class State;
  - takes an 'amount' source value (Av) and transforms it into a unipolar or bipolar value
  - calculates and returns Sv * Av * amount (from SF2 Entity::Modulator)
 
- The Sv and Av transformations are done in the Transform class.
+ The Sv and Av transformations are done in the Transformer class.
 
- The Modulator instances operate in a 'pull' fashion: a call to their `value()` method fetches source values, which may
- themselves be modulator instances. In this way, the `value()` method will always return the most up-to-date values.
+ The Modulator instances operate in a 'pull' fashion: a call to their `value()` method fetches source values.
+ In this way, the `value()` method will always return the most up-to-date values.
  */
 class Modulator {
 public:
 
-  static void resolveLinks(std::vector<Modulator>& modulators);
-  
   /**
    Construct new modulator
 
-   @param index the index of the entity in the zone
    @param configuration the entity configuration that defines the modulator
    @param state the voice state that can be used as a source for modulators
    */
-  Modulator(size_t index, const Entity::Modulator::Modulator& configuration, const State& state) noexcept;
+  Modulator(const Entity::Modulator::Modulator& configuration, const State& state) noexcept;
+
+  /**
+   Acquire the amount from the given configuration. This is the only change we can make since per spec, modulators are
+   equivalent (and thus overridable) when they have the same sources and transform.
+
+   @param configuration the SF2 entity to take the amount from
+   */
+  void takeAmountFrom(const Entity::Modulator::Modulator& configuration) noexcept
+  {
+    amount_ = configuration.amount();
+  }
 
   /// @returns current value of the modulator
   Float value() const noexcept
   {
-    assert(isValid());
-
     // If there is no source for the modulator, it always returns 0.0 (no modulation).
-    if (!sourceValue_.isValid()) return 0.0;
+    if (!primaryValue_.isActive()) return 0.0;
 
-    // Obtain transformed value from source.
-    Float value = sourceTransform_(sourceValue_());
-    if (value == 0.0) return 0.0;
+    // Obtain transformed primary value.
+    auto primaryValue = primaryValue_();
+    Float transformedPrimaryValue = primaryTransform_(primaryValue);
+    if (transformedPrimaryValue == 0.0) return 0.0;
 
-    // If there is a source for the scaling factor, apply its transformed value.
-    if (amountScale_.isValid()) value *= amountTransform_(amountScale_());
+    // Obtain transformed secondary value.
+    Float transformedSecondaryAmount = secondaryValue_.isActive() ? secondaryTransform_(secondaryValue_()) : 1.0;
 
-    return value * amount_;
+    Float result = transformedPrimaryValue * transformedSecondaryAmount * amount_;
+    return result;
   }
 
-  /// @returns configuration of the modulator from the SF2 file
+  /// @returns configuration of the modulator from the SF2 file. This is used to allow for comparisons between
+  /// modulators.
   const Entity::Modulator::Modulator& configuration() const noexcept { return configuration_; }
-
-  /// @returns index offset for the modulator
-  size_t index() const noexcept { return index_; }
-
-  /// Flag this modulator as being invalid.
-  void flagInvalid() noexcept { index_ = std::numeric_limits<size_t>::max(); }
-
-  /// @returns true if the modulator is valid.
-  bool isValid() const noexcept { return index_ != std::numeric_limits<size_t>::max(); }
-
-  /**
-   Resolve the linking between two modulators. Configures this modulator to invoke the `value()` method of another to
-   obtain an Sv value. Per spec, linking is NOT allowed for Av values. Also per spec, source values fall in range
-   0-127 and are transformed into unipolar or bipolar ranges depending on their definition. This makes linking a bit
-   strange: the 'source' modulator generates a unipolar or bipolar value per its definition, but unipolar is only
-   useful in the linked case, and its `amount` must be 127 or 128 in order to get back a value that is reasonable to
-   use as a source value for another modulator.
-
-   @param modulator provider for an Sv to use for this modulator
-   */
-  void setSource(const Modulator& modulator) noexcept;
 
   std::string description() const noexcept;
 
@@ -99,19 +87,17 @@ private:
     const State& state_;
     Proc proc_{nullptr};
     const int cc_{0};
-    const Modulator* modulator_{nullptr};
 
-    bool isValid() const noexcept { return proc_ != nullptr; }
-    int operator()() const noexcept { return isValid() ? (this->*proc_)() : 0; }
+    bool isActive() const noexcept { return proc_ != nullptr; }
+    int operator()() const noexcept { return (this->*proc_)(); }
 
     int ccValue() const noexcept;
-    int key() const noexcept;
-    int velocity() const noexcept;
+    int noteOnKey() const noexcept;
+    int noteOnVelocity() const noexcept;
     int keyPressure() const noexcept;
     int channelPressure() const noexcept;
     int pitchWheelValue() const noexcept;
     int pitchWheelSensitivity() const noexcept;
-    int linked() const noexcept;
   };
 
   /**
@@ -125,13 +111,12 @@ private:
   static ValueProvider makeValueProvider(const Entity::Modulator::Source& source, const State& state) noexcept;
 
   const Entity::Modulator::Modulator& configuration_;
-  size_t index_;
   int amount_;
-  MIDI::ValueTransformer sourceTransform_;
-  MIDI::ValueTransformer amountTransform_;
 
-  ValueProvider sourceValue_;
-  ValueProvider amountScale_;
+  const ValueProvider primaryValue_;
+  const MIDI::ValueTransformer primaryTransform_;
+  const ValueProvider secondaryValue_;
+  const MIDI::ValueTransformer secondaryTransform_;
 };
 
 } // namespace SF2::Render

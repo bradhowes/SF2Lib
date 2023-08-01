@@ -139,10 +139,10 @@ public:
    @param gen the index of the generator
    @returns current value of the generator
    */
-  int modulated(Index gen) const noexcept {
+  Float modulated(Index gen) const noexcept {
     auto value = gens_[gen].value();
-    auto modulation = channelState_.nrpnValue(gen);
-    return value + modulation;
+    auto mods = gens_[gen].sumMods(modulators_);
+    return value + mods + channelState_.nrpnValue(gen);
   }
 
   /// @returns MIDI key that started a voice to begin emitting samples. For DSP this is *not* what is desired. See
@@ -170,7 +170,6 @@ public:
 private:
 
   void setDefaults() noexcept;
-  void linkModulators() noexcept;
 
   Entity::Generator::GeneratorValueArray<GenValue> gens_;
   std::vector<Modulator> modulators_;

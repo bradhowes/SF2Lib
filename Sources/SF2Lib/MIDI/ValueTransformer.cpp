@@ -11,51 +11,81 @@
 
 using namespace SF2;
 using namespace SF2::MIDI;
-using VT = ValueTransformer;
-using TL = VT::TransformLookup;
+using namespace DSPHeaders::ConstMath;
 
-TL VT::positiveLinear_ = VT::Make(VT::positiveLinear);
-TL VT::positiveConcave_ = VT::Make(VT::positiveConcave);
-TL VT::positiveConvex_ = VT::Make(VT::positiveConvex);
-TL VT::positiveSwitched_ = VT::Make(VT::positiveSwitched);
+constexpr Float positiveLinear(size_t maxValue, size_t index) noexcept {
+  return Float(index) / Float(maxValue + 1);
+}
 
-TL VT::negativeLinear_ = VT::Make(VT::negativeLinear);
-TL VT::negativeConcave_ = VT::Make(VT::negativeConcave);
-TL VT::negativeConvex_ = VT::Make(VT::negativeConvex);
-TL VT::negativeSwitched_ = VT::Make(VT::negativeSwitched);
+constexpr Float positiveConcave(size_t maxValue, size_t index) noexcept {
+  return index == maxValue ? 1.0 : -40.0 / 96.0 * log10((maxValue - index) / Float(maxValue));
+}
 
-TL VT::positiveLinearBipolar_ = VT::Make(VT::positiveLinear, true);
-TL VT::positiveConcaveBipolar_ = VT::Make(VT::positiveConcave, true);
-TL VT::positiveConvexBipolar_ = VT::Make(VT::positiveConvex, true);
-TL VT::positiveSwitchedBipolar_ = VT::Make(VT::positiveSwitched, true);
+constexpr Float positiveConvex(size_t maxValue, size_t index) noexcept {
+  return index == 0 ? 0.0 : 1.0 - -40.0 / 96.0 * log10(index / Float(maxValue));
+}
 
-TL VT::negativeLinearBipolar_ = VT::Make(VT::negativeLinear, true);
-TL VT::negativeConcaveBipolar_ = VT::Make(VT::negativeConcave, true);
-TL VT::negativeConvexBipolar_ = VT::Make(VT::negativeConvex, true);
-TL VT::negativeSwitchedBipolar_ = VT::Make(VT::negativeSwitched, true);
+constexpr Float positiveSwitched(size_t maxValue, size_t index) noexcept {
+  return index <= maxValue / 2 ? 0.0 : 1.0;
+}
 
+constexpr Float negativeLinear(size_t maxValue, size_t index) noexcept {
+  return 1.0f - positiveLinear(maxValue, index);
+}
 
-const ValueTransformer::TransformArrayType&
-ValueTransformer::selectActive(Kind kind, Direction dir, Polarity pol) noexcept {
-  if (pol == Polarity::unipolar) {
-    switch (kind) {
-      case Kind::linear: return dir == Direction::ascending ? positiveLinear_ : negativeLinear_;
-      case Kind::concave: return dir == Direction::ascending ? positiveConcave_ : negativeConcave_;
-      case Kind::convex: return dir == Direction::ascending ? positiveConvex_ : negativeConvex_;
-      case Kind::switched: return dir == Direction::ascending ? positiveSwitched_ : negativeSwitched_;
-    }
-  } else {
-    switch (kind) {
-      case Kind::linear: return dir == Direction::ascending ? positiveLinearBipolar_ : negativeLinearBipolar_;
-      case Kind::concave: return dir== Direction::ascending ? positiveConcaveBipolar_ : negativeConcaveBipolar_;
-      case Kind::convex: return dir == Direction::ascending ? positiveConvexBipolar_ : negativeConvexBipolar_;
-      case Kind::switched: return dir == Direction::ascending ? positiveSwitchedBipolar_ : negativeSwitchedBipolar_;
-    }
+constexpr Float negativeConcave(size_t maxValue, size_t index) noexcept {
+  return index == 0 ? 1.0 : -40.0 / 96.0 * log10(index / Float(maxValue));
+}
+
+constexpr Float negativeConvex(size_t maxValue, size_t index) noexcept {
+  return index == maxValue ? 0.0 : 1.0 - -40.0 / 96.0 * log10((maxValue - index) / Float(maxValue));
+}
+
+constexpr Float negativeSwitched(size_t maxValue, size_t index) noexcept {
+  return 1.0f - positiveSwitched(maxValue, index);
+}
+
+using Generator = Float(*)(size_t, size_t);
+
+Generator proc(ValueTransformer::Kind kind, ValueTransformer::Direction dir) noexcept {
+  switch (kind) {
+    case ValueTransformer::Kind::linear:
+      return dir == ValueTransformer::Direction::ascending ? positiveLinear : negativeLinear;
+    case ValueTransformer::Kind::concave:
+      return dir == ValueTransformer::Direction::ascending ? positiveConcave : negativeConcave;
+    case ValueTransformer::Kind::convex:
+      return dir == ValueTransformer::Direction::ascending ? positiveConvex : negativeConvex;
+    case ValueTransformer::Kind::switched:
+      return dir == ValueTransformer::Direction::ascending ? positiveSwitched : negativeSwitched;
   }
 }
 
-ValueTransformer::ValueTransformer(Kind kind, Direction dir, Polarity pol) noexcept
-: active_{selectActive(kind, dir, pol)}
-{
-  ;
+size_t transformArrayIndex(size_t maxValue, ValueTransformer::Kind kind, ValueTransformer::Direction dir,
+                           ValueTransformer::Polarity pol) noexcept {
+  // 16 x size + 8 x polarity + 4 x direction + continuity
+  return (16 * (maxValue == 8191) +
+          8 * (pol == ValueTransformer::Polarity::bipolar) +
+          4 * (dir == ValueTransformer::Direction::descending) +
+          static_cast<size_t>(kind));
+}
+
+void fill(ValueTransformer::TransformArray& array, size_t maxValue, Generator gen, bool is_bipolar) noexcept {
+  array.reserve(maxValue + 1);
+  for (std::size_t value = 0; value <= maxValue; ++value) {
+    Float transformed = gen(maxValue, value);
+    if (is_bipolar) transformed = ::DSPHeaders::DSP::unipolarToBipolar(transformed);
+    array.emplace_back(transformed);
+  }
+}
+
+size_t transformsSize_ = 16 * 8 * 4 * 3;
+std::vector<ValueTransformer::TransformArray> transforms_{transformsSize_};
+
+const ValueTransformer::TransformArray&
+ValueTransformer::selectActive(size_t maxValue, Kind kind, Direction dir, Polarity pol) noexcept {
+  auto index = transformArrayIndex(maxValue, kind, dir, pol);
+  if (transforms_[index].empty()) {
+    fill(transforms_[index], maxValue, proc(kind, dir), pol == ValueTransformer::Polarity::bipolar);
+  }
+  return transforms_[index];
 }

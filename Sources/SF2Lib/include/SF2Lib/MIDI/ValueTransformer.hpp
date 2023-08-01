@@ -5,31 +5,23 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <array>
 #include <iosfwd>
+#include <vector>
 
 #include "DSPHeaders/ConstMath.hpp"
 #include "DSPHeaders/DSP.hpp"
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
 
-// namespace SF2::DSP { namespace Tables { struct Generator; } }
 namespace SF2::MIDI {
 
 /**
- Transforms MIDI controller domain values (between 0 and 127) into various ranges. This currently only works with the
- `coarse` controller values.
-
- The conversion is done via a collection of lookup tables that map between [0, 127] and [0, 1] or [-1, 1].
+ Transforms MIDI v1.0 controller values into various ranges for use in a modulator.
  */
 class ValueTransformer {
 public:
   using Float = SF2::Float;
-
-  /// Minimum MIDI value that controller can emit
-  inline constexpr static int MinValue = 0;
-  /// Maximum MIDI value that controller can emit
-  inline constexpr static int MaxValue = 127;
+  using TransformArray = std::vector<Float>;
 
   /**
    Kind specifies the curvature of the MIDI value transformation function.
@@ -50,99 +42,37 @@ public:
   /// Polarity determines the lower bound: unipolar = 0, bipolar = -1.
   enum struct Polarity {
     unipolar = 0,
-    bipolar = 1
+    bipolar
   };
 
   /// Direction controls the ordering of the min/max values.
   enum struct Direction {
     ascending = 0,
-    descending = 1
-  };
-
-  /// Domain controls how many values there are in the domain. Some domains start at 1 while others start at 0.
-  enum struct Domain {
-    zeroBased = 0,
-    oneBased = 1
+    descending
   };
 
   /**
-   Create new value transformer from an SF2 modulator source definition
+   Create new value transformer from an SF2 modulator source definition.
 
    @param source the source definition to use
    */
   explicit ValueTransformer(const Entity::Modulator::Source& source) noexcept :
-  ValueTransformer(Kind(source.type()), source.isMinToMax() ? Direction::ascending : Direction::descending,
-                   source.isUnipolar() ? Polarity::unipolar : Polarity::bipolar)
+  active_{selectActive(size_t(source.maxControllerValue()), Kind(source.type()),
+                       source.isPositive() ? Direction::ascending : Direction::descending,
+                       source.isUnipolar() ? Polarity::unipolar : Polarity::bipolar)}
   {}
 
   /**
-   Convert a controller value.
+   Transform a controller value into a modulation value.
 
    @param controllerValue value to convert between 0 and 127
    @returns transformed value
    */
   Float operator()(int controllerValue) const noexcept {
-    return Float(active_[size_t(std::clamp(controllerValue, MinValue, MaxValue))]);
-  }
-
-  static constexpr size_t TableSize = MaxValue + 1;
-
-  static constexpr Float positiveLinear(size_t index) noexcept {
-    return Float(index) / TableSize;
-  }
-
-  static constexpr Float positiveConcave(size_t index) noexcept {
-    return index == (TableSize - 1) ? 1.0 : -40.0 / 96.0 * DSPHeaders::ConstMath::log10((127.0 - index) / 127.0);
-  }
-
-  static constexpr Float positiveConvex(size_t index) noexcept {
-    return index == 0.0 ? 0.0 : 1.0 - -40.0 / 96.0 * DSPHeaders::ConstMath::log10(index / 127.0);
-  }
-
-  static constexpr Float positiveSwitched(size_t index) noexcept {
-    return index < TableSize / 2 ? 0.0 : 1.0;
-  }
-
-  static constexpr Float negativeLinear(size_t index) noexcept {
-    return 1.0f - positiveLinear(index);
-  }
-
-  static constexpr Float negativeConcave(size_t index) noexcept {
-    return index == 0.0 ? 1.0 : -40.0 / 96.0 * DSPHeaders::ConstMath::log10(index / 127.0);
-  }
-
-  static constexpr Float negativeConvex(size_t index) noexcept {
-    return index == (TableSize - 1) ? 0.0 : 1.0 - -40.0 / 96.0 * DSPHeaders::ConstMath::log10((127.0 - index) / 127.0);
-  }
-
-  static constexpr Float negativeSwitched(size_t index) noexcept {
-    return index < TableSize / 2 ? 1.0 : 0.0;
-  }
-
-  using Generator = Float(*)(size_t);
-  using TransformLookup = std::array<Float, TableSize>;
-
-  static constexpr TransformLookup Make(Generator gen, bool is_bipolar = false) noexcept {
-    TransformLookup table = {};
-    for (std::size_t i = 0; i != TableSize; ++i) {
-      Float value = gen(i);
-      if (is_bipolar) value = ::DSPHeaders::DSP::unipolarToBipolar(value);
-      table[i] = value;
-    }
-    return table;
+    return active_[std::clamp<size_t>(static_cast<size_t>(controllerValue), 0, active_.size() - 1)];
   }
 
 private:
-  using TransformArrayType = std::array<Float, TableSize>;
-
-  /**
-   Create new value transformer.
-
-   @param kind mapping operation from controller domain to value range
-   @param direction ordering from min to max
-   @param polarity range lower and upper bounds
-   */
-  ValueTransformer(Kind kind, Direction direction, Polarity polarity) noexcept;
 
   /**
    Locate the right table to use based on the transformation, direction, and polarity.
@@ -152,30 +82,10 @@ private:
    @param polarity the lower bound of the transformed result
    @returns reference to table to use for MIDI value transformations.
    */
-  static const TransformArrayType& selectActive(Kind kind, Direction direction, Polarity polarity) noexcept;
+  static const TransformArray& selectActive(size_t maxValue, Kind kind, Direction direction,
+                                            Polarity polarity) noexcept;
 
-  const TransformArrayType& active_;
-
-  static TransformLookup positiveLinear_;
-  static TransformLookup positiveConcave_;
-  static TransformLookup positiveConvex_;
-  static TransformLookup positiveSwitched_;
-
-  static TransformLookup negativeLinear_;
-  static TransformLookup negativeConcave_;
-  static TransformLookup negativeConvex_;
-  static TransformLookup negativeSwitched_;
-
-  static TransformLookup positiveLinearBipolar_;
-  static TransformLookup positiveConcaveBipolar_;
-  static TransformLookup positiveConvexBipolar_;
-  static TransformLookup positiveSwitchedBipolar_;
-
-  static TransformLookup negativeLinearBipolar_;
-  static TransformLookup negativeConcaveBipolar_;
-  static TransformLookup negativeConvexBipolar_;
-  static TransformLookup negativeSwitchedBipolar_;
-
+  const TransformArray& active_;
 };
 
 } // namespace SF2::MIDI

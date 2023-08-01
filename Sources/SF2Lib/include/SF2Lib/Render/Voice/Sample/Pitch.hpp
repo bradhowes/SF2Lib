@@ -51,9 +51,7 @@ public:
    @param state the state to use for pitch calculations
    */
   Pitch(const State::State& state) noexcept : state_{state}
-  {
-    // std::cout << "Pitch init state_ " << &state << '\n';
-  }
+  {}
 
   /**
    Configure instance to use the given sample definition. NOTE: this is invoked before start of rendering a note. This
@@ -78,10 +76,23 @@ public:
    */
   Float samplePhaseIncrement(ModLFO::Value modLFO, VibLFO::Value vibLFO, Float modEnv) const noexcept
   {
-    auto value = DSP::centsToFrequency(pitch_ + pitchOffset_ +
-                                       modLFO.val * state_.modulated(Index::modulatorLFOToPitch) +
-                                       vibLFO.val * state_.modulated(Index::vibratoLFOToPitch) +
-                                       modEnv * state_.modulated(Index::modulatorEnvelopeToPitch)) / rootFrequency_;
+    auto pitch = pitch_;
+    auto pitchOffset = pitchOffset_;
+    auto modLFOValue = modLFO.val;
+    auto vibLFOValue = vibLFO.val;
+    auto modLFOToPitch = state_.modulated(Index::modulatorLFOToPitch);
+    auto vibLFOToPitch = state_.modulated(Index::vibratoLFOToPitch);
+    auto modEnvToPitch = state_.modulated(Index::modulatorEnvelopeToPitch);
+//    std::cout << "pitch: " << pitch << " offset: " << pitchOffset_
+//    << " modLFO: " << modLFOValue << " modLFOToPitch: " << modLFOToPitch
+//    << " vibLFO: " << vibLFOValue << " vibLFOToPitch: " << vibLFOToPitch
+//    << " modEnv: " << modEnv << " modEnvToPitch: " << modEnvToPitch
+//    << " root: " << rootFrequency_ << std::endl;
+
+    auto value = DSP::centsToFrequency(pitch + pitchOffset +
+                                       modLFOValue * modLFOToPitch +
+                                       vibLFOValue * vibLFOToPitch +
+                                       modEnv * modEnvToPitch) / rootFrequency_;
     return Float(value);
   }
 
@@ -90,7 +101,9 @@ public:
    */
   void updatePitchOffset() noexcept
   {
-    pitchOffset_ = state_.modulated(Index::coarseTune) * 100.0f + state_.modulated(Index::fineTune);
+    auto coarseTune = state_.modulated(Index::coarseTune);
+    auto fineTune = state_.modulated(Index::fineTune);
+    pitchOffset_ = coarseTune * 100.0f + fineTune;
   }
 
 private:

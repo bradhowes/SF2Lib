@@ -58,7 +58,7 @@ public:
    Constructor for unit tests.
    */
   constexpr SampleHeader(uint32_t start, uint32_t end, uint32_t loopBegin, uint32_t loopEnd,
-                         uint32_t sampleRate, uint8_t key, int8_t adjustment, uint16_t link = 0,
+                         uint32_t sampleRate, uint8_t key, int8_t adjustment = 0, uint16_t link = 0,
                          Type type = Type::monoSample) noexcept :
   achSampleName{"blah"},
   dwStart{start},

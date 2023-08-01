@@ -34,7 +34,7 @@ public:
     notePressureValues_.fill(0);
     nrpnValues_.zero();
     channelPressure_ = 0;
-    pitchWheelValue_ = 0;
+    pitchWheelValue_ = 4096; // this is the middle of the wheel at rest
     pitchWheelSensitivity_ = 200;
     nrpnIndex_ = 0;
 
@@ -77,17 +77,21 @@ public:
   int channelPressure() const noexcept { return channelPressure_; }
 
   /**
-   Set the pitch wheel value
+   Set the pitch wheel value. For MIDI v1 this is a 14-bit value [0-8191] and at rest, it should report out a value
+   of 4096 which when mapped to bipolar range [-1 - 1) will give 0 as an output value.
 
    @param value the pitch wheel value
    */
-  void setPitchWheelValue(int value) noexcept { pitchWheelValue_ = value; }
+  void setPitchWheelValue(int value) noexcept {
+    pitchWheelValue_ = std::clamp(value, 0, 8191);
+  }
 
   /// @returns the current pitch wheel value
   int pitchWheelValue() const noexcept { return pitchWheelValue_; }
 
   /**
-   Set the pitch wheel sensitivity value
+   Set the pitch wheel sensitivity value. Default is 200 cents which results in 2 note jump in either direction of the
+   pitch wheel.
 
    @param value the sensitivity value to record
    */
@@ -103,7 +107,7 @@ public:
    @param value the value to set for the controller
    */
   void setContinuousControllerValue(size_t id, int value) {
-    if (id > 127) throw std::runtime_error("invalid CC ID");
+    if (id < CCMin || id > CCMax) throw std::runtime_error("invalid CC ID");
     continuousControllerValues_[id] = value;
   }
 

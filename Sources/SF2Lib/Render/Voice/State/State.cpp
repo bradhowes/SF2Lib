@@ -1,6 +1,7 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
 #include <cmath>
+#include <iostream>
 
 #include "SF2Lib/Render/Voice/State/Config.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
@@ -14,7 +15,6 @@ State::prepareForVoice(const Config& config) noexcept
   config.apply(*this);
   eventKey_ = config.eventKey();
   eventVelocity_ = config.eventVelocity();
-  Modulator::resolveLinks(modulators_);
 }
 
 void
@@ -46,22 +46,18 @@ State::setDefaults() noexcept {
 
 void
 State::addModulator(const Entity::Modulator::Modulator& modulator) noexcept {
+  if (!modulator.source().isValid()) return;
 
-  // Per spec, there must only be one modulator with specific (sfModSrcOper, sfModDestOper, and sfModSrcAmtOper)
-  // values. If we find a duplicate, flag it as not being used, but keep it around so that modulator linking is not
-  // broken if it is used.
+  // Per spec, there must only be one modulator with specific <sfModSrcOper, sfModDestOper, and sfModSrcAmtOper>
+  // values. If we find a duplicate, then we update it's amount with the amount taken from the newer modulator.
   for (auto& mod : modulators_) {
     if (mod.configuration() == modulator) {
-      mod.flagInvalid();
-      break;
+      mod.takeAmountFrom(modulator);
+      return;
     }
   }
 
-  size_t index = modulators_.size();
-  modulators_.emplace_back(index, modulator, *this);
-
-  if (modulator.hasGeneratorDestination()) {
-    // gens_[modulator.generatorDestination()].mods.push_front(index);
-  }
+  // Add modulator to State and add its index to the GenValue instance that it affects.
+  modulators_.emplace_back(modulator, *this);
+  gens_[modulator.generatorDestination()].addModulator(modulators_.size() - 1);
 }
-

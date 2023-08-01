@@ -102,21 +102,11 @@ public:
    */
   void gate(bool noteOn) noexcept {
     if (noteOn) {
-      os_log_debug(log_, "%s gate ON voice: %zu", kind_ == Kind::volume ? "volume" : "modulation", voiceIndex_);
       counter_ = 0;
       value_ = 0.0;
       enterStage(StageIndex::delay);
-    }
-    else {
-      if (stageIndex_ != StageIndex::idle) {
-        os_log_debug(log_, "%s gate OFF voice: %zu stage: %s releaseDurationInSamples: %d value: %f",
-                     kind_ == Kind::volume ? "volume" : "modulation",
-                     voiceIndex_,
-                     StageName(stageIndex_),
-                     stages_[StageIndex::release].durationInSamples(),
-                     value_);
-        enterStage(StageIndex::release);
-      }
+    } else if (stageIndex_ != StageIndex::idle) {
+      enterStage(StageIndex::release);
     }
   }
 
@@ -333,9 +323,6 @@ private:
   int activeDurationInSamples() const noexcept { return activeStage().durationInSamples(); }
 
   void enterStage(StageIndex next) noexcept {
-    os_log_debug(log_, "enterStage %s voice: %zu next: %s prev: %s",
-                 kind_ == Kind::volume ? "volume" : "modulation", voiceIndex_,
-                 StageName(next), StageName(stageIndex_));
     stageIndex_ = next;
 
     // NOTE: if a stage has no duration then we move to the next one by falling thru some of the cases.
@@ -373,10 +360,6 @@ private:
     }
 
     counter_ = activeDurationInSamples();
-
-    os_log_debug(log_, "enterStage %s voice: %zu active: %s counter: %d",
-                 kind_ == Kind::volume ? "volume" : "modulation", voiceIndex_,
-                 StageName(stageIndex_), counter_);
   }
 
   Stages stages_{};

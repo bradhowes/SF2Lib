@@ -39,12 +39,7 @@ public:
   /// @returns the MIDI value for the note
   int value() const noexcept { return value_; }
 
-  bool operator ==(const Note& rhs) const noexcept { return value_ == rhs.value_; }
-  bool operator !=(const Note& rhs) const noexcept { return value_ != rhs.value_; }
-  bool operator <=(const Note& rhs) const noexcept { return value_ <= rhs.value_; }
-  bool operator >=(const Note& rhs) const noexcept { return value_ >= rhs.value_; }
-  bool operator  <(const Note& rhs) const noexcept { return value_  < rhs.value_; }
-  bool operator  >(const Note& rhs) const noexcept { return value_  > rhs.value_; }
+  friend std::strong_ordering operator <=>(const Note& lhs, const Note& rhs) { return lhs.value_ <=> rhs.value_; }
 
   operator int() const noexcept { return value(); }
 
