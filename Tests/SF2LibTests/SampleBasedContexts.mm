@@ -193,8 +193,8 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount) {
 - (void)dumpSamples:(const std::vector<AUValue>&)samples
 {
   std::cout << std::setprecision(12);
-  for (size_t index = 0; index < samples.size(); ++index) {
-    std::cout << index << ' ' << samples[index] << '\n';
+  for (auto index = 0; index < samples.size(); ++index) {
+    std::cout << "XCTAssertEqualWithAccuracy(" << samples[index] << ", samples[" << index << "], epsilon);\n";
   }
 }
 

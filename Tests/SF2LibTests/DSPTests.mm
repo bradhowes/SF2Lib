@@ -215,9 +215,6 @@ static Float fluid_iir_filter_q_from_dB(Float q_dB)
 }
 
 - (void)testCentiBelsToResonance {
-  auto fs = fluid_iir_filter_q_from_dB(959);
-  auto us = DSP::centibelsToResonance(959);
-
   Float epsilon = []() {
     if constexpr (std::is_same_v<Float, float>) return 1.0e-1;
     if constexpr (std::is_same_v<Float, double>) return 1.0e-4;

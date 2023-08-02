@@ -273,7 +273,6 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 - (void)testChangeProgram {
   Float sampleRate{48000.0};
   AUAudioFrameCount frameCount = 512;
-  AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
   Engine engine(sampleRate, 6, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
   engine.load(contexts.context0.file(), 1);
   NSString* name = [NSString stringWithCString:engine.activePresetName().c_str() encoding:NSUTF8StringEncoding];
@@ -370,12 +369,12 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   NSArray* metrics = @[XCTPerformanceMetric_WallClockTime];
   [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
     Float sampleRate{48000.0};
-    AUAudioFrameCount frameCount = 512;
+    AUAudioFrameCount samplesPerFrame = 512;
     AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-    Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+    Engine engine(sampleRate, 64, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
     engine.load(contexts.context2.file(), 0);
-    engine.setRenderingFormat(3, format, frameCount);
+    engine.setRenderingFormat(3, format, samplesPerFrame);
 
     // Set NPRN state so that voices send 20% output to the chorus channel
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
@@ -391,8 +390,8 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
     int seconds = 1;
     int sampleCount = sampleRate * seconds;
-    int frames = sampleCount / frameCount;
-    int remaining = sampleCount - frames * frameCount;
+    int frames = sampleCount / samplesPerFrame;
+    int remaining = sampleCount - frames * samplesPerFrame;
 
     AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
     DSPHeaders::BufferFacet dryFacet;
@@ -420,7 +419,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
     [self startMeasuring];
     for (auto frameIndex = 0; frameIndex < frames; ++frameIndex) {
-      engine.renderInto(mixer, frameCount);
+      engine.renderInto(mixer, samplesPerFrame);
     }
     if (remaining > 0) engine.renderInto(mixer, remaining);
     [self stopMeasuring];
@@ -434,12 +433,12 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   NSArray* metrics = @[XCTPerformanceMetric_WallClockTime];
   [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
     Float sampleRate{48000.0};
-    AUAudioFrameCount frameCount = 512;
+    AUAudioFrameCount samplesPerFrame = 512;
     AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-    Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
+    Engine engine(sampleRate, 64, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
     engine.load(contexts.context2.file(), 0);
-    engine.setRenderingFormat(3, format, frameCount);
+    engine.setRenderingFormat(3, format, samplesPerFrame);
 
     // Set NPRN state so that voices send 20% output to the chorus channel
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
@@ -455,8 +454,8 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
     int seconds = 1;
     int sampleCount = sampleRate * seconds;
-    int frames = sampleCount / frameCount;
-    int remaining = sampleCount - frames * frameCount;
+    int frames = sampleCount / samplesPerFrame;
+    int remaining = sampleCount - frames * samplesPerFrame;
 
     AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
     DSPHeaders::BufferFacet dryFacet;
@@ -484,7 +483,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
     [self startMeasuring];
     for (auto frameIndex = 0; frameIndex < frames; ++frameIndex) {
-      engine.renderInto(mixer, frameCount);
+      engine.renderInto(mixer, samplesPerFrame);
     }
     if (remaining > 0) engine.renderInto(mixer, remaining);
     [self stopMeasuring];

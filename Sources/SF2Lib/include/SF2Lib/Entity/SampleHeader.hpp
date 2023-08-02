@@ -134,10 +134,12 @@ public:
   /// @returns the sample rate used to record the samples in the SF2 file
   constexpr size_t sampleRate() const noexcept { return dwSampleRate; }
   
-  /// @returns the MIDI key (frequency) for the source samples
+  /// @returns the MIDI key (frequency) for the source samples.
+  /// NOTE: according to spec 7.10, "Values between 128 and 254 are illegal. Whenever an illegal value or a value of
+  /// 255 is encountered, the value 60 [middle C] should be used."
   constexpr int originalMIDIKey() const noexcept { return originalKey; }
   
-  /// @returns the pitch correction to apply when playing back the samples
+  /// @returns the pitch correction in cents to apply when playing back the samples
   constexpr int pitchCorrection() const noexcept { return correction; }
 
   /// @returns number of samples between the start and end indices.

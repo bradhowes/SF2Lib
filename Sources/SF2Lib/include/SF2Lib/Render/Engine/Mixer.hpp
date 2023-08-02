@@ -29,6 +29,16 @@ public:
     ;
   }
 
+  Mixer() = delete;
+
+  Mixer(const Mixer& other) = default;
+
+  Mixer(Mixer&& other) = default;
+
+  Mixer& operator =(Mixer&&) = delete;
+
+  Mixer& operator =(const Mixer&) = delete;
+
   /**
    Add a sample to the output buffers.
 

@@ -50,9 +50,8 @@ public:
    @param value the constant value to use
    */
   void setConstant(int durationInSamples, Float value) noexcept {
-    assert(durationInSamples >= 0 && value >= 0.0 and value <= 1.0);
-    durationInSamples_ = durationInSamples;
-    initial_ = value;
+    durationInSamples_ = std::max(durationInSamples, 0);
+    initial_ = std::clamp(value, 0.0, 1.0);
     increment_ = 0.0;
   }
 
@@ -71,14 +70,13 @@ public:
    @param durationInSamples number of samples to spend in this stage
    */
   void setAttack(int durationInSamples) noexcept {
-    assert(durationInSamples >= 0);
-    durationInSamples_ = durationInSamples;
+    durationInSamples_ = std::max(durationInSamples, 0);
     initial_ = 0.0;
-    increment_ = calcIncrement(0.0, 1.0, durationInSamples);
+    increment_ = calcIncrement(0.0, 1.0, durationInSamples_);
   }
 
   inline static Float calcIncrement(Float start, Float end, int durationInSamples) noexcept {
-    return durationInSamples ? ((end - start) / Float(durationInSamples)) : 0.0;
+    return durationInSamples > 0 ? ((end - start) / Float(durationInSamples)) : 0.0;
   }
 
   inline static int calcDuration(Float start, Float end, Float increment) noexcept {
@@ -102,7 +100,6 @@ public:
    @param sustainLevel the sustain level to descend to from 1.0 peak.
    */
   void setDecay(int durationInSamples, Float sustainLevel) noexcept {
-    assert(durationInSamples >= 0 && sustainLevel >= 0.0 && sustainLevel <= 1.0);
     initial_ = 1.0;
     increment_ = calcIncrement(1.0, sustainLevel, durationInSamples);
     durationInSamples_ = calcDuration(1.0, sustainLevel, increment_);
@@ -125,8 +122,7 @@ public:
    @param sustainLevel the sustain level to descend from
    */
   void setRelease(int durationInSamples, Float sustainLevel) noexcept {
-    assert(durationInSamples >= 0 && sustainLevel >= 0.0 && sustainLevel <= 1.0);
-    initial_ = sustainLevel;
+    initial_ = std::clamp(sustainLevel, 0.0, 1.0);
     increment_ = calcIncrement(sustainLevel, 0.0, durationInSamples);
     durationInSamples_ = calcDuration(sustainLevel, 0.0, increment_);
   }

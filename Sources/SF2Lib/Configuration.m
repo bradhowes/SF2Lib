@@ -26,7 +26,7 @@ static dispatch_once_t onceToken;
   onceToken = NULL;
 }
 
-+ (NSString*)locate:(NSString*)name ofType:(NSString*)type {
++ (nullable NSString* )locate:(NSString*)name ofType:(NSString*)type {
   NSArray<NSBundle*>* allBundles = [NSBundle allBundles];
   for (int index = 0; index < [allBundles count]; ++index) {
     NSBundle* bundle = [allBundles objectAtIndex:index];
@@ -46,7 +46,7 @@ static dispatch_once_t onceToken;
 
 #if defined(SWIFTPM_MODULE_BUNDLE)
 
-+ (NSString*)getConfigurationPath:(NSString*)name from:(nullable NSBundle*)bundle {
++ (nullable NSString*)getConfigurationPath:(NSString*)name from:(nullable NSBundle*)bundle {
   if (bundle) {
     @try {
       return [bundle pathForResource:name ofType:@"plist"];
@@ -63,7 +63,7 @@ static dispatch_once_t onceToken;
 
 #else
 
-+ (NSString*)getConfigurationPath {
++ (nullable NSString*)getConfigurationPath {
   NSArray<NSBundle*>* allBundles = [NSBundle allBundles];
   for (int index = 0; index < [allBundles count]; ++index) {
     NSBundle* bundle = [allBundles objectAtIndex:index];

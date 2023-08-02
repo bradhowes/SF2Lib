@@ -16,10 +16,10 @@
 namespace SF2::DSP {
 
 /// Maximum absolute cents that will be used for frequencies. This corresponds to 20 kHz.
-inline constexpr Float MaximumAbsoluteCents = 13508.0f;
+inline constexpr int MaximumAbsoluteCents = 13'508;
 
 /// Number of cents in an octave
-inline constexpr Float CentsPerOctave = 1200.0f;
+inline constexpr int CentsPerOctave = 1'200;
 
 /// Attenuated samples at or below this value will be inaudible (I think).
 inline constexpr Float NoiseFloor = 2.0E-7f;
@@ -90,6 +90,17 @@ inline constexpr Float generator(size_t index) {
  @returns converted value
  */
 extern Float centsPartialLookup(int value) noexcept;
+
+namespace Power2Lookup {
+inline constexpr int Range = CentsPerOctave * 10 * 2;
+inline constexpr int Offset = Range / 2;
+inline constexpr size_t TableSize = Range;
+inline constexpr Float generator(size_t index) {
+  return DSPHeaders::ConstMath::pow(2.0, Float(int(index) - Offset) / Float(CentsPerOctave));
+}
+}
+
+extern Float power2Lookup(int cents) noexcept;
 
 /**
  Lookup table for SF2 pan values, where -500 means only left-channel, and +500 means only right channel. Other values

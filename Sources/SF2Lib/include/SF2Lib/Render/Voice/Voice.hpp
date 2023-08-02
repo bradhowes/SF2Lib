@@ -189,7 +189,10 @@ public:
     auto filtered = filter_.transform(frequency, resonance, sample);
 
     // Finally, calculate gain / attenuation to apply to filtered result and return attenuated value.
-    auto gain = calculateGain(modLFO, volEnv);
+    auto gain = (DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation)) *
+                 DSP::centibelsToAttenuation(DSP::MaximumAttenuationCentiBels * (1.0f - volEnv) +
+                                             modLFO.val * -state_.modulated(Index::modulatorLFOToVolume)));
+
     if (debug) {
       os_log_debug(log_, "renderSample modEnv: %f volEnv: %f gain: %f sample: %f", modEnv, volEnv, gain, sample);
     }

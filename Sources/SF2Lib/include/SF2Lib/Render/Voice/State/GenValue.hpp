@@ -50,6 +50,7 @@ struct GenValue {
   int value() const noexcept { return value_ + adjustment_; }
 
   Float sumMods(const std::vector<Modulator>& modulators) const noexcept {
+    if (mods_.empty()) return 0.0;
     auto sum = 0.0;
     for (auto index : mods_){
       sum += modulators[index].value();

@@ -142,7 +142,8 @@ public:
   Float modulated(Index gen) const noexcept {
     auto value = gens_[gen].value();
     auto mods = gens_[gen].sumMods(modulators_);
-    return value + mods + channelState_.nrpnValue(gen);
+    auto nrpn = channelState_.nrpnValue(gen);
+    return value + mods + nrpn;
   }
 
   /// @returns MIDI key that started a voice to begin emitting samples. For DSP this is *not* what is desired. See

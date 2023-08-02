@@ -15,9 +15,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)shared:(NSDictionary*)overrides;
 + (instancetype)shared;
 + (void)reset;
-+ (NSString*)getConfigurationPath;
-+ (NSString*)getConfigurationPath:(NSString*)name from:(nullable NSBundle*)bundle;
-+ (NSString*)locate:(NSString*)name ofType:(NSString*)type;
++ (nullable NSString*)getConfigurationPath;
++ (nullable NSString*)getConfigurationPath:(NSString*)name from:(nullable NSBundle*)bundle;
++ (nullable NSString*)locate:(NSString*)name ofType:(NSString*)type;
 
 @end
 

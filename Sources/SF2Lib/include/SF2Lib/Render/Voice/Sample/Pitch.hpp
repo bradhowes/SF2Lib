@@ -61,8 +61,22 @@ public:
    */
   void configure(const Entity::SampleHeader& header) noexcept
   {
-    // std::cout << "Pitch configure state_ " << &state_ << '\n';
-    initialize(header.originalMIDIKey(), header.pitchCorrection(), header.sampleRate());
+    auto rootKey = realRootKey(header.originalMIDIKey());
+    if (rootKey > 127) {
+      rootKey = 60;  // per spec 7.10
+    }
+
+    auto sampleRateDeltaCents = 0;
+    if (state_.sampleRate() != header.sampleRate()) {
+
+      //
+      auto sampleRateCents = int(std::round(1200 * std::log2(state_.sampleRate() / 440.0)));
+      auto originalSampleRateCents = int(std::round(1200 * std::log2(header.sampleRate() / 440.0)));
+      sampleRateDeltaCents = originalSampleRateCents - sampleRateCents;
+    }
+
+    phaseBase_ = (state_.unmodulated(Index::scaleTuning) * (state_.key() - rootKey) + header.pitchCorrection() +
+                  sampleRateDeltaCents);
   }
 
   /**
@@ -76,34 +90,18 @@ public:
    */
   Float samplePhaseIncrement(ModLFO::Value modLFO, VibLFO::Value vibLFO, Float modEnv) const noexcept
   {
-    auto pitch = pitch_;
-    auto pitchOffset = pitchOffset_;
-    auto modLFOValue = modLFO.val;
-    auto vibLFOValue = vibLFO.val;
-    auto modLFOToPitch = state_.modulated(Index::modulatorLFOToPitch);
-    auto vibLFOToPitch = state_.modulated(Index::vibratoLFOToPitch);
-    auto modEnvToPitch = state_.modulated(Index::modulatorEnvelopeToPitch);
-//    std::cout << "pitch: " << pitch << " offset: " << pitchOffset_
-//    << " modLFO: " << modLFOValue << " modLFOToPitch: " << modLFOToPitch
-//    << " vibLFO: " << vibLFOValue << " vibLFOToPitch: " << vibLFOToPitch
-//    << " modEnv: " << modEnv << " modEnvToPitch: " << modEnvToPitch
-//    << " root: " << rootFrequency_ << std::endl;
-
-    auto value = DSP::centsToFrequency(pitch + pitchOffset +
-                                       modLFOValue * modLFOToPitch +
-                                       vibLFOValue * vibLFOToPitch +
-                                       modEnv * modEnvToPitch) / rootFrequency_;
-    return Float(value);
-  }
-
-  /**
-   Recalculate pitch offset using state generators `coarseTune` and `fineTune`.
-   */
-  void updatePitchOffset() noexcept
-  {
     auto coarseTune = state_.modulated(Index::coarseTune);
     auto fineTune = state_.modulated(Index::fineTune);
-    pitchOffset_ = coarseTune * 100.0f + fineTune;
+    auto phaseOffset = coarseTune * 100.0 + fineTune;
+
+    auto modLFOValue = modLFO.val * state_.modulated(Index::modulatorLFOToPitch);
+    auto vibLFOValue = vibLFO.val * state_.modulated(Index::vibratoLFOToPitch);
+    auto modEnvValue = modEnv * state_.modulated(Index::modulatorEnvelopeToPitch);
+
+    auto phase = phaseBase_ + phaseOffset + modLFOValue + vibLFOValue + modEnvValue;
+    auto phaseIncrement = DSP::power2Lookup(int(std::round(phase)));
+
+    return phaseIncrement;
   }
 
 private:
@@ -115,18 +113,8 @@ private:
     return value;
   }
 
-  void initialize(int originalMIDIKey, int pitchCorrection, Float originalSampleRate) noexcept {
-    auto rootKey = realRootKey(originalMIDIKey);
-    auto rootPitch = rootKey * 100.0f - pitchCorrection;
-    rootFrequency_ = Float(DSP::centsToFrequency(rootPitch) * state_.sampleRate() / originalSampleRate);
-    pitch_ = state_.unmodulated(Index::scaleTuning) * (state_.key() - rootPitch / 100.0f) + rootPitch;
-    updatePitchOffset();
-  }
-
   const State::State& state_;
-  Float pitch_;
-  Float pitchOffset_{0.0};
-  Float rootFrequency_;
+  Float phaseBase_;
 };
 
 } // namespace SF2::Render

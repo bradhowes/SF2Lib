@@ -12,7 +12,7 @@ using namespace DSPHeaders;
 using namespace SF2;
 using namespace SF2::DSP;
 
-static constexpr auto lookup_ = ConstMath::make_array<Float, PanLookup::TableSize>(PanLookup::generator);
+constexpr auto lookup_ = ConstMath::make_array<Float, PanLookup::TableSize>(PanLookup::generator);
 
 void
 SF2::DSP::panLookup(Float pan, Float& left, Float& right) noexcept {

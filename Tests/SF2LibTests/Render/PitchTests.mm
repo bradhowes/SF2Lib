@@ -25,10 +25,10 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)testUnity {
-  auto sourceKey = 69; // A4
-  auto eventKey = sourceKey;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
-  State::State state{44100.0, channelState, eventKey};
+  auto sampleRate = 44100.0;
+  auto key = 69;
+  Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key);
+  State::State state{sampleRate, channelState, key};
   Pitch pitch{state};
   pitch.configure(header);
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), 0.0);
@@ -36,106 +36,104 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)test2x {
-  auto sourceKey = 69; // A4
-  auto eventKey = sourceKey + 12; // A5
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
-  State::State state{44100.0, channelState, eventKey};
+  auto sampleRate = 44100.0;
+  auto key = 69;
+  Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key);
+  State::State state{sampleRate, channelState, key + 12};
   Pitch pitch{state};
   pitch.configure(header);
-
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), 0.0);
   XCTAssertEqualWithAccuracy(inc, 2.0, epsilon);
 }
 
 - (void)test4x {
-  auto sourceKey = 69; // A4
-  auto eventKey = sourceKey + 24; // A6
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
-  State::State state{44100.0, channelState, eventKey};
+  auto sampleRate = 44100.0;
+  auto key = 69;
+  Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key);
+  State::State state{sampleRate, channelState, key + 24};
   Pitch pitch{state};
   pitch.configure(header);
-
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), 0.0);
   XCTAssertEqualWithAccuracy(inc, 4.0, epsilon);
 }
 
 - (void)testOverrideRoot {
-  auto sourceKey = 69; // A4
-  auto eventKey = sourceKey;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
-  State::State state{44100.0, channelState, eventKey};
+  auto sampleRate = 44100.0;
+  auto key = 69;
+  Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key);
+  State::State state{sampleRate, channelState, key};
   Pitch pitch{state};
-
   state.setValue(State::State::Index::overridingRootKey, 81);
   pitch.configure(header);
-
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), 0.0);
   XCTAssertEqualWithAccuracy(inc, 0.5, epsilon);
 }
 
 - (void)testGeneratorKey {
-  auto sourceKey = 69; // A4
-  auto eventKey = sourceKey + 12;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
-
-  State::State state{44100.0, channelState, eventKey};
-
-  // NOTE: since the forceMIDIKey is not a real-time parameter, it is only read once when Pitch is created.
-  state.setValue(State::State::Index::forcedMIDIKey, 69);
+  auto sampleRate = 44100.0;
+  auto key = 69;
+  Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key);
+  State::State state{sampleRate, channelState, key + 12};
+  state.setValue(State::State::Index::forcedMIDIKey, key);
   Pitch pitch{state};
   pitch.configure(header);
-
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), 0.0);
   XCTAssertEqualWithAccuracy(inc, 1.0, epsilon);
 }
 
-- (void)testDoubleSampleRate {
-  auto sourceKey = 69; // A4
-  auto eventKey = sourceKey;
-  Entity::SampleHeader header(0, 100, 80, 90, 22050.0, sourceKey);
-  State::State state{44100.0, channelState, eventKey};
+- (void)testHalfSampleRate {
+  auto sampleRate = 44100.0;
+  auto key = 69;
+  Entity::SampleHeader header(0, 100, 80, 90, sampleRate * 2, key);
+  State::State state{sampleRate, channelState, key};
   Pitch pitch{state};
   pitch.configure(header);
+  auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), 0.0);
+  XCTAssertEqualWithAccuracy(inc, 2.0, epsilon);
+}
 
+- (void)testDoubleSampleRate {
+  auto sampleRate = 44100.0;
+  auto key = 69;
+  Entity::SampleHeader header(0, 100, 80, 90, sampleRate / 2, key);
+  State::State state{sampleRate, channelState, key};
+  Pitch pitch{state};
+  pitch.configure(header);
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), 0.0);
   XCTAssertEqualWithAccuracy(inc, 0.5, epsilon);
 }
 
 - (void)testPosPitchAdjustment {
-  auto sourceKey = 69; // A4
-  auto eventKey = sourceKey - 1;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, 100.0);
-  State::State state{44100.0, channelState, eventKey};
+  auto sampleRate = 44100.0;
+  auto key = 69; // A4
+  Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key, 100.0);
+  State::State state{sampleRate, channelState, key - 1};
   Pitch pitch{state};
   pitch.configure(header);
-
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), 0.0);
   XCTAssertEqualWithAccuracy(inc, 1.0, 1.0e-3f);
 }
 
 - (void)testNegPitchAdjustment {
-  auto sourceKey = 69; // A4
-  auto eventKey = sourceKey + 1;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey, -100.0);
-  State::State state{44100.0, channelState, eventKey};
+  auto sampleRate = 44100.0;
+  auto key = 69; // A4
+  Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key, -100.0);
+  State::State state{sampleRate, channelState, key + 1};
   Pitch pitch{state};
   pitch.configure(header);
-
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), 0.0);
   XCTAssertEqualWithAccuracy(inc, 1.0, epsilon);
 }
 
 - (void)testScaleTuning {
-  auto sourceKey = 69; // A4
-  auto eventKey = sourceKey + 1;
-  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, sourceKey);
-  State::State state{44100.0, channelState, eventKey};
+  auto sampleRate = 44100.0;
+  auto key = 69; // A4
+  Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key);
+  State::State state{sampleRate, channelState, key + 1};
   Pitch pitch{state};
-
   // Make every key use the same frequency as the source key.
   state.setValue(State::State::Index::scaleTuning, 0.0);
   pitch.configure(header);
-
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), 0.0);
   XCTAssertEqualWithAccuracy(inc, 1.0, epsilon);
 
