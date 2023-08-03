@@ -7,7 +7,7 @@
 #include <limits>
 #include <utility>
 
-#include "SF2Lib/DSP/DSP.hpp"
+#include "SF2Lib/DSP.hpp"
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Envelope/Stage.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
@@ -215,23 +215,23 @@ private:
   inline static constexpr Float lowerBoundTimecents = -12'000.0;
 
   static inline Float delayTimecentsToSeconds(Float value) noexcept {
-    return (value <= -32768.0) ? 0.0 : DSP::centsToSeconds(std::clamp(value, lowerBoundTimecents, 5000.0));
+    return (value <= -32768.0) ? 0.0 : DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5000.0));
   }
 
   inline Float attackTimecentsToSeconds(Float value) noexcept {
-    return (value <= -32768.0) ? 0.0 : DSP::centsToSeconds(std::clamp(value, lowerBoundTimecents, 8000.0));
+    return (value <= -32768.0) ? 0.0 : DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 8000.0));
   }
 
   inline Float holdTimecentsToSeconds(Float value) noexcept {
-    return DSP::centsToSeconds(std::clamp(value, lowerBoundTimecents, 5000.0));
+    return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5000.0));
   }
 
   inline Float decayTimecentsToSeconds(Float value) noexcept {
-    return DSP::centsToSeconds(std::clamp(value, lowerBoundTimecents, 8000.0));
+    return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 8000.0));
   }
 
   inline Float releaseTimecentsToSeconds(Float value) noexcept {
-    return DSP::centsToSeconds(std::clamp(value, lowerBoundTimecents, 5000.0));
+    return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5000.0));
   }
 
   /// @returns the sustain level of the generator (only used by tests)
@@ -244,7 +244,7 @@ private:
             int sustain, Float release)
   : sampleRate_{sampleRate}, kind_{kind}, voiceIndex_{voiceIndex}, log_{os_log_create("SF2Lib", logTag(kind))}
   {
-    auto normSustain = 1.0 - sustain / 1000.0;
+    Float normSustain = 1.0f - sustain / Float(1000.0);
     stages_[StageIndex::delay].setDelay(int(round(sampleRate_ * delay)));
     stages_[StageIndex::attack].setAttack(int(round(sampleRate_ * attack)));
     stages_[StageIndex::hold].setHold(int(round(sampleRate_ * hold)));
@@ -293,7 +293,7 @@ private:
   /// @returns the sustain level for the modulator envelope (gain)
   static Float envSustain(const State& state, Index gen) noexcept {
     assert(gen == Index::sustainVolumeEnvelope || gen == Index::sustainModulatorEnvelope);
-    return 1.0 - state.modulated(gen) / 1000.0;
+    return 1.0f - state.modulated(gen) / Float(1000.0);
   }
 
   /// @returns the sustain level for the volume envelope (gain)

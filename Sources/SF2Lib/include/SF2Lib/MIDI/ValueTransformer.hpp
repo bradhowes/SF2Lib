@@ -69,7 +69,7 @@ public:
    @returns transformed value
    */
   Float operator()(int controllerValue) const noexcept {
-    return active_[std::clamp<size_t>(static_cast<size_t>(controllerValue), 0, active_.size() - 1)];
+    return active_[static_cast<size_t>(std::clamp<int>(controllerValue, 0, int(active_.size() - 1)))];
   }
 
 private:

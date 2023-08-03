@@ -6,7 +6,6 @@
 #include <memory>
 #include <vector>
 
-#include "SF2Lib/Types.hpp"
 #include "SF2Lib/IO/Format.hpp"
 #include "SF2Lib/IO/Pos.hpp"
 #include "SF2Lib/IO/StringUtils.hpp"

@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "SF2Lib/DSP/DSP.hpp"
+#include "SF2Lib/DSP.hpp"
 #include "SF2Lib/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Voice/Sample/Bounds.hpp"
 

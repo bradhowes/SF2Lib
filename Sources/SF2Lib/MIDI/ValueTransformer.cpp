@@ -2,11 +2,11 @@
 
 #include <cmath>
 #include <functional>
+#include <iostream>
 
 #include "DSPHeaders/ConstMath.hpp"
 
-#include "SF2Lib/Types.hpp"
-#include "SF2Lib/DSP/DSP.hpp"
+#include "SF2Lib/DSP.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/MIDI/ValueTransformer.hpp"
 
@@ -19,11 +19,11 @@ constexpr Float positiveLinear(size_t maxValue, size_t index) noexcept {
 }
 
 constexpr Float positiveConcave(size_t maxValue, size_t index) noexcept {
-  return index == maxValue ? 1.0 : -40.0 / 96.0 * log10((maxValue - index) / Float(maxValue));
+  return index == maxValue ? 1.0f : Float(-40.0) / Float(96.0) * log10((maxValue - index) / Float(maxValue));
 }
 
 constexpr Float positiveConvex(size_t maxValue, size_t index) noexcept {
-  return index == 0 ? 0.0 : 1.0 - -40.0 / 96.0 * log10(index / Float(maxValue));
+  return index == 0 ? 0.0f : 1.0f + Float(40.0) / Float(96.0) * log10(index / Float(maxValue));
 }
 
 constexpr Float positiveSwitched(size_t maxValue, size_t index) noexcept {
@@ -35,11 +35,11 @@ constexpr Float negativeLinear(size_t maxValue, size_t index) noexcept {
 }
 
 constexpr Float negativeConcave(size_t maxValue, size_t index) noexcept {
-  return index == 0 ? 1.0 : -40.0 / 96.0 * log10(index / Float(maxValue));
+  return index == 0 ? 1.0f : Float(-40.0) / Float(96.0) * log10(index / Float(maxValue));
 }
 
 constexpr Float negativeConvex(size_t maxValue, size_t index) noexcept {
-  return index == maxValue ? 0.0 : 1.0 - -40.0 / 96.0 * log10((maxValue - index) / Float(maxValue));
+  return index == maxValue ? 0.0f : 1.0f + Float(40.0) / Float(96.0) * log10((maxValue - index) / Float(maxValue));
 }
 
 constexpr Float negativeSwitched(size_t maxValue, size_t index) noexcept {
@@ -63,7 +63,6 @@ Generator proc(ValueTransformer::Kind kind, ValueTransformer::Direction dir) noe
 
 size_t transformArrayIndex(size_t maxValue, ValueTransformer::Kind kind, ValueTransformer::Direction dir,
                            ValueTransformer::Polarity pol) noexcept {
-  // 16 x size + 8 x polarity + 4 x direction + continuity
   return (16 * (maxValue == ChannelState::maxPitchWheelValue) +
           8 * (pol == ValueTransformer::Polarity::bipolar) +
           4 * (dir == ValueTransformer::Direction::descending) +
@@ -74,19 +73,35 @@ void fill(ValueTransformer::TransformArray& array, size_t maxValue, Generator ge
   array.reserve(maxValue + 1);
   for (std::size_t value = 0; value <= maxValue; ++value) {
     Float transformed = gen(maxValue, value);
-    if (is_bipolar) transformed = ::DSPHeaders::DSP::unipolarToBipolar(transformed);
+    if (is_bipolar) transformed = Float(::DSPHeaders::DSP::unipolarToBipolar(transformed));
     array.emplace_back(transformed);
   }
 }
 
-size_t transformsSize_ = 16 * 8 * 4 * 3;
-std::vector<ValueTransformer::TransformArray> transforms_{transformsSize_};
+std::vector<ValueTransformer::TransformArray> buildAll() {
+  size_t transformsSize_ = 32;
+  std::vector<ValueTransformer::TransformArray> transforms{transformsSize_};
+  for (int M = 0; M < 2; ++M) {
+    auto maxValue = size_t(M * (8191 - 127) + 127);
+    for (int P = 0; P < 2; ++P ) {
+      auto pol{ValueTransformer::Polarity(P)};
+      for (int D = 0; D < 2; ++D) {
+        auto dir{ValueTransformer::Direction(D)};
+        for (int K = 0; K < 4; ++K) {
+          auto kind{ValueTransformer::Kind(K)};
+          auto index = transformArrayIndex(maxValue, kind, dir, pol);
+          fill(transforms[index], maxValue, proc(kind, dir), P);
+        }
+      }
+    }
+  }
+  return transforms;
+}
+
+std::vector<ValueTransformer::TransformArray> transforms_{buildAll()};
 
 const ValueTransformer::TransformArray&
 ValueTransformer::selectTransformArray(size_t maxValue, Kind kind, Direction dir, Polarity pol) noexcept {
   auto index = transformArrayIndex(maxValue, kind, dir, pol);
-  if (transforms_[index].empty()) {
-    fill(transforms_[index], maxValue, proc(kind, dir), pol == ValueTransformer::Polarity::bipolar);
-  }
   return transforms_[index];
 }

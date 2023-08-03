@@ -10,7 +10,6 @@
 #include <numeric>
 #include <vector>
 
-#include "SF2Lib/Types.hpp"
 #include "SF2Lib/Entity/Generator/Generator.hpp"
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"

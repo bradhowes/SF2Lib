@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <unistd.h>
 
 #include "SF2Lib/IO/Format.hpp"

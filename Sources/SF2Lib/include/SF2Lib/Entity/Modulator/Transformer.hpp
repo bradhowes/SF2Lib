@@ -5,7 +5,6 @@
 #include <cmath>
 #include <iosfwd>
 
-#include "SF2Lib/Types.hpp"
 
 namespace SF2::Entity::Modulator {
 

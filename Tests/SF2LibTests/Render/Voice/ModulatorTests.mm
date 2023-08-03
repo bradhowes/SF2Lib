@@ -183,10 +183,8 @@ using namespace SF2::Entity::Generator;
 
   channelState->setPitchWheelValue(0);
   XCTAssertEqualWithAccuracy( modulator.value(), 0.0, epsilon);
-
   channelState->setPitchWheelValue(64);
   XCTAssertEqualWithAccuracy( modulator.value(), 0.0, epsilon);
-
   channelState->setPitchWheelValue(127);
   XCTAssertEqualWithAccuracy( modulator.value(), 0.0, epsilon);
 
@@ -194,10 +192,8 @@ using namespace SF2::Entity::Generator;
 
   channelState->setPitchWheelValue(0);
   XCTAssertEqualWithAccuracy( modulator.value(), -12600.78125, epsilon);
-
   channelState->setPitchWheelValue(4096);
   XCTAssertEqualWithAccuracy( modulator.value(), 0.0, epsilon);
-
   channelState->setPitchWheelValue(SF2::MIDI::ChannelState::maxPitchWheelValue);
   XCTAssertEqualWithAccuracy( modulator.value(), 12597.7048874, epsilon);
 }

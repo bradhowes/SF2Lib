@@ -6,7 +6,6 @@
 
 #include "SF2Lib/Render/Voice/State/Modulator.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
-#include "SF2Lib/Types.hpp"
 
 namespace SF2::Render::Voice::State {
 
@@ -50,12 +49,12 @@ struct GenValue {
   int value() const noexcept { return value_ + adjustment_; }
 
   Float sumMods(const std::vector<Modulator>& modulators) const noexcept {
-    if (mods_.empty()) return 0.0;
-    auto sum = 0.0;
-    for (auto index : mods_){
-      sum += modulators[index].value();
+    if (mods_.empty()) return 0.0f;
+    Float value = 0.0f;
+    for (auto index : mods_) {
+      value += modulators[index].value();
     }
-    return sum;
+    return value;
   }
 
 private:

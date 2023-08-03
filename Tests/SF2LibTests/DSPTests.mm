@@ -7,8 +7,7 @@
 
 #include "DSPHeaders/ConstMath.hpp"
 #include "DSPHeaders/DSP.hpp"
-#include "SF2Lib/Types.hpp"
-#include "SF2Lib/DSP/DSP.hpp"
+#include "SF2Lib/DSP.hpp"
 
 using namespace DSPHeaders::DSP;
 using namespace SF2;
@@ -21,7 +20,11 @@ using namespace SF2::DSP;
 @implementation DSPTests
 
 - (void)setUp {
-  self.epsilon = 1.0e-12;
+  if constexpr (std::is_same_v<Float, float>) {
+    self.epsilon = 1.0e-6;
+  } else {
+    self.epsilon = 1.0e-12;
+  }
 }
 
 - (void)tearDown {
@@ -67,7 +70,8 @@ using namespace SF2::DSP;
 
 - (void)testPanLookup {
   SF2::Float left, right;
-  
+  //std::cout << std::setprecision(18) << centsPartialLookup(1199) << '\n';
+
   SF2::DSP::panLookup(-501, left, right);
   XCTAssertEqualWithAccuracy(1.0, left, self.epsilon);
   XCTAssertEqualWithAccuracy(0.0, right, self.epsilon);
@@ -77,15 +81,18 @@ using namespace SF2::DSP;
   XCTAssertEqualWithAccuracy(0.0, right, self.epsilon);
   
   SF2::DSP::panLookup(-100, left, right);
+  std::cout << std::setprecision(18) << left << '\n';
   XCTAssertEqualWithAccuracy(0.809016994375, left, self.epsilon);
   XCTAssertEqualWithAccuracy(0.587785252292, right, self.epsilon);
   
   SF2::DSP::panLookup(0, left, right);
   XCTAssertEqualWithAccuracy(left, right, self.epsilon);
+  std::cout << std::setprecision(18) << right << '\n';
   XCTAssertEqualWithAccuracy(0.707106781187, right, self.epsilon);
 
   SF2::DSP::panLookup(100, left, right);
   XCTAssertEqualWithAccuracy(0.587785252292, left, self.epsilon);
+  std::cout << std::setprecision(18) << right << '\n';
   XCTAssertEqualWithAccuracy(0.809016994375, right, self.epsilon);
   
   SF2::DSP::panLookup(500, left, right);
@@ -95,22 +102,19 @@ using namespace SF2::DSP;
   SF2::DSP::panLookup(501, left, right);
   XCTAssertEqualWithAccuracy(0.0, left, self.epsilon);
   XCTAssertEqualWithAccuracy(1.0, right, self.epsilon);
-
-  constexpr auto lookup_ = DSPHeaders::ConstMath::make_array<Float, DSP::PanLookup::TableSize>(DSP::PanLookup::generator);
-  XCTAssertEqualWithAccuracy(0.0, lookup_[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.707106781187, lookup_[500], self.epsilon);
-  XCTAssertEqualWithAccuracy(1.0, lookup_[DSP::PanLookup::TableSize - 1], self.epsilon);
 }
 
 - (void)testCentsPartialLookup {
-  XCTAssertEqualWithAccuracy(6.875, centsPartialLookup(0), self.epsilon);
-  XCTAssertEqualWithAccuracy(9.722718241315, centsPartialLookup(600), self.epsilon);
-  XCTAssertEqualWithAccuracy(13.742059981944, centsPartialLookup(1199), self.epsilon);
-
-  constexpr auto lookup_ = DSPHeaders::ConstMath::make_array<Float, DSP::CentsPartialLookup::TableSize>(DSP::CentsPartialLookup::generator);
-  XCTAssertEqualWithAccuracy(6.875, lookup_[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(9.722718241315, lookup_[600], self.epsilon);
-  XCTAssertEqualWithAccuracy(13.742059981944, lookup_[1199], self.epsilon);
+  if constexpr (std::is_same_v<Float, float>) {
+    XCTAssertEqualWithAccuracy(6.875, centsPartialLookup(0), self.epsilon);
+    XCTAssertEqualWithAccuracy(9.722718241315, centsPartialLookup(600), self.epsilon);
+    XCTAssertEqualWithAccuracy(13.742059989514, centsPartialLookup(1199), self.epsilon);
+  } else if constexpr (std::is_same_v<Float, double>) {
+    XCTAssertEqualWithAccuracy(6.875, centsPartialLookup(0), self.epsilon);
+    XCTAssertEqualWithAccuracy(9.722718241315, centsPartialLookup(600), self.epsilon);
+    //std::cout << std::setprecision(18) << centsPartialLookup(1199) << '\n';
+    XCTAssertEqualWithAccuracy(13.7420599819439833, centsPartialLookup(1199), self.epsilon);
+  }
 }
 
 
@@ -123,17 +127,33 @@ using namespace SF2::DSP;
 }
 
 - (void)testCentToFrequency {
-  XCTAssertEqualWithAccuracy(1.0, centsToFrequency(-1), self.epsilon); // A0
-  XCTAssertEqualWithAccuracy(8.1757989156437, centsToFrequency(0), self.epsilon); // A0
-  XCTAssertEqualWithAccuracy(55.0, centsToFrequency(3300), self.epsilon); // A1
-  XCTAssertEqualWithAccuracy(110.0, centsToFrequency(4500), self.epsilon); // A2
-  XCTAssertEqualWithAccuracy(220.0, centsToFrequency(5700), self.epsilon); // A3
-  XCTAssertEqualWithAccuracy(329.62755691287, centsToFrequency(6400), self.epsilon); // C4
-  XCTAssertEqualWithAccuracy(440.0, centsToFrequency(6900), self.epsilon); // A4
-  XCTAssertEqualWithAccuracy(880.0, centsToFrequency(8100), self.epsilon); // A5
-  XCTAssertEqualWithAccuracy(1760.0, centsToFrequency(9300), self.epsilon); // A6
-  XCTAssertEqualWithAccuracy(3520.0, centsToFrequency(10500), self.epsilon); // A7
-  XCTAssertEqualWithAccuracy(4186.009044809578, centsToFrequency(10800), self.epsilon); // C8
+  if constexpr (std::is_same_v<Float, float>) {
+    XCTAssertEqualWithAccuracy(1.0, centsToFrequency(-1), self.epsilon); // A0
+    XCTAssertEqualWithAccuracy(8.1757989156437, centsToFrequency(0), self.epsilon); // A0
+    XCTAssertEqualWithAccuracy(55.0, centsToFrequency(3300), self.epsilon); // A1
+    XCTAssertEqualWithAccuracy(110.0, centsToFrequency(4500), self.epsilon); // A2
+    XCTAssertEqualWithAccuracy(220.0, centsToFrequency(5700), self.epsilon); // A3
+    // std::cout << std::setprecision(18) << centsToFrequency(6400) << '\n';
+    XCTAssertEqualWithAccuracy(329.6275634765625, centsToFrequency(6400), self.epsilon); // C4
+    XCTAssertEqualWithAccuracy(440.0, centsToFrequency(6900), self.epsilon); // A4
+    XCTAssertEqualWithAccuracy(880.0, centsToFrequency(8100), self.epsilon); // A5
+    XCTAssertEqualWithAccuracy(1760.0, centsToFrequency(9300), self.epsilon); // A6
+    XCTAssertEqualWithAccuracy(3520.0, centsToFrequency(10500), self.epsilon); // A7
+    // std::cout << std::setprecision(18) << centsToFrequency(10800) << '\n';
+    XCTAssertEqualWithAccuracy(4186.0087890625, centsToFrequency(10800), self.epsilon); // C8
+  } else if constexpr (std::is_same_v<Float, double>) {
+    XCTAssertEqualWithAccuracy(1.0, centsToFrequency(-1), self.epsilon); // A0
+    XCTAssertEqualWithAccuracy(8.1757989156437, centsToFrequency(0), self.epsilon); // A0
+    XCTAssertEqualWithAccuracy(55.0, centsToFrequency(3300), self.epsilon); // A1
+    XCTAssertEqualWithAccuracy(110.0, centsToFrequency(4500), self.epsilon); // A2
+    XCTAssertEqualWithAccuracy(220.0, centsToFrequency(5700), self.epsilon); // A3
+    XCTAssertEqualWithAccuracy(329.62755691286992, centsToFrequency(6400), self.epsilon); // C4
+    XCTAssertEqualWithAccuracy(440.0, centsToFrequency(6900), self.epsilon); // A4
+    XCTAssertEqualWithAccuracy(880.0, centsToFrequency(8100), self.epsilon); // A5
+    XCTAssertEqualWithAccuracy(1760.0, centsToFrequency(9300), self.epsilon); // A6
+    XCTAssertEqualWithAccuracy(3520.0, centsToFrequency(10500), self.epsilon); // A7
+    XCTAssertEqualWithAccuracy(4186.009044809578, centsToFrequency(10800), self.epsilon); // C8
+ }
 }
 
 - (void)testCentibelsToAttenuationLookup {
@@ -148,9 +168,8 @@ using namespace SF2::DSP;
 }
 
 - (void)testAttenuationLookup {
-  constexpr auto lookup_ = DSPHeaders::ConstMath::make_array<Float, DSP::AttenuationLookup::TableSize>(DSP::AttenuationLookup::generator);
-  XCTAssertEqualWithAccuracy(1.0, lookup_[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(6.3095734448e-08, lookup_[DSP::AttenuationLookup::TableSize - 1], self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0, DSP::AttenuationLookup::query(0), self.epsilon);
+  XCTAssertEqualWithAccuracy(6.3095734448e-08, DSP::AttenuationLookup::query(MaximumAttenuationCentiBels), self.epsilon);
 }
 
 - (void)testCentibelsToAttenuattionInterpolated {
@@ -186,10 +205,10 @@ static Float fluid_iir_filter_q_from_dB(Float q_dB)
 {
   /* The generator contains 'centibels' (1/10 dB) => divide by 10 to
    * obtain dB */
-  q_dB /= 10.0f;
+  q_dB /= 10.0;
 
   /* Range: SF2.01 section 8.1.3 # 8 (convert from cB to dB => /10) */
-  q_dB = std::min<Float>(std::max<Float>(q_dB, 0.0f), 96.0f);
+  q_dB = std::min<Float>(std::max<Float>(q_dB, 0.0), 96.0);
 
   /* Short version: Modify the Q definition in a way, that a Q of 0
    * dB leads to no resonance hump in the freq. response.
@@ -206,25 +225,21 @@ static Float fluid_iir_filter_q_from_dB(Float q_dB)
    * resonance peak not over the DC gain, but over the frequency
    * response of a non-resonant filter.  This idea is implemented as
    * follows: */
-  q_dB -= 3.01f;
+  q_dB -= 3.01;
 
   /* The 'sound font' Q is defined in dB. The filter needs a linear
    q. Convert. */
-  q_dB /= 20.0f;
-  return std::pow(10.0f, q_dB);
+  q_dB /= 20.0;
+  return std::pow(10.0, q_dB);
 }
 
 - (void)testCentiBelsToResonance {
   Float epsilon = []() {
     if constexpr (std::is_same_v<Float, float>) return 1.0e-1;
-    if constexpr (std::is_same_v<Float, double>) return 1.0e-4;
+    if constexpr (std::is_same_v<Float, double>) return 1.0e-10;
   }();
 
   for (auto centibels = 0; centibels < 960; ++centibels) {
-
-    // Compare our routine with FluidSynth. Note that I think the order of operations in FluidSynth is not
-    // optimal, at least on clang C++. Dividing by 10.0 and subtracting injects noise into the mantissa which is
-    // amplified when used in pow(). Better is to just divide once by 200.
     auto fs = fluid_iir_filter_q_from_dB(centibels);
     auto us = DSP::centibelsToResonance(centibels);
     

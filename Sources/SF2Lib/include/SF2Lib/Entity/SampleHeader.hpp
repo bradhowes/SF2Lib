@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "SF2Lib/Types.hpp"
 #include "SF2Lib/IO/Pos.hpp"
 #include "SF2Lib/IO/StringUtils.hpp"
 

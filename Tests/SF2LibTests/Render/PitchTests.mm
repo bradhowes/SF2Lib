@@ -25,7 +25,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)testUnity {
-  auto sampleRate = 44100.0;
+  Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key);
   State::State state{sampleRate, channelState, key};
@@ -36,7 +36,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)test2x {
-  auto sampleRate = 44100.0;
+  Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key);
   State::State state{sampleRate, channelState, key + 12};
@@ -47,7 +47,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)test4x {
-  auto sampleRate = 44100.0;
+  Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key);
   State::State state{sampleRate, channelState, key + 24};
@@ -58,7 +58,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)testOverrideRoot {
-  auto sampleRate = 44100.0;
+  Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key);
   State::State state{sampleRate, channelState, key};
@@ -70,7 +70,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)testGeneratorKey {
-  auto sampleRate = 44100.0;
+  Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key);
   State::State state{sampleRate, channelState, key + 12};
@@ -82,7 +82,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)testHalfSampleRate {
-  auto sampleRate = 44100.0;
+  Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, sampleRate * 2, key);
   State::State state{sampleRate, channelState, key};
@@ -93,7 +93,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)testDoubleSampleRate {
-  auto sampleRate = 44100.0;
+  Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, sampleRate / 2, key);
   State::State state{sampleRate, channelState, key};
@@ -104,7 +104,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)testPosPitchAdjustment {
-  auto sampleRate = 44100.0;
+  Float sampleRate = 44100.0;
   auto key = 69; // A4
   Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key, 100.0);
   State::State state{sampleRate, channelState, key - 1};
@@ -115,7 +115,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)testNegPitchAdjustment {
-  auto sampleRate = 44100.0;
+  Float sampleRate = 44100.0;
   auto key = 69; // A4
   Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key, -100.0);
   State::State state{sampleRate, channelState, key + 1};
@@ -126,7 +126,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)testScaleTuning {
-  auto sampleRate = 44100.0;
+  Float sampleRate = 44100.0;
   auto key = 69; // A4
   Entity::SampleHeader header(0, 100, 80, 90, sampleRate, key);
   State::State state{sampleRate, channelState, key + 1};

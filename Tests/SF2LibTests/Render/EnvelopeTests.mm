@@ -4,8 +4,7 @@
 
 #include "../SampleBasedContexts.hpp"
 
-#include "SF2Lib/Types.hpp"
-#include "SF2Lib/DSP/DSP.hpp"
+#include "SF2Lib/DSP.hpp"
 #include "SF2Lib/Render/Envelope/Generator.hpp"
 #include "SF2Lib/Render/Envelope/Stage.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"

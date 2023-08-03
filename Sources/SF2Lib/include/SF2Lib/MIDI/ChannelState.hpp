@@ -7,7 +7,6 @@
 #include <cassert>
 #include <cmath>
 
-#include "SF2Lib/Types.hpp"
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/MIDI/MIDI.hpp"
 

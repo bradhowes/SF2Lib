@@ -53,7 +53,15 @@ private:
 
 struct PresetTestContextBase
 {
-  inline static SF2::Float epsilon = 1.0e-8;
+  static constexpr SF2::Float epsilonValue() {
+    if constexpr (std::is_same_v<SF2::Float, float>) {
+      return 1.0e-3;
+    } else {
+      return 1.0e-12;
+    }
+  }
+
+  static inline const SF2::Float epsilon = epsilonValue();
   static NSURL* getUrl(int urlIndex);
   static bool playAudioInTests();
 

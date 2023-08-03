@@ -74,7 +74,7 @@ public:
    */
   void setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept {
     super::setRenderingFormat(busCount, format, maxFramesToRender);
-    initialize(format.sampleRate);
+    initialize(Float(format.sampleRate));
   }
 
   /// @returns the current sample rate

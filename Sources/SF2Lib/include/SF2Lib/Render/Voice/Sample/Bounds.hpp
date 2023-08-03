@@ -44,7 +44,9 @@ public:
     // Don't trust values above. Clamp them to valid ranges before using.
     auto lower = int(header.startIndex());
     auto upper = int(header.endIndex());
-    auto clampPos = [lower, upper](int value) -> size_t { return size_t(std::clamp(value, lower, upper) - lower); };
+    auto clampPos = [lower, upper](int value) -> size_t {
+      return static_cast<size_t>(std::clamp(value, lower, upper) - lower);
+    };
 
     return Bounds(clampPos(lower + startOffset),
                   clampPos(int(header.startLoopIndex()) + startLoopOffset),

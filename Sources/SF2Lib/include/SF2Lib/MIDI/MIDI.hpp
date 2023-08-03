@@ -8,8 +8,7 @@
 #include <cmath>
 #include <map>
 
-#include "SF2Lib/DSP/DSP.hpp"
-#include "SF2Lib/Types.hpp"
+#include "SF2Lib/DSP.hpp"
 #include "SF2Lib/MIDI/Note.hpp"
 
 /**

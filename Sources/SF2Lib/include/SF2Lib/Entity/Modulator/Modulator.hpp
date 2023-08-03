@@ -5,7 +5,6 @@
 #include <array>
 #include <string>
 
-#include "SF2Lib/Types.hpp"
 #include "SF2Lib/IO/Pos.hpp"
 #include "SF2Lib/Entity/Generator/Definition.hpp"
 #include "SF2Lib/Entity/Generator/Index.hpp"

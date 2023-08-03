@@ -4,8 +4,7 @@
 
 #include <cmath>
 
-#include "SF2Lib/Types.hpp"
-#include "SF2Lib/DSP/DSP.hpp"
+#include "SF2Lib/DSP.hpp"
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
@@ -108,11 +107,11 @@ public:
     counter_ += increment_;
     if (counter_ >= 1.0) {
       increment_ = -increment_;
-      counter_ = 2.0f - counter_;
+      counter_ = Float(2.0) - counter_;
     }
     else if (counter_ <= -1.0) {
       increment_ = -increment_;
-      counter_ = -2.0f - counter_;
+      counter_ = Float(-2.0) - counter_;
     }
   }
 
@@ -150,7 +149,7 @@ private:
 
   void configure(Float sampleRate, Float frequency, Float delay) {
     delaySampleCount_ = size_t(sampleRate * delay);
-    increment_ = frequency / sampleRate * 4.0f;
+    increment_ = frequency / sampleRate * Float(4.0);
   }
 
   Float counter_{0.0};
