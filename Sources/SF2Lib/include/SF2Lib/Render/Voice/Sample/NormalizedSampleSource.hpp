@@ -69,17 +69,26 @@ private:
   {
     assert(!loaded_);
 
-    const size_t startIndex = header_.startIndex();
-    const size_t size = header_.endIndex() - startIndex;
+    const auto startIndex = header_.startIndex();
+    const auto size = header_.sampleSize();
     samples_.resize(size + sizePaddingAfterEnd);
 
     // Read in the 16-bit sample values and convert into normalized values.
-    auto pos = allSamples_ + header_.startIndex();
+    auto pos = allSamples_ + startIndex;
     constexpr T scale = (1 << 15);
     Accelerated<T>::conversionProc(pos, 1, samples_.data(), 1, size);
     Accelerated<T>::scaleProc(samples_.data(), 1, &scale, samples_.data(), 1, size);
 
     loaded_ = true;
+  }
+
+  template <typename T>
+  T getMaxMagnitude(size_t startPos, size_t endPos) const {
+    T value{0.0f};
+    if (samples_.size() > startPos && samples_.size() >= endPos) {
+      Accelerated<T>::magnitudeProc(samples_.data() + startPos, 1, &value, endPos - startPos);
+    }
+    return std::max<T>(value, 1.0e-7f);
   }
 
   using SampleVector = std::vector<Float>;
@@ -89,7 +98,6 @@ private:
 
   const int16_t* allSamples_;
   mutable bool loaded_{false};
-  mutable Float noiseFloorOverMagnitude_;
   mutable Float noiseFloorOverMagnitudeOfLoop_;
 };
 

@@ -21,8 +21,9 @@ inline constexpr int MaximumAbsoluteCents = 13'508;
 /// Number of cents in an octave
 inline constexpr int CentsPerOctave = 1'200;
 
-/// Attenuated samples at or below this value will be inaudible (I think).
-inline constexpr Float NoiseFloor = 2.0E-7f;
+/// Attenuated samples at or below this value should be inaudible at 100 dB dynamic range.
+inline constexpr Float NoiseFloor = 0.00002;
+inline constexpr Float NoiseFloorCentiBels = 960.0f;
 
 /// Maximum attenuation defined by SF2 spec.
 inline constexpr Float MaximumAttenuationCentiBels = 1'440.0f;
@@ -69,7 +70,6 @@ private:
  @returns attenuation value
  */
 inline Float centibelsToAttenuation(Float value) noexcept {
-  extern Float attenuationLookup(int centibels) noexcept;
   if (value >= MaximumAttenuationCentiBels) return 0.0f;
   if (value <= 0.0f) return 1.0f;
   return AttenuationLookup::query(int(nearbyint(value)));
@@ -103,7 +103,8 @@ private:
   static constexpr size_t TableSize = size_t(CentsPerOctave);
   static constexpr Float generator(size_t index) {
     // 6.875 x 2^(index / 1200) ==> 6.875 x e^(index / 1200 * ln(2))
-    return 6.875f * DSPHeaders::ConstMath::exp(index / Float(CentsPerOctave) * DSPHeaders::ConstMath::Constants<Float>::ln2);
+    return 6.875f * DSPHeaders::ConstMath::exp(index / Float(CentsPerOctave) *
+                                               DSPHeaders::ConstMath::Constants<Float>::ln2);
   }
 
   static inline const auto lookup_ = DSPHeaders::ConstMath::make_array<Float, TableSize>(generator);

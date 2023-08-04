@@ -21,6 +21,11 @@
  */
 namespace SF2::Render::Envelope {
 
+enum struct Kind {
+  volume = 1,
+  modulation = 2
+};
+
 /**
  Collection of states for all of the stages in an SF2 envelope.
  */
@@ -54,20 +59,26 @@ struct Stages : public std::array<Stage, static_cast<size_t>(StageIndex::release
  The more traditional ADSR (attack, decay, sustain, release) envelope can be achieved by setting the delay and hold
  durations to zero.
  */
+template <enum struct Kind Kind>
 class Generator {
 public:
   using Index = Entity::Generator::Index;
   using State = Render::Voice::State::State;
 
-  enum struct Kind {
-    volume = 1,
-    modulation = 2
+  /**
+   Custom type for values from this LFO. Each LFO "kind" has its own value type in order to catch mistakes wiring with
+   the wrong one.
+   */
+  struct Value {
+    Float val;
+    explicit Value(Float v) noexcept : val{v} {}
   };
 
-  static constexpr const char* logTag(Kind kind) {
-    switch (kind) {
-      case Kind::volume: return "Envelope::Generator<Volume>";
-      case Kind::modulation: return "Envelope::Generator<Modulation>";
+  /// Obtain a log tag to use based on the EnvelopeKind enum value.
+  static constexpr const char* logTag() {
+    switch (Kind) {
+      case Kind::volume: return "Generator<Volume>";
+      case Kind::modulation: return "Generator<Modulation>";
       default: throw "invalid Kind";
     }
   }
@@ -76,11 +87,10 @@ public:
    Construct a NULL generator, one that will never emit any non-zero values. To be useful, a generator must be
    configured with a State that holds the stage definitions to use.
 
-   @param sampleRate the number of samples per second to be processed
-   @param kind which kind of envelope to be generated, volume or modulation.
+   @param voiceIndex the voice index this belongs to
    */
-  Generator(Float sampleRate, Kind kind, size_t voiceIndex) : sampleRate_{sampleRate}, kind_{kind},
-  voiceIndex_{voiceIndex}, log_{os_log_create("SF2Lib", logTag(kind))}
+  Generator(size_t voiceIndex)
+  : voiceIndex_{voiceIndex}, log_{os_log_create("SF2Lib", logTag())}
   {}
 
   /**
@@ -89,7 +99,7 @@ public:
    @param state the state holding the generator values for the envelope definition
    */
   void configure(const State& state) noexcept {
-    if (kind_ == Kind::volume) {
+    if (Kind == Kind::volume) {
       configureVolumeEnvelope(state);
     } else {
       configureModulationEnvelope(state);
@@ -106,6 +116,7 @@ public:
       value_ = 0.0;
       enterStage(StageIndex::delay);
     } else if (stageIndex_ != StageIndex::idle) {
+      // NOTE: we need to recalculate the duration of the release stage if the value is lower than the sustain level
       enterStage(StageIndex::release);
     }
   }
@@ -133,14 +144,14 @@ public:
   bool isAttack() const noexcept { return stageIndex_ == StageIndex::attack; }
 
   /// @returns the current envelope value.
-  Float value() const noexcept { return isAttack() ? value_ * value_ : value_; }
+  Value value() const noexcept { return Value(value_); }
 
   /**
    Calculate the next envelope value. This must be called on every sample for proper timing of the stages.
 
    @returns the new envelope value.
    */
-  Float getNextValue() noexcept {
+  Value getNextValue() noexcept {
     switch (stageIndex_) {
       case StageIndex::delay: checkIfEndStage(StageIndex::attack); break;
       case StageIndex::attack: updateValue(); checkIfEndStage(StageIndex::hold); break;
@@ -152,8 +163,6 @@ public:
     return value();
   }
 
-  void setSampleRate(Float sampleRate) noexcept { sampleRate_ = sampleRate; }
-  
 private:
 
   /**
@@ -165,21 +174,26 @@ private:
     Float sustainLevel = volEnvSustain(state);
 
     auto delayTimecents = state.modulated(Index::delayVolumeEnvelope);
-    stages_[StageIndex::delay].setDelay(samplesFor(delayTimecentsToSeconds(delayTimecents)));
+    stages_[StageIndex::delay].setDelay(samplesFor(state.sampleRate(),
+                                                   delayTimecentsToSeconds(delayTimecents)));
 
     auto attackTimecents = state.modulated(Index::attackVolumeEnvelope);
-    stages_[StageIndex::attack].setAttack(samplesFor(attackTimecentsToSeconds(attackTimecents)));
+    stages_[StageIndex::attack].setAttack(samplesFor(state.sampleRate(),
+                                                     attackTimecentsToSeconds(attackTimecents)));
 
     auto holdTimecents = state.modulated(Index::holdVolumeEnvelope) + midiKeyVolumeEnvelopeHoldAdjustment(state);
-    stages_[StageIndex::hold].setHold(samplesFor(holdTimecentsToSeconds(holdTimecents)));
+    stages_[StageIndex::hold].setHold(samplesFor(state.sampleRate(),
+                                                 holdTimecentsToSeconds(holdTimecents)));
 
     auto decayTimecents = state.modulated(Index::decayVolumeEnvelope) + midiKeyVolumeEnvelopeDecayAdjustment(state);
-    stages_[StageIndex::decay].setDecay(samplesFor(decayTimecentsToSeconds(decayTimecents)), sustainLevel);
+    stages_[StageIndex::decay].setDecay(samplesFor(state.sampleRate(),
+                                                   decayTimecentsToSeconds(decayTimecents)), sustainLevel);
 
     stages_[StageIndex::sustain].setSustain(sustainLevel);
 
     auto releaseTimecents = state.modulated(Index::releaseVolumeEnvelope);
-    stages_[StageIndex::release].setRelease(samplesFor(releaseTimecentsToSeconds(releaseTimecents)), sustainLevel);
+    stages_[StageIndex::release].setRelease(samplesFor(state.sampleRate(),
+                                                       releaseTimecentsToSeconds(releaseTimecents)), sustainLevel);
 
     gate(true);
   }
@@ -193,21 +207,26 @@ private:
     Float sustainLevel = modEnvSustain(state);
 
     auto delayTimecents = state.modulated(Index::delayModulatorEnvelope);
-    stages_[StageIndex::delay].setDelay(samplesFor(delayTimecentsToSeconds(delayTimecents)));
+    stages_[StageIndex::delay].setDelay(samplesFor(state.sampleRate(),
+                                                   delayTimecentsToSeconds(delayTimecents)));
 
     auto attackTimecents = state.modulated(Index::attackModulatorEnvelope);
-    stages_[StageIndex::attack].setAttack(samplesFor(attackTimecentsToSeconds(attackTimecents)));
+    stages_[StageIndex::attack].setAttack(samplesFor(state.sampleRate(),
+                                                     attackTimecentsToSeconds(attackTimecents)));
 
     auto holdTimecents = state.modulated(Index::holdModulatorEnvelope) + midiKeyModulatorEnvelopeHoldAdjustment(state);
-    stages_[StageIndex::hold].setHold(samplesFor(holdTimecentsToSeconds(holdTimecents)));
+    stages_[StageIndex::hold].setHold(samplesFor(state.sampleRate(),
+                                                 holdTimecentsToSeconds(holdTimecents)));
 
     auto decayTimecents = state.modulated(Index::decayModulatorEnvelope) + midiKeyModulatorEnvelopeDecayAdjustment(state);
-    stages_[StageIndex::decay].setDecay(samplesFor(decayTimecentsToSeconds(decayTimecents)), sustainLevel);
+    stages_[StageIndex::decay].setDecay(samplesFor(state.sampleRate(),
+                                                   decayTimecentsToSeconds(decayTimecents)), sustainLevel);
 
     stages_[StageIndex::sustain].setSustain(sustainLevel);
 
     auto releaseTimecents = state.modulated(Index::releaseModulatorEnvelope);
-    stages_[StageIndex::release].setRelease(samplesFor(releaseTimecentsToSeconds(releaseTimecents)), sustainLevel);
+    stages_[StageIndex::release].setRelease(samplesFor(state.sampleRate(),
+                                                       releaseTimecentsToSeconds(releaseTimecents)), sustainLevel);
 
     gate(true);
   }
@@ -234,23 +253,22 @@ private:
     return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5000.0));
   }
 
-  /// @returns the sustain level of the generator (only used by tests)
   Float sustain() const noexcept { return stages_[StageIndex::sustain].initial(); }
 
   const Stage& activeStage() const noexcept { return stages_[stageIndex_]; }
 
   /// NOTE: only used for testing via EnvelopeTestInjector
-  Generator(Float sampleRate, Kind kind, size_t voiceIndex, Float delay, Float attack, Float hold, Float decay,
+  Generator(Float sampleRate, size_t voiceIndex, Float delay, Float attack, Float hold, Float decay,
             int sustain, Float release)
-  : sampleRate_{sampleRate}, kind_{kind}, voiceIndex_{voiceIndex}, log_{os_log_create("SF2Lib", logTag(kind))}
+  : voiceIndex_{voiceIndex}, log_{os_log_create("SF2Lib", logTag())}
   {
     Float normSustain = 1.0f - sustain / Float(1000.0);
-    stages_[StageIndex::delay].setDelay(int(round(sampleRate_ * delay)));
-    stages_[StageIndex::attack].setAttack(int(round(sampleRate_ * attack)));
-    stages_[StageIndex::hold].setHold(int(round(sampleRate_ * hold)));
-    stages_[StageIndex::decay].setDecay(int(round(sampleRate_ * decay)), normSustain);
+    stages_[StageIndex::delay].setDelay(int(round(sampleRate * delay)));
+    stages_[StageIndex::attack].setAttack(int(round(sampleRate * attack)));
+    stages_[StageIndex::hold].setHold(int(round(sampleRate * hold)));
+    stages_[StageIndex::decay].setDecay(int(round(sampleRate * decay)), normSustain);
     stages_[StageIndex::sustain].setSustain(normSustain);
-    stages_[StageIndex::release].setRelease(int(round(sampleRate_ * release)), normSustain);
+    stages_[StageIndex::release].setRelease(int(round(sampleRate * release)), normSustain);
   }
 
   /// @returns the adjustment to the volume envelope's hold stage timing based on the MIDI key event
@@ -290,17 +308,40 @@ private:
     return value * scaling;
   }
 
-  /// @returns the sustain level for the modulator envelope (gain)
-  static Float envSustain(const State& state, Index gen) noexcept {
-    assert(gen == Index::sustainVolumeEnvelope || gen == Index::sustainModulatorEnvelope);
-    return 1.0f - state.modulated(gen) / Float(1000.0);
+  /// @returns the sustain level for the modulator envelope
+  static Float modEnvSustain(const State& state) noexcept {
+    /**
+     Spec 8.1.2 sustainModEnv
+
+     This is the decrease in level, expressed in 0.1% units, to which the Modulation Envelope value ramps during the
+     decay phase. For the Modulation Envelope, the sustain level is properly expressed in percent of full scale.
+     Because the volume envelope sustain level is expressed as an attenuation from full scale, the sustain level is
+     analogously expressed as a decrease from full scale. A value of 0 indicates the sustain level is full level; this
+     implies a zero duration of decay phase regardless of decay time. A positive value indicates a decay to the
+     corresponding level. Values less than zero are to be interpreted as zero; values above 1000 are to be interpreted
+     as 1000. For example, a sustain level which corresponds to an absolute value 40% of peak would be 600.
+
+     Our stages always work in normalized values, so convert percentage to a sustain level.
+     */
+    return 1.0f - DSP::tenthPercentageToNormalized(state.modulated(Index::sustainModulatorEnvelope));
   }
 
   /// @returns the sustain level for the volume envelope (gain)
-  static Float volEnvSustain(const State& state) noexcept { return envSustain(state, Index::sustainVolumeEnvelope); }
+  static Float volEnvSustain(const State& state) noexcept {
+    /**
+     Spec 8.1.2 sustainVolEnv
 
-  /// @returns the sustain level for the modulator envelope
-  static Float modEnvSustain(const State& state) noexcept { return envSustain(state, Index::sustainModulatorEnvelope); }
+     This is the decrease in level, expressed in centibels, to which the Volume Envelope value ramps during the decay
+     phase. For the Volume Envelope, the sustain level is best expressed in centibels of attenuation from full scale.
+     A value of 0 indicates the sustain level is full level; this implies a zero duration of decay phase regardless of
+     decay time. A positive value indicates a decay to the corresponding level. Values less than zero are to be
+     interpreted as zero; conventionally 1000 indicates full attenuation. For example, a sustain level which
+     corresponds to an absolute value 12dB below of peak would be 120.
+
+     Our stages always work in normalized values, so convert centibels to an attenuation value.
+     */
+    return DSP::centibelsToAttenuation(state.modulated(Index::sustainVolumeEnvelope));
+  }
 
   /**
    Obtain the number of samples for a given sample rate and duration.
@@ -308,9 +349,8 @@ private:
    @param seconds the amount of time to use in the calculation represented in timecents
    @returns the number of samples
    */
-  int samplesFor(Float seconds) noexcept {
-    auto samples = int(round(sampleRate_ * seconds));
-    // os_log_debug(log_, "samplesFor seconds: %f samples: %d", seconds, samples);
+  int samplesFor(Float sampleRate, Float seconds) noexcept {
+    auto samples = int(round(sampleRate * seconds));
     return samples;
   }
 
@@ -366,11 +406,12 @@ private:
   StageIndex stageIndex_{StageIndex::idle};
   int counter_{0};
   Float value_{0.0};
-  Float sampleRate_;
-  const Kind kind_;
   const size_t voiceIndex_;
   const os_log_t log_;
   friend class EnvelopeTestInjector;
 };
+
+using Volume = Generator<Kind::volume>;
+using Modulation = Generator<Kind::modulation>;
 
 } // namespace SF2::Render::Envelope

@@ -33,8 +33,6 @@ inline const char* StageName(StageIndex stageIndex) noexcept {
   }
 }
 
-class Generator;
-
 /**
  Configuration for a single stage of an envelope.
  */
@@ -142,9 +140,6 @@ public:
   int durationInSamples() const noexcept { return durationInSamples_; }
 
 private:
-
-  // friend class Generator;
-
   Float initial_{0.0};
   Float increment_{0.0};
   int durationInSamples_{0};

@@ -15,7 +15,7 @@ namespace SF2::Render::Voice::Sample {
  Represents the sample index bounds and loop start/end indices using values from the SF2 'shdr' entity as well as
  state values from generators that can change in real-time. Note that unlike the "absolute" values in the 'shdr' and
  the state offsets which are all based on the entire sample block of the file, these values are offsets from the first
- sample found in a NormalizedSampleSource.
+ sample found in a NormalizedSampleSource, so they are zero-based.
  */
 class Bounds {
 public:
@@ -54,7 +54,7 @@ public:
                   clampPos(upper + endOffset));
   }
 
-  Bounds() noexcept = default;
+  Bounds() = default;
 
   /// @returns the index of the first sample to use for rendering
   constexpr size_t startPos() const noexcept { return startPos_; }

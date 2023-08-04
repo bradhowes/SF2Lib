@@ -19,8 +19,8 @@ state_{sampleRate, channelState},
 loopingMode_{LoopingMode::none},
 pitch_{state_},
 sampleGenerator_{interpolator},
-gainEnvelope_{sampleRate, Envelope::Generator::Kind::volume, voiceIndex},
-modulatorEnvelope_{sampleRate, Envelope::Generator::Kind::modulation, voiceIndex},
+gainEnvelope_{voiceIndex},
+modulatorEnvelope_{voiceIndex},
 modulatorLFO_{sampleRate},
 vibratoLFO_{sampleRate},
 filter_{sampleRate},
@@ -55,6 +55,8 @@ Voice::start(const State::Config& config) noexcept
 
   active_ = true;
   keyDown_ = true;
+
+  initialAttenuation_ = DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));
 
   os_signpost_interval_end(log_, startSignpost_, "start");
 }

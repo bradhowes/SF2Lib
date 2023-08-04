@@ -67,7 +67,10 @@ public:
     signedSemitones,
 
     // Two 8-int bytes
-    range
+    range,
+
+    // Unused value
+    UNUSED
   };
 
   /// Scaling factor for NRPN values that affect a generator. This is for MIDI 1.0 messages where the range of an

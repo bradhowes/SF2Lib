@@ -26,7 +26,7 @@ public:
   /**
    Default constructor. Sets held value to 0.
    */
-  Amount() noexcept : Amount(0) {}
+  Amount() = default;
 
   /// @returns unsigned integer value
   uint16_t unsignedAmount() const noexcept { return raw_.wAmount; }

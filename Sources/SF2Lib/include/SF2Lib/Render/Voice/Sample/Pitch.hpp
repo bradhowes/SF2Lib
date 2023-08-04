@@ -6,6 +6,7 @@
 
 #include "SF2Lib/DSP.hpp"
 #include "SF2Lib/Entity/SampleHeader.hpp"
+#include "SF2Lib/Render/Envelope/Generator.hpp"
 #include "SF2Lib/Render/LFO.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
@@ -43,6 +44,7 @@ class Pitch
 {
 public:
   using Index = State::State::Index;
+  using Modulation = Envelope::Modulation;
 
   /**
    Construct new instance. NOTE: the instance is not usable for audio rendering at this point. One must call
@@ -121,7 +123,7 @@ public:
    @param vibLFO the current vibrato LFO value
    @param modEnv the current modulation envelope value
    */
-  Float samplePhaseIncrement(ModLFO::Value modLFO, VibLFO::Value vibLFO, Float modEnv) const noexcept
+  Float samplePhaseIncrement(ModLFO::Value modLFO, VibLFO::Value vibLFO, Modulation::Value modEnv) const noexcept
   {
     auto coarseTune = state_.modulated(Index::coarseTune);
     auto fineTune = state_.modulated(Index::fineTune);
@@ -129,7 +131,7 @@ public:
 
     auto modLFOValue = modLFO.val * state_.modulated(Index::modulatorLFOToPitch);
     auto vibLFOValue = vibLFO.val * state_.modulated(Index::vibratoLFOToPitch);
-    auto modEnvValue = modEnv * state_.modulated(Index::modulatorEnvelopeToPitch);
+    auto modEnvValue = modEnv.val * state_.modulated(Index::modulatorEnvelopeToPitch);
 
     auto phase = phaseBase_ + phaseOffset + modLFOValue + vibLFOValue + modEnvValue;
     auto phaseIncrement = DSP::power2Lookup(int(std::round(phase)));

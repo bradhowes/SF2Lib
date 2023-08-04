@@ -72,8 +72,6 @@ public:
    */
   void setSampleRate(Float sampleRate) noexcept {
     state_.setSampleRate(sampleRate);
-    gainEnvelope_.setSampleRate(sampleRate);
-    modulatorEnvelope_.setSampleRate(sampleRate);
     filter_.setSampleRate(sampleRate);
   }
 
@@ -159,7 +157,7 @@ public:
 
    @returns next sample
    */
-  Float renderSample(bool debug = false) noexcept {
+  Float renderSample() noexcept {
     if (!active_) {
       assert(!gainEnvelope_.isActive() && !sampleGenerator_.isActive());
       return 0.0;
@@ -182,20 +180,16 @@ public:
     // can have external modulators attached to their primary state value.
     auto frequency = (state_.modulated(Index::initialFilterCutoff) +
                       state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO.val +
-                      state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv);
+                      state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv.val);
     auto resonance = state_.modulated(Index::initialFilterResonance);
 
     // Apply the filter on the sample.
     auto filtered = filter_.transform(frequency, resonance, sample);
 
     // Finally, calculate gain / attenuation to apply to filtered result and return attenuated value.
-    auto gain = (DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation)) *
-                 DSP::centibelsToAttenuation(DSP::MaximumAttenuationCentiBels * (1.0f - volEnv) +
-                                             modLFO.val * -state_.modulated(Index::modulatorLFOToVolume)));
-
-    if (debug) {
-      os_log_debug(log_, "renderSample modEnv: %f volEnv: %f gain: %f sample: %f", modEnv, volEnv, gain, sample);
-    }
+    auto modLFOValCB = modLFO.val * state_.modulated(Index::modulatorLFOToVolume);
+    auto volEnvCB = DSP::NoiseFloorCentiBels * (1.0f - volEnv.val);
+    auto gain = initialAttenuation_ * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB);
 
     if (!gainEnvelope_.isActive() || !sampleGenerator_.isActive()) stop();
 
@@ -214,7 +208,7 @@ public:
     SF2::AUValue reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
 
     for (; index < frameCount; ++index) {
-      Float sample = isDone() ? 0.0 : renderSample(false);
+      Float sample = isDone() ? 0.0 : renderSample();
       Float pan = state_.modulated(Index::pan);
       Float leftPan, rightPan;
       DSP::panLookup(pan, leftPan, rightPan);
@@ -253,13 +247,14 @@ private:
   LoopingMode loopingMode_;
   Sample::Pitch pitch_;
   Sample::Generator sampleGenerator_;
-  Envelope::Generator gainEnvelope_;
-  Envelope::Generator modulatorEnvelope_;
+  Envelope::Volume gainEnvelope_;
+  Envelope::Modulation modulatorEnvelope_;
   ModLFO modulatorLFO_;
   VibLFO vibratoLFO_;
   LowPassFilter filter_;
   Float noiseFloorOverMagnitude_;
   Float noiseFloorOverMagnitudeOfLoop_;
+  Float initialAttenuation_{1.0};
 
   bool active_{false};
   bool keyDown_{false};

@@ -129,7 +129,7 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount) {
 {
   AUValue* ptr = [buffer left] + offset;
   for (auto index = 0; index < sampleCount; ++index) {
-    auto sample = voice.renderSample(offset == 45600 && index < 3);
+    auto sample = voice.renderSample();
     *ptr++ += sample;
   }
   return offset + sampleCount;

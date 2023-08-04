@@ -24,6 +24,7 @@ Definition::dump(const Amount& amount) const noexcept
     case ValueKind::signedTimeCents: std::cout << value << " seconds"; break;
     case ValueKind::signedSemitones: std::cout << value << " notes"; break;
     case ValueKind::range: std::cout << '[' << amount.low() << '-' << amount.high() << ']'; break;
+    case ValueKind::UNUSED: break;
   }
   
   return std::cout << " (" << (isUnsignedValue() ? amount.unsignedAmount() : amount.signedAmount()) << ')';
@@ -59,15 +60,15 @@ GeneratorValueArray<Definition> const Definition::definitions_{
   D(N(modulatorEnvelopeToFilterCutoff), ValueKind::signedShort, {-12'000, 12'000}, true,  NRPNMultiplier::x2),
   D(N(endAddressCoarseOffset),         ValueKind::coarseOffset,	    shortIntRange, false, NRPNMultiplier::x1),
   D(N(modulatorLFOToVolume),         ValueKind::signedCentsBel, {   -960,    960}, true,  NRPNMultiplier::x1),
-  D(N(unused1),                         ValueKind::signedShort,	      unusedRange, false, NRPNMultiplier::x1),
+  D(N(unused1),                              ValueKind::UNUSED,	      unusedRange, false, NRPNMultiplier::x1),
   // 15
   D(N(chorusEffectSend),            ValueKind::unsignedPercent, {      0,  1'000}, true,  NRPNMultiplier::x1),
   D(N(reverbEffectSend),            ValueKind::unsignedPercent, {      0,  1'000}, true,  NRPNMultiplier::x1),
   D(N(pan),                           ValueKind::signedPercent,	{   -500,    500}, true,  NRPNMultiplier::x1),
-  D(N(unused2),                       ValueKind::unsignedShort,	      unusedRange, false, NRPNMultiplier::x1),
-  D(N(unused3),                       ValueKind::unsignedShort,	      unusedRange, false, NRPNMultiplier::x1),
+  D(N(unused2),                              ValueKind::UNUSED,	      unusedRange, false, NRPNMultiplier::x1),
+  D(N(unused3),                              ValueKind::UNUSED,	      unusedRange, false, NRPNMultiplier::x1),
   // 20
-  D(N(unused4),                       ValueKind::unsignedShort, 	    unusedRange, false, NRPNMultiplier::x1),
+  D(N(unused4),                              ValueKind::UNUSED, 	    unusedRange, false, NRPNMultiplier::x1),
   D(N(delayModulatorLFO),           ValueKind::signedTimeCents,	{-12'000,  5'000}, true,  NRPNMultiplier::x2),
   D(N(frequencyModulatorLFO),  ValueKind::signedFrequencyCents,	{-16'000,  4'500}, true,  NRPNMultiplier::x4),
   D(N(delayVibratoLFO),             ValueKind::signedTimeCents,	{-12'000,  5'000}, true,  NRPNMultiplier::x2),
@@ -93,7 +94,7 @@ GeneratorValueArray<Definition> const Definition::definitions_{
   // 40
   D(N(midiKeyToVolumeEnvelopeDecay),    ValueKind::signedShort,	{ -1'200,  1'200}, true,  NRPNMultiplier::x1),
   D(N(instrument),                    ValueKind::unsignedShort,    ushortIntRange, true,  NRPNMultiplier::x1),
-  D(N(reserved1),                       ValueKind::signedShort,       unusedRange, false, NRPNMultiplier::x1),
+  D(N(reserved1),                            ValueKind::UNUSED,       unusedRange, false, NRPNMultiplier::x1),
   D(N(keyRange),                              ValueKind::range, 	       keyRange, true,  NRPNMultiplier::x1),
   D(N(velocityRange),                         ValueKind::range, 	       keyRange, true,  NRPNMultiplier::x1),
   // 45
@@ -101,7 +102,7 @@ GeneratorValueArray<Definition> const Definition::definitions_{
   D(N(forcedMIDIKey),                   ValueKind::signedShort,      neg1KeyRange, false, NRPNMultiplier::x1),
   D(N(forcedMIDIVelocity),              ValueKind::signedShort,      neg1KeyRange, false, NRPNMultiplier::x1),
   D(N(initialAttenuation),           ValueKind::signedCentsBel,	{      0,  1'440}, true,  NRPNMultiplier::x1),
-  D(N(reserved2),                     ValueKind::unsignedShort,	      unusedRange, false, NRPNMultiplier::x1),
+  D(N(reserved2),                            ValueKind::UNUSED,	      unusedRange, false, NRPNMultiplier::x1),
   // 50
   D(N(endLoopAddressCoarseOffset),     ValueKind::coarseOffset,	    shortIntRange, false, NRPNMultiplier::x1),
   D(N(coarseTune),                  ValueKind::signedSemitones,	{   -120,    120}, true,  NRPNMultiplier::x1),
@@ -109,7 +110,7 @@ GeneratorValueArray<Definition> const Definition::definitions_{
   D(N(sampleID),                      ValueKind::unsignedShort,	   ushortIntRange, false, NRPNMultiplier::x1),
   D(N(sampleModes),                   ValueKind::unsignedShort,	   ushortIntRange, false, NRPNMultiplier::x1),
   // 55
-  D(N(reserved3),                       ValueKind::signedShort,	      unusedRange, false, NRPNMultiplier::x1),
+  D(N(reserved3),                            ValueKind::UNUSED,	      unusedRange, false, NRPNMultiplier::x1),
   D(N(scaleTuning),                   ValueKind::unsignedShort,	{      0,   1200}, true,  NRPNMultiplier::x1),
   D(N(exclusiveClass),                ValueKind::unsignedShort,          keyRange, false, NRPNMultiplier::x1),
   D(N(overridingRootKey),               ValueKind::signedShort, 		 neg1KeyRange, false, NRPNMultiplier::x1),
