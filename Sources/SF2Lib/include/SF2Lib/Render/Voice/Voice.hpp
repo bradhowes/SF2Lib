@@ -90,8 +90,6 @@ public:
 
   /**
    Start the voice rendering. At this point, `isKeyDown()` will return `true` until `releaseKey()` is called.
-
-   @param config the voice configuration to apply
    */
   void start() noexcept;
 
