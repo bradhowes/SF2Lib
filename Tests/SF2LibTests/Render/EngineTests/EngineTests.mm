@@ -290,7 +290,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   AUAudioFrameCount frameCount = 512;
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-  Engine engine(sampleRate, 6, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
   engine.load(contexts.context0.file(), 0);
   engine.setRenderingFormat(3, format, frameCount);
 
@@ -304,7 +304,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   int sampleCount = sampleRate * seconds;
   int frames = sampleCount / frameCount;
   int remaining = sampleCount - frames * frameCount;
-  int noteOnFrame = 10;
+  int noteOnFrame = 1;
   int noteOnDuration = 50;
   int noteOffFrame = noteOnFrame + noteOnDuration;
 
@@ -331,13 +331,12 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   XCTAssertEqual(0, engine.activeVoiceCount());
 
   int frameIndex = 0;
-  int velocity = 127;
+  int velocity = 64;
   auto playChord = [&](int note1, int note2, int note3, bool sustain) {
     renderUntil(engine, mixer, frameIndex, frameCount, noteOnFrame);
     engine.noteOn(note1, velocity);
     engine.noteOn(note2, velocity);
     engine.noteOn(note3, velocity);
-    velocity -= 16;
     renderUntil(engine, mixer, frameIndex, frameCount, noteOffFrame);
     if (!sustain) {
       engine.noteOff(note1);

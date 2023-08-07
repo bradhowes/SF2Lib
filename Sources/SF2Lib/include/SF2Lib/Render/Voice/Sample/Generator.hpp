@@ -55,6 +55,11 @@ public:
     sampleSource_->load();
   }
 
+  void start() noexcept { index_.start(); }
+
+  /// Tell the generator that there will be no more samples generated.
+  void stop() noexcept { index_.stop(); }
+
   /**
    Obtain an interpolated sample value at the current index.
 
@@ -76,9 +81,6 @@ public:
 
   /// @returns true if generator has looped during rendering.
   bool looped() const noexcept { return index_.looped(); }
-
-  /// Tell the generator that there will be no more samples generated.
-  void stop() noexcept { index_.stop(); }
 
 private:
   using InterpolatorProc = Float (Generator::*)(size_t, Float, bool) const;

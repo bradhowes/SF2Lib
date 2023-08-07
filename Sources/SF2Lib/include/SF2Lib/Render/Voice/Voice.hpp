@@ -82,11 +82,18 @@ public:
   int exclusiveClass() const noexcept { return state_.unmodulated(Index::exclusiveClass); }
 
   /**
+   Configure the voice to begin rendering using the given settiings.
+
+   @param config the voice configuration to apply
+   */
+  void configure(const State::Config& config) noexcept;
+
+  /**
    Start the voice rendering. At this point, `isKeyDown()` will return `true` until `releaseKey()` is called.
 
    @param config the voice configuration to apply
    */
-  void start(const State::Config& config) noexcept;
+  void start() noexcept;
 
   /**
    Stop the voice. After this, it will just produce 0.0 if rendered.
@@ -133,8 +140,8 @@ public:
 
   /// @returns true if the voice can enter a loop if it is available
   bool canLoop() const noexcept {
-    return (loopingMode_ == LoopingMode::activeEnvelope && gainEnvelope_.isActive()) ||
-    (loopingMode_ == LoopingMode::duringKeyPress && gainEnvelope_.isGated());
+    return ((loopingMode_ == LoopingMode::activeEnvelope && gainEnvelope_.isActive()) ||
+            (loopingMode_ == LoopingMode::duringKeyPress && keyDown_));
   }
 
   /**
@@ -261,6 +268,7 @@ private:
 
   const size_t voiceIndex_;
   const os_log_t log_{os_log_create("SF2Lib", "Voice")};
+  const os_signpost_id_t configSignpost_{os_signpost_id_generate(log_)};
   const os_signpost_id_t startSignpost_{os_signpost_id_generate(log_)};
 };
 

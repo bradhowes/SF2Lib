@@ -34,10 +34,13 @@ public:
    @param bounds the sample bounds to work with
    */
   void configure(const Bounds& bounds) noexcept {
+    bounds_ = bounds;
+  }
+
+  void start() noexcept {
     whole_ = 0;
     partial_ = 0.0;
     looped_ = false;
-    bounds_ = bounds;
   }
 
   /// Signal that no further operations will take place using this index.

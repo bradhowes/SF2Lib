@@ -30,20 +30,28 @@ keyDown_{false}
 {}
 
 void
-Voice::start(const State::Config& config) noexcept
+Voice::configure(const State::Config& config) noexcept
 {
-  os_log_debug(log_, "starting voice: %zu", voiceIndex_);
+  os_log_debug(log_, "configuring voice: %zu", voiceIndex_);
+  os_signpost_interval_begin(log_, configSignpost_, "start");
 
-  os_signpost_interval_begin(log_, startSignpost_, "start");
 
   config.sampleSource().load();
   state_.prepareForVoice(config);
-  loopingMode_ = loopingMode();
 
   const auto& sampleSource{config.sampleSource()};
 
   sampleGenerator_.configure(sampleSource, state_);
   pitch_.configure(sampleSource.header());
+
+  os_signpost_interval_end(log_, configSignpost_, "end");
+}
+
+void
+Voice::start() noexcept
+{
+  os_log_debug(log_, "starting voice: %zu", voiceIndex_);
+  os_signpost_interval_begin(log_, startSignpost_, "start");
 
   gainEnvelope_.configure(state_);
   modulatorEnvelope_.configure(state_);
@@ -55,8 +63,9 @@ Voice::start(const State::Config& config) noexcept
 
   active_ = true;
   keyDown_ = true;
-
   initialAttenuation_ = DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));
-
+  loopingMode_ = loopingMode();
+  sampleGenerator_.start();
+  
   os_signpost_interval_end(log_, startSignpost_, "start");
 }

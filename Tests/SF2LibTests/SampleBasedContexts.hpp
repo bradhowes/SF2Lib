@@ -24,7 +24,7 @@ struct TestVoiceCollection {
     voices_.reserve(presetConfigs_.size());
     for (size_t index = 0; index < presetConfigs_.size(); ++index) {
       voices_.emplace_back(sampleRate_, channelState_, index);
-      voices_.back().start(presetConfigs_[index]);
+      voices_.back().configure(presetConfigs_[index]);
     }
   }
 
@@ -33,7 +33,7 @@ struct TestVoiceCollection {
 
   void start() {
     for (size_t index = 0; index < presetConfigs_.size(); ++index) {
-      voices_[index].start(presetConfigs_[index]);
+      voices_[index].start();
     }
   }
 
@@ -87,7 +87,8 @@ struct PresetTestContextBase
     return {midiNote, midiVelocity, preset(presetIndex), sampleRate_, channelState_};
   }
 
-  std::vector<TestVoiceCollection> makeVoicesCollection(int presetIndex, const std::vector<int>& midiNotes, int midiVelocity) {
+  std::vector<TestVoiceCollection> makeVoicesCollection(int presetIndex, const std::vector<int>& midiNotes,
+                                                        int midiVelocity) {
     std::vector<TestVoiceCollection> notes;
     for (auto midiNote : midiNotes) {
       notes.emplace_back(makeVoiceCollection(presetIndex, midiNote, midiVelocity));

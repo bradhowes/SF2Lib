@@ -164,8 +164,9 @@ public:
 
   /**
    Tell any voices playing the current MIDI key that the key has been released. The voice will continue to render until
-   it figures out that it is done. NOTE: this is not thread-safe. When running in a render thread, one should use a
-   MIDI command to stop a note.
+   it figures out that it is done.
+
+   NOTE: this is not thread-safe. When running in a render thread, one should use a MIDI command to stop a note.
 
    @param key the MIDI key that was released
    */
@@ -278,6 +279,18 @@ private:
     }
   }
 
+  void stopSameKeyVoices(int eventKey) noexcept
+  {
+    for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
+      auto voiceIndex = *pos;
+      if (voices_[voiceIndex].initiatingKey() == eventKey) {
+        pos = stopForExclusiveVoice(voiceIndex);
+      } else {
+        ++pos;
+      }
+    }
+  }
+
   size_t getVoice() noexcept
   {
     size_t found = voices_.size();
@@ -294,13 +307,18 @@ private:
   void startVoice(const Config& config) noexcept
   {
     os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice");
+
     auto exclusiveClass{config.exclusiveClass()};
     if (exclusiveClass > 0) {
       stopAllExclusiveVoices(exclusiveClass);
+    } else {
+      stopSameKeyVoices(config.eventKey());
     }
+
     auto voiceIndex = getVoice();
     if (voiceIndex != voices_.size()) {
-      voices_[voiceIndex].start(config);
+      voices_[voiceIndex].configure(config);
+      voices_[voiceIndex].start();
       oldestActive_.add(voiceIndex);
     }
     os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice");
