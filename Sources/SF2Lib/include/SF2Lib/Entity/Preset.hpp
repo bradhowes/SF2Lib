@@ -30,9 +30,14 @@ public:
     pos = pos.readInto(&dwLibrary, sizeof(uint32_t) * 3);
     IO::trim_property(achPresetName);
   }
-  
+
+  Preset(uint16_t bank, uint16_t program)
+  : wPreset{program}, wBank{bank}, wPresetBagNdx{}, dwLibrary{}, dwGenre{}, dwMorphology{} {}
+
   /// @returns name of the preset
   char const* cname() const noexcept { return achPresetName; }
+
+  /// @returns name of the preset
   std::string name() const noexcept { return achPresetName; }
   
   /// @returns preset number for this patch
@@ -51,8 +56,19 @@ public:
     return static_cast<size_t>(value);
   }
   
+  /// Write out description of the preset to std::cout
   void dump(const std::string& indent, size_t index) const noexcept;
-  
+
+  /// @returns true if first argument is ordered lower than the second
+  friend bool operator<(const Preset& lhs, const Preset& rhs) noexcept {
+    return lhs.bank() < rhs.bank() || (lhs.bank() == rhs.bank() && lhs.program() < rhs.program());
+  }
+
+  /// @returns true if first argument has same bank/program pair as second
+  friend bool operator==(const Preset& lhs, const Preset& rhs) noexcept {
+    return lhs.bank() == rhs.bank() && lhs.program() == rhs.program();
+  }
+
 private:
   
   char achPresetName[20];

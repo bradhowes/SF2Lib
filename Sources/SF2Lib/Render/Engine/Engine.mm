@@ -112,8 +112,9 @@ Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
 }
 
 void
-Engine::changeProgram(int program) noexcept {
-  int bank = channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectMSB) * 128 +
-  channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectLSB);
+Engine::changeProgram(uint16_t program) noexcept {
+  uint16_t bank = static_cast<uint16_t>(channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectMSB))
+  * 128u +
+  static_cast<uint16_t>(channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectLSB));
   usePreset(bank, program);
 }

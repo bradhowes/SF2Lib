@@ -54,7 +54,7 @@ public:
    @param value the constant value to use
    */
   void setConstant(int durationInSamples, Float value) noexcept {
-    durationInSamples_ = std::max(durationInSamples, 0);
+    setDurationInSamples(durationInSamples);
     initial_ = clamp(value);
     increment_ = 0.0;
   }
@@ -67,24 +67,14 @@ public:
   void setDelay(int durationInSamples) noexcept { setConstant(durationInSamples, 0.0); }
 
   /**
-   Generate a configuration for the attack stage. The spec implies that this is a transition from -100dB to 0dB
-   attenuation. Here, it is a transition of 0.0 to 1.0. However, the Generator will square the resulting value for
-   the attack stage which will result in an exponential curve for the attack.
+   Generate a configuration for the attack stage.
 
    @param durationInSamples number of samples to spend in this stage
    */
   void setAttack(int durationInSamples) noexcept {
-    durationInSamples_ = std::max(durationInSamples, 0);
+    setDurationInSamples(durationInSamples);
     initial_ = 0.0;
     increment_ = calcIncrement(0.0, 1.0, durationInSamples_);
-  }
-
-  static constexpr Float calcIncrement(Float start, Float end, int durationInSamples) noexcept {
-    return durationInSamples > 0 ? ((end - start) / Float(durationInSamples)) : 0.0;
-  }
-
-  static constexpr int calcDuration(Float start, Float end, Float increment) noexcept {
-    return increment != 0.0 ? static_cast<int>(std::nearbyint((end - start) / increment)) : 0;
   }
 
   /**
@@ -96,17 +86,15 @@ public:
   void setHold(int durationInSamples) noexcept { setConstant(durationInSamples, 1.0); }
 
   /**
-   Generate a configuration for the decay stage. The spec says that this is a 100% change in the volume envelope, going
-   from 0 to -100dB attenuation if the sustain level is set to 0. Thus if sustainLevel (0.0-1.0) is non-zero,
-   calculate the actual number of samples to spend in the stage to reach the given sustain level.
+   Generate a configuration for the decay stage.
 
    @param durationInSamples number of samples to spend in this stage
    @param sustainLevel the sustain level to descend to from 1.0 peak.
    */
   void setDecay(int durationInSamples, Float sustainLevel) noexcept {
+    setDurationInSamples(durationInSamples);
     initial_ = 1.0;
     increment_ = calcIncrement(1.0, sustainLevel, durationInSamples);
-    durationInSamples_ = calcDuration(1.0, sustainLevel, increment_);
   }
 
   /**
@@ -126,9 +114,9 @@ public:
    @param sustainLevel the sustain level to descend from
    */
   void setRelease(int durationInSamples, Float sustainLevel) noexcept {
+    setDurationInSamples(durationInSamples);
     initial_ = clamp(sustainLevel);
     increment_ = calcIncrement(sustainLevel, 0.0, durationInSamples);
-    durationInSamples_ = calcDuration(sustainLevel, 0.0, increment_);
   }
 
   /**
@@ -145,7 +133,13 @@ public:
   /// @returns the duration of the stage in samples
   constexpr int durationInSamples() const noexcept { return durationInSamples_; }
 
+  void setDurationInSamples(int value) noexcept { durationInSamples_ = std::max(value, 0); }
+
 private:
+
+  static constexpr Float calcIncrement(Float start, Float end, int durationInSamples) noexcept {
+    return durationInSamples ? (end - start) / Float(durationInSamples) : (end - start);
+  }
 
   static constexpr Float clamp(Float value) noexcept { return DSP::clamp(value, 0.0f, 1.0f); }
 

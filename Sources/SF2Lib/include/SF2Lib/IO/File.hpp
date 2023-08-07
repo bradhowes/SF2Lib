@@ -113,8 +113,14 @@ public:
   /// @returns reference to samples definitions
   const ChunkItems<Entity::SampleHeader>& sampleHeaders() const noexcept { return sampleHeaders_; };
 
+  /// @returns reference to collection of SampleSource entities.
   const Render::SampleSourceCollection& sampleSourceCollection() const noexcept {
     return sampleSourceCollection_;
+  }
+
+  /// @returns reference to collection of preset indices that order the Preset entities by bank and program.
+  const std::vector<size_t>& presetIndicesOrderedByBankProgram() const noexcept {
+    return presetIndicesOrderedByBankProgram_;
   }
 
   void patchReleaseTimes(float maxDuration) noexcept;
@@ -153,9 +159,10 @@ private:
   ChunkItems<Entity::Generator::Generator> instrumentZoneGenerators_;
   ChunkItems<Entity::Modulator::Modulator> instrumentZoneModulators_;
   ChunkItems<Entity::SampleHeader> sampleHeaders_;
-
-  Render::SampleSourceCollection sampleSourceCollection_;
+  Render::SampleSourceCollection sampleSourceCollection_{sampleHeaders_};
   std::vector<int16_t> rawSamples_;
+
+  std::vector<size_t> presetIndicesOrderedByBankProgram_;
 };
 
 } // end namespace SF2::IO

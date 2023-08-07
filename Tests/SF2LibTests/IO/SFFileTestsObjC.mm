@@ -42,6 +42,16 @@ using namespace SF2::Render::Voice::Sample;
   XCTAssertEqual(26537, file.instrumentZoneGenerators().size());
   XCTAssertEqual(0, file.instrumentZoneModulators().size());
   XCTAssertEqual(495, file.sampleHeaders().size());
+
+  XCTAssertEqual(235, file.presetIndicesOrderedByBankProgram().size());
+  XCTAssertEqual(7, file.presetIndicesOrderedByBankProgram()[3]);
+  XCTAssertEqual(std::string("Honky-tonk"), file.presets()[7].name());
+  XCTAssertEqual(176, file.presetIndicesOrderedByBankProgram()[200]);
+  XCTAssertEqual(std::string("Castanets"), file.presets()[176].name());
+  XCTAssertEqual(234, file.presetIndicesOrderedByBankProgram()[file.presets().size() - 1]);
+  XCTAssertEqual(std::string("SFX"), file.presets()[234].name());
+
+  file.presets()[80].dump("", 80);
 }
 
 - (void)testParsing2 {
@@ -56,6 +66,15 @@ using namespace SF2::Render::Voice::Sample;
   XCTAssertEqual(18942, file.instrumentZoneGenerators().size());
   XCTAssertEqual(2151, file.instrumentZoneModulators().size());
   XCTAssertEqual(864, file.sampleHeaders().size());
+
+  XCTAssertEqual(270, file.presetIndicesOrderedByBankProgram().size());
+  XCTAssertEqual(81, file.presetIndicesOrderedByBankProgram()[3]);
+  XCTAssertEqual(std::string("Honky-Tonk"), file.presets()[81].name());
+  XCTAssertEqual(117, file.presetIndicesOrderedByBankProgram()[200]);
+  XCTAssertEqual(std::string("Melodic Tom 2"), file.presets()[117].name());
+  XCTAssertEqual(69, file.presetIndicesOrderedByBankProgram()[file.presets().size() - 1]);
+  XCTAssertEqual(std::string("SFX"), file.presets()[69].name());
+  // file.presets()[69].dump("", 69);
 }
 
 - (void)testParsing3 {
@@ -71,6 +90,11 @@ using namespace SF2::Render::Voice::Sample;
   XCTAssertEqual(0, file.instrumentZoneModulators().size());
   XCTAssertEqual(24, file.sampleHeaders().size());
 
+  XCTAssertEqual(1, file.presetIndicesOrderedByBankProgram().size());
+  XCTAssertEqual(0, file.presetIndicesOrderedByBankProgram()[0]);
+  XCTAssertEqual(std::string("Nice Piano"), file.presets()[0].name());
+  // file.presets()[0].dump("", 0);
+
   auto samples = file.sampleSourceCollection()[0];
   samples.load();
   XCTAssertEqual(samples.size(), 115504);
@@ -83,7 +107,7 @@ using namespace SF2::Render::Voice::Sample;
   auto samples = file.sampleSourceCollection()[0];
   samples.load();
 
-  Float epsilon = 1e-6;
+  Float epsilon = 1e-12;
 
   off_t sampleOffset = 246;
   XCTAssertEqual(samples.size(), 115504);

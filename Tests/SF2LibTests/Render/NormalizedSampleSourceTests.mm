@@ -66,7 +66,6 @@ static SF2::Float epsilon = 1e-6;
   State::State state{100, channelState};
   Sample::Generator gen{Sample::Generator::Interpolator::linear};
   NormalizedSampleSource source{values, header};
-  source.load();
   gen.configure(source, state);
   Sample::Pitch pitch{state};
   pitch.configure(source.header());
@@ -85,8 +84,6 @@ static SF2::Float epsilon = 1e-6;
   [self measureBlock:^{
     for (size_t index = 0; index < sampleEntries; ++index) {
       auto samples = file.sampleSourceCollection()[index];
-      samples.load();
-      samples.unload();
     }
   }];
 }
@@ -99,8 +96,6 @@ static SF2::Float epsilon = 1e-6;
   [self measureBlock:^{
     for (size_t index = 0; index < sampleEntries; ++index) {
       auto samples = file.sampleSourceCollection()[index];
-      samples.load();
-      samples.unload();
     }
   }];
 }
@@ -113,8 +108,6 @@ static SF2::Float epsilon = 1e-6;
   [self measureBlock:^{
     for (size_t index = 0; index < sampleEntries; ++index) {
       auto samples = file.sampleSourceCollection()[index];
-      samples.load();
-      samples.unload();
     }
   }];
 }

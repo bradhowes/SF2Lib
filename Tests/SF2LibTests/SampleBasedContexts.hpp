@@ -7,7 +7,7 @@
 #include <XCTest/XCTest.h>
 
 #include "SF2Lib/IO/File.hpp"
-#include "SF2Lib/Render/Engine/PresetCollection.hpp"
+#include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Preset.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
 
@@ -75,7 +75,12 @@ struct PresetTestContextBase
     presets_.build(file_);
   }
 
-  const SF2::Render::Preset& preset(int presetIndex) const { return presets_[presetIndex]; }
+  const SF2::Render::Preset& preset(int presetIndex) const {
+    const auto& p{presets_[presetIndex].configuration()};
+    std::cout << "Using preset: " << presetIndex << " " << p.name() << " " << p.bank() << "/" << p.program()
+    << " " << url_.path.UTF8String << std::endl;
+    return presets_[presetIndex];
+  }
 
   TestVoiceCollection makeVoiceCollection(int presetIndex, int midiNote, int midiVelocity) {
     channelState_.reset();
@@ -111,7 +116,7 @@ struct PresetTestContextBase
 
   NSURL* url_;
   SF2::IO::File file_;
-  SF2::Render::Engine::PresetCollection presets_;
+  SF2::Render::PresetCollection presets_;
   SF2::MIDI::ChannelState channelState_;
   SF2::Float sampleRate_;
 };
@@ -146,6 +151,7 @@ struct SampleBasedContexts {
 @property (nonatomic, retain) XCTestExpectation* playedAudioExpectation;
 @property (nonatomic, retain) NSURL* audioFileURL;
 @property (nonatomic, retain) AVAudioPCMBuffer* buffer;
+@property (nonatomic) bool deleteFile;
 
 - (void)playSamples:(AVAudioPCMBuffer*)buffer count:(int)sampleCount;
 

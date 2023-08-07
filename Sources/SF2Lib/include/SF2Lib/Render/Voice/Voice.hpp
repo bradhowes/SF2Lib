@@ -166,8 +166,8 @@ public:
     // Capture the current state of the modulators and envelopes.
     auto modLFO = modulatorLFO_.getNextValue();
     auto vibLFO = vibratoLFO_.getNextValue();
-    auto modEnv = modulatorEnvelope_.getNextValue();
     auto volEnv = gainEnvelope_.getNextValue();
+    auto modEnv = modulatorEnvelope_.getNextValue();
 
     // According to FluidSynth this is the right thing to do.
     if (gainEnvelope_.isDelayed()) return 0.0;

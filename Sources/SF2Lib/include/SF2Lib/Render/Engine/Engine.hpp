@@ -14,7 +14,7 @@
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Engine/OldestActiveVoiceCache.hpp"
-#include "SF2Lib/Render/Engine/PresetCollection.hpp"
+#include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
 
 namespace SF2::IO { class File; }
@@ -90,7 +90,9 @@ public:
   bool hasActivePreset() const { return activePreset_ < presets_.size(); }
 
   /// @returns name of the active preset or empty string if none is active
-  std::string activePresetName() const noexcept { return hasActivePreset() ? presets_[activePreset_].name() : ""; }
+  std::string activePresetName() const noexcept {
+    return hasActivePreset() ? presets_[activePreset_].configuration().name() : "";
+  }
 
   /**
    Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
@@ -131,7 +133,7 @@ public:
    @param bank the bank to use
    @param program the program in the bank to use
    */
-  void usePreset(int bank, int program) {
+  void usePreset(uint16_t bank, uint16_t program) {
     setBypass(true);
     allOff();
     auto index = presets_.locatePresetIndex(bank, program);
@@ -314,7 +316,7 @@ private:
   }
 
   void processControlChange(MIDI::ControlChange cc) noexcept;
-  void changeProgram(int program) noexcept;
+  void changeProgram(uint16_t program) noexcept;
   void loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept;
 
   Float sampleRate_;

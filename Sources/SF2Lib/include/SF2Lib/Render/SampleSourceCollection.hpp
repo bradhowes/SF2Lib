@@ -9,27 +9,38 @@
 
 namespace SF2::Render {
 
+/**
+ Collection of all of the SampleHeader entities from a SoundFont
+ */
 class SampleSourceCollection
 {
 public:
   using SampleHeader = Entity::SampleHeader;
   using Key = uint64_t;
 
-  void add(const SampleHeader& header, const int16_t* rawSamples)
+  explicit SampleSourceCollection(const IO::ChunkItems<Entity::SampleHeader>& sampleHeaders) noexcept
+  : sampleHeaders_{sampleHeaders}
   {
-    headers_.push_back(header);
-    auto key{makeKey(header)};
-    auto found = collection_.find(key);
-    if (found == collection_.end()) {
-      auto [it, ok] = collection_.emplace(key, Voice::Sample::NormalizedSampleSource{rawSamples, header});
-      if (!ok) throw std::runtime_error("failed to insert sample source");
+    
+  }
+
+  void build(const int16_t* rawSamples)
+  {
+    for (const auto& header : sampleHeaders_) {
+      auto key{makeKey(header)};
+      auto found = collection_.find(key);
+      if (found == collection_.end()) {
+        auto [it, ok] = collection_.emplace(key, Voice::Sample::NormalizedSampleSource{rawSamples, header});
+        if (!ok) throw std::runtime_error("failed to insert sample source");
+      }
     }
   }
 
+
   const Voice::Sample::NormalizedSampleSource& operator[](size_t index) const
   {
-    if (index >= headers_.size()) throw std::runtime_error("invalid header index");
-    auto found = collection_.find(makeKey(headers_[index]));
+    const auto& header = sampleHeaders_[index];
+    auto found = collection_.find(makeKey(header));
     if (found == collection_.end()) throw std::runtime_error("failed to locate sample source");
     return found->second;
   }
@@ -37,11 +48,11 @@ public:
 private:
 
   Key makeKey(const SampleHeader& header) const noexcept {
-    return uint64_t(header.startIndex()) << 32 | header.endIndex();
+    return static_cast<Key>(header.startIndex()) << 32 | static_cast<Key>(header.endIndex());
   }
 
+  const IO::ChunkItems<Entity::SampleHeader>& sampleHeaders_;
   std::map<Key, Voice::Sample::NormalizedSampleSource> collection_;
-  std::vector<SampleHeader> headers_;
 };
 
 }

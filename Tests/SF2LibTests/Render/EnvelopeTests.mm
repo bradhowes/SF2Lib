@@ -19,7 +19,7 @@ struct EnvelopeTestInjector {
   static Volume DAHDSR(Float delay, Float attack, Float hold, Float decay, int sustain, Float release) {
     return Volume(1.0, 1, delay, attack, hold, decay, sustain, release);
   }
-  template <typename T> static AUValue sustain(const T& gen) { return gen.sustain(); }
+  template <typename T> static AUValue sustain(const T& gen) { return gen.sustainLevel(); }
 };
 }
 
@@ -36,7 +36,7 @@ struct EnvelopeTestInjector {
 }
 
 - (void)testGateOnOff {
-  auto gen = Volume(1);
+  auto gen = EnvelopeTestInjector::DAHDSR(0, 0, 2, 2, 1, 3);
   XCTAssertEqual(0.0, gen.value().val);
   XCTAssertEqual(StageIndex::idle, gen.activeIndex());
   XCTAssertEqual(0.0, gen.getNextValue().val);
@@ -44,13 +44,13 @@ struct EnvelopeTestInjector {
   XCTAssertTrue(!gen.isGated());
   gen.gate(true);
   XCTAssertTrue(gen.isGated());
-  XCTAssertEqual(StageIndex::sustain, gen.activeIndex());
-  XCTAssertEqual(0.0, gen.getNextValue().val);
-  XCTAssertEqual(StageIndex::sustain, gen.activeIndex());
+  XCTAssertEqual(StageIndex::delay, gen.activeIndex());
+  XCTAssertEqual(1.0, gen.getNextValue().val);
+  XCTAssertEqual(StageIndex::hold, gen.activeIndex());
   XCTAssertTrue(gen.isGated());
   gen.gate(false);
   XCTAssertTrue(!gen.isGated());
-  XCTAssertEqual(StageIndex::idle, gen.activeIndex());
+  XCTAssertEqual(StageIndex::release, gen.activeIndex());
 }
 
 - (void)testDelay {
@@ -77,13 +77,15 @@ struct EnvelopeTestInjector {
   XCTAssertEqualWithAccuracy(0.0, gen.getNextValue().val, self.epsilon);
   XCTAssertEqual(StageIndex::delay, gen.activeIndex());
   gen.gate(false);
+  XCTAssertEqual(StageIndex::release, gen.activeIndex());
+  XCTAssertEqualWithAccuracy(0.0, gen.getNextValue().val, self.epsilon);
   XCTAssertEqual(StageIndex::idle, gen.activeIndex());
 }
 
 - (void)testNoDelayNoAttack {
   auto gen = EnvelopeTestInjector::DAHDSR(0, 0, 1, 0, 0, 0);
   gen.gate(true);
-  XCTAssertEqual(StageIndex::hold, gen.activeIndex());
+  XCTAssertEqual(StageIndex::delay, gen.activeIndex());
   XCTAssertEqualWithAccuracy(1.0, gen.getNextValue().val, self.epsilon);
   XCTAssertEqual(StageIndex::sustain, gen.activeIndex());
 }
@@ -91,9 +93,8 @@ struct EnvelopeTestInjector {
 - (void)testAttack {
   auto gen = EnvelopeTestInjector::DAHDSR(0, 10, 0, 0, 0, 0);
   gen.gate(true);
-  XCTAssertEqual(0.0, gen.value().val);
+  XCTAssertEqual(0.1, gen.getNextValue().val);
   XCTAssertEqual(StageIndex::attack, gen.activeIndex());
-  XCTAssertEqualWithAccuracy(0.1, gen.getNextValue().val, self.epsilon);
   XCTAssertEqualWithAccuracy(0.2, gen.getNextValue().val, self.epsilon);
   XCTAssertEqualWithAccuracy(0.3, gen.getNextValue().val, self.epsilon);
   XCTAssertEqualWithAccuracy(0.4, gen.getNextValue().val, self.epsilon);
@@ -102,7 +103,6 @@ struct EnvelopeTestInjector {
   XCTAssertEqualWithAccuracy(0.7, gen.getNextValue().val, self.epsilon);
   XCTAssertEqualWithAccuracy(0.8, gen.getNextValue().val, self.epsilon);
   XCTAssertEqualWithAccuracy(0.9, gen.getNextValue().val, self.epsilon);
-  XCTAssertTrue(gen.isAttack());
   XCTAssertEqualWithAccuracy(1.0, gen.getNextValue().val, self.epsilon);
   XCTAssertFalse(gen.isAttack());
 }
@@ -110,8 +110,6 @@ struct EnvelopeTestInjector {
 - (void)testAttackAborted {
   auto gen = EnvelopeTestInjector::DAHDSR(0, 10, 0, 0, 200, 3);
   gen.gate(true);
-  XCTAssertEqual(0.0, gen.value().val);
-  XCTAssertEqual(StageIndex::attack, gen.activeIndex());
   XCTAssertEqualWithAccuracy(0.1, gen.getNextValue().val, self.epsilon);
   XCTAssertEqualWithAccuracy(0.2, gen.getNextValue().val, self.epsilon);
   XCTAssertEqualWithAccuracy(0.3, gen.getNextValue().val, self.epsilon);
@@ -119,62 +117,62 @@ struct EnvelopeTestInjector {
   gen.gate(false);
   XCTAssertFalse(gen.isAttack());
   XCTAssertEqual(StageIndex::release, gen.activeIndex());
-  XCTAssertEqualWithAccuracy(0.1333333333333, gen.getNextValue().val, self.epsilon);
+  XCTAssertEqualWithAccuracy(0.133333333333, gen.getNextValue().val, self.epsilon);
 }
 
 - (void)testHold {
   auto gen = EnvelopeTestInjector::DAHDSR(0, 0, 3, 0, 200, 0);
   gen.gate(true);
-  XCTAssertEqualWithAccuracy(1.0, gen.value().val, self.epsilon);
-  XCTAssertEqual(StageIndex::hold, gen.activeIndex());
   XCTAssertEqualWithAccuracy(1.0, gen.getNextValue().val, self.epsilon);
+  XCTAssertEqual(StageIndex::hold, gen.activeIndex());
   XCTAssertEqualWithAccuracy(1.0, gen.getNextValue().val, self.epsilon);
   XCTAssertEqualWithAccuracy(0.8, gen.getNextValue().val, self.epsilon);
   XCTAssertEqual(StageIndex::sustain, gen.activeIndex());
 }
 
 - (void)testDecay {
-  auto gen = EnvelopeTestInjector::DAHDSR(0, 0, 0, 5, 500, 0);
+  auto gen = EnvelopeTestInjector::DAHDSR(0, 0, 0, 5, 500, 5);
   gen.gate(true);
-  XCTAssertEqual(StageIndex::decay, gen.activeIndex());
   XCTAssertEqualWithAccuracy(0.9, gen.getNextValue().val, self.epsilon);
+  XCTAssertEqual(StageIndex::decay, gen.activeIndex());
   XCTAssertEqualWithAccuracy(0.8, gen.getNextValue().val, self.epsilon);
   XCTAssertEqualWithAccuracy(0.7, gen.getNextValue().val, self.epsilon);
   XCTAssertEqualWithAccuracy(0.6, gen.getNextValue().val, self.epsilon);
   XCTAssertEqualWithAccuracy(0.5, gen.getNextValue().val, self.epsilon);
   XCTAssertEqual(StageIndex::sustain, gen.activeIndex());
+  XCTAssertEqualWithAccuracy(0.5, gen.getNextValue().val, self.epsilon);
   gen.gate(false);
-  XCTAssertEqual(StageIndex::idle, gen.activeIndex());
+  XCTAssertEqual(StageIndex::release, gen.activeIndex());
+  XCTAssertEqualWithAccuracy(0.4, gen.getNextValue().val, self.epsilon);
 }
 
 - (void)testDecayAborted {
-  auto epsilon = 0.001;
-  auto gen = EnvelopeTestInjector::DAHDSR(0, 0, 0, 5, 500, 0);
+  auto gen = EnvelopeTestInjector::DAHDSR(0, 0, 0, 5, 500, 5);
   gen.gate(true);
+  XCTAssertEqualWithAccuracy(0.9, gen.getNextValue().val, self.epsilon);
   XCTAssertEqual(StageIndex::decay, gen.activeIndex());
-  XCTAssertEqualWithAccuracy(0.9, gen.getNextValue().val, epsilon);
-  XCTAssertEqualWithAccuracy(0.8, gen.getNextValue().val, epsilon);
+  XCTAssertEqualWithAccuracy(0.8, gen.getNextValue().val, self.epsilon);
   gen.gate(false);
-  XCTAssertEqual(StageIndex::idle, gen.activeIndex());
-  XCTAssertEqualWithAccuracy(0.0, gen.getNextValue().val, epsilon);
+  XCTAssertEqual(StageIndex::release, gen.activeIndex());
+  XCTAssertEqualWithAccuracy(0.7, gen.getNextValue().val, self.epsilon);
 }
 
 - (void)testSustain {
   auto gen = EnvelopeTestInjector::DAHDSR(0, 0, 0, 0, 750, 0);
   gen.gate(true);
-  XCTAssertEqual(0.25, gen.value().val);
+  XCTAssertEqual(0.25, gen.getNextValue().val);
   XCTAssertEqual(StageIndex::sustain, gen.activeIndex());
   XCTAssertEqual(0.25, gen.getNextValue().val);
   XCTAssertEqual(0.25, gen.getNextValue().val);
   gen.gate(false);
-  XCTAssertEqual(StageIndex::idle, gen.activeIndex());
+  XCTAssertEqual(StageIndex::release, gen.activeIndex());
 }
 
 - (void)testRelease {
   auto epsilon = 0.001;
   auto gen = EnvelopeTestInjector::DAHDSR(0, 0, 0, 0, 500, 5);
   gen.gate(true);
-  XCTAssertEqual(0.5, gen.value().val);
+  XCTAssertEqualWithAccuracy(0.5, gen.getNextValue().val, epsilon);
   XCTAssertEqual(StageIndex::sustain, gen.activeIndex());
   gen.gate(false);
   XCTAssertEqual(StageIndex::release, gen.activeIndex());
@@ -183,7 +181,7 @@ struct EnvelopeTestInjector {
   XCTAssertEqualWithAccuracy(0.2, gen.getNextValue().val, epsilon);
   XCTAssertEqualWithAccuracy(0.1, gen.getNextValue().val, epsilon);
   XCTAssertEqual(StageIndex::release, gen.activeIndex());
-  XCTAssertEqualWithAccuracy(0.000, gen.getNextValue().val, epsilon);
+  XCTAssertEqualWithAccuracy(0.0, gen.getNextValue().val, epsilon);
   XCTAssertEqual(StageIndex::idle, gen.activeIndex());
 }
 

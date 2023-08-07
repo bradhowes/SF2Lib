@@ -34,7 +34,8 @@ bool PresetTestContextBase::playAudioInTests() {
   CFStringRef uuidStr = CFUUIDCreateString(NULL, uuid);
   assert(uuidStr != NULL);
 
-  NSString* result = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.caf", uuidStr]];
+  NSString* result = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.caf",
+                                                                             uuidStr]];
   assert(result != nil);
 
   CFRelease(uuidStr);
@@ -43,23 +44,37 @@ bool PresetTestContextBase::playAudioInTests() {
   return result;
 }
 
-- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
-  [[NSFileManager defaultManager] removeItemAtPath:[self.audioFileURL path]  error:NULL];
+- (void)cleanup
+{
+  if (self.deleteFile) {
+    [[NSFileManager defaultManager] removeItemAtPath:[self.audioFileURL path]  error:NULL];
+  }
+}
+
+- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag
+{
+  [self cleanup];
   [self.playedAudioExpectation fulfill];
 }
 
-- (void)audioPlayerDecodeErrorDidOccur:(AVAudioPlayer *)player error:(NSError * __nullable)error {
-  [[NSFileManager defaultManager] removeItemAtPath:[self.audioFileURL path]  error:NULL];
+- (void)audioPlayerDecodeErrorDidOccur:(AVAudioPlayer *)player error:(NSError * __nullable)error
+{
+  [self cleanup];
 }
 
 - (void)playSamples:(AVAudioPCMBuffer*)buffer count:(int)sampleCount
 {
-  if (!PresetTestContextBase::playAudioInTests()) return;
+  if (!PresetTestContextBase::playAudioInTests()) {
+    [self cleanup];
+    return;
+  }
 
   buffer.frameLength = sampleCount;
 
   NSError* error = nil;
   self.audioFileURL = [NSURL fileURLWithPath: [self pathForTemporaryFile] isDirectory:NO];
+  NSLog(@"audioFileURL: %@", self.audioFileURL);
+
   NSDictionary* settings = [[buffer format] settings];
   // NSLog(@"%@", [settings description]);
   [settings setValue:0 forKey:@"AVLinearPCMIsNonInterleaved"];
@@ -97,7 +112,8 @@ bool PresetTestContextBase::playAudioInTests() {
   }];
 }
 
-AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount) {
+AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount)
+{
   AVAudioPCMBuffer* buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   AudioBufferList* bufferList = buffer.mutableAudioBufferList;
 
@@ -110,12 +126,14 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount) {
   return buffer;
 }
 
-- (AVAudioPCMBuffer*)allocateBuffer:(SF2::Float)sampleRate numberOfChannels:(int)channels capacity:(int)sampleCount {
+- (AVAudioPCMBuffer*)allocateBuffer:(SF2::Float)sampleRate numberOfChannels:(int)channels capacity:(int)sampleCount
+{
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:channels];
   return makeBuffer(format, sampleCount);
 }
 
-- (AVAudioPCMBuffer*)allocateBufferFor:(const TestVoiceCollection&)voices capacity:(int)sampleCount {
+- (AVAudioPCMBuffer*)allocateBufferFor:(const TestVoiceCollection&)voices capacity:(int)sampleCount
+{
   int channelCount = int(voices.count());
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:voices.sampleRate()
                                                                          channels:channelCount];
@@ -202,7 +220,8 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount) {
 
 @implementation AVAudioPCMBuffer(Accessors)
 
-- (void)normalize:(size_t)voices {
+- (void)normalize:(size_t)voices
+{
   for (int channel = 0; channel < self.format.channelCount; ++channel) {
     auto count = self.mutableAudioBufferList->mBuffers[channel].mDataByteSize / sizeof(AUValue);
     auto ptr = (AUValue*)(self.mutableAudioBufferList->mBuffers[channel].mData);

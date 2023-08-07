@@ -61,11 +61,11 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   engine.usePreset(1);
   XCTAssertTrue(engine.hasActivePreset());
   std::cout << engine.activePresetName() << '\n';
-  XCTAssertEqual("Piano 1", engine.activePresetName());
+  XCTAssertEqual("Piano 2", engine.activePresetName());
   engine.usePreset(2);
   XCTAssertTrue(engine.hasActivePreset());
   std::cout << engine.activePresetName() << '\n';
-  XCTAssertEqual("Piano 1d", engine.activePresetName());
+  XCTAssertEqual("Piano 3", engine.activePresetName());
   engine.usePreset(9999);
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqual("", engine.activePresetName());
@@ -248,7 +248,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  [self playSamples: dryBuffer count: sampleCount];
+  // [self playSamples: dryBuffer count: sampleCount];
   // [self playSamples: chorusBuffer count: sampleCount];
 }
 
@@ -277,7 +277,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   engine.load(contexts.context0.file(), 1);
   NSString* name = [NSString stringWithCString:engine.activePresetName().c_str() encoding:NSUTF8StringEncoding];
   NSLog(@"name: |%@|", name);
-  XCTAssertTrue([name isEqualToString:@"Piano 1"]);
+  XCTAssertTrue([name isEqualToString:@"Piano 2"]);
   EngineTestInjector eti;
   eti.testChangeProgram(engine, 2);
   name = [NSString stringWithCString:engine.activePresetName().c_str() encoding:NSUTF8StringEncoding];

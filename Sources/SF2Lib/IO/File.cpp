@@ -69,11 +69,19 @@ File::load()
     return LoadResponse::invalidFormat;
   }
 
-  for (const auto& header : sampleHeaders_) {
-    sampleSourceCollection_.add(header, rawSamples_.data());
-  }
-
   assert(!rawSamples_.empty());
+
+  // Create a indirection index that provides the presets ordered by bank/program ordering.
+  presetIndicesOrderedByBankProgram_.resize(presets_.size());
+  std::iota(presetIndicesOrderedByBankProgram_.begin(), presetIndicesOrderedByBankProgram_.end(), 0);
+  std::sort(presetIndicesOrderedByBankProgram_.begin(), presetIndicesOrderedByBankProgram_.end(),
+            [&](size_t aIndex, size_t bIndex) {
+    return presets_[aIndex] < presets_[bIndex];
+  });
+
+  // Build the collection of normalized samples.
+  sampleSourceCollection_.build(rawSamples_.data());
+
   return LoadResponse::ok;
 }
 

@@ -40,7 +40,6 @@ public:
   const Instrument& operator[](size_t index) const noexcept { return checkedVectorIndexing(instruments_, index); }
 
 private:
-
   std::vector<Instrument> instruments_{};
 };
 

@@ -32,15 +32,6 @@ public:
    */
   Preset(const IO::File& file, const InstrumentCollection& instruments, const Entity::Preset& config) noexcept;
 
-  /// Obtain the preset name.
-  std::string name() const noexcept { return configuration().name(); }
-
-  /// Obtain the preset bank number
-  int bank() const noexcept { return configuration().bank(); }
-
-  /// Obtain the preset program number
-  int program() const noexcept { return configuration().program(); }
-
   /**
    Locate preset/instrument zones for the given key/velocity values. There can be more than one match, often due to
    separate left/right channels for rendering. Each match will require its own Voice for rendering.

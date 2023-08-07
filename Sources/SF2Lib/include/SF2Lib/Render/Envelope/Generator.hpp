@@ -112,12 +112,11 @@ public:
    */
   void gate(bool noteOn) noexcept {
     if (noteOn) {
-      counter_ = 0;
-      value_ = 0.0;
       enterStage(StageIndex::delay);
     } else if (stageIndex_ != StageIndex::idle) {
-      // NOTE: we need to recalculate the duration of the release stage if the value is lower than the sustain level
+      auto value = value_;
       enterStage(StageIndex::release);
+      value_ = value;
     }
   }
 
@@ -138,9 +137,10 @@ public:
   /// @returns true if the generator is active and has not yet reached the release state
   bool isGated() const noexcept { return isActive() && stageIndex_ != StageIndex::release; }
 
-  /// @returns true if the generate is in the delayed state
+  /// @returns true if in the delayed stage
   bool isDelayed() const noexcept { return stageIndex_ == StageIndex::delay; }
 
+  /// @returns true if in the attack stage
   bool isAttack() const noexcept { return stageIndex_ == StageIndex::attack; }
 
   /// @returns the current envelope value.
@@ -152,18 +152,31 @@ public:
    @returns the new envelope value.
    */
   Value getNextValue() noexcept {
-    switch (stageIndex_) {
-      case StageIndex::delay: checkIfEndStage(StageIndex::attack); break;
-      case StageIndex::attack: updateValue(); checkIfEndStage(StageIndex::hold); break;
-      case StageIndex::hold: checkIfEndStage(StageIndex::decay); break;
-      case StageIndex::decay: updateValue(); checkIfEndStage(StageIndex::sustain); break;
-      case StageIndex::release: updateValue(); checkIfEndStage(StageIndex::idle); break;
-      default: break;
+    while (--counter_ <= 0) {
+      switch (stageIndex_) {
+        case StageIndex::delay: enterStage(StageIndex::attack); break;
+        case StageIndex::attack: enterStage(StageIndex::hold); break;
+        case StageIndex::hold: enterStage(StageIndex::decay); break;
+        case StageIndex::decay: enterStage(StageIndex::sustain); break;
+        case StageIndex::sustain: enterStage(StageIndex::release); break;
+        case StageIndex::release: enterStage(StageIndex::idle); return Value(0.0);
+        case StageIndex::idle: return Value(0.0);
+      }
     }
-    return value();
+
+    value_ = stages_[stageIndex_].next(value_);
+    return Value(value_);
   }
 
 private:
+
+  void enterStage(StageIndex next) noexcept {
+    stageIndex_ = next;
+    if (next != StageIndex::idle) {
+      counter_ = stages_[stageIndex_].durationInSamples();
+      value_ = stages_[stageIndex_].initial();
+    }
+  }
 
   /**
    Create new envelope for volume changes over time.
@@ -231,31 +244,7 @@ private:
     gate(true);
   }
 
-  inline static constexpr Float lowerBoundTimecents = -12'000.0;
-
-  static inline Float delayTimecentsToSeconds(Float value) noexcept {
-    return (value <= -32768.0) ? 0.0 : DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5000.0));
-  }
-
-  inline Float attackTimecentsToSeconds(Float value) noexcept {
-    return (value <= -32768.0) ? 0.0 : DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 8000.0));
-  }
-
-  inline Float holdTimecentsToSeconds(Float value) noexcept {
-    return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5000.0));
-  }
-
-  inline Float decayTimecentsToSeconds(Float value) noexcept {
-    return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 8000.0));
-  }
-
-  inline Float releaseTimecentsToSeconds(Float value) noexcept {
-    return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5000.0));
-  }
-
-  Float sustain() const noexcept { return stages_[StageIndex::sustain].initial(); }
-
-  const Stage& activeStage() const noexcept { return stages_[stageIndex_]; }
+  Float sustainLevel() const noexcept { return stages_[StageIndex::sustain].initial(); }
 
   /// NOTE: only used for testing via EnvelopeTestInjector
   Generator(Float sampleRate, size_t voiceIndex, Float delay, Float attack, Float hold, Float decay,
@@ -271,23 +260,45 @@ private:
     stages_[StageIndex::release].setRelease(int(round(sampleRate * release)), normSustain);
   }
 
+  static constexpr Float lowerBoundTimecents = -12'000.0;
+
+  static constexpr Float delayTimecentsToSeconds(Float value) noexcept {
+    return (value <= -32768.0) ? 0.0 : DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5000.0));
+  }
+
+  static constexpr Float attackTimecentsToSeconds(Float value) noexcept {
+    return (value <= -32768.0) ? 0.0 : DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 8000.0));
+  }
+
+  static constexpr Float holdTimecentsToSeconds(Float value) noexcept {
+    return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5000.0));
+  }
+
+  static constexpr Float decayTimecentsToSeconds(Float value) noexcept {
+    return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 8000.0));
+  }
+
+  static constexpr Float releaseTimecentsToSeconds(Float value) noexcept {
+    return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5000.0));
+  }
+
   /// @returns the adjustment to the volume envelope's hold stage timing based on the MIDI key event
-  static Float midiKeyVolumeEnvelopeHoldAdjustment(const State& state) noexcept {
+  static constexpr Float midiKeyVolumeEnvelopeHoldAdjustment(const State& state) noexcept {
     return midiKeyEnvelopeScaling(state, Index::midiKeyToVolumeEnvelopeHold);
   }
 
   /// @returns the adjustment to the volume envelope's decay stage timing based on the MIDI key event
-  static Float midiKeyVolumeEnvelopeDecayAdjustment(const State& state) noexcept {
+  static constexpr Float midiKeyVolumeEnvelopeDecayAdjustment(const State& state) noexcept {
     return midiKeyEnvelopeScaling(state, Index::midiKeyToVolumeEnvelopeDecay);
   }
 
   /// @returns the adjustment to the modulator envelope's hold stage timing based on the MIDI key event
-  static Float midiKeyModulatorEnvelopeHoldAdjustment(const State& state) noexcept {
+  static constexpr Float midiKeyModulatorEnvelopeHoldAdjustment(const State& state) noexcept {
     return midiKeyEnvelopeScaling(state, Index::midiKeyToModulatorEnvelopeHold);
   }
 
   /// @returns the adjustment to the modulator envelope's decay stage timing based on the MIDI key event
-  static Float midiKeyModulatorEnvelopeDecayAdjustment(const State& state) noexcept {
+  static constexpr Float midiKeyModulatorEnvelopeDecayAdjustment(const State& state) noexcept {
     return midiKeyEnvelopeScaling(state, Index::midiKeyToModulatorEnvelopeDecay);
   }
 
@@ -298,7 +309,7 @@ private:
    @param gen the generator holding the timecents/semitone scaling factor
    @returns result of generator value x (60 - key)
    */
-  static Float midiKeyEnvelopeScaling(const State& state, Index gen) noexcept {
+  static constexpr Float midiKeyEnvelopeScaling(const State& state, Index gen) noexcept {
     assert(gen == Index::midiKeyToVolumeEnvelopeHold ||
            gen == Index::midiKeyToVolumeEnvelopeDecay ||
            gen == Index::midiKeyToModulatorEnvelopeHold ||
@@ -309,7 +320,7 @@ private:
   }
 
   /// @returns the sustain level for the modulator envelope
-  static Float modEnvSustain(const State& state) noexcept {
+  static constexpr Float modEnvSustain(const State& state) noexcept {
     /**
      Spec 8.1.2 sustainModEnv
 
@@ -327,7 +338,7 @@ private:
   }
 
   /// @returns the sustain level for the volume envelope (gain)
-  static Float volEnvSustain(const State& state) noexcept {
+  static constexpr Float volEnvSustain(const State& state) noexcept {
     /**
      Spec 8.1.2 sustainVolEnv
 
@@ -349,57 +360,8 @@ private:
    @param seconds the amount of time to use in the calculation represented in timecents
    @returns the number of samples
    */
-  int samplesFor(Float sampleRate, Float seconds) noexcept {
-    auto samples = int(round(sampleRate * seconds));
-    return samples;
-  }
-
-  Float sustainLevel() const noexcept { return stages_[StageIndex::sustain].initial(); }
-
-  void updateValue() noexcept { value_ = activeStage().next(value_); }
-
-  void checkIfEndStage(StageIndex next) noexcept { if (--counter_ <= 0) enterStage(next); }
-
-  int activeDurationInSamples() const noexcept { return activeStage().durationInSamples(); }
-
-  void enterStage(StageIndex next) noexcept {
-    stageIndex_ = next;
-
-    // NOTE: if a stage has no duration then we move to the next one by falling thru some of the cases.
-    switch (next) {
-      case StageIndex::delay:
-        if (activeDurationInSamples()) break;
-        stageIndex_ = StageIndex::attack;
-
-      case StageIndex::attack:
-        value_ = activeStage().initial();
-        if (activeDurationInSamples()) break;
-        stageIndex_ = StageIndex::hold;
-
-      case StageIndex::hold:
-        value_ = activeStage().initial();
-        if (activeDurationInSamples()) break;
-        stageIndex_ = StageIndex::decay;
-
-      case StageIndex::decay:
-        value_ = activeStage().initial();
-        if (activeDurationInSamples()) break;
-        stageIndex_ = StageIndex::sustain;
-
-      case StageIndex::sustain:
-        value_ = activeStage().initial();
-        break;
-
-      case StageIndex::release:
-        if (activeDurationInSamples()) break;
-        stageIndex_ = StageIndex::idle;
-
-      case StageIndex::idle:
-        value_ = 0.0;
-        return;
-    }
-
-    counter_ = activeDurationInSamples();
+  static constexpr int samplesFor(Float sampleRate, Float seconds) noexcept {
+    return int(round(sampleRate * seconds));
   }
 
   Stages stages_{};
