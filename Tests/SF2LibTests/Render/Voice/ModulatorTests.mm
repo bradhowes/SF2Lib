@@ -25,7 +25,7 @@ using namespace SF2::Entity::Generator;
 @implementation ModulatorTests
 
 - (void)setUp {
-  epsilon = 1.0e-3f;
+  epsilon = PresetTestContextBase::epsilonValue();
   channelState = new MIDI::ChannelState();
   state = new State::State(44100.0, *channelState);
 }

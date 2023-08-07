@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iomanip>
 
+#include "SampleBasedContexts.hpp"
 #include "DSPHeaders/ConstMath.hpp"
 #include "DSPHeaders/DSP.hpp"
 #include "SF2Lib/DSP.hpp"
@@ -13,18 +14,15 @@ using namespace DSPHeaders::DSP;
 using namespace SF2;
 using namespace SF2::DSP;
 
-@interface DSPTests : XCTestCase
-@property (nonatomic, assign) SF2::Float epsilon;
+@interface DSPTests : XCTestCase {
+  SF2::Float epsilon;
+}
 @end
 
 @implementation DSPTests
 
 - (void)setUp {
-  if constexpr (std::is_same_v<Float, float>) {
-    self.epsilon = 1.0e-6;
-  } else {
-    self.epsilon = 1.0e-12;
-  }
+  epsilon = PresetTestContextBase::epsilonValue();
 }
 
 - (void)tearDown {
@@ -73,47 +71,47 @@ using namespace SF2::DSP;
   //std::cout << std::setprecision(18) << centsPartialLookup(1199) << '\n';
 
   SF2::DSP::panLookup(-501, left, right);
-  XCTAssertEqualWithAccuracy(1.0, left, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0, right, self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0, left, epsilon);
+  XCTAssertEqualWithAccuracy(0.0, right, epsilon);
   
   SF2::DSP::panLookup(-500, left, right);
-  XCTAssertEqualWithAccuracy(1.0, left, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0, right, self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0, left, epsilon);
+  XCTAssertEqualWithAccuracy(0.0, right, epsilon);
   
   SF2::DSP::panLookup(-100, left, right);
   std::cout << std::setprecision(18) << left << '\n';
-  XCTAssertEqualWithAccuracy(0.809016994375, left, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.587785252292, right, self.epsilon);
+  XCTAssertEqualWithAccuracy(0.809016994375, left, epsilon);
+  XCTAssertEqualWithAccuracy(0.587785252292, right, epsilon);
   
   SF2::DSP::panLookup(0, left, right);
-  XCTAssertEqualWithAccuracy(left, right, self.epsilon);
+  XCTAssertEqualWithAccuracy(left, right, epsilon);
   std::cout << std::setprecision(18) << right << '\n';
-  XCTAssertEqualWithAccuracy(0.707106781187, right, self.epsilon);
+  XCTAssertEqualWithAccuracy(0.707106781187, right, epsilon);
 
   SF2::DSP::panLookup(100, left, right);
-  XCTAssertEqualWithAccuracy(0.587785252292, left, self.epsilon);
+  XCTAssertEqualWithAccuracy(0.587785252292, left, epsilon);
   std::cout << std::setprecision(18) << right << '\n';
-  XCTAssertEqualWithAccuracy(0.809016994375, right, self.epsilon);
+  XCTAssertEqualWithAccuracy(0.809016994375, right, epsilon);
   
   SF2::DSP::panLookup(500, left, right);
-  XCTAssertEqualWithAccuracy(0.0, left, self.epsilon);
-  XCTAssertEqualWithAccuracy(1.0, right, self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, left, epsilon);
+  XCTAssertEqualWithAccuracy(1.0, right, epsilon);
   
   SF2::DSP::panLookup(501, left, right);
-  XCTAssertEqualWithAccuracy(0.0, left, self.epsilon);
-  XCTAssertEqualWithAccuracy(1.0, right, self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, left, epsilon);
+  XCTAssertEqualWithAccuracy(1.0, right, epsilon);
 }
 
 - (void)testCentsPartialLookup {
   if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(6.875, centsPartialLookup(0), self.epsilon);
-    XCTAssertEqualWithAccuracy(9.722718241315, centsPartialLookup(600), self.epsilon);
-    XCTAssertEqualWithAccuracy(13.742059989514, centsPartialLookup(1199), self.epsilon);
+    XCTAssertEqualWithAccuracy(6.875, centsPartialLookup(0), epsilon);
+    XCTAssertEqualWithAccuracy(9.722718241315, centsPartialLookup(600), epsilon);
+    XCTAssertEqualWithAccuracy(13.742059989514, centsPartialLookup(1199), epsilon);
   } else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(6.875, centsPartialLookup(0), self.epsilon);
-    XCTAssertEqualWithAccuracy(9.722718241315, centsPartialLookup(600), self.epsilon);
+    XCTAssertEqualWithAccuracy(6.875, centsPartialLookup(0), epsilon);
+    XCTAssertEqualWithAccuracy(9.722718241315, centsPartialLookup(600), epsilon);
     //std::cout << std::setprecision(18) << centsPartialLookup(1199) << '\n';
-    XCTAssertEqualWithAccuracy(13.7420599819439833, centsPartialLookup(1199), self.epsilon);
+    XCTAssertEqualWithAccuracy(13.7420599819439833, centsPartialLookup(1199), epsilon);
   }
 }
 
@@ -128,60 +126,60 @@ using namespace SF2::DSP;
 
 - (void)testCentToFrequency {
   if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(1.0, centsToFrequency(-1), self.epsilon); // A0
-    XCTAssertEqualWithAccuracy(8.1757989156437, centsToFrequency(0), self.epsilon); // A0
-    XCTAssertEqualWithAccuracy(55.0, centsToFrequency(3300), self.epsilon); // A1
-    XCTAssertEqualWithAccuracy(110.0, centsToFrequency(4500), self.epsilon); // A2
-    XCTAssertEqualWithAccuracy(220.0, centsToFrequency(5700), self.epsilon); // A3
+    XCTAssertEqualWithAccuracy(1.0, centsToFrequency(-1), epsilon); // A0
+    XCTAssertEqualWithAccuracy(8.1757989156437, centsToFrequency(0), epsilon); // A0
+    XCTAssertEqualWithAccuracy(55.0, centsToFrequency(3300), epsilon); // A1
+    XCTAssertEqualWithAccuracy(110.0, centsToFrequency(4500), epsilon); // A2
+    XCTAssertEqualWithAccuracy(220.0, centsToFrequency(5700), epsilon); // A3
     // std::cout << std::setprecision(18) << centsToFrequency(6400) << '\n';
-    XCTAssertEqualWithAccuracy(329.6275634765625, centsToFrequency(6400), self.epsilon); // C4
-    XCTAssertEqualWithAccuracy(440.0, centsToFrequency(6900), self.epsilon); // A4
-    XCTAssertEqualWithAccuracy(880.0, centsToFrequency(8100), self.epsilon); // A5
-    XCTAssertEqualWithAccuracy(1760.0, centsToFrequency(9300), self.epsilon); // A6
-    XCTAssertEqualWithAccuracy(3520.0, centsToFrequency(10500), self.epsilon); // A7
+    XCTAssertEqualWithAccuracy(329.6275634765625, centsToFrequency(6400), epsilon); // C4
+    XCTAssertEqualWithAccuracy(440.0, centsToFrequency(6900), epsilon); // A4
+    XCTAssertEqualWithAccuracy(880.0, centsToFrequency(8100), epsilon); // A5
+    XCTAssertEqualWithAccuracy(1760.0, centsToFrequency(9300), epsilon); // A6
+    XCTAssertEqualWithAccuracy(3520.0, centsToFrequency(10500), epsilon); // A7
     // std::cout << std::setprecision(18) << centsToFrequency(10800) << '\n';
-    XCTAssertEqualWithAccuracy(4186.0087890625, centsToFrequency(10800), self.epsilon); // C8
+    XCTAssertEqualWithAccuracy(4186.0087890625, centsToFrequency(10800), epsilon); // C8
   } else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(1.0, centsToFrequency(-1), self.epsilon); // A0
-    XCTAssertEqualWithAccuracy(8.1757989156437, centsToFrequency(0), self.epsilon); // A0
-    XCTAssertEqualWithAccuracy(55.0, centsToFrequency(3300), self.epsilon); // A1
-    XCTAssertEqualWithAccuracy(110.0, centsToFrequency(4500), self.epsilon); // A2
-    XCTAssertEqualWithAccuracy(220.0, centsToFrequency(5700), self.epsilon); // A3
-    XCTAssertEqualWithAccuracy(329.62755691286992, centsToFrequency(6400), self.epsilon); // C4
-    XCTAssertEqualWithAccuracy(440.0, centsToFrequency(6900), self.epsilon); // A4
-    XCTAssertEqualWithAccuracy(880.0, centsToFrequency(8100), self.epsilon); // A5
-    XCTAssertEqualWithAccuracy(1760.0, centsToFrequency(9300), self.epsilon); // A6
-    XCTAssertEqualWithAccuracy(3520.0, centsToFrequency(10500), self.epsilon); // A7
-    XCTAssertEqualWithAccuracy(4186.009044809578, centsToFrequency(10800), self.epsilon); // C8
+    XCTAssertEqualWithAccuracy(1.0, centsToFrequency(-1), epsilon); // A0
+    XCTAssertEqualWithAccuracy(8.1757989156437, centsToFrequency(0), epsilon); // A0
+    XCTAssertEqualWithAccuracy(55.0, centsToFrequency(3300), epsilon); // A1
+    XCTAssertEqualWithAccuracy(110.0, centsToFrequency(4500), epsilon); // A2
+    XCTAssertEqualWithAccuracy(220.0, centsToFrequency(5700), epsilon); // A3
+    XCTAssertEqualWithAccuracy(329.62755691286992, centsToFrequency(6400), epsilon); // C4
+    XCTAssertEqualWithAccuracy(440.0, centsToFrequency(6900), epsilon); // A4
+    XCTAssertEqualWithAccuracy(880.0, centsToFrequency(8100), epsilon); // A5
+    XCTAssertEqualWithAccuracy(1760.0, centsToFrequency(9300), epsilon); // A6
+    XCTAssertEqualWithAccuracy(3520.0, centsToFrequency(10500), epsilon); // A7
+    XCTAssertEqualWithAccuracy(4186.009044809578, centsToFrequency(10800), epsilon); // C8
  }
 }
 
 - (void)testCentibelsToAttenuationLookup {
-  XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuation(-1), self.epsilon);
-  XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuation(0), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.891250938134, centibelsToAttenuation(10), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.881048873008, centibelsToAttenuation(11), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.316227766017, centibelsToAttenuation(100), self.epsilon);
-  XCTAssertEqualWithAccuracy(1e-05, centibelsToAttenuation(1000), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0, centibelsToAttenuation(1440), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0, centibelsToAttenuation(1441), self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuation(-1), epsilon);
+  XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuation(0), epsilon);
+  XCTAssertEqualWithAccuracy(0.891250938134, centibelsToAttenuation(10), epsilon);
+  XCTAssertEqualWithAccuracy(0.881048873008, centibelsToAttenuation(11), epsilon);
+  XCTAssertEqualWithAccuracy(0.316227766017, centibelsToAttenuation(100), epsilon);
+  XCTAssertEqualWithAccuracy(1e-05, centibelsToAttenuation(1000), epsilon);
+  XCTAssertEqualWithAccuracy(0.0, centibelsToAttenuation(1440), epsilon);
+  XCTAssertEqualWithAccuracy(0.0, centibelsToAttenuation(1441), epsilon);
 }
 
 - (void)testAttenuationLookup {
-  XCTAssertEqualWithAccuracy(1.0, DSP::AttenuationLookup::query(0), self.epsilon);
-  XCTAssertEqualWithAccuracy(6.3095734448e-08, DSP::AttenuationLookup::query(MaximumAttenuationCentiBels), self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0, DSP::AttenuationLookup::query(0), epsilon);
+  XCTAssertEqualWithAccuracy(6.3095734448e-08, DSP::AttenuationLookup::query(MaximumAttenuationCentiBels), epsilon);
 }
 
 - (void)testCentibelsToAttenuattionInterpolated {
-  XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuationInterpolated(-1.0), self.epsilon);
-  XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuationInterpolated(0.0), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.891250938134, centibelsToAttenuationInterpolated(10.0), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.886149905571, centibelsToAttenuationInterpolated(10.5), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.881048873008, centibelsToAttenuationInterpolated(11.0), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.316227766017, centibelsToAttenuationInterpolated(100.0), self.epsilon);
-  XCTAssertEqualWithAccuracy(1e-05, centibelsToAttenuationInterpolated(1000.0), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0, centibelsToAttenuationInterpolated(1440.0), self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0, centibelsToAttenuationInterpolated(1441.0), self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuationInterpolated(-1.0), epsilon);
+  XCTAssertEqualWithAccuracy(1.0, centibelsToAttenuationInterpolated(0.0), epsilon);
+  XCTAssertEqualWithAccuracy(0.891250938134, centibelsToAttenuationInterpolated(10.0), epsilon);
+  XCTAssertEqualWithAccuracy(0.886149905571, centibelsToAttenuationInterpolated(10.5), epsilon);
+  XCTAssertEqualWithAccuracy(0.881048873008, centibelsToAttenuationInterpolated(11.0), epsilon);
+  XCTAssertEqualWithAccuracy(0.316227766017, centibelsToAttenuationInterpolated(100.0), epsilon);
+  XCTAssertEqualWithAccuracy(1e-05, centibelsToAttenuationInterpolated(1000.0), epsilon);
+  XCTAssertEqualWithAccuracy(0.0, centibelsToAttenuationInterpolated(1440.0), epsilon);
+  XCTAssertEqualWithAccuracy(0.0, centibelsToAttenuationInterpolated(1441.0), epsilon);
 }
 
 - (void)testTenthPercentage {

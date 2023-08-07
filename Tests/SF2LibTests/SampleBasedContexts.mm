@@ -44,6 +44,11 @@ bool PresetTestContextBase::playAudioInTests() {
   return result;
 }
 
+- (void)setUp
+{
+  self.deleteFile = true;
+}
+
 - (void)cleanup
 {
   if (self.deleteFile) {

@@ -4,16 +4,22 @@
 
 #include <XCTest/XCTest.h>
 
+#include "../SampleBasedContexts.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/MIDI/MIDI.hpp"
 
 using namespace SF2::MIDI;
 
-@interface ChannelStateTests : XCTestCase
-@property (nonatomic, assign) SF2::Float epsilon;
+@interface ChannelStateTests : XCTestCase {
+  SF2::Float epsilon;
+}
 @end
 
 @implementation ChannelStateTests
+
+- (void)setUp {
+  epsilon = PresetTestContextBase::epsilonValue();
+}
 
 - (void)testInit {
   ChannelState channel;

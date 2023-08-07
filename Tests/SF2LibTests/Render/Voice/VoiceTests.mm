@@ -1,14 +1,11 @@
 // Copyright © 2020 Brad Howes. All rights reserved.
 
-#include "SF2Lib/Types.hpp"
-
-static SF2::Float epsilon = 1.0e-8;
-
 #include <AVFoundation/AVFoundation.h>
 #include <iostream>
 
 #include "../../SampleBasedContexts.hpp"
 
+#include "SF2Lib/Types.hpp"
 #include "SF2Lib/Configuration.h"
 #include "SF2Lib/Render/Preset.hpp"
 #include "SF2Lib/Render/Voice/Sample/Generator.hpp"
@@ -17,10 +14,17 @@ static SF2::Float epsilon = 1.0e-8;
 using namespace SF2;
 using namespace SF2::Render;
 
-@interface VoiceTests : SamplePlayingTestCase
+@interface VoiceTests : SamplePlayingTestCase {
+  Float epsilon;
+}
 @end
 
 @implementation VoiceTests
+
+- (void)setUp
+{
+  epsilon = PresetTestContextBase::epsilonValue();
+}
 
 - (void)testVoiceRepeatedRenderGeneratesSameOutputRolandPiano {
   TestVoiceCollection voices{contexts.context2.makeVoiceCollection(0, 69, 127)};

@@ -20,10 +20,12 @@ using namespace SF2::Render::Voice::Sample;
 
 @implementation SFFileTestsObjC {
   SampleBasedContexts* contexts;
+  Float epsilon;
 }
 
 - (void)setUp {
   contexts = new SampleBasedContexts;
+  epsilon = PresetTestContextBase::epsilonValue();
 }
 
 - (void)tearDown {
@@ -106,8 +108,6 @@ using namespace SF2::Render::Voice::Sample;
   const auto& file = contexts->context2.file();
   auto samples = file.sampleSourceCollection()[0];
   samples.load();
-
-  Float epsilon = 1e-12;
 
   off_t sampleOffset = 246;
   XCTAssertEqual(samples.size(), 115504);

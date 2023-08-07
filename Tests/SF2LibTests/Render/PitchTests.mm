@@ -2,6 +2,7 @@
 
 #include <XCTest/XCTest.h>
 
+#include "../SampleBasedContexts.hpp"
 #include "SF2Lib/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Envelope/Generator.hpp"
 #include "SF2Lib/Render/LFO.hpp"
@@ -23,7 +24,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)setUp {
-  epsilon = 1.0e-7f;
+  epsilon = PresetTestContextBase::epsilonValue();
 }
 
 - (void)testUnity {
