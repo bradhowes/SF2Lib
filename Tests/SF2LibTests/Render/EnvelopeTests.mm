@@ -195,19 +195,19 @@ struct EnvelopeTestInjector {
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 120);
   gen.configure(state);
-  XCTAssertEqualWithAccuracy(0.251189, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.251188635826, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 500);
   gen.configure(state);
-  XCTAssertEqualWithAccuracy(0.003162, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.0031622776296, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 900);
   gen.configure(state);
-  XCTAssertEqualWithAccuracy(0.000032, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(3.16227778967e-05, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 960);
   gen.configure(state);
-  XCTAssertEqualWithAccuracy(0.000016, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(1.58489310706e-05, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 1440);
   gen.configure(state);
@@ -225,7 +225,7 @@ struct EnvelopeTestInjector {
 
   state.setValue(State::State::Index::sustainModulatorEnvelope, 100);
   gen.configure(state);
-  XCTAssertEqualWithAccuracy(0.9, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.899999976158, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainModulatorEnvelope, 500);
   gen.configure(state);
@@ -233,7 +233,7 @@ struct EnvelopeTestInjector {
 
   state.setValue(State::State::Index::sustainModulatorEnvelope, 900);
   gen.configure(state);
-  XCTAssertEqualWithAccuracy(0.1, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.10000000149, EnvelopeTestInjector::sustain(gen), epsilon);
 }
 
 - (void)testKeyToMod {

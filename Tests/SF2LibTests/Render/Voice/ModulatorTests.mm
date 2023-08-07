@@ -44,10 +44,10 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqualWithAccuracy(modulator.value(), 0.0, epsilon);
 
   state->setValue(Index::forcedMIDIVelocity, 64);
-  XCTAssertEqualWithAccuracy(modulator.value(), 119.049498789, epsilon);
+  XCTAssertEqualWithAccuracy(modulator.value(), 119.049498788827904, epsilon);
 
   state->setValue(Index::forcedMIDIVelocity, 1);
-  XCTAssertEqualWithAccuracy(modulator.value(), 841.521488382, epsilon);
+  XCTAssertEqualWithAccuracy(modulator.value(), 841.521488382382699, epsilon);
 
   // std::cout << modulator.description() << '\n';
   XCTAssertEqual("Sv: velocity(uni/+-/concave) Av: none(uni/-+/linear) dest: initialAttenuation amount: 960 trans: linear",
@@ -107,7 +107,7 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqualWithAccuracy(modulator.value(), 960.0, epsilon);
 
   channelState->setContinuousControllerValue(MIDI::ControlChange::volumeMSB, 64);
-  XCTAssertEqualWithAccuracy(modulator.value(), 119.049498789, epsilon);
+  XCTAssertEqualWithAccuracy(modulator.value(), 119.049498788827904, epsilon);
 
   channelState->setContinuousControllerValue(MIDI::ControlChange::volumeMSB, 127);
   XCTAssertEqualWithAccuracy(modulator.value(), 0.0, epsilon);
@@ -138,7 +138,7 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqualWithAccuracy(modulator.value(), 960.0, epsilon);
 
   channelState->setContinuousControllerValue(MIDI::ControlChange::expressionMSB, 64);
-  XCTAssertEqualWithAccuracy(modulator.value(), 119.049498789, epsilon);
+  XCTAssertEqualWithAccuracy(modulator.value(), 119.049498788827904, epsilon);
 
   channelState->setContinuousControllerValue(MIDI::ControlChange::expressionMSB, 127);
   XCTAssertEqualWithAccuracy(modulator.value(), 0.0, epsilon);
@@ -195,7 +195,7 @@ using namespace SF2::Entity::Generator;
   channelState->setPitchWheelValue(4096);
   XCTAssertEqualWithAccuracy( modulator.value(), 0.0, epsilon);
   channelState->setPitchWheelValue(SF2::MIDI::ChannelState::maxPitchWheelValue);
-  XCTAssertEqualWithAccuracy( modulator.value(), 12597.7048874, epsilon);
+  XCTAssertEqualWithAccuracy( modulator.value(), 12597.7048873901367, epsilon);
 }
 
 - (void)testKeyValueProvider {
