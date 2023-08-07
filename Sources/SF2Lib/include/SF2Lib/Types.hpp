@@ -30,7 +30,7 @@ struct Accelerated
 {
   /**
    Type definition for vDSP_vflt16 / vDSP_vflt16D routines that convert a sequence of signed 16-bit integers into
-   floating-point values.
+   floating-point values. NOTE that this does not do any scaling of the resulting values.
    */
   using ConversionProc = void (*)(const int16_t*, vDSP_Stride, T*, vDSP_Stride, vDSP_Length);
   inline static ConversionProc conversionProc = []() noexcept {
@@ -39,13 +39,14 @@ struct Accelerated
   }();
 
   /**
-   Type definition for vDSP_vsdiv / vDSP_vsdivD routines that divide a sequence of floating-point values by a scalar.
-   This is used to obtain normalized values (-1.0 - +1.0) after converting from 16-bit integers to floats or doubles.
+   Type definition for vDSP\_vsmul / vDSP\_vsmulD routines that multiplies a sequence of floating-point values by a
+   scalar. This is used to obtain normalized values (-1.0 - +1.0) after converting from 16-bit integers to floats or
+   doubles.
    */
   using ScaleProc = void (*)(const T*, vDSP_Stride, const T*, T*, vDSP_Stride, vDSP_Length);
   inline static ScaleProc scaleProc = []() noexcept {
-    if constexpr (std::is_same_v<T, float>) return vDSP_vsdiv;
-    if constexpr (std::is_same_v<T, double>) return vDSP_vsdivD;
+    if constexpr (std::is_same_v<T, float>) return vDSP_vsmul;
+    if constexpr (std::is_same_v<T, double>) return vDSP_vsmulD;
   }();
 
   /**

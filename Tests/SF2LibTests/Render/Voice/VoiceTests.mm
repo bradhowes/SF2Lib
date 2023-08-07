@@ -477,7 +477,8 @@ using namespace SF2::Render;
 }
 
 - (void)testSlowAttackDecay {
-  auto notes = contexts.context0.makeVoicesCollection(197, {64}, 127);
+  self.deleteFile = false;
+   auto notes = contexts.context0.makeVoicesCollection(197, {64}, 127);
   int seconds = 4;
   int sampleCount = notes.front().sampleRate() * seconds;
   int keyReleaseCount = sampleCount * 0.5;

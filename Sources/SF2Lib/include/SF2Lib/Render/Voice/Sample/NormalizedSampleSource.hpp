@@ -75,9 +75,8 @@ private:
 
     // Read in the 16-bit sample values and convert into normalized values.
     auto pos = allSamples_ + startIndex;
-    constexpr T scale = (1 << 15);
     Accelerated<T>::conversionProc(pos, 1, samples_.data(), 1, size);
-    Accelerated<T>::scaleProc(samples_.data(), 1, &scale, samples_.data(), 1, size);
+    Accelerated<T>::scaleProc(samples_.data(), 1, &normalizationScale, samples_.data(), 1, size);
 
     loaded_ = true;
   }
