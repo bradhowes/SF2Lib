@@ -63,7 +63,7 @@ struct PresetTestContextBase
 
   static inline const SF2::Float epsilon = epsilonValue();
   static NSURL* getUrl(int urlIndex);
-  static bool playAudioInTests();
+  static BOOL playAudioInTests();
 
   PresetTestContextBase(int urlIndex, SF2::Float sampleRate)
   :
@@ -152,7 +152,8 @@ struct SampleBasedContexts {
 @property (nonatomic, retain) XCTestExpectation* playedAudioExpectation;
 @property (nonatomic, retain) NSURL* audioFileURL;
 @property (nonatomic, retain) AVAudioPCMBuffer* buffer;
-@property (nonatomic) bool deleteFile;
+@property (nonatomic) BOOL deleteFile;
+@property (nonatomic) BOOL playAudio;
 
 - (void)playSamples:(AVAudioPCMBuffer*)buffer count:(int)sampleCount;
 

@@ -15,7 +15,7 @@ NSURL* PresetTestContextBase::getUrl(int urlIndex)
   return [TestResources getResourceUrl:urlIndex];
 }
 
-bool PresetTestContextBase::playAudioInTests() {
+BOOL PresetTestContextBase::playAudioInTests() {
 #if PLAY_AUDIO
   bool playAudio = YES;
 #else
@@ -46,7 +46,8 @@ bool PresetTestContextBase::playAudioInTests() {
 
 - (void)setUp
 {
-  self.deleteFile = true;
+  self.deleteFile = YES;
+  self.playAudio = PresetTestContextBase::playAudioInTests();
 }
 
 - (void)cleanup
@@ -69,7 +70,7 @@ bool PresetTestContextBase::playAudioInTests() {
 
 - (void)playSamples:(AVAudioPCMBuffer*)buffer count:(int)sampleCount
 {
-  if (!PresetTestContextBase::playAudioInTests()) {
+  if (!self.playAudio) {
     [self cleanup];
     return;
   }
