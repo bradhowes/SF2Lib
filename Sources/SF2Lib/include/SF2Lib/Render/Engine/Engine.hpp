@@ -311,8 +311,6 @@ private:
     auto exclusiveClass{config.exclusiveClass()};
     if (exclusiveClass > 0) {
       stopAllExclusiveVoices(exclusiveClass);
-    } else {
-      stopSameKeyVoices(config.eventKey());
     }
 
     auto voiceIndex = getVoice();

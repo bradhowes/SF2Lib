@@ -563,9 +563,6 @@ using namespace SF2::Render;
 
   XCTAssertEqual(4 * notes.size(), samples.size());
 
-  self.deleteFile = YES;
-  self.playAudio = YES;
-
   [self dumpSamples: samples];
 
   if constexpr (std::is_same_v<Float, float>) {
