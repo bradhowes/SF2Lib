@@ -116,8 +116,6 @@ public:
   /**
    Generate a configuration for the sustain stage. This is the envelope level to report out while the envelope gate is
    true (MIDI key is down).
-
-   @param level the envelope value to report out during while the gate is active
    */
   void setSustain() noexcept { setConstant(std::numeric_limits<int>::max()); }
 
