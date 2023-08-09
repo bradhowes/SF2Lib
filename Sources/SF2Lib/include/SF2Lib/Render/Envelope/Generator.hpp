@@ -144,9 +144,14 @@ public:
   /// @returns true if in the attack stage
   bool isAttack() const noexcept { return stageIndex_ == StageIndex::attack; }
 
+  /// @returns true if in the release stage
+  bool isRelease() const noexcept { return stageIndex_ == StageIndex::release; }
+
   /// @returns the current envelope value.
   Value value() const noexcept { return Value(value_); }
 
+  int counter() const noexcept { return counter_; }
+  
   /**
    Calculate the next envelope value. This must be called on every sample for proper timing of the stages.
 
@@ -157,8 +162,12 @@ public:
       value_ = 0.0;
     } else {
       value_ = stages_[stageIndex_].next(value_);
-      --counter_;
-      checkForNextStage();
+      if (value_ < 0.0) {
+        stop();
+      } else {
+        --counter_;
+        checkForNextStage();
+      }
     }
     return Value(value_);
   }
@@ -230,21 +239,20 @@ private:
 
     auto releaseTimecents = state.modulated(Index::releaseVolumeEnvelope);
     stages_[StageIndex::release].setRelease(sampleCountFor(state.sampleRate(),
-                                                       releaseTimecentsToSeconds(releaseTimecents)),
-                                            sustainLevel_);
+                                                       releaseTimecentsToSeconds(releaseTimecents)));
 
-//    os_log_debug(log_, "%s - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %f / %f release %d / %f",
-//                 logTag(),
-//                 stages_[StageIndex::delay].durationInSamples(),
-//                 stages_[StageIndex::attack].durationInSamples(),
-//                 stages_[StageIndex::attack].increment(),
-//                 stages_[StageIndex::hold].durationInSamples(),
-//                 stages_[StageIndex::decay].durationInSamples(),
-//                 stages_[StageIndex::decay].increment(),
-//                 sustainCents,
-//                 sustainLevel_,
-//                 stages_[StageIndex::release].durationInSamples(),
-//                 stages_[StageIndex::release].increment());
+    os_log_debug(log_, "%s - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %f / %f release %d / %f",
+                 logTag(),
+                 stages_[StageIndex::delay].durationInSamples(),
+                 stages_[StageIndex::attack].durationInSamples(),
+                 stages_[StageIndex::attack].increment(),
+                 stages_[StageIndex::hold].durationInSamples(),
+                 stages_[StageIndex::decay].durationInSamples(),
+                 stages_[StageIndex::decay].increment(),
+                 sustainCents,
+                 sustainLevel_,
+                 stages_[StageIndex::release].durationInSamples(),
+                 stages_[StageIndex::release].increment());
 
     gate(true);
   }
@@ -287,21 +295,20 @@ private:
 
     auto releaseTimecents = state.modulated(Index::releaseModulatorEnvelope);
     stages_[StageIndex::release].setRelease(sampleCountFor(state.sampleRate(),
-                                                       releaseTimecentsToSeconds(releaseTimecents)),
-                                            sustainLevel_);
+                                                       releaseTimecentsToSeconds(releaseTimecents)));
 
-//    os_log_debug(log_, "%s - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %f / %f release %d / %f",
-//                 logTag(),
-//                 stages_[StageIndex::delay].durationInSamples(),
-//                 stages_[StageIndex::attack].durationInSamples(),
-//                 stages_[StageIndex::attack].increment(),
-//                 stages_[StageIndex::hold].durationInSamples(),
-//                 stages_[StageIndex::decay].durationInSamples(),
-//                 stages_[StageIndex::decay].increment(),
-//                 sustainCents,
-//                 sustainLevel_,
-//                 stages_[StageIndex::release].durationInSamples(),
-//                 stages_[StageIndex::release].increment());
+    os_log_debug(log_, "%s - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %f / %f release %d / %f",
+                 logTag(),
+                 stages_[StageIndex::delay].durationInSamples(),
+                 stages_[StageIndex::attack].durationInSamples(),
+                 stages_[StageIndex::attack].increment(),
+                 stages_[StageIndex::hold].durationInSamples(),
+                 stages_[StageIndex::decay].durationInSamples(),
+                 stages_[StageIndex::decay].increment(),
+                 sustainCents,
+                 sustainLevel_,
+                 stages_[StageIndex::release].durationInSamples(),
+                 stages_[StageIndex::release].increment());
 
     gate(true);
   }
@@ -317,20 +324,20 @@ private:
     stages_[StageIndex::hold].setHold(int(round(sampleRate * hold)));
     stages_[StageIndex::decay].setDecay(int(round(sampleRate * decay)), sustainLevel_);
     stages_[StageIndex::sustain].setSustain();
-    stages_[StageIndex::release].setRelease(int(round(sampleRate * release)), sustainLevel_);
+    stages_[StageIndex::release].setRelease(int(round(sampleRate * release)));
 
-//    os_log_debug(log_, "%s - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %d / %f release %d / %f",
-//                 logTag(),
-//                 stages_[StageIndex::delay].durationInSamples(),
-//                 stages_[StageIndex::attack].durationInSamples(),
-//                 stages_[StageIndex::attack].increment(),
-//                 stages_[StageIndex::hold].durationInSamples(),
-//                 stages_[StageIndex::decay].durationInSamples(),
-//                 stages_[StageIndex::decay].increment(),
-//                 sustain,
-//                 sustainLevel_,
-//                 stages_[StageIndex::release].durationInSamples(),
-//                 stages_[StageIndex::release].increment());
+    os_log_debug(log_, "%s - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %d / %f release %d / %f",
+                 logTag(),
+                 stages_[StageIndex::delay].durationInSamples(),
+                 stages_[StageIndex::attack].durationInSamples(),
+                 stages_[StageIndex::attack].increment(),
+                 stages_[StageIndex::hold].durationInSamples(),
+                 stages_[StageIndex::decay].durationInSamples(),
+                 stages_[StageIndex::decay].increment(),
+                 sustain,
+                 sustainLevel_,
+                 stages_[StageIndex::release].durationInSamples(),
+                 stages_[StageIndex::release].increment());
   }
 
   static constexpr Float lowerBoundTimecents = -12'000.0;

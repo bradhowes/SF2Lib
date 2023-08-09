@@ -38,7 +38,7 @@ class Engine : public DSPHeaders::EventProcessor<Engine> {
 public:
   using Config = Voice::State::Config;
   using Voice = Voice::Voice;
-  using Interpolator = Render::Voice::Sample::Generator::Interpolator;
+  using Interpolator = Render::Voice::Sample::Interpolator;
 
   /**
    Construct new engine and its voices.

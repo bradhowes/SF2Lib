@@ -17,6 +17,11 @@
 
 namespace SF2::Render::Voice::Sample {
 
+enum struct Interpolator {
+  linear,
+  cubic4thOrder
+};
+
 /**
  Generator of new samples from a stream of original samples, properly scaled to sound correct for the output sample
  rate and the desired output frequency. We know the original samples' sample rate and root frequency, so we can do some
@@ -26,11 +31,6 @@ namespace SF2::Render::Voice::Sample {
 class Generator {
 public:
   using State = State::State;
-
-  enum struct Interpolator {
-    linear,
-    cubic4thOrder
-  };
 
   /**
    Construct new instance. NOTE: the instance is not usable for audio rendering at this point. One must call
@@ -70,8 +70,8 @@ public:
   Float generate(Float increment, bool canLoop) noexcept
   {
     if (index_.finished()) return 0.0;
-    auto whole = index_.whole();
-    auto partial = index_.partial();
+    auto whole{index_.whole()};
+    auto partial{index_.partial()};
     index_.increment(increment, canLoop);
     return (this->*interpolatorProc_)(whole, partial, canLoop);
   }

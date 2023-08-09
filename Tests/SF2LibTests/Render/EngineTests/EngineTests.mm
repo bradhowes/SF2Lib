@@ -38,13 +38,13 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 @implementation EngineTests
 
 - (void)testInit {
-  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
   XCTAssertEqual(engine.voiceCount(), 32);
   XCTAssertEqual(engine.activeVoiceCount(), 0);
 }
 
 - (void)testLoad {
-  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
   XCTAssertFalse(engine.hasActivePreset());
   engine.load(contexts.context0.file(), 0);
   XCTAssertEqual(engine.presetCount(), 235);
@@ -54,7 +54,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 }
 
 - (void)testUsePresetByIndex {
-  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
   engine.load(contexts.context0.file(), 0);
   XCTAssertTrue(engine.hasActivePreset());
   XCTAssertEqual("Piano 1", engine.activePresetName());
@@ -72,7 +72,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 }
 
 - (void)testUsePresetByBankProgram {
-  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
   engine.load(contexts.context0.file(), 0);
   engine.usePreset(0, 0);
   XCTAssertTrue(engine.hasActivePreset());
@@ -103,7 +103,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
 - (void)testRolandPianoChordRenderLinear {
   Float sampleRate{48000.0};
-  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
+  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Interpolator::linear);
 
   engine.load(contexts.context2.file(), 0);
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
@@ -176,7 +176,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   AUAudioFrameCount frameCount{512};
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-  Engine engine(sampleRate, 6, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+  Engine engine(sampleRate, 6, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder);
   engine.load(contexts.context2.file(), 0);
   engine.setRenderingFormat(3, format, frameCount);
 
@@ -273,7 +273,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 - (void)testChangeProgram {
   Float sampleRate{48000.0};
   AUAudioFrameCount frameCount = 512;
-  Engine engine(sampleRate, 6, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+  Engine engine(sampleRate, 6, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder);
   engine.load(contexts.context0.file(), 1);
   NSString* name = [NSString stringWithCString:engine.activePresetName().c_str() encoding:NSUTF8StringEncoding];
   NSLog(@"name: |%@|", name);
@@ -290,7 +290,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   AUAudioFrameCount frameCount = 512;
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder);
   engine.load(contexts.context0.file(), 0);
   engine.setRenderingFormat(3, format, frameCount);
 
@@ -371,7 +371,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
     AUAudioFrameCount samplesPerFrame = 512;
     AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-    Engine engine(sampleRate, 64, SF2::Render::Voice::Sample::Generator::Interpolator::cubic4thOrder);
+    Engine engine(sampleRate, 64, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder);
     engine.load(contexts.context2.file(), 0);
     engine.setRenderingFormat(3, format, samplesPerFrame);
 
@@ -435,7 +435,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
     AUAudioFrameCount samplesPerFrame = 512;
     AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-    Engine engine(sampleRate, 64, SF2::Render::Voice::Sample::Generator::Interpolator::linear);
+    Engine engine(sampleRate, 64, SF2::Render::Voice::Sample::Interpolator::linear);
     engine.load(contexts.context2.file(), 0);
     engine.setRenderingFormat(3, format, samplesPerFrame);
 

@@ -65,7 +65,7 @@ static int16_t values[8] = {10000, -20000, 30000, 20000, 10000, -10000, -20000, 
 
 - (void)testLinearInterpolation {
   State::State state{100, channelState};
-  Sample::Generator gen{Sample::Generator::Interpolator::linear};
+  Sample::Generator gen{Sample::Interpolator::linear};
   NormalizedSampleSource source{values, header};
   gen.configure(source, state);
   Sample::Pitch pitch{state};

@@ -49,7 +49,9 @@ public:
     setDefaults();
   }
 
-  /** Create new state vector for testing purposes.
+  /**
+   Create new state vector for testing purposes.
+
    @param sampleRate the sample rate of audio being rendered
    @param channelState the MIDI channel that is in control
    @param key the MIDI key to use
@@ -64,19 +66,11 @@ public:
   /// Allow move operations during construction to support std::vector
   State(State&&) noexcept = default;
 
-  /// Disallow copy construction -- not needed
-  State(const State&) = delete;
-
-  /// Disallow copy assignment -- not needed
-  State& operator=(const State&) noexcept = delete;
-
-  /// Disallow move assignment -- not needed
-  State& operator=(State&&) noexcept = delete;
-
-  /// Ensure use of default destructor
   ~State() noexcept = default;
 
-  // ~State() noexcept { std::cout << "~State " << this << std::endl; }
+  State(const State&) = delete;
+  State& operator=(const State&) noexcept = delete;
+  State& operator=(State&&) noexcept = delete;
 
   /**
    Set the sample rate to use for rendering
@@ -139,25 +133,25 @@ public:
    @returns current value of the generator
    */
   Float modulated(Index gen) const noexcept {
-    auto value = gens_[gen].value();
-    auto mods = gens_[gen].sumMods(modulators_);
-    auto nrpn = channelState_.nrpnValue(gen);
+    auto value{gens_[gen].value()};
+    auto mods{gens_[gen].sumMods(modulators_)};
+    auto nrpn{channelState_.nrpnValue(gen)};
     return value + mods + nrpn;
   }
 
   /// @returns MIDI key that started a voice to begin emitting samples. For DSP this is *not* what is desired. See
   /// `key` method below.
-  int eventKey() const noexcept { return eventKey_; }
+  constexpr int eventKey() const noexcept { return eventKey_; }
 
   /// @returns key value to use for DSP. A generator can force it to be fixed to a set value.
-  int key() const noexcept {
-    int key = unmodulated(Index::forcedMIDIKey);
+  constexpr int key() const noexcept {
+    int key{unmodulated(Index::forcedMIDIKey)};
     return key >= 0 ? key : eventKey_;
   }
 
   /// @returns velocity to use for DSP. A generator can force it to be fixed to a set value.
-  int velocity() const noexcept {
-    int velocity = unmodulated(Index::forcedMIDIVelocity);
+  constexpr int velocity() const noexcept {
+    int velocity{unmodulated(Index::forcedMIDIVelocity)};
     return velocity >= 0 ? velocity : eventVelocity_;
   }
 

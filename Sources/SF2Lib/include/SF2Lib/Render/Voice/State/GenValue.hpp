@@ -46,7 +46,7 @@ struct GenValue {
   void addModulator(size_t index) noexcept { mods_.push_back(index); }
 
   /// @returns generator value as defined by instrument zone (value) and preset zone (adjustment).
-  int value() const noexcept { return value_ + adjustment_; }
+  constexpr int value() const noexcept { return value_ + adjustment_; }
 
   Float sumMods(const std::vector<Modulator>& modulators) const noexcept {
     if (mods_.empty()) return 0.0f;

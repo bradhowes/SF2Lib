@@ -40,7 +40,7 @@ public:
    the wrong one.
    */
   struct Value {
-    Float val;
+    const Float val;
     explicit Value(Float v) noexcept : val{v} {}
   };
 
@@ -131,7 +131,7 @@ public:
 
    @returns current waveform value
    */
-  Value value() const noexcept { return Value(counter_); }
+  constexpr Value value() const noexcept { return Value(counter_); }
 
 private:
 
@@ -148,7 +148,7 @@ private:
   }
 
   void configure(Float sampleRate, Float frequency, Float delay) {
-    delaySampleCount_ = size_t(sampleRate * delay);
+    delaySampleCount_ = static_cast<size_t>(sampleRate * delay);
     increment_ = frequency / sampleRate * Float(4.0);
   }
 

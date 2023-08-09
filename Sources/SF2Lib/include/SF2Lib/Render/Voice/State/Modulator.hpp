@@ -56,17 +56,16 @@ public:
   Float value() const noexcept
   {
     // If there is no source for the modulator, it always returns 0.0 (no modulation).
-    if (!primaryValue_.isActive()) return 0.0;
+    if (!primaryValue_.isActive()) return 0.0f;
 
     // Obtain transformed primary value.
-    auto primaryValue = primaryValue_();
-    Float transformedPrimaryValue = primaryTransform_(primaryValue);
-    if (transformedPrimaryValue == 0.0) return 0.0;
+    auto primaryValue{primaryValue_()};
+    Float transformedPrimaryValue{primaryTransform_(primaryValue)};
+    if (transformedPrimaryValue == 0.0) return 0.0f;
 
     // Obtain transformed secondary value.
-    Float transformedSecondaryAmount = secondaryValue_.isActive() ? secondaryTransform_(secondaryValue_()) : 1.0;
-
-    Float result = transformedPrimaryValue * transformedSecondaryAmount * amount_;
+    Float transformedSecondaryAmount{secondaryValue_.isActive() ? secondaryTransform_(secondaryValue_()) : 1.0};
+    Float result{transformedPrimaryValue * transformedSecondaryAmount * amount_};
     return result;
   }
 

@@ -200,6 +200,7 @@ struct EnvelopeTestInjector {
   XCTAssertEqual(StageIndex::release, gen.activeIndex());
   XCTAssertEqualWithAccuracy(0.2, gen.getNextValue().val, epsilon);
   XCTAssertEqualWithAccuracy(0.0, gen.getNextValue().val, epsilon);
+  XCTAssertEqualWithAccuracy(0.0, gen.getNextValue().val, epsilon);
   XCTAssertEqual(StageIndex::idle, gen.activeIndex());
   XCTAssertEqualWithAccuracy(0.0, gen.getNextValue().val, epsilon);
   XCTAssertEqual(StageIndex::idle, gen.activeIndex());

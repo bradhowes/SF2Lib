@@ -14,7 +14,7 @@ using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
 
 Voice::Voice(Float sampleRate, const ChannelState& channelState, size_t voiceIndex,
-             Sample::Generator::Interpolator interpolator) noexcept :
+             Sample::Interpolator interpolator) noexcept :
 state_{sampleRate, channelState},
 loopingMode_{LoopingMode::none},
 pitch_{state_},
@@ -62,6 +62,7 @@ Voice::start() noexcept
 
   filter_.reset();
 
+  sampleCounter_ = 0;
   active_ = true;
   keyDown_ = true;
   initialAttenuation_ = DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));

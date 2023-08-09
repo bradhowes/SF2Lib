@@ -49,22 +49,16 @@ public:
    @param interpolator how to interpolate sample values
    */
   Voice(Float sampleRate, const MIDI::ChannelState& channelState, size_t voiceIndex,
-        Sample::Generator::Interpolator interpolator = Sample::Generator::Interpolator::linear) noexcept;
+        Sample::Interpolator interpolator = Sample::Interpolator::linear) noexcept;
 
   /// Allow move operations during construction to support std::vector
   Voice(Voice&&) noexcept = default;
 
-  /// Disallow copy construction -- not needed
-  Voice(const Voice&) = delete;
-
-  /// Disallow copy assignment -- not needed
-  Voice& operator=(const Voice&) noexcept = delete;
-
-  /// Disallow move assignment -- not needed
-  Voice& operator=(Voice&&) noexcept = delete;
-
-  /// Ensure use of default destructor
   ~Voice() noexcept = default;
+
+  Voice(const Voice&) = delete;
+  Voice& operator=(const Voice&) noexcept = delete;
+  Voice& operator=(Voice&&) noexcept = delete;
 
   /**
    Set the sample rate to use for rendering.
@@ -77,7 +71,7 @@ public:
   }
 
   /// @returns the unique index assigned to this voice instance.
-  size_t voiceIndex() const noexcept { return voiceIndex_; }
+  constexpr size_t voiceIndex() const noexcept { return voiceIndex_; }
 
   /// @returns the `exclusiveClass` generator value for the voice (only valid if voice is active).
   int exclusiveClass() const noexcept { return state_.unmodulated(Index::exclusiveClass); }
@@ -90,7 +84,7 @@ public:
   void configure(const State::Config& config) noexcept;
 
   /**
-   Start the voice rendering. At this point, `isKeyDown()` will return `true` until `releaseKey()` is called.
+   Start the voice rendering.
    */
   void start() noexcept;
 
@@ -105,16 +99,13 @@ public:
   }
 
   /// @returns true if this voice is still rendering interesting samples
-  bool isActive() const noexcept { return active_; }
+  constexpr bool isActive() const noexcept { return active_; }
 
   /// @returns true if this voice is done processing and will no longer render meaningful samples.
-  bool isDone() const noexcept { return !isActive(); }
+  constexpr bool isDone() const noexcept { return !isActive(); }
 
   /// @returns the MIDI key that started the voice. NOTE: not to be used for DSP processing.
-  int initiatingKey() const noexcept { return state_.eventKey(); }
-
-  /// @returns true if the key used to start the voice is still down.
-  bool isKeyDown() const noexcept { return keyDown_; }
+  constexpr int initiatingKey() const noexcept { return state_.eventKey(); }
 
   /**
    Signal the envelopes that the key is no longer pressed, transitioning to release phase. NOTE: this is invoked on a
@@ -127,7 +118,7 @@ public:
   }
 
   /// @returns looping mode of the sample being rendered
-  LoopingMode loopingMode() const noexcept {
+  constexpr LoopingMode loopingMode() const noexcept {
     switch (state_.unmodulated(Index::sampleModes)) {
       case 1: return LoopingMode::activeEnvelope;
       case 3: return LoopingMode::duringKeyPress;
@@ -136,7 +127,7 @@ public:
   }
 
   /// @returns true if the voice can enter a loop if it is available
-  bool canLoop() const noexcept {
+  constexpr bool canLoop() const noexcept {
     return ((loopingMode_ == LoopingMode::activeEnvelope && gainEnvelope_.isActive()) ||
             (loopingMode_ == LoopingMode::duringKeyPress && keyDown_));
   }
@@ -162,51 +153,62 @@ public:
    @returns next sample
    */
   Float renderSample() noexcept {
-    if (!active_) {
-      assert(!gainEnvelope_.isActive() && !sampleGenerator_.isActive());
-      return 0.0;
-    }
-
-    if (pendingRelease_ && pendingRelease_ <= samplesSeen_) {
-      pendingRelease_ = 0;
-      keyDown_ = false;
-      gainEnvelope_.gate(false);
-      modulatorEnvelope_.gate(false);
-    }
-
-    ++samplesSeen_;
+    if (! active_) return 0.0f;
 
     // Capture the current state of the modulators and envelopes.
-    auto modLFO = modulatorLFO_.getNextValue();
-    auto vibLFO = vibratoLFO_.getNextValue();
-    auto volEnv = gainEnvelope_.getNextValue();
-    auto modEnv = modulatorEnvelope_.getNextValue();
+    auto modLFO{modulatorLFO_.getNextValue()};
+    auto vibLFO{vibratoLFO_.getNextValue()};
+    auto modEnv{modulatorEnvelope_.getNextValue()};
+    auto volEnv{gainEnvelope_.getNextValue()};
 
-    // According to FluidSynth this is the right thing to do.
-    if (gainEnvelope_.isDelayed()) return 0.0;
+    if (gainEnvelope_.isDelayed()) return 0.0f;
 
     // Calculate the pitch to render and then generate a new sample.
-    auto increment = pitch_.samplePhaseIncrement(modLFO, vibLFO, modEnv);
-    auto sample = sampleGenerator_.generate(increment, canLoop());
+    Float increment{pitch_.samplePhaseIncrement(modLFO, vibLFO, modEnv)};
+    Float sample{sampleGenerator_.generate(increment, canLoop())};
+
+    // Calculate gain / attenuation to apply to sample. Here we are following the lead of FluidSynth and treat the
+    // attack stage of the volume envelope as special and just a linear ramp from 0.0 - 1.0. The other stages are
+    // treated as a normalized representation of a dB attenuation.
+    auto attacking{gainEnvelope_.isAttack()};
+    Float volEnvAttenuation{attacking ? volEnv.val : 1.0f};
+    Float volEnvCB{attacking ? 0.0f : DSP::NoiseFloorCentiBels * (1.0f - volEnv.val)};
+    Float modLFOValCB{modLFO.val * -state_.modulated(Index::modulatorLFOToVolume)};
+    Float gain{initialAttenuation_ * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB) * volEnvAttenuation};
 
     // Calculate the low-pass filter parameters. Only the frequency can be affected by an LFO or mod envelope, but both
     // can have external modulators attached to their primary state value.
-    auto frequency = (state_.modulated(Index::initialFilterCutoff) +
-                      state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO.val +
-                      state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv.val);
-    auto resonance = state_.modulated(Index::initialFilterResonance);
+    auto frequency{(state_.modulated(Index::initialFilterCutoff) +
+                    state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO.val +
+                    state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv.val)};
+    auto resonance{state_.modulated(Index::initialFilterResonance)};
 
-    // Apply the filter on the sample.
-    auto filtered = filter_.transform(frequency, resonance, sample);
+    auto filtered{filter_.transform(frequency, resonance, sample * gain)};
 
-    // Finally, calculate gain / attenuation to apply to filtered result and return attenuated value.
-    auto modLFOValCB = modLFO.val * state_.modulated(Index::modulatorLFOToVolume);
-    auto volEnvCB = DSP::NoiseFloorCentiBels * (1.0f - volEnv.val);
-    auto gain = initialAttenuation_ * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB);
+    if (!sampleGenerator_.isActive()) {
+      stop();
+      return filtered;
+    }
 
-    if (!gainEnvelope_.isActive() || !sampleGenerator_.isActive()) stop();
+    ++sampleCounter_;
 
-    return filtered * gain;
+    if (pendingRelease_) {
+      if (pendingRelease_ < sampleCounter_) {
+        pendingRelease_ = 0;
+        keyDown_ = false;
+        gainEnvelope_.gate(false);
+        modulatorEnvelope_.gate(false);
+      }
+    } else if (gainEnvelope_.isRelease()) {
+      if (gain < DSP::NoiseFloor) {
+        os_log_debug(log_, "stopping due to noise floor - remaining sample count: %d", gainEnvelope_.counter());
+        stop();
+      }
+    } else if (!gainEnvelope_.isActive()) {
+      stop();
+    }
+
+    return filtered;
   }
 
   /**
@@ -220,44 +222,25 @@ public:
     SF2::AUValue chorusSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend)));
     SF2::AUValue reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
 
-    for (; index < frameCount; ++index) {
-      Float sample = isDone() ? 0.0 : renderSample();
-      Float pan = state_.modulated(Index::pan);
+    for (; index < frameCount && active_; ++index) {
+      Float sample{renderSample()};
+      Float pan{state_.modulated(Index::pan)};
       Float leftPan, rightPan;
       DSP::panLookup(pan, leftPan, rightPan);
       mixer.add(index, SF2::AUValue(leftPan * sample), SF2::AUValue(rightPan * sample), chorusSend, reverbSend);
     }
+
+    for (; index < frameCount; ++index) {
+      mixer.add(index, 0.0, 0.0, chorusSend, reverbSend);
+    }
   }
 
   /// @returns `State` instance for the voice.
-  State::State& state() noexcept { return state_; }
+  constexpr State::State& state() noexcept { return state_; }
 
 private:
-
-  Float calculateGain(ModLFO::Value modLFO, Float volEnv) noexcept
-  {
-    // This formula follows what FluidSynth is doing for attenuation/gain.
-    auto gain = (DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation)) *
-                 DSP::centibelsToAttenuation(DSP::MaximumAttenuationCentiBels * (1.0f - volEnv) +
-                                             modLFO.val * -state_.modulated(Index::modulatorLFOToVolume)));
-
-    // When in the release stage, look for a magical point at which one can no longer hear the sample being generated.
-    // Use that as a short-circuit to flagging the voice as done.
-    // FIXME: this is busted, sporadically returning very large values.
-//    if (gainEnvelope_.activeIndex() == Envelope::StageIndex::release) {
-//      auto minGain = sampleGenerator_.looped() ? noiseFloorOverMagnitudeOfLoop_ : noiseFloorOverMagnitude_;
-//      if (gain < minGain) {
-//        os_log_debug(log_, "calculateGain modLFO: %f volEnv: %f minGain: %f gain: %f",
-//                     modLFO.val, volEnv, minGain, gain);
-//        stop();
-//      }
-//    }
-
-    return gain;
-  }
-
   State::State state_;
-  size_t samplesSeen_{0};
+  size_t sampleCounter_{0};
   size_t pendingRelease_{0};
   LoopingMode loopingMode_;
   Sample::Pitch pitch_;

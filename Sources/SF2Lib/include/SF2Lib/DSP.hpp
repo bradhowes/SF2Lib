@@ -22,7 +22,7 @@ inline constexpr int MaximumAbsoluteCents = 13'508;
 inline constexpr int CentsPerOctave = 1'200;
 
 /// Attenuated samples at or below this value should be inaudible at 100 dB dynamic range.
-inline constexpr Float NoiseFloor = 0.00002;
+inline constexpr Float NoiseFloor = 0.00001;
 inline constexpr Float NoiseFloorCentiBels = 960.0f;
 
 /// Maximum attenuation defined by SF2 spec.
