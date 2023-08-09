@@ -112,11 +112,11 @@ public:
    */
   void gate(bool noteOn) noexcept {
     if (noteOn) {
-      std::clog << logTag() << " - starting" << std::endl;
+      os_log_debug(log_, "%s - starting", logTag());
       value_ = 0.0;
       enterStage(StageIndex::delay);
     } else if (stageIndex_ != StageIndex::idle) {
-      std::clog << logTag() << " - releasing" << std::endl;
+      os_log_debug(log_, "%s - releasing", logTag());
       enterStage(StageIndex::release);
     }
   }
@@ -207,7 +207,7 @@ private:
      Our stages always work in normalized values, so convert centibels to an attenuation value.
      */
     auto sustainCents = state.modulated(Index::sustainVolumeEnvelope);
-    sustainLevel_ = DSP::centibelsToAttenuation(sustainCents);
+    sustainLevel_ = 1.0f - DSP::tenthPercentageToNormalized(sustainCents);
 
     auto delayTimecents = state.modulated(Index::delayVolumeEnvelope);
     stages_[StageIndex::delay].setDelay(sampleCountFor(state.sampleRate(),
@@ -233,30 +233,18 @@ private:
                                                        releaseTimecentsToSeconds(releaseTimecents)),
                                             sustainLevel_);
 
-    std::clog
-    << logTag()
-    << " - delay: "
-    << delayTimecents << ' ' << stages_[StageIndex::delay].durationInSamples()
-    << " attack: "
-    << attackTimecents << ' ' << stages_[StageIndex::attack].durationInSamples()
-    << " / "
-    << stages_[StageIndex::attack].increment()
-    << " hold: "
-    << holdTimecents << ' ' << stages_[StageIndex::hold].durationInSamples()
-    << " decay: "
-    << decayTimecents << ' ' << stages_[StageIndex::decay].durationInSamples()
-    << " / "
-    << stages_[StageIndex::decay].increment()
-    << " sustain: "
-    << sustainCents
-    << " / "
-    << sustainLevel_
-    << " release: "
-    << releaseTimecents << ' ' << stages_[StageIndex::release].durationInSamples()
-    << " / "
-    << stages_[StageIndex::release].increment()
-    << std::endl;
-    ;
+//    os_log_debug(log_, "%s - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %f / %f release %d / %f",
+//                 logTag(),
+//                 stages_[StageIndex::delay].durationInSamples(),
+//                 stages_[StageIndex::attack].durationInSamples(),
+//                 stages_[StageIndex::attack].increment(),
+//                 stages_[StageIndex::hold].durationInSamples(),
+//                 stages_[StageIndex::decay].durationInSamples(),
+//                 stages_[StageIndex::decay].increment(),
+//                 sustainCents,
+//                 sustainLevel_,
+//                 stages_[StageIndex::release].durationInSamples(),
+//                 stages_[StageIndex::release].increment());
 
     gate(true);
   }
@@ -302,30 +290,18 @@ private:
                                                        releaseTimecentsToSeconds(releaseTimecents)),
                                             sustainLevel_);
 
-    std::clog
-    << logTag()
-    << " - delay: "
-    << delayTimecents << ' ' << stages_[StageIndex::delay].durationInSamples()
-    << " attack: "
-    << attackTimecents << ' ' << stages_[StageIndex::attack].durationInSamples()
-    << " / "
-    << stages_[StageIndex::attack].increment()
-    << " hold: "
-    << holdTimecents << ' ' << stages_[StageIndex::hold].durationInSamples()
-    << " decay: "
-    << decayTimecents << ' ' << stages_[StageIndex::decay].durationInSamples()
-    << " / "
-    << stages_[StageIndex::decay].increment()
-    << " sustain: "
-    << sustainCents
-    << " / "
-    << sustainLevel_
-    << " release: "
-    << releaseTimecents << ' ' << stages_[StageIndex::release].durationInSamples()
-    << " / "
-    << stages_[StageIndex::release].increment()
-    << std::endl;
-    ;
+//    os_log_debug(log_, "%s - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %f / %f release %d / %f",
+//                 logTag(),
+//                 stages_[StageIndex::delay].durationInSamples(),
+//                 stages_[StageIndex::attack].durationInSamples(),
+//                 stages_[StageIndex::attack].increment(),
+//                 stages_[StageIndex::hold].durationInSamples(),
+//                 stages_[StageIndex::decay].durationInSamples(),
+//                 stages_[StageIndex::decay].increment(),
+//                 sustainCents,
+//                 sustainLevel_,
+//                 stages_[StageIndex::release].durationInSamples(),
+//                 stages_[StageIndex::release].increment());
 
     gate(true);
   }
@@ -343,31 +319,18 @@ private:
     stages_[StageIndex::sustain].setSustain();
     stages_[StageIndex::release].setRelease(int(round(sampleRate * release)), sustainLevel_);
 
-    std::clog
-    << logTag()
-    << " - delay: "
-    << stages_[StageIndex::delay].durationInSamples()
-    << " attack: "
-    << stages_[StageIndex::attack].durationInSamples()
-    << " / "
-    << stages_[StageIndex::attack].increment()
-    << " hold: "
-    << stages_[StageIndex::hold].durationInSamples()
-    << " decay: "
-    << stages_[StageIndex::decay].durationInSamples()
-    << " / "
-    << stages_[StageIndex::decay].increment()
-    << " sustain: "
-    << sustain
-    << " / "
-    << sustainLevel_
-    << " release: "
-    << stages_[StageIndex::release].durationInSamples()
-    << " / "
-    << stages_[StageIndex::release].increment()
-    << std::endl;
-    ;
-
+//    os_log_debug(log_, "%s - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %d / %f release %d / %f",
+//                 logTag(),
+//                 stages_[StageIndex::delay].durationInSamples(),
+//                 stages_[StageIndex::attack].durationInSamples(),
+//                 stages_[StageIndex::attack].increment(),
+//                 stages_[StageIndex::hold].durationInSamples(),
+//                 stages_[StageIndex::decay].durationInSamples(),
+//                 stages_[StageIndex::decay].increment(),
+//                 sustain,
+//                 sustainLevel_,
+//                 stages_[StageIndex::release].durationInSamples(),
+//                 stages_[StageIndex::release].increment());
   }
 
   static constexpr Float lowerBoundTimecents = -12'000.0;

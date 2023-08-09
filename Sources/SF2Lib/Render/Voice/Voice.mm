@@ -35,6 +35,7 @@ Voice::configure(const State::Config& config) noexcept
   os_log_debug(log_, "configuring voice: %zu", voiceIndex_);
   os_signpost_interval_begin(log_, configSignpost_, "start");
 
+  pendingRelease_ = 0;
 
   config.sampleSource().load();
   state_.prepareForVoice(config);

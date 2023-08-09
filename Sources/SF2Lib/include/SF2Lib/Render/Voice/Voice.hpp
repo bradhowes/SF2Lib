@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <algorithm>
+
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Envelope/Generator.hpp"
@@ -63,7 +65,6 @@ public:
 
   /// Ensure use of default destructor
   ~Voice() noexcept = default;
-  // ~Voice() { std::cout << "~Voice " << voiceIndex_ << '\n'; };
 
   /**
    Set the sample rate to use for rendering.
@@ -82,7 +83,7 @@ public:
   int exclusiveClass() const noexcept { return state_.unmodulated(Index::exclusiveClass); }
 
   /**
-   Configure the voice to begin rendering using the given settiings.
+   Configure the voice to begin rendering using the given settings.
 
    @param config the voice configuration to apply
    */
@@ -119,11 +120,9 @@ public:
    Signal the envelopes that the key is no longer pressed, transitioning to release phase. NOTE: this is invoked on a
    non-render thread so we need to signal the render thread that it has taken place and let the render thread handle it.
    */
-  void releaseKey() noexcept {
-    if (keyDown_) {
-      keyDown_ = false;
-      gainEnvelope_.gate(false);
-      modulatorEnvelope_.gate(false);
+  void releaseKey(size_t minElapsedSamplesSeen) noexcept {
+    if (keyDown_ && pendingRelease_ == 0) {
+      pendingRelease_ = std::max<size_t>(minElapsedSamplesSeen, 1);
     }
   }
 
@@ -167,6 +166,15 @@ public:
       assert(!gainEnvelope_.isActive() && !sampleGenerator_.isActive());
       return 0.0;
     }
+
+    if (pendingRelease_ && pendingRelease_ <= samplesSeen_) {
+      pendingRelease_ = 0;
+      keyDown_ = false;
+      gainEnvelope_.gate(false);
+      modulatorEnvelope_.gate(false);
+    }
+
+    ++samplesSeen_;
 
     // Capture the current state of the modulators and envelopes.
     auto modLFO = modulatorLFO_.getNextValue();
@@ -249,6 +257,8 @@ private:
   }
 
   State::State state_;
+  size_t samplesSeen_{0};
+  size_t pendingRelease_{0};
   LoopingMode loopingMode_;
   Sample::Pitch pitch_;
   Sample::Generator sampleGenerator_;

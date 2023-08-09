@@ -46,9 +46,14 @@ public:
    @param sampleRate the expected sample rate to use
    @param voiceCount the maximum number of individual voices to support
    @param interpolator the type of interpolation to use when rendering samples
+   @param minimumNoteDurationMilliseconds the minimum duration of a note-on/note-off sequence for a voice.
    */
-  Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator) noexcept :
-  super(), sampleRate_{sampleRate}, oldestActive_{voiceCount}, log_{os_log_create("SF2Lib", "Engine")},
+  Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
+         size_t minimumNoteDurationMilliseconds = 10) noexcept :
+  super(),
+  sampleRate_{sampleRate},
+  minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
+  oldestActive_{voiceCount}, log_{os_log_create("SF2Lib", "Engine")},
   renderSignpost_{os_signpost_id_generate(log_)},
   noteOnSignpost_{os_signpost_id_generate(log_)},
   noteOffSignpost_{os_signpost_id_generate(log_)},
@@ -61,6 +66,11 @@ public:
       voices_.emplace_back(sampleRate, channelState_, voiceIndex, interpolator);
       available_.push_back(voiceIndex);
     }
+  }
+
+  size_t minimumNoteDurationSamples() const noexcept
+  {
+    return static_cast<size_t>(ceil(minimumNoteDurationMilliseconds_ / 1000.0f * sampleRate_));
   }
 
   /// @returns maximum number of voices available for simultaneous rendering
@@ -181,7 +191,7 @@ public:
         available_.push_back(voiceIndex);
       } else {
         if (voices_[voiceIndex].initiatingKey() == key) {
-          voices_[voiceIndex].releaseKey();
+          voices_[voiceIndex].releaseKey(minimumNoteDurationSamples());
         }
         ++pos;
       }
@@ -336,6 +346,8 @@ private:
   void loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept;
 
   Float sampleRate_;
+  size_t minimumNoteDurationMilliseconds_{0};
+
   MIDI::ChannelState channelState_{};
 
   std::vector<Voice> voices_{};

@@ -235,7 +235,7 @@ inline constexpr Float clampFilterCutoff(Float value) noexcept { return clamp(va
  @returns normalized value between 0 and 1.
  */
 inline constexpr Float tenthPercentageToNormalized(Float value) noexcept {
-  return clamp(value / Float(1'000.0), 0.0f, 1.0f);
+  return clamp(value * Float(0.001f), 0.0f, 1.0f);
 }
 
 /**
