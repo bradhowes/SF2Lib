@@ -11,6 +11,7 @@
 #include "SF2Lib/Render/Engine/Engine.hpp"
 
 using namespace SF2;
+using namespace SF2::Entity::Generator;
 using namespace SF2::Render::Engine;
 
 @interface EngineTests : SamplePlayingTestCase
@@ -182,7 +183,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
   // Set NPRN state so that voices send 20% output to the chorus channel
   engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, 120);
-  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Entity::Generator::Index::chorusEffectSend));
+  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Index::chorusEffectSend));
   engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
   engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 65);
 
@@ -296,7 +297,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
   // Set NPRN state so that voices send 20% output to the chorus channel
   engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
-  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Entity::Generator::Index::chorusEffectSend));
+  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Index::chorusEffectSend));
   engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
   engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 65);
 
@@ -377,13 +378,13 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
     // Set NPRN state so that voices send 20% output to the chorus channel
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
-    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Entity::Generator::Index::chorusEffectSend));
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Index::chorusEffectSend));
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 65);
 
     // Set NPRN state so that voices send 10% output to the reverb channel
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
-    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Entity::Generator::Index::reverbEffectSend));
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Index::reverbEffectSend));
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 100);
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 64);
 
@@ -441,13 +442,13 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
     // Set NPRN state so that voices send 20% output to the chorus channel
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
-    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Entity::Generator::Index::chorusEffectSend));
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Index::chorusEffectSend));
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 65);
 
     // Set NPRN state so that voices send 10% output to the reverb channel
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
-    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Entity::Generator::Index::reverbEffectSend));
+    engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Index::reverbEffectSend));
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 100);
     engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 64);
 
