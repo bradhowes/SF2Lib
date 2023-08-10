@@ -49,7 +49,6 @@ public:
     switch (kind) {
       case LFOKind::modulator: return "LFO<Mod>";
       case LFOKind::vibrato: return "LFO<Vib>";
-      default: throw "invalid Kind";
     }
   }
 
@@ -89,9 +88,6 @@ public:
                   DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyVibratoLFO)),
                   DSP::centsToSeconds(state.modulated(Entity::Generator::Index::delayVibratoLFO)));
         break;
-
-      default:
-        throw "unknown kind";
     }
   }
 

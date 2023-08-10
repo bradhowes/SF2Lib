@@ -31,7 +31,7 @@ public:
    */
   static Bounds make(const Entity::SampleHeader& header, const State::State& state) noexcept {
     constexpr int coarse = 1 << 15;
-    auto offset = [&state, coarse](Index fineIndex, Index courseIndex) -> int {
+    auto offset = [&state](Index fineIndex, Index courseIndex) -> int {
       return state.unmodulated(fineIndex) + state.unmodulated(courseIndex) * coarse;
     };
 

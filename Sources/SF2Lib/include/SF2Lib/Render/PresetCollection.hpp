@@ -65,8 +65,8 @@ public:
     // Search for the first entry that is not less than the value being searched for (uses binary search).
     Entity::Preset config{bank, program};
     auto found = std::lower_bound(presets_.begin(), presets_.end(), config,
-                                  [](const Preset& preset, const Entity::Preset& config) {
-      return preset.configuration() < config;
+                                  [](const Preset& preset, const Entity::Preset& key) {
+      return preset.configuration() < key;
     });
 
     if (found == presets_.end() || found->configuration() != config) return presets_.size();

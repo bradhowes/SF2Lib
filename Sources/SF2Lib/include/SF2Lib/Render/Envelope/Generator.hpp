@@ -79,7 +79,6 @@ public:
     switch (Kind) {
       case Kind::volume: return "Generator<Volume>";
       case Kind::modulation: return "Generator<Modulation>";
-      default: throw "invalid Kind";
     }
   }
 

@@ -8,7 +8,7 @@ namespace SF2::IO {
 
 inline constexpr uint32_t Pack4Chars(const char* c) noexcept
 {
-  return ((uint32_t)(c[3])) << 24 | ((uint32_t)(c[2])) << 16 | ((uint32_t)(c[1])) << 8 | ((uint32_t)(c[0]));
+  return uint32_t(c[3]) << 24 | uint32_t(c[2]) << 16 | uint32_t(c[1]) << 8 | uint32_t(c[0]);
 }
 
 /**

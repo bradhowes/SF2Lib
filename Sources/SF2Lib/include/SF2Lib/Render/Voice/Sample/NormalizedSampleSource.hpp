@@ -97,7 +97,6 @@ private:
 
   const int16_t* allSamples_;
   mutable bool loaded_{false};
-  mutable Float noiseFloorOverMagnitudeOfLoop_;
 };
 
 } // namespace SF2::Render::Sample::Source

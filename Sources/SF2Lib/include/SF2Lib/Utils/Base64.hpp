@@ -20,7 +20,7 @@ public:
     31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
   };
 
-  inline static const unsigned char encoder[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  inline static const char encoder[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
   inline static std::string decode(const unsigned char* ptr, size_t size) noexcept {
     std::string source{reinterpret_cast<const char*>(ptr), size};
@@ -37,18 +37,18 @@ public:
     auto out = output.data();
 
     for (auto end = in + commonSize; in < end; in += 4) {
-      auto value = decoder[in[0]] << 18 | decoder[in[1]] << 12 | decoder[in[2]] << 6 | decoder[in[3]];
+      auto value = decoder[int(in[0])] << 18 | decoder[int(in[1])] << 12 | decoder[int(in[2])] << 6 | decoder[int(in[3])];
       *out++ = static_cast<char>(value >> 16);
       *out++ = static_cast<char>(value >> 8 & 0xFF);
       *out++ = static_cast<char>(value & 0xFF);
     }
 
     if (padded) {
-      int value = decoder[in[0]] << 18 | decoder[in[1]] << 12;
+      int value = decoder[int(in[0])] << 18 | decoder[int(in[1])] << 12;
       in += 2;
       output[output.size() - 1] = static_cast<char>(value >> 16);
       if (inputSize > commonSize + 2 && *in != '=') {
-        value |= decoder[*in] << 6;
+        value |= decoder[int(*in)] << 6;
         output.push_back(char(value >> 8 & 0xFF));
       }
     }
@@ -63,7 +63,7 @@ public:
 
     std::string output;
     output.resize(outputSize);
-    auto out = (unsigned char*)&output[0];
+    auto out = static_cast<char*>(&output[0]);
     auto in = input.data();
 
     while (inputSize >= 3) {

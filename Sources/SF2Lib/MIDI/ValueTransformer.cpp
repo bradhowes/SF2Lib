@@ -98,7 +98,7 @@ std::vector<ValueTransformer::TransformArray> buildAll() {
   return transforms;
 }
 
-std::vector<ValueTransformer::TransformArray> transforms_{buildAll()};
+static std::vector<ValueTransformer::TransformArray> transforms_{buildAll()};
 
 const ValueTransformer::TransformArray&
 ValueTransformer::selectTransformArray(size_t maxValue, Kind kind, Direction dir, Polarity pol) noexcept {

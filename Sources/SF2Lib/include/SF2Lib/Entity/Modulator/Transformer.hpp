@@ -26,6 +26,8 @@ public:
   /// @returns the kind of transform to apply
   Kind kind() const noexcept { return Kind::linear; }
 
+  uint16_t bits() const noexcept { return bits_; }
+  
   /**
    Transform a value.
 

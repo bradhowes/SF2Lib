@@ -92,8 +92,7 @@ protected:
   modulators_{std::move(mods)},
   keyRange_{GetKeyRange(generators_)},
   velocityRange_{GetVelocityRange(generators_)},
-  isGlobal_{IsGlobal(generators_, terminal, modulators_)},
-  filterGenerators_{terminal == Entity::Generator::Index::instrument}
+  isGlobal_{IsGlobal(generators_, terminal, modulators_)}
   {
     if (generators_.empty() && modulators_.empty()) throw std::runtime_error("empty zone created");
   }
@@ -152,7 +151,6 @@ private:
   MIDIRange keyRange_;
   MIDIRange velocityRange_;
   bool isGlobal_;
-  bool filterGenerators_;
 };
 
 } // namespace SF2::Render

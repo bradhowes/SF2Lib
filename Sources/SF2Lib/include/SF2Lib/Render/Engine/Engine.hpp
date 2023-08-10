@@ -316,7 +316,7 @@ private:
 
   void startVoice(const Config& config) noexcept
   {
-    os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice");
+    os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice", "");
 
     auto exclusiveClass{config.exclusiveClass()};
     if (exclusiveClass > 0) {
@@ -329,15 +329,15 @@ private:
       voices_[voiceIndex].start();
       oldestActive_.add(voiceIndex);
     }
-    os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice");
+    os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice", "");
   }
 
   OldestActiveVoiceCache::iterator stopForExclusiveVoice(size_t voiceIndex) noexcept {
-    os_signpost_interval_begin(log_, stopForExclusiveVoiceSignpost_, "stopForExclusiveVoice");
+    os_signpost_interval_begin(log_, stopForExclusiveVoiceSignpost_, "stopForExclusiveVoice", "");
     voices_[voiceIndex].stop();
     auto pos = oldestActive_.remove(voiceIndex);
     available_.push_back(voiceIndex);
-    os_signpost_interval_end(log_, stopForExclusiveVoiceSignpost_, "stopForExclusiveVoice");
+    os_signpost_interval_end(log_, stopForExclusiveVoiceSignpost_, "stopForExclusiveVoice", "");
     return pos;
   }
 

@@ -48,7 +48,13 @@ public:
   
   /// @returns the index of the first zone of the preset
   uint16_t firstZoneIndex() const noexcept { return wPresetBagNdx; }
-  
+
+  uint32_t library() const noexcept { return dwLibrary; }
+
+  uint32_t genre() const noexcept { return dwGenre; }
+
+  uint32_t morphology() const noexcept { return dwMorphology; }
+
   /// @returns the number of preset zones
   size_t zoneCount() const noexcept {
     int value = (this + 1)->firstZoneIndex() - firstZoneIndex();

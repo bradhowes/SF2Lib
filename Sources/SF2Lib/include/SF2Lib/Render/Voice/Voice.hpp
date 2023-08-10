@@ -250,8 +250,6 @@ private:
   ModLFO modulatorLFO_;
   VibLFO vibratoLFO_;
   LowPassFilter filter_;
-  Float noiseFloorOverMagnitude_;
-  Float noiseFloorOverMagnitudeOfLoop_;
   Float initialAttenuation_{1.0};
 
   bool active_{false};

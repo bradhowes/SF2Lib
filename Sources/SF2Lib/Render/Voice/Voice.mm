@@ -24,9 +24,9 @@ modulatorEnvelope_{voiceIndex},
 modulatorLFO_{sampleRate},
 vibratoLFO_{sampleRate},
 filter_{sampleRate},
-voiceIndex_{voiceIndex},
 active_{false},
-keyDown_{false}
+keyDown_{false},
+voiceIndex_{voiceIndex}
 {}
 
 void

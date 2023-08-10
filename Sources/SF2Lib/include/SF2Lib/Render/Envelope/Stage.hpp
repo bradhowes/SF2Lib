@@ -36,7 +36,6 @@ inline const char* StageName(StageIndex stageIndex) noexcept {
     case StageIndex::decay: return "decay";
     case StageIndex::sustain: return "sustain";
     case StageIndex::release: return "release";
-    default: throw "unknown stage value";
   }
 }
 
