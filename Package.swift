@@ -157,7 +157,8 @@ let package = Package(
       linkerSettings: [
         .linkedFramework("Accelerate", .none),
         .linkedFramework("AudioToolbox", .none),
-        .linkedFramework("AVFoundation", .none)
+        .linkedFramework("AVFoundation", .none),
+        .unsafeFlags(["-Xlinker", "-no_application_extension"])
       ]
     ),
     .testTarget(
