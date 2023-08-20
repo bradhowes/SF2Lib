@@ -9,17 +9,17 @@
 
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/MIDI/MIDI.hpp"
+#include "SF2Lib/MIDI/Note.hpp"
 
 namespace SF2::MIDI {
 
 /**
- Collection of state values that pertains to a specific MIDI channel.
+ Collection of state values that pertains to a specific MIDI channel. Holds values for general MIDI controllers and for
+ continuous controllers (CC). Also provides a way to translate NPRN values into a generator index, which can then be
+ used to deposit modulator values for any of the defined sound font generators.
  */
 class ChannelState {
 public:
-
-  inline constexpr static int CCMin = 0;
-  inline constexpr static int CCMax = 127;
   inline constexpr static int maxPitchWheelValue = 8191;
 
   /**
@@ -29,19 +29,8 @@ public:
     reset();
   }
 
-  void reset() {
-    continuousControllerValues_.fill(0);
-    notePressureValues_.fill(0);
-    nrpnValues_.zero();
-    channelPressure_ = 0;
-    pitchWheelValue_ = (maxPitchWheelValue + 1) / 2; // this is the middle of the wheel at rest
-    pitchWheelSensitivity_ = 200;
-    nrpnIndex_ = 0;
-
-    sustainActive_ = false;
-    sostenutoActive_ = false;
-    activeDecoding_ = false;
-  }
+  /// Put channel state in original state.
+  void reset() noexcept;
 
   /**
    Set the pressure for a given note. This should only apply for an actively-playing note, and not a new one which
@@ -51,7 +40,7 @@ public:
    @param value the pressure value to record
    */
   void setNotePressure(int key, int value) {
-    if (key < 0 || key > Note::Max) throw std::runtime_error("invalid key");
+    if (key < 0 || key > Note::Max) return;
     notePressureValues_[static_cast<size_t>(key)] = value;
   }
 
@@ -61,8 +50,8 @@ public:
    @param key the key to get
    @returns the current pressure value for a key
    */
-  int notePressure(int key) const {
-    if (key < 0 or key > Note::Max) throw std::runtime_error("invalid key");
+  int notePressure(int key) const noexcept {
+    if (key < 0 or key > Note::Max) return 0;
     return notePressureValues_[static_cast<size_t>(key)];
   }
 
@@ -101,47 +90,37 @@ public:
   int pitchWheelSensitivity() const noexcept { return pitchWheelSensitivity_; }
 
   /**
-   Set a continuous controller value
+   Set the continuous controller value.
 
    @param id the controller ID
    @param value the value to set for the controller
    */
-  void setContinuousControllerValue(size_t id, int value) {
-    if (id < CCMin || id > CCMax) throw std::runtime_error("invalid CC ID");
-    continuousControllerValues_[id] = value;
-  }
-
-  void setContinuousControllerValue(MIDI::ControlChange id, int value);
+  bool setContinuousControllerValue(MIDI::ControlChange id, int value) noexcept;
 
   /**
    Get a continuous controller value.
 
-   @param id the controller ID to get
+   @param cc the controller ID to get
    @returns the controller value
    */
-  int continuousControllerValue(int id) const {
-    if (id < CCMin || id > CCMax) throw std::runtime_error("invalid CC ID");
-    return continuousControllerValues_[static_cast<size_t>(id - CCMin)];
-  }
+  int continuousControllerValue(MIDI::ControlChange cc) const noexcept { return continuousControllerValues_[cc]; }
 
   /**
-   Get a continuous controller value.
+   Get the NRPN value for associated with a generator.
 
-   @param id the controller ID to get
-   @returns the controller value
+   @param index the generator ID to fetch
+   @returns the NRPN value for the generator
    */
-  int continuousControllerValue(MIDI::ControlChange id) const noexcept {
-    return continuousControllerValue(static_cast<int>(id));
-  }
-
   int nrpnValue(Entity::Generator::Index index) const noexcept { return nrpnValues_[index]; }
 
+  /// @returns true if currently decoding a generator index
   bool isActivelyDecoding() const noexcept { return activeDecoding_; }
 
+  /// @returns the currently decoded generator index
   size_t nrpnIndex() const noexcept { return nrpnIndex_; }
 
 private:
-  using ContinuousControllerValues = std::array<int, CCMax - CCMin + 1>;
+  using ContinuousControllerValues = EnumIndexableValueArray<int, ControlChange, 128>;
   using NotePressureValues = std::array<int, Note::Max + 1>;
 
   ContinuousControllerValues continuousControllerValues_{};

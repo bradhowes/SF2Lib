@@ -2,15 +2,6 @@
 
 #pragma once
 
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <cmath>
-#include <map>
-
-#include "SF2Lib/DSP.hpp"
-#include "SF2Lib/MIDI/Note.hpp"
-
 /**
  Collection of enums and types used to represent MIDI v1 values and state.
  */

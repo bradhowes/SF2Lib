@@ -35,13 +35,10 @@ Voice::configure(const State::Config& config) noexcept
   os_log_debug(log_, "configuring voice: %zu", voiceIndex_);
   os_signpost_interval_begin(log_, configSignpost_, "start");
 
-  pendingRelease_ = 0;
-
-  config.sampleSource().load();
   state_.prepareForVoice(config);
 
   const auto& sampleSource{config.sampleSource()};
-
+  sampleSource.load();
   sampleGenerator_.configure(sampleSource, state_);
   pitch_.configure(sampleSource.header());
 
@@ -54,20 +51,21 @@ Voice::start() noexcept
   os_log_debug(log_, "starting voice: %zu", voiceIndex_);
   os_signpost_interval_begin(log_, startSignpost_, "start");
 
-  gainEnvelope_.configure(state_);
-  modulatorEnvelope_.configure(state_);
-
-  modulatorLFO_.configure(state_);
-  vibratoLFO_.configure(state_);
-
-  filter_.reset();
-
+  pendingRelease_ = 0;
   sampleCounter_ = 0;
   active_ = true;
   keyDown_ = true;
-  initialAttenuation_ = DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));
+  filter_.reset();
+
   loopingMode_ = loopingMode();
+  initialAttenuation_ = DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));
+
+  gainEnvelope_.configure(state_);
+  modulatorEnvelope_.configure(state_);
+  modulatorLFO_.configure(state_);
+  vibratoLFO_.configure(state_);
+
   sampleGenerator_.start();
-  
+
   os_signpost_interval_end(log_, startSignpost_, "start");
 }

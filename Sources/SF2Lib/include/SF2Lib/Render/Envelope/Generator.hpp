@@ -125,6 +125,7 @@ public:
    */
   void stop() noexcept {
     stageIndex_ = StageIndex::idle;
+    counter_ = 0;
     value_ = 0.0;
   }
 

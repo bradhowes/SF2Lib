@@ -29,14 +29,16 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       os_log_info(log_, "doMIDIEvent - keyPressure: %hhd %hhd", midiEvent.data[1], midiEvent.data[2]);
       if (midiEvent.length == 3) {
         channelState_.setNotePressure(midiEvent.data[1], midiEvent.data[2]);
+        notifyActiveVoicesChannelStateChanged();
       }
       break;
 
     case MIDI::CoreEvent::controlChange:
       os_log_info(log_, "doMIDIEvent - controlChange: %hhX %hhX", midiEvent.data[1], midiEvent.data[2]);
       if (midiEvent.length == 3 && midiEvent.data[1] <= 127 && midiEvent.data[2] <= 127) {
-        auto cc{MIDI::ControlChange(midiEvent.data[1])};
-        channelState_.setContinuousControllerValue(cc, midiEvent.data[2]);
+        if (channelState_.setContinuousControllerValue(MIDI::ControlChange(midiEvent.data[1]), midiEvent.data[2])) {
+          notifyActiveVoicesChannelStateChanged();
+        }
       }
       break;
 
@@ -51,6 +53,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       os_log_info(log_, "doMIDIEvent - channelPressure: %hhd", midiEvent.data[1]);
       if (midiEvent.length == 2) {
         channelState_.setChannelPressure(midiEvent.data[1]);
+        notifyActiveVoicesChannelStateChanged();
       }
       break;
 
@@ -59,6 +62,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       if (midiEvent.length == 3) {
         int bend = (midiEvent.data[2] << 7) | midiEvent.data[1];
         channelState_.setPitchWheelValue(bend);
+        notifyActiveVoicesChannelStateChanged();
       }
       break;
 
@@ -86,6 +90,15 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 
     default:
       break;
+  }
+}
+
+void
+Engine::notifyActiveVoicesChannelStateChanged() noexcept
+{
+  for (auto pos = oldestActive_.begin(); pos != oldestActive_.end();) {
+    auto& voice{voices_[*pos++]};
+    voice.channelStateChanged();
   }
 }
 

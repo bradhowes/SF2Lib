@@ -1,7 +1,6 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
 #include <cmath>
-#include <iostream>
 
 #include "SF2Lib/Render/Voice/State/Config.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
@@ -39,9 +38,12 @@ State::setDefaults() noexcept {
   setValue(Index::overridingRootKey, -1);
 
   // Install default modulators for the voice. Zones can override them and add new ones.
+  modulators_.clear();
   for (const auto& modulator : Entity::Modulator::Modulator::defaults) {
     addModulator(modulator);
   }
+
+  updateStateMods();
 }
 
 void
@@ -59,5 +61,4 @@ State::addModulator(const Entity::Modulator::Modulator& modulator) noexcept {
 
   // Add modulator to State and add its index to the GenValue instance that it affects.
   modulators_.emplace_back(modulator, *this);
-  gens_[modulator.generatorDestination()].addModulator(modulators_.size() - 1);
 }

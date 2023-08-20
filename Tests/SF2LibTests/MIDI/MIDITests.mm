@@ -4,6 +4,7 @@
 
 #include <XCTest/XCTest.h>
 
+#include "SF2Lib/Types.hpp"
 #include "SF2Lib/MIDI/MIDI.hpp"
 
 using namespace SF2;

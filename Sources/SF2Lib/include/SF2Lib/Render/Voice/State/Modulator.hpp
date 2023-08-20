@@ -9,6 +9,7 @@
 
 #include "SF2Lib/Entity/Modulator/Modulator.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
+#include "SF2Lib/MIDI/MIDI.hpp"
 #include "SF2Lib/MIDI/ValueTransformer.hpp"
 
 namespace SF2::MIDI { class Channel; }
@@ -73,6 +74,8 @@ public:
   /// modulators.
   const Entity::Modulator::Modulator& configuration() const noexcept { return configuration_; }
 
+  Entity::Generator::Index destination() const noexcept { return configuration_.generatorDestination(); }
+
   std::string description() const noexcept;
 
 private:
@@ -85,7 +88,7 @@ private:
 
     const State& state_;
     Proc proc_{nullptr};
-    const int cc_{0};
+    const MIDI::ControlChange cc_{0};
 
     bool isActive() const noexcept { return proc_ != nullptr; }
     int operator()() const noexcept { return (this->*proc_)(); }

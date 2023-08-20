@@ -5,6 +5,8 @@
 #include <array>
 #include <cstdint>
 
+#include "SF2Lib/Types.hpp"
+
 namespace SF2::Entity::Generator {
 
 /**
@@ -429,13 +431,6 @@ enum struct Index : size_t {
 };
 
 /**
- Convert an Index num value into its underlying integral type.
- */
-inline typename std::underlying_type<Index>::type indexValue(Index index) noexcept {
-  return static_cast<typename std::underlying_type<Index>::type>(index);
-}
-
-/**
  Iterator that covers all of the Index enum values.
  */
 class IndexIterator {
@@ -444,14 +439,14 @@ public:
   /**
    Constructor of a new iterator that points to the first enum value.
    */
-  IndexIterator() noexcept = default;
+  IndexIterator() = default;
 
   /**
    Constructor of a new iterator that starts at the given Index enum value.
 
    @param value the starting value
    */
-  IndexIterator(Index value) noexcept : value_{indexValue(value)} {}
+  IndexIterator(Index value) noexcept : value_{SF2::valueOf(value)} {}
 
   /**
    Increment the iterator.
@@ -492,8 +487,6 @@ private:
 class RawIndex {
 public:
 
-  RawIndex() noexcept = default;
-
   /// @returns boxed value
   uint16_t value() const noexcept { return value_; }
 
@@ -508,36 +501,6 @@ private:
  Fixed-size array with template value type that uses Index enums for indices.
  */
 template <typename T>
-class GeneratorValueArray : public std::array<T, size_t(Index::numValues)>
-{
-  using super = std::array<T, size_t(Index::numValues)>;
-
-public:
-
-  /**
-   Set all values in the array to the default value for the template type.
-   */
-  void zero() { this->fill(T()); }
-
-  /**
-   Obtain the value at the given index
-
-   @param index the location of the value to return
-   @returns the value at the give index
-   */
-  typename super::const_reference operator[](Index index) const noexcept {
-    return super::operator[](indexValue(index));
-  }
-
-  /**
-   Obtain a reference to the value at the given index
-
-   @param index the location of the value to return
-   @returns an updatable reference for the given index
-   */
-  typename super::reference& operator[](Index index) noexcept {
-    return super::operator[](indexValue(index));
-  }
-};
+using GeneratorValueArray = EnumIndexableValueArray<T, Index, size_t(Index::numValues)>;
 
 } // end namespace SF2::Entity::Generator

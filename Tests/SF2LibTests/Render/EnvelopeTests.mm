@@ -233,7 +233,7 @@ struct EnvelopeTestInjector {
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 1440);
   gen.configure(state);
-  XCTAssertEqualWithAccuracy(0.000000, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.0, EnvelopeTestInjector::sustain(gen), epsilon);
 }
 
 - (void)testModulationEnvelopeSustainLevel {

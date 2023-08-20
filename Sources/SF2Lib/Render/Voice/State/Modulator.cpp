@@ -36,7 +36,7 @@ Modulator::makeValueProvider(const EntityMod::Source& source, const State& state
   using GI = EntityMod::Source::GeneralIndex;
   if (source.isContinuousController()) {
     int cc{source.ccIndex()};
-    return ValueProvider{state, &ValueProvider::ccValue, cc};
+    return ValueProvider{state, &ValueProvider::ccValue, MIDI::ControlChange(cc)};
   }
   switch (source.generalIndex()) {
     case GI::none: return ValueProvider{state};

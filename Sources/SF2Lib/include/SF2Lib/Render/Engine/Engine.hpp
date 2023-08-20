@@ -341,6 +341,7 @@ private:
     return pos;
   }
 
+  void notifyActiveVoicesChannelStateChanged() noexcept;
   void processControlChange(MIDI::ControlChange cc) noexcept;
   void changeProgram(uint16_t program) noexcept;
   void loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept;

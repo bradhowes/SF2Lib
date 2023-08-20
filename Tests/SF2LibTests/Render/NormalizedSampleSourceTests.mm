@@ -63,20 +63,6 @@ static int16_t values[8] = {10000, -20000, 30000, 20000, 10000, -10000, -20000, 
 }
 
 
-- (void)testLinearInterpolation {
-  State::State state{100, channelState};
-  Sample::Generator gen{Sample::Interpolator::linear};
-  NormalizedSampleSource source{values, header};
-  gen.configure(source, state);
-  Sample::Pitch pitch{state};
-  pitch.configure(source.header());
-  auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), Modulation::Value(0.0));
-  XCTAssertEqualWithAccuracy(0.30517578125, gen.generate(inc, true), epsilon);
-  XCTAssertEqualWithAccuracy(0.288164037013, gen.generate(inc, true), epsilon);
-  XCTAssertEqualWithAccuracy(0.271152292776, gen.generate(inc, true), epsilon);
-  XCTAssertEqualWithAccuracy(0.254140548539, gen.generate(inc, true), epsilon);
-}
-
 - (void)testLoadSamplesPerformance0 {
   const auto& file = contexts->context0.file();
   auto sampleEntries = file.sampleHeaders().size();

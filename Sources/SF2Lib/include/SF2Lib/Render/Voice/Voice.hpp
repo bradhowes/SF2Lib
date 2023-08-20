@@ -84,7 +84,7 @@ public:
   void configure(const State::Config& config) noexcept;
 
   /**
-   Start the voice rendering.
+   Start voice rendering.
    */
   void start() noexcept;
 
@@ -153,15 +153,15 @@ public:
    @returns next sample
    */
   Float renderSample() noexcept {
-    if (! active_) return 0.0f;
+    if (! active_) return 0_F;
 
-    // Capture the current state of the modulators and envelopes.
+    // Capture the current state of the modulators and envelopes and advance them to the next sample.
     auto modLFO{modulatorLFO_.getNextValue()};
     auto vibLFO{vibratoLFO_.getNextValue()};
     auto modEnv{modulatorEnvelope_.getNextValue()};
     auto volEnv{gainEnvelope_.getNextValue()};
 
-    if (gainEnvelope_.isDelayed()) return 0.0f;
+    if (gainEnvelope_.isDelayed()) return 0_F;
 
     // Calculate the pitch to render and then generate a new sample.
     Float increment{pitch_.samplePhaseIncrement(modLFO, vibLFO, modEnv)};
@@ -181,6 +181,7 @@ public:
     auto frequency{(state_.modulated(Index::initialFilterCutoff) +
                     state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO.val +
                     state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv.val)};
+    // std::cout << frequency << '\n';
     auto resonance{state_.modulated(Index::initialFilterResonance)};
 
     auto filtered{filter_.transform(frequency, resonance, sample * gain)};
@@ -238,6 +239,8 @@ public:
   /// @returns `State` instance for the voice.
   constexpr State::State& state() noexcept { return state_; }
 
+  void channelStateChanged() noexcept { state_.updateStateMods(); }
+  
 private:
   State::State state_;
   size_t sampleCounter_{0};
