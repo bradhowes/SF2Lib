@@ -152,11 +152,17 @@ public:
   /// @returns sample rate defined at construction
   Float sampleRate() const noexcept { return sampleRate_; }
 
+  /// Update the modulator values due to a change in the channel state.
   void updateStateMods() noexcept;
+
+  /// @returns number of unique attached modulators
+  size_t modulatorCount() const noexcept { return modulators_.size(); }
+
+  /// Show content of state.
+  void dump() noexcept;
 
 private:
   void clear() noexcept;
-  void dump() noexcept;
 
   Entity::Generator::GeneratorValueArray<GenValue> gens_;
   std::vector<Modulator> modulators_;

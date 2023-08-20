@@ -14,43 +14,43 @@ namespace EntityMod = Entity::Modulator;
 
 int Modulator::ValueProvider::ccValue(const State& state) const noexcept {
   auto value = state.channelState().continuousControllerValue(cc_);
-  std::cout << "ValueProvider CC " << valueOf(cc_) << " value: " << value << "\n";
+  // std::cout << "ValueProvider CC " << valueOf(cc_) << " value: " << value << "\n";
   return value;
 }
 
 int Modulator::ValueProvider::noteOnKey(const State& state) const noexcept {
   auto value = state.key();
-  std::cout << "ValueProvider key " << value << "\n";
+  // std::cout << "ValueProvider key " << value << "\n";
   return value;
 }
 
 int Modulator::ValueProvider::noteOnVelocity(const State& state) const noexcept {
   auto value = state.velocity();
-  std::cout << "ValueProvider vel " << value << "\n";
+  // std::cout << "ValueProvider vel " << value << "\n";
   return value;
 }
 
 int Modulator::ValueProvider::keyPressure(const State& state) const noexcept {
   auto value = state.channelState().notePressure(state.key());
-  std::cout << "ValueProvider keyPressure " << state.key() << " " << value << "\n";
+  // std::cout << "ValueProvider keyPressure " << state.key() << " " << value << "\n";
   return value;
 }
 
 int Modulator::ValueProvider::channelPressure(const State& state) const noexcept {
   auto value = state.channelState().channelPressure();
-  std::cout << "ValueProvider channelPressure " << value << "\n";
+  // std::cout << "ValueProvider channelPressure " << value << "\n";
   return value;
 }
 
 int Modulator::ValueProvider::pitchWheelValue(const State& state) const noexcept {
   auto value = state.channelState().pitchWheelValue();
-  std::cout << "ValueProvider pitchWheelValue " << value << "\n";
+  // std::cout << "ValueProvider pitchWheelValue " << value << "\n";
   return value;
 }
 
 int Modulator::ValueProvider::pitchWheelSensitivity(const State& state) const noexcept {
   auto value = state.channelState().pitchWheelSensitivity();
-  std::cout << "ValueProvider pitchWheelSensitivity " << value << "\n";
+  // std::cout << "ValueProvider pitchWheelSensitivity " << value << "\n";
   return value;
 }
 
@@ -103,7 +103,7 @@ Modulator::value(const State& state) const noexcept
   // Obtain transformed secondary value.
   Float transformedSecondary{secondaryValue_.isActive() ? secondaryTransform_(secondaryValue_(state)) : 1.0};
   Float result{transformedPrimary * transformedSecondary * amount_};
-  std::cout << "P: " << primary << " tP: " << transformedPrimary << " tS: " << transformedSecondary
-  << " amount: " << amount_ << " result: " << result << "\n";
+  // std::cout << "P: " << primary << " tP: " << transformedPrimary << " tS: " << transformedSecondary
+  // << " amount: " << amount_ << " result: " << result << "\n";
   return result;
 }

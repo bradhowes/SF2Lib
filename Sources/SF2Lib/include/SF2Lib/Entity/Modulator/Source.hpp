@@ -61,7 +61,9 @@ public:
   inline static constexpr uint16_t polarityBit = (1 << 9);
 
   /// Default constructor that maps to an inactive source (one that always returns 0.0)
-  Source() noexcept : bits_{0} {}
+  Source() = default;
+
+  explicit Source(uint16_t bits) : bits_{bits} {}
 
   /**
    Generate a Source based on a MIDI general controller.
@@ -154,8 +156,7 @@ public:
   friend std::ostream& operator<<(std::ostream& os, const Source& mod) noexcept;
 
 private:
-  explicit Source(uint16_t bits) : bits_{bits} {}
-
+  
   Source continuity(ContinuityType continuity) const noexcept {
     return Source(static_cast<uint16_t>((bits_ & 0x3FF) | (uint16_t(continuity) << 10)));
   }
