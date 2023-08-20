@@ -25,9 +25,9 @@ public:
   /**
    Construct new channel.
    */
-  ChannelState() noexcept {
-    reset();
-  }
+  ChannelState() noexcept { reset(); }
+
+  ChannelState(ChannelState&&) = default;
 
   /// Put channel state in original state.
   void reset() noexcept;
@@ -119,6 +119,8 @@ public:
   /// @returns the currently decoded generator index
   size_t nrpnIndex() const noexcept { return nrpnIndex_; }
 
+  void dump() const noexcept;
+  
 private:
   using ContinuousControllerValues = EnumIndexableValueArray<int, ControlChange, 128>;
   using NotePressureValues = std::array<int, Note::Max + 1>;

@@ -64,4 +64,10 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqualWithAccuracy(150.0, state.modulated(Index::holdVolumeEnvelope), 0.000001);
 }
 
+- (void)testInitialAttenuationValues {
+  State::State state{contexts.context2.makeState(0, 60, 32)};
+  XCTAssertEqual(100, state.channelState().continuousControllerValue(MIDI::ControlChange(7)));
+  XCTAssertEqualWithAccuracy(280.982985437, state.modulated(Index::initialAttenuation), 0.000001);
+}
+
 @end

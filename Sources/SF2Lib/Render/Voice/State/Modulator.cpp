@@ -1,5 +1,6 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
+#include <iostream>
 #include <sstream>
 
 #include "SF2Lib/MIDI/ChannelState.hpp"
@@ -11,41 +12,72 @@ using namespace SF2::Render::Voice::State;
 
 namespace EntityMod = Entity::Modulator;
 
-int Modulator::ValueProvider::ccValue() const noexcept { return state_.channelState().continuousControllerValue(cc_); }
-int Modulator::ValueProvider::noteOnKey() const noexcept { return state_.key(); }
-int Modulator::ValueProvider::noteOnVelocity() const noexcept { return state_.velocity(); }
-int Modulator::ValueProvider::keyPressure() const noexcept { return state_.channelState().notePressure(state_.key()); }
-int Modulator::ValueProvider::channelPressure() const noexcept { return state_.channelState().channelPressure(); }
-int Modulator::ValueProvider::pitchWheelValue() const noexcept { return state_.channelState().pitchWheelValue(); }
-int Modulator::ValueProvider::pitchWheelSensitivity() const noexcept {
-  return state_.channelState().pitchWheelSensitivity();
+int Modulator::ValueProvider::ccValue(const State& state) const noexcept {
+  auto value = state.channelState().continuousControllerValue(cc_);
+  std::cout << "ValueProvider CC " << valueOf(cc_) << " value: " << value << "\n";
+  return value;
 }
 
-Modulator::Modulator(const EntityMod::Modulator& configuration, const State& state) noexcept :
+int Modulator::ValueProvider::noteOnKey(const State& state) const noexcept {
+  auto value = state.key();
+  std::cout << "ValueProvider key " << value << "\n";
+  return value;
+}
+
+int Modulator::ValueProvider::noteOnVelocity(const State& state) const noexcept {
+  auto value = state.velocity();
+  std::cout << "ValueProvider vel " << value << "\n";
+  return value;
+}
+
+int Modulator::ValueProvider::keyPressure(const State& state) const noexcept {
+  auto value = state.channelState().notePressure(state.key());
+  std::cout << "ValueProvider keyPressure " << state.key() << " " << value << "\n";
+  return value;
+}
+
+int Modulator::ValueProvider::channelPressure(const State& state) const noexcept {
+  auto value = state.channelState().channelPressure();
+  std::cout << "ValueProvider channelPressure " << value << "\n";
+  return value;
+}
+
+int Modulator::ValueProvider::pitchWheelValue(const State& state) const noexcept {
+  auto value = state.channelState().pitchWheelValue();
+  std::cout << "ValueProvider pitchWheelValue " << value << "\n";
+  return value;
+}
+
+int Modulator::ValueProvider::pitchWheelSensitivity(const State& state) const noexcept {
+  auto value = state.channelState().pitchWheelSensitivity();
+  std::cout << "ValueProvider pitchWheelSensitivity " << value << "\n";
+  return value;
+}
+
+Modulator::Modulator(const EntityMod::Modulator& configuration) noexcept :
 configuration_{configuration},
 amount_{configuration.amount()},
-primaryValue_{makeValueProvider(configuration.source(), state)},
+primaryValue_{makeValueProvider(configuration.source())},
 primaryTransform_{configuration.source()},
-secondaryValue_{makeValueProvider(configuration.amountSource(), state)},
+secondaryValue_{makeValueProvider(configuration.amountSource())},
 secondaryTransform_{configuration.amountSource()}
 {}
 
 Modulator::ValueProvider
-Modulator::makeValueProvider(const EntityMod::Source& source, const State& state) noexcept
+Modulator::makeValueProvider(const EntityMod::Source& source) noexcept
 {
   using GI = EntityMod::Source::GeneralIndex;
   if (source.isContinuousController()) {
-    int cc{source.ccIndex()};
-    return ValueProvider{state, &ValueProvider::ccValue, MIDI::ControlChange(cc)};
+    return ValueProvider{&ValueProvider::ccValue, MIDI::ControlChange(source.ccIndex().value)};
   }
   switch (source.generalIndex()) {
-    case GI::none: return ValueProvider{state};
-    case GI::noteOnKey: return ValueProvider{state, &ValueProvider::noteOnKey};
-    case GI::noteOnVelocity: return ValueProvider{state, &ValueProvider::noteOnVelocity};
-    case GI::keyPressure: return ValueProvider{state, &ValueProvider::keyPressure};
-    case GI::channelPressure: return ValueProvider{state, &ValueProvider::channelPressure};
-    case GI::pitchWheel: return ValueProvider{state, &ValueProvider::pitchWheelValue};
-    case GI::pitchWheelSensitivity: return ValueProvider{state, &ValueProvider::pitchWheelSensitivity};
+    case GI::none: return ValueProvider{};
+    case GI::noteOnKey: return ValueProvider{&ValueProvider::noteOnKey};
+    case GI::noteOnVelocity: return ValueProvider{&ValueProvider::noteOnVelocity};
+    case GI::keyPressure: return ValueProvider{&ValueProvider::keyPressure};
+    case GI::channelPressure: return ValueProvider{&ValueProvider::channelPressure};
+    case GI::pitchWheel: return ValueProvider{&ValueProvider::pitchWheelValue};
+    case GI::pitchWheelSensitivity: return ValueProvider{&ValueProvider::pitchWheelSensitivity};
   }
 }
 
@@ -55,4 +87,23 @@ Modulator::description() const noexcept
   std::ostringstream os;
   os << configuration().description();
   return os.str();
+}
+
+Float
+Modulator::value(const State& state) const noexcept
+{
+  // If there is no source for the modulator, it always returns 0.0 (no modulation).
+  if (!primaryValue_.isActive()) return 0.0f;
+
+  // Obtain transformed primary value.
+  auto primary{primaryValue_(state)};
+  Float transformedPrimary{primaryTransform_(primary)};
+  if (transformedPrimary == 0.0) return 0.0f;
+
+  // Obtain transformed secondary value.
+  Float transformedSecondary{secondaryValue_.isActive() ? secondaryTransform_(secondaryValue_(state)) : 1.0};
+  Float result{transformedPrimary * transformedSecondary * amount_};
+  std::cout << "P: " << primary << " tP: " << transformedPrimary << " tS: " << transformedSecondary
+  << " amount: " << amount_ << " result: " << result << "\n";
+  return result;
 }

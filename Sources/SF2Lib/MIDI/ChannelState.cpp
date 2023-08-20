@@ -1,6 +1,6 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
-#include <cmath>
+#include <iostream>
 
 #include "SF2Lib/Entity/Generator/Definition.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
@@ -128,4 +128,15 @@ ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, int value) no
   }
 
   return !activeDecoding_;
+}
+
+void
+ChannelState::dump() const noexcept
+{
+  for (size_t index = 0; index < 128; ++index) {
+    std::cout << "CC " << index << " = " << continuousControllerValues_[index] << '\n';
+  }
+  for (auto pos = Entity::Generator::IndexIterator::begin(); pos != Entity::Generator::IndexIterator::end(); ++pos) {
+    std::cout << "NRPN " << valueOf(*pos) << " = " << nrpnValues_[*pos] << '\n';
+  }
 }

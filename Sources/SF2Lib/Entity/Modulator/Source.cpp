@@ -23,7 +23,7 @@ Source::description() const noexcept {
     }
   }
   else {
-    os << "CC[" << ccIndex() << ']';
+    os << "CC[" << ccIndex().value << ']';
   }
   
   os << '(' << (isUnipolar() ? "uni" : "bi") << '/' << (isPositive() ? "-+" : "+-") << '/'

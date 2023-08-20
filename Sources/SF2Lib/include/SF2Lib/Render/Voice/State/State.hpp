@@ -44,7 +44,7 @@ public:
   State(Float sampleRate, const MIDI::ChannelState& channelState) noexcept :
   sampleRate_{sampleRate}, eventKey_{}, eventVelocity_{}, channelState_{channelState}
   {
-    setDefaults();
+    clear();
   }
 
   /**
@@ -58,13 +58,11 @@ public:
   State(Float sampleRate, const MIDI::ChannelState& channelState, int key, int velocity = 64) noexcept :
   sampleRate_{sampleRate}, eventKey_{key}, eventVelocity_{velocity}, channelState_{channelState}
   {
-    setDefaults();
+    clear();
   }
 
   /// Allow move operations during construction to support std::vector
-  State(State&&) noexcept = default;
-
-  ~State() noexcept = default;
+  State(State&&) = default;
 
   State(const State&) = delete;
   State& operator=(const State&) noexcept = delete;
@@ -154,18 +152,11 @@ public:
   /// @returns sample rate defined at construction
   Float sampleRate() const noexcept { return sampleRate_; }
 
-  void updateStateMods() noexcept {
-    std::for_each(Entity::Generator::IndexIterator::begin(), Entity::Generator::IndexIterator::end(), [&](auto index) {
-      gens_[index].setMods(channelState_.nrpnValue(index));
-    });
-    for (auto& mod : modulators_ ) {
-      gens_[mod.destination()].addMod(mod.value());
-    }
-  }
+  void updateStateMods() noexcept;
 
 private:
-
-  void setDefaults() noexcept;
+  void clear() noexcept;
+  void dump() noexcept;
 
   Entity::Generator::GeneratorValueArray<GenValue> gens_;
   std::vector<Modulator> modulators_;

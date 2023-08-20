@@ -132,9 +132,9 @@ public:
   }
   
   /// @returns the index of the continuous controller
-  int ccIndex() const noexcept {
+  CC ccIndex() const noexcept {
     assert(isValid() && isContinuousController());
-    return rawIndex();
+    return CC(rawIndex());
   }
 
   /// @returns the continuity type for the controller values

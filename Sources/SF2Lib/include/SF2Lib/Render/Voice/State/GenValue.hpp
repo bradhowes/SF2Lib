@@ -51,6 +51,8 @@ private:
   int value_{0};
   int adjustment_{0};
   Float mods_{0_F};
+
+  friend class State;
 };
 
 }

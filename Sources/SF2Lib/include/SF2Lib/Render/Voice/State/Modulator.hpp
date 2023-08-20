@@ -2,10 +2,7 @@
 
 #pragma once
 
-#include <cassert>
-#include <cmath>
-#include <functional>
-#include <limits>
+#include <iostream>
 
 #include "SF2Lib/Entity/Modulator/Modulator.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
@@ -38,9 +35,8 @@ public:
    Construct new modulator
 
    @param configuration the entity configuration that defines the modulator
-   @param state the voice state that can be used as a source for modulators
    */
-  Modulator(const Entity::Modulator::Modulator& configuration, const State& state) noexcept;
+  Modulator(const Entity::Modulator::Modulator& configuration) noexcept;
 
   /**
    Acquire the amount from the given configuration. This is the only change we can make since per spec, modulators are
@@ -53,53 +49,44 @@ public:
     amount_ = configuration.amount();
   }
 
-  /// @returns current value of the modulator
-  Float value() const noexcept
-  {
-    // If there is no source for the modulator, it always returns 0.0 (no modulation).
-    if (!primaryValue_.isActive()) return 0.0f;
+  /**
+   Calculate the modulator's value.
 
-    // Obtain transformed primary value.
-    auto primaryValue{primaryValue_()};
-    Float transformedPrimaryValue{primaryTransform_(primaryValue)};
-    if (transformedPrimaryValue == 0.0) return 0.0f;
+   @param state the voice state that is used as a source of values for the modulator
 
-    // Obtain transformed secondary value.
-    Float transformedSecondaryAmount{secondaryValue_.isActive() ? secondaryTransform_(secondaryValue_()) : 1.0};
-    Float result{transformedPrimaryValue * transformedSecondaryAmount * amount_};
-    return result;
-  }
+   @returns current value of the modulator
+   */
+  Float value(const State& state) const noexcept;
 
   /// @returns configuration of the modulator from the SF2 file. This is used to allow for comparisons between
   /// modulators.
   const Entity::Modulator::Modulator& configuration() const noexcept { return configuration_; }
 
+  /// @returns the generator index that this modulator affects.
   Entity::Generator::Index destination() const noexcept { return configuration_.generatorDestination(); }
 
+  /// @returns a textual description of the modulator.
   std::string description() const noexcept;
 
 private:
 
-  // Holds a pointer to member function that determines how to generate a value for a modulator. Holds state for the
-  // member function to use, but not all pieces are used by all methods. Once set, these values normally do not change.
-  // The one exception is when a Modulator is used to provide a value to another (aka linking).
+  // Holds a pointer to member function that determines how to generate a value for a modulator.
   struct ValueProvider {
-    using Proc = int (ValueProvider::*)() const;
+    using Proc = int (ValueProvider::*)(const State&) const;
 
-    const State& state_;
     Proc proc_{nullptr};
     const MIDI::ControlChange cc_{0};
 
     bool isActive() const noexcept { return proc_ != nullptr; }
-    int operator()() const noexcept { return (this->*proc_)(); }
+    int operator()(const State& state) const noexcept { return (this->*proc_)(state); }
 
-    int ccValue() const noexcept;
-    int noteOnKey() const noexcept;
-    int noteOnVelocity() const noexcept;
-    int keyPressure() const noexcept;
-    int channelPressure() const noexcept;
-    int pitchWheelValue() const noexcept;
-    int pitchWheelSensitivity() const noexcept;
+    int ccValue(const State&) const noexcept;
+    int noteOnKey(const State&) const noexcept;
+    int noteOnVelocity(const State&) const noexcept;
+    int keyPressure(const State&) const noexcept;
+    int channelPressure(const State&) const noexcept;
+    int pitchWheelValue(const State&) const noexcept;
+    int pitchWheelSensitivity(const State&) const noexcept;
   };
 
   /**
@@ -107,10 +94,9 @@ private:
    `amount` values, regardless of their actual source.
 
    @param source the modulator source definition from the SF2 file
-   @param state the voice state that will be modulated
    @returns ValueProvider instance for obtaining the value
    */
-  static ValueProvider makeValueProvider(const Entity::Modulator::Source& source, const State& state) noexcept;
+  static ValueProvider makeValueProvider(const Entity::Modulator::Source& source) noexcept;
 
   const Entity::Modulator::Modulator& configuration_;
   int amount_;

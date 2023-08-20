@@ -88,7 +88,7 @@ using namespace SF2::Entity::Modulator;
     Source s{Source(Source::CC(bits))};
     XCTAssertTrue(s.isValid());
     XCTAssertTrue(s.isContinuousController());
-    XCTAssertEqual(bits, s.ccIndex());
+    XCTAssertEqual(bits, s.ccIndex().value);
   }
   
   for (auto bits : {0, 6, 32, 63, 98, 101, 120, 127}) {
