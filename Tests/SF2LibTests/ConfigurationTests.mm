@@ -34,9 +34,16 @@
 }
 
 - (void)testAlternate {
-  auto z = [Configuration getConfigurationPath: @"Configuration" from: (NSBundle*)(self)];
-  XCTAssertNotNil(z);
-  z = [Configuration getConfigurationPath: @"Blah" from: NULL];
+  auto bundles = [NSBundle allBundles];
+  for (int index = 0; index < bundles.count; ++index) {
+    NSBundle* bundle = [bundles objectAtIndex:index];
+    auto z = [Configuration getConfigurationPath: @"Configuration" from: bundle];
+    XCTAssertNotNil(z);
+    auto z2 = [Configuration getConfigurationPath: @"wfejefjweofijweofe f" from: bundle];
+    XCTAssertNil(z2);
+  }
+
+  auto z = [Configuration getConfigurationPath: @"Blah" from: NULL];
   XCTAssertNil(z);
 }
 

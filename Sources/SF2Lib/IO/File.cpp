@@ -69,8 +69,6 @@ File::load()
     return LoadResponse::invalidFormat;
   }
 
-  assert(!rawSamples_.empty());
-
   // Create a indirection index that provides the presets ordered by bank/program ordering.
   presetIndicesOrderedByBankProgram_.resize(presets_.size());
   std::iota(presetIndicesOrderedByBankProgram_.begin(), presetIndicesOrderedByBankProgram_.end(), 0);

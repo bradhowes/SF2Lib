@@ -128,8 +128,14 @@ using namespace SF2::Render::Voice::Sample;
   // file.dumpThreaded();
 }
 
-- (void)testDump {
+- (void)testDump0 {
   const auto& file = contexts->context0.file();
+  XCTAssertNoThrow(file.dump());
+  XCTAssertNoThrow(file.dumpThreaded());
+}
+
+- (void)testDump1 {
+  const auto& file = contexts->context1.file();
   XCTAssertNoThrow(file.dump());
   XCTAssertNoThrow(file.dumpThreaded());
 }

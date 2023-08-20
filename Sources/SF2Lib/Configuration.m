@@ -48,10 +48,8 @@ static dispatch_once_t onceToken;
 
 + (nullable NSString*)getConfigurationPath:(NSString*)name from:(nullable NSBundle*)bundle {
   if (bundle) {
-    @try {
-      return [bundle pathForResource:name ofType:@"plist"];
-    } @catch (NSException *exception) {
-    }
+    NSString* found = [bundle pathForResource:name ofType:@"plist"];
+    if (found) return found;
   }
   return [Configuration locate:name ofType:@"plist"];
 }
