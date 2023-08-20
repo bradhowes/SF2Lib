@@ -28,8 +28,7 @@ public:
   Index() = default;
 
   /**
-   Configure the index to work with the given bounds. NOTE: this is invoked before start of rendering a note. This
-   routine *must* ensure that the state is properly setup to do so, just as if it was created from scratch.
+   Configure the index to work with the given bounds.
 
    @param bounds the sample bounds to work with
    */
@@ -37,13 +36,14 @@ public:
     bounds_ = bounds;
   }
 
+  /// Start rendering.
   void start() noexcept {
     whole_ = 0;
     partial_ = 0.0;
     looped_ = false;
   }
 
-  /// Signal that no further operations will take place using this index.
+  /// Signal that no further rendering will take place using this index until a new start.
   void stop() noexcept { whole_ = bounds_.endPos(); }
 
   /// @returns true if the index has been stopped.

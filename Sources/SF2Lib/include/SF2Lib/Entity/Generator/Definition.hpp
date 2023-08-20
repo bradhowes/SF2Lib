@@ -99,7 +99,7 @@ public:
   bool isAvailableInPreset() const noexcept { return availableInPreset_; }
 
   /**
-   Obtain the NRPN multiplier for a generator index. Per SF 2.01 spec:
+   Obtain the NRPN multiplier for a generator index. Per SF 2.01 spec section 9.6.3:
 
    Data Entry value spans the “useful” range as outlined in section 8.1.3, and in the same
    perceptually-additive-real-world units. In the case where the meaningful range consists of more than 8192
