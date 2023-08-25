@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include "SF2Lib/Entity/Bag.hpp"
-#include "SF2Lib/Render/SampleSourceCollection.hpp"
 #include "SF2Lib/Render/Zone/Zone.hpp"
 
 namespace SF2::Render::Zone {

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "SF2Lib/Render/Zone/Zone.hpp"
 #include "SF2Lib/Render/Zone/Collection.hpp"
 
 namespace SF2::IO { class File; }

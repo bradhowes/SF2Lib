@@ -2,10 +2,7 @@
 
 #pragma once
 
-#include <cassert>
-#include <iostream>
-
-#include "SF2Lib/DSP.hpp"
+#include "SF2Lib/Types.hpp"
 #include "DSPHeaders/Biquad.hpp"
 
 namespace SF2::Render {

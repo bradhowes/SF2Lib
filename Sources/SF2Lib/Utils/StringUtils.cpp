@@ -1,10 +1,9 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
-#include <string>
-
 #include <algorithm>
 #include <cctype>
 #include <locale>
+#include <string>
 
 #include "SF2Lib/Utils/StringUtils.hpp"
 
@@ -21,5 +20,6 @@ SF2::Utils::trim_property(char* property, size_t size) noexcept
   std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) -> unsigned char {
     return std::isprint(c) ? c : '_';
   });
+  // Move back to original container
   strncpy(property, s.c_str(), std::min(s.size() + 1, size));
 }

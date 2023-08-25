@@ -10,6 +10,7 @@
 #include "SF2Lib/Entity/Modulator/Modulator.hpp"
 #include "SF2Lib/IO/ChunkItems.hpp"
 #include "SF2Lib/IO/File.hpp"
+#include "SF2Lib/Render/Zone/Zone.hpp"
 
 namespace SF2::Render::Zone {
 
@@ -38,7 +39,7 @@ public:
   size_t size() const noexcept { return zones_.size(); }
 
   /**
-   Locate the zones that match the given key/velocity pair.
+   Locate the zone(s) that match the given key/velocity pair.
 
    @param key the MIDI key to filter on
    @param velocity the MIDI velocity to filter on
@@ -64,7 +65,8 @@ public:
    Add a zone with the given args. Note that empty zones (no generators and no modulators) are dropped, as are any
    global zones that are not the first zone.
 
-   @param notGlobalIfPresent generator index that if present at end of gen collection means the zone is not global
+   @param notGlobalIfPresent generator index that if present at end of gen collection means the zone is not global. For
+   a PresetZone, this is an Instrument. For an InstrumentZone, it is a SampleSource.
    @param gens collection of generators that defines the zone
    @param mods collection of modulators that defines the zone
    @param values additional arguments for the Zone construction
