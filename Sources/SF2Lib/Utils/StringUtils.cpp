@@ -1,16 +1,15 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
-#pragma once
-
 #include <string>
 
 #include <algorithm>
 #include <cctype>
 #include <locale>
 
-namespace SF2::IO {
+#include "SF2Lib/Utils/StringUtils.hpp"
 
-static inline void trim_property(char* property, size_t size) noexcept
+void
+SF2::Utils::trim_property(char* property, size_t size) noexcept
 {
   // This is really inefficient, but these sizes are very small (< 50) so...
   std::string s(property, size - 1);
@@ -24,9 +23,3 @@ static inline void trim_property(char* property, size_t size) noexcept
   });
   strncpy(property, s.c_str(), std::min(s.size() + 1, size));
 }
-
-template <typename T> static inline void trim_property(T& property) noexcept {
-  trim_property(property, sizeof(property));
-}
-
-} // end namespace SF2::IO

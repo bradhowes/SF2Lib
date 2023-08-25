@@ -3,8 +3,8 @@
 #pragma once
 
 #include "SF2Lib/Render/Voice/State/Config.hpp"
-#include "SF2Lib/Render/Zone/Preset.hpp"
 #include "SF2Lib/Render/WithCollectionBase.hpp"
+#include "SF2Lib/Render/Zone/Preset.hpp"
 
 namespace SF2::IO {
 class File;
@@ -40,24 +40,7 @@ public:
    @param velocity the MIDI velocity to filter with
    @returns vector of Voice:Config instances containing the zones to use
    */
-  ConfigCollection find(int key, int velocity) const noexcept {
-    ConfigCollection zonePairs;
-
-    // Obtain the preset zones that match the key/velocity combination
-    for (const Zone::Preset& preset : zones_.filter(key, velocity)) {
-
-      // For each preset zone, scan to find an instrument to use for rendering
-      const Instrument& presetInstrument = preset.instrument();
-      auto globalInstrument = presetInstrument.globalZone();
-      for (const Zone::Instrument& instrument : presetInstrument.filter(key, velocity)) {
-
-        // Record a new Voice::Config with the preset/instrument zones to use for rendering
-        zonePairs.emplace_back(preset, globalZone(), instrument, globalInstrument, key, velocity);
-      }
-    }
-
-    return zonePairs;
-  }
+  ConfigCollection find(int key, int velocity) const noexcept;
 };
 
 } // namespace SF2::Render

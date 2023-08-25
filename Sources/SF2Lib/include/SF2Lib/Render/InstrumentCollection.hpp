@@ -24,20 +24,11 @@ public:
 
    @param file the file to build with
    */
-  void build(const IO::File& file) noexcept
-  {
-    assert(instruments_.empty());
-    const auto& definitions = file.instruments();
-    auto count = definitions.size();
-    instruments_.reserve(count);
-    for (size_t index = 0; index < count; ++index) {
-      instruments_.emplace_back(file, definitions[index]);
-    }
-  }
+  void build(const IO::File& file) noexcept;
 
-  void clear() noexcept { instruments_.clear(); }
+  void clear() noexcept;
 
-  const Instrument& operator[](size_t index) const noexcept { return checkedVectorIndexing(instruments_, index); }
+  const Instrument& operator[](size_t index) const noexcept;
 
 private:
   std::vector<Instrument> instruments_{};

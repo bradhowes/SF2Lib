@@ -2,6 +2,8 @@
 //
 
 #include <AVFoundation/AVFoundation.h>
+#include <iomanip>
+
 #import "SF2Lib/Configuration.h"
 
 #include "SampleBasedContexts.hpp"

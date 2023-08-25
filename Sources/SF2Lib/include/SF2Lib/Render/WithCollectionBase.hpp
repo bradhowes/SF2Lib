@@ -2,13 +2,10 @@
 
 #pragma once
 
-#include <optional>
-
-#include "SF2Lib/IO/File.hpp"
-
 #include "SF2Lib/Render/Zone/Zone.hpp"
 #include "SF2Lib/Render/Zone/Collection.hpp"
 
+namespace SF2::IO { class File; }
 namespace SF2::Render {
 
 /**

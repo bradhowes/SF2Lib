@@ -2,9 +2,6 @@
 
 #pragma once
 
-#include <fstream>
-#include <map>
-#include <memory>
 #include <vector>
 
 #include "SF2Lib/Entity/Bag.hpp"
@@ -36,24 +33,12 @@ public:
 
    @param path the file to open and load
    */
-  File(const char* path) : path_{path}, fd_{-1}
-  {
-    fd_ = ::open(path, O_RDONLY);
-    if (fd_ == -1) throw std::runtime_error("file not found");
-    if (load() != LoadResponse::ok) {
-      ::close(fd_);
-      fd_ = -1;
-      throw Format::error;
-    }
-  }
+  File(const char* path);
 
   /**
    Custom destructor. Closes file that was opened in constructor.
    */
-  ~File() noexcept
-  {
-    if (fd_ >= 0) ::close(fd_);
-  }
+  ~File() noexcept;
 
   File(const File&) = delete;
   File(File&&) = delete;

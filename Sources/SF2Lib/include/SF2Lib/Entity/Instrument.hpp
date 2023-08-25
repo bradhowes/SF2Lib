@@ -3,8 +3,6 @@
 #pragma once
 
 #include "SF2Lib/Entity/Entity.hpp"
-#include "SF2Lib/IO/Pos.hpp"
-#include "SF2Lib/IO/StringUtils.hpp"
 
 namespace SF2::Entity {
 
@@ -17,28 +15,20 @@ namespace SF2::Entity {
 class Instrument : Entity {
 public:
   static constexpr size_t size = 22;
-  
-  explicit Instrument(IO::Pos& pos) noexcept {
-    assert(sizeof(*this) == size);
-    pos = pos.readInto(*this);
-    IO::trim_property(achInstName);
-  }
-  
+
+  explicit Instrument(IO::Pos& pos) noexcept;
+
   /// @returns the name of the instrument
-  std::string name() const noexcept { return std::string(achInstName); }
-  
+  std::string name() const noexcept;
+
   /// @returns the index of the first Zone of the instrument
   uint16_t firstZoneIndex() const noexcept { return wInstBagNdx; }
-  
+
   /// @returns the number of instrument zones
-  size_t zoneCount() const noexcept {
-    int value = (this + 1)->firstZoneIndex() - firstZoneIndex();
-    assert(value >= 0);
-    return static_cast<size_t>(value);
-  }
+  size_t zoneCount() const noexcept;
 
   void dump(const std::string& indent, size_t index) const noexcept;
-  
+
 private:
   char achInstName[20];
   uint16_t wInstBagNdx;

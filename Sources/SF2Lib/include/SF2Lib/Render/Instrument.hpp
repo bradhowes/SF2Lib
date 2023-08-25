@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/Render/Zone/Instrument.hpp"
 #include "SF2Lib/Render/WithCollectionBase.hpp"
 
+namespace SF2::IO { class File; }
 namespace SF2::Render {
 
 /**
@@ -27,15 +27,7 @@ public:
    @param file the SF2 file that was loaded
    @param config the SF2 file entity that defines the instrument
    */
-  Instrument(const IO::File& file, const Entity::Instrument& config) noexcept :
-  WithCollectionBase<Zone::Instrument, Entity::Instrument>(config.zoneCount(), config) {
-    for (const Entity::Bag& bag : file.instrumentZones().slice(config.firstZoneIndex(), config.zoneCount())) {
-      zones_.add(Entity::Generator::Index::sampleID,
-                 file.instrumentZoneGenerators().slice(bag.firstGeneratorIndex(), bag.generatorCount()),
-                 file.instrumentZoneModulators().slice(bag.firstModulatorIndex(), bag.modulatorCount()),
-                 file.sampleSourceCollection());
-    }
-  }
+  Instrument(const IO::File& file, const Entity::Instrument& config) noexcept;
 
   /**
    Locate the instrument zones that apply to the given key/velocity values.
@@ -44,7 +36,7 @@ public:
    @param velocity the MIDI velocity value
    @returns vector of matching zones
    */
-  CollectionType::Matches filter(int key, int velocity) const noexcept { return zones_.filter(key, velocity); }
+  CollectionType::Matches filter(int key, int velocity) const noexcept;
 };
 
 } // namespace SF2::Render

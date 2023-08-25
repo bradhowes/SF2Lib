@@ -1,14 +1,35 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
+#include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 
 #include "SF2Lib/Entity/Instrument.hpp"
 #include "SF2Lib/Entity/Preset.hpp"
 #include "SF2Lib/IO/ChunkList.hpp"
 #include "SF2Lib/IO/File.hpp"
+#include "SF2Lib/IO/Format.hpp"
 
 using namespace SF2::IO;
+
+File::File(const char* path) :
+path_{path},
+fd_{-1}
+{
+  fd_ = ::open(path, O_RDONLY);
+  if (fd_ == -1) throw std::runtime_error("file not found");
+  if (load() != LoadResponse::ok) {
+    ::close(fd_);
+    fd_ = -1;
+    throw Format::error;
+  }
+}
+
+File::~File() noexcept
+{
+  if (fd_ >= 0) ::close(fd_);
+}
 
 File::LoadResponse
 File::load()

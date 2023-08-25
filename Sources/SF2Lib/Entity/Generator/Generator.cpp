@@ -5,8 +5,15 @@
 #include "SF2Lib/Entity/Generator/Amount.hpp"
 #include "SF2Lib/Entity/Generator/Definition.hpp"
 #include "SF2Lib/Entity/Generator/Generator.hpp"
+#include "SF2Lib/IO/Pos.hpp"
 
 using namespace SF2::Entity::Generator;
+
+Generator::Generator(IO::Pos& pos) noexcept
+{
+  assert(sizeof(*this) == size);
+  pos = pos.readInto(*this);
+}
 
 struct Dumper {
   const Definition& genDef_;
@@ -20,6 +27,18 @@ struct Dumper {
     return os;
   }
 };
+
+const Definition&
+Generator::definition() const noexcept
+{
+  return Definition::definition(index_.index());
+}
+
+const std::string&
+Generator::name() const noexcept
+{
+  return definition().name();
+}
 
 std::ostream&
 Generator::dump(const std::string& indent, size_t index) const noexcept

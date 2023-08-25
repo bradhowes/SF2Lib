@@ -9,9 +9,9 @@
 
 #include "SF2Lib/DSP.hpp"
 #include "SF2Lib/Entity/SampleHeader.hpp"
-#include "SF2Lib/Render/Voice/Sample/NormalizedSampleSource.hpp"
 #include "SF2Lib/Render/Voice/Sample/Bounds.hpp"
 #include "SF2Lib/Render/Voice/Sample/Index.hpp"
+#include "SF2Lib/Render/Voice/Sample/NormalizedSampleSource.hpp"
 #include "SF2Lib/Render/Voice/Sample/Pitch.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
@@ -47,13 +47,7 @@ public:
    @param sampleSource the samples to use for rendering
    @param state the state configuration for the voice
    */
-  void configure(const NormalizedSampleSource& sampleSource, const State& state) noexcept
-  {
-    bounds_ = Bounds::make(sampleSource.header(), state);
-    index_.configure(bounds_);
-    sampleSource_ = &sampleSource;
-    sampleSource_->load();
-  }
+  void configure(const NormalizedSampleSource& sampleSource, const State& state) noexcept;
 
   void start() noexcept { index_.start(); }
 

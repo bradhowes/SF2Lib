@@ -2,10 +2,9 @@
 
 #pragma once
 
-#include <array>
 #include <string>
 
-#include "SF2Lib/DSP.hpp"
+#include "SF2Lib/Types.hpp"
 #include "SF2Lib/Entity/Generator/Amount.hpp"
 #include "SF2Lib/Entity/Generator/Index.hpp"
 
@@ -137,21 +136,7 @@ public:
    @param amount the container holding the value to extract
    @returns the converted value
    */
-  Float convertedValueOf(const Amount& amount) const noexcept {
-    switch (valueKind_) {
-      case ValueKind::coarseOffset: return valueOf(amount) * 32768;
-      case ValueKind::signedCents: return Float(valueOf(amount) / 1200.0f);
-
-      case ValueKind::signedCentsBel:
-      case ValueKind::unsignedPercent:
-      case ValueKind::signedPercent: return valueOf(amount) / 10.0f;
-
-      case ValueKind::signedFrequencyCents: return Float(DSP::centsToFrequency(valueOf(amount)));
-      case ValueKind::signedTimeCents: return DSP::centsToSeconds(valueOf(amount));
-
-      default: return valueOf(amount);
-    }
-  }
+  Float convertedValueOf(const Amount& amount) const noexcept;
 
   /**
    Clamp a given value to the defined range for the generator.
@@ -167,9 +152,7 @@ private:
   static GeneratorValueArray<Definition> const definitions_;
 
   Definition(const char* name, ValueKind valueKind, ValueRange minMax, bool availableInPreset,
-             NRPNMultiplier nrpnMultiplier) noexcept :
-  name_{name}, valueKind_{valueKind}, valueRange_{minMax}, availableInPreset_{availableInPreset},
-  nrpnMultiplier_{nrpnMultiplier} {}
+             NRPNMultiplier nrpnMultiplier) noexcept;
 
   std::string name_;
   ValueKind valueKind_;

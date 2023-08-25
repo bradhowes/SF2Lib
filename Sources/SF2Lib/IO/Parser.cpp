@@ -7,7 +7,6 @@
 #include "SF2Lib/IO/ChunkList.hpp"
 #include "SF2Lib/IO/Format.hpp"
 #include "SF2Lib/IO/Parser.hpp"
-#include "SF2Lib/IO/StringUtils.hpp"
 
 using namespace SF2::IO;
 

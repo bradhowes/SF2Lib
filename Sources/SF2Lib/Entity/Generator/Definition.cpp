@@ -3,9 +3,40 @@
 #include <cmath>
 #include <iostream>
 
-#include "SF2Lib/Entity/Generator/Generator.hpp"
+#include "SF2Lib/DSP.hpp"
+#include "SF2Lib/Entity/Generator/Definition.hpp"
 
+using namespace SF2;
 using namespace SF2::Entity::Generator;
+
+Definition::Definition(const char* name, ValueKind valueKind, ValueRange minMax, bool availableInPreset,
+                       NRPNMultiplier nrpnMultiplier) noexcept :
+name_{name},
+valueKind_{valueKind},
+valueRange_{minMax},
+availableInPreset_{availableInPreset},
+nrpnMultiplier_{nrpnMultiplier}
+{
+  ;
+}
+
+Float
+Definition::convertedValueOf(const Amount& amount) const noexcept
+{
+  switch (valueKind_) {
+    case ValueKind::coarseOffset: return valueOf(amount) * 32768;
+    case ValueKind::signedCents: return Float(valueOf(amount) / 1200.0_F);
+
+    case ValueKind::signedCentsBel:
+    case ValueKind::unsignedPercent:
+    case ValueKind::signedPercent: return valueOf(amount) / 10.0_F;
+
+    case ValueKind::signedFrequencyCents: return Float(DSP::centsToFrequency(valueOf(amount)));
+    case ValueKind::signedTimeCents: return DSP::centsToSeconds(valueOf(amount));
+
+    default: return valueOf(amount);
+  }
+}
 
 std::ostream&
 Definition::dump(const Amount& amount) const noexcept

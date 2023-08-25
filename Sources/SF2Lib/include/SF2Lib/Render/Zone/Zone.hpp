@@ -45,10 +45,7 @@ public:
    @param mods collection of modulators for the zone
    */
   static bool IsGlobal(const GeneratorCollection& gens, Entity::Generator::Index expected,
-                       const ModulatorCollection& mods) noexcept {
-    assert(!gens.empty() || !mods.empty());
-    return (gens.empty() && !mods.empty()) || (!gens.empty() && gens.back().get().index() != expected);
-  }
+                       const ModulatorCollection& mods) noexcept;
 
   /// @returns range of MID key values that this Zone handles
   const MIDIRange& keyRange() const noexcept { return keyRange_; }
@@ -87,15 +84,7 @@ protected:
    @param mods collection of modulators for the zone
    @param terminal the index type of a generator that signals the zone is NOT global
    */
-  Zone(GeneratorCollection&& gens, ModulatorCollection&& mods, Entity::Generator::Index terminal) :
-  generators_{std::move(gens)},
-  modulators_{std::move(mods)},
-  keyRange_{GetKeyRange(generators_)},
-  velocityRange_{GetVelocityRange(generators_)},
-  isGlobal_{IsGlobal(generators_, terminal, modulators_)}
-  {
-    if (generators_.empty() && modulators_.empty()) throw std::runtime_error("empty zone created");
-  }
+  Zone(GeneratorCollection&& gens, ModulatorCollection&& mods, Entity::Generator::Index terminal);
 
   /**
    Obtain the link to the resource used by this zone. For an instrument zone, this points to the sample buffer to
@@ -103,14 +92,7 @@ protected:
 
    @returns index of the resource that this zone uses
    */
-  uint16_t resourceLink() const {
-    if (isGlobal_)
-      throw std::runtime_error("global zones do not have a linked resource");
-    const Entity::Generator::Generator& generator{generators_.back().get()};
-    assert(generator.index() == Entity::Generator::Index::instrument ||
-           generator.index() == Entity::Generator::Index::sampleID);
-    return generator.amount().unsignedAmount();
-  }
+  uint16_t resourceLink() const;
 
 private:
 
@@ -120,12 +102,7 @@ private:
    @param generators collection of generators for the zone
    @returns key range if found or `all` if not
    */
-  static MIDIRange GetKeyRange(const GeneratorCollection& generators) noexcept {
-    if (generators.size() > 0 && generators[0].get().index() == Entity::Generator::Index::keyRange) {
-      return MIDIRange(generators[0].get().amount());
-    }
-    return all;
-  }
+  static MIDIRange GetKeyRange(const GeneratorCollection& generators) noexcept;
 
   /**
    Obtain a velocity range from a generator collection. Per spec, if it exists it must be the first OR second
@@ -134,17 +111,7 @@ private:
    @param generators collection of generators for the zone
    @returns velocity range if found or `all` if not
    */
-  static MIDIRange GetVelocityRange(const GeneratorCollection& generators) noexcept {
-    int index = -1;
-    if (generators.size() > 1 && generators[0].get().index() == Entity::Generator::Index::keyRange &&
-        generators[1].get().index() == Entity::Generator::Index::velocityRange) {
-      index = 1;
-    }
-    else if (generators.size() > 0 && generators[0].get().index() == Entity::Generator::Index::velocityRange) {
-      index = 0;
-    }
-    return index == -1 ? all : MIDIRange(generators[size_t(index)].get().amount());
-  }
+  static MIDIRange GetVelocityRange(const GeneratorCollection& generators) noexcept;
 
   GeneratorCollection generators_;
   ModulatorCollection modulators_;

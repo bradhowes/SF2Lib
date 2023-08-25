@@ -6,7 +6,6 @@
 #include <string>
 
 #include "SF2Lib/Entity/Entity.hpp"
-#include "SF2Lib/IO/Pos.hpp"
 
 namespace SF2::Entity {
 
@@ -19,7 +18,7 @@ namespace SF2::Entity {
  operate in this way have a terminating instance whose index value is the total number of generators or
  modulators in the preset or instrument zones.
  */
-class Bag : Entity {
+class Bag : public Entity {
 public:
   static constexpr size_t size = 4;
 
@@ -28,30 +27,19 @@ public:
 
    @param pos location to read from
    */
-  explicit Bag(IO::Pos& pos) noexcept {
-    assert(sizeof(*this) == 4);
-    pos = pos.readInto(*this);
-  }
+  explicit Bag(IO::Pos& pos) noexcept;
 
   /// @returns first generator index in this collection
   uint16_t firstGeneratorIndex() const noexcept { return wGenNdx; }
 
   /// @returns number of generators in this collection
-  size_t generatorCount() const noexcept {
-    int value = (this + 1)->firstGeneratorIndex() - firstGeneratorIndex();
-    assert(value >= 0);
-    return static_cast<size_t>(value);
-  }
-  
+  size_t generatorCount() const noexcept;
+
   /// @returns first modulator index in this collection
   uint16_t firstModulatorIndex() const noexcept { return wModNdx; }
 
   /// @returns number of modulators in this collection
-  size_t modulatorCount() const noexcept {
-    int value = (this + 1)->firstModulatorIndex() - firstModulatorIndex();
-    assert(value >= 0);
-    return static_cast<size_t>(value);
-  }
+  size_t modulatorCount() const noexcept;
 
   /**
    Utility for displaying bag contents on output stream.

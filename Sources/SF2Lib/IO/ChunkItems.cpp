@@ -12,4 +12,3 @@ ChunkItemsSupport::beginDump(size_t size)
 {
   std::cout << " count: " << size << std::endl;
 }
-

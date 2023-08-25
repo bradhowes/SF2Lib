@@ -2,9 +2,9 @@
 
 #pragma once
 
+#include "SF2Lib/Entity/Entity.hpp"
 #include "SF2Lib/Entity/Generator/Definition.hpp"
 #include "SF2Lib/Entity/Generator/Index.hpp"
-#include "SF2Lib/IO/Pos.hpp"
 
 /**
  Classes involved in describing an SF2 generator that provides or "generates" a value that is used to render audio.
@@ -15,7 +15,7 @@ namespace SF2::Entity::Generator {
  Memory layout of a 'pgen'/'igen' entry. The size of this is defined to be 4. Each instance represents a generator
  configuration.
  */
-class Generator {
+class Generator : public Entity {
 public:
   static constexpr size_t size = 4;
 
@@ -24,7 +24,7 @@ public:
 
    @param pos location in file to read
    */
-  explicit Generator(IO::Pos& pos) noexcept { assert(sizeof(*this) == size); pos = pos.readInto(*this); }
+  explicit Generator(IO::Pos& pos) noexcept;
 
   /// @returns index of the generator as an enumerated type
   Index index() const noexcept { return index_.index(); }
@@ -33,10 +33,10 @@ public:
   Amount amount() const noexcept { return amount_; }
 
   /// @returns meta-data for the generator
-  const Definition& definition() const noexcept { return Definition::definition(index_.index()); }
+  const Definition& definition() const noexcept;
 
   /// @returns the name of the generator
-  const std::string& name() const noexcept { return definition().name(); }
+  const std::string& name() const noexcept;
 
   /// @returns the configured value of a generator
   int value() const noexcept { return definition().valueOf(amount_); }

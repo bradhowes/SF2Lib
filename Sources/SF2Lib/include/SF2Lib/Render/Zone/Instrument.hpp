@@ -23,34 +23,17 @@ public:
    @param sampleSources the samples for all of the instruments in the SF2 file
    */
   Instrument(GeneratorCollection&& gens, ModulatorCollection&& mods,
-             const SampleSourceCollection& sampleSources) noexcept :
-  Zone(std::forward<decltype(gens)>(gens), std::forward<decltype(mods)>(mods), Entity::Generator::Index::sampleID),
-  sampleSource_{isGlobal() ? nullptr : &sampleSources[resourceLink()]}
-  {}
+             const SampleSourceCollection& sampleSources) noexcept;
 
   /// @returns the sample buffer registered to this zone. Throws exception if zone is global
-  const Render::Voice::Sample::NormalizedSampleSource& sampleSource() const {
-    if (sampleSource_ == nullptr) throw std::runtime_error("global instrument zone has no sample source");
-    return *sampleSource_;
-  }
+  const Render::Voice::Sample::NormalizedSampleSource& sampleSource() const;
 
   /**
    Apply the instrument zone to the given voice state. Sets the nominal value of the generators in the zone.
 
    @param state the voice state to update
    */
-  void apply(Voice::State::State& state) const noexcept
-  {
-    // Generator state settings
-    std::for_each(generators().cbegin(), generators().cend(), [&](const Entity::Generator::Generator& generator) {
-      state.setValue(generator.index(), generator.value());
-    });
-
-    // Modulator definitions
-    std::for_each(modulators().cbegin(), modulators().cend(), [&](const Entity::Modulator::Modulator& modulator) {
-      state.addModulator(modulator);
-    });
-  }
+  void apply(Voice::State::State& state) const noexcept;
 
 private:
   const Render::Voice::Sample::NormalizedSampleSource* sampleSource_;

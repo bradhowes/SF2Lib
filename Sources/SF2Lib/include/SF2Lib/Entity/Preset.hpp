@@ -3,9 +3,6 @@
 #pragma once
 
 #include "SF2Lib/Entity/Entity.hpp"
-#include "SF2Lib/IO/Chunk.hpp"
-#include "SF2Lib/IO/Pos.hpp"
-#include "SF2Lib/IO/StringUtils.hpp"
 
 namespace SF2::Entity {
 
@@ -13,7 +10,7 @@ namespace SF2::Entity {
  Memory layout of 'phdr' entry in sound font. The size of this is defined to be 38 bytes, but due
  to alignment/padding the struct below is 40 bytes.
  */
-class Preset : Entity {
+class Preset : public Entity {
 public:
   static constexpr size_t size = 38;
   
@@ -22,17 +19,9 @@ public:
    
    @param pos location to read from
    */
-  explicit Preset(IO::Pos& pos) noexcept
-  {
-    assert(sizeof(*this) == size + 2);
-    // Account for the extra padding by reading twice.
-    pos = pos.readInto(&achPresetName, 20 + sizeof(uint16_t) * 3);
-    pos = pos.readInto(&dwLibrary, sizeof(uint32_t) * 3);
-    IO::trim_property(achPresetName);
-  }
+  explicit Preset(IO::Pos& pos) noexcept;
 
-  Preset(uint16_t bank, uint16_t program)
-  : wPreset{program}, wBank{bank}, wPresetBagNdx{}, dwLibrary{}, dwGenre{}, dwMorphology{} {}
+  Preset(uint16_t bank, uint16_t program) noexcept;
 
   /// @returns name of the preset
   char const* cname() const noexcept { return achPresetName; }
@@ -56,11 +45,7 @@ public:
   uint32_t morphology() const noexcept { return dwMorphology; }
 
   /// @returns the number of preset zones
-  size_t zoneCount() const noexcept {
-    int value = (this + 1)->firstZoneIndex() - firstZoneIndex();
-    assert(value >= 0);
-    return static_cast<size_t>(value);
-  }
+  size_t zoneCount() const noexcept;
   
   /// Write out description of the preset to std::cout
   void dump(const std::string& indent, size_t index) const noexcept;

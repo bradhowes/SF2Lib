@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "SF2Lib/IO/Chunk.hpp"
+#include "SF2Lib/Types.hpp"
 
 namespace SF2::IO {
 
@@ -37,18 +38,15 @@ public:
   static constexpr size_t itemSize = T::size;
   
   /// Constructor for an empty collection.
-  ChunkItems() noexcept : items_{} {}
+  ChunkItems() noexcept = default;
 
   /**
    Constructor that loads items from the file.
    
    @param source defines where to load and how many items to load
    */
-  explicit ChunkItems(const ChunkList& source) noexcept : items_{}
-  {
-    load(source);
-  }
-  
+  explicit ChunkItems(const ChunkList& source) noexcept { load(source); }
+
   /**
    Get the number of items in this collection
    
@@ -129,7 +127,7 @@ private:
     while (pos < end) items_.emplace_back(pos);
   }
   
-  ItemCollection items_;
+  ItemCollection items_{};
   
   friend class File;
 };

@@ -18,12 +18,7 @@ public:
   inline static Float defaultFrequency = 13500;
   inline static Float defaultResonance = 0.0;
 
-  LowPassFilter(Float sampleRate) noexcept :
-  filter_{Coefficients()}, sampleRate_{sampleRate},
-  lastFrequency_{defaultFrequency}, lastResonance_{defaultResonance}
-  {
-    updateSettings(defaultFrequency, defaultResonance);
-  }
+  LowPassFilter(Float sampleRate) noexcept;
 
   /**
    Update the filter to use the given frequency and resonance settings.
@@ -32,39 +27,17 @@ public:
    @param resonance resonance in centiBels
    */
   Float transform(Float frequency, Float resonance, Float sample) noexcept {
-    if (lastFrequency_ != frequency || lastResonance_ != resonance) {
-      updateSettings(frequency, resonance);
-
-      // Bounds taken from FluidSynth, where the upper bound serves as an anti-aliasing filter, just below the
-      // Nyquist frequency.
-      frequency = DSP::clamp(DSP::centsToFrequency(frequency), 5.0f, Float(0.45) * sampleRate_);
-      resonance = DSP::centibelsToResonance(resonance);
-      filter_.setCoefficients(Coefficients::LPF2(sampleRate_, frequency, resonance));
-    }
-
+    if (lastFrequency_ != frequency || lastResonance_ != resonance) updateSettings(frequency, resonance);
     return filter_.transform(sample);
   }
 
   void reset() noexcept { filter_.reset(); }
 
-  void setSampleRate(Float sampleRate) noexcept {
-    sampleRate_ = sampleRate;
-    updateSettings(lastFrequency_, lastResonance_);
-  }
+  void setSampleRate(Float sampleRate) noexcept;
 
 private:
 
-  void updateSettings(Float frequency, Float resonance) noexcept
-  {
-    lastFrequency_ = frequency;
-    lastResonance_ = resonance;
-
-    // Bounds taken from FluidSynth, where the upper bound serves as an anti-aliasing filter, just below the
-    // Nyquist frequency.
-    frequency = DSP::clamp(DSP::centsToFrequency(frequency), 5.0f, 0.45f * sampleRate_);
-    resonance = DSP::centibelsToResonance(resonance);
-    filter_.setCoefficients(Coefficients::LPF2(sampleRate_, frequency, resonance));
-  }
+  void updateSettings(Float frequency, Float resonance) noexcept;
 
   DSPHeaders::Biquad::Direct<Float> filter_;
   Float sampleRate_;

@@ -1,10 +1,15 @@
+// Copyright © 2022 Brad Howes. All rights reserved.
+
 #pragma once
 
-#include <optional>
+namespace SF2::Render::Zone {
+class Instrument;
+class Preset;
+}
 
-#include "SF2Lib/Render/Zone/Preset.hpp"
-#include "SF2Lib/Render/Zone/Instrument.hpp"
-#include "SF2Lib/Render/Voice/Sample/NormalizedSampleSource.hpp"
+namespace SF2::Render::Voice::Sample {
+class NormalizedSampleSource;
+}
 
 namespace SF2::Render::Voice::State {
 
@@ -29,13 +34,10 @@ public:
    @param eventVelocity the MIDI velocity that triggered the rendering
    */
   Config(const Zone::Preset& preset, const Zone::Preset* globalPreset, const Zone::Instrument& instrument,
-         const Zone::Instrument* globalInstrument, int eventKey, int eventVelocity) noexcept :
-  preset_{preset}, globalPreset_{globalPreset},
-  instrument_{instrument}, globalInstrument_{globalInstrument}, eventKey_{eventKey}, eventVelocity_{eventVelocity}
-  {}
+         const Zone::Instrument* globalInstrument, int eventKey, int eventVelocity) noexcept;
 
   /// @returns the buffer of audio samples to use for rendering
-  const Sample::NormalizedSampleSource& sampleSource() const noexcept { return instrument_.sampleSource(); }
+  const Sample::NormalizedSampleSource& sampleSource() const noexcept;
 
   /// @returns original MIDI key that triggered the voice
   constexpr int eventKey() const noexcept { return eventKey_; }
@@ -44,20 +46,9 @@ public:
   constexpr int eventVelocity() const noexcept { return eventVelocity_; }
 
   /// @returns value of `exclusiveClass` generator for an instrument if it is set, or 0 if not found.
-  int exclusiveClass() const noexcept {
-    for (const auto& box : instrument_.generators()) {
-      const auto& gen{box.get()};
-      if (gen.index() == Entity::Generator::Index::exclusiveClass) {
-        return gen.amount().unsignedAmount();
-      }
-    }
-    return 0;
-  }
+  int exclusiveClass() const noexcept { return exclusiveClass_; }
 
 private:
-
-  /// Grant access to `apply`.
-  friend State;
 
   /**
    Update a state with the various zone configurations. This is done once during the initialization of a Voice with a
@@ -65,17 +56,7 @@ private:
 
    @param state the voice state to update
    */
-  void apply(State& state) const noexcept {
-
-    // Use Instrument zones to set absolute values. Do the global state first, then allow instruments to change
-    // their settings.
-    if (globalInstrument_ != nullptr) globalInstrument_->apply(state);
-    instrument_.apply(state);
-
-    // Presets apply refinements to absolute values set from instruments zones above.
-    if (globalPreset_ != nullptr) globalPreset_->refine(state);
-    preset_.refine(state);
-  }
+  void apply(State& state) const noexcept;
 
   const Zone::Preset& preset_;
   const Zone::Preset* globalPreset_;
@@ -83,6 +64,9 @@ private:
   const Zone::Instrument* globalInstrument_;
   int eventKey_;
   int eventVelocity_;
+  int exclusiveClass_;
+
+  friend State;  /// Grant access to `apply`.
 };
 
 } // namespace SF2::Render

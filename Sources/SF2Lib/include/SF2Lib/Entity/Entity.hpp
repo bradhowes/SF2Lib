@@ -4,6 +4,8 @@
 
 #include <cassert>
 
+namespace SF2::IO { struct Pos; }
+
 /**
  Collection of types that mirror data structures defined in the SF2 spec. These are all read-only representations.
  */

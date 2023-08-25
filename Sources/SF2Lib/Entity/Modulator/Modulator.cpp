@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "SF2Lib/IO/Pos.hpp"
 #include "SF2Lib/Entity/Modulator/Modulator.hpp"
 
 using namespace SF2::Entity::Modulator;
@@ -35,6 +36,23 @@ const std::array<Modulator, Modulator::DefaultsSize> Modulator::defaults {
             Generator::Index::fineTune, 12700,
             Source(Source::GeneralIndex::pitchWheelSensitivity))
 };
+
+Modulator::Modulator(IO::Pos& pos) noexcept
+{
+  assert(sizeof(*this) == size);
+  pos = pos.readInto(*this);
+}
+
+Modulator::Modulator(Source modSrcOper, Generator::Index dest, int16_t amount, Source modAmtSrcOper,
+                     Transformer transform) noexcept :
+sfModSrcOper{modSrcOper},
+sfModDestOper{static_cast<uint16_t>(dest)},
+modAmount{amount},
+sfModAmtSrcOper{modAmtSrcOper},
+sfModTransOper{transform}
+{
+  ;
+}
 
 void
 Modulator::dump(const std::string& indent, size_t index) const noexcept

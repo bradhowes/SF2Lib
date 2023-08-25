@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "SF2Lib/IO/Pos.hpp"
-#include "SF2Lib/IO/StringUtils.hpp"
+#include <string>
+
+#include "SF2Lib/Entity/Entity.hpp"
 
 namespace SF2::Entity {
 
@@ -26,7 +27,7 @@ namespace SF2::Entity {
  dwStartloop must be less than dwEndloop-31, and dwEndloop must be less than dwEnd-7. If these constraints are not met,
  the sound may optionally not be played if the hardware cannot support artifact-free playback for the parameters given.
  */
-class SampleHeader {
+class SampleHeader : public Entity {
 public:
   static constexpr size_t size = 46;
   
@@ -44,32 +45,14 @@ public:
   /**
    Construct new instance from SF2 file
    */
-  explicit SampleHeader(IO::Pos& pos) noexcept
-  {
-    assert(sizeof(*this) == size + 2);
-    // Account for the extra padding by reading twice.
-    pos = pos.readInto(&achSampleName, 40);
-    pos = pos.readInto(&originalKey, 6);
-    IO::trim_property(achSampleName);
-  }
-  
+  explicit SampleHeader(IO::Pos& pos) noexcept;
+
   /**
    Constructor for unit tests.
    */
-  constexpr SampleHeader(uint32_t start, uint32_t end, uint32_t loopBegin, uint32_t loopEnd,
-                         uint32_t sampleRate, uint8_t key, int8_t adjustment = 0, uint16_t link = 0,
-                         Type type = Type::monoSample) noexcept :
-  achSampleName{"blah"},
-  dwStart{start},
-  dwEnd{end},
-  dwStartLoop{loopBegin},
-  dwEndLoop{loopEnd},
-  dwSampleRate{sampleRate},
-  originalKey{key},
-  correction{adjustment},
-  sampleLink{link},
-  sampleType{toRawType<Type>(type)}
-  {}
+  SampleHeader(uint32_t start, uint32_t end, uint32_t loopBegin, uint32_t loopEnd,
+               uint32_t sampleRate, uint8_t key, int8_t adjustment = 0, uint16_t link = 0,
+               Type type = Type::monoSample) noexcept;
 
   constexpr bool sampleIsA(Type type) const noexcept {
     return (sampleType & toRawType<Type>(type)) == toRawType<Type>(type);

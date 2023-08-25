@@ -32,9 +32,7 @@ public:
 
    @param bounds the sample bounds to work with
    */
-  void configure(const Bounds& bounds) noexcept {
-    bounds_ = bounds;
-  }
+  void configure(const Bounds& bounds) noexcept { bounds_ = bounds; }
 
   /// Start rendering.
   void start() noexcept {

@@ -5,8 +5,6 @@
 #include <algorithm>
 #include <unistd.h>
 
-#include "SF2Lib/IO/Format.hpp"
-
 namespace SF2::IO {
 
 class Chunk;
@@ -25,7 +23,7 @@ struct Pos {
    @param pos the current location in the file being processed
    @param end the end of the file being processed
    */
-  Pos(int fd, off_t pos, off_t end) noexcept : fd_{fd}, pos_{pos}, end_{end} {}
+  Pos(int fd, off_t pos, off_t end) noexcept;
 
   /**
    Create a new ChunkList from the current position.
@@ -49,9 +47,7 @@ struct Pos {
    @returns new Pos instance for the next bytes in the file
    */
   template <typename T>
-  Pos readInto(T& buffer) const {
-    return readInto(&buffer, sizeof(buffer));
-  }
+  Pos readInto(T& buffer) const { return readInto(&buffer, sizeof(buffer)); }
 
   /**
    Read bytes from the file at the current position and place them into the given buffer.
@@ -62,9 +58,7 @@ struct Pos {
    @returns new Pos instance for the next bytes in the file
    */
   template <typename T>
-  Pos readInto(T& buffer, size_t maxCount) const {
-    return readInto(&buffer, std::min(sizeof(buffer), maxCount));
-  }
+  Pos readInto(T& buffer, size_t maxCount) const { return readInto(&buffer, std::min(sizeof(buffer), maxCount)); }
 
   /**
    Read bytes from the file at the current position and place them into the given buffer.
@@ -74,12 +68,7 @@ struct Pos {
 
    @returns new Pos instance for the next bytes in the file
    */
-  Pos readInto(void* buffer, size_t count) const {
-    if (Pos::seek(fd_, off_t(pos_), SEEK_SET) != off_t(pos_)) throw Format::error;
-    off_t result = Pos::read(fd_, buffer, count);
-    if (result != long(count)) throw Format::error;
-    return advance(result);
-  }
+  Pos readInto(void* buffer, size_t count) const;
 
   /**
    Obtain the file offset represented by this instance
@@ -97,7 +86,7 @@ struct Pos {
    @param offset the number of bytes to advance
    @returns new Pos instance for the next bytes in the file
    */
-  Pos advance(off_t offset) const noexcept { return Pos(fd_, std::min(pos_ + offset, end_), end_); }
+  Pos advance(off_t offset) const noexcept;
 
   /// @returns true if Pos is invalid
   constexpr explicit operator bool() const noexcept { return fd_ < 0 || pos_ >= end_; }

@@ -5,7 +5,7 @@
 #include <array>
 #include <string>
 
-#include "SF2Lib/IO/Pos.hpp"
+#include "SF2Lib/Entity/Entity.hpp"
 #include "SF2Lib/Entity/Generator/Definition.hpp"
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
@@ -29,7 +29,7 @@ namespace SF2::Entity::Modulator {
  If there are duplicates, the second occurrence wins. This is also how modulators can override those that were defined
  either by default or in an instrument or preset zone.
  */
-class Modulator {
+class Modulator : public Entity {
 public:
   inline static constexpr size_t size = 10;
 
@@ -47,10 +47,7 @@ public:
 
    @param pos location to read from
    */
-  explicit Modulator(IO::Pos& pos) noexcept {
-    assert(sizeof(*this) == size);
-    pos = pos.readInto(*this);
-  }
+  explicit Modulator(IO::Pos& pos) noexcept;
 
   /**
    Construct instance from values. Used to define default mods and support unit tests.
@@ -62,9 +59,7 @@ public:
    @param transform the transformation to apply to modulated values.
    */
   Modulator(Source modSrcOper, Generator::Index dest, int16_t amount, Source modAmtSrcOper = Source(),
-            Transformer transform = Transformer()) noexcept :
-  sfModSrcOper{modSrcOper}, sfModDestOper{static_cast<uint16_t>(dest)}, modAmount{amount},
-  sfModAmtSrcOper{modAmtSrcOper}, sfModTransOper{transform} {}
+            Transformer transform = Transformer()) noexcept;
 
   /// @returns the source of data for the modulator
   const Source& source() const noexcept { return sfModSrcOper; }
