@@ -49,6 +49,7 @@ public:
    */
   void configure(const NormalizedSampleSource& sampleSource, const State& state) noexcept;
 
+  /// Begin rendering samples from the generator.
   void start() noexcept { index_.start(); }
 
   /// Tell the generator that there will be no more samples generated.

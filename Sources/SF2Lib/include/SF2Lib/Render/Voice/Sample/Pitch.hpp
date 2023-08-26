@@ -3,7 +3,7 @@
 #pragma once
 
 #include "SF2Lib/DSP.hpp"
-#include "SF2Lib/Render/Envelope/Generator.hpp"
+#include "SF2Lib/Render/Envelope/Modulation.hpp"
 #include "SF2Lib/Render/ModLFO.hpp"
 #include "SF2Lib/Render/VibLFO.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"

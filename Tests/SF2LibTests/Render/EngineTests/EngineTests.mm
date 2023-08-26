@@ -38,6 +38,10 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
 @implementation EngineTests
 
+- (void)setUp {
+  self.playAudio = NO;
+}
+
 - (void)testInit {
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
   XCTAssertEqual(engine.voiceCount(), 32);
@@ -107,8 +111,6 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   auto& engine{harness.engine()};
   engine.load(contexts.context2.file(), 0);
 
-  AUAudioFrameCount maxFramesToRender{harness.maxFramesToRender()};
-
   int seconds = 6;
   int noteOnIndex = 10;
   int noteOnDuration = 50;
@@ -117,13 +119,12 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   auto mixer{harness.createMixer(seconds)};
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  int renderIndex = 0;
   auto playChord = [&](int note1, int note2, int note3, bool sustain) {
-    renderUntil(engine, mixer, renderIndex, maxFramesToRender, noteOnIndex);
+    harness.renderUntil(mixer, noteOnIndex);
     engine.noteOn(note1, 64);
     engine.noteOn(note2, 64);
     engine.noteOn(note3, 64);
-    renderUntil(engine, mixer, renderIndex, maxFramesToRender, noteOffIndex);
+    harness.renderUntil(mixer, noteOffIndex);
     if (!sustain) {
       engine.noteOff(note1);
       engine.noteOff(note2);
@@ -139,12 +140,9 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   playChord(59, 62, 67, false);
   playChord(60, 64, 67, true);
 
-  renderUntil(engine, mixer, renderIndex, maxFramesToRender, harness.renders());
-  if (harness.remaining() > 0) engine.renderInto(mixer, harness.remaining());
-
+  harness.renderToEnd(mixer);
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  // self.playAudio = YES;
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 
@@ -153,31 +151,27 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   auto& engine{harness.engine()};
   engine.load(contexts.context2.file(), 0);
 
-  AUAudioFrameCount maxFramesToRender{harness.maxFramesToRender()};
-
   int cycles = 5;
-  int seconds = 4;
-  int noteOnIndex = 10;
-  int noteOnDuration = 50;
-  int noteOffIndex = noteOnIndex + noteOnDuration;
+  int noteOnIndex = 1;
+  int chordDuration = 30;
+  int noteOffIndex = noteOnIndex + chordDuration * 0.75;
 
-  auto mixer{harness.createMixer(cycles * seconds)};
+  auto mixer{harness.createMixer(12)};
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  int renderIndex = 0;
   auto playChord = [&](int note1, int note2, int note3, bool sustain) {
-    renderUntil(engine, mixer, renderIndex, maxFramesToRender, noteOnIndex);
+    harness.renderUntil(mixer, noteOnIndex);
     engine.noteOn(note1, 64);
     engine.noteOn(note2, 64);
     engine.noteOn(note3, 64);
-    renderUntil(engine, mixer, renderIndex, maxFramesToRender, noteOffIndex);
+    harness.renderUntil(mixer, noteOffIndex);
     if (!sustain) {
       engine.noteOff(note1);
       engine.noteOff(note2);
       engine.noteOff(note3);
     }
-    noteOnIndex += noteOnDuration;
-    noteOffIndex += noteOnDuration;
+    noteOnIndex += chordDuration;
+    noteOffIndex += chordDuration;
   };
 
   for (auto count = 0; count < cycles; ++count) {
@@ -188,14 +182,10 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
     playChord(60, 64, 67, count == cycles - 1);
   }
 
-  XCTAssertEqual(7, engine.activeVoiceCount());
-
-  renderUntil(engine, mixer, renderIndex, maxFramesToRender, harness.renders());
-  if (harness.remaining() > 0) engine.renderInto(mixer, harness.remaining());
-
+  XCTAssertEqual(14, engine.activeVoiceCount());
+  harness.renderToEnd(mixer);
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  self.playAudio = YES;
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 
@@ -237,11 +227,10 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   auto& engine{harness.engine()};
   engine.load(contexts.context0.file(), 0);
 
-  AUAudioFrameCount maxFramesToRender{harness.maxFramesToRender()};
-  int seconds = 6;
+  int seconds = 3;
   int noteOnIndex = 1;
-  int noteOnDuration = 50;
-  int noteOffIndex = noteOnIndex + noteOnDuration;
+  int chordDuration = 30;
+  int noteOffIndex = noteOnIndex + chordDuration * .75;
 
   auto mixer{harness.createMixer(seconds)};
 
@@ -253,21 +242,19 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  int renderIndex = 0;
-  int velocity = 64;
   auto playChord = [&](int note1, int note2, int note3, bool sustain) {
-    renderUntil(engine, mixer, renderIndex, maxFramesToRender, noteOnIndex);
-    engine.noteOn(note1, velocity);
-    engine.noteOn(note2, velocity);
-    engine.noteOn(note3, velocity);
-    renderUntil(engine, mixer, renderIndex, maxFramesToRender, noteOffIndex);
+    harness.renderUntil(mixer, noteOnIndex);
+    engine.noteOn(note1, 64);
+    engine.noteOn(note2, 64);
+    engine.noteOn(note3, 64);
+    harness.renderUntil(mixer, noteOffIndex);
     if (!sustain) {
       engine.noteOff(note1);
       engine.noteOff(note2);
       engine.noteOff(note3);
     }
-    noteOnIndex += noteOnDuration;
-    noteOffIndex += noteOnDuration;
+    noteOnIndex += chordDuration;
+    noteOffIndex += chordDuration;
   };
 
   playChord(60, 64, 67, false);
@@ -276,13 +263,11 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   playChord(59, 62, 67, false);
   playChord(60, 64, 67, true);
 
-  renderUntil(engine, mixer, renderIndex, maxFramesToRender, harness.renders());
-  if (harness.remaining() > 0) engine.renderInto(mixer, harness.remaining());
-
+  harness.renderToEnd(mixer);
   XCTAssertEqual(3, engine.activeVoiceCount());
 
-  self.playAudio = YES;
   [self playSamples: harness.dryBuffer() count: harness.duration()];
+  [self playSamples: harness.chorusBuffer() count: harness.duration()];
 }
 
 // Render 1 second of audio at 48000.0 sample rate using all voices of an engine and interpolating using 4th-order cubic.
@@ -297,21 +282,10 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
     int seconds = 1;
     auto mixer{harness.createMixer(seconds)};
-
-    for (int voice = 0; voice < engine.voiceCount(); ++voice) {
-      engine.noteOn(12 + voice * 1, 64);
-    }
-
-    auto maxFramesToRender{harness.maxFramesToRender()};
-    auto renders{harness.renders()};
-    auto remaining{harness.remaining()};
+    for (int voice = 0; voice < engine.voiceCount(); ++voice) engine.noteOn(12 + voice * 1, 64);
 
     [self startMeasuring];
-    for (auto renderIndex = 0; renderIndex < renders; ++renderIndex) {
-      engine.renderInto(mixer, maxFramesToRender);
-      mixer.shiftOver(maxFramesToRender);
-    }
-    if (remaining > 0) engine.renderInto(mixer, remaining);
+    harness.renderToEnd(mixer);
     [self stopMeasuring];
 
     self.playAudio = NO;
@@ -331,26 +305,15 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 
     int seconds = 1;
     auto mixer{harness.createMixer(seconds)};
-
-    for (int voice = 0; voice < engine.voiceCount(); ++voice) {
-      engine.noteOn(12 + voice * 1, 64);
-    }
-
-    auto maxFramesToRender{harness.maxFramesToRender()};
-    auto renders{harness.renders()};
-    auto remaining{harness.remaining()};
+    for (int voice = 0; voice < engine.voiceCount(); ++voice) engine.noteOn(12 + voice * 1, 64);
 
     [self startMeasuring];
-    for (auto renderIndex = 0; renderIndex < renders; ++renderIndex) {
-      engine.renderInto(mixer, maxFramesToRender);
-      mixer.shiftOver(maxFramesToRender);
-    }
-    if (remaining > 0) engine.renderInto(mixer, remaining);
+    harness.renderToEnd(mixer);
     [self stopMeasuring];
 
     self.playAudio = NO;
     [self playSamples: harness.dryBuffer() count: harness.duration()];
-}];
+  }];
 }
 
 - (void)testEngineMIDINoteOnOffProcessing
@@ -380,6 +343,7 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   engine.doMIDIEvent(midiEvent);
   XCTAssertEqual(2, engine.activeVoiceCount());
 
+  // Render 20% of total
   int renderIndex = 0;
   renderUntil(engine, mixer, renderIndex, maxFramesToRender, harness.renders() * 0.2);
 
@@ -388,15 +352,80 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   midiEvent.data[1] = 0x40;
   midiEvent.length = 2;
   engine.doMIDIEvent(midiEvent);
+
+  // Render another 20%
   renderUntil(engine, mixer, renderIndex, maxFramesToRender, harness.renders() * 0.4);
 
   // Note 2 off
   midiEvent.data[1] = 0x44;
   engine.doMIDIEvent(midiEvent);
+
+  // Render rest
   renderUntil(engine, mixer, renderIndex, maxFramesToRender, harness.renders());
   if (harness.remaining() > 0) engine.renderInto(mixer, harness.remaining());
 
   XCTAssertEqual(0, engine.activeVoiceCount());
+
+  [self playSamples: harness.dryBuffer() count: harness.duration()];
+}
+
+- (void)testEngineMIDIPitchBendProcessing
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  engine.load(contexts.context2.file(), 0);
+
+  AUAudioFrameCount maxFramesToRender{harness.maxFramesToRender()};
+  int seconds = 2;
+  auto mixer{harness.createMixer(seconds)};
+  XCTAssertEqual(0, engine.activeVoiceCount());
+
+
+  AUMIDIEvent midiEvent;
+  midiEvent.data[0] = 0x90;
+  midiEvent.data[1] = 0x40;
+  midiEvent.data[2] = 0x7F;
+  midiEvent.length = 3;
+
+  // Note 1 on
+  engine.doMIDIEvent(midiEvent);
+  XCTAssertEqual(2, engine.activeVoiceCount());
+
+//  // Note 2 on
+//  midiEvent.data[1] = 0x44;
+//  engine.doMIDIEvent(midiEvent);
+//  XCTAssertEqual(2, engine.activeVoiceCount());
+
+//  // Note 3 on
+//  midiEvent.data[1] = 0x47;
+//  engine.doMIDIEvent(midiEvent);
+//  XCTAssertEqual(3, engine.activeVoiceCount());
+
+  // Render 20% of total
+  int renderIndex = 0;
+  harness.renderUntil(mixer, harness.renders() * 0.2);
+
+  // Pitch wheel all the way up
+  midiEvent.data[0] = 0xE0;
+  midiEvent.data[1] = 127;
+  midiEvent.data[2] = 127;
+  engine.doMIDIEvent(midiEvent);
+  harness.renderUntil(mixer, harness.renders() * 0.4);
+
+  // Pitch wheel all the way down
+  midiEvent.data[1] = 0;
+  midiEvent.data[2] = 0;
+  engine.doMIDIEvent(midiEvent);
+  harness.renderUntil(mixer, harness.renders() * 0.6);
+
+  // Pitch wheel at center
+  midiEvent.data[1] = 0;
+  midiEvent.data[2] = 0x20;
+  engine.doMIDIEvent(midiEvent);
+
+  harness.renderUntil(mixer, harness.renders() * 0.8);
+
+  harness.renderToEnd(mixer);
 
   self.playAudio = YES;
   [self playSamples: harness.dryBuffer() count: harness.duration()];

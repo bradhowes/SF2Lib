@@ -26,7 +26,7 @@ using namespace SF2::MIDI;
   for (int key = 0; key < 128; ++key) XCTAssertEqual(0, channel.notePressure(Note(key)));
   XCTAssertEqual(0, channel.channelPressure());
   XCTAssertEqual(4096, channel.pitchWheelValue());
-  XCTAssertEqual(200, channel.pitchWheelSensitivity());
+  XCTAssertEqual(2, channel.pitchWheelSensitivity());
 
   for (int cc = 0; cc < 128; ++cc) {
     int expectedValue = 0;
@@ -58,7 +58,7 @@ using namespace SF2::MIDI;
     }
 
     std::cout << cc << ' ' << expectedValue << ' ' << channel.continuousControllerValue(CC) << '\n';
-    XCTAssertEqual(expectedValue, channel.continuousControllerValue(CC));
+    XCTAssertEqual(expectedValue, channel.continuousControllerValue(CC), @"CC: %d", cc);
   }
 
   for (auto index : SF2::Entity::Generator::IndexIterator()) {
@@ -95,7 +95,7 @@ using namespace SF2::MIDI;
 
 - (void)testPitchWheelSensitivity {
   ChannelState channel;
-  XCTAssertEqual(200, channel.pitchWheelSensitivity());
+  XCTAssertEqual(2, channel.pitchWheelSensitivity());
 
   channel.setPitchWheelSensitivity(123);
   XCTAssertEqual(123, channel.pitchWheelSensitivity());

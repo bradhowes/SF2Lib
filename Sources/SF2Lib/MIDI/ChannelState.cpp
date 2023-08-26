@@ -13,11 +13,11 @@ ChannelState::reset() noexcept
   continuousControllerValues_.fill(0);
 
   // Follow settings from FluidSynth
-  setContinuousControllerValue(ControlChange::volumeMSB, 100);
-  setContinuousControllerValue(ControlChange::balanceMSB, 64);
-  setContinuousControllerValue(ControlChange::panMSB, 64);
+  setContinuousControllerValue(ControlChange::volumeMSB, 100); // 7
+  setContinuousControllerValue(ControlChange::balanceMSB, 64); // 8
+  setContinuousControllerValue(ControlChange::panMSB, 64); // 10
 
-  setContinuousControllerValue(ControlChange::expressionMSB, 127);
+  setContinuousControllerValue(ControlChange::expressionMSB, 127); // 11
   setContinuousControllerValue(ControlChange::expressionLSB, 127);
 
   setContinuousControllerValue(ControlChange::soundControl1, 64);
@@ -40,8 +40,8 @@ ChannelState::reset() noexcept
 
   nrpnValues_.zero();
   channelPressure_ = 0;
-  pitchWheelValue_ = (maxPitchWheelValue + 1) / 2; // this is the middle of the wheel at rest
-  pitchWheelSensitivity_ = 200;
+  pitchWheelValue_ = (maxPitchWheelValue + 1) / 2; // This is the middle of the wheel at rest
+  pitchWheelSensitivity_ = 2; // This should resolve to 200 cents
   nrpnIndex_ = 0;
 
   sustainActive_ = false;

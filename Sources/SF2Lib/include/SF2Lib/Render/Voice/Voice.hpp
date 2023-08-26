@@ -6,7 +6,8 @@
 
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
-#include "SF2Lib/Render/Envelope/Generator.hpp"
+#include "SF2Lib/Render/Envelope/Modulation.hpp"
+#include "SF2Lib/Render/Envelope/Volume.hpp"
 #include "SF2Lib/Render/LFO.hpp"
 #include "SF2Lib/Render/LowPassFilter.hpp"
 #include "SF2Lib/Render/Voice/Sample/Generator.hpp"
@@ -150,6 +151,8 @@ public:
    Vol Env ---------------------+
    ```
 
+   Note that in this routine, panning and effects are not performed.
+   
    @returns next sample
    */
   Float renderSample() noexcept {
@@ -222,7 +225,6 @@ public:
     SF2::AUAudioFrameCount index = 0;
     SF2::AUValue chorusSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend)));
     SF2::AUValue reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
-
     for (; index < frameCount && active_; ++index) {
       Float sample{renderSample()};
       Float pan{state_.modulated(Index::pan)};

@@ -18,7 +18,8 @@ struct TestEngineHarness {
   using Mixer = SF2::Render::Engine::Mixer;
   using Interpolator = SF2::Render::Voice::Sample::Interpolator;
 
-  TestEngineHarness(SF2::Float sampleRate, size_t voiceCount = 96, Interpolator interpolator = Interpolator::linear) :
+  TestEngineHarness(SF2::Float sampleRate, size_t voiceCount = 96,
+                    Interpolator interpolator = Interpolator::cubic4thOrder) :
   engine_{sampleRate, voiceCount, interpolator}
   {
     format_ = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
@@ -46,6 +47,23 @@ struct TestEngineHarness {
     return Mixer(dry, chorus, reverb);
   }
 
+  void renderUntil(Mixer& mixer, int limit) {
+    while (renderIndex_++ < limit) {
+      engine_.renderInto(mixer, maxFramesToRender_);
+      mixer.shiftOver(maxFramesToRender_);
+    }
+  }
+
+  void renderToEnd(Mixer& mixer) {
+    auto limit = renders();
+    while (renderIndex_++ < limit) {
+      engine_.renderInto(mixer, maxFramesToRender_);
+      mixer.shiftOver(maxFramesToRender_);
+    }
+    limit = remaining();
+    if (limit) engine_.renderInto(mixer, limit);
+  }
+
   Engine& engine() { return engine_; }
 
   AVAudioFrameCount maxFramesToRender() const noexcept { return maxFramesToRender_; }
@@ -69,6 +87,7 @@ private:
   DSPHeaders::BufferFacet dryFacet_;
   DSPHeaders::BufferFacet chorusFacet_;
   DSPHeaders::BufferFacet reverbFacet_;
+  int renderIndex_{0};
 };
 
 

@@ -141,6 +141,9 @@ public:
    Render samples to the given stereo output buffers. The buffers are guaranteed to be able to hold `frameCount`
    samples, and `frameCount` will never be more than the `maxFramesToRender` value given to the `setRenderingFormat`.
 
+   NOTE: everything from this point on should be inlined as much as possible for speed. This is executed in a real-time
+   rendering thread.
+
    @param mixer collection of buffers to render into
    @param frameCount number of samples to render.
    */

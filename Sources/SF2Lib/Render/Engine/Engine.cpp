@@ -94,7 +94,19 @@ Engine::noteOn(int key, int velocity) noexcept
 {
   os_signpost_interval_begin(log_, noteOnSignpost_, "noteOn", "key: %d vel: %d", key, velocity);
   if (! hasActivePreset()) return;
-  for (const Config& config : presets_[activePreset_].find(key, velocity)) {
+  auto configs = presets_[activePreset_].find(key, velocity);
+
+  // Stop any existing voice with this same key (?) or same exclusiveClass value.
+  for (const Config& config : configs) {
+    stopSameKeyVoices(config.eventKey());
+    auto exclusiveClass{config.exclusiveClass()};
+    if (exclusiveClass > 0) {
+      stopAllExclusiveVoices(exclusiveClass);
+    }
+  }
+
+  os_log_info(log_, "noteOn - number of voices: %lu", configs.size());
+  for (const Config& config : configs) {
     startVoice(config);
   }
   os_signpost_interval_end(log_, noteOnSignpost_, "noteOn", "key: %d vel: %d", key, velocity);
@@ -301,14 +313,7 @@ void
 Engine::startVoice(const Config& config) noexcept
 {
   os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice", "");
-
-  auto exclusiveClass{config.exclusiveClass()};
-  if (exclusiveClass > 0) {
-    stopAllExclusiveVoices(exclusiveClass);
-  }
-
-  stopSameKeyVoices(config.eventKey());
-
+  os_log_info(log_, "startVoice");
   auto voiceIndex = getVoice();
   if (voiceIndex != voices_.size()) {
     voices_[voiceIndex].configure(config);

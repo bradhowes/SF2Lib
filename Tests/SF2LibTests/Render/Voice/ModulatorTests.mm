@@ -117,13 +117,14 @@ using namespace SF2::Entity::Generator;
   State::Modulator modulator{config};
 
   channelState->setContinuousControllerValue(MIDI::ControlChange::panMSB, 0);
-  XCTAssertEqualWithAccuracy(modulator.value(*state), -1000, epsilon);
+  XCTAssertEqualWithAccuracy(modulator.value(*state), -500, epsilon);
 
   channelState->setContinuousControllerValue(MIDI::ControlChange::panMSB, 64);
   XCTAssertEqualWithAccuracy(modulator.value(*state), 0, epsilon);
 
   channelState->setContinuousControllerValue(MIDI::ControlChange::panMSB, 127);
-  XCTAssertEqualWithAccuracy(modulator.value(*state), config.amount() * DSPHeaders::DSP::unipolarToBipolar(127.0 / 128.0),
+  XCTAssertEqualWithAccuracy(modulator.value(*state),
+                             config.amount() * DSPHeaders::DSP::unipolarToBipolar(127.0 / 128.0),
                              epsilon);
 }
 

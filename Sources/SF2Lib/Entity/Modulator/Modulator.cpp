@@ -23,7 +23,7 @@ const std::array<Modulator, Modulator::DefaultsSize> Modulator::defaults {
   // MIDI CC 7 to initial attenuation (NOTE spec says Source(0x0582) which gives CC 2) (8.4.5)
   Modulator(Source(Source::CC(7)).negative().concave(), Generator::Index::initialAttenuation, 960),
   // MIDI CC 10 to pan position (8.4.6)
-  Modulator(Source(Source::CC(10)).bipolar().linear(), Generator::Index::pan, 1000),
+  Modulator(Source(Source::CC(10)).bipolar().linear(), Generator::Index::pan, 500),
   // MIDI CC 11 to initial attenuation (8.4.7)
   Modulator(Source(Source::CC(11)).negative().concave(), Generator::Index::initialAttenuation, 960),
   // MIDI CC 91 to reverb amount (8.4.8)

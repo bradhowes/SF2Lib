@@ -84,7 +84,7 @@ using namespace SF2::Entity::Modulator;
   XCTAssertTrue(mod.source().isPositive());
   XCTAssertTrue(mod.source().isBipolar());
   XCTAssertEqual(mod.source().ccIndex().value, 10);
-  XCTAssertEqual(mod.amount(), 1000);
+  XCTAssertEqual(mod.amount(), 500);
   XCTAssertEqual(mod.amountSource().generalIndex(), Source::GeneralIndex::none);
   XCTAssertEqual(mod.transformer().kind(), Transformer::Kind::linear);
 }
