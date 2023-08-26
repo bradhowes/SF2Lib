@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <vector>
 
 #include "SF2Lib/IO/Chunk.hpp"
 #include "SF2Lib/Utils/StringUtils.hpp"
