@@ -103,59 +103,34 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 }
 
 - (void)testRolandPianoChordRenderLinear {
-  Float sampleRate{48000.0};
-  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-
+  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
+  auto& engine{harness.engine()};
   engine.load(contexts.context2.file(), 0);
-  AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
 
-  AUAudioFrameCount frameCount = 512;
-  engine.setRenderingFormat(3, format, frameCount);
+  AUAudioFrameCount maxFramesToRender{harness.maxFramesToRender()};
 
   int seconds = 6;
-  int sampleCount = sampleRate * seconds;
-  int frames = sampleCount / frameCount;
-  int remaining = sampleCount - frames * frameCount;
-  int noteOnFrame = 10;
+  int noteOnIndex = 10;
   int noteOnDuration = 50;
-  int noteOffFrame = noteOnFrame + noteOnDuration;
+  int noteOffIndex = noteOnIndex + noteOnDuration;
 
-  AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet dryFacet;
-  dryFacet.setChannelCount(2);
-  dryFacet.assignBufferList(dryBuffer.mutableAudioBufferList);
-  DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
-
-  AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet chorusFacet;
-  chorusFacet.setChannelCount(2);
-  chorusFacet.assignBufferList(chorusBuffer.mutableAudioBufferList);
-  DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
-
-  AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet reverbFacet;
-  reverbFacet.setChannelCount(2);
-  reverbFacet.assignBufferList(reverbBuffer.mutableAudioBufferList);
-  DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
-
-  Mixer mixer{dry, chorus, reverb};
-
+  auto mixer{harness.createMixer(seconds)};
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  int frameIndex = 0;
+  int renderIndex = 0;
   auto playChord = [&](int note1, int note2, int note3, bool sustain) {
-    renderUntil(engine, mixer, frameIndex, frameCount, noteOnFrame);
+    renderUntil(engine, mixer, renderIndex, maxFramesToRender, noteOnIndex);
     engine.noteOn(note1, 64);
     engine.noteOn(note2, 64);
     engine.noteOn(note3, 64);
-    renderUntil(engine, mixer, frameIndex, frameCount, noteOffFrame);
+    renderUntil(engine, mixer, renderIndex, maxFramesToRender, noteOffIndex);
     if (!sustain) {
       engine.noteOff(note1);
       engine.noteOff(note2);
       engine.noteOff(note3);
     }
-    noteOnFrame += noteOnDuration;
-    noteOffFrame += noteOnDuration;
+    noteOnIndex += noteOnDuration;
+    noteOffIndex += noteOnDuration;
   };
 
   playChord(60, 64, 67, false);
@@ -164,74 +139,45 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   playChord(59, 62, 67, false);
   playChord(60, 64, 67, true);
 
-  renderUntil(engine, mixer, frameIndex, frameCount, frames);
-  if (remaining > 0) engine.renderInto(mixer, remaining);
+  renderUntil(engine, mixer, renderIndex, maxFramesToRender, harness.renders());
+  if (harness.remaining() > 0) engine.renderInto(mixer, harness.remaining());
 
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  [self playSamples: dryBuffer count: sampleCount];
+  // self.playAudio = YES;
+  [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 
 - (void)testRolandPianoChordRenderCubic4thOrder {
-  Float sampleRate{48000.0};
-  AUAudioFrameCount frameCount{512};
-  AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
-
-  Engine engine(sampleRate, 6, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder);
+  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
+  auto& engine{harness.engine()};
   engine.load(contexts.context2.file(), 0);
-  engine.setRenderingFormat(3, format, frameCount);
 
-  // Set NPRN state so that voices send 20% output to the chorus channel
-  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, 120);
-  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnLSB, int(Index::chorusEffectSend));
-  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
-  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 65);
+  AUAudioFrameCount maxFramesToRender{harness.maxFramesToRender()};
 
   int cycles = 5;
-  int seconds = 4.0;
-  int sampleCount = sampleRate * seconds * cycles;
-  int frames = sampleCount / frameCount;
-  int remaining = sampleCount - frames * frameCount;
-  int noteOnFrame = 10;
+  int seconds = 4;
+  int noteOnIndex = 10;
   int noteOnDuration = 50;
-  int noteOffFrame = noteOnFrame + noteOnDuration;
+  int noteOffIndex = noteOnIndex + noteOnDuration;
 
-  AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet dryFacet;
-  dryFacet.setChannelCount(2);
-  dryFacet.assignBufferList(dryBuffer.mutableAudioBufferList);
-  DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
-
-  AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet chorusFacet;
-  chorusFacet.setChannelCount(2);
-  chorusFacet.assignBufferList(chorusBuffer.mutableAudioBufferList);
-  DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
-
-  AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet reverbFacet;
-  reverbFacet.setChannelCount(2);
-  reverbFacet.assignBufferList(reverbBuffer.mutableAudioBufferList);
-  DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
-
-  Mixer mixer{dry, chorus, reverb};
-
+  auto mixer{harness.createMixer(cycles * seconds)};
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  int frameIndex = 0;
+  int renderIndex = 0;
   auto playChord = [&](int note1, int note2, int note3, bool sustain) {
-    renderUntil(engine, mixer, frameIndex, frameCount, noteOnFrame);
+    renderUntil(engine, mixer, renderIndex, maxFramesToRender, noteOnIndex);
     engine.noteOn(note1, 64);
     engine.noteOn(note2, 64);
     engine.noteOn(note3, 64);
-    renderUntil(engine, mixer, frameIndex, frameCount, noteOffFrame);
+    renderUntil(engine, mixer, renderIndex, maxFramesToRender, noteOffIndex);
     if (!sustain) {
       engine.noteOff(note1);
       engine.noteOff(note2);
       engine.noteOff(note3);
     }
-    noteOnFrame += noteOnDuration;
-    noteOffFrame += noteOnDuration;
+    noteOnIndex += noteOnDuration;
+    noteOffIndex += noteOnDuration;
   };
 
   for (auto count = 0; count < cycles; ++count) {
@@ -242,16 +188,15 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
     playChord(60, 64, 67, count == cycles - 1);
   }
 
-  XCTAssertEqual(6, engine.activeVoiceCount());
+  XCTAssertEqual(7, engine.activeVoiceCount());
 
-  renderUntil(engine, mixer, frameIndex, frameCount, frames);
-  if (remaining > 0) engine.renderInto(mixer, remaining);
+  renderUntil(engine, mixer, renderIndex, maxFramesToRender, harness.renders());
+  if (harness.remaining() > 0) engine.renderInto(mixer, harness.remaining());
 
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  self.playAudio = NO;
-  [self playSamples: dryBuffer count: sampleCount];
-  // [self playSamples: chorusBuffer count: sampleCount];
+  self.playAudio = YES;
+  [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 
 //- (void)testDoMIDIEvent {
@@ -288,13 +233,17 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 }
 
 - (void)testYamahaPianoChordRender {
-  Float sampleRate{48000.0};
-  AUAudioFrameCount frameCount = 512;
-  AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
-
-  Engine engine(sampleRate, 32, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder);
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
   engine.load(contexts.context0.file(), 0);
-  engine.setRenderingFormat(3, format, frameCount);
+
+  AUAudioFrameCount maxFramesToRender{harness.maxFramesToRender()};
+  int seconds = 6;
+  int noteOnIndex = 1;
+  int noteOnDuration = 50;
+  int noteOffIndex = noteOnIndex + noteOnDuration;
+
+  auto mixer{harness.createMixer(seconds)};
 
   // Set NPRN state so that voices send 20% output to the chorus channel
   engine.channelState().setContinuousControllerValue(MIDI::ControlChange::nrpnMSB, 120);
@@ -302,51 +251,23 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryLSB, 72);
   engine.channelState().setContinuousControllerValue(MIDI::ControlChange::dataEntryMSB, 65);
 
-  int seconds = 6;
-  int sampleCount = sampleRate * seconds;
-  int frames = sampleCount / frameCount;
-  int remaining = sampleCount - frames * frameCount;
-  int noteOnFrame = 1;
-  int noteOnDuration = 50;
-  int noteOffFrame = noteOnFrame + noteOnDuration;
-
-  AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet dryFacet;
-  dryFacet.setChannelCount(2);
-  dryFacet.assignBufferList(dryBuffer.mutableAudioBufferList);
-  DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
-
-  AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet chorusFacet;
-  chorusFacet.setChannelCount(2);
-  chorusFacet.assignBufferList(chorusBuffer.mutableAudioBufferList);
-  DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
-
-  AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-  DSPHeaders::BufferFacet reverbFacet;
-  reverbFacet.setChannelCount(2);
-  reverbFacet.assignBufferList(reverbBuffer.mutableAudioBufferList);
-  DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
-
-  Mixer mixer{dry, chorus, reverb};
-
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  int frameIndex = 0;
+  int renderIndex = 0;
   int velocity = 64;
   auto playChord = [&](int note1, int note2, int note3, bool sustain) {
-    renderUntil(engine, mixer, frameIndex, frameCount, noteOnFrame);
+    renderUntil(engine, mixer, renderIndex, maxFramesToRender, noteOnIndex);
     engine.noteOn(note1, velocity);
     engine.noteOn(note2, velocity);
     engine.noteOn(note3, velocity);
-    renderUntil(engine, mixer, frameIndex, frameCount, noteOffFrame);
+    renderUntil(engine, mixer, renderIndex, maxFramesToRender, noteOffIndex);
     if (!sustain) {
       engine.noteOff(note1);
       engine.noteOff(note2);
       engine.noteOff(note3);
     }
-    noteOnFrame += noteOnDuration;
-    noteOffFrame += noteOnDuration;
+    noteOnIndex += noteOnDuration;
+    noteOffIndex += noteOnDuration;
   };
 
   playChord(60, 64, 67, false);
@@ -355,13 +276,13 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   playChord(59, 62, 67, false);
   playChord(60, 64, 67, true);
 
-  renderUntil(engine, mixer, frameIndex, frameCount, frames);
-  if (remaining > 0) engine.renderInto(mixer, remaining);
+  renderUntil(engine, mixer, renderIndex, maxFramesToRender, harness.renders());
+  if (harness.remaining() > 0) engine.renderInto(mixer, harness.remaining());
 
   XCTAssertEqual(3, engine.activeVoiceCount());
 
-  self.playAudio = NO;
-  [self playSamples: dryBuffer count: sampleCount];
+  self.playAudio = YES;
+  [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 
 // Render 1 second of audio at 48000.0 sample rate using all voices of an engine and interpolating using 4th-order cubic.
@@ -370,53 +291,31 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 {
   NSArray* metrics = @[XCTPerformanceMetric_WallClockTime];
   [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
-    Float sampleRate{48000.0};
-    AUAudioFrameCount frameCount = 512;
-    AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
-
-    Engine engine(sampleRate, 96, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder);
+    auto harness{TestEngineHarness{48000.0, 96, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder}};
+    auto& engine{harness.engine()};
     engine.load(contexts.context0.file(), 0);
-    engine.setRenderingFormat(3, format, frameCount);
 
     int seconds = 1;
-    int sampleCount = sampleRate * seconds;
-    int frames = sampleCount / frameCount;
-    int remaining = sampleCount - frames * frameCount;
-
-    AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-    DSPHeaders::BufferFacet dryFacet;
-    dryFacet.setChannelCount(2);
-    dryFacet.assignBufferList(dryBuffer.mutableAudioBufferList);
-    DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
-
-    AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-    DSPHeaders::BufferFacet chorusFacet;
-    chorusFacet.setChannelCount(2);
-    chorusFacet.assignBufferList(chorusBuffer.mutableAudioBufferList);
-    DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
-
-    AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-    DSPHeaders::BufferFacet reverbFacet;
-    reverbFacet.setChannelCount(2);
-    reverbFacet.assignBufferList(reverbBuffer.mutableAudioBufferList);
-    DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
-
-    Mixer mixer{dry, chorus, reverb};
+    auto mixer{harness.createMixer(seconds)};
 
     for (int voice = 0; voice < engine.voiceCount(); ++voice) {
       engine.noteOn(12 + voice * 1, 64);
     }
 
+    auto maxFramesToRender{harness.maxFramesToRender()};
+    auto renders{harness.renders()};
+    auto remaining{harness.remaining()};
+
     [self startMeasuring];
-    for (auto frameIndex = 0; frameIndex < frames; ++frameIndex) {
-      engine.renderInto(mixer, frameCount);
-      mixer.shiftOver(frameCount);
+    for (auto renderIndex = 0; renderIndex < renders; ++renderIndex) {
+      engine.renderInto(mixer, maxFramesToRender);
+      mixer.shiftOver(maxFramesToRender);
     }
     if (remaining > 0) engine.renderInto(mixer, remaining);
     [self stopMeasuring];
 
     self.playAudio = NO;
-    [self playSamples: dryBuffer count: sampleCount];
+    [self playSamples: harness.dryBuffer() count: harness.duration()];
   }];
 }
 
@@ -426,54 +325,83 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
 {
   NSArray* metrics = @[XCTPerformanceMetric_WallClockTime];
   [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
-    Float sampleRate{48000.0};
-    AUAudioFrameCount frameCount = 512;
-    AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
-
-    Engine engine(sampleRate, 96, SF2::Render::Voice::Sample::Interpolator::linear);
+    auto harness{TestEngineHarness{48000.0, 96, SF2::Render::Voice::Sample::Interpolator::linear}};
+    auto& engine{harness.engine()};
     engine.load(contexts.context0.file(), 0);
-    engine.setRenderingFormat(3, format, frameCount);
 
     int seconds = 1;
-    int sampleCount = sampleRate * seconds;
-    int frames = sampleCount / frameCount;
-    int remaining = sampleCount - frames * frameCount;
-
-    AVAudioPCMBuffer* dryBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-    DSPHeaders::BufferFacet dryFacet;
-    dryFacet.setChannelCount(2);
-    dryFacet.assignBufferList(dryBuffer.mutableAudioBufferList);
-    DSPHeaders::BusBuffers dry{dryFacet.busBuffers()};
-
-    AVAudioPCMBuffer* chorusBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-    DSPHeaders::BufferFacet chorusFacet;
-    chorusFacet.setChannelCount(2);
-    chorusFacet.assignBufferList(chorusBuffer.mutableAudioBufferList);
-    DSPHeaders::BusBuffers chorus{chorusFacet.busBuffers()};
-
-    AVAudioPCMBuffer* reverbBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
-    DSPHeaders::BufferFacet reverbFacet;
-    reverbFacet.setChannelCount(2);
-    reverbFacet.assignBufferList(reverbBuffer.mutableAudioBufferList);
-    DSPHeaders::BusBuffers reverb{reverbFacet.busBuffers()};
-
-    Mixer mixer{dry, chorus, reverb};
+    auto mixer{harness.createMixer(seconds)};
 
     for (int voice = 0; voice < engine.voiceCount(); ++voice) {
-      engine.noteOn(12 + voice, 64);
+      engine.noteOn(12 + voice * 1, 64);
     }
 
+    auto maxFramesToRender{harness.maxFramesToRender()};
+    auto renders{harness.renders()};
+    auto remaining{harness.remaining()};
+
     [self startMeasuring];
-    for (auto frameIndex = 0; frameIndex < frames; ++frameIndex) {
-      engine.renderInto(mixer, frameCount);
-      mixer.shiftOver(frameCount);
+    for (auto renderIndex = 0; renderIndex < renders; ++renderIndex) {
+      engine.renderInto(mixer, maxFramesToRender);
+      mixer.shiftOver(maxFramesToRender);
     }
     if (remaining > 0) engine.renderInto(mixer, remaining);
     [self stopMeasuring];
 
     self.playAudio = NO;
-    [self playSamples: dryBuffer count: sampleCount];
+    [self playSamples: harness.dryBuffer() count: harness.duration()];
 }];
 }
+
+- (void)testEngineMIDINoteOnOffProcessing
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  engine.load(contexts.context0.file(), 0);
+
+  AUAudioFrameCount maxFramesToRender{harness.maxFramesToRender()};
+  int seconds = 2;
+  auto mixer{harness.createMixer(seconds)};
+  XCTAssertEqual(0, engine.activeVoiceCount());
+
+
+  AUMIDIEvent midiEvent;
+  midiEvent.data[0] = 0x90;
+  midiEvent.data[1] = 0x40;
+  midiEvent.data[2] = 0x7F;
+  midiEvent.length = 3;
+
+  // Note 1 on
+  engine.doMIDIEvent(midiEvent);
+  XCTAssertEqual(1, engine.activeVoiceCount());
+
+  // Note 2 on
+  midiEvent.data[1] = 0x44;
+  engine.doMIDIEvent(midiEvent);
+  XCTAssertEqual(2, engine.activeVoiceCount());
+
+  int renderIndex = 0;
+  renderUntil(engine, mixer, renderIndex, maxFramesToRender, harness.renders() * 0.2);
+
+  // Note 1 off
+  midiEvent.data[0] = 0x80;
+  midiEvent.data[1] = 0x40;
+  midiEvent.length = 2;
+  engine.doMIDIEvent(midiEvent);
+  renderUntil(engine, mixer, renderIndex, maxFramesToRender, harness.renders() * 0.4);
+
+  // Note 2 off
+  midiEvent.data[1] = 0x44;
+  engine.doMIDIEvent(midiEvent);
+  renderUntil(engine, mixer, renderIndex, maxFramesToRender, harness.renders());
+  if (harness.remaining() > 0) engine.renderInto(mixer, harness.remaining());
+
+  XCTAssertEqual(0, engine.activeVoiceCount());
+
+  self.playAudio = YES;
+  [self playSamples: harness.dryBuffer() count: harness.duration()];
+}
+
+
 
 @end

@@ -27,7 +27,7 @@ using namespace SF2::Render;
 {
   [super setUp];
   epsilon = PresetTestContextBase::epsilonValue();
-  self.playAudio = YES;
+  // self.playAudio = YES;
 }
 
 - (void)testVoiceRepeatedRenderGeneratesSameOutputRolandPiano {
@@ -681,7 +681,6 @@ using namespace SF2::Render;
     XCTAssertEqualWithAccuracy(-0.000118655749247, samples[3], epsilon);
   }
 
-  self.playAudio = YES;
   [self playSamples: buffer count: sampleCount];
 }
 

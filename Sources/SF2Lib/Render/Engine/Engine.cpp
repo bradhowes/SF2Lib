@@ -123,11 +123,12 @@ Engine::noteOff(int key) noexcept
 void
 Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 {
-  switch (MIDI::CoreEvent(midiEvent.data[0] & 0xF0)) {
+  if (midiEvent.length < 1) return;
 
+  switch (MIDI::CoreEvent(midiEvent.data[0] & 0xF0)) {
     case MIDI::CoreEvent::noteOff:
       os_log_info(log_, "doMIDIEvent - noteOff: %hhd", midiEvent.data[1]);
-      if (midiEvent.length == 3) {
+      if (midiEvent.length > 1) {
         noteOff(midiEvent.data[1]);
       }
       break;

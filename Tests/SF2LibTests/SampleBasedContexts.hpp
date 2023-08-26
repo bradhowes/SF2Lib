@@ -7,9 +7,70 @@
 #include <XCTest/XCTest.h>
 
 #include "SF2Lib/IO/File.hpp"
+#include "SF2Lib/Render/Engine/Engine.hpp"
+#include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Preset.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
+
+struct TestEngineHarness {
+  using Engine = SF2::Render::Engine::Engine;
+  using Mixer = SF2::Render::Engine::Mixer;
+  using Interpolator = SF2::Render::Voice::Sample::Interpolator;
+
+  TestEngineHarness(SF2::Float sampleRate, size_t voiceCount = 96, Interpolator interpolator = Interpolator::linear) :
+  engine_{sampleRate, voiceCount, interpolator}
+  {
+    format_ = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
+    engine_.setRenderingFormat(3, format_, 512);
+  }
+
+  Mixer createMixer(int seconds)
+  {
+    duration_ = seconds * engine_.sampleRate();
+    dryBuffer_ = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format_ frameCapacity:duration_];
+    dryFacet_.setChannelCount(2);
+    dryFacet_.assignBufferList(dryBuffer_.mutableAudioBufferList);
+    DSPHeaders::BusBuffers dry{dryFacet_.busBuffers()};
+
+    chorusBuffer_ = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format_ frameCapacity:duration_];
+    chorusFacet_.setChannelCount(2);
+    chorusFacet_.assignBufferList(chorusBuffer_.mutableAudioBufferList);
+    DSPHeaders::BusBuffers chorus{chorusFacet_.busBuffers()};
+
+    reverbBuffer_ = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format_ frameCapacity:duration_];
+    reverbFacet_.setChannelCount(2);
+    reverbFacet_.assignBufferList(reverbBuffer_.mutableAudioBufferList);
+    DSPHeaders::BusBuffers reverb{reverbFacet_.busBuffers()};
+
+    return Mixer(dry, chorus, reverb);
+  }
+
+  Engine& engine() { return engine_; }
+
+  AVAudioFrameCount maxFramesToRender() const noexcept { return maxFramesToRender_; }
+
+  AVAudioPCMBuffer* dryBuffer() const { return dryBuffer_; }
+  AVAudioPCMBuffer* chorusBuffer() const { return chorusBuffer_; }
+  AVAudioPCMBuffer* reverbBuffer() const { return reverbBuffer_; }
+
+  AVAudioFrameCount duration() const { return duration_; }
+  AVAudioFrameCount renders() const { return duration_ / maxFramesToRender_; }
+  AVAudioFrameCount remaining() const { return duration_ - renders() * maxFramesToRender_; }
+
+private:
+  Engine engine_;
+  AUAudioFrameCount maxFramesToRender_{512};
+  AVAudioFormat* format_{nullptr};
+  AVAudioPCMBuffer* dryBuffer_{nullptr};
+  AVAudioPCMBuffer* chorusBuffer_{nullptr};
+  AVAudioPCMBuffer* reverbBuffer_{nullptr};
+  AVAudioFrameCount duration_{0};
+  DSPHeaders::BufferFacet dryFacet_;
+  DSPHeaders::BufferFacet chorusFacet_;
+  DSPHeaders::BufferFacet reverbFacet_;
+};
+
 
 struct TestVoiceCollection {
   TestVoiceCollection(int midiKey, int midiVelocity, SF2::Render::Preset preset, SF2::Float sampleRate,
