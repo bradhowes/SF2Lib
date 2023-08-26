@@ -431,6 +431,58 @@ renderUntil(Engine& engine, Mixer& mixer, int& frameIndex, int frameCount, int u
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 
+- (void)testEngineExcludeClass
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  engine.load(contexts.context0.file(), 231);
+
+  AUAudioFrameCount maxFramesToRender{harness.maxFramesToRender()};
+  int seconds = 2;
+  auto mixer{harness.createMixer(seconds)};
+  XCTAssertEqual(0, engine.activeVoiceCount());
+
+
+  AUMIDIEvent midiEvent;
+  midiEvent.data[0] = 0x90;
+  midiEvent.data[1] = 0x40;
+  midiEvent.data[2] = 0x7F;
+  midiEvent.length = 3;
+
+  // Note 1 on
+  engine.doMIDIEvent(midiEvent);
+  engine.doMIDIEvent(midiEvent);
+  harness.renderUntil(mixer, harness.renders() * 0.1);
+  engine.doMIDIEvent(midiEvent);
+  engine.doMIDIEvent(midiEvent);
+  harness.renderUntil(mixer, harness.renders() * 0.2);
+  engine.doMIDIEvent(midiEvent);
+  engine.doMIDIEvent(midiEvent);
+  harness.renderUntil(mixer, harness.renders() * 0.3);
+  engine.doMIDIEvent(midiEvent);
+  engine.doMIDIEvent(midiEvent);
+  harness.renderUntil(mixer, harness.renders() * 0.4);
+  engine.doMIDIEvent(midiEvent);
+  engine.doMIDIEvent(midiEvent);
+  harness.renderUntil(mixer, harness.renders() * 0.5);
+  engine.doMIDIEvent(midiEvent);
+  engine.doMIDIEvent(midiEvent);
+  harness.renderUntil(mixer, harness.renders() * 0.6);
+  engine.doMIDIEvent(midiEvent);
+  engine.doMIDIEvent(midiEvent);
+  harness.renderUntil(mixer, harness.renders() * 0.7);
+  engine.doMIDIEvent(midiEvent);
+  engine.doMIDIEvent(midiEvent);
+  harness.renderUntil(mixer, harness.renders() * 0.8);
+  engine.doMIDIEvent(midiEvent);
+  engine.doMIDIEvent(midiEvent);
+  harness.renderUntil(mixer, harness.renders() * 0.9);
+  harness.renderToEnd(mixer);
+
+  self.playAudio = YES;
+  [self playSamples: harness.dryBuffer() count: harness.duration()];
+}
+
 
 
 @end

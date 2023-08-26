@@ -198,7 +198,7 @@ private:
   void stopSameKeyVoices(int eventKey) noexcept;
   size_t getVoice() noexcept;
   void startVoice(const Config& config) noexcept;
-  OldestActiveVoiceCache::iterator stopForExclusiveVoice(size_t voiceIndex) noexcept;
+  OldestActiveVoiceCache::iterator forcedStopVoice(size_t voiceIndex) noexcept;
 
   void notifyActiveVoicesChannelStateChanged() noexcept;
   void processControlChange(MIDI::ControlChange cc) noexcept;
@@ -222,7 +222,7 @@ private:
   os_signpost_id_t noteOnSignpost_;
   os_signpost_id_t noteOffSignpost_;
   os_signpost_id_t startVoiceSignpost_;
-  os_signpost_id_t stopForExclusiveVoiceSignpost_;
+  os_signpost_id_t forcedStopVoiceSignpost_;
   friend class EngineTestInjector;
 };
 
