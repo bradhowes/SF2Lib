@@ -2,11 +2,10 @@
 
 #pragma once
 
-#include <iostream>
-
 #include "SF2Lib/DSP.hpp"
 #include "SF2Lib/Render/Envelope/Generator.hpp"
-#include "SF2Lib/Render/LFO.hpp"
+#include "SF2Lib/Render/ModLFO.hpp"
+#include "SF2Lib/Render/VibLFO.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
 namespace SF2::Entity { class SampleHeader; }
