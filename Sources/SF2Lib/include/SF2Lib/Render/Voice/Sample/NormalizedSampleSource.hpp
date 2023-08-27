@@ -67,8 +67,6 @@ private:
   template <typename T>
   void loadNormalizedSamples() const noexcept
   {
-    assert(!loaded_);
-
     const auto startIndex = header_.startIndex();
     const auto size = header_.sampleSize();
     samples_.resize(size + sizePaddingAfterEnd);

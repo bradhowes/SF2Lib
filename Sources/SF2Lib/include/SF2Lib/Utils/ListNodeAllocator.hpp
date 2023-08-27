@@ -55,13 +55,9 @@ public:
 
   /**
    Allocate a new node.
-
-   @param num the number of items to allocate. Asserts if not 1.
    */
-  [[nodiscard]] constexpr value_type* allocate(std::size_t num)
+  [[nodiscard]] constexpr value_type* allocate(std::size_t)
   {
-    assert(num == 1);
-
     // Allocate our nodes first time we are asked for one. This makes the first allocation the most costly, but we
     // assume that this is done at some time where this cost is not an issue. One can force the allocation at a certain
     // time by doing a std::list operation to trigger an allocation/deallocation at a time that is most appropriate.
@@ -70,10 +66,8 @@ public:
       size_t totalSize = elementSize * maxNodeCount_;
       memoryBlock_ = ::malloc(totalSize);
       if (memoryBlock_ ==  nullptr) throw std::bad_alloc();
-      void* limit = reinterpret_cast<char*>(memoryBlock_) + totalSize;
       Node* ptr = reinterpret_cast<Node*>(memoryBlock_);
       for (size_t index = 0; index < maxNodeCount_; ++index) {
-        assert(ptr < limit);
         ptr->next = freeList_;
         freeList_ = ptr;
         ++ptr;
@@ -90,11 +84,9 @@ public:
    Deallocate a node.
 
    @param p pointer to node to deallocate.
-   @param num number of items to be deallocated. Must be 1.
    */
-  constexpr void deallocate(value_type* p, std::size_t num) noexcept
+  constexpr void deallocate(value_type* p, std::size_t) noexcept
   {
-    assert(num == 1);
     auto ptr = reinterpret_cast<Node*>(p);
     ptr->next = freeList_;
     freeList_ = ptr;

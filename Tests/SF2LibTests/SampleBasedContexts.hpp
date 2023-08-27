@@ -208,7 +208,6 @@ struct PresetTestContextBase
   }
 
   SF2::Render::Voice::State::State makeState(int presetIndex, int midiKey, int midiVelocity) const {
-    assert(url_);
     auto found{preset(presetIndex).find(midiKey, midiVelocity)};
     return makeState(found[0]);
   }

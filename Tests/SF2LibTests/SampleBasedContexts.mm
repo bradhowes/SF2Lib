@@ -31,18 +31,11 @@ BOOL PresetTestContextBase::playAudioInTests() {
 - (NSString *)pathForTemporaryFile
 {
   CFUUIDRef uuid = CFUUIDCreate(NULL);
-  assert(uuid != NULL);
-
   CFStringRef uuidStr = CFUUIDCreateString(NULL, uuid);
-  assert(uuidStr != NULL);
-
   NSString* result = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.caf",
                                                                              uuidStr]];
-  assert(result != nil);
-
   CFRelease(uuidStr);
   CFRelease(uuid);
-
   return result;
 }
 

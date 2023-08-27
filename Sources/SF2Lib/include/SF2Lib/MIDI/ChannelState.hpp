@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cassert>
 #include <cmath>
 
 #include "SF2Lib/Entity/Generator/Index.hpp"

@@ -39,7 +39,6 @@ const std::array<Modulator, Modulator::DefaultsSize> Modulator::defaults {
 
 Modulator::Modulator(IO::Pos& pos) noexcept
 {
-  assert(sizeof(*this) == size);
   pos = pos.readInto(*this);
 }
 

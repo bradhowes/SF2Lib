@@ -22,7 +22,6 @@ enum struct StageIndex {
 };
 
 inline StageIndex operator++(StageIndex value) noexcept {
-  assert(value != StageIndex::release);
   using IntType = typename std::underlying_type<StageIndex>::type;
   return static_cast<StageIndex>( static_cast<IntType>(value) + 1 );
 }

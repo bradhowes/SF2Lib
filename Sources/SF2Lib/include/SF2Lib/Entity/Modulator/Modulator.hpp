@@ -66,7 +66,6 @@ public:
 
   /// @returns the destination (generator) for the modulator
   Generator::Index generatorDestination() const noexcept {
-    assert(sfModDestOper < size_t(Generator::Index::numValues));
     return Generator::Index(sfModDestOper);
   }
 

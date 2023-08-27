@@ -2,14 +2,6 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <iosfwd>
-#include <vector>
-
-#include "DSPHeaders/ConstMath.hpp"
-#include "DSPHeaders/DSP.hpp"
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
 

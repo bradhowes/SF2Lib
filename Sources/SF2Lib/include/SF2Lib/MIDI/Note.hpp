@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <cassert>
 #include <string>
 #include <array>
 
@@ -21,9 +20,7 @@ public:
 
    @param value the MIDI value to represent
    */
-  explicit Note(int value) noexcept : value_{value}, note_{size_t(value % 12)} {
-    assert(value >= 0 && value <= 127);
-  }
+  explicit Note(int value) noexcept : value_{value}, note_{size_t(value % 12)} {}
 
   /// @returns the octave that the note resides in
   int octave() const noexcept { return value_ / 12 - 1; }

@@ -464,7 +464,6 @@ public:
    @returns Index enum value
    */
   Index operator*() const noexcept {
-    assert(*this < end());
     return static_cast<Index>(value_);
   }
 

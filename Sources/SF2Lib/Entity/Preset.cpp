@@ -10,7 +10,6 @@ using namespace SF2::Entity;
 
 Preset::Preset(IO::Pos& pos) noexcept
 {
-  assert(sizeof(*this) == size + 2);
   // Account for the extra padding by reading twice.
   pos = pos.readInto(&achPresetName, 20 + sizeof(uint16_t) * 3);
   pos = pos.readInto(&dwLibrary, sizeof(uint32_t) * 3);
@@ -33,7 +32,6 @@ size_t
 Preset::zoneCount() const noexcept
 {
   int value = (this + 1)->firstZoneIndex() - firstZoneIndex();
-  assert(value >= 0);
   return static_cast<size_t>(value);
 }
 

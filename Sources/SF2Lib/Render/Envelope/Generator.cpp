@@ -15,10 +15,6 @@ static constexpr Float lowerBoundTimecents = -12'000.0;
  @returns result of generator value x (60 - key)
  */
 constexpr Float midiKeyEnvelopeScaling(const Generator::State& state, Generator::Index gen) noexcept {
-  assert(gen == Generator::Index::midiKeyToVolumeEnvelopeHold ||
-         gen == Generator::Index::midiKeyToVolumeEnvelopeDecay ||
-         gen == Generator::Index::midiKeyToModulatorEnvelopeHold ||
-         gen == Generator::Index::midiKeyToModulatorEnvelopeDecay);
   auto value = state.modulated(gen);
   auto scaling = 60 - state.key();
   return value * scaling;

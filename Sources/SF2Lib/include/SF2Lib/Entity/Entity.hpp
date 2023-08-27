@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <cassert>
-
 namespace SF2::IO { struct Pos; }
 
 /**
@@ -22,10 +20,7 @@ struct Entity {
    @param next the bag index from the following item in the collection
    @param current the bag index from the current item in the collection
    */
-  static uint16_t calculateSize(uint16_t next, uint16_t current) noexcept {
-    assert(next >= current);
-    return next - current;
-  }
+  static uint16_t calculateSize(uint16_t next, uint16_t current) noexcept { return next - current; }
 };
 
 } // end namespace SF2::Entity

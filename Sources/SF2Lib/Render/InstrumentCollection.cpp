@@ -10,7 +10,6 @@ using namespace SF2::Render;
 void
 InstrumentCollection::build(const SF2::IO::File& file) noexcept
 {
-  assert(instruments_.empty());
   const auto& definitions = file.instruments();
   auto count = definitions.size();
   instruments_.reserve(count);

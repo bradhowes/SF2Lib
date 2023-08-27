@@ -10,7 +10,6 @@ using namespace SF2::Entity;
 
 Instrument::Instrument(IO::Pos& pos) noexcept
 {
-  assert(sizeof(*this) == size);
   pos = pos.readInto(*this);
   SF2::Utils::trim_property(achInstName);
 }
@@ -25,7 +24,6 @@ size_t
 Instrument::zoneCount() const noexcept
 {
   int value = (this + 1)->firstZoneIndex() - firstZoneIndex();
-  assert(value >= 0);
   return static_cast<size_t>(value);
 }
 

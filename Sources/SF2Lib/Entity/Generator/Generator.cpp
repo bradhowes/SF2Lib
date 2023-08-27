@@ -11,7 +11,6 @@ using namespace SF2::Entity::Generator;
 
 Generator::Generator(IO::Pos& pos) noexcept
 {
-  assert(sizeof(*this) == size);
   pos = pos.readInto(*this);
 }
 

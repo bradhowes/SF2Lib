@@ -10,7 +10,6 @@ using namespace SF2::Entity;
 
 SampleHeader::SampleHeader(IO::Pos& pos) noexcept
 {
-  assert(sizeof(*this) == size + 2);
   // Account for the extra padding by reading twice.
   pos = pos.readInto(&achSampleName, 40);
   pos = pos.readInto(&originalKey, 6);

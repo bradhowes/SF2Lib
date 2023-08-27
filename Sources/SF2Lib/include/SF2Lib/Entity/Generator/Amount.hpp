@@ -21,7 +21,7 @@ public:
    
    @param raw the value to hold
    */
-  explicit Amount(uint16_t raw) noexcept : raw_{raw} { assert(sizeof(*this) == size); }
+  explicit Amount(uint16_t raw) noexcept : raw_{raw} {}
 
   /**
    Default constructor. Sets held value to 0.

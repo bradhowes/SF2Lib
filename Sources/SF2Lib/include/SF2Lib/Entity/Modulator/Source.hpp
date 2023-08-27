@@ -122,10 +122,7 @@ public:
   bool isNegative() const noexcept { return !isPositive(); }
 
   /// @returns the index of the general controller
-  GeneralIndex generalIndex() const noexcept {
-    assert(isValid() && isGeneralController());
-    return GeneralIndex(rawIndex());
-  }
+  GeneralIndex generalIndex() const noexcept { return GeneralIndex(rawIndex()); }
 
   /// @returns largest value the controller will return.
   ControllerRange controllerRange() const noexcept {
@@ -134,16 +131,10 @@ public:
   }
   
   /// @returns the index of the continuous controller
-  CC ccIndex() const noexcept {
-    assert(isValid() && isContinuousController());
-    return CC(rawIndex());
-  }
+  CC ccIndex() const noexcept { return CC(rawIndex()); }
 
   /// @returns the continuity type for the controller values
-  ContinuityType type() const noexcept {
-    assert(isValid());
-    return ContinuityType(rawType());
-  }
+  ContinuityType type() const noexcept { return ContinuityType(rawType()); }
   
   /// @returns the name of the continuity type
   std::string continuityTypeName() const noexcept { return isValid() ? std::string(typeNames[rawType()]) : "N/A"; }

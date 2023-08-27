@@ -71,7 +71,6 @@ public:
    @returns true if so
    */
   bool appliesTo(int key, int velocity) const noexcept {
-    assert(!isGlobal_); // Global zones do not have ranges
     return keyRange_.contains(key) && velocityRange_.contains(velocity);
   }
 

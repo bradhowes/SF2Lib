@@ -22,7 +22,6 @@ bool
 Zone::IsGlobal(const GeneratorCollection& gens, Entity::Generator::Index expected,
                const ModulatorCollection& mods) noexcept
 {
-  assert(!gens.empty() || !mods.empty());
   return (gens.empty() && !mods.empty()) || (!gens.empty() && gens.back().get().index() != expected);
 }
 
@@ -32,8 +31,6 @@ Zone::resourceLink() const
   if (isGlobal_)
     throw std::runtime_error("global zones do not have a linked resource");
   const Entity::Generator::Generator& generator{generators_.back().get()};
-  assert(generator.index() == Entity::Generator::Index::instrument ||
-         generator.index() == Entity::Generator::Index::sampleID);
   return generator.amount().unsignedAmount();
 }
 
