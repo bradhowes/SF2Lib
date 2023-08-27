@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
 
