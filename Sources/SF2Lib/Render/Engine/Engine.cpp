@@ -49,6 +49,7 @@ Engine::load(const IO::File& file, size_t index) noexcept
 {
   allOff();
   presets_.build(file);
+  os_log_info(log_, "load - built %zu presets", presets_.size());
   usePreset(index);
 }
 
@@ -58,7 +59,7 @@ Engine::usePreset(size_t index)
   setBypass(true);
   allOff();
   if (index >= presets_.size()) {
-    index = presets_.size();
+    index = 0;
   }
   activePreset_ = index;
   setBypass(false);
@@ -136,8 +137,10 @@ void
 Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 {
   if (midiEvent.length < 1) return;
+  if (midiEvent.data[0] < 0x80) return;
 
-  switch (MIDI::CoreEvent(midiEvent.data[0] & 0xF0)) {
+  auto event = MIDI::CoreEvent(midiEvent.data[0] < 0xF0 ? (midiEvent.data[0] & 0xF0) : midiEvent.data[0]);
+  switch (event) {
     case MIDI::CoreEvent::noteOff:
       os_log_info(log_, "doMIDIEvent - noteOff: %hhd", midiEvent.data[1]);
       if (midiEvent.length > 1) {
@@ -205,7 +208,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       //
     case MIDI::CoreEvent::systemExclusive:
       os_log_info(log_, "doMIDIEvent - systemExclusive: %hhX %hhX", midiEvent.data[1], midiEvent.data[2]);
-      if (midiEvent.length > 2 && midiEvent.data[1] == 0x7e && midiEvent.data[2] == 0x00) {
+      if (midiEvent.length > 5 && midiEvent.data[1] == 0x7e && midiEvent.data[2] == 0x00) {
         loadFromMIDI(midiEvent);
       }
       break;
@@ -213,6 +216,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
     case MIDI::CoreEvent::reset:
       os_log_info(log_, "doMIDIEvent - reset");
       allOff();
+      channelState_.reset();
       break;
 
     default:
@@ -232,9 +236,11 @@ Engine::notifyActiveVoicesChannelStateChanged() noexcept
 void
 Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
   size_t count = midiEvent.length - 5;
-  size_t index = (*(&midiEvent.data[0] + 3) * 256) + *(&midiEvent.data[0] + 4);
+  if (count < 1) return;
+
+  size_t index = (*(&midiEvent.data[0] + 3) * 128) + *(&midiEvent.data[0] + 4);
   auto path = Utils::Base64::decode(&midiEvent.data[0] + 5, count);
-  os_log_info(log_, "loadFromMIDI BEGIN - %{public}s", path.c_str());
+  os_log_info(log_, "loadFromMIDI BEGIN - %{public}s index: %zu", path.c_str(), index);
   SF2::IO::File file{path.c_str()};
   load(file, index);
 }

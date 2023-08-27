@@ -80,6 +80,10 @@ struct TestEngineHarness {
   AUValue lastChorusSample() noexcept { return chorusFacet_.busBuffers()[0][-1]; }
   AUValue lastReverbSample() noexcept { return reverbFacet_.busBuffers()[0][-1]; }
 
+  AUValue lastDrySample(int channel) noexcept { return dryFacet_.busBuffers()[channel][-1]; }
+  AUValue lastChorusSample(int channel) noexcept { return chorusFacet_.busBuffers()[channel][-1]; }
+  AUValue lastReverbSample(int channel) noexcept { return reverbFacet_.busBuffers()[channel][-1]; }
+
   void sendNoteOn(uint8_t note, uint8_t velocity = 64) noexcept {
     AUMIDIEvent midiEvent;
     midiEvent.data[0] = static_cast<uint8_t>(SF2::MIDI::CoreEvent::noteOn);
