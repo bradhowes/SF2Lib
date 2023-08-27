@@ -59,7 +59,8 @@ Engine::usePreset(size_t index)
   setBypass(true);
   allOff();
   if (index >= presets_.size()) {
-    index = 0;
+    // Special case to flag no preset being used.
+    index = presets_.size();
   }
   activePreset_ = index;
   setBypass(false);
