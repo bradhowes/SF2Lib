@@ -16,17 +16,13 @@
 using namespace SF2;
 using namespace SF2::Render;
 
-@interface VoiceTests : SamplePlayingTestCase {
-  Float epsilon;
-}
+@interface VoiceTests : SamplePlayingTestCase
 @end
 
 @implementation VoiceTests
 
-- (void)setUp
-{
+- (void)setUp {
   [super setUp];
-  epsilon = PresetTestContextBase::epsilonValue();
   // self.playAudio = YES;
 }
 

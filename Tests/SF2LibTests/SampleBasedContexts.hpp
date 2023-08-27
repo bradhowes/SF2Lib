@@ -19,14 +19,14 @@ struct TestEngineHarness {
   using Interpolator = SF2::Render::Voice::Sample::Interpolator;
 
   TestEngineHarness(SF2::Float sampleRate, size_t voiceCount = 96,
-                    Interpolator interpolator = Interpolator::cubic4thOrder) :
+                    Interpolator interpolator = Interpolator::cubic4thOrder) noexcept :
   engine_{sampleRate, voiceCount, interpolator}
   {
     format_ = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
     engine_.setRenderingFormat(3, format_, 512);
   }
 
-  Mixer createMixer(int seconds)
+  Mixer createMixer(int seconds) noexcept
   {
     duration_ = seconds * engine_.sampleRate();
     dryBuffer_ = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format_ frameCapacity:duration_];
@@ -47,14 +47,14 @@ struct TestEngineHarness {
     return Mixer(dry, chorus, reverb);
   }
 
-  void renderUntil(Mixer& mixer, int limit) {
+  void renderUntil(Mixer& mixer, int limit) noexcept {
     while (renderIndex_++ < limit) {
       engine_.renderInto(mixer, maxFramesToRender_);
       mixer.shiftOver(maxFramesToRender_);
     }
   }
 
-  void renderToEnd(Mixer& mixer) {
+  void renderToEnd(Mixer& mixer) noexcept {
     auto limit = renders();
     while (renderIndex_++ < limit) {
       engine_.renderInto(mixer, maxFramesToRender_);
@@ -64,17 +64,38 @@ struct TestEngineHarness {
     if (limit) engine_.renderInto(mixer, limit);
   }
 
-  Engine& engine() { return engine_; }
+  Engine& engine() noexcept { return engine_; }
 
   AVAudioFrameCount maxFramesToRender() const noexcept { return maxFramesToRender_; }
 
-  AVAudioPCMBuffer* dryBuffer() const { return dryBuffer_; }
-  AVAudioPCMBuffer* chorusBuffer() const { return chorusBuffer_; }
-  AVAudioPCMBuffer* reverbBuffer() const { return reverbBuffer_; }
+  AVAudioPCMBuffer* dryBuffer() const noexcept { return dryBuffer_; }
+  AVAudioPCMBuffer* chorusBuffer() const noexcept { return chorusBuffer_; }
+  AVAudioPCMBuffer* reverbBuffer() const noexcept { return reverbBuffer_; }
 
-  AVAudioFrameCount duration() const { return duration_; }
-  AVAudioFrameCount renders() const { return duration_ / maxFramesToRender_; }
-  AVAudioFrameCount remaining() const { return duration_ - renders() * maxFramesToRender_; }
+  AVAudioFrameCount duration() const noexcept { return duration_; }
+  AVAudioFrameCount renders() const noexcept { return duration_ / maxFramesToRender_; }
+  AVAudioFrameCount remaining() const noexcept { return duration_ - renders() * maxFramesToRender_; }
+
+  AUValue lastDrySample() noexcept { return dryFacet_.busBuffers()[0][-1]; }
+  AUValue lastChorusSample() noexcept { return chorusFacet_.busBuffers()[0][-1]; }
+  AUValue lastReverbSample() noexcept { return reverbFacet_.busBuffers()[0][-1]; }
+
+  void sendNoteOn(uint8_t note, uint8_t velocity = 64) noexcept {
+    AUMIDIEvent midiEvent;
+    midiEvent.data[0] = static_cast<uint8_t>(SF2::MIDI::CoreEvent::noteOn);
+    midiEvent.data[1] = note;
+    midiEvent.data[2] = velocity;
+    midiEvent.length = 3;
+    engine_.doMIDIEvent(midiEvent);
+  }
+
+  void sendNoteOff(uint8_t note) noexcept {
+    AUMIDIEvent midiEvent;
+    midiEvent.data[0] = static_cast<uint8_t>(SF2::MIDI::CoreEvent::noteOff);
+    midiEvent.data[1] = note;
+    midiEvent.length = 2;
+    engine_.doMIDIEvent(midiEvent);
+  }
 
 private:
   Engine engine_;
@@ -225,6 +246,7 @@ struct SampleBasedContexts {
 };
 
 @interface SamplePlayingTestCase : XCTestCase <AVAudioPlayerDelegate> {
+  SF2::Float epsilon;
   SampleBasedContexts contexts;
 }
 

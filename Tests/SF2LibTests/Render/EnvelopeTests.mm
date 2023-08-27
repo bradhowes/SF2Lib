@@ -23,9 +23,7 @@ struct EnvelopeTestInjector {
 };
 }
 
-@interface EnvelopeTests : SamplePlayingTestCase {
-  Float epsilon;
-}
+@interface EnvelopeTests : SamplePlayingTestCase
 @end
 
 @implementation EnvelopeTests

@@ -96,13 +96,13 @@ Engine::noteOn(int key, int velocity) noexcept
   if (! hasActivePreset()) return;
   auto configs = presets_[activePreset_].find(key, velocity);
 
-  // Stop any existing voice with this same key (?) or same exclusiveClass value.
+  // Stop any existing voice with the same exclusiveClass value OR with the same key.
   for (const Config& config : configs) {
-    stopSameKeyVoices(config.eventKey());
     auto exclusiveClass{config.exclusiveClass()};
     if (exclusiveClass > 0) {
       stopAllExclusiveVoices(exclusiveClass);
     }
+    stopSameKeyVoices(config.eventKey());
   }
 
   os_log_info(log_, "noteOn - number of voices: %lu", configs.size());
@@ -226,18 +226,6 @@ Engine::notifyActiveVoicesChannelStateChanged() noexcept
   for (auto pos = oldestActive_.begin(); pos != oldestActive_.end();) {
     auto& voice{voices_[*pos++]};
     voice.channelStateChanged();
-  }
-}
-
-void
-Engine::processControlChange(MIDI::ControlChange cc) noexcept
-{
-  switch (cc) {
-    case MIDI::ControlChange::bankSelectMSB:
-      channelState_.setContinuousControllerValue(MIDI::ControlChange::bankSelectLSB, 0);
-      break;
-    default:
-      break;
   }
 }
 

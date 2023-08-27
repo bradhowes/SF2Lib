@@ -48,6 +48,7 @@ BOOL PresetTestContextBase::playAudioInTests() {
 
 - (void)setUp
 {
+  epsilon = PresetTestContextBase::epsilonValue();
   self.deleteFile = YES;
   self.playAudio = PresetTestContextBase::playAudioInTests();
 }
