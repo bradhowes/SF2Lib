@@ -11,6 +11,9 @@
 
 namespace SF2::IO {
 
+template <typename T>
+concept HasSize = requires { { T::entity_size } -> std::convertible_to<std::size_t>; };
+
 struct ChunkItemsSupport {
   static void beginDump(size_t size);
 };
@@ -24,7 +27,7 @@ struct ChunkItemsSupport {
  
  @arg T is the entity type to hold in this container
  */
-template <typename T>
+template <HasSize T>
 class ChunkItems : private ChunkItemsSupport
 {
 public:
@@ -35,7 +38,7 @@ public:
   using ItemRefCollection = std::vector<std::reference_wrapper<ItemType const>>;
   
   /// Definition of the size in bytes of each item in the collection
-  static constexpr size_t itemSize = T::size;
+  static constexpr size_t itemSize = T::entity_size;
   
   /// Constructor for an empty collection.
   ChunkItems() noexcept = default;

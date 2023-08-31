@@ -104,45 +104,6 @@ File::load()
   return LoadResponse::ok;
 }
 
-//void
-//File::patchReleaseTimes(float maxDuration) noexcept {
-//  int limit = int(log2(maxDuration) * 1200.0 + 0.5);
-//  std::cout << "maxDuration: " << maxDuration << " limit: " << limit << '\n';
-//
-//  std::map<int, int> visited;
-//  for (size_t phdrIndex = 0; phdrIndex < presets_.size(); ++phdrIndex) {
-//    const auto& preset{presets_[phdrIndex]};
-//    for (size_t pbagIndex = 0; pbagIndex < preset.zoneCount(); ++pbagIndex) {
-//      const auto& pbag{presetZones_[pbagIndex + preset.firstZoneIndex()]};
-//      for (size_t pgenIndex = 0; pgenIndex < pbag.generatorCount(); ++pgenIndex) {
-//        const auto& pgen{presetZoneGenerators_[pgenIndex + pbag.firstGeneratorIndex()]};
-//        if (pgen.index() == Entity::Generator::Index::instrument) {
-//          auto instrumentIndex = pgen.amount().unsignedAmount();
-//          const auto& inst{instruments_[instrumentIndex]};
-//          auto found = visited.find(instrumentIndex);
-//          if (found != visited.end()) {
-//            continue;
-//          }
-//          visited.insert(std::pair(instrumentIndex, 1));
-//          for (size_t ibagIndex = 0; ibagIndex < inst.zoneCount(); ++ibagIndex) {
-//            const auto& ibag{instrumentZones_[size_t(ibagIndex + inst.firstZoneIndex())]};
-//            for (size_t igenIndex = 0; igenIndex < ibag.generatorCount(); ++igenIndex) {
-//              const auto& igen{instrumentZoneGenerators_[igenIndex + ibag.firstGeneratorIndex()]};
-//              if (igen.index() == Entity::Generator::Index::releaseVolumeEnvelope) {
-//                if (igen.value() > limit) {
-//                  preset.dump("phdr", phdrIndex);
-//                  inst.dump(" inst", instrumentIndex);
-//                  igen.dump("  igen", igenIndex + ibag.firstGeneratorIndex());
-//                }
-//              }
-//            }
-//          }
-//        }
-//      }
-//    }
-//  }
-//}
-
 void
 File::dump() const noexcept {
   std::cout << "|-ifil"; soundFontVersion_.dump("|-ifil");

@@ -14,7 +14,7 @@ namespace SF2::Entity::Generator {
  */
 class Amount {
 public:
-  static constexpr size_t size = 2;
+  static constexpr size_t entity_size = 2;
 
   /**
    Constructor with specific value. Only used for testing. All values for generators should come from SF2 file.

@@ -20,7 +20,7 @@ namespace SF2::Entity {
  */
 class Bag : public Entity {
 public:
-  static constexpr size_t size = 4;
+  static constexpr size_t entity_size = 4;
 
   /**
    Constructor that reads from file.
