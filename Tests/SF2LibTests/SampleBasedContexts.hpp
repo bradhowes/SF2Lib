@@ -47,6 +47,12 @@ struct TestEngineHarness {
     return Mixer(dry, chorus, reverb);
   }
 
+  int renderOnce(Mixer& mixer) noexcept {
+    engine_.renderInto(mixer, maxFramesToRender_);
+    mixer.shiftOver(maxFramesToRender_);
+    return ++renderIndex_;
+  }
+
   void renderUntil(Mixer& mixer, int limit) noexcept {
     while (renderIndex_++ < limit) {
       engine_.renderInto(mixer, maxFramesToRender_);
@@ -187,13 +193,13 @@ struct PresetTestContextBase
     return presets_[presetIndex];
   }
 
-  TestVoiceCollection makeVoiceCollection(int presetIndex, int midiNote, int midiVelocity) {
+  TestVoiceCollection makeVoiceCollection(int presetIndex, int midiNote, int midiVelocity = 64) {
     channelState_.reset();
     return {midiNote, midiVelocity, preset(presetIndex), sampleRate_, channelState_};
   }
 
   std::vector<TestVoiceCollection> makeVoicesCollection(int presetIndex, const std::vector<int>& midiNotes,
-                                                        int midiVelocity) {
+                                                        int midiVelocity = 64) {
     std::vector<TestVoiceCollection> notes;
     for (auto midiNote : midiNotes) {
       notes.emplace_back(makeVoiceCollection(presetIndex, midiNote, midiVelocity));

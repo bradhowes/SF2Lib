@@ -15,7 +15,7 @@ renderSignpost_{os_signpost_id_generate(log_)},
 noteOnSignpost_{os_signpost_id_generate(log_)},
 noteOffSignpost_{os_signpost_id_generate(log_)},
 startVoiceSignpost_{os_signpost_id_generate(log_)},
-forcedStopVoiceSignpost_{os_signpost_id_generate(log_)}
+stopVoiceSignpost_{os_signpost_id_generate(log_)}
 {
   available_.reserve(voiceCount);
   voices_.reserve(voiceCount);
@@ -270,7 +270,7 @@ Engine::stopAllExclusiveVoices(int exclusiveClass) noexcept
   for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
     auto voiceIndex = *pos;
     if (voices_[voiceIndex].exclusiveClass() == exclusiveClass) {
-      pos = forcedStopVoice(voiceIndex);
+      pos = stopVoice(voiceIndex);
     } else {
       ++pos;
     }
@@ -283,7 +283,7 @@ Engine::stopSameKeyVoices(int eventKey) noexcept
   for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
     auto voiceIndex = *pos;
     if (voices_[voiceIndex].initiatingKey() == eventKey) {
-      pos = forcedStopVoice(voiceIndex);
+      pos = stopVoice(voiceIndex);
     } else {
       ++pos;
     }
@@ -319,12 +319,12 @@ Engine::startVoice(const Config& config) noexcept
 }
 
 OldestActiveVoiceCache::iterator
-Engine::forcedStopVoice(size_t voiceIndex) noexcept
+Engine::stopVoice(size_t voiceIndex) noexcept
 {
-  os_signpost_interval_begin(log_, forcedStopVoiceSignpost_, "forcedStopVoice", "");
+  os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice", "");
   voices_[voiceIndex].stop();
   auto pos = oldestActive_.remove(voiceIndex);
   available_.push_back(voiceIndex);
-  os_signpost_interval_end(log_, forcedStopVoiceSignpost_, "forcedStopVoice", "");
+  os_signpost_interval_end(log_, stopVoiceSignpost_, "stopVoice", "");
   return pos;
 }
