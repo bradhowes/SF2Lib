@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <concepts>
+
 #include "SF2Lib/Entity/Generator/Amount.hpp"
 
 namespace SF2::Render {
@@ -10,7 +12,7 @@ namespace SF2::Render {
  Representation of a range of values between low and high values inclusive. It can answer if a given value is within
  the range.
  */
-template <typename T>
+template <std::integral T>
 class Range
 {
 public:

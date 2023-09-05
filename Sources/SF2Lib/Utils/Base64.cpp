@@ -60,7 +60,7 @@ Base64::encode(const std::string& input) noexcept
 
   std::string output;
   output.resize(outputSize);
-  auto out = static_cast<char*>(&output[0]);
+  auto out = output.data();
   auto in = input.data();
 
   while (inputSize >= 3) {

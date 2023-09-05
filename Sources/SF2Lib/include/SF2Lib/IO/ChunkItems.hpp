@@ -11,9 +11,6 @@
 
 namespace SF2::IO {
 
-template <typename T>
-concept HasSize = requires { { T::entity_size } -> std::convertible_to<std::size_t>; };
-
 struct ChunkItemsSupport {
   static void beginDump(size_t size);
 };
@@ -27,7 +24,7 @@ struct ChunkItemsSupport {
  
  @arg T is the entity type to hold in this container
  */
-template <HasSize T>
+template <EntityDerivedType T>
 class ChunkItems : private ChunkItemsSupport
 {
 public:

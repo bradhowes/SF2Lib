@@ -64,7 +64,7 @@ public:
 
 private:
 
-  template <typename T>
+  template <std::floating_point T>
   void loadNormalizedSamples() const noexcept
   {
     const auto startIndex = header_.startIndex();
@@ -79,7 +79,7 @@ private:
     loaded_ = true;
   }
 
-  template <typename T>
+  template <std::floating_point T>
   T getMaxMagnitude(size_t startPos, size_t endPos) const {
     T value{0.0f};
     if (samples_.size() > startPos && samples_.size() >= endPos) {

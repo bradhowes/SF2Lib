@@ -11,7 +11,7 @@ namespace SF2 {
  Collection of function pointers that refer to routines found in Apple's Accelerated framework.
  These are written so that the right routine is chosen depending on the definition of `Float`.
  */
-template <typename T>
+template <std::floating_point T>
 struct Accelerated
 {
   /**

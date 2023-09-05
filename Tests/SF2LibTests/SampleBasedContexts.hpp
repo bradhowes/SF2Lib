@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <iomanip>
 #include <AVFoundation/AVFoundation.h>
 #include <XCTest/XCTest.h>
 
@@ -92,7 +93,7 @@ struct TestEngineHarness {
 
   void sendNoteOn(uint8_t note, uint8_t velocity = 64) noexcept {
     AUMIDIEvent midiEvent;
-    midiEvent.data[0] = static_cast<uint8_t>(SF2::MIDI::CoreEvent::noteOn);
+    midiEvent.data[0] = SF2::valueOf(SF2::MIDI::CoreEvent::noteOn);
     midiEvent.data[1] = note;
     midiEvent.data[2] = velocity;
     midiEvent.length = 3;
@@ -101,7 +102,7 @@ struct TestEngineHarness {
 
   void sendNoteOff(uint8_t note) noexcept {
     AUMIDIEvent midiEvent;
-    midiEvent.data[0] = static_cast<uint8_t>(SF2::MIDI::CoreEvent::noteOff);
+    midiEvent.data[0] = SF2::valueOf(SF2::MIDI::CoreEvent::noteOff);
     midiEvent.data[1] = note;
     midiEvent.length = 2;
     engine_.doMIDIEvent(midiEvent);

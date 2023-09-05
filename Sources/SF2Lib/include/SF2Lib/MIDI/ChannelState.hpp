@@ -38,9 +38,9 @@ public:
    @param key the key (note) to set
    @param value the pressure value to record
    */
-  void setNotePressure(int key, int value) {
-    if (key < 0 || key > Note::Max) return;
-    notePressureValues_[static_cast<size_t>(key)] = value;
+  void setNotePressure(int key, int value) noexcept {
+    assert(key >= 0 && key <= Note::Max);
+    checkedVectorIndexing(notePressureValues_, key) = value;
   }
 
   /**
@@ -50,8 +50,8 @@ public:
    @returns the current pressure value for a key
    */
   int notePressure(int key) const noexcept {
-    if (key < 0 or key > Note::Max) return 0;
-    return notePressureValues_[static_cast<size_t>(key)];
+    assert(key >= 0 && key <= Note::Max);
+    return checkedVectorIndexing(notePressureValues_, key);
   }
 
   /**

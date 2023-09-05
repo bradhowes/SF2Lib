@@ -21,10 +21,7 @@ enum struct StageIndex {
   release
 };
 
-inline StageIndex operator++(StageIndex value) noexcept {
-  using IntType = typename std::underlying_type<StageIndex>::type;
-  return static_cast<StageIndex>( static_cast<IntType>(value) + 1 );
-}
+inline StageIndex operator++(StageIndex value) noexcept { return static_cast<StageIndex>(SF2::valueOf(value) + 1); }
 
 inline const char* StageName(StageIndex stageIndex) noexcept {
   switch (stageIndex) {

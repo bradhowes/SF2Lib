@@ -14,13 +14,16 @@
 
 namespace SF2::Render::Zone {
 
+template <typename T>
+concept ZoneDerivedType = std::derived_from<T, SF2::Render::Zone::Zone>;
+
 /**
  Templated collection of zones, made up of either Preset zones or Instrument zones. A non-global zone defines a range
  of MIDI keys and/or velocities over which it operates. The first zone can be a `global` zone. The global zone defines
  the configuration settings that apply to all other zones. The collection can be filtered by MIDI key and velocity to
  obtain the zones that are to be used for rendering audio samples.
  */
-template <typename T>
+template <ZoneDerivedType T>
 class Collection
 {
 public:

@@ -40,24 +40,25 @@ namespace SF2::Render::Envelope {
  durations to zero.
  */
 class Generator {
-public:
-  using Index = Entity::Generator::Index;
-  using State = Render::Voice::State::State;
-
+  
   /**
    Collection of states for all of the stages in an SF2 envelope.
    */
-  struct Stages : public std::array<Stage, static_cast<size_t>(StageIndex::release) + 1> {
-    using super = std::array<Stage, static_cast<size_t>(StageIndex::release) + 1>;
+  struct Stages : public std::array<Stage, SF2::valueOf(StageIndex::release) + 1> {
+    using super = std::array<Stage, SF2::valueOf(StageIndex::release) + 1>;
 
     Stage& operator[](const StageIndex& index) {
-      return super::operator[](static_cast<super::size_type>(index));
+      return super::operator[](static_cast<size_t>(index));
     }
 
     const Stage& operator[](const StageIndex& index) const {
       return super::operator[](static_cast<super::size_type>(index));
     }
   };
+
+public:
+  using Index = Entity::Generator::Index;
+  using State = Render::Voice::State::State;
 
   /**
    Set the status of a note playing. When true, the envelope begins proper. When set to false, the envelope will

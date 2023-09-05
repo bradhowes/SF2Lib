@@ -4,8 +4,10 @@
 
 #include <array>
 #include <cstdlib>
-#include <iostream>
+#include <iosfwd>
 #include <string>
+
+#include "SF2Lib/Types.hpp"
 
 namespace SF2::Entity::Modulator {
 
@@ -70,7 +72,7 @@ public:
 
    @param index the controller to use
    */
-  explicit Source(GeneralIndex index) noexcept : bits_{static_cast<uint16_t>(uint16_t(index) & indexMask)} {}
+  explicit Source(GeneralIndex index) noexcept : bits_{static_cast<uint16_t>(SF2::valueOf(index) & indexMask)} {}
 
   /**
    Generate a Source based on a MIDI continuous controller (CC)
@@ -96,7 +98,7 @@ public:
 
   /// @returns true if the source is valid
   bool isValid() const noexcept {
-    if (rawType() > static_cast<uint16_t>(ContinuityType::switched)) {
+    if (rawType() > SF2::valueOf(ContinuityType::switched)) {
       return false;
     }
     auto idx = rawIndex();

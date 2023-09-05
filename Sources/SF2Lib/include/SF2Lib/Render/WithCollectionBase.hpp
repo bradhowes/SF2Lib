@@ -2,10 +2,15 @@
 
 #pragma once
 
+#include <concepts>
+
 #include "SF2Lib/Render/Zone/Collection.hpp"
 
 namespace SF2::IO { class File; }
 namespace SF2::Render {
+
+template <typename T>
+concept ZoneDerivedType = std::derived_from<T, SF2::Render::Zone::Zone>;
 
 /**
  Base class for entities that contain a collection of zones (there are two: Render::Preset and Render::Instrument).
@@ -16,7 +21,7 @@ namespace SF2::Render {
 
  Must be derived from.
  */
-template <typename T, typename E>
+template <ZoneDerivedType T, EntityDerivedType E>
 class WithCollectionBase
 {
 public:

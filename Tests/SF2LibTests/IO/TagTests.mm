@@ -19,7 +19,7 @@ using namespace SF2::IO;
 }
 
 - (void)testRiff {
-  XCTAssertEqual(1179011410, static_cast<uint32_t>(Tags::riff));
+  XCTAssertEqual(1179011410, SF2::valueOf(Tags::riff));
 }
 
 /**

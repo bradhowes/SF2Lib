@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include "SF2Lib/Types.hpp"
 #include "SF2Lib/Entity/Entity.hpp"
 
 namespace SF2::Entity {
@@ -39,9 +40,6 @@ public:
     rom = 0x8000
   };
 
-  template<typename E>
-  static constexpr auto toRawType(E value) noexcept { return static_cast<std::underlying_type_t<E>>(value); }
-
   /**
    Construct new instance from SF2 file
    */
@@ -55,7 +53,7 @@ public:
                Type type = Type::monoSample) noexcept;
 
   constexpr bool sampleIsA(Type type) const noexcept {
-    return (sampleType & toRawType<Type>(type)) == toRawType<Type>(type);
+    return (sampleType & SF2::valueOf(type)) == SF2::valueOf(type);
   }
 
   /// @returns true if this sample only has one channel

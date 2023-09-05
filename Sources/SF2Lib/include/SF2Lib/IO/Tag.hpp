@@ -4,17 +4,20 @@
 
 #include <string>
 
+#include "SF2Lib/Types.hpp"
+
 namespace SF2::IO {
 
-inline constexpr uint32_t Pack4Chars(const char* c) noexcept
+constexpr uint32_t Pack4Chars(const char* c) noexcept
 {
-  return uint32_t(c[3]) << 24 | uint32_t(c[2]) << 16 | uint32_t(c[1]) << 8 | uint32_t(c[0]);
+  auto bits = [](char v, int shift) -> auto { return uint32_t(v) << shift; };
+  return bits(c[3], 24) | bits(c[2], 16) | bits(c[1], 8) | bits(c[0], 0);
 }
 
 /**
  Global list of all tags defined in the SF2 specification.
  */
-enum struct Tags {
+enum struct Tags : uint32_t {
   riff = Pack4Chars("RIFF"),
   list = Pack4Chars("LIST"),
   sfbk = Pack4Chars("sfbk"),
@@ -59,7 +62,7 @@ enum struct Tags {
 class Tag {
 public:
   Tag(uint32_t tag) noexcept : tag_{tag} {}
-  Tag(Tags tag) noexcept : tag_{static_cast<uint32_t>(tag)} {}
+  Tag(Tags tag) noexcept : tag_{SF2::valueOf(tag)} {}
 
   uint32_t rawValue() const noexcept { return tag_; }
 

@@ -463,9 +463,7 @@ public:
 
    @returns Index enum value
    */
-  Index operator*() const noexcept {
-    return static_cast<Index>(value_);
-  }
+  Index operator*() const noexcept { return static_cast<Index>(value_); }
 
   /// @return iterator that points to first Index enum value.
   static IndexIterator begin() noexcept { return {}; }
@@ -499,7 +497,7 @@ private:
 /**
  Fixed-size array with template value type that uses Index enums for indices.
  */
-template <typename T>
-using GeneratorValueArray = EnumIndexableValueArray<T, Index, size_t(Index::numValues)>;
+template <typename ValueType>
+using GeneratorValueArray = EnumIndexableValueArray<ValueType, Index, size_t(Index::numValues)>;
 
 } // end namespace SF2::Entity::Generator

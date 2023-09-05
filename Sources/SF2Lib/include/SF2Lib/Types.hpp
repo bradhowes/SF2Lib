@@ -4,6 +4,7 @@
 
 #include <Accelerate/Accelerate.h>
 #include <cmath>
+#include <concepts>
 
 namespace SF2 {
 
@@ -21,12 +22,32 @@ using AUValue = ::AUValue;
 using AUAudioFrameCount = ::AUAudioFrameCount;
 #endif
 
+/// Concept that limits a type to a numeric type. NOTE: this might need to be refined.
+template <typename T>
+concept Numeric = std::floating_point<T> || std::integral<T>;
+
+/// Concept that requires the type to be an enumeration.
+template <typename T>
+concept EnumeratedType = std::is_enum_v<T>;
+
+/// Concept that requires the type to to be convertible to a `size_t` value.
+template <typename T>
+concept SizableType = std::convertible_to<T, std::size_t>;
+
+/// Concept that requires the type to have an `entity_size` static member which provides a `size_t` value.
+template <typename T>
+concept EntityDerivedType = requires { { T::entity_size } -> std::convertible_to<std::size_t>; };
+
+/// Concept that requires the type to support random access indexing. I think this can be improved on.
+template <typename T>
+concept RandomAccessContainer = requires(T v) { { v.at(0) } -> std::convertible_to<typename T::value_type>; };
+
 /**
  Generic method that invokes checked or unchecked indexing on a container based on the DEBUG compile flag. When DEBUG
  is defined, invokes `at` which will validate the index prior to use, and as a result is slower than just blindly
  indexing via `operator []`.
  */
-template <typename T>
+template <RandomAccessContainer T>
 const typename T::value_type& checkedVectorIndexing(const T& container, size_t index) noexcept
 {
 #if defined(CHECKED_VECTOR_INDEXING) && CHECKED_VECTOR_INDEXING == 1
@@ -36,29 +57,44 @@ const typename T::value_type& checkedVectorIndexing(const T& container, size_t i
 #endif
 }
 
-template <typename T>
-typename T::value_type& checkedVectorIndexing(T& container, size_t index) noexcept
+/// Allow for safe indexing into a `vector` when enabled with `CHECKED_VECTOR_INDEXING` set to `1`.
+template <RandomAccessContainer T, SizableType S>
+const typename T::value_type& checkedVectorIndexing(const T& container, S index) noexcept
 {
+  auto index_ = static_cast<size_t>(index);
 #if defined(CHECKED_VECTOR_INDEXING) && CHECKED_VECTOR_INDEXING == 1
-  return container.at(index);
+  return container.at(index_);
 #else
-  return container[index];
+  return container[index_];
 #endif
 }
 
+template <RandomAccessContainer T, SizableType S>
+typename T::value_type& checkedVectorIndexing(T& container, S index) noexcept
+{
+  auto index_ = static_cast<size_t>(index);
+#if defined(CHECKED_VECTOR_INDEXING) && CHECKED_VECTOR_INDEXING == 1
+  return container.at(index_);
+#else
+  return container[index_];
+#endif
+}
+
+/// Literal operator that generates `Float` values from the literal content.
 constexpr Float operator ""_F(long double value) { return Float(value); }
+/// Literal operator that generates `Float` values from the literal content.
 constexpr Float operator ""_F(unsigned long long value) { return Float(value); }
 
 /**
  Convert an enum value into its underlying integral type.
  */
-template <typename T>
-inline auto valueOf(T index) noexcept { return static_cast<typename std::underlying_type<T>::type>(index); }
+template <EnumeratedType T>
+constexpr auto valueOf(T index) noexcept { return static_cast<typename std::underlying_type<T>::type>(index); }
 
 /**
  Fixed-size array with template value type that can use an enum for indices.
  */
-template <typename ElementType, typename EnumType, size_t Size>
+template <typename ElementType, EnumeratedType EnumType, size_t Size>
 class EnumIndexableValueArray : public std::array<ElementType, Size>
 {
   using super = std::array<ElementType, Size>;

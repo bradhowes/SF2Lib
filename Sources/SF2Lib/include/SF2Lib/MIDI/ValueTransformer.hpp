@@ -63,7 +63,7 @@ public:
    @returns transformed value
    */
   auto operator()(int controllerValue) const noexcept {
-    return active_[static_cast<size_t>(std::clamp(controllerValue, 0, int(active_.size() - 1)))];
+    return checkedVectorIndexing(active_, std::clamp(controllerValue, 0, int(active_.size() - 1)));
   }
 
 private:

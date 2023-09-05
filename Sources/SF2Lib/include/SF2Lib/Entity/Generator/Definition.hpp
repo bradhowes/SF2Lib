@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <string>
 
 #include "SF2Lib/Types.hpp"
@@ -25,12 +26,9 @@ namespace SF2::Entity::Generator {
 
  */
 class Definition {
-public:
 
-  /// Range for generator values. Default is no range checking.
+  /// Range for generator values.
   struct ValueRange {
-
-    constexpr ValueRange(int _min, int _max) : min{_min}, max{_max} {}
 
     /**
      Clamp the given value to be within the defined range.
@@ -38,16 +36,19 @@ public:
      @param value the value to clamp
      @returns clamped value
      */
-    template <typename T> T clamp(T value) const noexcept { return std::clamp<T>(value, min, max); }
+    template <Numeric T> T clamp(T value) const noexcept { return std::clamp<T>(value, min, max); }
 
     const int min;
     const int max;
   };
 
-  /// Number of definitions. This is the same as the number of generators defined in the SF2 spec.
-  static constexpr size_t NumDefs = static_cast<size_t>(Index::numValues);
+  static constexpr Definition::ValueRange unusedRange{0, 0};
+  static constexpr Definition::ValueRange keyRange{0, 127 * 256 + 127};
+  static constexpr Definition::ValueRange neg1KeyRange{-1, 127};
+  static constexpr Definition::ValueRange shortIntRange{-32'768, 32'767};
+  static constexpr Definition::ValueRange ushortIntRange{0, 65'535};
 
-  /// The kind of value held by the generator
+  /// The kind of value held by the generator.
   enum struct ValueKind {
 
     // These have isUnsignedValue() == true
@@ -79,6 +80,11 @@ public:
     x2 = 2,
     x4 = 4
   };
+
+public:
+
+  /// Number of definitions. This is the same as the number of generators defined in the SF2 spec.
+  static constexpr size_t NumDefs = SF2::valueOf(Index::numValues);
 
   /**
    Obtain the Definition entry for a given Index value
@@ -114,13 +120,14 @@ public:
 
    @returns multiplier for NRPN values.
   */
-  int nrpnMultiplier() const noexcept { return static_cast<int>(nrpnMultiplier_); }
+  int nrpnMultiplier() const noexcept { return SF2::valueOf(nrpnMultiplier_); }
 
   /// @returns true if the generator amount value is unsigned or signed
   bool isUnsignedValue() const noexcept { return valueKind_ < ValueKind::signedShort; }
 
   /**
-   Obtain the value from a generator Amount instance.
+   Obtain the value from a generator Amount instance. The SF2 spec defines `unsigned` and `signed` values, but in
+   general we work in signed space. 
 
    @param amount the container holding the value to extract
    @returns extracted value
@@ -130,21 +137,12 @@ public:
   }
 
   /**
-   Obtain the value from a generator Amount instance (from an SF2 file) after converting it to its natural or desired
-   form.
-
-   @param amount the container holding the value to extract
-   @returns the converted value
-   */
-  Float convertedValueOf(const Amount& amount) const noexcept;
-
-  /**
    Clamp a given value to the defined range for the generator.
 
    @param value the value to clamp
    @returns clamped value
    */
-  template <typename T> T clamp(T value) const noexcept { return valueRange_.clamp(value); }
+  template <Numeric T> T clamp(T value) const noexcept { return valueRange_.clamp(value); }
 
   std::ostream& dump(const Amount& amount) const noexcept;
 
@@ -154,11 +152,20 @@ private:
   Definition(const char* name, ValueKind valueKind, ValueRange minMax, bool availableInPreset,
              NRPNMultiplier nrpnMultiplier) noexcept;
 
+  /**
+   Obtain the value from a generator Amount instance (from an SF2 file) after converting it to its natural or desired
+   form. Only used by the `dump` method to generate human-readable representation of a generator.
+
+   @param amount the container holding the value to extract
+   @returns the converted value
+   */
+  Float convertedValueOf(const Amount& amount) const noexcept;
+
   std::string name_;
-  ValueKind valueKind_;
   ValueRange valueRange_;
-  bool availableInPreset_;
+  ValueKind valueKind_;
   NRPNMultiplier nrpnMultiplier_;
+  bool availableInPreset_;
 };
 
 } // end namespace SF2::Entity::Generator

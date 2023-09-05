@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iosfwd>
 
+#include "SF2Lib/Types.hpp"
 
 namespace SF2::Entity::Modulator {
 
@@ -20,7 +21,7 @@ public:
     linear = 0
   };
 
-  Transformer() noexcept : bits_{static_cast<uint16_t>(Kind::linear)} {}
+  Transformer() noexcept : bits_{SF2::valueOf(Kind::linear)} {}
   explicit Transformer(uint16_t bits) noexcept : bits_{bits} {}
 
   /// @returns the kind of transform to apply
@@ -34,7 +35,7 @@ public:
    @param value the value to transform
    @returns transformed value
    */
-  template <typename T>
+  template <std::floating_point T>
   T transform(T value) const noexcept { return value; }
 
   friend std::ostream& operator<<(std::ostream& os, const Transformer& value) noexcept;

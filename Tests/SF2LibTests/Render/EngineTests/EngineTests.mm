@@ -263,7 +263,7 @@ using namespace SF2::Render::Engine;
   std::vector<AUValue> samples;
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = static_cast<uint8_t>(MIDI::CoreEvent::noteOn);
+  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::noteOn);
   midiEvent.data[1] = 0x40;
   midiEvent.data[2] = 0x7F;
   midiEvent.length = 3;
@@ -274,7 +274,7 @@ using namespace SF2::Render::Engine;
   samples.push_back(harness.lastDrySample());
   XCTAssertEqual(1, engine.activeVoiceCount());
 
-  midiEvent.data[0] = static_cast<uint8_t>(MIDI::CoreEvent::programChange);
+  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::programChange);
   midiEvent.data[1] = 23;
   midiEvent.length = 2;
 
@@ -284,7 +284,7 @@ using namespace SF2::Render::Engine;
   XCTAssertTrue([name isEqualToString:@"Bandoneon"]);
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  midiEvent.data[0] = static_cast<uint8_t>(MIDI::CoreEvent::noteOn);
+  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::noteOn);
   midiEvent.data[1] = 0x40;
   midiEvent.data[2] = 0x7F;
   midiEvent.length = 3;
@@ -441,7 +441,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(0, engine.activeVoiceCount());
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = static_cast<uint8_t>(MIDI::CoreEvent::noteOn);
+  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::noteOn);
   midiEvent.data[1] = 0x40;
   midiEvent.data[2] = 0x7F;
   midiEvent.length = 3;
@@ -492,7 +492,7 @@ using namespace SF2::Render::Engine;
   std::vector<AUValue> samples;
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = static_cast<uint8_t>(MIDI::CoreEvent::noteOn);
+  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::noteOn);
   midiEvent.data[1] = 0x40;
   midiEvent.data[2] = 0x7F;
   midiEvent.length = 3;
@@ -517,7 +517,7 @@ using namespace SF2::Render::Engine;
   samples.push_back(harness.lastDrySample());
 
   // Pitch wheel all the way up
-  midiEvent.data[0] = static_cast<uint8_t>(MIDI::CoreEvent::pitchBend);
+  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::pitchBend);
   midiEvent.data[1] = 127;
   midiEvent.data[2] = 127;
   engine.doMIDIEvent(midiEvent);
@@ -600,7 +600,7 @@ using namespace SF2::Render::Engine;
   samples.push_back(harness.lastDrySample());
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = static_cast<uint8_t>(MIDI::CoreEvent::channelPressure);
+  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::channelPressure);
   midiEvent.length = 2;
 
   midiEvent.data[1] = 127;
@@ -639,7 +639,7 @@ using namespace SF2::Render::Engine;
   samples.push_back(harness.lastDrySample());
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = static_cast<uint8_t>(MIDI::CoreEvent::keyPressure);
+  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::keyPressure);
   midiEvent.data[1] = 60;
   midiEvent.length = 3;
 
@@ -694,7 +694,7 @@ using namespace SF2::Render::Engine;
   samples.push_back(harness.lastDrySample(1));
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = static_cast<uint8_t>(MIDI::CoreEvent::controlChange);
+  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
   midiEvent.data[1] = 10;
   midiEvent.length = 3;
 
@@ -1052,7 +1052,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(3, engine.activeVoiceCount());
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = static_cast<uint8_t>(MIDI::CoreEvent::reset);
+  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::reset);
   midiEvent.length = 1;
   engine.doMIDIEvent(midiEvent);
   
@@ -1070,7 +1070,7 @@ using namespace SF2::Render::Engine;
   AUMIDIEvent& midiEvent{*reinterpret_cast<AUMIDIEvent*>(blob)};
 
   uint8_t* pdata = midiEvent.data;
-  pdata[0] = static_cast<uint8_t>(MIDI::CoreEvent::systemExclusive);
+  pdata[0] = SF2::valueOf(MIDI::CoreEvent::systemExclusive);
   pdata[1] = 0x7E; // Custom command for SF2Lib
   pdata[2] = 0x00;
   pdata[3] = 1;

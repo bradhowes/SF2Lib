@@ -28,7 +28,7 @@ dwSampleRate{sampleRate},
 originalKey{key},
 correction{adjustment},
 sampleLink{link},
-sampleType{toRawType<Type>(type)}
+sampleType{SF2::valueOf(type)}
 {}
 
 std::string

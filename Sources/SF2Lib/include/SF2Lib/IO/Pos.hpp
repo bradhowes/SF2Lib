@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <unistd.h>
 
+#include "SF2Lib/Types.hpp"
+
 namespace SF2::IO {
 
 class Chunk;
@@ -46,7 +48,7 @@ struct Pos {
 
    @returns new Pos instance for the next bytes in the file
    */
-  template <typename T>
+  template <EntityDerivedType T>
   Pos readInto(T& buffer) const { return readInto(&buffer, sizeof(buffer)); }
 
   /**
@@ -57,7 +59,7 @@ struct Pos {
 
    @returns new Pos instance for the next bytes in the file
    */
-  template <typename T>
+  template <EntityDerivedType T>
   Pos readInto(T& buffer, size_t maxCount) const { return readInto(&buffer, std::min(sizeof(buffer), maxCount)); }
 
   /**
