@@ -75,7 +75,7 @@ There are two tests (currently) that provide performance metrics:
 * testEngineRenderPerformanceUsingLinearInterpolation
 
 As their name suggests, these exercise a specific interpolation method. They both generate 1 second of audio at a 48K
-sample rate, rendering 96 simultaneous notes. On an optimized build, both tests take ~0.4s to complete.
+sample rate, rendering 96 simultaneous notes. On an optimized build, both tests take ~0.34s to complete.
 
 Addional performance gains could be had by following the approach of FluidSynth and render 64 samples at a time with no
 changes to most of the modulators and generators. Furthermore, one could check the pending MIDI event list to see if it
