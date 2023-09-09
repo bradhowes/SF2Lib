@@ -6,7 +6,7 @@ DERIVED_DATA_MACOS = $(PWD)/.DerivedData-macos
 
 TARGET = SF2Lib
 QUIET = -quiet
-SCHEME = -scheme SF2Lib-Package
+SCHEME = -scheme 'SF2Lib-Package (Release)'
 
 default: test
 

@@ -31,11 +31,11 @@ route a percentage of the signal to a chorus and reverb bus/channel if it is pro
 that configure the percentage.
 
 The render [Engine](Sources/SF2Lib/include/SF2Lib/Render/Engine/Engine.hpp) `renderInto` method takes a
-[Mixer](Sources/SF2Lib/include/SF2Lib/Utils/Mixer.hpp) instance which supports a main "dry" bus and two busses for the
-"chorus effect send" and a "reverb effect send". These are populated with samples from active voices, and their levels
-are controlled by the `chorusEffectSend` and `reverbEffectSend` parameters mentioned above. One can then connect bus 1
-to a chorus effect and bus 2 to reverb, and then connect those outputs and bus 0 of this library to a mixer to generate
-the final output.
+[Mixer](Sources/SF2Lib/include/SF2Lib/Render/Engine/Mixer.hpp) instance which supports a main "dry" bus and two busses
+for the "chorus effect send" and a "reverb effect send". These are populated with samples from active voices, and their
+levels are controlled by the `chorusEffectSend` and `reverbEffectSend` parameters mentioned above. One can then connect
+bus 1 to a chorus effect and bus 2 to reverb, and then connect those outputs and bus 0 of this library to a mixer to
+generate the final output.
 
 # Code
 
