@@ -25,7 +25,7 @@ This package depends on some general DSP and audio classes from my
 # SF2 Spec Support
 
 Currently, all SF2 generators and modulators are supported and/or implemented according to the
-[SoundFont Spec v2](SoundFont Spec 2.01.pdf).
+[SoundFont Spec v2](SoundFont%20Spec%202.01.pdf).
 However, this library does not currently contain chorus or reverb effects. When rendering, the library will properly
 route a percentage of the signal to a chorus and reverb bus/channel if it is provided using the generator settiings
 that configure the percentage.
