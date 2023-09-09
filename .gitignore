@@ -5,6 +5,7 @@
 xcuserdata/
 DerivedData/
 .DerivedData-macos/
+.DerivedData-ios/
 .workspace/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 build.run
