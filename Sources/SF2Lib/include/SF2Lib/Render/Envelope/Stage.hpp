@@ -48,10 +48,7 @@ public:
 
    @param durationInSamples number of samples to report out the constant value.
    */
-  void setConstant(int durationInSamples) noexcept {
-    durationInSamples_ = std::max(durationInSamples, 0);
-    increment_ = 0.0;
-  }
+  void setConstant(int durationInSamples) noexcept;
 
   /**
    Generate a configuration for the delay stage.
@@ -66,10 +63,7 @@ public:
 
    @param durationInSamples number of samples to spend in this stage
    */
-  void setAttack(int durationInSamples) noexcept {
-    durationInSamples_ = std::max(durationInSamples, 1);
-    increment_ = 1.0 / durationInSamples_;
-  }
+  void setAttack(int durationInSamples) noexcept;
 
   /**
    Generate a configuration for the hold stage. This "holds" the envelope at a 1.0 value for a given number of samples
@@ -86,32 +80,8 @@ public:
    @param durationInSamples number of samples to spend in this stage
    @param sustainLevel the sustain level to descend to from 1.0 peak.
    */
-  void setDecay(int durationInSamples, Float sustainLevel) noexcept {
-    durationInSamples_ = std::max(durationInSamples, 1);
-    if (durationInSamples_ == 1) {
-      increment_ = sustainLevel - 1.0;
-      return;
-    }
+  void setDecay(int durationInSamples, Float sustainLevel) noexcept;
 
-    /*
-     According to the spec, the duration for the decay stage is the amount of time that it takes to go from 1.0 to
-     100 dB attenuation: "If the sustain level were -100dB, the Volume Envelope Decay Time would be the time spent in
-     decay phase." This implies that the slope of the decay is based only on the duration, not on the sustain level.
-
-     - First calculate the slope for a 1.0 - 0.0 descent over the given duration in samples
-     - Calculate the actual duration to go from 1.0 to the sustain level
-     - Recalculate the increment so that we reach the sustain level after the duration samples counts have passed.
-     */
-    Float span = (1.0 - sustainLevel);
-    if (span == 0.0) {
-      increment_ = 0.0;
-      return;
-    }
-
-    Float increment = Float(-1.0) / Float(durationInSamples_);
-    durationInSamples_ = std::max(static_cast<int>(floor(span / -increment)), 1);
-    increment_ = (1.0 - sustainLevel) / -Float(durationInSamples_);
-  }
 
   /**
    Generate a configuration for the sustain stage. This is the envelope level to report out while the envelope gate is
@@ -127,10 +97,7 @@ public:
 
    @param durationInSamples number of samples to spend in this stage
    */
-  void setRelease(int durationInSamples) noexcept {
-    durationInSamples_ = std::max(durationInSamples, 1);
-    increment_ = -1.0 / durationInSamples_;
-  }
+  void setRelease(int durationInSamples) noexcept;
 
   /**
    Obtain the next value of a stage.

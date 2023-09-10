@@ -68,7 +68,7 @@ State::updateStateMods() noexcept
   // Overwrite a generator's mods value with the NRPN value configured for it
   std::for_each(Entity::Generator::IndexIterator::begin(), Entity::Generator::IndexIterator::end(), [&](auto index) {
     auto value{channelState_.nrpnValue(index)};
-    if (value != 0 || value != gens_[index].mods_) {
+    if (value != 0 || value != gens_[index].mods()) {
       // std::cout << "setMod " << Definition::definition(index).name() << " = " << value << '\n';
       gens_[index].setMods(value);
     }
@@ -91,8 +91,8 @@ State::dump() noexcept
 {
   for (auto pos = Entity::Generator::IndexIterator::begin(); pos != Entity::Generator::IndexIterator::end(); ++pos) {
     auto& gen{gens_[*pos]};
-    std::cout << valueOf(*pos) << " value: " << gen.value_ << " adj: " << gen.adjustment_ << " mods: " << gen.mods_
-    << '\n';
+    std::cout << valueOf(*pos) << " value: " << gen.instrumentValue() << " adj: " << gen.presetValue()
+    << " mods: " << gen.mods() << '\n';
   }
   for (auto& mod : modulators_) {
     std::cout << mod.description() << '\n';

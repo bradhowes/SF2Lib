@@ -223,21 +223,21 @@ struct EnvelopeTestInjector {
   gen.configure(state);
 
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
-  XCTAssertEqualWithAccuracy(0.879999994300306, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.88, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 500);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
-  XCTAssertEqualWithAccuracy(0.499999976251274, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.5, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 900);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
-  XCTAssertEqualWithAccuracy(0.0999999572522938, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.1, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 960);
   gen.configure(state);
-  XCTAssertEqualWithAccuracy(0.0399999544024467, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.04, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 1440);
   gen.configure(state);
@@ -257,17 +257,17 @@ struct EnvelopeTestInjector {
   state.setValue(State::State::Index::sustainModulatorEnvelope, 100);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
-  XCTAssertEqualWithAccuracy(0.899999995250255, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.9, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainModulatorEnvelope, 500);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
-  XCTAssertEqualWithAccuracy(0.499999976251274, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.5, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainModulatorEnvelope, 900);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
-  XCTAssertEqualWithAccuracy(0.0999999572522938, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.1, EnvelopeTestInjector::sustain(gen), epsilon);
 }
 
 - (void)testKeyToMod {

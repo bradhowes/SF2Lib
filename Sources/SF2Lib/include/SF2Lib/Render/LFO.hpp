@@ -52,19 +52,19 @@ protected:
    Advance the current value of the LFO to the next value. NOTE: this is automatically done by `getNextValue` method.
    */
   void increment() noexcept {
-    if (delaySampleCount_ > 0) {
+    if (delaySampleCount_ > 0) [[unlikely]] {
       --delaySampleCount_;
       return;
     }
 
     counter_ += increment_;
-    if (counter_ >= 1.0) {
+    if (counter_ >= 1.0_F) [[unlikely]] {
       increment_ = -increment_;
-      counter_ = Float(2.0) - counter_;
+      counter_ = 2.0_F - counter_;
     }
-    else if (counter_ <= -1.0) {
+    else if (counter_ <= -1.0_F) [[unlikely]] {
       increment_ = -increment_;
-      counter_ = Float(-2.0) - counter_;
+      counter_ = -2.0_F - counter_;
     }
   }
 
@@ -88,8 +88,8 @@ protected:
 
   void configure(Float sampleRate, Float frequency, Float delay);
 
-  Float counter_{0.0};
-  Float increment_{0.0};
+  Float counter_{0.0_F};
+  Float increment_{0.0_F};
   size_t delaySampleCount_{0};
 
   const os_log_t log_;

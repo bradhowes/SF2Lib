@@ -22,15 +22,15 @@ inline constexpr int MaximumAbsoluteCents = 13'508;
 inline constexpr int CentsPerOctave = 1'200;
 
 /// Attenuated samples at or below this value should be inaudible at 100 dB dynamic range.
-inline constexpr Float NoiseFloor = 0.00001;
-inline constexpr Float NoiseFloorCentiBels = 960.0f;
+inline constexpr Float NoiseFloor = 0.00001_F;
+inline constexpr Float NoiseFloorCentiBels = 960.0_F;
 
 /// Maximum attenuation defined by SF2 spec.
-inline constexpr Float MaximumAttenuationCentiBels = 1'440.0f;
+inline constexpr Float MaximumAttenuationCentiBels = 1'440.0_F;
 
 /// Lowest note frequency that we can generate. This corresponds to C-1 in MIDI nomenclature
 /// (440 * pow(2.0, (N - 69) / 12))
-inline constexpr Float LowestNoteFrequency = Float(8.17579891564370697665253828745335);
+inline constexpr Float LowestNoteFrequency = 8.17579891564370697665253828745335_F;
 
 inline constexpr Float clamp(Float value, Float lowerBounds, Float upperBounds) noexcept {
   return std::clamp(value, lowerBounds, upperBounds);
@@ -48,7 +48,7 @@ private:
   static constexpr size_t TableSize = size_t(MaximumAttenuationCentiBels + 1);
   static constexpr Float generator(size_t index) {
     // Equivalent to pow(10.0, Float(index) / -200.0)
-    return DSPHeaders::ConstMath::exp(Float(index) / Float(-200.0) * DSPHeaders::ConstMath::Constants<Float>::ln10);
+    return DSPHeaders::ConstMath::exp(index / -200.0_F * DSPHeaders::ConstMath::Constants<Float>::ln10);
   }
 
   static inline const auto lookup_ = DSPHeaders::ConstMath::make_array<Float, TableSize>(generator);
@@ -70,8 +70,8 @@ private:
  @returns attenuation value
  */
 inline constexpr Float centibelsToAttenuation(Float value) noexcept {
-  if (value >= MaximumAttenuationCentiBels) return 0.0f;
-  if (value <= 0.0f) return 1.0f;
+  if (value >= MaximumAttenuationCentiBels) return 0.0_F;
+  if (value <= 0.0f) return 1.0_F;
   return AttenuationLookup::query(int(nearbyint(value)));
 }
 
@@ -103,8 +103,8 @@ private:
   static constexpr size_t TableSize = size_t(CentsPerOctave);
   static constexpr Float generator(size_t index) {
     // 6.875 x 2^(index / 1200) ==> 6.875 x e^(index / 1200 * ln(2))
-    return 6.875f * DSPHeaders::ConstMath::exp(index / Float(CentsPerOctave) *
-                                               DSPHeaders::ConstMath::Constants<Float>::ln2);
+    return 6.875_F * DSPHeaders::ConstMath::exp(index / Float(CentsPerOctave) *
+                                                DSPHeaders::ConstMath::Constants<Float>::ln2);
   }
 
   static inline const auto lookup_ = DSPHeaders::ConstMath::make_array<Float, TableSize>(generator);
@@ -134,7 +134,7 @@ private:
   static constexpr int Offset = Range / 2;
   static constexpr size_t TableSize = Range;
   static constexpr Float generator(size_t index) {
-    return DSPHeaders::ConstMath::pow(Float(2.0), Float(int(index) - Offset) / Float(CentsPerOctave));
+    return DSPHeaders::ConstMath::pow(2.0_F, Float(int(index) - Offset) / Float(CentsPerOctave));
   }
 
   static inline const auto lookup_ = DSPHeaders::ConstMath::make_array<Float, TableSize>(generator);
@@ -217,7 +217,7 @@ inline constexpr Float lfoCentsToFrequency(Float value) noexcept {
  @param value the value to convert
  */
 inline constexpr Float centibelsToResonance(Float value) noexcept {
-  return Float(std::pow(10.0, (clamp(value, 0.0f, 960.0f) - Float(30.1)) / Float(200.0)));
+  return Float(std::pow(10.0_F, (clamp(value, 0.0_F, 960.0_F) - 30.1_F) / 200.0_F));
 }
 
 /**
@@ -226,7 +226,7 @@ inline constexpr Float centibelsToResonance(Float value) noexcept {
  @param value cutoff value
  @returns clamped cutoff value
  */
-inline constexpr Float clampFilterCutoff(Float value) noexcept { return clamp(value, 1'500.0f, 20'000.0f); }
+inline constexpr Float clampFilterCutoff(Float value) noexcept { return clamp(value, 1'500.0_F, 20'000.0_F); }
 
 /**
  Convert integer from integer [0-1000] into [0.0-1.0]
@@ -235,7 +235,7 @@ inline constexpr Float clampFilterCutoff(Float value) noexcept { return clamp(va
  @returns normalized value between 0 and 1.
  */
 inline constexpr Float tenthPercentageToNormalized(Float value) noexcept {
-  return clamp(value * Float(0.001f), 0.0f, 1.0f);
+  return clamp(value * Float(0.001_F), 0.0_F, 1.0_F);
 }
 
 /**
@@ -246,7 +246,7 @@ inline constexpr Float tenthPercentageToNormalized(Float value) noexcept {
  @returns frequency of the given cents value
  */
 inline constexpr Float centsToFrequency(Float value) noexcept {
-  if (value < 0.0f) return 1.0f;
+  if (value < 0.0_F) return 1.0_F;
   if (value > MaximumAbsoluteCents) value = MaximumAbsoluteCents;
   auto cents = int(value + 300);
   auto whole = cents / 1'200;

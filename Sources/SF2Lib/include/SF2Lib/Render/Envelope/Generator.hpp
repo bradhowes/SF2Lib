@@ -118,13 +118,13 @@ protected:
    @returns the new envelope value.
    */
   Float getNextValue() noexcept {
-    if (!checkForNextStage()) {
+    if (!checkForNextStage()) [[unlikely]] {
       value_ = 0.0_F;
-    } else {
+    } else [[likely]] {
       value_ = stages_[stageIndex_].next(value_);
-      if (value_ < 0.0_F) {
+      if (value_ < 0.0_F) [[unlikely]] {
         stop();
-      } else {
+      } else [[likely]] {
         --counter_;
         checkForNextStage();
       }
@@ -148,7 +148,7 @@ private:
    */
   void enterStage(StageIndex next) noexcept {
     stageIndex_ = next;
-    if (next != StageIndex::idle) {
+    if (next != StageIndex::idle) [[likely]] {
       counter_ = stages_[stageIndex_].durationInSamples();
     }
   }

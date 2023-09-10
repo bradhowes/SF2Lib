@@ -68,7 +68,7 @@ Generator::Generator(Float sampleRate, const char* logTag, size_t voiceIndex, Fl
 voiceIndex_{voiceIndex},
 log_{os_log_create("SF2Lib", logTag)}
 {
-  sustainLevel_ = 1.0f - sustain / Float(1'000.0);
+  sustainLevel_ = 1.0f - sustain / 1'000.0_F;
   stages_[StageIndex::delay].setDelay(int(round(sampleRate * delay)));
   stages_[StageIndex::attack].setAttack(int(round(sampleRate * attack)));
   stages_[StageIndex::hold].setHold(int(round(sampleRate * hold)));

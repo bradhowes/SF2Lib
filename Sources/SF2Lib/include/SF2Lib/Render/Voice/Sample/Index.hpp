@@ -60,7 +60,7 @@ public:
     if (finished()) return;
 
     auto wholeIncrement{size_t(increment)};
-    auto partialIncrement{increment - Float(wholeIncrement)};
+    auto partialIncrement{increment - wholeIncrement};
 
     whole_ += wholeIncrement;
     partial_ += partialIncrement;
@@ -88,7 +88,7 @@ public:
 
 private:
   size_t whole_{0};
-  Float partial_{0.0};
+  Float partial_{0.0_F};
   Bounds bounds_{};
   bool looped_{false};
 };

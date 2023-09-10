@@ -549,6 +549,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqualWithAccuracy(-0.0279013551772, samples[3], epsilon);
   XCTAssertEqualWithAccuracy(-0.0126082124189, samples[4], epsilon);
 
+  self.playAudio = true;
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 

@@ -109,8 +109,9 @@ public:
   constexpr int initiatingKey() const noexcept { return state_.eventKey(); }
 
   /**
-   Signal the envelopes that the key is no longer pressed, transitioning to release phase. NOTE: this is invoked on a
-   non-render thread so we need to signal the render thread that it has taken place and let the render thread handle it.
+   Signal the envelopes that the key is no longer pressed, transitioning to release phase.
+
+   @param minElapsedSamplesSeen -- minimum number of samples that must be processed before actually releasing the key.
    */
   void releaseKey(size_t minElapsedSamplesSeen) noexcept {
     if (keyDown_ && pendingRelease_ == 0) {
@@ -156,7 +157,7 @@ public:
    @returns next sample
    */
   Float renderSample() noexcept {
-    if (! active_) return 0_F;
+    if (! active_) [[unlikely]] { return 0_F; }
 
     // Capture the current state of the modulators and envelopes and advance them to the next sample.
     auto modLFO{modulatorLFO_.getNextValue()};
@@ -164,51 +165,44 @@ public:
     auto modEnv{modulatorEnvelope_.getNextValue()};
     auto volEnv{gainEnvelope_.getNextValue()};
 
-    if (gainEnvelope_.isDelayed()) return 0_F;
+    if (gainEnvelope_.isDelayed()) [[unlikely]] return 0_F;
 
     // Calculate the pitch to render and then generate a new sample.
-    Float increment{pitch_.samplePhaseIncrement(modLFO, vibLFO, modEnv)};
-    Float sample{sampleGenerator_.generate(increment, canLoop())};
+    auto increment{pitch_.samplePhaseIncrement(modLFO, vibLFO, modEnv)};
+    auto sample{sampleGenerator_.generate(increment, canLoop())};
 
     // Calculate gain / attenuation to apply to sample. Here we are following the lead of FluidSynth and treat the
     // attack stage of the volume envelope as special and just a linear ramp from 0.0 - 1.0. The other stages are
     // treated as a normalized representation of a dB attenuation.
     auto attacking{gainEnvelope_.isAttack()};
-    Float volEnvAttenuation{attacking ? volEnv.val : 1.0f};
-    Float volEnvCB{attacking ? 0.0f : DSP::NoiseFloorCentiBels * (1.0f - volEnv.val)};
-    Float modLFOValCB{modLFO.val * -state_.modulated(Index::modulatorLFOToVolume)};
-    Float gain{initialAttenuation_ * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB) * volEnvAttenuation};
+    auto volEnvAttenuation{attacking ? volEnv.val : 1.0_F};
+    auto volEnvCB{attacking ? 0.0_F : DSP::NoiseFloorCentiBels * (1.0_F - volEnv.val)};
+    auto modLFOValCB{modLFO.val * -state_.modulated(Index::modulatorLFOToVolume)};
+    auto gain{initialAttenuation_ * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB) * volEnvAttenuation};
 
     // Calculate the low-pass filter parameters. Only the frequency can be affected by an LFO or mod envelope, but both
     // can have external modulators attached to their primary state value.
     auto frequency{(state_.modulated(Index::initialFilterCutoff) +
                     state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO.val +
                     state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv.val)};
-    // std::cout << frequency << '\n';
     auto resonance{state_.modulated(Index::initialFilterResonance)};
-
     auto filtered{filter_.transform(frequency, resonance, sample * gain)};
 
-    if (!sampleGenerator_.isActive()) {
+    if (!sampleGenerator_.isActive()) [[unlikely]] {
       stop();
       return filtered;
     }
 
     ++sampleCounter_;
 
-    if (pendingRelease_) {
+    if (pendingRelease_) [[unlikely]] {
       if (pendingRelease_ < sampleCounter_) {
         pendingRelease_ = 0;
         keyDown_ = false;
         gainEnvelope_.gate(false);
         modulatorEnvelope_.gate(false);
       }
-    } else if (gainEnvelope_.isRelease()) {
-      if (gain < DSP::NoiseFloor) {
-        os_log_debug(log_, "stopping due to noise floor - remaining sample count: %d", gainEnvelope_.counter());
-        stop();
-      }
-    } else if (!gainEnvelope_.isActive()) {
+    } else if ((gainEnvelope_.isRelease() && gain < DSP::NoiseFloor) || !gainEnvelope_.isActive()) [[unlikely]] {
       stop();
     }
 
@@ -234,7 +228,7 @@ public:
     }
 
     for (; index < frameCount; ++index) {
-      mixer.add(index, 0.0, 0.0, chorusSend, reverbSend);
+      mixer.add(index, 0.0_F, 0.0_F, chorusSend, reverbSend);
     }
   }
 

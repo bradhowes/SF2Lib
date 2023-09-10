@@ -49,12 +49,22 @@
 					<string>Local Baseline</string>
 				</dict>
 			</dict>
+			<key>testEngineRenderPerformanceUsingCubic4thOrderInterpolation</key>
+			<dict>
+				<key>com.apple.XCTPerformanceMetric_WallClockTime</key>
+				<dict>
+					<key>baselineAverage</key>
+					<real>0.335000</real>
+					<key>baselineIntegrationDisplayName</key>
+					<string>Local Baseline</string>
+				</dict>
+			</dict>
 			<key>testEngineRenderPerformanceUsingLinearInterpolation</key>
 			<dict>
 				<key>com.apple.XCTPerformanceMetric_WallClockTime</key>
 				<dict>
 					<key>baselineAverage</key>
-					<real>0.353000</real>
+					<real>0.316000</real>
 					<key>baselineIntegrationDisplayName</key>
 					<string>Local Baseline</string>
 				</dict>
