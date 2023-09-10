@@ -52,17 +52,17 @@ protected:
    Advance the current value of the LFO to the next value. NOTE: this is automatically done by `getNextValue` method.
    */
   void increment() noexcept {
-    if (delaySampleCount_ > 0) [[unlikely]] {
+    if (delaySampleCount_ > 0) {
       --delaySampleCount_;
       return;
     }
 
     counter_ += increment_;
-    if (counter_ >= 1.0_F) [[unlikely]] {
+    if (counter_ >= 1.0_F) {
       increment_ = -increment_;
       counter_ = 2.0_F - counter_;
     }
-    else if (counter_ <= -1.0_F) [[unlikely]] {
+    else if (counter_ <= -1.0_F) {
       increment_ = -increment_;
       counter_ = -2.0_F - counter_;
     }

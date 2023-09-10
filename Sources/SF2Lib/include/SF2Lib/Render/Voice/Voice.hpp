@@ -157,7 +157,7 @@ public:
    @returns next sample
    */
   Float renderSample() noexcept {
-    if (! active_) [[unlikely]] { return 0_F; }
+    if (! active_) { return 0_F; }
 
     // Capture the current state of the modulators and envelopes and advance them to the next sample.
     auto modLFO{modulatorLFO_.getNextValue()};
@@ -165,7 +165,7 @@ public:
     auto modEnv{modulatorEnvelope_.getNextValue()};
     auto volEnv{gainEnvelope_.getNextValue()};
 
-    if (gainEnvelope_.isDelayed()) [[unlikely]] return 0_F;
+    if (gainEnvelope_.isDelayed()) return 0_F;
 
     // Calculate the pitch to render and then generate a new sample.
     auto increment{pitch_.samplePhaseIncrement(modLFO, vibLFO, modEnv)};
@@ -188,21 +188,21 @@ public:
     auto resonance{state_.modulated(Index::initialFilterResonance)};
     auto filtered{filter_.transform(frequency, resonance, sample * gain)};
 
-    if (!sampleGenerator_.isActive()) [[unlikely]] {
+    if (!sampleGenerator_.isActive()) {
       stop();
       return filtered;
     }
 
     ++sampleCounter_;
 
-    if (pendingRelease_) [[unlikely]] {
+    if (pendingRelease_) {
       if (pendingRelease_ < sampleCounter_) {
         pendingRelease_ = 0;
         keyDown_ = false;
         gainEnvelope_.gate(false);
         modulatorEnvelope_.gate(false);
       }
-    } else if ((gainEnvelope_.isRelease() && gain < DSP::NoiseFloor) || !gainEnvelope_.isActive()) [[unlikely]] {
+    } else if ((gainEnvelope_.isRelease() && gain < DSP::NoiseFloor) || !gainEnvelope_.isActive()) {
       stop();
     }
 
