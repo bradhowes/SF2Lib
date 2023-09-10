@@ -117,7 +117,7 @@ public:
    @param gen the index of the generator
    @returns configured value of the generator
    */
-  int unmodulated(Index gen) const noexcept { return gens_[gen].unmodulated(); }
+  inline int unmodulated(Index gen) const noexcept { return gens_[gen].unmodulated(); }
 
   /**
    Obtain a generator value that includes the changes added by attached modulators.
@@ -127,7 +127,7 @@ public:
    @param gen the index of the generator
    @returns current value of the generator
    */
-  Float modulated(Index gen) const noexcept { return gens_[gen].modulated(); }
+  inline Float modulated(Index gen) const noexcept { return gens_[gen].modulated(); }
 
   /// @returns MIDI key that started a voice to begin emitting samples. For DSP this is *not* what is desired. See
   /// `key` method below.

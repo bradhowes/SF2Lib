@@ -51,7 +51,7 @@ struct GenValue {
   constexpr int unmodulated() const noexcept { return value_ + adjustment_; }
 
   /// @returns generator value + modulations
-  constexpr Float modulated() const noexcept { return cached_; }
+  inline constexpr Float modulated() const noexcept { return cached_; }
 
 private:
   int value_{0};

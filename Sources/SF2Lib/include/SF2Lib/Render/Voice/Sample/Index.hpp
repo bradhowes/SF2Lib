@@ -45,10 +45,10 @@ public:
   void stop() noexcept { whole_ = bounds_.endPos(); }
 
   /// @returns true if the index has been stopped.
-  bool finished() const noexcept { return whole_ >= bounds_.endPos(); }
+  inline bool finished() const noexcept { return whole_ >= bounds_.endPos(); }
 
   /// @returns true if the index has looped.
-  bool looped() const noexcept { return looped_; }
+  inline bool looped() const noexcept { return looped_; }
 
   /**
    Increment the index to the next location. Properly handles looping and buffer end.
@@ -56,7 +56,7 @@ public:
    @param increment the increment to apply to the internal index
    @param canLoop true if looping is allowed
    */
-  void increment(Float increment, bool canLoop) noexcept {
+  inline void increment(Float increment, bool canLoop) noexcept {
     if (finished()) return;
 
     auto wholeIncrement{size_t(increment)};

@@ -92,8 +92,7 @@ public:
   /**
    Stop the voice. After this, it will just produce 0.0 if rendered.
    */
-  void stop() noexcept {
-    os_log_debug(log_, "stop voice: %zu", voiceIndex_);
+  inline void stop() noexcept {
     active_ = false;
     gainEnvelope_.stop();
     sampleGenerator_.stop();
@@ -156,7 +155,7 @@ public:
    
    @returns next sample
    */
-  Float renderSample() noexcept {
+  inline Float renderSample() noexcept {
     if (! active_) { return 0_F; }
 
     // Capture the current state of the modulators and envelopes and advance them to the next sample.

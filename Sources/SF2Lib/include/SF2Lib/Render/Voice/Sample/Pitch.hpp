@@ -72,20 +72,16 @@ public:
    @param vibLFO the current vibrato LFO value
    @param modEnv the current modulation envelope value
    */
-  Float samplePhaseIncrement(ModLFO::Value modLFO, VibLFO::Value vibLFO, Modulation::Value modEnv) const noexcept
+  inline Float samplePhaseIncrement(ModLFO::Value modLFO, VibLFO::Value vibLFO, Modulation::Value modEnv) const noexcept
   {
     auto coarseTune{state_.modulated(Index::coarseTune)};
     auto fineTune{state_.modulated(Index::fineTune)};
-    auto phaseOffset{coarseTune * 100.0 + fineTune};
-
+    auto phaseOffset{coarseTune * 100.0_F + fineTune};
     auto modLFOValue{modLFO.val * state_.modulated(Index::modulatorLFOToPitch)};
     auto vibLFOValue{vibLFO.val * state_.modulated(Index::vibratoLFOToPitch)};
     auto modEnvValue{modEnv.val * state_.modulated(Index::modulatorEnvelopeToPitch)};
-
     auto phase{phaseBase_ + phaseOffset + modLFOValue + vibLFOValue + modEnvValue};
-    auto phaseIncrement{DSP::power2Lookup(int(std::round(phase)))};
-
-    return phaseIncrement;
+    return DSP::power2Lookup(int(std::round(phase)));
   }
 
 private:

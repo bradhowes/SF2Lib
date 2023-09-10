@@ -112,11 +112,11 @@ public:
    @param index the location of the value to return
    @returns the value at the give index
    */
-  typename super::const_reference operator[](EnumType index) const noexcept {
+  inline typename super::const_reference operator[](EnumType index) const noexcept {
     return super::operator[](static_cast<size_t>(valueOf(index)));
   }
 
-  typename super::const_reference operator[](size_t index) const noexcept {
+  inline typename super::const_reference operator[](size_t index) const noexcept {
     return super::operator[](index);
   }
 
@@ -126,11 +126,11 @@ public:
    @param index the location of the value to return
    @returns an updatable reference for the given index
    */
-  typename super::reference& operator[](EnumType index) noexcept {
+  inline typename super::reference& operator[](EnumType index) noexcept {
     return super::operator[](static_cast<size_t>(valueOf(index)));
   }
 
-  typename super::reference& operator[](size_t index) noexcept {
+  inline typename super::reference& operator[](size_t index) noexcept {
     return super::operator[](index);
   }
 };

@@ -109,7 +109,7 @@ protected:
             int sustain, Float release) noexcept;
 
   /// @returns the current envelope value.
-  Float value() const noexcept { return value_; }
+  inline Float value() const noexcept { return value_; }
 
   /**
    Calculate the next envelope value. This must be called on every sample for proper timing of the stages.
@@ -117,17 +117,14 @@ protected:
 
    @returns the new envelope value.
    */
-  Float getNextValue() noexcept {
-    if (!checkForNextStage()) {
-      value_ = 0.0_F;
+  inline Float getNextValue() noexcept {
+    if (!checkForNextStage()) return 0.0_F;
+    value_ = stages_[stageIndex_].next(value_);
+    if (value_ < 0.0_F) {
+      stop();
     } else {
-      value_ = stages_[stageIndex_].next(value_);
-      if (value_ < 0.0_F) {
-        stop();
-      } else {
-        --counter_;
-        checkForNextStage();
-      }
+      --counter_;
+      checkForNextStage();
     }
     return value_;
   }
@@ -146,7 +143,7 @@ private:
 
    @param next the stage to enter
    */
-  void enterStage(StageIndex next) noexcept {
+  inline void enterStage(StageIndex next) noexcept {
     stageIndex_ = next;
     if (next != StageIndex::idle) {
       counter_ = stages_[stageIndex_].durationInSamples();
@@ -158,16 +155,29 @@ private:
 
    @returns true if the envelope is still active
    */
-  bool checkForNextStage() noexcept {
+  inline bool checkForNextStage() noexcept {
     while (counter_ == 0) {
       switch (stageIndex_) {
-        case StageIndex::delay: enterStage(StageIndex::attack); break;
-        case StageIndex::attack: enterStage(StageIndex::hold); break;
-        case StageIndex::hold: enterStage(StageIndex::decay); break;
-        case StageIndex::decay: enterStage(StageIndex::sustain); break;
-        case StageIndex::sustain: enterStage(StageIndex::release); break;
-        case StageIndex::release: enterStage(StageIndex::idle); return false;
-        case StageIndex::idle: return false;
+        case StageIndex::delay:
+          enterStage(StageIndex::attack);
+          break;
+        case StageIndex::attack:
+          enterStage(StageIndex::hold);
+          break;
+        case StageIndex::hold:
+          enterStage(StageIndex::decay);
+          break;
+        case StageIndex::decay:
+          enterStage(StageIndex::sustain);
+          break;
+        case StageIndex::sustain:
+          enterStage(StageIndex::release);
+          break;
+        case StageIndex::release:
+          enterStage(StageIndex::idle);
+          return false;
+        case StageIndex::idle:
+          return false;
       }
     }
     return true;

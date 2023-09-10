@@ -12,11 +12,15 @@ namespace SF2::Render::Engine {
 
 /**
  Least-recently used cache of active voices. All operations on the cache are O(1) but each entry in the
- cache is 3x the size of the value being held (size_t) + an iterator that points to the entry in the cache.
+ cache is 3x the size of the value being held (`size_t`) + an iterator that points to the entry in the cache.
  Internally, the cache consists of a linked list which keeps the voices ordered by their time of activation. For fast
  removal within the linked list, there is a separate vector of iterators that points to each entry in the linked list.
  Changes to a std::list do not invalidate iterators that point to other nodes besides the one being added or removed.
+
  This vector is indexed by the voice index that is unique to each voice.
+
+ The internal std::list uses a custom allocator that guarantees there are no allocations/frees during changes in the
+ std::list container.
  */
 class OldestActiveVoiceCache
 {
@@ -30,43 +34,21 @@ public:
 
    @param maxVoiceCount the number of voices to support
    */
-  OldestActiveVoiceCache(size_t maxVoiceCount) noexcept
-  : leastRecentlyUsed_(Allocator(maxVoiceCount)), log_{os_log_create("SF2Lib", "OldestActiveVoiceCache")}
-  {
-    iterators_.assign(maxVoiceCount, leastRecentlyUsed_.end());
-  }
+  OldestActiveVoiceCache(size_t maxVoiceCount) noexcept;
 
   /**
    Add a voice to the cache. It must not already be in the cache.
 
    @param voiceIndex the unique ID of the voice
    */
-  void add(size_t voiceIndex) {
-    // os_log_debug(log_, "add BEGIN - %ld", voiceIndex);
-    if (voiceIndex >= iterators_.size()) throw std::runtime_error("invalid voice index");
-    if (iterators_[voiceIndex] != leastRecentlyUsed_.end()) throw std::runtime_error("voice already in cache");
-
-    // Insert the voice at the beginning of the linked list. Record an iterator to it.
-    iterators_[voiceIndex] = leastRecentlyUsed_.insert(leastRecentlyUsed_.begin(), voiceIndex);
-    // os_log_debug(log_, "add END");
-  }
+  void add(size_t voiceIndex) noexcept;
 
   /**
    Remove a voice from the cache. It must be in the cache.
 
    @param voiceIndex the unique ID of the voice
    */
-  iterator remove(size_t voiceIndex) {
-    // os_log_debug(log_, "remove BEGIN - %ld", voiceIndex);
-    if (voiceIndex >= iterators_.size()) throw std::runtime_error("invalid voice index");
-    if (iterators_[voiceIndex] == leastRecentlyUsed_.end()) throw std::runtime_error("voice not in cache");
-
-    // Remove voice by using the iterator that points to it.
-    auto pos = leastRecentlyUsed_.erase(iterators_[voiceIndex]);
-    iterators_[voiceIndex] = leastRecentlyUsed_.end();
-    // os_log_debug(log_, "remove END");
-    return pos;
-  }
+  iterator remove(size_t voiceIndex) noexcept;
 
   /**
    Remove the oldest voice. There must be at least one active voice in the cache (really, the size of the list should
@@ -74,15 +56,7 @@ public:
 
    @returns index of the voice that was taken from the cache
    */
-  size_t takeOldest() {
-    // os_log_debug(log_, "takeOldest BEGIN");
-    if (leastRecentlyUsed_.empty()) throw std::runtime_error("cache is empty");
-    size_t oldest = leastRecentlyUsed_.back();
-    iterators_[oldest] = leastRecentlyUsed_.end();
-    leastRecentlyUsed_.pop_back();
-    // os_log_debug(log_, "takeOldest END - %ld", oldest);
-    return oldest;
-  }
+  size_t takeOldest() noexcept;
 
   /// @returns true if the cache is empty
   bool empty() const noexcept { return leastRecentlyUsed_.empty(); }
@@ -90,12 +64,19 @@ public:
   /// @returns the number of voices in the cache (since C++11 this is guaranteed to be O(1)).
   size_t size() const noexcept { return leastRecentlyUsed_.size(); }
 
+  /// @returns iterator to first (oldest) active voice
   iterator begin() noexcept { return leastRecentlyUsed_.begin(); }
+
+  /// @returns iterator to last + 1 voice
   iterator end() noexcept { return leastRecentlyUsed_.end(); }
 
+  /// @returns iterator to first (oldest) active voice
   const_iterator cbegin() const noexcept { return leastRecentlyUsed_.cbegin(); }
+
+  /// @returns iterator to last + 1 voice
   const_iterator cend() const noexcept { return leastRecentlyUsed_.cend(); }
 
+  /// Remove all active entries.
   void clear() noexcept { while (!empty()) takeOldest(); }
 
 private:

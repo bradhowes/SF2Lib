@@ -446,7 +446,7 @@ public:
 
    @param value the starting value
    */
-  IndexIterator(Index value) noexcept : value_{SF2::valueOf(value)} {}
+  inline IndexIterator(Index value) noexcept : value_{SF2::valueOf(value)} {}
 
   /**
    Increment the iterator.
@@ -463,7 +463,7 @@ public:
 
    @returns Index enum value
    */
-  Index operator*() const noexcept { return static_cast<Index>(value_); }
+  inline Index operator*() const noexcept { return static_cast<Index>(value_); }
 
   /// @return iterator that points to first Index enum value.
   static IndexIterator begin() noexcept { return {}; }
@@ -485,10 +485,10 @@ class RawIndex {
 public:
 
   /// @returns boxed value
-  uint16_t value() const noexcept { return value_; }
+  inline uint16_t value() const noexcept { return value_; }
 
   /// @returns Index value
-  Index index() const noexcept { return Index(value_); }
+  inline Index index() const noexcept { return Index(value_); }
 
 private:
   uint16_t const value_{0};

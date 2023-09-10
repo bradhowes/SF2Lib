@@ -29,29 +29,6 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(cache.size(), 0);
 }
 
-- (void)testDuplicateAddThrows {
-  OldestActiveVoiceCache cache{8};
-  XCTAssertTrue(cache.empty());
-  cache.add(0);
-  XCTAssertThrows(cache.add(0));
-}
-
-- (void)testRemoveMissingThrows {
-  OldestActiveVoiceCache cache{8};
-  XCTAssertThrows(cache.remove(0));
-}
-
-- (void)testInvalidVoiceIndexThrows {
-  OldestActiveVoiceCache cache{8};
-  XCTAssertThrows(cache.add(10));
-  XCTAssertThrows(cache.remove(10));
-}
-
-- (void)testEmptyTakeOldestThrows {
-  OldestActiveVoiceCache cache{8};
-  XCTAssertThrows(cache.takeOldest());
-}
-
 - (void)testTiming {
   NSArray* metrics = @[XCTPerformanceMetric_WallClockTime];
   [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{

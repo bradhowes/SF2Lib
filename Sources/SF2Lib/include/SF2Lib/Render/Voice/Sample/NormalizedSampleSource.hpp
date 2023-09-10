@@ -57,7 +57,9 @@ public:
    @param index the index to use
    @returns sample at the index
    */
-  Float operator[](size_t index) const noexcept { return checkedVectorIndexing<decltype(samples_)>(samples_, index); }
+  inline Float operator[](size_t index) const noexcept {
+    return checkedVectorIndexing<decltype(samples_)>(samples_, index);
+  }
 
   /// @returns the sample header ('shdr') of the sample stream being rendered
   const Entity::SampleHeader& header() const noexcept { return header_; }

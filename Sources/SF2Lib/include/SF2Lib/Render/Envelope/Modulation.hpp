@@ -18,8 +18,8 @@ class Modulation : public Generator
 public:
 
   struct Value {
+    inline Value(Float v) noexcept : val{v} {}
     const Float val;
-    explicit Value(Float v) noexcept : val{v} {}
   };
 
   explicit Modulation(size_t voiceIndex) : Generator(voiceIndex, "ModGen") {}
@@ -32,14 +32,14 @@ public:
   void configure(const State& state) noexcept { configureModulationEnvelope(state); }
 
   /// @returns the current envelope value.
-  Value value() const noexcept { return Value(Generator::value()); }
+  inline Value value() const noexcept { return Generator::value(); }
 
   /**
    Calculate the next envelope value. This must be called on every sample for proper timing of the stages.
 
    @returns the new envelope value.
    */
-  Value getNextValue() noexcept { return Value(Generator::getNextValue()); }
+  Value getNextValue() noexcept { return Generator::getNextValue(); }
 
 private:
   Modulation(Float sampleRate, size_t voiceIndex, Float delay, Float attack, Float hold, Float decay,
