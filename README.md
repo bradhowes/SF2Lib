@@ -60,8 +60,9 @@ that are performed in this code.
 There are quite a lot (yet not enough) unit tests that cover nearly all of the code base. There are even some rendering
 tests that will play audio at the end if configured to do so. This option is found in the
 [Package.swift](Package.swift#L86) file, in the line `.define("PLAY_AUDIO", to: "0", .none)`. Change the "0" to "1" to
-enable the audio output for all tests. Alternatively, the unit tests with rendering capability have a `playAudio` 
-attribute which can
+enable the audio output for all tests.
+
+Alternatively, the unit tests with rendering capability have a `playAudio` attribute which can
 be set to `true` to play the rendered output from a test. Note that the test results do not depend on this setting, but
 enabling it does increase the time it takes to run the tests due to the time it takes to play back the recorded audio
 samples.

@@ -98,13 +98,13 @@ Engine::noteOn(int key, int velocity) noexcept
   if (! hasActivePreset()) return;
   auto configs = presets_[activePreset_].find(key, velocity);
 
-  // Stop any existing voice with the same exclusiveClass value OR with the same key.
+  // Stop any existing voice with the same exclusiveClass value.
   for (const Config& config : configs) {
     auto exclusiveClass{config.exclusiveClass()};
     if (exclusiveClass > 0) {
       stopAllExclusiveVoices(exclusiveClass);
     }
-    stopSameKeyVoices(config.eventKey());
+    // stopSameKeyVoices(config.eventKey());
   }
 
   os_log_info(log_, "noteOn - number of voices: %lu", configs.size());
