@@ -35,7 +35,7 @@ public:
   using ItemRefCollection = std::vector<std::reference_wrapper<ItemType const>>;
   
   /// Definition of the size in bytes of each item in the collection
-  static constexpr size_t itemSize = T::entity_size;
+  inline static const size_t itemSize = T::entity_size;
   
   /// Constructor for an empty collection.
   ChunkItems() noexcept = default;

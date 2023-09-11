@@ -31,10 +31,10 @@ namespace SF2::Entity::Modulator {
  */
 class Modulator : public Entity {
 public:
-  inline static constexpr size_t entity_size = 10;
+  inline static size_t entity_size = 10;
 
   /// Number of default modulators
-  inline static constexpr size_t DefaultsSize = 10;
+  static constexpr size_t DefaultsSize = 10;
 
   /**
    Default modulators that are predefined for every instrument. These get copied over to each voice's State before the

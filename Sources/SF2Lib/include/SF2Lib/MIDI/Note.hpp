@@ -12,8 +12,8 @@ namespace SF2::MIDI {
  */
 class Note {
 public:
-  inline constexpr static int Min = 0;
-  inline constexpr static int Max = 127;
+  inline static const int Min = 0;
+  inline static const int Max = 127;
 
   /**
    Construct new note.

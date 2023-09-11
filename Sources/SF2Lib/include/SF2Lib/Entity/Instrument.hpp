@@ -14,7 +14,7 @@ namespace SF2::Entity {
  */
 class Instrument : Entity {
 public:
-  static constexpr size_t entity_size = 22;
+  inline static const size_t entity_size = 22;
 
   explicit Instrument(IO::Pos& pos) noexcept;
 

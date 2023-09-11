@@ -72,7 +72,7 @@ public:
   }
 
   /// @returns the unique index assigned to this voice instance.
-  constexpr size_t voiceIndex() const noexcept { return voiceIndex_; }
+  size_t voiceIndex() const noexcept { return voiceIndex_; }
 
   /// @returns the `exclusiveClass` generator value for the voice (only valid if voice is active).
   int exclusiveClass() const noexcept { return state_.unmodulated(Index::exclusiveClass); }
@@ -99,13 +99,13 @@ public:
   }
 
   /// @returns true if this voice is still rendering interesting samples
-  constexpr bool isActive() const noexcept { return active_; }
+  bool isActive() const noexcept { return active_; }
 
   /// @returns true if this voice is done processing and will no longer render meaningful samples.
-  constexpr bool isDone() const noexcept { return !isActive(); }
+  bool isDone() const noexcept { return !isActive(); }
 
   /// @returns the MIDI key that started the voice. NOTE: not to be used for DSP processing.
-  constexpr int initiatingKey() const noexcept { return state_.eventKey(); }
+  int initiatingKey() const noexcept { return state_.eventKey(); }
 
   /**
    Signal the envelopes that the key is no longer pressed, transitioning to release phase.
@@ -119,7 +119,7 @@ public:
   }
 
   /// @returns looping mode of the sample being rendered
-  constexpr LoopingMode loopingMode() const noexcept {
+  LoopingMode loopingMode() const noexcept {
     switch (state_.unmodulated(Index::sampleModes)) {
       case 1: return LoopingMode::activeEnvelope;
       case 3: return LoopingMode::duringKeyPress;
@@ -128,7 +128,7 @@ public:
   }
 
   /// @returns true if the voice can enter a loop if it is available
-  constexpr bool canLoop() const noexcept {
+  bool canLoop() const noexcept {
     return ((loopingMode_ == LoopingMode::activeEnvelope && gainEnvelope_.isActive()) ||
             (loopingMode_ == LoopingMode::duringKeyPress && keyDown_));
   }
@@ -232,7 +232,7 @@ public:
   }
 
   /// @returns `State` instance for the voice.
-  constexpr State::State& state() noexcept { return state_; }
+  State::State& state() noexcept { return state_; }
 
   void channelStateChanged() noexcept { state_.updateStateMods(); }
   

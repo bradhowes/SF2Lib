@@ -42,11 +42,11 @@ class Definition {
     const int max;
   };
 
-  static constexpr Definition::ValueRange unusedRange{0, 0};
-  static constexpr Definition::ValueRange keyRange{0, 127 * 256 + 127};
-  static constexpr Definition::ValueRange neg1KeyRange{-1, 127};
-  static constexpr Definition::ValueRange shortIntRange{-32'768, 32'767};
-  static constexpr Definition::ValueRange ushortIntRange{0, 65'535};
+  static inline const Definition::ValueRange unusedRange{0, 0};
+  static inline const Definition::ValueRange keyRange{0, 127 * 256 + 127};
+  static inline const Definition::ValueRange neg1KeyRange{-1, 127};
+  static inline const Definition::ValueRange shortIntRange{-32'768, 32'767};
+  static inline const Definition::ValueRange ushortIntRange{0, 65'535};
 
   /// The kind of value held by the generator.
   enum struct ValueKind {
@@ -84,7 +84,7 @@ class Definition {
 public:
 
   /// Number of definitions. This is the same as the number of generators defined in the SF2 spec.
-  static constexpr size_t NumDefs = SF2::valueOf(Index::numValues);
+  static inline const size_t NumDefs = SF2::valueOf(Index::numValues);
 
   /**
    Obtain the Definition entry for a given Index value

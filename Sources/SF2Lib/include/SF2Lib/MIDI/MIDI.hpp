@@ -30,15 +30,15 @@ enum struct CoreEvent {
 };
 
 enum struct ControlChange {
-  bankSelectMSB = 0x00,
+  bankSelectMSB = 0x00, // used
   modulationWheelMSB = 0x01,
   breathMSB = 0x02,
   footMSB = 0x04,
   portamentoTimeMSB = 0x05,
-  dataEntryMSB = 0x06,
-  volumeMSB = 0x07,
-  balanceMSB = 0x08,
-  panMSB = 0x0A,
+  dataEntryMSB = 0x06, // used
+  volumeMSB = 0x07, // used
+  balanceMSB = 0x08, // used
+  panMSB = 0x0A, // used
   expressionMSB = 0x0B,
   effects1MSB = 0x0C,
   effects2MSB = 0x0D,
@@ -48,12 +48,12 @@ enum struct ControlChange {
   generalPurpose3MSB = 0x12,
   generalPurpose4MSB = 0x13,
 
-  bankSelectLSB = 0x20,
+  bankSelectLSB = 0x20, // used
   modulationWheelLSB = 0x21,
   breathLSB = 0x22,
   footLSB = 0x24,
   portamentoTimeLSB = 0x25,
-  dataEntryLSB = 0x26,
+  dataEntryLSB = 0x26, // used
   volumeLSB = 0x27,
   balanceLSB = 0x28,
   panLSB = 0x2A,
@@ -66,7 +66,7 @@ enum struct ControlChange {
   generalPurpose3LSB = 0x32,
   generalPurpose4LSB = 0x33,
 
-  sustainSwitch = 0x40,
+  sustainSwitch = 0x40, // used
   portamentoSwitch = 0x41,
   sostenutoSwitch = 0x42,
   softPedalSwitch = 0x43,
@@ -99,16 +99,16 @@ enum struct ControlChange {
   dataEntryIncrement = 0x60,
   dataEntryDecrement = 0x61,
 
-  nrpnLSB = 0x62,
-  nrpnMSB = 0x63,
-  rpnLSB = 0x64,
-  rpnMSB = 0x65,
+  nrpnLSB = 0x62, // used
+  nrpnMSB = 0x63, // used
+  rpnLSB = 0x64, // used
+  rpnMSB = 0x65, // used
 
   // Channel messages
   allSoundOff = 0x78,
-  resetAllControllers = 0x79,
+  resetAllControllers = 0x79, // used
   localControl = 0x7A,
-  allNotesOff = 0x7B,
+  allNotesOff = 0x7B, // used
   omniOff = 0x7C,
   omniOn = 0x7D,
   monoOn = 0x7E,

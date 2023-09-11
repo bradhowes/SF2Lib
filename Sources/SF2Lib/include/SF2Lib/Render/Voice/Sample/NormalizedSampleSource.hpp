@@ -21,8 +21,8 @@ namespace SF2::Render::Voice::Sample {
 class NormalizedSampleSource {
 public:
 
-  static constexpr Float normalizationScale = 1.0_F / Float(1 << 15);
-  static constexpr size_t sizePaddingAfterEnd = 46; // SF2 spec 7.10
+  inline static const Float normalizationScale = 1.0_F / Float(1 << 15);
+  inline static const size_t sizePaddingAfterEnd = 46; // SF2 spec 7.10
 
   /**
    Construct a new normalized buffer of samples.

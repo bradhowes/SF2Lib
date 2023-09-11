@@ -84,7 +84,7 @@ protected:
 
    @returns current waveform value
    */
-  constexpr Float value() const noexcept { return counter_; }
+  Float value() const noexcept { return counter_; }
 
   void configure(Float sampleRate, Float frequency, Float delay);
 

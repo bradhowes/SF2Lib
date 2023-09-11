@@ -81,10 +81,10 @@ public:
   }
 
   /// @returns index to first sample to use for rendering
-  constexpr size_t whole() const noexcept { return whole_; }
+  size_t whole() const noexcept { return whole_; }
 
   /// @returns normalized position between 2 samples. For instance, 0.5 indicates half-way between two samples.
-  constexpr Float partial() const noexcept { return partial_; }
+  Float partial() const noexcept { return partial_; }
 
 private:
   size_t whole_{0};

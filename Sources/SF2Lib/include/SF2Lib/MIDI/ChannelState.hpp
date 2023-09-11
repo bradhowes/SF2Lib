@@ -19,7 +19,7 @@ namespace SF2::MIDI {
  */
 class ChannelState {
 public:
-  inline constexpr static int maxPitchWheelValue = 8191;
+  inline static const int maxPitchWheelValue = 8191;
 
   /**
    Construct new channel.

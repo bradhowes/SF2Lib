@@ -17,7 +17,7 @@ namespace SF2::Entity::Generator {
  */
 class Generator : public Entity {
 public:
-  static constexpr size_t entity_size = 4;
+  static inline const size_t entity_size = 4;
 
   /**
    Constructor from file.

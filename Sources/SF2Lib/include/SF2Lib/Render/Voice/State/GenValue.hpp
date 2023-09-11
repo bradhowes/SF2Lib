@@ -41,17 +41,17 @@ struct GenValue {
    */
   void addMod(Float value) noexcept { mods_ += value; cached_ += value; }
 
-  constexpr Float mods() const noexcept { return mods_; }
+  Float mods() const noexcept { return mods_; }
 
-  constexpr int instrumentValue() const noexcept { return value_; }
+  int instrumentValue() const noexcept { return value_; }
 
-  constexpr int presetValue() const noexcept { return adjustment_; }
+  int presetValue() const noexcept { return adjustment_; }
 
   /// @returns generator value as defined by instrument zone (value) and preset zone (adjustment).
-  constexpr int unmodulated() const noexcept { return value_ + adjustment_; }
+  int unmodulated() const noexcept { return value_ + adjustment_; }
 
   /// @returns generator value + modulations
-  inline constexpr Float modulated() const noexcept { return cached_; }
+  Float modulated() const noexcept { return cached_; }
 
 private:
   int value_{0};

@@ -40,10 +40,10 @@ public:
   const Sample::NormalizedSampleSource& sampleSource() const noexcept;
 
   /// @returns original MIDI key that triggered the voice
-  constexpr int eventKey() const noexcept { return eventKey_; }
+  int eventKey() const noexcept { return eventKey_; }
 
   /// @returns original MIDI velocity that triggered the voice
-  constexpr int eventVelocity() const noexcept { return eventVelocity_; }
+  int eventVelocity() const noexcept { return eventVelocity_; }
 
   /// @returns value of `exclusiveClass` generator for an instrument if it is set, or 0 if not found.
   int exclusiveClass() const noexcept { return exclusiveClass_; }

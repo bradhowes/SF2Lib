@@ -56,7 +56,7 @@ public:
   /**
    Allocate a new node.
    */
-  [[nodiscard]] constexpr value_type* allocate(std::size_t)
+  [[nodiscard]] value_type* allocate(std::size_t)
   {
     // Allocate our nodes first time we are asked for one. This makes the first allocation the most costly, but we
     // assume that this is done at some time where this cost is not an issue. One can force the allocation at a certain
@@ -85,7 +85,7 @@ public:
 
    @param p pointer to node to deallocate.
    */
-  constexpr void deallocate(value_type* p, std::size_t) noexcept
+  void deallocate(value_type* p, std::size_t) noexcept
   {
     auto ptr = reinterpret_cast<Node*>(p);
     ptr->next = freeList_;

@@ -11,7 +11,7 @@ namespace SF2::Entity {
  */
 class Version {
 public:
-  static constexpr size_t entity_size = 4;
+  inline static const size_t entity_size = 4;
   
   Version() noexcept : wMajor{0}, wMinor{0} {}
   

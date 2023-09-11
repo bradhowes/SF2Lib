@@ -54,13 +54,13 @@ public:
   };
 
   /// The bit that flags a CC index
-  inline static constexpr uint16_t ccBit = (1 << 7);
+  inline static const uint16_t ccBit = (1 << 7);
   /// Bit mask for the index
-  inline static constexpr uint16_t indexMask = ccBit - 1;
+  inline static const uint16_t indexMask = ccBit - 1;
   /// The bit that flags the direction of the controller mapping
-  inline static constexpr uint16_t directionBit = (1 << 8);
+  inline static const uint16_t directionBit = (1 << 8);
   /// The bit that flags the polarity of the controller mapping
-  inline static constexpr uint16_t polarityBit = (1 << 9);
+  inline static const uint16_t polarityBit = (1 << 9);
 
   /// Default constructor that maps to an inactive source (one that always returns 0.0)
   Source() = default;
@@ -154,7 +154,7 @@ private:
     return Source(static_cast<uint16_t>((bits_ & 0x3FF) | (uint16_t(continuity) << 10)));
   }
 
-  static constexpr char const* typeNames[] = { "linear", "concave", "convex", "switched" };
+  static inline const char* typeNames[] = { "linear", "concave", "convex", "switched" };
 
   uint16_t rawIndex() const noexcept { return bits_ & indexMask; }
   uint16_t rawType() const noexcept { return bits_ >> 10; }

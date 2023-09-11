@@ -34,17 +34,17 @@ public:
   Bounds() = default;
 
   /// @returns the index of the first sample to use for rendering
-  constexpr size_t startPos() const noexcept { return startPos_; }
+  size_t startPos() const noexcept { return startPos_; }
   /// @returns the index of the first sample of a loop
-  constexpr size_t startLoopPos() const noexcept { return startLoopPos_; }
+  size_t startLoopPos() const noexcept { return startLoopPos_; }
   /// @returns the index of the first sample AFTER a loop
-  constexpr size_t endLoopPos() const noexcept { return endLoopPos_; }
+  size_t endLoopPos() const noexcept { return endLoopPos_; }
   /// @returns the index after the last valid sample to use for rendering
-  constexpr size_t endPos() const noexcept { return endPos_; }
+  size_t endPos() const noexcept { return endPos_; }
   /// Number of samples involved in a loop
-  constexpr size_t loopSize() const noexcept { return endLoopPos() - startLoopPos(); }
+  size_t loopSize() const noexcept { return endLoopPos() - startLoopPos(); }
   /// True if there is a loop established for the samples
-  constexpr bool hasLoop() const noexcept {
+  bool hasLoop() const noexcept {
     return startLoopPos_ > startPos_ && startLoopPos_ < endLoopPos_ && endLoopPos_ <= endPos_;
   }
 

@@ -201,7 +201,7 @@ private:
   OldestActiveVoiceCache::iterator stopVoice(size_t voiceIndex) noexcept;
 
   void notifyActiveVoicesChannelStateChanged() noexcept;
-  void processControlChange(MIDI::ControlChange cc) noexcept;
+  void processControlChange(MIDI::ControlChange cc, int value) noexcept;
   void changeProgram(uint16_t program) noexcept;
   void loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept;
 

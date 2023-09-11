@@ -167,9 +167,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
     case MIDI::CoreEvent::controlChange:
       os_log_info(log_, "doMIDIEvent - controlChange: %hhX %hhX", midiEvent.data[1], midiEvent.data[2]);
       if (midiEvent.length == 3 && midiEvent.data[1] <= 127 && midiEvent.data[2] <= 127) {
-        if (channelState_.setContinuousControllerValue(MIDI::ControlChange(midiEvent.data[1]), midiEvent.data[2])) {
-          notifyActiveVoicesChannelStateChanged();
-        }
+        processControlChange(MIDI::ControlChange(midiEvent.data[1]), midiEvent.data[2]);
       }
       break;
 
@@ -222,6 +220,41 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 
     default:
       break;
+  }
+}
+
+void
+Engine::processControlChange(MIDI::ControlChange cc, int value) noexcept
+{
+  if (channelState_.setContinuousControllerValue(cc, value)) {
+    notifyActiveVoicesChannelStateChanged();
+  } else {
+    switch(cc) {
+      case MIDI::ControlChange::bankSelectMSB:
+      case MIDI::ControlChange::bankSelectLSB:
+        break;
+
+      case MIDI::ControlChange::sustainSwitch:
+        break;
+
+      case MIDI::ControlChange::softPedalSwitch:
+        break;
+
+      case MIDI::ControlChange::sostenutoSwitch:
+        break;
+
+      case MIDI::ControlChange::resetAllControllers:
+        channelState_.reset();
+        notifyActiveVoicesChannelStateChanged();
+        break;
+
+      case MIDI::ControlChange::allNotesOff:
+        allOff();
+        break;
+
+      default:
+        break;
+    }
   }
 }
 

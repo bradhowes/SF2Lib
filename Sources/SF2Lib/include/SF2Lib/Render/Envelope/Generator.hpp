@@ -189,9 +189,7 @@ private:
    @param seconds the amount of time to use in the calculation represented in timecents
    @returns the number of samples
    */
-  static constexpr int sampleCountFor(Float sampleRate, Float seconds) noexcept {
-    return int(round(sampleRate * seconds));
-  }
+  static int sampleCountFor(Float sampleRate, Float seconds) noexcept { return int(round(sampleRate * seconds)); }
 
   Stages stages_{};
   StageIndex stageIndex_{StageIndex::idle};
