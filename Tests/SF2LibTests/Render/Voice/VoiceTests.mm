@@ -704,4 +704,41 @@ using namespace SF2::Render;
   XCTAssertEqual(Voice::Voice::LoopingMode::none, voice.loopingMode());
 }
 
+- (void)testSostenuto {
+  auto state = contexts.context0.makeVoiceCollection(0, 60);
+  auto& voice = state[0];
+  voice.start();
+  while (voice.renderSample() == 0.0) ;
+  XCTAssertTrue(voice.isKeyDown());
+  voice.useSostenuto();
+  XCTAssertTrue(voice.isKeyDown());
+  voice.renderSample();
+  voice.releaseKey({1, {true, true, true}});
+  voice.renderSample();
+  XCTAssertTrue(voice.isKeyDown());
+  voice.releaseKey({0, {false, true, false}});
+  voice.renderSample();
+  XCTAssertTrue(voice.isKeyDown());
+  voice.releaseKey({0, {false, false, false}});
+  voice.renderSample();
+  XCTAssertFalse(voice.isKeyDown());
+}
+
+- (void)testSustain {
+  auto state = contexts.context0.makeVoiceCollection(0, 60);
+  auto& voice = state[0];
+  voice.start();
+  XCTAssertTrue(voice.isKeyDown());
+  while (voice.renderSample() == 0.0) ;
+  voice.releaseKey({1, {true, false, false}});
+  voice.renderSample();
+  XCTAssertTrue(voice.isKeyDown());
+  voice.releaseKey({0, {true, true, true}});
+  voice.renderSample();
+  XCTAssertTrue(voice.isKeyDown());
+  voice.releaseKey({0, {false, true, true}});
+  voice.renderSample();
+  XCTAssertFalse(voice.isKeyDown());
+}
+
 @end

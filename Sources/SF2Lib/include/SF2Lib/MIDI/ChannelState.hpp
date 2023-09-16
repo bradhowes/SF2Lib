@@ -118,11 +118,25 @@ public:
   /// @returns the currently decoded generator index
   size_t nrpnIndex() const noexcept { return nrpnIndex_; }
 
+  /**
+   State of control pedals -- those that have ON/OFF values.
+   */
+  struct PedalState {
+    bool sustainPedalActive;
+    bool sostenutoPedalActive;
+    bool softPedalActive;
+  };
+
+  /// @returns current state of control pedals.
+  PedalState pedalState() const { return pedalState_; }
+
   void dump() const noexcept;
   
 private:
   using ContinuousControllerValues = EnumIndexableValueArray<int, ControlChange, 128>;
   using NotePressureValues = std::array<int, Note::Max + 1>;
+
+  bool decodeNRPN(MIDI::ControlChange cc, int value) noexcept;
 
   ContinuousControllerValues continuousControllerValues_{};
   NotePressureValues notePressureValues_{};
@@ -132,9 +146,9 @@ private:
   int pitchWheelValue_{0};
   int pitchWheelSensitivity_{200};
   size_t nrpnIndex_{0};
-  
-  bool sustainActive_{false};
-  bool sostenutoActive_{false};
+
+  PedalState pedalState_{false, false, false};
+
   bool activeDecoding_{false};
 };
 

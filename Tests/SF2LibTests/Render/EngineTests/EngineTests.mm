@@ -677,6 +677,149 @@ using namespace SF2::Render::Engine;
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 
+- (void)testEngineSustainPedalProcessing
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  engine.load(contexts.context1.file(), 0);
+
+  int seconds = 2;
+  auto mixer{harness.createMixer(seconds)};
+  XCTAssertEqual(0, engine.activeVoiceCount());
+
+  std::vector<AUValue> samples;
+
+  harness.sendNoteOn(72, 127);
+  harness.sendNoteOn(76, 127);
+  harness.sendNoteOn(79, 127);
+  harness.renderUntil(mixer, harness.renders() * 0.1);
+  samples.push_back(harness.lastDrySample());
+  XCTAssertFalse(engine.channelState().pedalState().sustainPedalActive);
+
+  AUMIDIEvent midiEvent;
+  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
+  midiEvent.data[1] = SF2::valueOf(MIDI::ControlChange::sustainSwitch);
+  midiEvent.data[2] = 64;
+  midiEvent.length = 3;
+
+  engine.doMIDIEvent(midiEvent);
+  XCTAssertTrue(engine.channelState().pedalState().sustainPedalActive);
+
+  harness.renderUntil(mixer, harness.renders() * 0.2);
+  samples.push_back(harness.lastDrySample());
+
+  harness.sendNoteOff(72);
+  harness.sendNoteOff(76);
+  harness.sendNoteOff(79);
+  harness.renderUntil(mixer, harness.renders() * 0.4);
+  XCTAssertTrue(engine.channelState().pedalState().sustainPedalActive);
+  XCTAssertEqual(3, engine.activeVoiceCount());
+  samples.push_back(harness.lastDrySample());
+
+  midiEvent.data[2] = 0;
+  engine.doMIDIEvent(midiEvent);
+  harness.renderUntil(mixer, harness.renders() * 0.5);
+  samples.push_back(harness.lastDrySample());
+  XCTAssertFalse(engine.channelState().pedalState().sustainPedalActive);
+
+  harness.sendNoteOn(72, 127);
+  harness.sendNoteOn(76, 127);
+  harness.sendNoteOn(79, 127);
+  harness.renderUntil(mixer, harness.renders() * 0.7);
+  samples.push_back(harness.lastDrySample());
+
+  harness.sendNoteOff(72);
+  harness.sendNoteOff(76);
+  harness.sendNoteOff(79);
+  harness.renderUntil(mixer, harness.renders() * 0.9);
+  samples.push_back(harness.lastDrySample());
+
+  harness.renderToEnd(mixer);
+  samples.push_back(harness.lastDrySample());
+
+  [self dumpSamples: samples];
+
+  XCTAssertEqualWithAccuracy(-0.0529702976346, samples[0], epsilon);
+  XCTAssertEqualWithAccuracy(-0.0153270084411, samples[1], epsilon);
+  XCTAssertEqualWithAccuracy(0.00318588037044, samples[2], epsilon);
+  XCTAssertEqualWithAccuracy(-0.00134005001746, samples[3], epsilon);
+
+  XCTAssertEqualWithAccuracy(-0.0153976893052, samples[4], epsilon);
+  XCTAssertEqualWithAccuracy(8.56176557136e-05, samples[5], epsilon);
+  XCTAssertEqualWithAccuracy(-5.57662788196e-05, samples[6], epsilon);
+
+  [self playSamples: harness.dryBuffer() count: harness.duration()];
+}
+
+- (void)testEngineSostenutoPedalProcessing
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  engine.load(contexts.context1.file(), 0);
+
+  int seconds = 2;
+  auto mixer{harness.createMixer(seconds)};
+  XCTAssertEqual(0, engine.activeVoiceCount());
+
+  std::vector<AUValue> samples;
+
+  harness.sendNoteOn(72, 127);
+  harness.sendNoteOn(76, 127);
+  harness.sendNoteOn(79, 127);
+  harness.renderUntil(mixer, harness.renders() * 0.1);
+  samples.push_back(harness.lastDrySample());
+  XCTAssertFalse(engine.channelState().pedalState().sostenutoPedalActive);
+
+  AUMIDIEvent midiEvent;
+  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
+  midiEvent.data[1] = SF2::valueOf(MIDI::ControlChange::sostenutoSwitch);
+  midiEvent.data[2] = 64;
+  midiEvent.length = 3;
+
+  engine.doMIDIEvent(midiEvent);
+  XCTAssertTrue(engine.channelState().pedalState().sostenutoPedalActive);
+
+  harness.renderUntil(mixer, harness.renders() * 0.2);
+  samples.push_back(harness.lastDrySample());
+
+  harness.sendNoteOff(72);
+  harness.sendNoteOff(76);
+  harness.sendNoteOff(79);
+  harness.renderUntil(mixer, harness.renders() * 0.5);
+  XCTAssertTrue(engine.channelState().pedalState().sostenutoPedalActive);
+  XCTAssertEqual(3, engine.activeVoiceCount());
+  samples.push_back(harness.lastDrySample());
+
+  harness.sendNoteOn(74, 127);
+  harness.sendNoteOn(78, 127);
+  harness.sendNoteOn(81, 127);
+  harness.renderUntil(mixer, harness.renders() * 0.7);
+  samples.push_back(harness.lastDrySample());
+  XCTAssertEqual(6, engine.activeVoiceCount());
+
+  harness.sendNoteOff(74);
+  harness.sendNoteOff(88);
+  harness.sendNoteOff(81);
+  harness.renderUntil(mixer, harness.renders() * 0.9);
+  XCTAssertEqual(6, engine.activeVoiceCount());
+  samples.push_back(harness.lastDrySample());
+
+  harness.renderToEnd(mixer);
+  samples.push_back(harness.lastDrySample());
+  XCTAssertEqual(6, engine.activeVoiceCount());
+
+  [self dumpSamples: samples];
+
+  XCTAssertEqualWithAccuracy(-0.0529702976346, samples[0], epsilon);
+  XCTAssertEqualWithAccuracy(-0.0153270084411, samples[1], epsilon);
+  XCTAssertEqualWithAccuracy(-0.000906414352357, samples[2], epsilon);
+  XCTAssertEqualWithAccuracy(0.0282810628414, samples[3], epsilon);
+  XCTAssertEqualWithAccuracy(-0.00963072106242, samples[4], epsilon);
+  XCTAssertEqualWithAccuracy(-0.00154553796165, samples[5], epsilon);
+
+  [self playSamples: harness.dryBuffer() count: harness.duration()];
+}
+
 - (void)testEngineMIDIControlChangeCC10ForPanning
 {
   auto harness{TestEngineHarness{48000.0}};

@@ -69,3 +69,15 @@ Voice::start() noexcept
 
   os_signpost_interval_end(log_, startSignpost_, "start");
 }
+
+void
+Voice::releaseKey(const ReleaseKeyState& releaseKeyState) noexcept
+{
+  if (releaseKeyState.pedalState.sustainPedalActive ||
+      (releaseKeyState.pedalState.sostenutoPedalActive && sostenutoActive_)) {
+    postponedRelease_ = true;
+  } else if (keyDown_ && pendingRelease_ == 0) {
+    pendingRelease_ = std::max<size_t>(releaseKeyState.minimumNoteDurationSamples, 1);
+  }
+}
+

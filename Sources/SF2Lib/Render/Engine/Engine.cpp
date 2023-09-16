@@ -96,6 +96,11 @@ Engine::noteOn(int key, int velocity) noexcept
 {
   os_signpost_interval_begin(log_, noteOnSignpost_, "noteOn", "key: %d vel: %d", key, velocity);
   if (! hasActivePreset()) return;
+
+  if (channelState_.pedalState().softPedalActive) {
+    velocity /= 2;
+  }
+
   auto configs = presets_[activePreset_].find(key, velocity);
 
   // Stop any existing voice with the same exclusiveClass value.
@@ -118,20 +123,28 @@ void
 Engine::noteOff(int key) noexcept
 {
   os_signpost_interval_begin(log_, noteOffSignpost_, "noteOff", "key: %d", key);
-  for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
-    auto voiceIndex = *pos;
-    const auto& voice{voices_[voiceIndex]};
-    if (!voice.isActive()) {
-      pos = oldestActive_.remove(voiceIndex);
-      available_.push_back(voiceIndex);
-    } else {
-      if (voices_[voiceIndex].initiatingKey() == key) {
-        voices_[voiceIndex].releaseKey(minimumNoteDurationSamples());
-      }
-      ++pos;
+  visitActiveVoice([=](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
+    if (voice.initiatingKey() == key) {
+      voice.releaseKey(releaseKeyState);
     }
-  }
+  });
   os_signpost_interval_end(log_, noteOffSignpost_, "noteOff", "key: %d", key);
+}
+
+void
+Engine::applySostenutoPedal() noexcept
+{
+  visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState&) {
+    if (voice.isKeyDown()) voice.useSostenuto();
+  });
+}
+
+void
+Engine::releaseVoices() noexcept
+{
+  visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
+    voice.releaseKey(releaseKeyState);
+  });
 }
 
 void
@@ -226,45 +239,42 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 void
 Engine::processControlChange(MIDI::ControlChange cc, int value) noexcept
 {
+  auto previousPedalState = channelState_.pedalState();
+
+  // Delegate the processing of the CC values. If a value was actually changed, then notify the active voices so that
+  // they can update their generators that rely on CC values.
   if (channelState_.setContinuousControllerValue(cc, value)) {
     notifyActiveVoicesChannelStateChanged();
-  } else {
-    switch(cc) {
-      case MIDI::ControlChange::bankSelectMSB:
-      case MIDI::ControlChange::bankSelectLSB:
-        break;
+  }
 
-      case MIDI::ControlChange::sustainSwitch:
-        break;
+  // Now check if there is a pedal change that can affect note off responses in a voice.
+  auto currentPedalState = channelState_.pedalState();
+  auto doRelease = false;
 
-      case MIDI::ControlChange::softPedalSwitch:
-        break;
-
-      case MIDI::ControlChange::sostenutoSwitch:
-        break;
-
-      case MIDI::ControlChange::resetAllControllers:
-        channelState_.reset();
-        notifyActiveVoicesChannelStateChanged();
-        break;
-
-      case MIDI::ControlChange::allNotesOff:
-        allOff();
-        break;
-
-      default:
-        break;
+  if (!previousPedalState.sostenutoPedalActive) {
+    if (currentPedalState.sostenutoPedalActive) {
+      os_log_debug(log_, "processControlChange - using sostenuto pedal");
+      applySostenutoPedal();
     }
+  } else {
+    os_log_debug(log_, "processControlChange - releasing sostenuto pedal");
+    doRelease = !currentPedalState.sostenutoPedalActive;
+  }
+
+  if (previousPedalState.sustainPedalActive && !currentPedalState.sustainPedalActive) {
+    os_log_debug(log_, "processControlChange - releasing sustain pedal");
+    doRelease = true;
+  }
+
+  if (doRelease) {
+    releaseVoices();
   }
 }
 
 void
 Engine::notifyActiveVoicesChannelStateChanged() noexcept
 {
-  for (auto pos = oldestActive_.begin(); pos != oldestActive_.end();) {
-    auto& voice{voices_[*pos++]};
-    voice.channelStateChanged();
-  }
+  visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState&) { voice.channelStateChanged(); });
 }
 
 void

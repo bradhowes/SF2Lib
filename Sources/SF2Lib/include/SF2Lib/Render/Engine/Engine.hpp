@@ -192,6 +192,22 @@ public:
 
 private:
 
+  template <typename Visitor>
+  void visitActiveVoice(Visitor visitor) noexcept {
+    auto releaseKeyState = Voice::ReleaseKeyState{minimumNoteDurationSamples(), channelState_.pedalState()};
+    for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
+      auto voiceIndex = *pos;
+      auto& voice{voices_[voiceIndex]};
+      if (!voice.isActive()) {
+        pos = oldestActive_.remove(voiceIndex);
+        available_.push_back(voiceIndex);
+      } else {
+        visitor(voice, releaseKeyState);
+        ++pos;
+      }
+    }
+  }
+
   void initialize(Float sampleRate) noexcept;
 
   void stopAllExclusiveVoices(int exclusiveClass) noexcept;
@@ -204,6 +220,9 @@ private:
   void processControlChange(MIDI::ControlChange cc, int value) noexcept;
   void changeProgram(uint16_t program) noexcept;
   void loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept;
+
+  void applySostenutoPedal() noexcept;
+  void releaseVoices() noexcept;
 
   Float sampleRate_;
   size_t minimumNoteDurationMilliseconds_{0};

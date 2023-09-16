@@ -28,6 +28,10 @@ using namespace SF2::MIDI;
   XCTAssertEqual(4096, channel.pitchWheelValue());
   XCTAssertEqual(2, channel.pitchWheelSensitivity());
 
+  XCTAssertFalse(channel.pedalState().softPedalActive);
+  XCTAssertFalse(channel.pedalState().sostenutoPedalActive);
+  XCTAssertFalse(channel.pedalState().sustainPedalActive);
+
   for (int cc = 0; cc < 128; ++cc) {
     int expectedValue = 0;
     auto CC{ControlChange(cc)};
@@ -121,6 +125,21 @@ using namespace SF2::MIDI;
       XCTAssertEqual(-50 + index, channel.continuousControllerValue(ControlChange(index)));
     }
   }
+
+  channel.setContinuousControllerValue(ControlChange::sustainSwitch, 63);
+  XCTAssertFalse(channel.pedalState().sustainPedalActive);
+  channel.setContinuousControllerValue(ControlChange::sustainSwitch, 64);
+  XCTAssertTrue(channel.pedalState().sustainPedalActive);
+
+  channel.setContinuousControllerValue(ControlChange::sostenutoSwitch, 63);
+  XCTAssertFalse(channel.pedalState().sostenutoPedalActive);
+  channel.setContinuousControllerValue(ControlChange::sostenutoSwitch, 64);
+  XCTAssertTrue(channel.pedalState().sostenutoPedalActive);
+
+  channel.setContinuousControllerValue(ControlChange::softPedalSwitch, 63);
+  XCTAssertFalse(channel.pedalState().softPedalActive);
+  channel.setContinuousControllerValue(ControlChange::softPedalSwitch, 64);
+  XCTAssertTrue(channel.pedalState().softPedalActive);
 }
 
 - (void)testNRPNActivation {

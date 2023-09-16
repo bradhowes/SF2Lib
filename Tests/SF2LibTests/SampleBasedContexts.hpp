@@ -151,7 +151,14 @@ struct TestVoiceCollection {
 
   void stop() { for (auto& voice : voices_) voice.stop(); }
 
-  void releaseKey() { for (auto& voice : voices_) voice.releaseKey(0); }
+  void releaseKey() {
+    auto releaseKeyState = SF2::Render::Voice::Voice::ReleaseKeyState{1, false, false};
+    for (auto& voice : voices_) voice.releaseKey(releaseKeyState);
+  }
+
+  void releaseKey(const SF2::Render::Voice::Voice::ReleaseKeyState& releaseKeyState) {
+    for (auto& voice : voices_) voice.releaseKey(releaseKeyState);
+  }
 
   SF2::Render::Voice::Voice& operator[](size_t index) { return voices_[index]; }
 

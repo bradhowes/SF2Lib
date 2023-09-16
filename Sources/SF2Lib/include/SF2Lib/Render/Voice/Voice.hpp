@@ -101,6 +101,8 @@ public:
   /// @returns true if this voice is still rendering interesting samples
   bool isActive() const noexcept { return active_; }
 
+  bool isKeyDown() const noexcept { return keyDown_; }
+  
   /// @returns true if this voice is done processing and will no longer render meaningful samples.
   bool isDone() const noexcept { return !isActive(); }
 
@@ -108,15 +110,20 @@ public:
   int initiatingKey() const noexcept { return state_.eventKey(); }
 
   /**
-   Signal the envelopes that the key is no longer pressed, transitioning to release phase.
-
-   @param minElapsedSamplesSeen -- minimum number of samples that must be processed before actually releasing the key.
+   Engine state that governs how a voice will react to a key release event.
    */
-  void releaseKey(size_t minElapsedSamplesSeen) noexcept {
-    if (keyDown_ && pendingRelease_ == 0) {
-      pendingRelease_ = std::max<size_t>(minElapsedSamplesSeen, 1);
-    }
-  }
+  struct ReleaseKeyState {
+    size_t minimumNoteDurationSamples;
+    MIDI::ChannelState::PedalState pedalState;
+  };
+
+  /**
+   Signal the envelopes that the key is no longer pressed, transitioning to release phase. This is always the result of
+   a MIDI event -- usually a note-off event, but pedal activity can also trigger it.
+
+   @param releaseKeyState -- engine state that may affect if/when the key release actually takes place.
+   */
+  void releaseKey(const ReleaseKeyState& releaseKeyState) noexcept;
 
   /// @returns looping mode of the sample being rendered
   LoopingMode loopingMode() const noexcept {
@@ -235,7 +242,9 @@ public:
   State::State& state() noexcept { return state_; }
 
   void channelStateChanged() noexcept { state_.updateStateMods(); }
-  
+
+  void useSostenuto() noexcept { sostenutoActive_ = true; }
+
 private:
   State::State state_;
   size_t sampleCounter_{0};
@@ -252,6 +261,8 @@ private:
 
   bool active_{false};
   bool keyDown_{false};
+  bool postponedRelease_{false};
+  bool sostenutoActive_{false};
 
   const size_t voiceIndex_;
   const os_log_t log_{os_log_create("SF2Lib", "Voice")};

@@ -44,16 +44,12 @@ ChannelState::reset() noexcept
   pitchWheelSensitivity_ = 2; // This should resolve to 200 cents
   nrpnIndex_ = 0;
 
-  sustainActive_ = false;
-  sostenutoActive_ = false;
-  activeDecoding_ = false;
+  pedalState_ = {false, false, false};
 }
 
 bool
-ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, int value) noexcept
+ChannelState::decodeNRPN(MIDI::ControlChange cc, int value) noexcept
 {
-  continuousControllerValues_[cc] = value;
-
   switch (cc) {
     case MIDI::ControlChange::nrpnMSB:
 
@@ -61,9 +57,6 @@ ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, int value) no
       // SoundFont 2.01 NRPN message.
       activeDecoding_ = value == 120;
       nrpnIndex_ = 0;
-      break;
-
-    case MIDI::ControlChange::dataEntryLSB:
       break;
 
     case MIDI::ControlChange::nrpnLSB:
@@ -84,17 +77,20 @@ ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, int value) no
           // message to select 251 if the most recently sent message selected generator 250.
           if (nrpnIndex_ % 100) {
             nrpnIndex_ = size_t(value);
-          }
-          else {
+          } else {
             nrpnIndex_ += size_t(value);
           }
         }
+
         // Unclear from spec LSB 8, LSB 100 should be treated as 108 or as 100. We will go with the former, and allow
         // any ordering of large multiples up until we have a final value < 100.
         else if (value == 100) nrpnIndex_ += 100;
         else if (value == 101) nrpnIndex_ += 1000;
         else if (value == 102) nrpnIndex_ += 10000;
       }
+      break;
+
+    case MIDI::ControlChange::dataEntryLSB:
       break;
 
     case MIDI::ControlChange::dataEntryMSB:
@@ -108,18 +104,21 @@ ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, int value) no
                                                   static_cast<size_t>(MIDI::ControlChange::dataEntryLSB));
           auto factor = Entity::Generator::Definition::definition(index).nrpnMultiplier();
           auto modValue = ((msb | lsb) - 8192) * factor;
+
           nrpnValues_[index] = modValue;
           return true;
         }
       }
-      DISPATCH_FALLTHROUGH;
+      break;
 
-    // Data Entry values are ONLY applied as SoundFont 2.01 controllers if and only if the most recently sent
-    // NRPN MSB and LSB message comprises a SoundFont 2.01 message AND an RPN LSB/MSB message combination was NOT sent
-    // more recently than the SoundFont 2.01 NRPN LSB/MSB message.
+      // Data Entry values are ONLY applied as SoundFont 2.01 controllers if and only if the most recently sent
+      // NRPN MSB and LSB message comprises a SoundFont 2.01 message AND an RPN LSB/MSB message combination was NOT sent
+      // more recently than the SoundFont 2.01 NRPN LSB/MSB message.
     case MIDI::ControlChange::rpnLSB:
     case MIDI::ControlChange::rpnMSB:
-      DISPATCH_FALLTHROUGH;
+      activeDecoding_ = false;
+      nrpnIndex_ = 0;
+      break;
 
     default:
       activeDecoding_ = false;
@@ -127,7 +126,34 @@ ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, int value) no
       break;
   }
 
-  return !activeDecoding_;
+  return false;
+}
+
+bool
+ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, int value) noexcept
+{
+  if (decodeNRPN(cc, value)) return true;
+
+  continuousControllerValues_[cc] = value;
+
+  switch (cc) {
+    case ControlChange::sustainSwitch:
+      pedalState_.sustainPedalActive = value >= 64;
+      break;
+
+    case ControlChange::sostenutoSwitch:
+      pedalState_.sostenutoPedalActive = value >= 64;
+      break;
+
+    case ControlChange::softPedalSwitch:
+      pedalState_.softPedalActive = value >= 64;
+      break;
+
+    default:
+      break;
+  }
+
+  return true;
 }
 
 void
