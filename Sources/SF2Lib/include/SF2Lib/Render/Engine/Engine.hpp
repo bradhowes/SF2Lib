@@ -14,6 +14,7 @@
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Engine/OldestActiveVoiceCache.hpp"
+#include "SF2Lib/Render/Engine/Parameters.hpp"
 #include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
 
@@ -34,15 +35,15 @@ namespace SF2::Render::Engine {
 class Engine : public DSPHeaders::EventProcessor<Engine> {
   using super = DSPHeaders::EventProcessor<Engine>;
   friend super;
-
+  
 public:
   using Config = Voice::State::Config;
   using Voice = Voice::Voice;
   using Interpolator = Render::Voice::Sample::Interpolator;
-
+  
   /**
    Construct new engine and its voices.
-
+   
    @param sampleRate the expected sample rate to use
    @param voiceCount the maximum number of individual voices to support
    @param interpolator the type of interpolation to use when rendering samples
@@ -50,100 +51,100 @@ public:
    */
   Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
          size_t minimumNoteDurationMilliseconds = 10) noexcept;
-
+  
   size_t minimumNoteDurationSamples() const noexcept
   { return static_cast<size_t>(ceil(minimumNoteDurationMilliseconds_ / 1000.0f * sampleRate_)); }
-
+  
   /// @returns maximum number of voices available for simultaneous rendering
   size_t voiceCount() const noexcept { return voices_.size(); }
   
   /**
    Update kernel and buffers to support the given format and channel count
-
+   
    @param format the audio format to render
    @param maxFramesToRender the maximum number of samples we will be asked to render in one go
    */
   void setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept;
-
+  
   /// @returns the current sample rate
   Float sampleRate() const noexcept { return sampleRate_; }
-
+  
   /// @returns the MIDI channel state assigned to the engine
   MIDI::ChannelState& channelState() noexcept { return channelState_; }
-
+  
   /// @returns the MIDI channel state assigned to the engine
   const MIDI::ChannelState& channelState() const noexcept { return channelState_; }
-
+  
   /// @returns true if there is an active preset
   bool hasActivePreset() const noexcept;
-
+  
   /// @returns name of the active preset or empty string if none is active
   std::string activePresetName() const noexcept;
-
+  
   /**
    Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
    one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
-
+   
    @param file the file to load from
    @param index the preset to make active
    */
   void load(const IO::File& file, size_t index) noexcept;
-
+  
   /// @returns number of presets available.
   size_t presetCount() const noexcept { return presets_.size(); }
-
+  
   /**
    Activate the preset at the given index. NOTE: this is not thread-safe. When running in a render thread, one should
    use the program controller change MIDI command to perform a preset change.
-
+   
    @param index the preset to use
    */
   void usePreset(size_t index);
-
+  
   /**
    Activate the preset at the given bank/program. NOTE: this is not thread-safe. When running in a render thread,
    one should use the bank/program controller change MIDI commands to perform a preset change.
-
+   
    @param bank the bank to use
    @param program the program in the bank to use
    */
   void usePreset(uint16_t bank, uint16_t program);
-
+  
   /// @return the number of active voices
   size_t activeVoiceCount() const noexcept { return oldestActive_.size(); }
-
+  
   /**
    Turn off all voices, making them all available for rendering. NOTE: this is not thread-safe. When running in a
    render thread, one should use a MIDI command to stop all notes.
    */
   void allOff() noexcept;
-
+  
   /**
    Tell any voices playing the current MIDI key that the key has been released. The voice will continue to render until
    it figures out that it is done.
-
+   
    NOTE: this is not thread-safe. When running in a render thread, one should use a MIDI command to stop a note.
-
+   
    @param key the MIDI key that was released
    */
   void noteOff(int key) noexcept;
-
+  
   /**
    Activate one or more voices to play a MIDI key with the given velocity. NOTE: this is not thread-safe. When running
    in a render thread, one should use a MIDI command to start a note.
-
+   
    @param key the MIDI key to play
    @param velocity the MIDI velocity to play at
    */
   void noteOn(int key, int velocity) noexcept;
-
+  
   /**
    Render samples to the given stereo output buffers. The buffers are guaranteed to be able to hold `frameCount`
    samples, and `frameCount` will never be more than the `maxFramesToRender` value given to the `setRenderingFormat`.
-
+   
    NOTE: everything from this point on should be inlined as much as possible for speed. This is executed in a real-time
    rendering thread.
-
+   
    @param mixer collection of buffers to render into
    @param frameCount number of samples to render.
    */
@@ -167,18 +168,18 @@ public:
     os_signpost_interval_end(log_, renderSignpost_, "renderInto", "voices: %lu frameCount: %d",
                              oldestActive_.size(), frameCount);
   }
-
+  
   /// API for EventProcessor
   void doParameterEvent(const AUParameterEvent& event) noexcept {
     os_log_debug(log_, "setParameterEvent - address: %llu value: %f", event.parameterAddress, event.value);
   }
-
+  
   /// API for EventProcessor
   void doRenderingStateChanged(bool state) noexcept { if (!state) allOff(); }
-
+  
   /// API for EventProcessor
   void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
-
+  
   /// API for EventProcessor
   void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs,
                    AUAudioFrameCount frameCount) noexcept
@@ -190,8 +191,10 @@ public:
     }
   }
 
-private:
+  void notifyParametersChanged() noexcept;
 
+private:
+  
   template <typename Visitor>
   void visitActiveVoice(Visitor visitor) noexcept {
     auto releaseKeyState = Voice::ReleaseKeyState{minimumNoteDurationSamples(), channelState_.pedalState()};
@@ -207,34 +210,38 @@ private:
       }
     }
   }
-
+  
   void initialize(Float sampleRate) noexcept;
-
+  
   void stopAllExclusiveVoices(int exclusiveClass) noexcept;
   void stopSameKeyVoices(int eventKey) noexcept;
   size_t getVoice() noexcept;
   void startVoice(const Config& config) noexcept;
   OldestActiveVoiceCache::iterator stopVoice(size_t voiceIndex) noexcept;
-
+  
   void notifyActiveVoicesChannelStateChanged() noexcept;
+
   void processControlChange(MIDI::ControlChange cc, int value) noexcept;
   void changeProgram(uint16_t program) noexcept;
   void loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept;
-
+  
   void applySostenutoPedal() noexcept;
   void releaseVoices() noexcept;
-
+  
   Float sampleRate_;
   size_t minimumNoteDurationMilliseconds_{0};
-
+  
   MIDI::ChannelState channelState_{};
+  Parameters parameters_;
 
   std::vector<Voice> voices_{};
   std::vector<size_t> available_{};
   OldestActiveVoiceCache oldestActive_;
-
+  
   PresetCollection presets_{};
   size_t activePreset_{0};
+  
+  AUParameterTree* parameterTree_{nullptr};
 
   os_log_t log_;
   os_signpost_id_t renderSignpost_;

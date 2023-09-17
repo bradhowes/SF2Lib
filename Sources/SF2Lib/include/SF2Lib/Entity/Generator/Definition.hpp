@@ -26,7 +26,7 @@ namespace SF2::Entity::Generator {
 
  */
 class Definition {
-
+public:
   /// Range for generator values.
   struct ValueRange {
 
@@ -80,8 +80,6 @@ class Definition {
     x2 = 2,
     x4 = 4
   };
-
-public:
 
   /// Number of definitions. This is the same as the number of generators defined in the SF2 spec.
   static inline const size_t NumDefs = SF2::valueOf(Index::numValues);
@@ -143,6 +141,8 @@ public:
    @returns clamped value
    */
   template <Numeric T> T clamp(T value) const noexcept { return valueRange_.clamp(value); }
+
+  ValueRange valueRange() const noexcept { return valueRange_; }
 
   std::ostream& dump(const Amount& amount) const noexcept;
 

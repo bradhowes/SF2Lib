@@ -10,7 +10,9 @@ Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
                size_t minimumNoteDurationMilliseconds) noexcept : super(),
 sampleRate_{sampleRate},
 minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
-oldestActive_{voiceCount}, log_{os_log_create("SF2Lib", "Engine")},
+parameters_{*this},
+oldestActive_{voiceCount},
+log_{os_log_create("SF2Lib", "Engine")},
 renderSignpost_{os_signpost_id_generate(log_)},
 noteOnSignpost_{os_signpost_id_generate(log_)},
 noteOffSignpost_{os_signpost_id_generate(log_)},
@@ -269,6 +271,12 @@ Engine::processControlChange(MIDI::ControlChange cc, int value) noexcept
   if (doRelease) {
     releaseVoices();
   }
+}
+
+void
+Engine::notifyParametersChanged() noexcept
+{
+  visitActiveVoice([&](Voice& voice, const Voice::ReleaseKeyState&) { parameters_.apply(voice.state()); });
 }
 
 void
