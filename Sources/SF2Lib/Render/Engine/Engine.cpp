@@ -65,6 +65,7 @@ Engine::usePreset(size_t index)
     index = presets_.size();
   }
   activePreset_ = index;
+  parameters_.reset();
   setBypass(false);
 }
 
@@ -78,6 +79,7 @@ Engine::usePreset(uint16_t bank, uint16_t program)
     index = presets_.size();
   }
   activePreset_ = index;
+  parameters_.reset();
   setBypass(false);
 }
 
@@ -313,6 +315,7 @@ Engine::initialize(Float sampleRate) noexcept
   for (auto& voice : voices_) {
     voice.setSampleRate(sampleRate);
   }
+  parameters_.reset();
 }
 
 void
@@ -363,6 +366,7 @@ Engine::startVoice(const Config& config) noexcept
   auto voiceIndex = getVoice();
   if (voiceIndex != voices_.size()) {
     voices_[voiceIndex].configure(config);
+    parameters_.apply(voices_[voiceIndex].state());
     voices_[voiceIndex].start();
     oldestActive_.add(voiceIndex);
   }
