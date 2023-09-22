@@ -12,7 +12,6 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/bradhowes/AUv3Support", branch: "main")
-    // .package(name: "AUv3SupportPackage", path: "../AUv3Support")
   ],
   targets: [
     .target(
