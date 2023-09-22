@@ -68,7 +68,7 @@ Parameters::makeParameter(Index index) noexcept
   const auto& definition = Definition::definition(index);
   assert(definition.valueKind() != Definition::ValueKind::UNUSED);
 
-  NSString* name = [NSString stringWithCString:definition.name().data() encoding:kUnicodeUTF8Format];
+  NSString* name = [NSString stringWithUTF8String:definition.name().data()];
 
   auto param = [AUParameterTree createParameterWithIdentifier:name
                                                          name:name
