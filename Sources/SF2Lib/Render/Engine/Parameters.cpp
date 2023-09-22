@@ -20,7 +20,7 @@ Parameters::reset() noexcept
 }
 
 void
-Parameters::apply(SF2::Render::Voice::State::State& state) noexcept
+Parameters::applyAll(SF2::Render::Voice::State::State& state) noexcept
 {
   if (!anyChanged_) return;
 
@@ -29,6 +29,12 @@ Parameters::apply(SF2::Render::Voice::State::State& state) noexcept
       state.setValue(index, values_[index]);
     }
   }
+}
+
+void
+Parameters::applyOne(SF2::Render::Voice::State::State& state, Index index) noexcept
+{
+  state.setValue(index, values_[index]);
 }
 
 void
@@ -41,7 +47,7 @@ Parameters::setValue(AUParameter* parameter, AUValue value) noexcept
   values_[index] = def.clamp(int(std::round(value)));
   changed_[index] = true;
   anyChanged_ = true;
-  engine_.notifyParametersChanged();
+  engine_.notifyParameterChanged(index);
 }
 
 AUValue

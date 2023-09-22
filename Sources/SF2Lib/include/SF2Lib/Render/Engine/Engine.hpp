@@ -203,7 +203,12 @@ public:
     }
   }
 
-  void notifyParametersChanged() noexcept;
+  /**
+   Notify all active voices with a parameter change.
+
+   @param index the generate to update
+   */
+  void notifyParameterChanged(Entity::Generator::Index index) noexcept;
 
 private:
   

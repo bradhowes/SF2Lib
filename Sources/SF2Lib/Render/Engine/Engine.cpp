@@ -287,9 +287,11 @@ Engine::processControlChange(MIDI::ControlChange cc, int value) noexcept
 }
 
 void
-Engine::notifyParametersChanged() noexcept
+Engine::notifyParameterChanged(Entity::Generator::Index index) noexcept
 {
-  visitActiveVoice([&](Voice& voice, const Voice::ReleaseKeyState&) { parameters_.apply(voice.state()); });
+  visitActiveVoice([&](Voice& voice, const Voice::ReleaseKeyState&) {
+    parameters_.applyOne(voice.state(), index);
+  });
 }
 
 void
@@ -376,7 +378,7 @@ Engine::startVoice(const Config& config) noexcept
   auto voiceIndex = getVoice();
   if (voiceIndex != voices_.size()) {
     voices_[voiceIndex].configure(config);
-    parameters_.apply(voices_[voiceIndex].state());
+    parameters_.applyAll(voices_[voiceIndex].state());
     voices_[voiceIndex].start();
     oldestActive_.add(voiceIndex);
   }
