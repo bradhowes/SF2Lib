@@ -3,6 +3,7 @@
 #pragma once
 
 #include <CoreAudioKit/CoreAudioKit.h>
+
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
