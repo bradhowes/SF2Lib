@@ -11,6 +11,7 @@
 
 #include "DSPHeaders/EventProcessor.hpp"
 
+#include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Engine/OldestActiveVoiceCache.hpp"
@@ -84,12 +85,23 @@ public:
   /**
    Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
    one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
-   
+
+   @deprecated use the alternative that takes a file path
+
    @param file the file to load from
    @param index the preset to make active
    */
-  void load(const IO::File& file, size_t index) noexcept;
-  
+  CA_DEPRECATED void load(const IO::File& file, size_t index) noexcept;
+
+  /**
+   Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
+   one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
+
+   @param path the file to load from
+   @param index the preset to make active
+   */
+  void load(const std::string& path, size_t index) noexcept;
+
   /// @returns number of presets available.
   size_t presetCount() const noexcept { return presets_.size(); }
   
@@ -238,6 +250,7 @@ private:
   std::vector<size_t> available_{};
   OldestActiveVoiceCache oldestActive_;
   
+  std::unique_ptr<IO::File> file_{};
   PresetCollection presets_{};
   size_t activePreset_{0};
   

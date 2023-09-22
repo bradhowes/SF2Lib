@@ -13,11 +13,11 @@
 
 using namespace SF2::IO;
 
-File::File(const char* path) :
+File::File(std::string path) :
 path_{path},
 fd_{-1}
 {
-  fd_ = ::open(path, O_RDONLY);
+  fd_ = ::open(path.data(), O_RDONLY);
   if (fd_ == -1) throw std::runtime_error("file not found");
   if (load() != LoadResponse::ok) {
     ::close(fd_);
@@ -25,6 +25,8 @@ fd_{-1}
     throw Format::error;
   }
 }
+
+File::File(const char* path) : File::File(std::string(path)) {}
 
 File::~File() noexcept
 {

@@ -36,6 +36,13 @@ public:
   File(const char* path);
 
   /**
+   Constructor. Processes the SF2 file contents and builds up various collections based on what it finds.
+
+   @param path the file to open and load
+   */
+  File(std::string path);
+
+  /**
    Custom destructor. Closes file that was opened in constructor.
    */
   ~File() noexcept;

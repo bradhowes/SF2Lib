@@ -17,6 +17,11 @@ NSURL* PresetTestContextBase::getUrl(int urlIndex)
   return [TestResources getResourceUrl:urlIndex];
 }
 
+std::string PresetTestContextBase::getPath(int urlIndex)
+{
+  return [TestResources getResourceUrl:urlIndex].path.UTF8String;
+}
+
 BOOL PresetTestContextBase::playAudioInTests() {
 #if PLAY_AUDIO
   bool playAudio = YES;

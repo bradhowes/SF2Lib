@@ -182,6 +182,7 @@ struct PresetTestContextBase
 
   static inline const SF2::Float epsilon = epsilonValue();
   static NSURL* getUrl(int urlIndex);
+  static std::string getPath(int urlIndex);
   static BOOL playAudioInTests();
 
   PresetTestContextBase(int urlIndex, SF2::Float sampleRate)
@@ -227,6 +228,7 @@ struct PresetTestContextBase
   }
 
   const NSURL* url() const { return url_; }
+  const std::string path() const { return url_.path.UTF8String; }
   const SF2::IO::File& file() const { return file_; }
   SF2::Float sampleRate() const { return sampleRate_; }
 

@@ -31,7 +31,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(engine.activeVoiceCount(), 0);
 }
 
-- (void)testLoad {
+- (void)testDeprecatedLoad {
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
   XCTAssertFalse(engine.hasActivePreset());
   engine.load(contexts.context0.file(), 0);
@@ -41,9 +41,19 @@ using namespace SF2::Render::Engine;
   XCTAssertFalse(engine.hasActivePreset());
 }
 
+- (void)testLoad {
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
+  XCTAssertFalse(engine.hasActivePreset());
+  engine.load(contexts.context0.path(), 0);
+  XCTAssertEqual(engine.presetCount(), 235);
+  XCTAssertTrue(engine.hasActivePreset());
+  engine.load(contexts.context1.path(), 10000);
+  XCTAssertFalse(engine.hasActivePreset());
+}
+
 - (void)testUsePresetByIndex {
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-  engine.load(contexts.context0.file(), 0);
+  engine.load(contexts.context0.path(), 0);
   XCTAssertTrue(engine.hasActivePreset());
   XCTAssertEqual("Piano 1", engine.activePresetName());
   engine.usePreset(1);
@@ -61,7 +71,7 @@ using namespace SF2::Render::Engine;
 
 - (void)testUsePresetByBankProgram {
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-  engine.load(contexts.context0.file(), 0);
+  engine.load(contexts.context0.path(), 0);
   engine.usePreset(0, 0);
   XCTAssertTrue(engine.hasActivePreset());
   XCTAssertEqual("Piano 1", engine.activePresetName());
@@ -92,7 +102,7 @@ using namespace SF2::Render::Engine;
 - (void)testRolandPianoChordRenderLinear {
   auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context0.file(), 0);
+  engine.load(contexts.context0.path(), 0);
 
   int cycles = 5;
   int noteOnIndex = 1;
@@ -173,7 +183,7 @@ using namespace SF2::Render::Engine;
 - (void)testRolandPianoChordRenderCubic4thOrder {
   auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context0.file(), 0);
+  engine.load(contexts.context0.path(), 0);
 
   int cycles = 5;
   int noteOnIndex = 1;
@@ -254,7 +264,7 @@ using namespace SF2::Render::Engine;
 - (void)testEngineMIDIProgramChange {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context0.file(), 0);
+  engine.load(contexts.context0.path(), 0);
 
   NSString* name = [NSString stringWithCString:engine.activePresetName().c_str() encoding:NSUTF8StringEncoding];
   NSLog(@"name: |%@|", name);
@@ -307,7 +317,7 @@ using namespace SF2::Render::Engine;
 - (void)testYamahaPianoChordRender {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context0.file(), 0);
+  engine.load(contexts.context0.path(), 0);
 
   int seconds = 3;
   int noteOnIndex = 1;
@@ -360,7 +370,7 @@ using namespace SF2::Render::Engine;
   [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
     auto harness{TestEngineHarness{48000.0, 96, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder}};
     auto& engine{harness.engine()};
-    engine.load(contexts.context0.file(), 0);
+    engine.load(contexts.context0.path(), 0);
     std::vector<AUValue> samples;
     samples.reserve(8);
 
@@ -400,7 +410,7 @@ using namespace SF2::Render::Engine;
   [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
     auto harness{TestEngineHarness{48000.0, 96, SF2::Render::Voice::Sample::Interpolator::linear}};
     auto& engine{harness.engine()};
-    engine.load(contexts.context0.file(), 0);
+    engine.load(contexts.context0.path(), 0);
     std::vector<AUValue> samples;
     samples.reserve(8);
 
@@ -436,7 +446,7 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context0.file(), 0);
+  engine.load(contexts.context0.path(), 0);
 
   int seconds = 2;
   auto mixer{harness.createMixer(seconds)};
@@ -485,7 +495,7 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context2.file(), 0);
+  engine.load(contexts.context2.path(), 0);
 
   int seconds = 2;
   auto mixer{harness.createMixer(seconds)};
@@ -559,7 +569,7 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context1.file(), 260);
+  engine.load(contexts.context1.path(), 260);
 
   int seconds = 1.5;
   auto mixer{harness.createMixer(seconds)};
@@ -588,7 +598,7 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context1.file(), 14);
+  engine.load(contexts.context1.path(), 14);
 
   int seconds = 2;
   auto mixer{harness.createMixer(seconds)};
@@ -629,7 +639,7 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context1.file(), 0);
+  engine.load(contexts.context1.path(), 0);
 
   int seconds = 2;
   auto mixer{harness.createMixer(seconds)};
@@ -681,7 +691,7 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context1.file(), 0);
+  engine.load(contexts.context1.path(), 0);
 
   int seconds = 2;
   auto mixer{harness.createMixer(seconds)};
@@ -755,7 +765,7 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context1.file(), 0);
+  engine.load(contexts.context1.path(), 0);
 
   int seconds = 2;
   auto mixer{harness.createMixer(seconds)};
@@ -824,7 +834,7 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context0.file(), 18);
+  engine.load(contexts.context0.path(), 18);
 
   int seconds = 4;
   auto mixer{harness.createMixer(seconds)};
@@ -1190,7 +1200,7 @@ using namespace SF2::Render::Engine;
 - (void)testEngineMIDIReset {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context0.file(), 0);
+  engine.load(contexts.context0.path(), 0);
 
   harness.sendNoteOn(60);
   harness.sendNoteOn(64);
@@ -1208,7 +1218,7 @@ using namespace SF2::Render::Engine;
 - (void)testEngineMIDILoad {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context2.file(), 0);
+  engine.load(contexts.context2.path(), 0);
 
   XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
 

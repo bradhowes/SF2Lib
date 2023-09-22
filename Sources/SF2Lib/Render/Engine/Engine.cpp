@@ -50,7 +50,18 @@ void
 Engine::load(const IO::File& file, size_t index) noexcept
 {
   allOff();
+  file_.reset(nullptr);
   presets_.build(file);
+  os_log_info(log_, "load - built %zu presets", presets_.size());
+  usePreset(index);
+}
+
+void
+Engine::load(const std::string& path, size_t index) noexcept
+{
+  allOff();
+  file_ = std::make_unique<IO::File>(path);
+  presets_.build(*file_);
   os_log_info(log_, "load - built %zu presets", presets_.size());
   usePreset(index);
 }
@@ -295,8 +306,7 @@ Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
   size_t index = (*(&midiEvent.data[0] + 3) * 128) + *(&midiEvent.data[0] + 4);
   auto path = Utils::Base64::decode(&midiEvent.data[0] + 5, count);
   os_log_info(log_, "loadFromMIDI BEGIN - %{public}s index: %zu", path.c_str(), index);
-  SF2::IO::File file{path.c_str()};
-  load(file, index);
+  load(path, index);
 }
 
 void
