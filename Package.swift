@@ -31,8 +31,8 @@ let package = Package(
       resources: [
         .process("Resources", localization: nil)
       ],
+      publicHeadersPath: "./include",
       cxxSettings: [
-        .headerSearchPath("./include", .none),
         .define("USE_ACCELERATE", to: "1", .none),
         // Set to 1 to assert if std::vector[] index is invalid
         .define("CHECKED_VECTOR_INDEXING", to: "0", .none),
