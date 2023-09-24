@@ -19,7 +19,6 @@
 #include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
 
-namespace SF2::IO { class File; }
 
 namespace SF2::Render::Engine {
 
@@ -90,7 +89,7 @@ public:
    @param index the preset to make active
    @returns true if the loading was successful
    */
-  bool load(const std::string& path, size_t index) noexcept;
+  IO::File::LoadResponse load(const std::string& path, size_t index) noexcept;
 
   /// @returns number of presets available.
   size_t presetCount() const noexcept { return presets_.size(); }

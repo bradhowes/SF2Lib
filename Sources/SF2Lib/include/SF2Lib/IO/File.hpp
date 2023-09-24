@@ -58,9 +58,16 @@ public:
     invalidFormat
   };
 
+  /**
+   Load the file given in the constructor. Note that most of the File API is valid only if that load was successful
+   and returned `LoadResponse::ok`.
+
+   @returns status of the load
+   */
   LoadResponse load() noexcept;
 
-  bool loaded() const noexcept { fd_ != -1; }
+  /// @returns true if the file has been loaded successfully.
+  bool loaded() const noexcept { return fd_ != -1; }
 
   /// @returns the embedded name in the file
   const std::string& embeddedName() const noexcept { return embeddedName_; }
@@ -128,35 +135,35 @@ public:
 private:
 
   std::string path_;
-  int fd_;
-  off_t size_;
-  off_t sampleDataBegin_;
-  off_t sampleDataEnd_;
-  Entity::Version soundFontVersion_;
-  Entity::Version fileVersion_;
+  int fd_{-1};
+  off_t size_{0};
+  off_t sampleDataBegin_{0};
+  off_t sampleDataEnd_{0};
+  Entity::Version soundFontVersion_{};
+  Entity::Version fileVersion_{};
 
-  std::string soundEngine_;
-  std::string embeddedName_;
-  std::string embeddedCreationDate_;
-  std::string embeddedAuthor_;
-  std::string embeddedProduct_;
-  std::string embeddedCopyright_;
-  std::string embeddedComment_;
-  std::string embeddedTools_;
+  std::string soundEngine_{};
+  std::string embeddedName_{};
+  std::string embeddedCreationDate_{};
+  std::string embeddedAuthor_{};
+  std::string embeddedProduct_{};
+  std::string embeddedCopyright_{};
+  std::string embeddedComment_{};
+  std::string embeddedTools_{};
 
-  ChunkItems<Entity::Preset> presets_;
-  ChunkItems<Entity::Bag> presetZones_;
-  ChunkItems<Entity::Generator::Generator> presetZoneGenerators_;
-  ChunkItems<Entity::Modulator::Modulator> presetZoneModulators_;
-  ChunkItems<Entity::Instrument> instruments_;
-  ChunkItems<Entity::Bag> instrumentZones_;
-  ChunkItems<Entity::Generator::Generator> instrumentZoneGenerators_;
-  ChunkItems<Entity::Modulator::Modulator> instrumentZoneModulators_;
-  ChunkItems<Entity::SampleHeader> sampleHeaders_;
+  ChunkItems<Entity::Preset> presets_{};
+  ChunkItems<Entity::Bag> presetZones_{};
+  ChunkItems<Entity::Generator::Generator> presetZoneGenerators_{};
+  ChunkItems<Entity::Modulator::Modulator> presetZoneModulators_{};
+  ChunkItems<Entity::Instrument> instruments_{};
+  ChunkItems<Entity::Bag> instrumentZones_{};
+  ChunkItems<Entity::Generator::Generator> instrumentZoneGenerators_{};
+  ChunkItems<Entity::Modulator::Modulator> instrumentZoneModulators_{};
+  ChunkItems<Entity::SampleHeader> sampleHeaders_{};
   Render::SampleSourceCollection sampleSourceCollection_{sampleHeaders_};
-  std::vector<int16_t> rawSamples_;
+  std::vector<int16_t> rawSamples_{};
 
-  std::vector<size_t> presetIndicesOrderedByBankProgram_;
+  std::vector<size_t> presetIndicesOrderedByBankProgram_{};
 };
 
 } // end namespace SF2::IO
