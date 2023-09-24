@@ -62,19 +62,12 @@ public:
    */
   AUValue getValue(AUParameter* parameter) noexcept;
 
-  /**
-   Create a new AUParameter definition for a generator.
+private:
 
-   @param index the index of the generator to use
-   @returns new AUParameter instance
-   */
-  static AUParameter* makeParameter(Entity::Generator::Index index) noexcept;
+  static AUParameter* makeGeneratorParameter(Entity::Generator::Index index) noexcept;
 
-  /**
-   Create a AUParameterTree containing the AUParameter instances for the generators.
+  static AUParameter* makeBooleanParameter(NSString* name, AUParameterAddress) noexcept;
 
-   @returns the AUParameterTree with all of the generator children
-   */
   static AUParameterTree* makeTree() noexcept;
 
 private:

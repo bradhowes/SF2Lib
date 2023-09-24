@@ -7,6 +7,14 @@
 using namespace SF2::Entity::Generator;
 using namespace SF2::Render::Engine;
 
+enum struct EngineParameterAddress : AUParameterAddress
+{
+  portamentoEnabled = 1000,
+  portamentoRate = 1001,
+  oneVoicePerKey = 1002,
+  polyphonicEnabled = 1003,
+};
+
 Parameters::Parameters(Engine& engine)
 : engine_{engine}, parameterTree_{makeTree()}, anyChanged_{false}
 {
@@ -43,27 +51,65 @@ void
 Parameters::setValue(AUParameter* parameter, AUValue value) noexcept
 {
   auto rawIndex = parameter.address;
-  if (rawIndex < 0 || rawIndex >= valueOf(Index::numValues)) return;
-  auto index = Index(rawIndex);
-  const auto& def = Definition::definition(index);
-  values_[index] = def.clamp(int(std::round(value)));
-  changed_[index] = true;
-  anyChanged_ = true;
-  engine_.notifyParameterChanged(index);
+  if (rawIndex < 0) return;
+  if (rawIndex < valueOf(Index::numValues)) {
+    auto index = Index(rawIndex);
+    const auto& def = Definition::definition(index);
+    values_[index] = def.clamp(int(std::round(value)));
+    changed_[index] = true;
+    anyChanged_ = true;
+    engine_.notifyParameterChanged(index);
+  } else if (rawIndex >= valueOf(EngineParameterAddress::portamentoEnabled) &&
+             rawIndex <= valueOf(EngineParameterAddress::polyphonicEnabled)) {
+    auto address = EngineParameterAddress(rawIndex);
+    switch (address) {
+      case EngineParameterAddress::portamentoEnabled:
+        engine_.channelState().setPortamentoEnabled(value >= 0.5 ? true : false);
+        return;
+      case EngineParameterAddress::portamentoRate:
+        engine_.channelState().setPortamentoRate(size_t(value));
+        return;
+      case EngineParameterAddress::oneVoicePerKey:
+        engine_.channelState().setOneVoicePerKey(value >= 0.5 ? true : false);
+        return;
+      case EngineParameterAddress::polyphonicEnabled:
+        engine_.channelState().setPhonicMode(value >= 0.5 ? 
+                                             MIDI::ChannelState::PhonicMode::poly :
+                                             MIDI::ChannelState::PhonicMode::mono);
+        return;
+    }
+  }
 }
 
 AUValue
 Parameters::getValue(AUParameter* parameter) noexcept
 {
   auto rawIndex = parameter.address;
-  if (rawIndex < 0 || rawIndex >= valueOf(Index::numValues)) return 0.0;
-  auto index = Index(rawIndex);
-  const auto& def = Definition::definition(index);
-  return def.clamp(values_[Index(rawIndex)]);
+  if (rawIndex < 0) return 0.0;
+  if (rawIndex < valueOf(Index::numValues)) {
+    auto index = Index(rawIndex);
+    const auto& def = Definition::definition(index);
+    return def.clamp(values_[Index(rawIndex)]);
+  } else if (rawIndex >= valueOf(EngineParameterAddress::portamentoEnabled) &&
+             rawIndex <= valueOf(EngineParameterAddress::polyphonicEnabled)) {
+    auto address = EngineParameterAddress(rawIndex);
+    switch (address) {
+      case EngineParameterAddress::portamentoEnabled:
+        return engine_.channelState().portamentoEnabled();
+      case EngineParameterAddress::portamentoRate:
+        return engine_.channelState().portamentoRate();
+      case EngineParameterAddress::oneVoicePerKey:
+        return engine_.channelState().oneVoicePerKey();
+      case EngineParameterAddress::polyphonicEnabled:
+        return engine_.channelState().polyphonicMode();
+    }
+  } else {
+    return 0.0;
+  }
 }
 
 AUParameter*
-Parameters::makeParameter(Index index) noexcept
+Parameters::makeGeneratorParameter(Index index) noexcept
 {
   const auto& definition = Definition::definition(index);
   assert(definition.valueKind() != Definition::ValueKind::UNUSED);
@@ -83,6 +129,21 @@ Parameters::makeParameter(Index index) noexcept
   return param;
 }
 
+AUParameter*
+Parameters::makeBooleanParameter(NSString* name, AUParameterAddress address) noexcept
+{
+  return [AUParameterTree createParameterWithIdentifier:name
+                                                   name:name
+                                                address:address
+                                                    min:0
+                                                    max:1
+                                                   unit:kAudioUnitParameterUnit_Boolean
+                                               unitName:nullptr
+                                                  flags:0
+                                           valueStrings:nullptr
+                                    dependentParameters:nullptr];
+}
+
 AUParameterTree*
 Parameters::makeTree() noexcept
 {
@@ -94,11 +155,24 @@ Parameters::makeTree() noexcept
       continue;
     }
 
-    auto param = makeParameter(index);
+    auto param = makeGeneratorParameter(index);
     assert(param != nullptr);
 
     [definitions addObject:param];
   }
 
+  [definitions addObject:makeBooleanParameter(@"portamentoEnabled", valueOf(EngineParameterAddress::portamentoEnabled))];
+  [definitions addObject:makeBooleanParameter(@"oneVoicePerKey", valueOf(EngineParameterAddress::oneVoicePerKey))];
+  [definitions addObject:makeBooleanParameter(@"polyphonicEnabled", valueOf(EngineParameterAddress::polyphonicEnabled))];
+  [definitions addObject:[AUParameterTree createParameterWithIdentifier:@"portamentoRate"
+                                                                   name:@"portamentoRate"
+                                                                address:valueOf(EngineParameterAddress::portamentoRate)
+                                                                    min:0
+                                                                    max:60000
+                                                                   unit:kAudioUnitParameterUnit_Milliseconds
+                                                               unitName:nullptr
+                                                                  flags:0
+                                                           valueStrings:nullptr
+                                                    dependentParameters:nullptr]];
   return [AUParameterTree createTreeWithChildren:definitions];
 }
