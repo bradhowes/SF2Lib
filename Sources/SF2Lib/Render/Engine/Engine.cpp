@@ -124,7 +124,9 @@ Engine::noteOn(int key, int velocity) noexcept
     if (exclusiveClass > 0) {
       stopAllExclusiveVoices(exclusiveClass);
     }
-    // stopSameKeyVoices(config.eventKey());
+    if (channelState_.oneVoicePerKey()) {
+      stopSameKeyVoices(config.eventKey());
+    }
   }
 
   os_log_info(log_, "noteOn - number of voices: %lu", configs.size());

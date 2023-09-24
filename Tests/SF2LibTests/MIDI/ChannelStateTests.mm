@@ -32,6 +32,11 @@ using namespace SF2::MIDI;
   XCTAssertFalse(channel.pedalState().sostenutoPedalActive);
   XCTAssertFalse(channel.pedalState().sustainPedalActive);
 
+  XCTAssertTrue(channel.polyphonicMode());
+  XCTAssertFalse(channel.oneVoicePerKey());
+  XCTAssertFalse(channel.portamentoEnabled());
+  XCTAssertEqual(100, channel.portamentoRate());
+
   for (int cc = 0; cc < 128; ++cc) {
     int expectedValue = 0;
     auto CC{ControlChange(cc)};
@@ -229,4 +234,30 @@ using namespace SF2::MIDI;
   XCTAssertEqual(channelState.nrpnValue(SF2::Entity::Generator::Index(56)), z);
   XCTAssertEqual(56, channelState.nrpnIndex());
 }
+
+- (void)testPortamento {
+  ChannelState channelState;
+  XCTAssertFalse(channelState.portamentoEnabled());
+  channelState.setPortamentoEnabled(true);
+  XCTAssertTrue(channelState.portamentoEnabled());
+  channelState.setPortamentoRate(12345);
+  XCTAssertEqual(12345, channelState.portamentoRate());
+}
+
+- (void)testPhonicMode {
+  ChannelState channelState;
+  XCTAssertTrue(channelState.polyphonicMode());
+  XCTAssertFalse(channelState.monophonicMode());
+  channelState.setPhonicMode(ChannelState::PhonicMode::mono);
+  XCTAssertFalse(channelState.polyphonicMode());
+  XCTAssertTrue(channelState.monophonicMode());
+}
+
+- (void)testOneVoicePerKey {
+  ChannelState channelState;
+  XCTAssertFalse(channelState.oneVoicePerKey());
+  channelState.setOneVoicePerKey(true);
+  XCTAssertTrue(channelState.oneVoicePerKey());
+}
+
 @end

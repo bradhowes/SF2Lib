@@ -247,7 +247,7 @@ private:
   
   Float sampleRate_;
   size_t minimumNoteDurationMilliseconds_{0};
-  
+
   MIDI::ChannelState channelState_{};
   Parameters parameters_;
 

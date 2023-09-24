@@ -1222,8 +1222,8 @@ using namespace SF2::Render::Engine;
 
   XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
 
-  void* blob = malloc(sizeof(AUMIDIEvent) + 4096);
-  AUMIDIEvent& midiEvent{*reinterpret_cast<AUMIDIEvent*>(blob)};
+  auto blob = std::array<char, sizeof(AUMIDIEvent) + 4096>();
+  AUMIDIEvent& midiEvent{*reinterpret_cast<AUMIDIEvent*>(blob.data())};
 
   uint8_t* pdata = midiEvent.data;
   pdata[0] = SF2::valueOf(MIDI::CoreEvent::systemExclusive);
@@ -1246,8 +1246,57 @@ using namespace SF2::Render::Engine;
 
   std::cout << engine.activePresetName() << '\n';
   XCTAssertEqual(std::string("SFX"), engine.activePresetName());
-
-  free(blob);
 }
+
+- (void)testEngineOneVoicePerKey
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  engine.load(contexts.context0.path(), 0);
+
+  int seconds = 1;
+  auto mixer{harness.createMixer(seconds)};
+  XCTAssertEqual(0, engine.activeVoiceCount());
+
+  engine.channelState().setOneVoicePerKey(false);
+
+  std::vector<AUValue> samples;
+
+  harness.sendNoteOn(60);
+  harness.renderUntil(mixer, harness.renders() * 0.25);
+  samples.push_back(harness.lastDrySample());
+  XCTAssertEqual(1, engine.activeVoiceCount());
+
+  harness.sendNoteOn(60);
+  harness.renderUntil(mixer, harness.renders() * 0.5);
+  samples.push_back(harness.lastDrySample());
+  XCTAssertEqual(2, engine.activeVoiceCount());
+
+  engine.allOff();
+  engine.channelState().setOneVoicePerKey(true);
+
+  harness.sendNoteOn(60);
+  harness.renderUntil(mixer, harness.renders() * 0.75);
+  samples.push_back(harness.lastDrySample());
+  XCTAssertEqual(1, engine.activeVoiceCount());
+
+  harness.sendNoteOn(60);
+  harness.renderToEnd(mixer);
+  samples.push_back(harness.lastDrySample());
+  XCTAssertEqual(1, engine.activeVoiceCount());
+
+  [self dumpSamples: samples];
+
+  XCTAssertEqualWithAccuracy(-0.00523802358657, samples[0], epsilon);
+  XCTAssertEqualWithAccuracy(0.0055279256776, samples[1], epsilon);
+  XCTAssertEqualWithAccuracy(0.00371959502809, samples[2], epsilon);
+  XCTAssertEqualWithAccuracy(-0.00523802358657, samples[3], epsilon);
+
+  XCTAssertNotEqualWithAccuracy(samples[1], samples[3], epsilon);
+
+  [self playSamples: harness.dryBuffer() count: harness.duration()];
+}
+
+
 
 @end
