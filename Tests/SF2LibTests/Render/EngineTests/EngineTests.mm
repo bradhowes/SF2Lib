@@ -31,29 +31,20 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(engine.activeVoiceCount(), 0);
 }
 
-- (void)testDeprecatedLoad {
-  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-  XCTAssertFalse(engine.hasActivePreset());
-  engine.load(contexts.context0.file(), 0);
-  XCTAssertEqual(engine.presetCount(), 235);
-  XCTAssertTrue(engine.hasActivePreset());
-  engine.load(contexts.context1.file(), 10000);
-  XCTAssertFalse(engine.hasActivePreset());
-}
-
 - (void)testLoad {
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
   XCTAssertFalse(engine.hasActivePreset());
-  engine.load(contexts.context0.path(), 0);
+  XCTAssertTrue(engine.load(contexts.context0.path(), 0));
   XCTAssertEqual(engine.presetCount(), 235);
   XCTAssertTrue(engine.hasActivePreset());
-  engine.load(contexts.context1.path(), 10000);
+  XCTAssertTrue(engine.load(contexts.context1.path(), 10000));
   XCTAssertFalse(engine.hasActivePreset());
+  XCTAssertTrue(engine.load(contexts.context2.path(), 0));
 }
 
 - (void)testUsePresetByIndex {
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-  engine.load(contexts.context0.path(), 0);
+  XCTAssertTrue(engine.load(contexts.context0.path(), 0));
   XCTAssertTrue(engine.hasActivePreset());
   XCTAssertEqual("Piano 1", engine.activePresetName());
   engine.usePreset(1);
@@ -71,7 +62,7 @@ using namespace SF2::Render::Engine;
 
 - (void)testUsePresetByBankProgram {
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-  engine.load(contexts.context0.path(), 0);
+  XCTAssertTrue(engine.load(contexts.context0.path(), 0));
   engine.usePreset(0, 0);
   XCTAssertTrue(engine.hasActivePreset());
   XCTAssertEqual("Piano 1", engine.activePresetName());

@@ -58,6 +58,8 @@ public:
     invalidFormat
   };
 
+  LoadResponse load() noexcept;
+
   /// @returns the embedded name in the file
   const std::string& embeddedName() const noexcept { return embeddedName_; }
 
@@ -122,8 +124,6 @@ public:
   void dump() const noexcept;
 
 private:
-
-  LoadResponse load();
 
   std::string path_;
   int fd_;

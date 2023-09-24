@@ -5,6 +5,7 @@
 namespace SF2::Render::Zone {
 class Instrument;
 class Preset;
+
 }
 
 namespace SF2::Render::Voice::Sample {

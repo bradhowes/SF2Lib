@@ -46,24 +46,17 @@ Engine::activePresetName() const noexcept
   return hasActivePreset() ? presets_[activePreset_].configuration().name() : "";
 }
 
-void
-Engine::load(const IO::File& file, size_t index) noexcept
-{
-  allOff();
-  file_.reset(nullptr);
-  presets_.build(file);
-  os_log_info(log_, "load - built %zu presets", presets_.size());
-  usePreset(index);
-}
-
-void
+bool
 Engine::load(const std::string& path, size_t index) noexcept
 {
   allOff();
-  file_ = std::make_unique<IO::File>(path);
+  auto file = std::make_unique<IO::File>(path);
+  if (file->load() != IO::File::LoadResponse::ok) return false;
+  file_.swap(file);
   presets_.build(*file_);
   os_log_info(log_, "load - built %zu presets", presets_.size());
   usePreset(index);
+  return true;
 }
 
 void

@@ -55,8 +55,7 @@ static dispatch_once_t onceToken;
 }
 
 + (NSString*)getConfigurationPath {
-  return [Configuration getConfigurationPath: @"Configuration"
-                                        from: SWIFTPM_MODULE_BUNDLE];
+  return [Configuration getConfigurationPath: @"Configuration" from: SWIFTPM_MODULE_BUNDLE];
 }
 
 #else

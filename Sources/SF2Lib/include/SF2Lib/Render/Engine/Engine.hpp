@@ -86,21 +86,11 @@ public:
    Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
    one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
 
-   @deprecated use the alternative that takes a file path
-
-   @param file the file to load from
-   @param index the preset to make active
-   */
-  CA_DEPRECATED void load(const IO::File& file, size_t index) noexcept;
-
-  /**
-   Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
-   one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
-
    @param path the file to load from
    @param index the preset to make active
+   @returns true if the loading was successful
    */
-  void load(const std::string& path, size_t index) noexcept;
+  bool load(const std::string& path, size_t index) noexcept;
 
   /// @returns number of presets available.
   size_t presetCount() const noexcept { return presets_.size(); }

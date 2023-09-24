@@ -17,13 +17,6 @@ File::File(std::string path) :
 path_{path},
 fd_{-1}
 {
-  fd_ = ::open(path.data(), O_RDONLY);
-  if (fd_ == -1) throw std::runtime_error("file not found");
-  if (load() != LoadResponse::ok) {
-    ::close(fd_);
-    fd_ = -1;
-    throw Format::error;
-  }
 }
 
 File::File(const char* path) : File::File(std::string(path)) {}
@@ -34,8 +27,11 @@ File::~File() noexcept
 }
 
 File::LoadResponse
-File::load()
+File::load() noexcept
 {
+  fd_ = ::open(path_.data(), O_RDONLY);
+  if (fd_ == -1) return LoadResponse::notFound;
+
   off_t fileSize = ::lseek(fd_, 0, SEEK_END);
   if (fileSize < 4) return LoadResponse::invalidFormat;
 
@@ -49,7 +45,7 @@ File::load()
     return LoadResponse::invalidFormat;
 
   if (riff.kind() != Tags::sfbk)
-    throw LoadResponse::invalidFormat;
+    return LoadResponse::invalidFormat;
 
   try {
     auto p0 = riff.begin();

@@ -19,6 +19,7 @@ let package = Package(
       dependencies: [
         .product(name: "AUv3-DSP-Headers", package: "AUv3Support", condition: .none),
       ],
+      path: "Sources/SF2Lib",
       exclude: [
         "DSP/README.md",
         "Entity/README.md",
@@ -31,7 +32,7 @@ let package = Package(
       resources: [
         .process("Resources", localization: nil)
       ],
-      publicHeadersPath: "./include",
+      publicHeadersPath: "include",
       cxxSettings: [
         .define("USE_ACCELERATE", to: "1", .none),
         // Set to 1 to assert if std::vector[] index is invalid
@@ -171,16 +172,16 @@ let package = Package(
         .define("PLAY_AUDIO", to: "0"),
         .unsafeFlags([
           "-Wno-newline-eof", // resource_bundle_accessor.h is missing newline at end of file
-          "-x", "objective-c++", // treat source files as Obj-C++ files
+//          "-x", "objective-c++", // treat source files as Obj-C++ files
         ], .none)
       ],
       linkerSettings: [
-        .linkedFramework("Accelerate", .none),
-        .linkedFramework("AudioToolbox", .none),
-        .linkedFramework("AVFoundation", .none),
-        .linkedFramework("QuartzCore", .none),
-        .linkedFramework("Foundation", .none),
-        .linkedFramework("XCTest", .none),
+//        .linkedFramework("Accelerate", .none),
+//        .linkedFramework("AudioToolbox", .none),
+//        .linkedFramework("AVFoundation", .none),
+//        .linkedFramework("QuartzCore", .none),
+//        .linkedFramework("Foundation", .none),
+//        .linkedFramework("XCTest", .none),
       ]
     )
   ],
