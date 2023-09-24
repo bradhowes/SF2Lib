@@ -4,23 +4,22 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbradhowes%2FSF2Lib%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/bradhowes/SF2Lib)
 [![License: MIT](https://img.shields.io/badge/License-MIT-A31F34.svg)](https://opensource.org/licenses/MIT)
 
-# SF2Lib - a SoundFont (SF2) Library for Parsing and Rendering in C++ (mostly) for iOS, macOS, and tvOS
+# SF2Lib - a SoundFont (SF2) synthesizer in C++
 
-This library can read SF2 SoundFont files and render audio samples from them. It properly reads in a compliant SF2 file
+This library can read SF2 SoundFont files and render audio samples from them in real-time. It properly reads in a 
+compliant SF2 file
 and can be used to obtain meta data such as preset names. It also has an audio rendering engine that can generate audio
-samples for key events that come from (say) a MIDI keyboard. Work on the rendering side is still on-going, but at
-present it can generate audio at the right pitch. This library is currently being used by my
-[SoundFonts](https://github.com/bradhowes/SoundFonts) application for SF2 file parsing, and now experimental rendering.
+samples for key events that come from (say) a MIDI keyboard. This library is currently being used by my
+[SoundFonts](https://github.com/bradhowes/SoundFonts) application for SF2 file parsing, and more recently as an
+optional alternative to Apple's rendering offering.
 
-Although much of the code is generic C++17/23, there are bits that expect an Apple platform that has
-the AudioToolbox and Accelerate frameworks available. As such, there are some code files that have the `.mm` suffix
-so that they compile as Obj-C++ instead of C++ -- these "bridge" files provide a means to interact with the SF2Lib from
-Swift code. However, such cases are fairly isolated. The goal is to be a simple library for reading SF2 files as well
-as a competent SF2 audio renderer whose output can be fed to any sort of audio processing chain, not just macOS and iOS
-Core Audio systems.
+Although most of the library code is generic C++17/23, there are a few bits that expect an Apple platform that has
+the AudioToolbox and Accelerate frameworks available. The goal is to be a simple library for reading SF2 files as well
+as a competent SF2 audio renderer whose output can be fed to any sort of audio processing chain, but it would probably
+take some effort to remove it from the Apple ecosystem.
 
-This package depends on some general DSP and audio classes from my
-[AUv3Support](https://github.com/bradhowes/AUv3Support) package.
+Note that this package depends on some general DSP headers and audio classes from my
+[AUv3Support](https://github.com/bradhowes/AUv3Support) package which is used by my various AUv3 extensions.
 
 # SF2 Spec Support
 
