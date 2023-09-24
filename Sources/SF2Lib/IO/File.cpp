@@ -9,7 +9,6 @@
 #include "SF2Lib/Entity/Preset.hpp"
 #include "SF2Lib/IO/ChunkList.hpp"
 #include "SF2Lib/IO/File.hpp"
-#include "SF2Lib/IO/Format.hpp"
 
 using namespace SF2::IO;
 
@@ -26,13 +25,37 @@ File::~File() noexcept
   if (fd_ >= 0) ::close(fd_);
 }
 
+
+struct Closer
+{
+  explicit Closer(int fd) : fd_{fd} {}
+
+  ~Closer() { if (is_valid()) ::close(fd_); }
+
+  int operator *() const { return fd_; }
+
+  bool is_valid() const { return fd_ != -1; }
+
+  int release() noexcept {
+    int tmp = -1;
+    std::swap(tmp, fd_);
+    return tmp;
+  }
+
+private:
+  int fd_{-1};
+};
+
+
 File::LoadResponse
 File::load() noexcept
 {
-  fd_ = ::open(path_.data(), O_RDONLY);
-  if (fd_ == -1) return LoadResponse::notFound;
+  if (fd_ != -1) return LoadResponse::ok;
 
-  off_t fileSize = ::lseek(fd_, 0, SEEK_END);
+  auto fd = Closer(::open(path_.data(), O_RDONLY));
+  if (!fd.is_valid()) return LoadResponse::notFound;
+
+  off_t fileSize = ::lseek(*fd, 0, SEEK_END);
   if (fileSize < 4) return LoadResponse::invalidFormat;
 
   size_ = fileSize;
@@ -40,7 +63,7 @@ File::load() noexcept
   sampleDataEnd_ = 0;
   rawSamples_.clear();
 
-  auto riff = Pos(fd_, 0, size_).makeChunkList();
+  auto riff = Pos(*fd, 0, size_).makeChunkList();
   if (riff.tag() != Tags::riff)
     return LoadResponse::invalidFormat;
 
@@ -99,6 +122,7 @@ File::load() noexcept
   // Build the collection of normalized samples.
   sampleSourceCollection_.build(rawSamples_.data());
 
+  fd_ = fd.release();
   return LoadResponse::ok;
 }
 

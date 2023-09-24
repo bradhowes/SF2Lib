@@ -5,7 +5,7 @@
 #include "SF2Lib/Entity/Preset.hpp"
 
 #include "SF2Lib/IO/ChunkList.hpp"
-#include "SF2Lib/IO/Format.hpp"
+#include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/IO/Parser.hpp"
 
 using namespace SF2::IO;
@@ -14,14 +14,14 @@ Parser::Info
 Parser::parse(const char* path)
 {
   int fd = ::open(path, O_RDONLY);
-  if (fd == -1) throw Format::error;
+  if (fd == -1) throw File::LoadResponse::notFound;
 
   Parser::Info info;
   off_t fileSize = ::lseek(fd, 0, SEEK_END);
 
   auto riff = Pos(fd, 0, fileSize).makeChunkList();
-  if (riff.tag() != Tags::riff) throw Format::error;
-  if (riff.kind() != Tags::sfbk) throw Format::error;
+  if (riff.tag() != Tags::riff) throw File::LoadResponse::invalidFormat;
+  if (riff.kind() != Tags::sfbk) throw File::LoadResponse::invalidFormat;
 
   auto p0 = riff.begin();
   while (p0 < riff.end()) {
@@ -63,6 +63,6 @@ Parser::parse(const char* path)
     }
   }
 
-  if (info.presets.empty()) throw Format::error;
+  if (info.presets.empty()) throw File::LoadResponse::invalidFormat;
   return info;
 }

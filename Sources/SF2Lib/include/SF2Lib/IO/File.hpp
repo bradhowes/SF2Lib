@@ -60,6 +60,8 @@ public:
 
   LoadResponse load() noexcept;
 
+  bool loaded() const noexcept { fd_ != -1; }
+
   /// @returns the embedded name in the file
   const std::string& embeddedName() const noexcept { return embeddedName_; }
 

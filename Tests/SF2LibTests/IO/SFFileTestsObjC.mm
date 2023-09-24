@@ -141,12 +141,12 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)testLoad {
-  XCTAssertThrows(SF2::IO::File("/dev/null"));
-  XCTAssertThrows(SF2::IO::File("/dev/zero"));
-  XCTAssertThrows(SF2::IO::File("/dev/urandom"));
+  XCTAssertEqual(SF2::IO::File("/dev/null").load(), SF2::IO::File::LoadResponse::invalidFormat);
+  XCTAssertEqual(SF2::IO::File("/dev/zero").load(), SF2::IO::File::LoadResponse::invalidFormat);
+  XCTAssertEqual(SF2::IO::File("/dev/urandom").load(), SF2::IO::File::LoadResponse::invalidFormat);
   NSURL* b1 = [TestResources getBadResourceUrl:0];
-  XCTAssertThrows(SF2::IO::File([[b1 absoluteString] UTF8String]));
+  XCTAssertEqual(SF2::IO::File([[b1 absoluteString] UTF8String]).load(), SF2::IO::File::LoadResponse::notFound);
   NSURL* b2 = [TestResources getBadResourceUrl:1];
-  XCTAssertThrows(SF2::IO::File([[b2 absoluteString] UTF8String]));
+  XCTAssertEqual(SF2::IO::File([[b2 absoluteString] UTF8String]).load(), SF2::IO::File::LoadResponse::notFound);
 }
 @end

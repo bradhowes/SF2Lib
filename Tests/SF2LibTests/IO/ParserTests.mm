@@ -54,7 +54,7 @@
 
   XCTAssertTrue([data writeToURL:tmp atomically:NO]);
 
-  XCTAssertThrows(SF2::IO::File(tmp.path.UTF8String));
+  XCTAssertEqual(SF2::IO::File(tmp.path.UTF8String).load(), SF2::IO::File::LoadResponse::invalidFormat);
 }
 
 - (void)testNoRiffPayload {
@@ -75,7 +75,7 @@
 
   XCTAssertTrue([data writeToURL:tmp atomically:NO]);
 
-  XCTAssertThrows(SF2::IO::File(tmp.path.UTF8String));
+  XCTAssertEqual(SF2::IO::File(tmp.path.UTF8String).load(), SF2::IO::File::LoadResponse::invalidFormat);
 }
 
 - (void)testNoSfbkPayload {
@@ -96,7 +96,7 @@
 
   XCTAssertTrue([data writeToURL:tmp atomically:NO]);
 
-  XCTAssertThrows(SF2::IO::File(tmp.path.UTF8String));
+  XCTAssertEqual(SF2::IO::File(tmp.path.UTF8String).load(), SF2::IO::File::LoadResponse::invalidFormat);
 }
 
 @end

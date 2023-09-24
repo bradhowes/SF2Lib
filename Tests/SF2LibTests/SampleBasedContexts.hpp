@@ -192,6 +192,8 @@ struct PresetTestContextBase
   presets_{},
   sampleRate_{sampleRate}
   {
+    auto response = file_.load();
+    if (response != SF2::IO::File::LoadResponse::ok) throw response;
     presets_.build(file_);
   }
 

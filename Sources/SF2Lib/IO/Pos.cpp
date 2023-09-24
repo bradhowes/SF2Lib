@@ -1,7 +1,7 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
 #include "SF2Lib/IO/ChunkList.hpp"
-#include "SF2Lib/IO/Format.hpp"
+#include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/IO/Pos.hpp"
 
 using namespace SF2::IO;
@@ -20,9 +20,9 @@ end_{end}
 Pos
 Pos::readInto(void* buffer, size_t count) const
 {
-  if (Pos::seek(fd_, off_t(pos_), SEEK_SET) != off_t(pos_)) throw Format::error;
+  if (Pos::seek(fd_, off_t(pos_), SEEK_SET) != off_t(pos_)) throw File::LoadResponse::invalidFormat;
   off_t result = Pos::read(fd_, buffer, count);
-  if (result != long(count)) throw Format::error;
+  if (result != long(count)) throw File::LoadResponse::invalidFormat;
   return advance(result);
 }
 
@@ -36,8 +36,8 @@ Chunk
 Pos::makeChunk() const
 {
   uint32_t buffer[2];
-  if (Pos::seek(fd_, off_t(pos_), SEEK_SET) != off_t(pos_)) throw Format::error;
-  if (Pos::read(fd_, buffer, sizeof(buffer)) != sizeof(buffer)) throw Format::error;
+  if (Pos::seek(fd_, off_t(pos_), SEEK_SET) != off_t(pos_)) throw File::LoadResponse::invalidFormat;
+  if (Pos::read(fd_, buffer, sizeof(buffer)) != sizeof(buffer)) throw File::LoadResponse::invalidFormat;
   return Chunk(Tag(buffer[0]), buffer[1], advance(sizeof(buffer)));
 }
 
@@ -45,7 +45,7 @@ ChunkList
 Pos::makeChunkList() const
 {
   uint32_t buffer[3];
-  if (Pos::seek(fd_, off_t(pos_), SEEK_SET) != off_t(pos_)) throw Format::error;
-  if (Pos::read(fd_, buffer, sizeof(buffer)) != sizeof(buffer)) throw Format::error;
+  if (Pos::seek(fd_, off_t(pos_), SEEK_SET) != off_t(pos_)) throw File::LoadResponse::invalidFormat;
+  if (Pos::read(fd_, buffer, sizeof(buffer)) != sizeof(buffer)) throw File::LoadResponse::invalidFormat;
   return ChunkList(Tag(buffer[0]), buffer[1] - 4, Tag(buffer[2]), advance(sizeof(buffer)));
 }
