@@ -71,6 +71,19 @@ Voice::start() noexcept
 }
 
 void
+Voice::retrigger() noexcept
+{
+  pendingRelease_ = 0;
+  sampleCounter_ = 0;
+  active_ = true;
+  keyDown_ = true;
+
+  sampleGenerator_.start();
+  volumeEnvelope_.retrigger();
+  modulatorEnvelope_.retrigger();
+}
+
+void
 Voice::releaseKey(const ReleaseKeyState& releaseKeyState) noexcept
 {
   if (releaseKeyState.pedalState.sustainPedalActive ||

@@ -95,9 +95,13 @@ public:
    */
   inline void stop() noexcept {
     active_ = false;
-    volumeEnvelope_.stop();
-    sampleGenerator_.stop();
   }
+
+  /**
+   Restart the same voice that was just playing, resuming at the same envelope levels but jumping back into the
+   attack stage.
+   */
+  void retrigger() noexcept;
 
   /// @returns true if this voice is still rendering interesting samples
   bool isActive() const noexcept { return active_; }
@@ -175,7 +179,12 @@ public:
 
     if (volumeEnvelope_.isDelayed()) return 0_F;
 
-    // Calculate the pitch to render and then generate a new sample.
+    // Calculate the pitch to render and then generate a new sample. 
+    //
+    // NOTE: according the SF2 7.10, linked L/R voices should "be played entirely synchronously, with their pitch
+    // controlled by the right sample's generators. All non-pitch generators should apply as normal". We do not do
+    // this, and I'm not entirely sure how to do it given that modLFO and modEnv do not just affect pitch. It seems to
+    // make sense to have common LFOs and envelopes for stereo voices.
     auto increment{pitch_.samplePhaseIncrement(modLFO, vibLFO, modEnv)};
     auto sample{sampleGenerator_.generate(increment, canLoop())};
 

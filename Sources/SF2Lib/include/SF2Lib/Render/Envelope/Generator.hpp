@@ -78,6 +78,9 @@ public:
    */
   void gate(bool noteOn) noexcept;
 
+  /// Put the envelope back in the `attack` stage but at the current value. Update the counter to match the value.
+  void retrigger() noexcept;
+
   /**
    Stop the envelope generator. All future requests for its value will report 0.0.
    */

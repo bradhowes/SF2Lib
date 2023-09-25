@@ -104,6 +104,15 @@ Generator::gate(bool noteOn) noexcept
 }
 
 void
+Generator::retrigger() noexcept
+{
+  enterStage(StageIndex::attack);
+  // Reduce the number of samples by the position of the envelope value we are reusing.
+  auto passed = int(std::round(value_ / stages_[StageIndex::attack].increment()));
+  counter_ = std::max(counter_ - passed, 1);
+}
+
+void
 Generator::stop() noexcept
 {
   stageIndex_ = StageIndex::idle;
