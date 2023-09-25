@@ -77,11 +77,10 @@ public:
    Generate a configuration for the decay stage. There is always at least 1 sample in this stage to support the
    transition from 1.0 to the sustainLevel.
 
-   @param durationInSamples number of samples to spend in this stage
    @param sustainLevel the sustain level to descend to from 1.0 peak.
+   @param durationInSamples number of samples to spend in this stage
    */
-  void setDecay(int durationInSamples, Float sustainLevel) noexcept;
-
+  void setDecay(Float sustainLevel, int durationInSamples) noexcept;
 
   /**
    Generate a configuration for the sustain stage. This is the envelope level to report out while the envelope gate is

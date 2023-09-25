@@ -22,7 +22,7 @@
 namespace SF2::Render::Envelope {
 
 /**
- Generator of values for the SF2 volume/filter envelopes. An SF2 envelope contains 6 stages:
+ Generator of values for the SF2 volume/modulation envelopes. An SF2 envelope contains 6 stages:
 
  - Delay -- number of samples to delay the beginning of the attack stage
  - Attack -- number of samples to ramp up from 0.0 to 1.0 in a exponential way

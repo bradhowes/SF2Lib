@@ -20,7 +20,7 @@ Stage::setAttack(int durationInSamples) noexcept
 }
 
 void
-Stage::setDecay(int durationInSamples, Float sustainLevel) noexcept
+Stage::setDecay(Float sustainLevel, int durationInSamples) noexcept
 {
   durationInSamples_ = std::max(durationInSamples, 1);
   if (durationInSamples_ == 1) {

@@ -63,16 +63,16 @@ log_{os_log_create("SF2Lib", logTag)}
   ;
 }
 
-Generator::Generator(Float sampleRate, const char* logTag, size_t voiceIndex, Float delay, Float attack, Float hold, Float decay,
-          int sustain, Float release) noexcept :
+Generator::Generator(Float sampleRate, const char* logTag, size_t voiceIndex, Float delay, Float attack, Float hold, 
+                     Float decay, int sustain, Float release) noexcept :
 voiceIndex_{voiceIndex},
 log_{os_log_create("SF2Lib", logTag)}
 {
-  sustainLevel_ = 1.0f - sustain / 1'000.0_F;
+  sustainLevel_ = 1_F - sustain / 1'000_F;
   stages_[StageIndex::delay].setDelay(int(round(sampleRate * delay)));
   stages_[StageIndex::attack].setAttack(int(round(sampleRate * attack)));
   stages_[StageIndex::hold].setHold(int(round(sampleRate * hold)));
-  stages_[StageIndex::decay].setDecay(int(round(sampleRate * decay)), sustainLevel_);
+  stages_[StageIndex::decay].setDecay(sustainLevel_, int(round(sampleRate * decay)));
   stages_[StageIndex::sustain].setSustain();
   stages_[StageIndex::release].setRelease(int(round(sampleRate * release)));
 
@@ -95,7 +95,7 @@ Generator::gate(bool noteOn) noexcept
 {
   if (noteOn) {
     os_log_debug(log_, "starting %zu", voiceIndex_);
-    value_ = 0.0;
+    value_ = 0_F;
     enterStage(StageIndex::delay);
   } else if (stageIndex_ != StageIndex::idle) {
     os_log_debug(log_, "releasing %zu", voiceIndex_);
@@ -108,7 +108,7 @@ Generator::stop() noexcept
 {
   stageIndex_ = StageIndex::idle;
   counter_ = 0;
-  value_ = 0.0;
+  value_ = 0_F;
 }
 
 void
@@ -127,7 +127,7 @@ Generator::configureVolumeEnvelope(const State& state) noexcept
    Our stages always work in normalized values, so convert centibels to an attenuation value.
    */
   auto sustainCents = state.modulated(Index::sustainVolumeEnvelope);
-  sustainLevel_ = 1.0f - DSP::tenthPercentageToNormalized(sustainCents);
+  sustainLevel_ = 1_F - DSP::tenthPercentageToNormalized(sustainCents);
 
   auto delayTimecents = state.modulated(Index::delayVolumeEnvelope);
   stages_[StageIndex::delay].setDelay(sampleCountFor(state.sampleRate(),
@@ -142,9 +142,9 @@ Generator::configureVolumeEnvelope(const State& state) noexcept
                                                    holdTimecentsToSeconds(holdTimecents)));
 
   auto decayTimecents = state.modulated(Index::decayVolumeEnvelope) + midiKeyVolumeEnvelopeDecayAdjustment(state);
-  stages_[StageIndex::decay].setDecay(sampleCountFor(state.sampleRate(),
-                                                     decayTimecentsToSeconds(decayTimecents)),
-                                      sustainLevel_);
+  stages_[StageIndex::decay].setDecay(sustainLevel_, 
+                                      sampleCountFor(state.sampleRate(),
+                                                     decayTimecentsToSeconds(decayTimecents)));
 
   stages_[StageIndex::sustain].setSustain();
 
@@ -200,9 +200,9 @@ Generator::configureModulationEnvelope(const State& state) noexcept
                                                    holdTimecentsToSeconds(holdTimecents)));
 
   auto decayTimecents = state.modulated(Index::decayModulatorEnvelope) + midiKeyModulatorEnvelopeDecayAdjustment(state);
-  stages_[StageIndex::decay].setDecay(sampleCountFor(state.sampleRate(),
-                                                     decayTimecentsToSeconds(decayTimecents)),
-                                      sustainLevel_);
+  stages_[StageIndex::decay].setDecay(sustainLevel_,
+                                      sampleCountFor(state.sampleRate(),
+                                                     decayTimecentsToSeconds(decayTimecents)));
 
   stages_[StageIndex::sustain].setSustain();
 
