@@ -57,6 +57,7 @@ constexpr Float midiKeyModulatorEnvelopeDecayAdjustment(const Generator::State& 
 }
 
 Generator::Generator(size_t voiceIndex, const char* logTag) noexcept :
+logTag_{logTag},
 voiceIndex_{voiceIndex},
 log_{os_log_create("SF2Lib", logTag)}
 {
@@ -65,6 +66,7 @@ log_{os_log_create("SF2Lib", logTag)}
 
 Generator::Generator(Float sampleRate, const char* logTag, size_t voiceIndex, Float delay, Float attack, Float hold, 
                      Float decay, int sustain, Float release) noexcept :
+logTag_{logTag},
 voiceIndex_{voiceIndex},
 log_{os_log_create("SF2Lib", logTag)}
 {
@@ -94,11 +96,11 @@ void
 Generator::gate(bool noteOn) noexcept
 {
   if (noteOn) {
-    os_log_debug(log_, "starting %zu", voiceIndex_);
+    os_log_debug(log_, "%s starting %zu", logTag_, voiceIndex_);
     value_ = 0_F;
     enterStage(StageIndex::delay);
   } else if (stageIndex_ != StageIndex::idle) {
-    os_log_debug(log_, "releasing %zu", voiceIndex_);
+    os_log_debug(log_, "%s releasing %zu", logTag_, voiceIndex_);
     enterStage(StageIndex::release);
   }
 }
@@ -136,7 +138,7 @@ Generator::configureVolumeEnvelope(const State& state) noexcept
    Our stages always work in normalized values, so convert centibels to an attenuation value.
    */
   auto sustainCents = state.modulated(Index::sustainVolumeEnvelope);
-  sustainLevel_ = 1_F - DSP::tenthPercentageToNormalized(sustainCents);
+  sustainLevel_ = DSP::centibelsToAttenuationInterpolated(sustainCents);
 
   auto delayTimecents = state.modulated(Index::delayVolumeEnvelope);
   stages_[StageIndex::delay].setDelay(sampleCountFor(state.sampleRate(),
@@ -234,4 +236,3 @@ Generator::configureModulationEnvelope(const State& state) noexcept
 
   gate(true);
 }
-

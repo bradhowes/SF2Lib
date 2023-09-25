@@ -58,8 +58,8 @@ private:
  Convert centibels [0-1440] into an attenuation value from [1.0-0.0].
 
  - Zero indicates no attenuation (1.0)
- -  20 centibels (-2 dB) gives 0.1 attenuation (10% reduction of original signal)
- -  60 centibels (-6 dB) gives 0.5 attenuation (50% reduction of original signal)
+ - 20 centibels (-2 dB) gives 0.1 attenuation (10% reduction of original signal)
+ - 60 centibels (-6 dB) gives 0.5 attenuation (50% reduction of original signal)
  - 120 centibels (-12 dB) gives 0.25 attenuation
 
  and every 200 is a reduction by a power of 10 (200 = 0.1, 400 = 0.001, etc.)

@@ -223,21 +223,21 @@ struct EnvelopeTestInjector {
   gen.configure(state);
 
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
-  XCTAssertEqualWithAccuracy(0.88, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.251188643151, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 500);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
-  XCTAssertEqualWithAccuracy(0.5, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(0.00316227766017, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 900);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
-  XCTAssertEqualWithAccuracy(0.1, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(3.16227766017e-05, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 960);
   gen.configure(state);
-  XCTAssertEqualWithAccuracy(0.04, EnvelopeTestInjector::sustain(gen), epsilon);
+  XCTAssertEqualWithAccuracy(1.58489319246e-05, EnvelopeTestInjector::sustain(gen), epsilon);
 
   state.setValue(State::State::Index::sustainVolumeEnvelope, 1440);
   gen.configure(state);
