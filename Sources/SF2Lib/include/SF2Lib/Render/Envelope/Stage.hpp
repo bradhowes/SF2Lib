@@ -103,7 +103,7 @@ public:
   int durationInSamples() const noexcept { return durationInSamples_; }
 
 private:
-  Float increment_{0.0};
+  Float increment_{0_F};
   int durationInSamples_{0};
 };
 

@@ -93,15 +93,15 @@ Float
 Modulator::value(const State& state) const noexcept
 {
   // If there is no source for the modulator, it always returns 0.0 (no modulation).
-  if (!primaryValue_.isActive()) return 0.0f;
+  if (!primaryValue_.isActive()) return 0_F;
 
   // Obtain transformed primary value.
   auto primary{primaryValue_(state)};
   Float transformedPrimary{primaryTransform_(primary)};
-  if (transformedPrimary == 0.0) return 0.0f;
+  if (transformedPrimary == 0_F) return 0_F;
 
   // Obtain transformed secondary value.
-  Float transformedSecondary{secondaryValue_.isActive() ? secondaryTransform_(secondaryValue_(state)) : 1.0};
+  Float transformedSecondary{secondaryValue_.isActive() ? secondaryTransform_(secondaryValue_(state)) : 1_F};
   Float result{transformedPrimary * transformedSecondary * amount_};
   // std::cout << "P: " << primary << " tP: " << transformedPrimary << " tS: " << transformedSecondary
   // << " amount: " << amount_ << " result: " << result << "\n";

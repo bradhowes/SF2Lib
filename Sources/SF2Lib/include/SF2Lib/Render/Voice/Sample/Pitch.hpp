@@ -76,7 +76,7 @@ public:
   {
     auto coarseTune{state_.modulated(Index::coarseTune)};
     auto fineTune{state_.modulated(Index::fineTune)};
-    auto phaseOffset{coarseTune * 100.0_F + fineTune};
+    auto phaseOffset{coarseTune * 100_F + fineTune};
     auto modLFOValue{modLFO.val * state_.modulated(Index::modulatorLFOToPitch)};
     auto vibLFOValue{vibLFO.val * state_.modulated(Index::vibratoLFOToPitch)};
     auto modEnvValue{modEnv.val * state_.modulated(Index::modulatorEnvelopeToPitch)};

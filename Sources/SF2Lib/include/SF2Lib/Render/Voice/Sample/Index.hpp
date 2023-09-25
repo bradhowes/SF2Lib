@@ -37,7 +37,7 @@ public:
   /// Start rendering.
   void start() noexcept {
     whole_ = 0;
-    partial_ = 0.0;
+    partial_ = 0_F;
     looped_ = false;
   }
 
@@ -65,7 +65,7 @@ public:
     whole_ += wholeIncrement;
     partial_ += partialIncrement;
 
-    if (partial_ >= 1.0) {
+    if (partial_ >= 1_F) {
       auto carry{size_t(partial_)};
       whole_ += carry;
       partial_ -= carry;
@@ -88,7 +88,7 @@ public:
 
 private:
   size_t whole_{0};
-  Float partial_{0.0_F};
+  Float partial_{0_F};
   Bounds bounds_{};
   bool looped_{false};
 };

@@ -22,7 +22,7 @@ LowPassFilter::updateSettings(Float frequency, Float resonance) noexcept
 
   // Bounds taken from FluidSynth, where the upper bound serves as an anti-aliasing filter, just below the
   // Nyquist frequency.
-  frequency = DSP::clamp(DSP::centsToFrequency(frequency), 5.0f, 0.45f * sampleRate_);
+  frequency = DSP::clamp(DSP::centsToFrequency(frequency), 5_F, 0.45_F * sampleRate_);
   resonance = DSP::centibelsToResonance(resonance);
   filter_.setCoefficients(Coefficients::LPF2(sampleRate_, frequency, resonance));
 }

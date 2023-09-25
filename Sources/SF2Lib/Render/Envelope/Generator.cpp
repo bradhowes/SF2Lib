@@ -185,7 +185,7 @@ Generator::configureModulationEnvelope(const State& state) noexcept
    Our stages always work in normalized values, so convert percentage to a sustain level.
    */
   auto sustainCents = state.modulated(Index::sustainModulatorEnvelope);
-  sustainLevel_ = 1.0f - DSP::tenthPercentageToNormalized(sustainCents);
+  sustainLevel_ = 1_F - DSP::tenthPercentageToNormalized(sustainCents);
 
   auto delayTimecents = state.modulated(Index::delayModulatorEnvelope);
   stages_[StageIndex::delay].setDelay(sampleCountFor(state.sampleRate(),

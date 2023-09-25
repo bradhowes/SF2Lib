@@ -19,31 +19,31 @@ constexpr Float positiveLinear(size_t maxValue, size_t index) noexcept {
 }
 
 constexpr Float positiveConcave(size_t maxValue, size_t index) noexcept {
-  return index == maxValue ? 1.0_F : -40.0_F / 96.0_F * log10((maxValue - index) / Float(maxValue));
+  return index == maxValue ? 1_F : -40_F / 96_F * log10((maxValue - index) / Float(maxValue));
 }
 
 constexpr Float positiveConvex(size_t maxValue, size_t index) noexcept {
-  return index == 0 ? 0.0_F : 1.0_F + 40.0_F / 96.0_F * log10(index / Float(maxValue));
+  return index == 0 ? 0_F : 1_F + 40_F / 96_F * log10(index / Float(maxValue));
 }
 
 constexpr Float positiveSwitched(size_t maxValue, size_t index) noexcept {
-  return index <= maxValue / 2 ? 0.0_F : 1.0_F;
+  return index <= maxValue / 2 ? 0_F : 1_F;
 }
 
 constexpr Float negativeLinear(size_t maxValue, size_t index) noexcept {
-  return 1.0_F - positiveLinear(maxValue, index);
+  return 1_F - positiveLinear(maxValue, index);
 }
 
 constexpr Float negativeConcave(size_t maxValue, size_t index) noexcept {
-  return index == 0 ? 1.0_F : -40.0_F / 96.0_F * log10(index / Float(maxValue));
+  return index == 0 ? 1_F : -40_F / 96_F * log10(index / Float(maxValue));
 }
 
 constexpr Float negativeConvex(size_t maxValue, size_t index) noexcept {
-  return index == maxValue ? 0.0_F : 1.0_F + 40.0_F / 96.0_F * log10((maxValue - index) / Float(maxValue));
+  return index == maxValue ? 0_F : 1_F + 40_F / 96_F * log10((maxValue - index) / Float(maxValue));
 }
 
 constexpr Float negativeSwitched(size_t maxValue, size_t index) noexcept {
-  return 1.0_F - positiveSwitched(maxValue, index);
+  return 1_F - positiveSwitched(maxValue, index);
 }
 
 using Generator = Float(*)(size_t, size_t);

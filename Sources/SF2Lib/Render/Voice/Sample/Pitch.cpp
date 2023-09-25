@@ -44,8 +44,8 @@ Pitch::configure(const Entity::SampleHeader& header) noexcept
   if (state_.sampleRate() != header.sampleRate()) {
     // Calculate ratio of sample rates as a difference in their cent frequency values, which can then be added to
     // the sum of the phase increments. Saves us from a multiply later on.
-    auto sampleRateCents{int(std::round(1200 * std::log2(state_.sampleRate() / 440.0)))};
-    auto originalSampleRateCents{int(std::round(1200 * std::log2(header.sampleRate() / 440.0)))};
+    auto sampleRateCents{int(std::round(1200 * std::log2(state_.sampleRate() / 440_F)))};
+    auto originalSampleRateCents{int(std::round(1200 * std::log2(header.sampleRate() / 440_F)))};
     sampleRateDeltaCents = originalSampleRateCents - sampleRateCents;
   }
 
@@ -55,6 +55,6 @@ Pitch::configure(const Entity::SampleHeader& header) noexcept
    This parameter represents the degree to which MIDI key number influences pitch. A value of zero indicates that
    MIDI key number has no effect on pitch; a value of 100 represents the usual tempered semitone scale.
    */
-  auto keyCents{constantPitch ? 0.0f : state_.unmodulated(Index::scaleTuning) * (state_.key() - rootKey)};
+  auto keyCents{constantPitch ? 0_F : state_.unmodulated(Index::scaleTuning) * (state_.key() - rootKey)};
   phaseBase_ = keyCents + header.pitchCorrection() + sampleRateDeltaCents;
 }

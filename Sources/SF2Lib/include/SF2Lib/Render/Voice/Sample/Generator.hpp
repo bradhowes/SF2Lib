@@ -64,7 +64,7 @@ public:
    */
   inline Float generate(Float increment, bool canLoop) noexcept
   {
-    if (index_.finished()) { return 0.0; }
+    if (index_.finished()) { return 0_F; }
     auto whole{index_.whole()};
     auto partial{index_.partial()};
     index_.increment(increment, canLoop);
@@ -111,11 +111,11 @@ private:
 
   Float sample(size_t whole, bool canLoop) const noexcept {
     if (whole == bounds_.endLoopPos() && canLoop) { whole = bounds_.startLoopPos(); }
-    return whole < sampleSource_->size() ? (*sampleSource_)[whole] : 0.0;
+    return whole < sampleSource_->size() ? (*sampleSource_)[whole] : 0_F;
   }
 
   Float before(size_t whole, bool canLoop) const noexcept {
-    if (whole == 0) { return 0.0_F; }
+    if (whole == 0) { return 0_F; }
     if (whole == bounds_.startLoopPos() && canLoop) { whole = bounds_.endLoopPos(); }
     return (*sampleSource_)[whole - 1];
   }

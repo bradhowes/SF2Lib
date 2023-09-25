@@ -26,7 +26,7 @@ public:
    Restart from a known zero state.
    */
   void reset() noexcept {
-    counter_ = 0.0;
+    counter_ = 0_F;
     if (increment_ < 0) increment_ = -increment_;
   }
 
@@ -58,13 +58,13 @@ protected:
     }
 
     counter_ += increment_;
-    if (counter_ >= 1.0_F) {
+    if (counter_ >= 1_F) {
       increment_ = -increment_;
-      counter_ = 2.0_F - counter_;
+      counter_ = 2_F - counter_;
     }
-    else if (counter_ <= -1.0_F) {
+    else if (counter_ <= -1_F) {
       increment_ = -increment_;
-      counter_ = -2.0_F - counter_;
+      counter_ = -2_F - counter_;
     }
   }
 
@@ -88,8 +88,8 @@ protected:
 
   void configure(Float sampleRate, Float frequency, Float delay);
 
-  Float counter_{0.0_F};
-  Float increment_{0.0_F};
+  Float counter_{0_F};
+  Float increment_{0_F};
   size_t delaySampleCount_{0};
 
   const os_log_t log_;

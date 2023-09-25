@@ -53,7 +53,7 @@ public:
          size_t minimumNoteDurationMilliseconds = 10) noexcept;
   
   size_t minimumNoteDurationSamples() const noexcept
-  { return static_cast<size_t>(ceil(minimumNoteDurationMilliseconds_ / 1000.0f * sampleRate_)); }
+  { return static_cast<size_t>(ceil(minimumNoteDurationMilliseconds_ / 1000_F * sampleRate_)); }
   
   /// @returns maximum number of voices available for simultaneous rendering
   size_t voiceCount() const noexcept { return voices_.size(); }

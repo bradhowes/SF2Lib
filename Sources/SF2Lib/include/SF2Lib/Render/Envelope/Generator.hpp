@@ -135,7 +135,9 @@ protected:
   inline Float getNextValue() noexcept {
     if (!checkForNextStage()) return 0_F;
     value_ = stages_[stageIndex_].next(value_);
-    if (value_ < 0_F) {
+    if (value_ > 1_F) {
+      value_ = 1_F;
+    } else if (value_ < 0_F) { // Do not check for 0.0 since that is a valid starting state.
       stop();
     } else {
       --counter_;
@@ -170,26 +172,13 @@ private:
   inline bool checkForNextStage() noexcept {
     while (counter_ == 0) {
       switch (stageIndex_) {
-        case StageIndex::delay:
-          enterStage(StageIndex::attack);
-          break;
-        case StageIndex::attack:
-          enterStage(StageIndex::hold);
-          break;
-        case StageIndex::hold:
-          enterStage(StageIndex::decay);
-          break;
-        case StageIndex::decay:
-          enterStage(StageIndex::sustain);
-          break;
-        case StageIndex::sustain:
-          enterStage(StageIndex::release);
-          break;
-        case StageIndex::release:
-          enterStage(StageIndex::idle);
-          return false;
-        case StageIndex::idle:
-          return false;
+        case StageIndex::delay:   enterStage(StageIndex::attack); continue;
+        case StageIndex::attack:  enterStage(StageIndex::hold); continue;
+        case StageIndex::hold:    enterStage(StageIndex::decay); continue;
+        case StageIndex::decay:   enterStage(StageIndex::sustain); continue;
+        case StageIndex::sustain: enterStage(StageIndex::release); continue;
+        case StageIndex::release: stop(); return false;
+        case StageIndex::idle:    return false;
       }
     }
     return true;

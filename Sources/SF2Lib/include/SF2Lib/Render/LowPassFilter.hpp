@@ -12,8 +12,8 @@ class LowPassFilter
 public:
   using Coefficients = DSPHeaders::Biquad::Coefficients<Float>;
 
-  inline static Float defaultFrequency = 13500;
-  inline static Float defaultResonance = 0.0;
+  inline static Float defaultFrequency = 13500_F;
+  inline static Float defaultResonance = 0_F;
 
   LowPassFilter(Float sampleRate) noexcept;
 

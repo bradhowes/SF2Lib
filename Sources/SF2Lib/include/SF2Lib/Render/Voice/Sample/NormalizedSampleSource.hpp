@@ -83,11 +83,11 @@ private:
 
   template <std::floating_point T>
   T getMaxMagnitude(size_t startPos, size_t endPos) const {
-    T value{0.0f};
+    T value{0_F};
     if (samples_.size() > startPos && samples_.size() >= endPos) {
       Accelerated<T>::magnitudeProc(samples_.data() + startPos, 1, &value, endPos - startPos);
     }
-    return std::max<T>(value, 1.0e-7f);
+    return std::max<T>(value, 1.0e-7_F);
   }
 
   using SampleVector = std::vector<Float>;

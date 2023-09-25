@@ -25,11 +25,11 @@ Definition::convertedValueOf(const Amount& amount) const noexcept
 {
   switch (valueKind_) {
     case ValueKind::coarseOffset: return valueOf(amount) * 32768;
-    case ValueKind::signedCents: return valueOf(amount) / 1200.0_F;
+    case ValueKind::signedCents: return valueOf(amount) / 1200_F;
 
     case ValueKind::signedCentsBel:
     case ValueKind::unsignedPercent:
-    case ValueKind::signedPercent: return valueOf(amount) / 10.0_F;
+    case ValueKind::signedPercent: return valueOf(amount) / 10_F;
 
     case ValueKind::signedFrequencyCents: return DSP::centsToFrequency(valueOf(amount));
     case ValueKind::signedTimeCents: return DSP::centsToSeconds(valueOf(amount));
