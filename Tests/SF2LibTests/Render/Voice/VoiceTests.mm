@@ -599,8 +599,8 @@ using namespace SF2::Render;
     XCTAssertEqualWithAccuracy(0, samples[3], epsilon);
   } else if constexpr (std::is_same_v<Float, double>) {
     XCTAssertEqualWithAccuracy(0, samples[0], epsilon);
-    XCTAssertEqualWithAccuracy(0.00833839643747, samples[1], epsilon);
-    XCTAssertEqualWithAccuracy(0.010355248116, samples[2], epsilon);
+    XCTAssertEqualWithAccuracy(0.00834430195391, samples[1], epsilon);
+    XCTAssertEqualWithAccuracy(0.0103608714417, samples[2], epsilon);
     XCTAssertEqualWithAccuracy(0, samples[3], epsilon);
   }
 

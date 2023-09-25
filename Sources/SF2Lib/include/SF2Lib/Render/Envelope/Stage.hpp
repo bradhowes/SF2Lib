@@ -21,22 +21,12 @@ enum struct StageIndex {
   release
 };
 
-inline StageIndex operator++(StageIndex value) noexcept { return static_cast<StageIndex>(SF2::valueOf(value) + 1); }
-
-inline const char* StageName(StageIndex stageIndex) noexcept {
-  switch (stageIndex) {
-    case StageIndex::idle: return "idle";
-    case StageIndex::delay: return "delay";
-    case StageIndex::attack: return "attack";
-    case StageIndex::hold: return "hold";
-    case StageIndex::decay: return "decay";
-    case StageIndex::sustain: return "sustain";
-    case StageIndex::release: return "release";
-  }
-}
-
 /**
- Configuration for a single stage of an envelope.
+ Configuration for a single stage of an envelope. Each Stage holds a sample counter and an increment value. During
+ each render of a sample the envelope's current value is adjusted using the increment value, and the counter is
+ decremented. When the counter reaches zero, the envelope moves to the next stage.
+
+ The current envelope value is only adjusted by the increments in the Stage instances.
  */
 class Stage
 {

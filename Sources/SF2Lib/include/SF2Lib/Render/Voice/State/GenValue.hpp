@@ -47,7 +47,7 @@ struct GenValue {
 
   int presetValue() const noexcept { return adjustment_; }
 
-  /// @returns generator value as defined by instrument zone (value) and preset zone (adjustment).
+  /// @returns generator value as defined by instrument zone (value) and preset zone (adjustment) only.
   int unmodulated() const noexcept { return value_ + adjustment_; }
 
   /// @returns generator value + modulations

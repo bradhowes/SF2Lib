@@ -19,7 +19,7 @@ state_{sampleRate, channelState},
 loopingMode_{LoopingMode::none},
 pitch_{state_},
 sampleGenerator_{interpolator},
-gainEnvelope_{voiceIndex},
+volumeEnvelope_{voiceIndex},
 modulatorEnvelope_{voiceIndex},
 modulatorLFO_{sampleRate},
 vibratoLFO_{sampleRate},
@@ -60,7 +60,7 @@ Voice::start() noexcept
   loopingMode_ = loopingMode();
   initialAttenuation_ = DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));
 
-  gainEnvelope_.configure(state_);
+  volumeEnvelope_.configure(state_);
   modulatorEnvelope_.configure(state_);
   modulatorLFO_.configure(state_);
   vibratoLFO_.configure(state_);

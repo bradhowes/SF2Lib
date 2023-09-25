@@ -108,6 +108,9 @@ protected:
   Generator(Float sampleRate, const char* logTag, size_t voiceIndex, Float delay, Float attack, Float hold, Float decay,
             int sustain, Float release) noexcept;
 
+  /// @returns configured sustain level. NOTE: only used for testing
+  Float sustainLevel() const noexcept { return sustainLevel_; }
+
   /// @returns the current envelope value.
   inline Float value() const noexcept { return value_; }
 
@@ -118,9 +121,9 @@ protected:
    @returns the new envelope value.
    */
   inline Float getNextValue() noexcept {
-    if (!checkForNextStage()) return 0.0_F;
+    if (!checkForNextStage()) return 0_F;
     value_ = stages_[stageIndex_].next(value_);
-    if (value_ < 0.0_F) {
+    if (value_ < 0_F) {
       stop();
     } else {
       --counter_;
@@ -128,9 +131,6 @@ protected:
     }
     return value_;
   }
-
-  /// @returns configured sustain level
-  Float sustainLevel() const noexcept { return sustainLevel_; }
 
   void configureVolumeEnvelope(const State& state) noexcept;
 
@@ -194,8 +194,8 @@ private:
   Stages stages_{};
   StageIndex stageIndex_{StageIndex::idle};
   int counter_{0};
-  Float value_{0.0};
-  Float sustainLevel_{0.0};
+  Float value_{0_F};
+  Float sustainLevel_{0_F};
   const size_t voiceIndex_;
   const os_log_t log_;
 };
