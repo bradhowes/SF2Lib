@@ -34,7 +34,19 @@ namespace SF2::Render::Envelope {
  The envelope will remain in the idle state until `gate(true)` is invoked. It will remain in the sustain stage until
  `gate(false)` is invoked at which point it will enter the `release` stage. Although the stages above are listed in the
  order in which they are performed, any stage will transition to the `release` stage upon a `gate(false)`
- call.
+ call. Note that the envelope value is only changed by increments found in the Stage instances, and there is no forced
+ adjustment of the value when transitioning from stage to stage. For instance, for an envelope value to traverse the
+ entire delay, attack, hold, decay, sustain collection of stages, the generator gate must be `true` for all of the
+ sample counts found in each stage up until the sustain stage (which effectively holds an unlimited sample count value).
+ When the gate becomes `false` due to a key release, the envelope enters the release stage and the value begins to
+ become smaller as it approaches 0.0. However, if the generator gate becomes `false` before the envelope enters the
+ `sustain` stage, it could be at a level higher than the configured sustain level when it reaches the `release` stage.
+ The decrement of the release stage is the (negative) slope of the line going from 1.0 to 0.0 over the duration of the
+ release stage, so the envelope will have the same trailing edge slope regardless of what value the envelope has
+ reached before entering the `release` stage.
+
+ This behavior should also protect the rendering engine from discontinuities that might result when manually setting
+ the envelope value to a fixed value when changing states.
 
  The more traditional ADSR (attack, decay, sustain, release) envelope can be achieved by setting the delay and hold
  durations to zero.

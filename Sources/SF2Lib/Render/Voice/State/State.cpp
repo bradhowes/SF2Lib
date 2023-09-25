@@ -10,6 +10,7 @@ using namespace SF2::Render::Voice::State;
 void
 State::clear() noexcept
 {
+  // Reset all of the generators and apply default values.
   gens_.zero();
   setValue(Index::initialFilterCutoff, 13500);
   setValue(Index::delayModulatorLFO, -12000);
