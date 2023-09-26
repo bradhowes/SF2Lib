@@ -22,12 +22,12 @@ public:
   enum struct EngineParameterAddress : AUParameterAddress
   {
     portamentoEnabled = 1000,
-    portamentoRate = 1001,
-    oneVoicePerKey = 1002,
-    polyphonicEnabled = 1003,
-    activeVoiceCount = 1004,
+    portamentoRate,
+    oneVoicePerKey,
+    polyphonicEnabled,
+    activeVoiceCount,
 
-    nextAddress
+    firstUnusedAddress
   };
 
   /**

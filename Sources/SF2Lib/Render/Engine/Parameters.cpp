@@ -53,7 +53,7 @@ Parameters::valueChanged(AUParameter* parameter, AUValue value) noexcept
     anyChanged_ = true;
     engine_.notifyParameterChanged(index);
   } else if (rawIndex >= valueOf(EngineParameterAddress::portamentoEnabled) &&
-             rawIndex < valueOf(EngineParameterAddress::nextAddress)) {
+             rawIndex < valueOf(EngineParameterAddress::firstUnusedAddress)) {
     auto address = EngineParameterAddress(rawIndex);
     switch (address) {
       case EngineParameterAddress::portamentoEnabled:
@@ -72,6 +72,8 @@ Parameters::valueChanged(AUParameter* parameter, AUValue value) noexcept
         return;
       case EngineParameterAddress::activeVoiceCount:
         return;
+      case EngineParameterAddress::firstUnusedAddress:
+        return;
     }
   }
 }
@@ -87,7 +89,7 @@ Parameters::provideValue(AUParameter* parameter) noexcept
     const auto& def = Definition::definition(index);
     return def.clamp(values_[Index(rawIndex)]);
   } else if (rawIndex >= valueOf(EngineParameterAddress::portamentoEnabled) &&
-             rawIndex < valueOf(EngineParameterAddress::nextAddress)) {
+             rawIndex < valueOf(EngineParameterAddress::firstUnusedAddress)) {
     auto address = EngineParameterAddress(rawIndex);
     switch (address) {
       case EngineParameterAddress::portamentoEnabled:
@@ -100,6 +102,8 @@ Parameters::provideValue(AUParameter* parameter) noexcept
         return engine_.channelState().polyphonicMode();
       case EngineParameterAddress::activeVoiceCount:
         return engine_.activeVoiceCount();
+      case EngineParameterAddress::firstUnusedAddress:
+        return 0.0;
     }
   } else {
     return 0.0;
