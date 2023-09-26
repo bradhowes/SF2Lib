@@ -57,18 +57,16 @@ Parameters::valueChanged(AUParameter* parameter, AUValue value) noexcept
     auto address = EngineParameterAddress(rawIndex);
     switch (address) {
       case EngineParameterAddress::portamentoEnabled:
-        engine_.channelState().setPortamentoEnabled(value >= 0.5 ? true : false);
+        engine_.setPortamentoEnabled(value >= 0.5 ? true : false);
         return;
       case EngineParameterAddress::portamentoRate:
-        engine_.channelState().setPortamentoRate(size_t(value));
+        engine_.setPortamentoRate(size_t(value));
         return;
       case EngineParameterAddress::oneVoicePerKey:
-        engine_.channelState().setOneVoicePerKey(value >= 0.5 ? true : false);
+        engine_.setOneVoicePerKey(value >= 0.5 ? true : false);
         return;
       case EngineParameterAddress::polyphonicEnabled:
-        engine_.channelState().setPhonicMode(value >= 0.5 ? 
-                                             MIDI::ChannelState::PhonicMode::poly :
-                                             MIDI::ChannelState::PhonicMode::mono);
+        engine_.setPhonicMode(value >= 0.5 ? Engine::PhonicMode::poly : Engine::PhonicMode::mono);
         return;
       case EngineParameterAddress::activeVoiceCount:
         return;
@@ -93,13 +91,13 @@ Parameters::provideValue(AUParameter* parameter) noexcept
     auto address = EngineParameterAddress(rawIndex);
     switch (address) {
       case EngineParameterAddress::portamentoEnabled:
-        return engine_.channelState().portamentoEnabled();
+        return engine_.portamentoEnabled();
       case EngineParameterAddress::portamentoRate:
-        return engine_.channelState().portamentoRate();
+        return engine_.portamentoRate();
       case EngineParameterAddress::oneVoicePerKey:
-        return engine_.channelState().oneVoicePerKey();
+        return engine_.oneVoicePerKey();
       case EngineParameterAddress::polyphonicEnabled:
-        return engine_.channelState().polyphonicMode();
+        return engine_.polyphonicMode();
       case EngineParameterAddress::activeVoiceCount:
         return engine_.activeVoiceCount();
       case EngineParameterAddress::firstUnusedAddress:

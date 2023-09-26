@@ -130,32 +130,6 @@ public:
   /// @returns current state of control pedals.
   PedalState pedalState() const noexcept { return pedalState_; }
 
-  void setPortamentoEnabled(bool value) noexcept { portamentoEnabled_ = value; }
-
-  bool portamentoEnabled() const noexcept { return portamentoEnabled_; }
-
-  void setPortamentoRate(size_t value) noexcept { portamentoRateMillisecondsPerSemitone_ = value; }
-
-  /// @returns the rate of change from one note to another expressed as milliseconds per semitone change
-  size_t portamentoRate() const noexcept { return portamentoRateMillisecondsPerSemitone_; }
-
-  void setOneVoicePerKey(bool value) noexcept { oneVoicePerKey_ = value; }
-
-  /// @returns true if only one voice will play at the same time for the same MIDI key
-  bool oneVoicePerKey() const noexcept { return oneVoicePerKey_; }
-
-  enum class PhonicMode
-  {
-    mono = 0,
-    poly = 1
-  };
-
-  void setPhonicMode(PhonicMode mode) noexcept { phonicMode_ = mode; }
-
-  bool monophonicMode() const noexcept { return phonicMode_ == PhonicMode::mono; }
-
-  bool polyphonicMode() const noexcept { return phonicMode_ == PhonicMode::poly; }
-
   void dump() const noexcept;
   
 private:
@@ -172,14 +146,8 @@ private:
   int pitchWheelValue_{0};
   int pitchWheelSensitivity_{200};
   size_t nrpnIndex_{0};
-  size_t portamentoRateMillisecondsPerSemitone_{100};
-
   PedalState pedalState_{false, false, false};
-  PhonicMode phonicMode_{PhonicMode::poly};
-
   bool activeDecoding_{false};
-  bool oneVoicePerKey_{false};
-  bool portamentoEnabled_{false};
 };
 
 } // namespace SF2::MIDI

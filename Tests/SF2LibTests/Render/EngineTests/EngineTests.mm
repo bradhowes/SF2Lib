@@ -29,6 +29,35 @@ using namespace SF2::Render::Engine;
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
   XCTAssertEqual(engine.voiceCount(), 32);
   XCTAssertEqual(engine.activeVoiceCount(), 0);
+  XCTAssertTrue(engine.polyphonicMode());
+  XCTAssertFalse(engine.oneVoicePerKey());
+  XCTAssertFalse(engine.portamentoEnabled());
+  XCTAssertEqual(100, engine.portamentoRate());
+}
+
+- (void)testPortamento {
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
+  XCTAssertFalse(engine.portamentoEnabled());
+  engine.setPortamentoEnabled(true);
+  XCTAssertTrue(engine.portamentoEnabled());
+  engine.setPortamentoRate(12345);
+  XCTAssertEqual(12345, engine.portamentoRate());
+}
+
+- (void)testPhonicMode {
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
+  XCTAssertTrue(engine.polyphonicMode());
+  XCTAssertFalse(engine.monophonicMode());
+  engine.setPhonicMode(Engine::PhonicMode::mono);
+  XCTAssertFalse(engine.polyphonicMode());
+  XCTAssertTrue(engine.monophonicMode());
+}
+
+- (void)testOneVoicePerKey {
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
+  XCTAssertFalse(engine.oneVoicePerKey());
+  engine.setOneVoicePerKey(true);
+  XCTAssertTrue(engine.oneVoicePerKey());
 }
 
 - (void)testLoad {
@@ -1251,7 +1280,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(0, engine.activeVoiceCount());
 
   param.value = false;
-  XCTAssertFalse(engine.channelState().oneVoicePerKey());
+  XCTAssertFalse(engine.oneVoicePerKey());
 
   std::vector<AUValue> samples;
 
@@ -1267,7 +1296,7 @@ using namespace SF2::Render::Engine;
 
   engine.allOff();
   param.value = true;
-  XCTAssertTrue(engine.channelState().oneVoicePerKey());
+  XCTAssertTrue(engine.oneVoicePerKey());
 
   harness.sendNoteOn(60);
   harness.renderUntil(mixer, harness.renders() * 0.75);

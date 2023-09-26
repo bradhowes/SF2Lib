@@ -120,7 +120,7 @@ Engine::noteOn(int key, int velocity) noexcept
     if (exclusiveClass > 0) {
       stopAllExclusiveVoices(exclusiveClass);
     }
-    if (channelState_.oneVoicePerKey()) {
+    if (oneVoicePerKey_) {
       stopSameKeyVoices(config.eventKey());
     }
   }

@@ -93,7 +93,7 @@ public:
 
   /// @returns number of presets available.
   size_t presetCount() const noexcept { return presets_.size(); }
-  
+
   /**
    Activate the preset at the given index. NOTE: this is not thread-safe. When running in a render thread, one should
    use the program controller change MIDI command to perform a preset change.
@@ -101,7 +101,7 @@ public:
    @param index the preset to use
    */
   void usePreset(size_t index);
-  
+
   /**
    Activate the preset at the given bank/program. NOTE: this is not thread-safe. When running in a render thread,
    one should use the bank/program controller change MIDI commands to perform a preset change.
@@ -110,16 +110,16 @@ public:
    @param program the program in the bank to use
    */
   void usePreset(uint16_t bank, uint16_t program);
-  
+
   /// @return the number of active voices
   size_t activeVoiceCount() const noexcept { return oldestActive_.size(); }
-  
+
   /**
    Turn off all voices, making them all available for rendering. NOTE: this is not thread-safe. When running in a
    render thread, one should use a MIDI command to stop all notes.
    */
   void allOff() noexcept;
-  
+
   /**
    Tell any voices playing the current MIDI key that the key has been released. The voice will continue to render until
    it figures out that it is done.
@@ -129,7 +129,7 @@ public:
    @param key the MIDI key that was released
    */
   void noteOff(int key) noexcept;
-  
+
   /**
    Activate one or more voices to play a MIDI key with the given velocity. NOTE: this is not thread-safe. When running
    in a render thread, one should use a MIDI command to start a note.
@@ -138,7 +138,7 @@ public:
    @param velocity the MIDI velocity to play at
    */
   void noteOn(int key, int velocity) noexcept;
-  
+
   /**
    Render samples to the given stereo output buffers. The buffers are guaranteed to be able to hold `frameCount`
    samples, and `frameCount` will never be more than the `maxFramesToRender` value given to the `setRenderingFormat`.
@@ -169,18 +169,18 @@ public:
     os_signpost_interval_end(log_, renderSignpost_, "renderInto", "voices: %lu frameCount: %d",
                              oldestActive_.size(), frameCount);
   }
-  
+
   /// API for EventProcessor
   void doParameterEvent(const AUParameterEvent& event) noexcept {
     os_log_debug(log_, "setParameterEvent - address: %llu value: %f", event.parameterAddress, event.value);
   }
-  
+
   /// API for EventProcessor
   void doRenderingStateChanged(bool state) noexcept { if (!state) allOff(); }
-  
+
   /// API for EventProcessor
   void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
-  
+
   /// API for EventProcessor
   void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs,
                    AUAudioFrameCount frameCount) noexcept
@@ -199,10 +199,61 @@ public:
    */
   void notifyParameterChanged(Entity::Generator::Index index) noexcept;
 
+  /// @returns the AUParameterTree for the engine.
   AUParameterTree* parameterTree() const noexcept { return parameters_.parameterTree(); }
-  
+
+  /**
+   Set the portamento (glissando/glide) mode. Note that this is only applicable in monophonic mode.
+
+   @param value enable portamento mode if true
+   */
+  void setPortamentoEnabled(bool value) noexcept { portamentoEnabled_ = value; }
+
+  /// @returns true if portamento mode is enabled
+  bool portamentoEnabled() const noexcept { return portamentoEnabled_; }
+
+  /**
+   Set the rate at which the note transitions from the old pitch to the new pitch. This is expressed as milliseconds
+   per semitone.
+
+   @param value the rate in milliseconds
+   */
+  void setPortamentoRate(size_t value) noexcept { portamentoRateMillisecondsPerSemitone_ = value; }
+
+  /// @returns the rate of change from one note to another expressed as milliseconds per semitone change
+  size_t portamentoRate() const noexcept { return portamentoRateMillisecondsPerSemitone_; }
+
+  /**
+   Set the "one voice per key" mode. When enabled, playing the same MIDI note will stop any active previous note. When
+   disabled, the engine will allow multiple voices to play simultaneously for the same MIDI note.
+   */
+  void setOneVoicePerKey(bool value) noexcept { oneVoicePerKey_ = value; }
+
+  /// @returns true if only one voice will play at the same time for the same MIDI key
+  bool oneVoicePerKey() const noexcept { return oneVoicePerKey_; }
+
+  /// The note playing mode of the engine.
+  enum class PhonicMode
+  {
+    mono = 0,
+    poly = 1
+  };
+
+  /**
+   Set the "phonic" mode of the synthesizer.
+
+   @param mode the mode to enter
+   */
+  void setPhonicMode(PhonicMode mode) noexcept { phonicMode_ = mode; }
+
+  /// @returns true if Engine is in monophonic mode
+  bool monophonicMode() const noexcept { return phonicMode_ == PhonicMode::mono; }
+
+  /// @returns true if Engine is in polyphonic mode (default)
+  bool polyphonicMode() const noexcept { return phonicMode_ == PhonicMode::poly; }
+
 private:
-  
+
   template <typename Visitor>
   void visitActiveVoice(Visitor visitor) noexcept {
     auto releaseKeyState = Voice::ReleaseKeyState{minimumNoteDurationSamples(), channelState_.pedalState()};
@@ -218,24 +269,20 @@ private:
       }
     }
   }
-  
+
   void initialize(Float sampleRate) noexcept;
-  
   void stopAllExclusiveVoices(int exclusiveClass) noexcept;
   void stopSameKeyVoices(int eventKey) noexcept;
   size_t getVoice() noexcept;
   void startVoice(const Config& config) noexcept;
   OldestActiveVoiceCache::iterator stopVoice(size_t voiceIndex) noexcept;
-  
   void notifyActiveVoicesChannelStateChanged() noexcept;
-
   void processControlChange(MIDI::ControlChange cc, int value) noexcept;
   void changeProgram(uint16_t program) noexcept;
   void loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept;
-  
   void applySostenutoPedal() noexcept;
   void releaseVoices() noexcept;
-  
+
   Float sampleRate_;
   size_t minimumNoteDurationMilliseconds_{0};
 
@@ -245,12 +292,18 @@ private:
   std::vector<Voice> voices_{};
   std::vector<size_t> available_{};
   OldestActiveVoiceCache oldestActive_;
-  
+
   std::unique_ptr<IO::File> file_{};
   PresetCollection presets_{};
   size_t activePreset_{0};
-  
+
   AUParameterTree* parameterTree_{nullptr};
+
+  size_t portamentoRateMillisecondsPerSemitone_{100};
+  PhonicMode phonicMode_{PhonicMode::poly};
+
+  bool oneVoicePerKey_{false};
+  bool portamentoEnabled_{false};
 
   os_log_t log_;
   os_signpost_id_t renderSignpost_;
