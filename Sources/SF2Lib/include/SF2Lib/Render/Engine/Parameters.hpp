@@ -26,7 +26,7 @@ public:
     oneVoicePerKey,
     polyphonicEnabled,
     activeVoiceCount,
-
+    retriggerEnabled,
     firstUnusedAddress
   };
 

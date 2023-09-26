@@ -57,7 +57,7 @@ public:
   
   /// @returns maximum number of voices available for simultaneous rendering
   size_t voiceCount() const noexcept { return voices_.size(); }
-  
+
   /**
    Update kernel and buffers to support the given format and channel count
    
@@ -65,16 +65,16 @@ public:
    @param maxFramesToRender the maximum number of samples we will be asked to render in one go
    */
   void setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept;
-  
+
   /// @returns the current sample rate
   Float sampleRate() const noexcept { return sampleRate_; }
-  
+
   /// @returns the MIDI channel state assigned to the engine
   MIDI::ChannelState& channelState() noexcept { return channelState_; }
-  
+
   /// @returns the MIDI channel state assigned to the engine
   const MIDI::ChannelState& channelState() const noexcept { return channelState_; }
-  
+
   /// @returns true if there is an active preset
   bool hasActivePreset() const noexcept;
   
@@ -232,6 +232,9 @@ public:
   /// @returns true if only one voice will play at the same time for the same MIDI key
   bool oneVoicePerKey() const noexcept { return oneVoicePerKey_; }
 
+  void setRetriggerMode(bool value) noexcept { retriggerModeEnabled_ = value; }
+  bool retriggerModeEnabled() const noexcept { return retriggerModeEnabled_; }
+
   /// The note playing mode of the engine.
   enum class PhonicMode
   {
@@ -304,6 +307,7 @@ private:
 
   bool oneVoicePerKey_{false};
   bool portamentoEnabled_{false};
+  bool retriggerModeEnabled_{false};
 
   os_log_t log_;
   os_signpost_id_t renderSignpost_;

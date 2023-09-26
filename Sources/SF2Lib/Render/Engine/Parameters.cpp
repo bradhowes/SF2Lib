@@ -42,7 +42,8 @@ Parameters::applyOne(SF2::Render::Voice::State::State& state, Index index) noexc
 void
 Parameters::valueChanged(AUParameter* parameter, AUValue value) noexcept
 {
-  os_log_info(log_, "valueChanged - %lluz %f", [parameter address], value);
+  os_log_info(log_, "valueChanged - %llu %f", [parameter address], value);
+  auto asBool = [](AUValue v) -> bool { return v >= 0.5 ? true : false; };
   auto rawIndex = parameter.address;
   if (rawIndex < 0) return;
   if (rawIndex < valueOf(Index::numValues)) {
@@ -57,18 +58,21 @@ Parameters::valueChanged(AUParameter* parameter, AUValue value) noexcept
     auto address = EngineParameterAddress(rawIndex);
     switch (address) {
       case EngineParameterAddress::portamentoEnabled:
-        engine_.setPortamentoEnabled(value >= 0.5 ? true : false);
+        engine_.setPortamentoEnabled(asBool(value));
         return;
       case EngineParameterAddress::portamentoRate:
         engine_.setPortamentoRate(size_t(value));
         return;
       case EngineParameterAddress::oneVoicePerKey:
-        engine_.setOneVoicePerKey(value >= 0.5 ? true : false);
+        engine_.setOneVoicePerKey(asBool(value));
         return;
       case EngineParameterAddress::polyphonicEnabled:
         engine_.setPhonicMode(value >= 0.5 ? Engine::PhonicMode::poly : Engine::PhonicMode::mono);
         return;
       case EngineParameterAddress::activeVoiceCount:
+        return;
+      case EngineParameterAddress::retriggerEnabled:
+        engine_.setRetriggerMode(asBool(value));
         return;
       case EngineParameterAddress::firstUnusedAddress:
         return;
@@ -80,6 +84,7 @@ AUValue
 Parameters::provideValue(AUParameter* parameter) noexcept
 {
   os_log_info(log_, "provideValue - %lluz", [parameter address]);
+  auto toBool = [](bool v) -> AUValue { return v ? 1.0 : 0.0; };
   auto rawIndex = parameter.address;
   if (rawIndex < 0) return 0.0;
   if (rawIndex < valueOf(Index::numValues)) {
@@ -90,18 +95,13 @@ Parameters::provideValue(AUParameter* parameter) noexcept
              rawIndex < valueOf(EngineParameterAddress::firstUnusedAddress)) {
     auto address = EngineParameterAddress(rawIndex);
     switch (address) {
-      case EngineParameterAddress::portamentoEnabled:
-        return engine_.portamentoEnabled();
-      case EngineParameterAddress::portamentoRate:
-        return engine_.portamentoRate();
-      case EngineParameterAddress::oneVoicePerKey:
-        return engine_.oneVoicePerKey();
-      case EngineParameterAddress::polyphonicEnabled:
-        return engine_.polyphonicMode();
-      case EngineParameterAddress::activeVoiceCount:
-        return engine_.activeVoiceCount();
-      case EngineParameterAddress::firstUnusedAddress:
-        return 0.0;
+      case EngineParameterAddress::portamentoEnabled:   return toBool(engine_.portamentoEnabled());
+      case EngineParameterAddress::portamentoRate:      return engine_.portamentoRate();
+      case EngineParameterAddress::oneVoicePerKey:      return toBool(engine_.oneVoicePerKey());
+      case EngineParameterAddress::polyphonicEnabled:   return toBool(engine_.polyphonicMode());
+      case EngineParameterAddress::activeVoiceCount:    return engine_.activeVoiceCount();
+      case EngineParameterAddress::retriggerEnabled: return toBool(engine_.retriggerModeEnabled());
+      case EngineParameterAddress::firstUnusedAddress:  return 0.0;
     }
   } else {
     return 0.0;
