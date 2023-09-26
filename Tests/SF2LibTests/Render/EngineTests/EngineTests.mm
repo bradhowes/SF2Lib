@@ -1241,13 +1241,17 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
+  auto address = valueOf(Parameters::EngineParameterAddress::oneVoicePerKey);
+  AUParameter* param = [engine.parameterTree() parameterWithAddress:address];
+
   engine.load(contexts.context0.path(), 0);
 
   int seconds = 1;
   auto mixer{harness.createMixer(seconds)};
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  engine.channelState().setOneVoicePerKey(false);
+  param.value = false;
+  XCTAssertFalse(engine.channelState().oneVoicePerKey());
 
   std::vector<AUValue> samples;
 
@@ -1262,7 +1266,8 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(2, engine.activeVoiceCount());
 
   engine.allOff();
-  engine.channelState().setOneVoicePerKey(true);
+  param.value = true;
+  XCTAssertTrue(engine.channelState().oneVoicePerKey());
 
   harness.sendNoteOn(60);
   harness.renderUntil(mixer, harness.renders() * 0.75);
@@ -1286,6 +1291,33 @@ using namespace SF2::Render::Engine;
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 
+- (void)testEngineActiveVoiceCount
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  auto address = valueOf(Parameters::EngineParameterAddress::activeVoiceCount);
+  AUParameter* param = [engine.parameterTree() parameterWithAddress:address];
+  engine.load(contexts.context0.path(), 0);
 
+  int seconds = 2;
+  auto mixer{harness.createMixer(seconds)};
+  XCTAssertEqual(0, engine.activeVoiceCount());
+
+  harness.sendNoteOn(60);
+  harness.sendNoteOn(72);
+  harness.renderUntil(mixer, harness.renders() * 0.1);
+  XCTAssertEqual(2, engine.activeVoiceCount());
+  XCTAssertEqual(2, param.value);
+
+  harness.sendNoteOff(60);
+  harness.renderUntil(mixer, harness.renders() * 0.5);
+  XCTAssertEqual(1, engine.activeVoiceCount());
+  XCTAssertEqual(1, param.value);
+
+  harness.sendNoteOff(72);
+  harness.renderToEnd(mixer);
+  XCTAssertEqual(0, engine.activeVoiceCount());
+  XCTAssertEqual(0, param.value);
+}
 
 @end

@@ -19,6 +19,17 @@ class Parameters
 {
 public:
 
+  enum struct EngineParameterAddress : AUParameterAddress
+  {
+    portamentoEnabled = 1000,
+    portamentoRate = 1001,
+    oneVoicePerKey = 1002,
+    polyphonicEnabled = 1003,
+    activeVoiceCount = 1004,
+
+    nextAddress
+  };
+
   /**
    Construct new instance for the given Engine
 
@@ -46,13 +57,17 @@ public:
    */
   void applyOne(SF2::Render::Voice::State::State& state, Entity::Generator::Index index) noexcept;
 
+  AUParameterTree* parameterTree() const noexcept { return parameterTree_; }
+
+private:
+
   /**
    Notification that the given AUParameter has a new value
 
    @param parameter the parameter that changed
    @param value the new value
    */
-  void setValue(AUParameter* parameter, AUValue value) noexcept;
+  void valueChanged(AUParameter* parameter, AUValue value) noexcept;
 
   /**
    Obtain the current value of a generator.
@@ -60,21 +75,19 @@ public:
    @param parameter the AUParameter to query
    @returns the current value
    */
-  AUValue getValue(AUParameter* parameter) noexcept;
-
-private:
+  AUValue provideValue(AUParameter* parameter) noexcept;
 
   static AUParameter* makeGeneratorParameter(Entity::Generator::Index index) noexcept;
 
   static AUParameter* makeBooleanParameter(NSString* name, AUParameterAddress) noexcept;
 
-  static AUParameterTree* makeTree() noexcept;
+  AUParameterTree* makeTree() noexcept;
 
-private:
   Engine& engine_;
   AUParameterTree* parameterTree_{nullptr};
   Entity::Generator::GeneratorValueArray<int> values_{};
   Entity::Generator::GeneratorValueArray<bool> changed_{};
+  os_log_t log_;
   bool anyChanged_;
 };
 

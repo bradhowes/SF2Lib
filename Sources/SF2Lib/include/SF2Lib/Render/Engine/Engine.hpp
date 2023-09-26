@@ -199,6 +199,8 @@ public:
    */
   void notifyParameterChanged(Entity::Generator::Index index) noexcept;
 
+  AUParameterTree* parameterTree() const noexcept { return parameters_.parameterTree(); }
+  
 private:
   
   template <typename Visitor>
