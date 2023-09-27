@@ -23,35 +23,35 @@ struct GenValue {
 
    @param value the value to store
    */
-  void setValue(int value) noexcept { value_ = value; cached_ = value; }
+  inline void setValue(int value) noexcept { value_ = value; cached_ = value; }
 
   /**
    Set the generator's adjustment. This should only come from a preset zone.
 
    @param adjustment the value to store
    */
-  void setAdjustment(int adjustment) noexcept { adjustment_ = adjustment; cached_ = value_ + adjustment_; }
+  inline void setAdjustment(int adjustment) noexcept { adjustment_ = adjustment; cached_ = value_ + adjustment_; }
 
-  void setMods(Float value) noexcept { mods_ = value; cached_ = value_ + adjustment_ + mods_; }
+  inline void setMods(Float value) noexcept { mods_ = value; cached_ = value_ + adjustment_ + mods_; }
 
   /**
    Add a value from a modulator
 
    @param value the value to add
    */
-  void addMod(Float value) noexcept { mods_ += value; cached_ += value; }
+  inline void addMod(Float value) noexcept { mods_ += value; cached_ += value; }
 
-  Float mods() const noexcept { return mods_; }
+  inline Float mods() const noexcept { return mods_; }
 
-  int instrumentValue() const noexcept { return value_; }
+  inline int instrumentValue() const noexcept { return value_; }
 
-  int presetValue() const noexcept { return adjustment_; }
+  inline int presetValue() const noexcept { return adjustment_; }
 
   /// @returns generator value as defined by instrument zone (value) and preset zone (adjustment) only.
-  int unmodulated() const noexcept { return value_ + adjustment_; }
+  inline int unmodulated() const noexcept { return value_ + adjustment_; }
 
   /// @returns generator value + modulations
-  Float modulated() const noexcept { return cached_; }
+  inline Float modulated() const noexcept { return cached_; }
 
 private:
   int value_{0};

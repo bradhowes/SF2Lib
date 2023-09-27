@@ -87,24 +87,24 @@ public:
   StageIndex activeIndex() const { return stageIndex_; }
 
   /// @returns true if the generator still has values to emit
-  bool isActive() const noexcept { return stageIndex_ != StageIndex::idle; }
+  inline bool isActive() const noexcept { return stageIndex_ != StageIndex::idle; }
 
   /// @returns true if the generator is active and has not yet reached the release state
-  bool isGated() const noexcept { return isActive() && stageIndex_ != StageIndex::release; }
+  inline bool isGated() const noexcept { return isActive() && stageIndex_ != StageIndex::release; }
 
   /// @returns true if in the delayed stage
-  bool isDelayed() const noexcept { return stageIndex_ == StageIndex::delay; }
+  inline bool isDelayed() const noexcept { return stageIndex_ == StageIndex::delay; }
 
   /// @returns true if in the attack stage
-  bool isAttack() const noexcept { return stageIndex_ == StageIndex::attack; }
+  inline bool isAttack() const noexcept { return stageIndex_ == StageIndex::attack; }
 
   /// @returns true if in the release stage
-  bool isRelease() const noexcept { return stageIndex_ == StageIndex::release; }
+  inline bool isRelease() const noexcept { return stageIndex_ == StageIndex::release; }
 
-  int counter() const noexcept { return counter_; }
+  inline int counter() const noexcept { return counter_; }
 
   /// @returns stage at given index
-  const Stage& stage(StageIndex index) const noexcept { return stages_[index]; }
+  inline const Stage& stage(StageIndex index) const noexcept { return stages_[index]; }
 
 protected:
 

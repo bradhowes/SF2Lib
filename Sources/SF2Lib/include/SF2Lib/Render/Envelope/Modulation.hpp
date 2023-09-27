@@ -39,7 +39,7 @@ public:
 
    @returns the new envelope value.
    */
-  Value getNextValue() noexcept { return Generator::getNextValue(); }
+  inline Value getNextValue() noexcept { return Generator::getNextValue(); }
 
 private:
   Modulation(Float sampleRate, size_t voiceIndex, Float delay, Float attack, Float hold, Float decay,

@@ -131,16 +131,16 @@ public:
 
   /// @returns MIDI key that started a voice to begin emitting samples. For DSP this is *not* what is desired. See
   /// `key` method below.
-  int eventKey() const noexcept { return eventKey_; }
+  inline int eventKey() const noexcept { return eventKey_; }
 
   /// @returns key value to use for DSP. A generator can force it to be fixed to a set value.
-  int key() const noexcept {
+  inline int key() const noexcept {
     int key{unmodulated(Index::forcedMIDIKey)};
     return key >= 0 ? key : eventKey_;
   }
 
   /// @returns velocity to use for DSP. A generator can force it to be fixed to a set value.
-  int velocity() const noexcept {
+  inline int velocity() const noexcept {
     int velocity{unmodulated(Index::forcedMIDIVelocity)};
     return velocity >= 0 ? velocity : eventVelocity_;
   }

@@ -23,7 +23,7 @@ public:
    @param frequency frequency represented in cents
    @param resonance resonance in centiBels
    */
-  Float transform(Float frequency, Float resonance, Float sample) noexcept {
+  inline Float transform(Float frequency, Float resonance, Float sample) noexcept {
     if (lastFrequency_ != frequency || lastResonance_ != resonance) updateSettings(frequency, resonance);
     return filter_.transform(sample);
   }

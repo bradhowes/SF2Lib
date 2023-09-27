@@ -12,7 +12,7 @@ public:
 
   struct Value {
     const Float val;
-    explicit Value(Float v) noexcept : val{v} {}
+    Value(Float v) noexcept : val{v} {}
   };
 
   VibLFO(Float sampleRate) noexcept : LFO(sampleRate, "ModLFO") {}
@@ -28,14 +28,14 @@ public:
 
    @returns next waveform value to use
    */
-  Value getNextValue() noexcept { return Value(LFO::getNextValue()); }
+  Value getNextValue() noexcept { return LFO::getNextValue(); }
 
   /**
    Obtain the current value of the oscillator.
 
    @returns current waveform value
    */
-  Value value() const noexcept { return Value(counter_); }
+  Value value() const noexcept { return LFO::value(); }
 
 private:
   VibLFO(Float sampleRate, Float frequency, Float delay) : LFO(sampleRate, "ModLFO", frequency, delay) {}
