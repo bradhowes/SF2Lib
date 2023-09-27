@@ -97,12 +97,6 @@ public:
     active_ = false;
   }
 
-  /**
-   Restart the same voice that was just playing, resuming at the same envelope levels but jumping back into the
-   attack stage.
-   */
-  void retrigger() noexcept;
-
   /// @returns true if this voice is still rendering interesting samples
   bool isActive() const noexcept { return active_; }
 
@@ -132,16 +126,10 @@ public:
   void releaseKey(const ReleaseKeyState& releaseKeyState) noexcept;
 
   /// @returns looping mode of the sample being rendered
-  LoopingMode loopingMode() const noexcept {
-    switch (state_.unmodulated(Index::sampleModes)) {
-      case 1: return LoopingMode::activeEnvelope;
-      case 3: return LoopingMode::duringKeyPress;
-      default: return LoopingMode::none;
-    }
-  }
+  LoopingMode loopingMode() const noexcept;
 
   /// @returns true if the voice can enter a loop if it is available
-  bool canLoop() const noexcept {
+  inline bool canLoop() const noexcept {
     return ((loopingMode_ == LoopingMode::activeEnvelope && volumeEnvelope_.isActive()) ||
             (loopingMode_ == LoopingMode::duringKeyPress && keyDown_));
   }

@@ -45,6 +45,16 @@ Voice::configure(const State::Config& config) noexcept
   os_signpost_interval_end(log_, configSignpost_, "end");
 }
 
+Voice::LoopingMode
+Voice::loopingMode() const noexcept
+{
+  switch (state_.unmodulated(Index::sampleModes)) {
+    case 1: return LoopingMode::activeEnvelope;
+    case 3: return LoopingMode::duringKeyPress;
+    default: return LoopingMode::none;
+  }
+}
+
 void
 Voice::start() noexcept
 {
@@ -68,19 +78,6 @@ Voice::start() noexcept
   sampleGenerator_.start();
 
   os_signpost_interval_end(log_, startSignpost_, "start");
-}
-
-void
-Voice::retrigger() noexcept
-{
-  pendingRelease_ = 0;
-  sampleCounter_ = 0;
-  active_ = true;
-  keyDown_ = true;
-
-  sampleGenerator_.start();
-  volumeEnvelope_.retrigger();
-  modulatorEnvelope_.retrigger();
 }
 
 void

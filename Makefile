@@ -33,6 +33,7 @@ test-macos: resolve-deps
 		-enableCodeCoverage YES
 
 coverage: test-macos
+	@xcrun xccov view --report $(DERIVED_DATA_MACOS)/Logs/Test/*.xcresult --files-for-target SF2Lib
 	@xcrun xccov view --report --only-targets $(DERIVED_DATA_MACOS)/Logs/Test/*.xcresult > coverage.txt
 	@cat coverage.txt
 
@@ -45,7 +46,7 @@ post: percentage
 		echo "PERCENTAGE=$$(< percentage.txt)" >> $$GITHUB_ENV; \
 	fi
 
-all_coverage: coverage.txt
+report: coverage.txt
 	@xcrun xccov view --report $(DERIVED_DATA_MACOS)/Logs/Test/*.xcresult --files-for-target SF2Lib
 
 test: test-ios post
