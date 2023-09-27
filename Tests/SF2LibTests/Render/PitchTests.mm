@@ -228,4 +228,27 @@ using namespace SF2::Render::Voice::Sample;
   XCTAssertEqualWithAccuracy(inc, 1.0, epsilon);
 }
 
+- (void)testConstantRootKey {
+  Entity::SampleHeader header(0, 100, 80, 90, 44100.0, 255);
+  State::State state{44100.0, channelState, 60};
+  Pitch pitch{state};
+  pitch.configure(header);
+
+  auto inc = pitch.samplePhaseIncrement(ModLFO::Value(1.0), VibLFO::Value(0.0), Modulation::Value(0.0));
+  XCTAssertEqualWithAccuracy(inc, 1.0, epsilon);
+
+  state.setValue(State::State::Index::modulatorEnvelopeToPitch, 1200);
+  inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), Modulation::Value(1.0));
+  XCTAssertEqualWithAccuracy(inc, 2.0, epsilon);
+  inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), Modulation::Value(0.0));
+  XCTAssertEqualWithAccuracy(inc, 1.0, epsilon);
+
+  state.setValue(State::State::Index::modulatorEnvelopeToPitch, -1200);
+  inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), Modulation::Value(1.0));
+  XCTAssertEqualWithAccuracy(inc, 0.5, epsilon);
+  inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), Modulation::Value(0.0));
+  XCTAssertEqualWithAccuracy(inc, 1.0, epsilon);
+}
+
+
 @end
