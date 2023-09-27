@@ -13,16 +13,12 @@ OldestActiveVoiceCache::OldestActiveVoiceCache(size_t maxVoiceCount) noexcept
 void
 OldestActiveVoiceCache::add(size_t voiceIndex) noexcept
 {
-  assert(voiceIndex < iterators_.size());
-  assert(iterators_[voiceIndex] == leastRecentlyUsed_.end());
   iterators_[voiceIndex] = leastRecentlyUsed_.insert(leastRecentlyUsed_.begin(), voiceIndex);
 }
 
 OldestActiveVoiceCache::iterator
 OldestActiveVoiceCache::remove(size_t voiceIndex) noexcept
 {
-  assert(voiceIndex < iterators_.size());
-  assert(iterators_[voiceIndex] != leastRecentlyUsed_.end());
   auto pos = leastRecentlyUsed_.erase(iterators_[voiceIndex]);
   iterators_[voiceIndex] = leastRecentlyUsed_.end();
   return pos;
@@ -31,7 +27,6 @@ OldestActiveVoiceCache::remove(size_t voiceIndex) noexcept
 size_t
 OldestActiveVoiceCache::takeOldest() noexcept
 {
-  assert(!leastRecentlyUsed_.empty());
   size_t oldest = leastRecentlyUsed_.back();
   iterators_[oldest] = leastRecentlyUsed_.end();
   leastRecentlyUsed_.pop_back();

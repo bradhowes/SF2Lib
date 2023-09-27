@@ -21,12 +21,12 @@ public:
 
   enum struct EngineParameterAddress : AUParameterAddress
   {
-    portamentoEnabled = 1000,
+    portamentoModeEnabled = 1000,
     portamentoRate,
-    oneVoicePerKey,
-    polyphonicEnabled,
+    oneVoicePerKeyModeEnabled,
+    polyphonicModeEnabled,
     activeVoiceCount,
-    retriggerEnabled,
+    retriggerModeEnabled,
     firstUnusedAddress
   };
 
@@ -79,7 +79,7 @@ private:
 
   static AUParameter* makeGeneratorParameter(Entity::Generator::Index index) noexcept;
 
-  static AUParameter* makeBooleanParameter(NSString* name, AUParameterAddress) noexcept;
+  static AUParameter* makeBooleanParameter(NSString* name, EngineParameterAddress, bool value) noexcept;
 
   AUParameterTree* makeTree() noexcept;
 

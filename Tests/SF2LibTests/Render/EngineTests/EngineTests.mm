@@ -29,35 +29,76 @@ using namespace SF2::Render::Engine;
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
   XCTAssertEqual(engine.voiceCount(), 32);
   XCTAssertEqual(engine.activeVoiceCount(), 0);
-  XCTAssertTrue(engine.polyphonicMode());
-  XCTAssertFalse(engine.oneVoicePerKey());
-  XCTAssertFalse(engine.portamentoEnabled());
+  XCTAssertTrue(engine.polyphonicModeEnabled());
+  XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
+  XCTAssertFalse(engine.portamentoModeEnabled());
   XCTAssertEqual(100, engine.portamentoRate());
+  XCTAssertTrue(engine.retriggerModeEnabled());
 }
 
 - (void)testPortamento {
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-  XCTAssertFalse(engine.portamentoEnabled());
-  engine.setPortamentoEnabled(true);
-  XCTAssertTrue(engine.portamentoEnabled());
-  engine.setPortamentoRate(12345);
+  auto pt = engine.parameterTree();
+  auto pr = [pt parameterWithAddress:SF2::valueOf(Parameters::EngineParameterAddress::portamentoRate)];
+  auto pe = [pt parameterWithAddress:SF2::valueOf(Parameters::EngineParameterAddress::portamentoModeEnabled)];
+
+  XCTAssertFalse(engine.portamentoModeEnabled());
+  pe.value = 1.0;
+  XCTAssertTrue(engine.portamentoModeEnabled());
+  pr.value = 12345;
   XCTAssertEqual(12345, engine.portamentoRate());
+
+  [pr setValue:987];
+  XCTAssertEqual(987, engine.portamentoRate());
+  XCTAssertEqual(987, pr.value);
+
+  [pe setValue:0.0];
+  XCTAssertFalse(engine.portamentoModeEnabled());
+  XCTAssertEqual(0.0, pe.value);
 }
 
 - (void)testPhonicMode {
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-  XCTAssertTrue(engine.polyphonicMode());
-  XCTAssertFalse(engine.monophonicMode());
-  engine.setPhonicMode(Engine::PhonicMode::mono);
-  XCTAssertFalse(engine.polyphonicMode());
-  XCTAssertTrue(engine.monophonicMode());
+  auto pt = engine.parameterTree();
+  auto pe = [pt parameterWithAddress:SF2::valueOf(Parameters::EngineParameterAddress::polyphonicModeEnabled)];
+
+  XCTAssertTrue(engine.polyphonicModeEnabled());
+  XCTAssertFalse(engine.monophonicModeEnabled());
+  XCTAssertEqual(1.0, pe.value);
+
+  pe.value = 0.0;
+  XCTAssertFalse(engine.polyphonicModeEnabled());
+  XCTAssertTrue(engine.monophonicModeEnabled());
+  XCTAssertEqual(0.0, pe.value);
+
+  pe.value = 1.0;
+  XCTAssertTrue(engine.polyphonicModeEnabled());
+  XCTAssertFalse(engine.monophonicModeEnabled());
+  XCTAssertEqual(1.0, pe.value);
 }
 
 - (void)testOneVoicePerKey {
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-  XCTAssertFalse(engine.oneVoicePerKey());
-  engine.setOneVoicePerKey(true);
-  XCTAssertTrue(engine.oneVoicePerKey());
+  auto pt = engine.parameterTree();
+  auto ov = [pt parameterWithAddress:SF2::valueOf(Parameters::EngineParameterAddress::oneVoicePerKeyModeEnabled)];
+
+  XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
+  ov.value = 1.0;
+  XCTAssertTrue(engine.oneVoicePerKeyModeEnabled());
+  ov.value = 0.0;
+  XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
+}
+
+- (void)testRetriggering {
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
+  auto pt = engine.parameterTree();
+  auto rt = [pt parameterWithAddress:SF2::valueOf(Parameters::EngineParameterAddress::retriggerModeEnabled)];
+  XCTAssertEqual(1.0, rt.value);
+  XCTAssertTrue(engine.retriggerModeEnabled());
+  rt.value = 0.0;
+  XCTAssertFalse(engine.retriggerModeEnabled());
+  rt.value = 1.0;
+  XCTAssertTrue(engine.retriggerModeEnabled());
 }
 
 - (void)testLoad {
@@ -1270,7 +1311,7 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  auto address = valueOf(Parameters::EngineParameterAddress::oneVoicePerKey);
+  auto address = valueOf(Parameters::EngineParameterAddress::oneVoicePerKeyModeEnabled);
   AUParameter* param = [engine.parameterTree() parameterWithAddress:address];
 
   engine.load(contexts.context0.path(), 0);
@@ -1280,7 +1321,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(0, engine.activeVoiceCount());
 
   param.value = false;
-  XCTAssertFalse(engine.oneVoicePerKey());
+  XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
 
   std::vector<AUValue> samples;
 
@@ -1296,7 +1337,7 @@ using namespace SF2::Render::Engine;
 
   engine.allOff();
   param.value = true;
-  XCTAssertTrue(engine.oneVoicePerKey());
+  XCTAssertTrue(engine.oneVoicePerKeyModeEnabled());
 
   harness.sendNoteOn(60);
   harness.renderUntil(mixer, harness.renders() * 0.75);

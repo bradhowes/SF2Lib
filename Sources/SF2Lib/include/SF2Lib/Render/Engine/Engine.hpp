@@ -202,38 +202,62 @@ public:
   /// @returns the AUParameterTree for the engine.
   AUParameterTree* parameterTree() const noexcept { return parameters_.parameterTree(); }
 
+  /// @returns true if portamento mode is enabled
+  bool portamentoModeEnabled() const noexcept { return portamentoModeEnabled_; }
+
+  /// @returns the rate of change from one note to another expressed as milliseconds per semitone change
+  size_t portamentoRate() const noexcept { return portamentoRateMillisecondsPerSemitone_; }
+
+  /// @returns true if only one voice will play at the same time for the same MIDI key
+  bool oneVoicePerKeyModeEnabled() const noexcept { return oneVoicePerKeyModeEnabled_; }
+
+  /// @returns true if a new note ON for the same key will use a new envelopes or will simply inherit the active one.
+  bool retriggerModeEnabled() const noexcept { return retriggerModeEnabled_; }
+
+  /// @returns true if Engine is in monophonic mode
+  bool monophonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::mono; }
+
+  /// @returns true if Engine is in polyphonic mode (default)
+  bool polyphonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::poly; }
+
+private:
+
   /**
    Set the portamento (glissando/glide) mode. Note that this is only applicable in monophonic mode.
+   NOTE: only settable via AUParameter change
 
    @param value enable portamento mode if true
    */
-  void setPortamentoEnabled(bool value) noexcept { portamentoEnabled_ = value; }
-
-  /// @returns true if portamento mode is enabled
-  bool portamentoEnabled() const noexcept { return portamentoEnabled_; }
+  void setPortamentoModeEnabled(bool value) noexcept { portamentoModeEnabled_ = value; }
 
   /**
    Set the rate at which the note transitions from the old pitch to the new pitch. This is expressed as milliseconds
    per semitone.
 
+   NOTE: only settable via AUParameter change
+
    @param value the rate in milliseconds
    */
   void setPortamentoRate(size_t value) noexcept { portamentoRateMillisecondsPerSemitone_ = value; }
 
-  /// @returns the rate of change from one note to another expressed as milliseconds per semitone change
-  size_t portamentoRate() const noexcept { return portamentoRateMillisecondsPerSemitone_; }
-
   /**
    Set the "one voice per key" mode. When enabled, playing the same MIDI note will stop any active previous note. When
    disabled, the engine will allow multiple voices to play simultaneously for the same MIDI note.
+
+   NOTE: only settable via AUParameter change
+
+   @param value enable if true
    */
-  void setOneVoicePerKey(bool value) noexcept { oneVoicePerKey_ = value; }
+  void setOneVoicePerKeyModeEnabled(bool value) noexcept { oneVoicePerKeyModeEnabled_ = value; }
 
-  /// @returns true if only one voice will play at the same time for the same MIDI key
-  bool oneVoicePerKey() const noexcept { return oneVoicePerKey_; }
+  /**
+   Controls the retriggering of the volume and modulation envelopes when pressing the same key.
 
-  void setRetriggerMode(bool value) noexcept { retriggerModeEnabled_ = value; }
-  bool retriggerModeEnabled() const noexcept { return retriggerModeEnabled_; }
+   NOTE: only settable via AUParameter change
+
+   @param value enable if true
+   */
+  void setRetriggerModeEnabled(bool value) noexcept { retriggerModeEnabled_ = value; }
 
   /// The note playing mode of the engine.
   enum class PhonicMode
@@ -245,17 +269,11 @@ public:
   /**
    Set the "phonic" mode of the synthesizer.
 
+   NOTE: only settable via AUParameter change
+
    @param mode the mode to enter
    */
   void setPhonicMode(PhonicMode mode) noexcept { phonicMode_ = mode; }
-
-  /// @returns true if Engine is in monophonic mode
-  bool monophonicMode() const noexcept { return phonicMode_ == PhonicMode::mono; }
-
-  /// @returns true if Engine is in polyphonic mode (default)
-  bool polyphonicMode() const noexcept { return phonicMode_ == PhonicMode::poly; }
-
-private:
 
   template <typename Visitor>
   void visitActiveVoice(Visitor visitor) noexcept {
@@ -305,9 +323,9 @@ private:
   size_t portamentoRateMillisecondsPerSemitone_{100};
   PhonicMode phonicMode_{PhonicMode::poly};
 
-  bool oneVoicePerKey_{false};
-  bool portamentoEnabled_{false};
-  bool retriggerModeEnabled_{false};
+  bool oneVoicePerKeyModeEnabled_{false};
+  bool portamentoModeEnabled_{false};
+  bool retriggerModeEnabled_{true};
 
   os_log_t log_;
   os_signpost_id_t renderSignpost_;
@@ -315,7 +333,9 @@ private:
   os_signpost_id_t noteOffSignpost_;
   os_signpost_id_t startVoiceSignpost_;
   os_signpost_id_t stopVoiceSignpost_;
+
   friend class EngineTestInjector;
+  friend class Parameters;
 };
 
 } // end namespace SF2::Render
