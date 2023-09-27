@@ -127,7 +127,7 @@ public:
   }
 
   void patchReleaseTimes(float maxDuration) noexcept;
-  
+
   void dumpThreaded() const noexcept;
 
   void dump() const noexcept;

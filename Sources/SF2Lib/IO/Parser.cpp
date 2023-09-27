@@ -20,9 +20,6 @@ Parser::parse(const char* path)
   off_t fileSize = ::lseek(fd, 0, SEEK_END);
 
   auto riff = Pos(fd, 0, fileSize).makeChunkList();
-  if (riff.tag() != Tags::riff) throw File::LoadResponse::invalidFormat;
-  if (riff.kind() != Tags::sfbk) throw File::LoadResponse::invalidFormat;
-
   auto p0 = riff.begin();
   while (p0 < riff.end()) {
     auto chunkList = p0.makeChunkList();

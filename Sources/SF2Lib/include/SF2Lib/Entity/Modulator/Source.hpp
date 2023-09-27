@@ -13,16 +13,16 @@ namespace SF2::Entity::Modulator {
 
 /**
  The source of an SF2 modulator. There are two types:
- 
+
  - general controller
  - MIDI continuous controller (CC)
- 
+
  The type is defined by the CC flag (bit 7). The general type points to various common MIDI values as a source of
  modulation, while the CC type allows for a broader collection of controllers.
  */
 class Source {
 public:
-  
+
   /// Valid sources for a general controller
   enum struct GeneralIndex : uint16_t {
     none = 0,
@@ -33,7 +33,7 @@ public:
     pitchWheel = 14,
     pitchWheelSensitivity = 16,
   };
-  
+
   /// Transformations applied to values that come from a source
   enum struct ContinuityType : uint16_t {
     linear = 0,
@@ -41,18 +41,18 @@ public:
     convex,
     switched
   };
-  
+
   enum struct ControllerRange: uint16_t {
     _128 = 128,
     _8192 = 8192
   };
-  
+
   /// Continuous Controller (CC) designation
   struct CC {
     explicit CC(uint16_t v) : value{v} {}
     uint16_t value;
   };
-  
+
   /// The bit that flags a CC index
   inline static const uint16_t ccBit = (1 << 7);
   /// Bit mask for the index
@@ -61,7 +61,7 @@ public:
   inline static const uint16_t directionBit = (1 << 8);
   /// The bit that flags the polarity of the controller mapping
   inline static const uint16_t polarityBit = (1 << 9);
-  
+
   Source() noexcept : bits_{0} {};
 
   explicit Source(uint16_t bits) noexcept : bits_{bits} {}
@@ -130,25 +130,25 @@ public:
     if (!isContinuousController() && generalIndex() == GeneralIndex::pitchWheel) return ControllerRange::_8192;
     return ControllerRange::_128;
   }
-  
+
   /// @returns the index of the continuous controller
   CC ccIndex() const noexcept { return CC(rawIndex()); }
 
   /// @returns the continuity type for the controller values
   ContinuityType type() const noexcept { return ContinuityType(rawType()); }
-  
+
   /// @returns the name of the continuity type
   std::string continuityTypeName() const noexcept { return isValid() ? std::string(typeNames[rawType()]) : "N/A"; }
   /// @returns a description of the Source
   std::string description() const noexcept;
-  
+
   bool operator ==(const Source& rhs) const noexcept { return bits_ == rhs.bits_; }
   bool operator !=(const Source& rhs) const noexcept { return bits_ != rhs.bits_; }
 
   friend std::ostream& operator<<(std::ostream& os, const Source& mod) noexcept;
 
 private:
-  
+
   Source continuity(ContinuityType continuity) const noexcept {
     return Source(static_cast<uint16_t>((bits_ & 0x3FF) | (uint16_t(continuity) << 10)));
   }

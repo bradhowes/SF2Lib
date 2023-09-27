@@ -11,10 +11,10 @@ namespace SF2::Entity {
 
 /**
  Define the audio samples to be used for playing a specific sound.
- 
+
  Memory layout of a 'shdr' entry. The size of this is defined to be 46 bytes, but due
  to alignment/padding the struct below is 48 bytes.
- 
+
  The offsets (begin, end, loopBegin, and loopEnd) are indices into a big array of 16-bit integer sample values.
 
  From the SF2 spec:
@@ -31,7 +31,7 @@ namespace SF2::Entity {
 class SampleHeader : public Entity {
 public:
   inline static const size_t entity_size = 46;
-  
+
   enum struct Type: uint16_t {
     monoSample = 1,
     rightSample = 2,
@@ -58,13 +58,13 @@ public:
 
   /// @returns true if this sample only has one channel
   bool isMono() const noexcept { return sampleIsA(Type::monoSample); }
-  
+
   /// @returns true if these samples generate for the right channel
   bool isRight() const noexcept { return sampleIsA(Type::rightSample); }
-  
+
   /// @returns true if these samples generate for the left channel
   bool isLeft() const noexcept { return sampleIsA(Type::leftSample); }
-  
+
   /// @returns true if samples come from a ROM
   bool isROM() const noexcept { return sampleIsA(Type::rom); }
 
@@ -82,7 +82,7 @@ public:
    @returns the index of the first sample to use
    */
   size_t startIndex() const noexcept { return dwStart; }
-  
+
   /**
    The DWORD dwEnd contains the index, in sample data points, from the beginning of the sample data field to the first
    of the set of 46 zero valued data points following this sample.
@@ -108,15 +108,15 @@ public:
    @returns index of the last + 1 of a sample in a loop.
    */
   size_t endLoopIndex() const noexcept { return dwEndLoop; }
-  
+
   /// @returns the sample rate used to record the samples in the SF2 file
   size_t sampleRate() const noexcept { return dwSampleRate; }
-  
+
   /// @returns the MIDI key (frequency) for the source samples.
   /// NOTE: according to spec 7.10, "Values between 128 and 254 are illegal. Whenever an illegal value or a value of
   /// 255 is encountered, the value 60 [middle C] should be used."
   int originalMIDIKey() const noexcept { return originalKey; }
-  
+
   /// @returns the pitch correction in cents to apply when playing back the samples
   int pitchCorrection() const noexcept { return correction; }
 
@@ -129,7 +129,7 @@ public:
 
 private:
   std::string sampleTypeDescription() const noexcept;
-  
+
   char achSampleName[20];
   uint32_t dwStart;
   uint32_t dwEnd;

@@ -28,7 +28,6 @@ using namespace SF2::Entity::Modulator;
   XCTAssertEqual(mod.amount(), 960);
   XCTAssertEqual(mod.amountSource().generalIndex(), Source::GeneralIndex::none);
   XCTAssertEqual(mod.transformer().kind(), Transformer::Kind::linear);
-
   mod.dump("", 0);
   XCTAssertEqual("Sv: velocity(uni/+-/concave) Av: none(uni/-+/linear) dest: initialAttenuation amount: 960 trans: linear",
                  mod.description());

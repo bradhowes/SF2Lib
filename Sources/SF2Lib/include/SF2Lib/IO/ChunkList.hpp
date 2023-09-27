@@ -21,7 +21,7 @@ public:
    @param kind the Tag type for the elements in the chunk list
    @param pos the file position where the first item in the list is to be found
    */
-  ChunkList(Tag tag, uint32_t size, Tag kind, Pos pos) noexcept : Chunk(tag, size, pos), kind_{kind} {}
+  ChunkList(Tag tag, uint32_t size, Tag kind, Pos pos);
 
   /**
    Obtain the Tag type for the elements held in the container

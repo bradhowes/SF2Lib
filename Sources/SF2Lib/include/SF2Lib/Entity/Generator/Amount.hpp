@@ -18,7 +18,7 @@ public:
 
   /**
    Constructor with specific value. Only used for testing. All values for generators should come from SF2 file.
-   
+
    @param raw the value to hold
    */
   explicit Amount(uint16_t raw) noexcept : raw_{raw} {}

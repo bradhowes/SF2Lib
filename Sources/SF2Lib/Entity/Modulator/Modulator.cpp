@@ -67,6 +67,6 @@ Modulator::description() const noexcept
   os << Generator::Definition::definition(generatorDestination()).name();
 
   os << " amount: " << modAmount << " trans: " << transformer();
-  
+
   return os.str();
 }

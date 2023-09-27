@@ -1,5 +1,7 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
+#include <iostream>
+
 #include "SF2Lib/IO/ChunkList.hpp"
 #include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/IO/Pos.hpp"
@@ -36,6 +38,7 @@ Chunk
 Pos::makeChunk() const
 {
   uint32_t buffer[2];
+  if (static_cast<size_t>(available()) < sizeof(buffer)) throw File::LoadResponse::invalidFormat;
   if (Pos::seek(fd_, off_t(pos_), SEEK_SET) != off_t(pos_)) throw File::LoadResponse::invalidFormat;
   if (Pos::read(fd_, buffer, sizeof(buffer)) != sizeof(buffer)) throw File::LoadResponse::invalidFormat;
   return Chunk(Tag(buffer[0]), buffer[1], advance(sizeof(buffer)));
@@ -45,7 +48,9 @@ ChunkList
 Pos::makeChunkList() const
 {
   uint32_t buffer[3];
+  if (static_cast<size_t>(available()) < sizeof(buffer)) throw File::LoadResponse::invalidFormat;
   if (Pos::seek(fd_, off_t(pos_), SEEK_SET) != off_t(pos_)) throw File::LoadResponse::invalidFormat;
   if (Pos::read(fd_, buffer, sizeof(buffer)) != sizeof(buffer)) throw File::LoadResponse::invalidFormat;
-  return ChunkList(Tag(buffer[0]), buffer[1] - 4, Tag(buffer[2]), advance(sizeof(buffer)));
+  auto size = buffer[1] - 4;
+  return ChunkList(Tag(buffer[0]), size, Tag(buffer[2]), advance(sizeof(buffer)));
 }

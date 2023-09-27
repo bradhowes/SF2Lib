@@ -178,7 +178,7 @@ inline static void panLookup(Float value, Float& left, Float& right) noexcept { 
 
 /**
  Convert cents value into a power of 2. There are 1200 cents per power of 2.
- 
+
  @param value the value to convert
  @returns power of 2 value
  */
@@ -202,7 +202,7 @@ inline static Float secondsToCents(Float value) noexcept { return std::log2(valu
 
 /**
  Convert cents to frequency, with 0 being 8.175798 Hz. Values are clamped to [-16000, 4500].
- 
+
  @param value the value to convert
  @returns frequency in Hz
  */
@@ -230,7 +230,7 @@ inline static Float clampFilterCutoff(Float value) noexcept { return clamp(value
 
 /**
  Convert integer from integer [0-1000] into [0.0-1.0]
- 
+
  @param value percentage value expressed as tenths
  @returns normalized value between 0 and 1.
  */

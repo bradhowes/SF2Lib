@@ -4,33 +4,14 @@
 #include <unistd.h>
 #include <vector>
 
-#include "SF2Lib/IO/Chunk.hpp"
-#include "SF2Lib/Utils/StringUtils.hpp"
+#include "SF2Lib/IO/ChunkList.hpp"
+#include "SF2Lib/IO/File.hpp"
 
 using namespace SF2::IO;
 
-Chunk::Chunk(Tag tag, uint32_t size, Pos pos) noexcept :
-tag_{tag},
-size_{size},
-pos_{pos}
+ChunkList::ChunkList(Tag tag, uint32_t size, Tag kind, Pos pos) :
+Chunk(tag, size, pos), kind_{kind}
 {
-  ;
-}
-
-std::string
-Chunk::extract() const noexcept
-{
-  char buffer[256];
-  size_t count = std::min(size(), sizeof(buffer));
-  begin().readInto(buffer, count);
-  buffer[count - 1] = 0;
-  SF2::Utils::trim_property(buffer);
-  return std::string(buffer);
-}
-
-void
-Chunk::extractSamples(std::vector<int16_t>& buffer) const noexcept
-{
-  buffer.resize(size() / sizeof(int16_t), 0);
-  begin().readInto(buffer.data(), size());
+  auto available = pos.available();
+  if (size > available) throw File::LoadResponse::invalidFormat;
 }

@@ -13,10 +13,10 @@ namespace SF2::Entity {
 class Preset : public Entity {
 public:
   inline static const size_t entity_size = 38;
-  
+
   /**
    Construct from contents of file.
-   
+
    @param pos location to read from
    */
   explicit Preset(IO::Pos& pos) noexcept;
@@ -28,13 +28,13 @@ public:
 
   /// @returns name of the preset
   std::string name() const noexcept { return achPresetName; }
-  
+
   /// @returns preset number for this patch
   uint16_t program() const noexcept { return wPreset; }
-  
+
   /// @returns bank number for the patch
   uint16_t bank() const noexcept { return wBank; }
-  
+
   /// @returns the index of the first zone of the preset
   uint16_t firstZoneIndex() const noexcept { return wPresetBagNdx; }
 
@@ -46,7 +46,7 @@ public:
 
   /// @returns the number of preset zones
   size_t zoneCount() const noexcept;
-  
+
   /// Write out description of the preset to std::cout
   void dump(const std::string& indent, size_t index) const noexcept;
 
@@ -61,7 +61,7 @@ public:
   }
 
 private:
-  
+
   char achPresetName[20];
   uint16_t wPreset;
   uint16_t wBank;

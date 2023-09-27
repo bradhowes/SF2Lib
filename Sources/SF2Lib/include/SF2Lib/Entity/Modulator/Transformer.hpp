@@ -28,7 +28,7 @@ public:
   Kind kind() const noexcept { return Kind::linear; }
 
   uint16_t bits() const noexcept { return bits_; }
-  
+
   /**
    Transform a value.
 

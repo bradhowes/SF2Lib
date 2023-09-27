@@ -56,31 +56,28 @@ File::load() noexcept
   if (!fd.is_valid()) return LoadResponse::notFound;
 
   off_t fileSize = ::lseek(*fd, 0, SEEK_END);
-  if (fileSize < 4) return LoadResponse::invalidFormat;
+  if (fileSize < 16) return LoadResponse::invalidFormat;
 
   size_ = fileSize;
   sampleDataBegin_ = 0;
   sampleDataEnd_ = 0;
   rawSamples_.clear();
 
-  auto riff = Pos(*fd, 0, size_).makeChunkList();
-  if (riff.tag() != Tags::riff)
-    return LoadResponse::invalidFormat;
-
-  if (riff.kind() != Tags::sfbk)
-    return LoadResponse::invalidFormat;
-
   try {
+    auto riff = Pos(*fd, 0, size_).makeChunkList();
+    if (riff.tag() != Tag(Tags::riff) || riff.kind() != Tag(Tags::sfbk)) throw File::LoadResponse::invalidFormat;
     auto p0 = riff.begin();
     while (p0 < riff.end()) {
       auto chunkList = p0.makeChunkList();
-
+      if (chunkList.tag() != Tag(Tags::list)) throw File::LoadResponse::invalidFormat;
+      if (chunkList.kind() != Tag(Tags::info) &&
+          chunkList.kind() != Tag(Tags::sdta) &&
+          chunkList.kind() != Tag(Tags::pdta)) throw File::LoadResponse::invalidFormat;
       auto p1 = chunkList.begin();
       p0 = chunkList.advance();
       while (p1 < chunkList.end()) {
         auto chunk = p1.makeChunk();
         p1 = chunk.advance();
-
         switch (Tags(chunk.tag().rawValue())) {
           case Tags::ifil: soundFontVersion_.load(chunk.begin()); break;
           case Tags::isng: soundEngine_ = chunk.extract(); break;
@@ -107,7 +104,7 @@ File::load() noexcept
         }
       }
     }
-  } catch (...) {
+  } catch (File::LoadResponse) {
     return LoadResponse::invalidFormat;
   }
 
@@ -130,7 +127,7 @@ void
 File::dump() const noexcept {
   std::cout << "|-ifil"; soundFontVersion_.dump("|-ifil");
   std::cout << "|-iver"; fileVersion_.dump("|-iver");
-  
+
   std::cout << "|-phdr"; presets_.dump("|-phdr: ");
   std::cout << "|-pbag"; presetZones_.dump("|-pbag: ");
   std::cout << "|-pgen"; presetZoneGenerators_.dump("|-pgen: ");

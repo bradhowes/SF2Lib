@@ -52,7 +52,7 @@ namespace SF2::Render::Envelope {
  durations to zero.
  */
 class Generator {
-  
+
   /**
    Collection of states for all of the stages in an SF2 envelope.
    */

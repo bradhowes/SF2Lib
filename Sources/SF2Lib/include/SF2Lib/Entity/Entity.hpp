@@ -13,10 +13,10 @@ namespace SF2::Entity {
  Base class that offers common functionality for working with entities that are part of a collection.
  */
 struct Entity {
-  
+
   /**
    Calculate the number of bag elements between to items
-   
+
    @param next the bag index from the following item in the collection
    @param current the bag index from the current item in the collection
    */

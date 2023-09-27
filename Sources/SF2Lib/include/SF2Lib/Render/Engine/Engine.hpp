@@ -35,15 +35,15 @@ namespace SF2::Render::Engine {
 class Engine : public DSPHeaders::EventProcessor<Engine> {
   using super = DSPHeaders::EventProcessor<Engine>;
   friend super;
-  
+
 public:
   using Config = Voice::State::Config;
   using Voice = Voice::Voice;
   using Interpolator = Render::Voice::Sample::Interpolator;
-  
+
   /**
    Construct new engine and its voices.
-   
+
    @param sampleRate the expected sample rate to use
    @param voiceCount the maximum number of individual voices to support
    @param interpolator the type of interpolation to use when rendering samples
@@ -51,16 +51,16 @@ public:
    */
   Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
          size_t minimumNoteDurationMilliseconds = 10) noexcept;
-  
+
   size_t minimumNoteDurationSamples() const noexcept
   { return static_cast<size_t>(ceil(minimumNoteDurationMilliseconds_ / 1000_F * sampleRate_)); }
-  
+
   /// @returns maximum number of voices available for simultaneous rendering
   size_t voiceCount() const noexcept { return voices_.size(); }
 
   /**
    Update kernel and buffers to support the given format and channel count
-   
+
    @param format the audio format to render
    @param maxFramesToRender the maximum number of samples we will be asked to render in one go
    */
@@ -77,10 +77,10 @@ public:
 
   /// @returns true if there is an active preset
   bool hasActivePreset() const noexcept;
-  
+
   /// @returns name of the active preset or empty string if none is active
   std::string activePresetName() const noexcept;
-  
+
   /**
    Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
    one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
@@ -97,7 +97,7 @@ public:
   /**
    Activate the preset at the given index. NOTE: this is not thread-safe. When running in a render thread, one should
    use the program controller change MIDI command to perform a preset change.
-   
+
    @param index the preset to use
    */
   void usePreset(size_t index);
@@ -105,7 +105,7 @@ public:
   /**
    Activate the preset at the given bank/program. NOTE: this is not thread-safe. When running in a render thread,
    one should use the bank/program controller change MIDI commands to perform a preset change.
-   
+
    @param bank the bank to use
    @param program the program in the bank to use
    */
@@ -123,9 +123,9 @@ public:
   /**
    Tell any voices playing the current MIDI key that the key has been released. The voice will continue to render until
    it figures out that it is done.
-   
+
    NOTE: this is not thread-safe. When running in a render thread, one should use a MIDI command to stop a note.
-   
+
    @param key the MIDI key that was released
    */
   void noteOff(int key) noexcept;
@@ -133,7 +133,7 @@ public:
   /**
    Activate one or more voices to play a MIDI key with the given velocity. NOTE: this is not thread-safe. When running
    in a render thread, one should use a MIDI command to start a note.
-   
+
    @param key the MIDI key to play
    @param velocity the MIDI velocity to play at
    */
@@ -142,10 +142,10 @@ public:
   /**
    Render samples to the given stereo output buffers. The buffers are guaranteed to be able to hold `frameCount`
    samples, and `frameCount` will never be more than the `maxFramesToRender` value given to the `setRenderingFormat`.
-   
+
    NOTE: everything from this point on should be inlined as much as possible for speed. This is executed in a real-time
    rendering thread.
-   
+
    @param mixer collection of buffers to render into
    @param frameCount number of samples to render.
    */

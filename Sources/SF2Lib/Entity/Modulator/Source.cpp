@@ -25,10 +25,10 @@ Source::description() const noexcept {
   else {
     os << "CC[" << ccIndex().value << ']';
   }
-  
+
   os << '(' << (isUnipolar() ? "uni" : "bi") << '/' << (isPositive() ? "-+" : "+-") << '/'
   << continuityTypeName() << ')';
-  
+
   return os.str();
 }
 

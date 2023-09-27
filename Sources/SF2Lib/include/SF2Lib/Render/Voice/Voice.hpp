@@ -108,7 +108,7 @@ public:
 
   /// @returns true if this voice has its key down
   bool isKeyDown() const noexcept { return keyDown_; }
-  
+
   /// @returns true if this voice is done processing and will no longer render meaningful samples.
   bool isDone() const noexcept { return !isActive(); }
 
@@ -165,7 +165,7 @@ public:
    ```
 
    Note that in this routine, panning and effects are not performed.
-   
+
    @returns next sample
    */
   inline Float renderSample() noexcept {
@@ -179,7 +179,7 @@ public:
 
     if (volumeEnvelope_.isDelayed()) return 0_F;
 
-    // Calculate the pitch to render and then generate a new sample. 
+    // Calculate the pitch to render and then generate a new sample.
     //
     // NOTE: according the SF2 7.10, linked L/R voices should "be played entirely synchronously, with their pitch
     // controlled by the right sample's generators. All non-pitch generators should apply as normal". We do not do

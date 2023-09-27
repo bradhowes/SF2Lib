@@ -64,7 +64,7 @@ log_{os_log_create("SF2Lib", logTag)}
   ;
 }
 
-Generator::Generator(Float sampleRate, const char* logTag, size_t voiceIndex, Float delay, Float attack, Float hold, 
+Generator::Generator(Float sampleRate, const char* logTag, size_t voiceIndex, Float delay, Float attack, Float hold,
                      Float decay, int sustain, Float release) noexcept :
 logTag_{logTag},
 voiceIndex_{voiceIndex},
@@ -153,7 +153,7 @@ Generator::configureVolumeEnvelope(const State& state) noexcept
                                                    holdTimecentsToSeconds(holdTimecents)));
 
   auto decayTimecents = state.modulated(Index::decayVolumeEnvelope) + midiKeyVolumeEnvelopeDecayAdjustment(state);
-  stages_[StageIndex::decay].setDecay(sustainLevel_, 
+  stages_[StageIndex::decay].setDecay(sustainLevel_,
                                       sampleCountFor(state.sampleRate(),
                                                      decayTimecentsToSeconds(decayTimecents)));
 

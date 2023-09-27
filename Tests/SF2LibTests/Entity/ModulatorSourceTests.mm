@@ -26,7 +26,7 @@ using namespace SF2::Entity::Modulator;
   XCTAssertTrue(s.isPositive());
   XCTAssertEqual(Source::ContinuityType::linear, s.type());
   XCTAssertEqual("linear", s.continuityTypeName());
-  
+
   XCTAssertFalse(s.isContinuousController());
   XCTAssertFalse(s.isBipolar());
   XCTAssertFalse(s.isNegative());
@@ -75,7 +75,7 @@ using namespace SF2::Entity::Modulator;
     XCTAssertFalse(s.isContinuousController());
     XCTAssertEqual(Source::GeneralIndex(bits), s.generalIndex());
   }
-  
+
   for (auto bits : {1, 4, 5, 11, 126}) {
     Source s{Source(Source::GeneralIndex(bits))};
     XCTAssertFalse(s.isValid());
@@ -90,7 +90,7 @@ using namespace SF2::Entity::Modulator;
     XCTAssertTrue(s.isContinuousController());
     XCTAssertEqual(bits, s.ccIndex().value);
   }
-  
+
   for (auto bits : {0, 6, 32, 63, 98, 101, 120, 127}) {
     Source s{Source(Source::CC(bits))};
     XCTAssertFalse(s.isValid());

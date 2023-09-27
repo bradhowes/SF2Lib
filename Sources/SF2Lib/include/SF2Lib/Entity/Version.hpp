@@ -12,23 +12,23 @@ namespace SF2::Entity {
 class Version {
 public:
   inline static const size_t entity_size = 4;
-  
+
   Version() noexcept : wMajor{0}, wMinor{0} {}
-  
+
   /**
    Constructor that reads from file.
-   
+
    @param pos location to read from
    */
   void load(const IO::Pos& pos) noexcept { pos.readInto(*this); }
-  
+
   /**
    Utility for displaying bag contents on output stream.
-   
+
    @param indent the prefix to write out before each line
    */
   void dump(const std::string& indent) const noexcept;
-  
+
 private:
   uint16_t wMajor;
   uint16_t wMinor;

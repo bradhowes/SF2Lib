@@ -131,7 +131,7 @@ public:
   PedalState pedalState() const noexcept { return pedalState_; }
 
   void dump() const noexcept;
-  
+
 private:
   using ContinuousControllerValues = EnumIndexableValueArray<int, ControlChange, 128>;
   using NotePressureValues = std::array<int, Note::Max + 1>;

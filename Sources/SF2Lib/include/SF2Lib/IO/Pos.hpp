@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <unistd.h>
 
+#include "SF2Lib/IO/Tag.hpp"
 #include "SF2Lib/Types.hpp"
 
 namespace SF2::IO {

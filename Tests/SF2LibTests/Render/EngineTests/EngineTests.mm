@@ -1229,7 +1229,7 @@ using namespace SF2::Render::Engine;
   midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::reset);
   midiEvent.length = 1;
   engine.doMIDIEvent(midiEvent);
-  
+
   XCTAssertEqual(0, engine.activeVoiceCount());
 }
 

@@ -125,7 +125,7 @@ public:
 
   /**
    Obtain the value from a generator Amount instance. The SF2 spec defines `unsigned` and `signed` values, but in
-   general we work in signed space. 
+   general we work in signed space.
 
    @param amount the container holding the value to extract
    @returns extracted value

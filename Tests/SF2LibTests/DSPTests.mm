@@ -73,16 +73,16 @@ using namespace SF2::DSP;
   SF2::DSP::panLookup(-501, left, right);
   XCTAssertEqualWithAccuracy(1.0, left, epsilon);
   XCTAssertEqualWithAccuracy(0.0, right, epsilon);
-  
+
   SF2::DSP::panLookup(-500, left, right);
   XCTAssertEqualWithAccuracy(1.0, left, epsilon);
   XCTAssertEqualWithAccuracy(0.0, right, epsilon);
-  
+
   SF2::DSP::panLookup(-100, left, right);
   std::cout << std::setprecision(18) << left << '\n';
   XCTAssertEqualWithAccuracy(0.809016994375, left, epsilon);
   XCTAssertEqualWithAccuracy(0.587785252292, right, epsilon);
-  
+
   SF2::DSP::panLookup(0, left, right);
   XCTAssertEqualWithAccuracy(left, right, epsilon);
   std::cout << std::setprecision(18) << right << '\n';
@@ -92,11 +92,11 @@ using namespace SF2::DSP;
   XCTAssertEqualWithAccuracy(0.587785252292, left, epsilon);
   std::cout << std::setprecision(18) << right << '\n';
   XCTAssertEqualWithAccuracy(0.809016994375, right, epsilon);
-  
+
   SF2::DSP::panLookup(500, left, right);
   XCTAssertEqualWithAccuracy(0.0, left, epsilon);
   XCTAssertEqualWithAccuracy(1.0, right, epsilon);
-  
+
   SF2::DSP::panLookup(501, left, right);
   XCTAssertEqualWithAccuracy(0.0, left, epsilon);
   XCTAssertEqualWithAccuracy(1.0, right, epsilon);
@@ -240,7 +240,7 @@ static Float fluid_iir_filter_q_from_dB(Float q_dB)
   for (auto centibels = 0; centibels < 960; ++centibels) {
     auto fs = fluid_iir_filter_q_from_dB(centibels);
     auto us = DSP::centibelsToResonance(centibels);
-    
+
     XCTAssertEqualWithAccuracy(fs, us, epsilon);
   }
 }
