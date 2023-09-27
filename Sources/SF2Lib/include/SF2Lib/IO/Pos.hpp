@@ -28,18 +28,10 @@ struct Pos {
    */
   Pos(int fd, off_t pos, off_t end) noexcept;
 
-  /**
-   Create a new ChunkList from the current position.
-
-   @returns new ChunkList instance
-   */
+  /// @returns a new ChunkList from the current position.
   ChunkList makeChunkList() const;
 
-  /**
-   Create a new Chunk from the current position.
-
-   @returns new Chunk instance
-   */
+  /// @returns a new Chunk from the current position.
   Chunk makeChunk() const;
 
   /**
@@ -73,11 +65,7 @@ struct Pos {
    */
   Pos readInto(void* buffer, size_t count) const;
 
-  /**
-   Obtain the file offset represented by this instance
-
-   @returns file offset
-   */
+  /// @returns the file offset represented by this instance
   off_t offset() const noexcept { return pos_; }
 
   /// @returns number of bytes available to read at this position in the file.

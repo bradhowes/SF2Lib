@@ -2,23 +2,28 @@
 
 #pragma once
 
+#include "SF2Lib/Types.hpp"
+
 namespace SF2::Utils {
 
 /**
- Remove spaces from start and end of a fixed character array. Replace non-printable characters with '_'.
+ Remove spaces from start and end of a std::string. Replace non-printable characters with '_'.
 
  @param property location of text to clean up
- @param size the number of characters available in the character array
  */
-void trim_property(char* property, size_t size) noexcept;
+void trim_property(std::string& property) noexcept;
 
 /**
  Templated version of the above -- only works with arrays.
 
  @param property reference to C++ array to work with
  */
-template <typename T> static inline void trim_property(T& property) noexcept {
-  trim_property(property, sizeof(property));
+template <CharArray T> static inline void trim_property(T& property) noexcept {
+  auto size = sizeof(T);
+  std::string s(property, size);
+  trim_property(s);
+  memset(property, 0, size);
+  memcpy(property, s.data(), s.size());
 }
 
 } // end namespace SF2::IO

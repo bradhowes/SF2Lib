@@ -65,20 +65,20 @@ File::load() noexcept
 
   try {
     auto riff = Pos(*fd, 0, size_).makeChunkList();
-    if (riff.tag() != Tag(Tags::riff) || riff.kind() != Tag(Tags::sfbk)) throw File::LoadResponse::invalidFormat;
+    if (riff.tag() != Tags::riff || riff.kind() != Tags::sfbk) throw File::LoadResponse::invalidFormat;
     auto p0 = riff.begin();
     while (p0 < riff.end()) {
       auto chunkList = p0.makeChunkList();
-      if (chunkList.tag() != Tag(Tags::list)) throw File::LoadResponse::invalidFormat;
-      if (chunkList.kind() != Tag(Tags::info) &&
-          chunkList.kind() != Tag(Tags::sdta) &&
-          chunkList.kind() != Tag(Tags::pdta)) throw File::LoadResponse::invalidFormat;
+      if (chunkList.tag() != Tags::list) throw File::LoadResponse::invalidFormat;
+      if (chunkList.kind() != Tags::info &&
+          chunkList.kind() != Tags::sdta &&
+          chunkList.kind() != Tags::pdta) throw File::LoadResponse::invalidFormat;
       auto p1 = chunkList.begin();
       p0 = chunkList.advance();
       while (p1 < chunkList.end()) {
         auto chunk = p1.makeChunk();
         p1 = chunk.advance();
-        switch (Tags(chunk.tag().rawValue())) {
+        switch (chunk.tag().toTags()) {
           case Tags::ifil: soundFontVersion_.load(chunk.begin()); break;
           case Tags::isng: soundEngine_ = chunk.extract(); break;
           case Tags::iver: fileVersion_.load(chunk.begin()); break;

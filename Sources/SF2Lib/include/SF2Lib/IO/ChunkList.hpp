@@ -23,11 +23,7 @@ public:
    */
   ChunkList(Tag tag, uint32_t size, Tag kind, Pos pos);
 
-  /**
-   Obtain the Tag type for the elements held in the container
-
-   @return Tag type
-   */
+  /// @returns the Tag type for the elements held in the container
   Tag kind() const noexcept { return kind_; }
 
 private:

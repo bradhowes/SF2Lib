@@ -86,18 +86,10 @@ public:
     return items;
   }
 
-  /**
-   Obtain iterator to the start of the collection
-
-   @returns iterator to start of the collection
-   */
+  /// @returns iterator to the start of the collection
   const_iterator begin() const noexcept { return items_.begin(); }
 
-  /**
-   Obtain iterator at the end of the collection
-
-   @returns iterator at the end of the collection
-   */
+  /// @returns iterator at the end of the collection
   const_iterator end() const noexcept { return items_.end() - 1; }
 
   /**

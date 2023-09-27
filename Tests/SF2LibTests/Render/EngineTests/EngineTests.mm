@@ -1238,7 +1238,7 @@ using namespace SF2::Render::Engine;
   auto& engine{harness.engine()};
   engine.load(contexts.context2.path(), 0);
 
-  XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
+   XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
 
   auto blob = std::array<char, sizeof(AUMIDIEvent) + 4096>();
   AUMIDIEvent& midiEvent{*reinterpret_cast<AUMIDIEvent*>(blob.data())};

@@ -26,38 +26,19 @@ public:
    */
   Chunk(Tag tag, uint32_t size, Pos pos);
 
-  /**
-   Obtain the Tag type for the chunk
-
-   @return Tag type
-   */
+  /// @returns the Tag type for the chunk
   Tag tag() const noexcept { return tag_; }
 
-  /**
-   Obtain the size of the chunk data
-
-   @return Tag type
-   */
+  /// @returns the size of the chunk data
   size_t size() const noexcept { return size_; }
 
-  /**
-   Obtain the location of the first byte of the chunk data
-
-   @return Pos instance
-   */
+  /// @returns the location of the first byte of the chunk data
   Pos begin() const noexcept { return pos_; }
 
-  /**
-   Obtain the location right after the last byte of chunk data
-
-   @return Pos instance
-   */
+  /// @returns the location after the last byte of the chunk data
   Pos end() const noexcept { return pos_.advance(size_); }
 
-  /** Obtain the file position of the next chunk in the file after this one.
-
-   @return Pos instance
-   */
+  /// @returns the file position of the next chunk in the file after this one
   Pos advance() const noexcept { return pos_.advance(paddedSize()); }
 
   /**
