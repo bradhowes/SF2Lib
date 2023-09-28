@@ -55,9 +55,10 @@ struct TestEngineHarness {
   }
 
   void renderUntil(Mixer& mixer, int limit) noexcept {
-    while (renderIndex_++ < limit) {
+    while (renderIndex_ < limit) {
       engine_.renderInto(mixer, maxFramesToRender_);
       mixer.shiftOver(maxFramesToRender_);
+      ++renderIndex_;
     }
   }
 

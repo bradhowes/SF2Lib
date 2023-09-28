@@ -61,8 +61,6 @@ Voice::start() noexcept
   os_log_debug(log_, "starting voice: %zu", voiceIndex_);
   os_signpost_interval_begin(log_, startSignpost_, "start");
 
-  pendingRelease_ = 0;
-  sampleCounter_ = 0;
   active_ = true;
   keyDown_ = true;
   filter_.reset();
@@ -86,8 +84,9 @@ Voice::releaseKey(const ReleaseKeyState& releaseKeyState) noexcept
   if (releaseKeyState.pedalState.sustainPedalActive ||
       (releaseKeyState.pedalState.sostenutoPedalActive && sostenutoActive_)) {
     postponedRelease_ = true;
-  } else if (keyDown_ && pendingRelease_ == 0) {
-    pendingRelease_ = std::max<size_t>(releaseKeyState.minimumNoteDurationSamples, 1);
+  } else {
+    keyDown_ = false;
+    volumeEnvelope_.gate(false);
+    modulatorEnvelope_.gate(false);
   }
 }
-

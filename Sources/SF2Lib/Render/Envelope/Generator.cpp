@@ -99,9 +99,11 @@ Generator::gate(bool noteOn) noexcept
     os_log_debug(log_, "%s starting %zu", logTag_, voiceIndex_);
     value_ = 0_F;
     enterStage(StageIndex::delay);
-  } else if (stageIndex_ != StageIndex::idle) {
+  } else {
     os_log_debug(log_, "%s releasing %zu", logTag_, voiceIndex_);
-    enterStage(StageIndex::release);
+    if (stageIndex_ != StageIndex::idle) {
+      enterStage(StageIndex::release);
+    }
   }
 }
 
@@ -116,6 +118,9 @@ Generator::stop() noexcept
 void
 Generator::configureVolumeEnvelope(const State& state) noexcept
 {
+  auto sampleRate = state.sampleRate();
+  auto durationInSamples = [=](Float duration) { return int(round(sampleRate * duration)); };
+
   /*
    Spec 8.1.2 sustainVolEnv
 
@@ -132,27 +137,21 @@ Generator::configureVolumeEnvelope(const State& state) noexcept
   sustainLevel_ = DSP::centibelsToAttenuationInterpolated(sustainCents);
 
   auto delayTimecents = state.modulated(Index::delayVolumeEnvelope);
-  stages_[StageIndex::delay].setDelay(sampleCountFor(state.sampleRate(),
-                                                     delayTimecentsToSeconds(delayTimecents)));
+  stages_[StageIndex::delay].setDelay(durationInSamples(delayTimecentsToSeconds(delayTimecents)));
 
   auto attackTimecents = state.modulated(Index::attackVolumeEnvelope);
-  stages_[StageIndex::attack].setAttack(sampleCountFor(state.sampleRate(),
-                                                       attackTimecentsToSeconds(attackTimecents)));
+  stages_[StageIndex::attack].setAttack(durationInSamples(attackTimecentsToSeconds(attackTimecents)));
 
   auto holdTimecents = state.modulated(Index::holdVolumeEnvelope) + midiKeyVolumeEnvelopeHoldAdjustment(state);
-  stages_[StageIndex::hold].setHold(sampleCountFor(state.sampleRate(),
-                                                   holdTimecentsToSeconds(holdTimecents)));
+  stages_[StageIndex::hold].setHold(durationInSamples(holdTimecentsToSeconds(holdTimecents)));
 
   auto decayTimecents = state.modulated(Index::decayVolumeEnvelope) + midiKeyVolumeEnvelopeDecayAdjustment(state);
-  stages_[StageIndex::decay].setDecay(sustainLevel_,
-                                      sampleCountFor(state.sampleRate(),
-                                                     decayTimecentsToSeconds(decayTimecents)));
+  stages_[StageIndex::decay].setDecay(sustainLevel_, durationInSamples(decayTimecentsToSeconds(decayTimecents)));
 
   stages_[StageIndex::sustain].setSustain();
 
   auto releaseTimecents = state.modulated(Index::releaseVolumeEnvelope);
-  stages_[StageIndex::release].setRelease(sampleCountFor(state.sampleRate(),
-                                                         releaseTimecentsToSeconds(releaseTimecents)));
+  stages_[StageIndex::release].setRelease(durationInSamples(releaseTimecentsToSeconds(releaseTimecents)));
 
   os_log_debug(log_, "%zu - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %f / %f release %d / %f",
                voiceIndex_,
@@ -173,6 +172,9 @@ Generator::configureVolumeEnvelope(const State& state) noexcept
 void
 Generator::configureModulationEnvelope(const State& state) noexcept
 {
+  auto sampleRate = state.sampleRate();
+  auto durationInSamples = [=](Float duration) { return int(round(sampleRate * duration)); };
+
   /*
    Spec 8.1.2 sustainModEnv
 
@@ -190,27 +192,21 @@ Generator::configureModulationEnvelope(const State& state) noexcept
   sustainLevel_ = 1_F - DSP::tenthPercentageToNormalized(sustainCents);
 
   auto delayTimecents = state.modulated(Index::delayModulatorEnvelope);
-  stages_[StageIndex::delay].setDelay(sampleCountFor(state.sampleRate(),
-                                                     delayTimecentsToSeconds(delayTimecents)));
+  stages_[StageIndex::delay].setDelay(durationInSamples(delayTimecentsToSeconds(delayTimecents)));
 
   auto attackTimecents = state.modulated(Index::attackModulatorEnvelope);
-  stages_[StageIndex::attack].setAttack(sampleCountFor(state.sampleRate(),
-                                                       attackTimecentsToSeconds(attackTimecents)));
+  stages_[StageIndex::attack].setAttack(durationInSamples(attackTimecentsToSeconds(attackTimecents)));
 
   auto holdTimecents = state.modulated(Index::holdModulatorEnvelope) + midiKeyModulatorEnvelopeHoldAdjustment(state);
-  stages_[StageIndex::hold].setHold(sampleCountFor(state.sampleRate(),
-                                                   holdTimecentsToSeconds(holdTimecents)));
+  stages_[StageIndex::hold].setHold(durationInSamples(holdTimecentsToSeconds(holdTimecents)));
 
   auto decayTimecents = state.modulated(Index::decayModulatorEnvelope) + midiKeyModulatorEnvelopeDecayAdjustment(state);
-  stages_[StageIndex::decay].setDecay(sustainLevel_,
-                                      sampleCountFor(state.sampleRate(),
-                                                     decayTimecentsToSeconds(decayTimecents)));
+  stages_[StageIndex::decay].setDecay(sustainLevel_, durationInSamples(decayTimecentsToSeconds(decayTimecents)));
 
   stages_[StageIndex::sustain].setSustain();
 
   auto releaseTimecents = state.modulated(Index::releaseModulatorEnvelope);
-  stages_[StageIndex::release].setRelease(sampleCountFor(state.sampleRate(),
-                                                         releaseTimecentsToSeconds(releaseTimecents)));
+  stages_[StageIndex::release].setRelease(durationInSamples(releaseTimecentsToSeconds(releaseTimecents)));
 
   os_log_debug(log_, "%zu - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %f / %f release %d / %f",
                voiceIndex_,

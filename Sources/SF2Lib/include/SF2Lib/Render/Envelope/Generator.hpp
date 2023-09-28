@@ -21,6 +21,18 @@
  */
 namespace SF2::Render::Envelope {
 
+/// Stages defined in the SF2 2.01 spec (except for the `idle` state).
+enum struct StageIndex : size_t {
+  delay = 0,
+  attack,
+  hold,
+  decay,
+  sustain,
+  release,
+  idle,
+  numStages = idle
+};
+
 /**
  Generator of values for the SF2 volume/modulation envelopes. An SF2 envelope contains 6 stages:
 
@@ -54,18 +66,12 @@ namespace SF2::Render::Envelope {
 class Generator {
 
   /**
-   Collection of states for all of the stages in an SF2 envelope.
+   Collection of states for all of the stages in an SF2 envelope. Provides for indexing by StageIndex values.
    */
-  struct Stages : public std::array<Stage, SF2::valueOf(StageIndex::release) + 1> {
-    using super = std::array<Stage, SF2::valueOf(StageIndex::release) + 1>;
-
-    Stage& operator[](const StageIndex& index) {
-      return super::operator[](static_cast<size_t>(index));
-    }
-
-    const Stage& operator[](const StageIndex& index) const {
-      return super::operator[](static_cast<super::size_type>(index));
-    }
+  struct Stages : public std::array<Stage, SF2::valueOf(StageIndex::numStages)> {
+    using super = std::array<Stage, SF2::valueOf(StageIndex::numStages)>;
+    Stage& operator[](const StageIndex& index) { return super::operator[](SF2::valueOf(index)); }
+    const Stage& operator[](const StageIndex& index) const { return super::operator[](SF2::valueOf(index)); }
   };
 
 public:
@@ -135,11 +141,12 @@ protected:
   inline Float getNextValue() noexcept {
     if (!checkForNextStage()) return 0_F;
     value_ = stages_[stageIndex_].next(value_);
-    if (value_ > 1_F) {
-      value_ = 1_F;
-    } else if (value_ < 0_F) { // Do not check for 0.0 since that is a valid starting state.
+    if (value_ < 0_F) { // Do not check for 0.0 since that is a valid starting state.
       stop();
     } else {
+      if (value_ > 1_F) {
+        value_ = 1_F;
+      }
       --counter_;
       checkForNextStage();
     }
@@ -152,12 +159,26 @@ protected:
 
 private:
 
+  static const char* stageName(StageIndex index) noexcept {
+    switch (index) {
+      case StageIndex::delay:   return "DELAY";
+      case StageIndex::attack:  return "ATTACK";
+      case StageIndex::hold:    return "HOLD";
+      case StageIndex::decay:   return "DECAY";
+      case StageIndex::sustain: return "SUSTAIN";
+      case StageIndex::release: return "RELEASE";
+      case StageIndex::idle:    return "IDLE";
+    }
+  }
+
   /**
    Enter a new stage.
 
    @param next the stage to enter
    */
   inline void enterStage(StageIndex next) noexcept {
+    os_log_info(log_, "enterStage %zu - old: %s new: %s value: %f", voiceIndex_, stageName(stageIndex_),
+                stageName(next), value_);
     stageIndex_ = next;
     if (next != StageIndex::idle) {
       counter_ = stages_[stageIndex_].durationInSamples();
@@ -176,21 +197,13 @@ private:
         case StageIndex::attack:  enterStage(StageIndex::hold); continue;
         case StageIndex::hold:    enterStage(StageIndex::decay); continue;
         case StageIndex::decay:   enterStage(StageIndex::sustain); continue;
-        case StageIndex::sustain: enterStage(StageIndex::release); continue;
+        case StageIndex::sustain: enterStage(StageIndex::release); continue; // this will actually never happen
         case StageIndex::release: stop(); return false;
         case StageIndex::idle:    return false;
       }
     }
     return true;
   }
-
-  /**
-   Obtain the number of samples for a given sample rate and duration.
-
-   @param seconds the amount of time to use in the calculation represented in timecents
-   @returns the number of samples
-   */
-  static int sampleCountFor(Float sampleRate, Float seconds) noexcept { return int(round(sampleRate * seconds)); }
 
   Stages stages_{};
   StageIndex stageIndex_{StageIndex::idle};

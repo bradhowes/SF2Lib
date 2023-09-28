@@ -10,17 +10,6 @@
 
 namespace SF2::Render::Envelope {
 
-/// Stages defined in the SF2 2.01 spec (except for the `idle` state).
-enum struct StageIndex {
-  idle = -1,
-  delay = 0,
-  attack,
-  hold,
-  decay,
-  sustain,
-  release
-};
-
 /**
  Configuration for a single stage of an envelope. Each Stage holds a sample counter and an increment value. During
  each render of a sample the envelope's current value is adjusted using the increment value, and the counter is

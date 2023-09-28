@@ -195,21 +195,9 @@ public:
     auto resonance{state_.modulated(Index::initialFilterResonance)};
     auto filtered{filter_.transform(frequency, resonance, sample * gain)};
 
-    ++sampleCounter_;
-
-    if (!sampleGenerator_.isActive()) {
-      stop();
-      return filtered;
-    }
-
-    if (pendingRelease_) {
-      if (pendingRelease_ < sampleCounter_) {
-        pendingRelease_ = 0;
-        keyDown_ = false;
-        volumeEnvelope_.gate(false);
-        modulatorEnvelope_.gate(false);
-      }
-    } else if ((volumeEnvelope_.isRelease() && gain < DSP::NoiseFloor) || !volumeEnvelope_.isActive()) {
+    if (!sampleGenerator_.isActive() ||
+        !volumeEnvelope_.isActive() ||
+        (volumeEnvelope_.isRelease() && gain < DSP::NoiseFloor)) {
       stop();
     }
 
@@ -250,8 +238,6 @@ public:
 
 private:
   State::State state_;
-  size_t sampleCounter_{0};
-  size_t pendingRelease_{0};
   LoopingMode loopingMode_;
   Sample::Pitch pitch_;
   Sample::Generator sampleGenerator_;
