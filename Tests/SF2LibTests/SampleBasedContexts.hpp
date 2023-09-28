@@ -109,6 +109,13 @@ struct TestEngineHarness {
     engine_.doMIDIEvent(midiEvent);
   }
 
+  void sendAllOff() noexcept {
+    AUMIDIEvent midiEvent;
+    midiEvent.data[0] = SF2::valueOf(SF2::MIDI::CoreEvent::reset);
+    midiEvent.length = 1;
+    engine_.doMIDIEvent(midiEvent);
+  }
+
 private:
   Engine engine_;
   AUAudioFrameCount maxFramesToRender_{512};

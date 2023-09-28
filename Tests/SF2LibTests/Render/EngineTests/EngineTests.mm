@@ -397,14 +397,14 @@ using namespace SF2::Render::Engine;
 
   auto playChord = [&](int note1, int note2, int note3, bool sustain) {
     harness.renderUntil(mixer, noteOnIndex);
-    engine.noteOn(note1, 64);
-    engine.noteOn(note2, 64);
-    engine.noteOn(note3, 64);
+    harness.sendNoteOn(note1);
+    harness.sendNoteOn(note2);
+    harness.sendNoteOn(note3);
     harness.renderUntil(mixer, noteOffIndex);
     if (!sustain) {
-      engine.noteOff(note1);
-      engine.noteOff(note2);
-      engine.noteOff(note3);
+      harness.sendNoteOff(note1);
+      harness.sendNoteOff(note2);
+      harness.sendNoteOff(note3);
     }
     noteOnIndex += chordDuration;
     noteOffIndex += chordDuration;
@@ -437,7 +437,7 @@ using namespace SF2::Render::Engine;
 
     int seconds = 1;
     auto mixer{harness.createMixer(seconds)};
-    for (int voice = 0; voice < engine.voiceCount(); ++voice) engine.noteOn(12 + voice * 1, 64);
+    for (int voice = 0; voice < engine.voiceCount(); ++voice) harness.sendNoteOn(12 + voice);
 
     [self startMeasuring];
 
@@ -477,7 +477,7 @@ using namespace SF2::Render::Engine;
 
     int seconds = 1;
     auto mixer{harness.createMixer(seconds)};
-    for (int voice = 0; voice < engine.voiceCount(); ++voice) engine.noteOn(12 + voice * 1, 64);
+    for (int voice = 0; voice < engine.voiceCount(); ++voice) harness.sendNoteOn(12 + voice);
 
     [self startMeasuring];
 
@@ -1335,7 +1335,7 @@ using namespace SF2::Render::Engine;
   samples.push_back(harness.lastDrySample());
   XCTAssertEqual(2, engine.activeVoiceCount());
 
-  engine.allOff();
+  harness.sendAllOff();
   param.value = true;
   XCTAssertTrue(engine.oneVoicePerKeyModeEnabled());
 

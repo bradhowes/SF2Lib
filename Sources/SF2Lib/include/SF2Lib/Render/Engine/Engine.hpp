@@ -115,31 +115,6 @@ public:
   size_t activeVoiceCount() const noexcept { return oldestActive_.size(); }
 
   /**
-   Turn off all voices, making them all available for rendering. NOTE: this is not thread-safe. When running in a
-   render thread, one should use a MIDI command to stop all notes.
-   */
-  void allOff() noexcept;
-
-  /**
-   Tell any voices playing the current MIDI key that the key has been released. The voice will continue to render until
-   it figures out that it is done.
-
-   NOTE: this is not thread-safe. When running in a render thread, one should use a MIDI command to stop a note.
-
-   @param key the MIDI key that was released
-   */
-  void noteOff(int key) noexcept;
-
-  /**
-   Activate one or more voices to play a MIDI key with the given velocity. NOTE: this is not thread-safe. When running
-   in a render thread, one should use a MIDI command to start a note.
-
-   @param key the MIDI key to play
-   @param velocity the MIDI velocity to play at
-   */
-  void noteOn(int key, int velocity) noexcept;
-
-  /**
    Render samples to the given stereo output buffers. The buffers are guaranteed to be able to hold `frameCount`
    samples, and `frameCount` will never be more than the `maxFramesToRender` value given to the `setRenderingFormat`.
 
@@ -221,6 +196,31 @@ public:
   bool polyphonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::poly; }
 
 private:
+
+  /**
+   Turn off all voices, making them all available for rendering. NOTE: this is not thread-safe. When running in a
+   render thread, one should use a MIDI command to stop all notes.
+   */
+  void allOff() noexcept;
+
+  /**
+   Tell any voices playing the current MIDI key that the key has been released. The voice will continue to render until
+   it figures out that it is done.
+
+   NOTE: this is not thread-safe. When running in a render thread, one should use a MIDI command to stop a note.
+
+   @param key the MIDI key that was released
+   */
+  void noteOff(int key) noexcept;
+
+  /**
+   Activate one or more voices to play a MIDI key with the given velocity. NOTE: this is not thread-safe. When running
+   in a render thread, one should use a MIDI command to start a note.
+
+   @param key the MIDI key to play
+   @param velocity the MIDI velocity to play at
+   */
+  void noteOn(int key, int velocity) noexcept;
 
   /**
    Set the portamento (glissando/glide) mode. Note that this is only applicable in monophonic mode.
