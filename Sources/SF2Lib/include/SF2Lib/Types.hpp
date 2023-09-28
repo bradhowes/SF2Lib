@@ -42,8 +42,9 @@ concept EntityDerivedType = requires { { T::entity_size } -> std::convertible_to
 template <typename T>
 concept RandomAccessContainer = requires(T v) { { v.at(0) } -> std::convertible_to<typename T::value_type>; };
 
+/// Concept that requires the type to be an array of a fixed size and of type 'char'.
 template <typename T>
-concept CharArray = std::is_bounded_array_v<T>;
+concept CharArray = std::is_bounded_array_v<T> && requires(T v) { { v[0] } -> std::same_as<char&>; };
 
 /**
  Generic method that invokes checked or unchecked indexing on a container based on the DEBUG compile flag. When DEBUG
