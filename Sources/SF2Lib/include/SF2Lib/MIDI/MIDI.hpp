@@ -7,7 +7,7 @@
  */
 namespace SF2::MIDI {
 
-enum struct CoreEvent {
+enum struct CoreEvent : uint8_t {
   noteOff = 0x80,
   noteOn = 0x90,
   keyPressure = 0xA0,
@@ -29,7 +29,7 @@ enum struct CoreEvent {
   reset = 0xFF
 };
 
-enum struct ControlChange {
+enum struct ControlChange : uint8_t {
   bankSelectMSB = 0x00, // used
   modulationWheelMSB = 0x01,
   breathMSB = 0x02,
@@ -105,18 +105,18 @@ enum struct ControlChange {
   rpnMSB = 0x65, // used
 
   // Channel messages
-  allSoundOff = 0x78,
+  allSoundOff = 0x78, // used
   resetAllControllers = 0x79, // used
   localControl = 0x7A,
   allNotesOff = 0x7B, // used
   omniOff = 0x7C,
   omniOn = 0x7D,
-  monoOn = 0x7E,
-  polyOn = 0x7F
+  monoOn = 0x7E, // used
+  polyOn = 0x7F // used
 };
 
 /* General MIDI RPN event numbers (LSB, MSB = 0) */
-enum struct RPNEvent
+enum struct RPNEvent : uint8_t
 {
   pitchBendRange = 0x00,
   channelFineTune = 0x01,

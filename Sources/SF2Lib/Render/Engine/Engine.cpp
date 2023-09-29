@@ -192,8 +192,14 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 
     case MIDI::CoreEvent::controlChange:
       os_log_info(log_, "doMIDIEvent - controlChange: %hhX %hhX", midiEvent.data[1], midiEvent.data[2]);
-      if (midiEvent.length == 3 && midiEvent.data[1] <= 127 && midiEvent.data[2] <= 127) {
-        processControlChange(MIDI::ControlChange(midiEvent.data[1]), midiEvent.data[2]);
+      if (midiEvent.length == 3) {
+        auto what = MIDI::ControlChange(midiEvent.data[1]);
+        auto data = midiEvent.data[2];
+        if (midiEvent.data[1] < 120) {
+          processControlChange(what, data);
+        } else {
+          processChannelMessage(what, data);
+        }
       }
       break;
 
@@ -221,20 +227,29 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       }
       break;
 
-      // System-Exclusive command for loading URL in SF2Engine:
-      //
-      //   0 0xF0 - System Exclusive
-      //   1 0x7E - non-realtime ID
-      //   2 0x00 - unused subtype
-      //   3 0xAA - MSB of the preset to load
-      //   4 0xBB - LSB of the preset to load
-      //   5 ...  - N Base-64 encoded URL bytes
-      // 5+N 0xF7 - EOX
-      //
     case MIDI::CoreEvent::systemExclusive:
       os_log_info(log_, "doMIDIEvent - systemExclusive: %hhX %hhX", midiEvent.data[1], midiEvent.data[2]);
-      if (midiEvent.length > 5 && midiEvent.data[1] == 0x7e && midiEvent.data[2] == 0x00) {
-        loadFromMIDI(midiEvent);
+      if (midiEvent.data[1] == 0x7e && midiEvent.data[midiEvent.length - 1] != 0xF7) {
+        switch (midiEvent.data[2]) {
+          case 0x00:
+            // System-Exclusive command for loading URL in SF2Engine:
+            //
+            //   0 0xF0 - System Exclusive
+            //   1 0x7E - non-realtime ID
+            //   2 0x00 - unused subtype
+            //   3 0xAA - MSB of the preset to load
+            //   4 0xBB - LSB of the preset to load
+            //   5 ...  - N Base-64 encoded URL bytes
+            // 5+N 0xF7 - EOX
+            //
+            if (midiEvent.length >= 6) {
+              loadFromMIDI(midiEvent);
+            }
+            break;
+
+          default:
+            break;
+        }
       }
       break;
 
@@ -246,6 +261,47 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 
     default:
       break;
+  }
+}
+
+void
+Engine::processChannelMessage(MIDI::ControlChange channelMessage, uint8_t value) noexcept
+{
+  os_log_info(log_, "processChannelMessage - %hhX %hhX", valueOf(channelMessage), value);
+  switch (channelMessage) {
+    case MIDI::ControlChange::allSoundOff:
+      allOff();
+      break;
+
+    case MIDI::ControlChange::resetAllControllers:
+      allOff();
+      channelState_.reset();
+      break;
+
+    case MIDI::ControlChange::localControl:
+      break;
+
+    case MIDI::ControlChange::allNotesOff:
+      allOff();
+      break;
+
+    case MIDI::ControlChange::omniOff:
+      break;
+
+    case MIDI::ControlChange::omniOn:
+      break;
+
+    case MIDI::ControlChange::monoOn:
+      allOff();
+      setPhonicMode(PhonicMode::mono);
+      break;
+
+    case MIDI::ControlChange::polyOn:
+      allOff();
+      setPhonicMode(PhonicMode::poly);
+      break;
+
+    default: break;
   }
 }
 
@@ -301,33 +357,67 @@ Engine::notifyActiveVoicesChannelStateChanged() noexcept
 void
 Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
   size_t count = midiEvent.length - 5;
-  if (count < 1) return;
-
-  // We have to do this silly dance because AUMIDIEvent only allows indexing into the first three bytes.
-  size_t index = (*(&midiEvent.data[0] + 3) * 128) + *(&midiEvent.data[0] + 4);
-  auto path = Utils::Base64::decode(&midiEvent.data[0] + 5, count);
-  os_log_info(log_, "loadFromMIDI BEGIN - %{public}s index: %zu", path.c_str(), index);
-  load(path, index);
+  const uint8_t* data = midiEvent.data;
+  size_t index = data[3] * 128u + data[4];
+  if (midiEvent.length > 6) {
+    auto path = Utils::Base64::decode(data + 5, count);
+    os_log_info(log_, "loadFromMIDI BEGIN - %{public}s index: %zu", path.c_str(), index);
+    load(path, index);
+  } else {
+    usePresetWithIndex(index);
+  }
 }
 
 std::vector<uint8_t>
-Engine::createLoadSysExec(const std::string& path, int preset) noexcept
+Engine::createLoadSysExec(const std::string& path, size_t preset) noexcept
 {
-  auto encoded = SF2::Utils::Base64::encode(path);
+  auto encoded = path.empty() ? "" : SF2::Utils::Base64::encode(path);
   auto nameOffset = 5;
-  auto size = encoded.size() + size_t(nameOffset);
+  auto size = encoded.size() + size_t(nameOffset + 1);
   auto data = std::vector<uint8_t>(size, uint8_t(0));
   data[0] = SF2::valueOf(MIDI::CoreEvent::systemExclusive);
   data[1] = 0x7E; // Custom command for SF2Lib
-  data[2] = 0x00;
-  data[3] = static_cast<uint8_t>(preset / 128);
-  data[4] = static_cast<uint8_t>(preset - data[3] * 128);
+  data[2] = 0x00; // unused subtype
+  data[3] = static_cast<uint8_t>(preset / 128); // MSB of preset value
+  data[4] = static_cast<uint8_t>(preset - data[3] * 128); // LSB of preset value
   std::copy_n(encoded.begin(), encoded.size(), data.begin() + nameOffset);
+  data[size -1] = 0xF7;
+  return data;
+}
+
+std::vector<uint8_t>
+Engine::createUseIndex(size_t index) noexcept
+{
+  return createLoadSysExec("", index);
+}
+
+std::vector<uint8_t>
+Engine::createResetCommand() noexcept
+{
+  auto data = std::vector<uint8_t>(1, uint8_t(0));
+  data[0] = SF2::valueOf(MIDI::CoreEvent::reset);
+  return data;
+}
+
+std::vector<uint8_t>
+Engine::createUseBankProgram(uint16_t bank, uint8_t program) noexcept
+{
+  assert(bank < 128 * 128 && program < 128);
+  auto data = std::vector<uint8_t>(8, uint8_t(0));
+  data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
+  data[1] = SF2::valueOf(MIDI::ControlChange::bankSelectMSB);
+  data[2] = uint8_t(bank / 128u);
+  data[3] = SF2::valueOf(MIDI::CoreEvent::controlChange);
+  data[4] = SF2::valueOf(MIDI::ControlChange::bankSelectLSB);
+  data[5] = uint8_t(bank - data[2] * 128u);
+  data[6] = SF2::valueOf(MIDI::CoreEvent::programChange);
+  data[7] = program;
   return data;
 }
 
 void
-Engine::changeProgram(uint8_t program) noexcept {
+Engine::changeProgram(uint8_t program) noexcept
+{
   uint16_t msbBank = channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectMSB);
   uint16_t lsbBank = channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectLSB);
   uint16_t bank = msbBank * 128u + lsbBank;

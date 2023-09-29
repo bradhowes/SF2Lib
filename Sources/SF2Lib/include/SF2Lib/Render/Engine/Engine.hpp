@@ -169,7 +169,13 @@ public:
   /// @returns true if Engine is in polyphonic mode (default)
   bool polyphonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::poly; }
 
-  static std::vector<uint8_t> createLoadSysExec(const std::string& path, int preset) noexcept;
+  static std::vector<uint8_t> createLoadSysExec(const std::string& path, size_t preset) noexcept;
+
+  static std::vector<uint8_t> createUseIndex(size_t index) noexcept;
+
+  static std::vector<uint8_t> createResetCommand() noexcept;
+
+  static std::vector<uint8_t> createUseBankProgram(uint16_t bank, uint8_t program) noexcept;
 
 private:
 
@@ -301,6 +307,9 @@ private:
   void startVoice(const Config& config) noexcept;
   OldestActiveVoiceCache::iterator stopVoice(size_t voiceIndex) noexcept;
   void notifyActiveVoicesChannelStateChanged() noexcept;
+
+  void processChannelMessage(MIDI::ControlChange cc, uint8_t value) noexcept;
+
   void processControlChange(MIDI::ControlChange cc, uint8_t value) noexcept;
 
   void changeProgram(uint8_t program) noexcept;
