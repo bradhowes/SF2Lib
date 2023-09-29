@@ -74,6 +74,14 @@ struct TestEngineHarness {
 
   Engine& engine() noexcept { return engine_; }
 
+  SF2::IO::File::LoadResponse load(const std::string& path, size_t index) noexcept {
+    return engine_.load(path, index);
+  }
+
+  void usePreset(size_t index) { engine_.usePreset(index); }
+
+  void usePreset(uint16_t bank, uint16_t program) { engine_.usePreset(bank, program); };
+
   AVAudioFrameCount maxFramesToRender() const noexcept { return maxFramesToRender_; }
 
   AVAudioPCMBuffer* dryBuffer() const noexcept { return dryBuffer_; }

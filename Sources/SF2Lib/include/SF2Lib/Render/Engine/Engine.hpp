@@ -19,6 +19,7 @@
 #include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
 
+struct TestEngineHarness;
 
 namespace SF2::Render::Engine {
 
@@ -81,35 +82,8 @@ public:
   /// @returns name of the active preset or empty string if none is active
   std::string activePresetName() const noexcept;
 
-  /**
-   Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
-   one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
-
-   @param path the file to load from
-   @param index the preset to make active
-   @returns true if the loading was successful
-   */
-  IO::File::LoadResponse load(const std::string& path, size_t index) noexcept;
-
   /// @returns number of presets available.
   size_t presetCount() const noexcept { return presets_.size(); }
-
-  /**
-   Activate the preset at the given index. NOTE: this is not thread-safe. When running in a render thread, one should
-   use the program controller change MIDI command to perform a preset change.
-
-   @param index the preset to use
-   */
-  void usePreset(size_t index);
-
-  /**
-   Activate the preset at the given bank/program. NOTE: this is not thread-safe. When running in a render thread,
-   one should use the bank/program controller change MIDI commands to perform a preset change.
-
-   @param bank the bank to use
-   @param program the program in the bank to use
-   */
-  void usePreset(uint16_t bank, uint16_t program);
 
   /// @return the number of active voices
   size_t activeVoiceCount() const noexcept { return oldestActive_.size(); }
@@ -196,8 +170,35 @@ public:
   bool polyphonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::poly; }
 
   static std::unique_ptr<AUMIDIEvent> createLoadFromMIDIEvent(const std::string& path, int preset) noexcept;
-  
+
 private:
+
+  /**
+   Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
+   one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
+
+   @param path the file to load from
+   @param index the preset to make active
+   @returns true if the loading was successful
+   */
+  IO::File::LoadResponse load(const std::string& path, size_t index) noexcept;
+
+  /**
+   Activate the preset at the given index. NOTE: this is not thread-safe. When running in a render thread, one should
+   use the program controller change MIDI command to perform a preset change.
+
+   @param index the preset to use
+   */
+  void usePreset(size_t index);
+
+  /**
+   Activate the preset at the given bank/program. NOTE: this is not thread-safe. When running in a render thread,
+   one should use the bank/program controller change MIDI commands to perform a preset change.
+
+   @param bank the bank to use
+   @param program the program in the bank to use
+   */
+  void usePreset(uint16_t bank, uint16_t program);
 
   /**
    Turn off all voices, making them all available for rendering. NOTE: this is not thread-safe. When running in a
@@ -336,7 +337,7 @@ private:
   os_signpost_id_t startVoiceSignpost_;
   os_signpost_id_t stopVoiceSignpost_;
 
-  friend class EngineTestInjector;
+  friend struct ::TestEngineHarness;
   friend class Parameters;
 };
 

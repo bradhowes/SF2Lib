@@ -29,7 +29,7 @@ using namespace SF2::Render;
 - (void)testVoiceRepeatedRenderGeneratesSameOutputRolandPiano {
   auto harness{TestEngineHarness{48000.0, 96, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder}};
   auto& engine{harness.engine()};
-  engine.load(contexts.context2.path(), 0);
+  harness.load(contexts.context2.path(), 0);
 
   int seconds = 4;
   int repetitions = 14;
