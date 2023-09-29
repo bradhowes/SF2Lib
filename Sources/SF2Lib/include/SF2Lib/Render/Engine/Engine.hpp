@@ -169,7 +169,7 @@ public:
   /// @returns true if Engine is in polyphonic mode (default)
   bool polyphonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::poly; }
 
-  static std::unique_ptr<AUMIDIEvent> createLoadFromMIDIEvent(const std::string& path, int preset) noexcept;
+  static std::vector<uint8_t> createLoadSysExec(const std::string& path, int preset) noexcept;
 
 private:
 
@@ -189,7 +189,7 @@ private:
 
    @param index the preset to use
    */
-  void usePreset(size_t index);
+  void usePresetWithIndex(size_t index);
 
   /**
    Activate the preset at the given bank/program. NOTE: this is not thread-safe. When running in a render thread,
@@ -198,7 +198,7 @@ private:
    @param bank the bank to use
    @param program the program in the bank to use
    */
-  void usePreset(uint16_t bank, uint16_t program);
+  void usePresetWithBankProgram(uint16_t bank, uint16_t program);
 
   /**
    Turn off all voices, making them all available for rendering. NOTE: this is not thread-safe. When running in a
@@ -301,10 +301,14 @@ private:
   void startVoice(const Config& config) noexcept;
   OldestActiveVoiceCache::iterator stopVoice(size_t voiceIndex) noexcept;
   void notifyActiveVoicesChannelStateChanged() noexcept;
-  void processControlChange(MIDI::ControlChange cc, int value) noexcept;
-  void changeProgram(uint16_t program) noexcept;
+  void processControlChange(MIDI::ControlChange cc, uint8_t value) noexcept;
+
+  void changeProgram(uint8_t program) noexcept;
+
   void loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept;
+
   void applySostenutoPedal() noexcept;
+
   void releaseVoices() noexcept;
 
   Float sampleRate_;

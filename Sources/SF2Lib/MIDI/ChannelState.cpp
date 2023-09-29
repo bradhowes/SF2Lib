@@ -48,7 +48,7 @@ ChannelState::reset() noexcept
 }
 
 bool
-ChannelState::decodeNRPN(MIDI::ControlChange cc, int value) noexcept
+ChannelState::decodeNRPN(MIDI::ControlChange cc, uint8_t value) noexcept
 {
   switch (cc) {
     case MIDI::ControlChange::nrpnMSB:
@@ -130,7 +130,7 @@ ChannelState::decodeNRPN(MIDI::ControlChange cc, int value) noexcept
 }
 
 bool
-ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, int value) noexcept
+ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, uint8_t value) noexcept
 {
   if (decodeNRPN(cc, value)) return true;
 

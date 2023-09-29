@@ -78,9 +78,9 @@ struct TestEngineHarness {
     return engine_.load(path, index);
   }
 
-  void usePreset(size_t index) { engine_.usePreset(index); }
+  void usePresetWithIndex(size_t index) { engine_.usePresetWithIndex(index); }
 
-  void usePreset(uint16_t bank, uint16_t program) { engine_.usePreset(bank, program); };
+  void usePresetWithBankProgram(uint16_t bank, uint16_t program) { engine_.usePresetWithBankProgram(bank, program); };
 
   AVAudioFrameCount maxFramesToRender() const noexcept { return maxFramesToRender_; }
 
@@ -99,6 +99,15 @@ struct TestEngineHarness {
   AUValue lastDrySample(int channel) noexcept { return dryFacet_.busBuffers()[channel][-1]; }
   AUValue lastChorusSample(int channel) noexcept { return chorusFacet_.busBuffers()[channel][-1]; }
   AUValue lastReverbSample(int channel) noexcept { return reverbFacet_.busBuffers()[channel][-1]; }
+
+  void sendRaw(const std::vector<uint8_t>& data) noexcept {
+    auto rawEvent = std::vector<uint8_t>(sizeof(AUMIDIEvent) + data.size(), uint8_t(0));
+    AUMIDIEvent& event = *reinterpret_cast<AUMIDIEvent*>(rawEvent.data());
+    event.eventSampleTime = AUEventSampleTimeImmediate;
+    event.length = data.size();
+    ::memcpy(event.data, data.data(), data.size());
+    engine_.doMIDIEvent(event);
+  }
 
   void sendNoteOn(uint8_t note, uint8_t velocity = 64) noexcept {
     AUMIDIEvent midiEvent;

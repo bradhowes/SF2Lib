@@ -124,15 +124,15 @@ using namespace SF2::Render::Engine;
 
   XCTAssertTrue(engine.hasActivePreset());
   XCTAssertEqual("Piano 1", engine.activePresetName());
-  harness.usePreset(1);
+  harness.usePresetWithIndex(1);
   XCTAssertTrue(engine.hasActivePreset());
   std::cout << engine.activePresetName() << '\n';
   XCTAssertEqual("Piano 2", engine.activePresetName());
-  harness.usePreset(2);
+  harness.usePresetWithIndex(2);
   XCTAssertTrue(engine.hasActivePreset());
   std::cout << engine.activePresetName() << '\n';
   XCTAssertEqual("Piano 3", engine.activePresetName());
-  harness.usePreset(9999);
+  harness.usePresetWithIndex(9999);
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqual("", engine.activePresetName());
 }
@@ -142,29 +142,29 @@ using namespace SF2::Render::Engine;
   auto& engine{harness.engine()};
   XCTAssertEqual(harness.load(contexts.context0.path(), 0), SF2::IO::File::LoadResponse::ok);
 
-  harness.usePreset(0, 0);
+  harness.usePresetWithBankProgram(0, 0);
   XCTAssertTrue(engine.hasActivePreset());
   XCTAssertEqual("Piano 1", engine.activePresetName());
-  harness.usePreset(0, 1);
+  harness.usePresetWithBankProgram(0, 1);
   XCTAssertTrue(engine.hasActivePreset());
   std::cout << engine.activePresetName() << '\n';
   XCTAssertEqual("Piano 2", engine.activePresetName());
-  harness.usePreset(128, 56);
+  harness.usePresetWithBankProgram(128, 56);
   XCTAssertTrue(engine.hasActivePreset());
   XCTAssertEqual("SFX", engine.activePresetName());
-  harness.usePreset(-1, -1);
+  harness.usePresetWithBankProgram(-1, -1);
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqual("", engine.activePresetName());
-  harness.usePreset(-1, 0);
+  harness.usePresetWithBankProgram(-1, 0);
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqual("", engine.activePresetName());
-  harness.usePreset(0, -1);
+  harness.usePresetWithBankProgram(0, -1);
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqual("", engine.activePresetName());
-  harness.usePreset(129, 0);
+  harness.usePresetWithBankProgram(129, 0);
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqual("", engine.activePresetName());
-  harness.usePreset(0, 128);
+  harness.usePresetWithBankProgram(0, 128);
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqual("", engine.activePresetName());
 }
@@ -1296,8 +1296,8 @@ using namespace SF2::Render::Engine;
   NSLog(@"path: %@", path);
   std::string tmp([path cStringUsingEncoding: NSUTF8StringEncoding],
                   [path lengthOfBytesUsingEncoding: NSUTF8StringEncoding]);
-  auto event = engine.createLoadFromMIDIEvent(tmp, 234);
-  engine.doMIDIEvent(*event);
+  auto payload = engine.createLoadSysExec(tmp, 234);
+  harness.sendRaw(payload);
   std::cout << engine.activePresetName() << '\n';
   XCTAssertEqual(std::string("SFX"), engine.activePresetName());
 }

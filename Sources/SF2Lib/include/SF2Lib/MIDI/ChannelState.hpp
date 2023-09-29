@@ -38,10 +38,7 @@ public:
    @param key the key (note) to set
    @param value the pressure value to record
    */
-  void setNotePressure(int key, int value) noexcept {
-    assert(key >= 0 && key <= Note::Max);
-    checkedVectorIndexing(notePressureValues_, key) = value;
-  }
+  void setNotePressure(int key, uint8_t value) noexcept { checkedVectorIndexing(notePressureValues_, key) = value; }
 
   /**
    Get the pressure for a given key.
@@ -49,20 +46,17 @@ public:
    @param key the key to get
    @returns the current pressure value for a key
    */
-  int notePressure(int key) const noexcept {
-    assert(key >= 0 && key <= Note::Max);
-    return checkedVectorIndexing(notePressureValues_, key);
-  }
+  uint8_t notePressure(int key) const noexcept { return checkedVectorIndexing(notePressureValues_, key); }
 
   /**
    Set the channel pressure.
 
    @param value the pressure value to record
    */
-  void setChannelPressure(int value) noexcept { channelPressure_ = value; }
+  void setChannelPressure(uint8_t value) noexcept { channelPressure_ = value; }
 
   /// @returns the current channel pressure
-  int channelPressure() const noexcept { return channelPressure_; }
+  uint8_t channelPressure() const noexcept { return channelPressure_; }
 
   /**
    Set the pitch wheel value. For MIDI v1 this is a 14-bit value [0-8191] and at rest, it should report out a value
@@ -94,7 +88,7 @@ public:
    @param id the controller ID
    @param value the value to set for the controller
    */
-  bool setContinuousControllerValue(MIDI::ControlChange id, int value) noexcept;
+  bool setContinuousControllerValue(MIDI::ControlChange id, uint8_t value) noexcept;
 
   /**
    Get a continuous controller value.
@@ -102,7 +96,7 @@ public:
    @param cc the controller ID to get
    @returns the controller value
    */
-  int continuousControllerValue(MIDI::ControlChange cc) const noexcept { return continuousControllerValues_[cc]; }
+  uint8_t continuousControllerValue(MIDI::ControlChange cc) const noexcept { return continuousControllerValues_[cc]; }
 
   /**
    Get the NRPN value for associated with a generator.
@@ -133,16 +127,16 @@ public:
   void dump() const noexcept;
 
 private:
-  using ContinuousControllerValues = EnumIndexableValueArray<int, ControlChange, 128>;
-  using NotePressureValues = std::array<int, Note::Max + 1>;
+  using ContinuousControllerValues = EnumIndexableValueArray<uint8_t, ControlChange, 128>;
+  using NotePressureValues = std::array<uint8_t, Note::Max + 1>;
 
-  bool decodeNRPN(MIDI::ControlChange cc, int value) noexcept;
+  bool decodeNRPN(MIDI::ControlChange cc, uint8_t value) noexcept;
 
   ContinuousControllerValues continuousControllerValues_{};
   NotePressureValues notePressureValues_{};
   Entity::Generator::GeneratorValueArray<int> nrpnValues_{};
 
-  int channelPressure_{0};
+  uint8_t channelPressure_{0};
   int pitchWheelValue_{0};
   int pitchWheelSensitivity_{200};
   size_t nrpnIndex_{0};

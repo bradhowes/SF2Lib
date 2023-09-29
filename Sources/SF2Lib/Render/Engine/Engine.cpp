@@ -57,13 +57,13 @@ Engine::load(const std::string& path, size_t index) noexcept
     file_.swap(file);
     presets_.build(*file_);
     os_log_info(log_, "load - built %zu presets", presets_.size());
-    usePreset(index);
+    usePresetWithIndex(index);
   }
   return response;
 }
 
 void
-Engine::usePreset(size_t index)
+Engine::usePresetWithIndex(size_t index)
 {
   setBypass(true);
   allOff();
@@ -77,7 +77,7 @@ Engine::usePreset(size_t index)
 }
 
 void
-Engine::usePreset(uint16_t bank, uint16_t program)
+Engine::usePresetWithBankProgram(uint16_t bank, uint16_t program)
 {
   setBypass(true);
   allOff();
@@ -250,7 +250,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 }
 
 void
-Engine::processControlChange(MIDI::ControlChange cc, int value) noexcept
+Engine::processControlChange(MIDI::ControlChange cc, uint8_t value) noexcept
 {
   auto previousPedalState = channelState_.pedalState();
 
@@ -310,39 +310,28 @@ Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
   load(path, index);
 }
 
-std::unique_ptr<AUMIDIEvent>
-Engine::createLoadFromMIDIEvent(const std::string& path, int preset) noexcept
+std::vector<uint8_t>
+Engine::createLoadSysExec(const std::string& path, int preset) noexcept
 {
   auto encoded = SF2::Utils::Base64::encode(path);
-  auto rawSize = sizeof(AUMIDIEvent) + encoded.size();
-  auto raw = ::malloc(rawSize);
-  ::memset(raw, 0, rawSize);
-  if (raw == nullptr) return nullptr;
-
-  auto event = reinterpret_cast<AUMIDIEvent*>(raw);
-  event->eventSampleTime = AUEventSampleTimeImmediate;
-  event->eventType = AURenderEventMIDISysEx;
-
-  uint16_t dataOffset = 5;
-  event->length = static_cast<uint16_t>(encoded.size()) + dataOffset;
-
-  uint8_t* data = event->data;
+  auto nameOffset = 5;
+  auto size = encoded.size() + size_t(nameOffset);
+  auto data = std::vector<uint8_t>(size, uint8_t(0));
   data[0] = SF2::valueOf(MIDI::CoreEvent::systemExclusive);
   data[1] = 0x7E; // Custom command for SF2Lib
   data[2] = 0x00;
   data[3] = static_cast<uint8_t>(preset / 128);
   data[4] = static_cast<uint8_t>(preset - data[3] * 128);
-  ::memcpy(data + dataOffset, encoded.data(), encoded.size());
-
-  return std::unique_ptr<AUMIDIEvent>(event);
+  std::copy_n(encoded.begin(), encoded.size(), data.begin() + nameOffset);
+  return data;
 }
 
 void
-Engine::changeProgram(uint16_t program) noexcept {
-  uint16_t bank = static_cast<uint16_t>(channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectMSB))
-  * 128u +
-  static_cast<uint16_t>(channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectLSB));
-  usePreset(bank, program);
+Engine::changeProgram(uint8_t program) noexcept {
+  uint16_t msbBank = channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectMSB);
+  uint16_t lsbBank = channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectLSB);
+  uint16_t bank = msbBank * 128u + lsbBank;
+  usePresetWithBankProgram(bank, program);
 }
 
 void

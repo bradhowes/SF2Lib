@@ -111,18 +111,18 @@ using namespace SF2::MIDI;
   channel.setContinuousControllerValue(ControlChange::bankSelectMSB, 123);
   XCTAssertEqual(123, channel.continuousControllerValue(ControlChange::bankSelectMSB));
 
-  channel.setContinuousControllerValue(ControlChange::bankSelectMSB, 456);
-  XCTAssertEqual(456, channel.continuousControllerValue(ControlChange::bankSelectMSB));
+  channel.setContinuousControllerValue(ControlChange::bankSelectMSB, 31);
+  XCTAssertEqual(31, channel.continuousControllerValue(ControlChange::bankSelectMSB));
 
   for (int index = 0; index < 128; ++index) {
     if (index < 0x62 || index > 0x65){
-      channel.setContinuousControllerValue(ControlChange(index), -50 + index);
+      channel.setContinuousControllerValue(ControlChange(index), index);
     }
   }
 
   for (int index = 0; index < 128; index += 10) {
     if (index < 0x62 || index > 0x65) {
-      XCTAssertEqual(-50 + index, channel.continuousControllerValue(ControlChange(index)));
+      XCTAssertEqual(index, channel.continuousControllerValue(ControlChange(index)));
     }
   }
 
