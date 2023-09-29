@@ -2,6 +2,7 @@
 
 #include <AVFoundation/AVFoundation.h>
 #include <iostream>
+#include <vector>
 
 #include <XCTest/XCTest.h>
 
@@ -1279,17 +1280,7 @@ using namespace SF2::Render::Engine;
   auto& engine{harness.engine()};
   engine.load(contexts.context2.path(), 0);
 
-   XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
-
-  auto blob = std::array<char, sizeof(AUMIDIEvent) + 4096>();
-  AUMIDIEvent& midiEvent{*reinterpret_cast<AUMIDIEvent*>(blob.data())};
-
-  uint8_t* pdata = midiEvent.data;
-  pdata[0] = SF2::valueOf(MIDI::CoreEvent::systemExclusive);
-  pdata[1] = 0x7E; // Custom command for SF2Lib
-  pdata[2] = 0x00;
-  pdata[3] = 1;
-  pdata[4] = 106; // preset 234 (last one of the FreeFont)
+  XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
 
   const NSURL* url = contexts.context0.url();
   NSLog(@"URL: %@", url);
@@ -1297,12 +1288,8 @@ using namespace SF2::Render::Engine;
   NSLog(@"path: %@", path);
   std::string tmp([path cStringUsingEncoding: NSUTF8StringEncoding],
                   [path lengthOfBytesUsingEncoding: NSUTF8StringEncoding]);
-  auto encoded = SF2::Utils::Base64::encode(tmp);
-  memcpy(pdata + 5, encoded.data(), encoded.size());
-  midiEvent.length = encoded.size() + 5;
-
-  engine.doMIDIEvent(midiEvent);
-
+  auto event = engine.createLoadFromMIDIEvent(tmp, 234);
+  engine.doMIDIEvent(*event);
   std::cout << engine.activePresetName() << '\n';
   XCTAssertEqual(std::string("SFX"), engine.activePresetName());
 }

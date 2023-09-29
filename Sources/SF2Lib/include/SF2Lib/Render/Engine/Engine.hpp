@@ -195,6 +195,8 @@ public:
   /// @returns true if Engine is in polyphonic mode (default)
   bool polyphonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::poly; }
 
+  static std::unique_ptr<AUMIDIEvent> createLoadFromMIDIEvent(const std::string& path, int preset) noexcept;
+  
 private:
 
   /**

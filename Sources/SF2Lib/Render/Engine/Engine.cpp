@@ -303,10 +303,38 @@ Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
   size_t count = midiEvent.length - 5;
   if (count < 1) return;
 
+  // We have to do this silly dance because AUMIDIEvent only allows indexing into the first three bytes.
   size_t index = (*(&midiEvent.data[0] + 3) * 128) + *(&midiEvent.data[0] + 4);
   auto path = Utils::Base64::decode(&midiEvent.data[0] + 5, count);
   os_log_info(log_, "loadFromMIDI BEGIN - %{public}s index: %zu", path.c_str(), index);
   load(path, index);
+}
+
+std::unique_ptr<AUMIDIEvent>
+Engine::createLoadFromMIDIEvent(const std::string& path, int preset) noexcept
+{
+  auto encoded = SF2::Utils::Base64::encode(path);
+  auto rawSize = sizeof(AUMIDIEvent) + encoded.size();
+  auto raw = ::malloc(rawSize);
+  ::memset(raw, 0, rawSize);
+  if (raw == nullptr) return nullptr;
+
+  auto event = reinterpret_cast<AUMIDIEvent*>(raw);
+  event->eventSampleTime = AUEventSampleTimeImmediate;
+  event->eventType = AURenderEventMIDISysEx;
+
+  uint16_t dataOffset = 5;
+  event->length = static_cast<uint16_t>(encoded.size()) + dataOffset;
+
+  uint8_t* data = event->data;
+  data[0] = SF2::valueOf(MIDI::CoreEvent::systemExclusive);
+  data[1] = 0x7E; // Custom command for SF2Lib
+  data[2] = 0x00;
+  data[3] = static_cast<uint8_t>(preset / 128);
+  data[4] = static_cast<uint8_t>(preset - data[3] * 128);
+  ::memcpy(data + dataOffset, encoded.data(), encoded.size());
+
+  return std::unique_ptr<AUMIDIEvent>(event);
 }
 
 void
