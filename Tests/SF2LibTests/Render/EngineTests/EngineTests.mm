@@ -1750,4 +1750,142 @@ using namespace SF2::Render::Engine;
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 
+- (void)testEngineChangePresetByIndex
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(contexts.context0.path(), 0);
+  XCTAssertEqual("Piano 1", engine.activePresetName());
+  harness.sendRaw(engine.createUseIndex(1));
+  XCTAssertEqual("Piano 2", engine.activePresetName());
+  harness.sendRaw(engine.createUseIndex(128));
+  std::clog << engine.activePresetName() << '\n';
+  XCTAssertEqual("SynthBass101", engine.activePresetName());
+  harness.sendRaw(engine.createUseIndex(engine.presetCount() - 1));
+  std::clog << engine.activePresetName() << '\n';
+  XCTAssertEqual("SFX", engine.activePresetName());
+}
+
+- (void)testEngineChangePresetByBankProgram
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(contexts.context0.path(), 0);
+  XCTAssertEqual("Piano 1", engine.activePresetName());
+  harness.sendRaw(engine.createUseBankProgram(0, 1));
+  std::clog << engine.activePresetName() << '\n';
+  XCTAssertEqual("Piano 2", engine.activePresetName());
+  harness.sendRaw(engine.createUseBankProgram(1, 38));
+  std::clog << engine.activePresetName() << '\n';
+  XCTAssertEqual("SynthBass101", engine.activePresetName());
+  harness.sendRaw(engine.createUseBankProgram(128, 56));
+  std::clog << engine.activePresetName() << '\n';
+  XCTAssertEqual("SFX", engine.activePresetName());
+}
+
+- (void)testEngineAllSoundOff
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(contexts.context0.path(), 0);
+
+  int seconds = 1.0;
+  auto mixer{harness.createMixer(seconds)};
+
+  harness.sendNoteOn(60);
+  XCTAssertEqual(1, engine.activeVoiceCount());
+  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::allSoundOff, 0));
+  XCTAssertEqual(0, engine.activeVoiceCount());
+}
+
+- (void)testEngineAllNotesOff
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(contexts.context0.path(), 0);
+
+  int seconds = 1.0;
+  auto mixer{harness.createMixer(seconds)};
+
+  harness.sendNoteOn(60);
+  XCTAssertEqual(1, engine.activeVoiceCount());
+  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::allNotesOff, 0));
+  XCTAssertEqual(1, engine.activeVoiceCount());
+}
+
+- (void)testEngineResetAllControllers
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(contexts.context0.path(), 0);
+
+  int seconds = 1.0;
+  auto mixer{harness.createMixer(seconds)};
+
+  XCTAssertEqual(0, engine.channelState().continuousControllerValue(MIDI::ControlChange::bankSelectLSB));
+  engine.channelState().setContinuousControllerValue(MIDI::ControlChange::bankSelectLSB, 123u);
+  XCTAssertEqual(123u, engine.channelState().continuousControllerValue(MIDI::ControlChange::bankSelectLSB));
+
+  harness.sendNoteOn(60);
+  XCTAssertEqual(1, engine.activeVoiceCount());
+  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::resetAllControllers, 0));
+  XCTAssertEqual(0, engine.channelState().continuousControllerValue(MIDI::ControlChange::bankSelectLSB));
+  XCTAssertEqual(0, engine.activeVoiceCount());
+}
+
+- (void)testEngineMonoOn
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(contexts.context0.path(), 0);
+
+  XCTAssertFalse(engine.monophonicModeEnabled());
+
+  harness.sendNoteOn(60);
+  XCTAssertEqual(1, engine.activeVoiceCount());
+  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::monoOn, 0));
+  XCTAssertTrue(engine.monophonicModeEnabled());
+  XCTAssertEqual(0, engine.activeVoiceCount());
+}
+
+- (void)testEnginePolyOn
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(contexts.context0.path(), 0);
+
+  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::monoOn, 0));
+  XCTAssertTrue(engine.monophonicModeEnabled());
+
+  harness.sendNoteOn(60);
+  XCTAssertEqual(1, engine.activeVoiceCount());
+  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::polyOn, 0));
+  XCTAssertFalse(engine.monophonicModeEnabled());
+  XCTAssertEqual(0, engine.activeVoiceCount());
+}
+
+- (void)testEngineOmniOff
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(contexts.context0.path(), 0);
+
+  harness.sendNoteOn(60);
+  XCTAssertEqual(1, engine.activeVoiceCount());
+  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::omniOff, 0));
+  XCTAssertEqual(0, engine.activeVoiceCount());
+}
+
+- (void)testEngineOmniOn
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(contexts.context0.path(), 0);
+
+  harness.sendNoteOn(60);
+  XCTAssertEqual(1, engine.activeVoiceCount());
+  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::omniOn, 0));
+  XCTAssertEqual(0, engine.activeVoiceCount());
+}
+
 @end

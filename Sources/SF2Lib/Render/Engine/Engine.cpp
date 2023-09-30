@@ -65,7 +65,6 @@ Engine::load(const std::string& path, size_t index) noexcept
 void
 Engine::usePresetWithIndex(size_t index)
 {
-  setBypass(true);
   allOff();
   if (index >= presets_.size()) {
     // Special case to flag no preset being used.
@@ -73,13 +72,11 @@ Engine::usePresetWithIndex(size_t index)
   }
   activePreset_ = index;
   parameters_.reset();
-  setBypass(false);
 }
 
 void
 Engine::usePresetWithBankProgram(uint16_t bank, uint16_t program)
 {
-  setBypass(true);
   allOff();
   auto index = presets_.locatePresetIndex(bank, program);
   if (index >= presets_.size()) {
@@ -87,19 +84,16 @@ Engine::usePresetWithBankProgram(uint16_t bank, uint16_t program)
   }
   activePreset_ = index;
   parameters_.reset();
-  setBypass(false);
 }
 
 void
 Engine::allOff() noexcept
 {
-  setBypass(true);
   while (!oldestActive_.empty()) {
     auto voiceIndex = oldestActive_.takeOldest();
     voices_[voiceIndex].stop();
     available_.push_back(voiceIndex);
   }
-  setBypass(false);
 }
 
 void
@@ -153,7 +147,15 @@ Engine::applySostenutoPedal() noexcept
 }
 
 void
-Engine::releaseVoices() noexcept
+Engine::releaseKeys() noexcept
+{
+  visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
+    voice.releaseKey(releaseKeyState);
+  }, Voice::ReleaseKeyState{0u, MIDI::ChannelState::PedalState()});
+}
+
+void
+Engine::applyPedals() noexcept
 {
   visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
     voice.releaseKey(releaseKeyState);
@@ -229,7 +231,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 
     case MIDI::CoreEvent::systemExclusive:
       os_log_info(log_, "doMIDIEvent - systemExclusive: %hhX %hhX", midiEvent.data[1], midiEvent.data[2]);
-      if (midiEvent.data[1] == 0x7e && midiEvent.data[midiEvent.length - 1] != 0xF7) {
+      if (midiEvent.data[1] == 0x7e && midiEvent.data[midiEvent.length - 1] == 0xF7) {
         switch (midiEvent.data[2]) {
           case 0x00:
             // System-Exclusive command for loading URL in SF2Engine:
@@ -278,17 +280,19 @@ Engine::processChannelMessage(MIDI::ControlChange channelMessage, uint8_t value)
       channelState_.reset();
       break;
 
-    case MIDI::ControlChange::localControl:
-      break;
+//    case MIDI::ControlChange::localControl:
+//      break;
 
     case MIDI::ControlChange::allNotesOff:
-      allOff();
+      releaseKeys();
       break;
 
     case MIDI::ControlChange::omniOff:
+      allOff();
       break;
 
     case MIDI::ControlChange::omniOn:
+      allOff();
       break;
 
     case MIDI::ControlChange::monoOn:
@@ -336,7 +340,7 @@ Engine::processControlChange(MIDI::ControlChange cc, uint8_t value) noexcept
   }
 
   if (doRelease) {
-    releaseVoices();
+    applyPedals();
   }
 }
 
@@ -356,10 +360,10 @@ Engine::notifyActiveVoicesChannelStateChanged() noexcept
 
 void
 Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
-  size_t count = midiEvent.length - 5;
   const uint8_t* data = midiEvent.data;
   size_t index = data[3] * 128u + data[4];
   if (midiEvent.length > 6) {
+    size_t count = midiEvent.length - 6;
     auto path = Utils::Base64::decode(data + 5, count);
     os_log_info(log_, "loadFromMIDI BEGIN - %{public}s index: %zu", path.c_str(), index);
     load(path, index);
@@ -400,19 +404,42 @@ Engine::createResetCommand() noexcept
 }
 
 std::vector<uint8_t>
+Engine::createChannelMessage(MIDI::ControlChange channelMessage, uint8_t value) noexcept
+{
+  auto data = std::vector<uint8_t>(3, uint8_t(0));
+  data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
+  data[1] = SF2::valueOf(channelMessage);
+  data[2] = value;
+  return data;
+}
+
+std::vector<std::vector<uint8_t>>
 Engine::createUseBankProgram(uint16_t bank, uint8_t program) noexcept
 {
   assert(bank < 128 * 128 && program < 128);
-  auto data = std::vector<uint8_t>(8, uint8_t(0));
+  auto commands = std::vector<std::vector<uint8_t>>();
+  commands.reserve(3);
+
+  auto bankMSB = uint8_t(bank / 128u);
+  auto bankLSB = uint8_t(bank - bankMSB * 128u);
+  auto data = std::vector<uint8_t>(3, uint8_t(0));
   data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
   data[1] = SF2::valueOf(MIDI::ControlChange::bankSelectMSB);
-  data[2] = uint8_t(bank / 128u);
-  data[3] = SF2::valueOf(MIDI::CoreEvent::controlChange);
-  data[4] = SF2::valueOf(MIDI::ControlChange::bankSelectLSB);
-  data[5] = uint8_t(bank - data[2] * 128u);
-  data[6] = SF2::valueOf(MIDI::CoreEvent::programChange);
-  data[7] = program;
-  return data;
+  data[2] = bankMSB;
+  commands.push_back(data);
+
+  data = std::vector<uint8_t>(3, uint8_t(0));
+  data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
+  data[1] = SF2::valueOf(MIDI::ControlChange::bankSelectLSB);
+  data[2] = bankLSB;
+  commands.push_back(data);
+
+  data = std::vector<uint8_t>(2, uint8_t(0));
+  data[0] = SF2::valueOf(MIDI::CoreEvent::programChange);
+  data[1] = program;
+  commands.push_back(data);
+
+  return commands;
 }
 
 void

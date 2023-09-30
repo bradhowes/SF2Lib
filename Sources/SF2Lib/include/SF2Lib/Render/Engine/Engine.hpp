@@ -175,7 +175,9 @@ public:
 
   static std::vector<uint8_t> createResetCommand() noexcept;
 
-  static std::vector<uint8_t> createUseBankProgram(uint16_t bank, uint8_t program) noexcept;
+  static std::vector<std::vector<uint8_t>> createUseBankProgram(uint16_t bank, uint8_t program) noexcept;
+
+  static std::vector<uint8_t> createChannelMessage(MIDI::ControlChange channelMessage, uint8_t value) noexcept;
 
 private:
 
@@ -212,6 +214,8 @@ private:
    */
   void allOff() noexcept;
 
+  void releaseKeys() noexcept;
+  
   /**
    Tell any voices playing the current MIDI key that the key has been released. The voice will continue to render until
    it figures out that it is done.
@@ -287,6 +291,11 @@ private:
   template <typename Visitor>
   void visitActiveVoice(Visitor visitor) noexcept {
     auto releaseKeyState = Voice::ReleaseKeyState{minimumNoteDurationSamples(), channelState_.pedalState()};
+    visitActiveVoice(visitor, releaseKeyState);
+  }
+
+  template <typename Visitor>
+  void visitActiveVoice(Visitor visitor, const Voice::ReleaseKeyState releaseKeyState) noexcept {
     for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
       auto voiceIndex = *pos;
       auto& voice{voices_[voiceIndex]};
@@ -318,7 +327,7 @@ private:
 
   void applySostenutoPedal() noexcept;
 
-  void releaseVoices() noexcept;
+  void applyPedals() noexcept;
 
   Float sampleRate_;
   size_t minimumNoteDurationMilliseconds_{0};

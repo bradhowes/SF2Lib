@@ -116,9 +116,9 @@ public:
    State of control pedals -- those that have ON/OFF values.
    */
   struct PedalState {
-    bool sustainPedalActive;
-    bool sostenutoPedalActive;
-    bool softPedalActive;
+    bool sustainPedalActive{false};
+    bool sostenutoPedalActive{false};
+    bool softPedalActive{false};
   };
 
   /// @returns current state of control pedals.

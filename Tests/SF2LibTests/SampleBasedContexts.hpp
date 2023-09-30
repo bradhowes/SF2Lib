@@ -100,12 +100,18 @@ struct TestEngineHarness {
   AUValue lastChorusSample(int channel) noexcept { return chorusFacet_.busBuffers()[channel][-1]; }
   AUValue lastReverbSample(int channel) noexcept { return reverbFacet_.busBuffers()[channel][-1]; }
 
-  void sendRaw(const std::vector<uint8_t>& data) noexcept {
-    auto rawEvent = std::vector<uint8_t>(sizeof(AUMIDIEvent) + data.size(), uint8_t(0));
+  void sendRaw(const std::vector<std::vector<uint8_t>>& commands) noexcept {
+    for (const auto& command : commands) {
+      sendRaw(command);
+    }
+  }
+
+  void sendRaw(const std::vector<uint8_t>& command) noexcept {
+    auto rawEvent = std::vector<uint8_t>(sizeof(AUMIDIEvent) + command.size(), uint8_t(0));
     AUMIDIEvent& event = *reinterpret_cast<AUMIDIEvent*>(rawEvent.data());
     event.eventSampleTime = AUEventSampleTimeImmediate;
-    event.length = data.size();
-    ::memcpy(event.data, data.data(), data.size());
+    event.length = command.size();
+    ::memcpy(event.data, command.data(), command.size());
     engine_.doMIDIEvent(event);
   }
 
