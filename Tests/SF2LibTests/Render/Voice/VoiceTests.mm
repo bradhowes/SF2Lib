@@ -8,7 +8,7 @@
 #include "../../SampleBasedContexts.hpp"
 
 #include "SF2Lib/Types.hpp"
-#include "SF2Lib/Configuration.h"
+#include "SF2Lib/Configuration.hpp"
 #include "SF2Lib/Render/Preset.hpp"
 #include "SF2Lib/Render/Voice/Sample/Generator.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"

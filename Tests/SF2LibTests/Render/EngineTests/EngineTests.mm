@@ -8,7 +8,7 @@
 
 #include "../../SampleBasedContexts.hpp"
 
-#include "SF2Lib/Configuration.h"
+#include "SF2Lib/Configuration.hpp"
 #include "SF2Lib/Utils/Base64.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
 

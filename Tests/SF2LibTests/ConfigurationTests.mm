@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 
-#import "SF2Lib/Configuration.h"
+#import "SF2Lib/Configuration.hpp"
 
 @interface ConfigurationTests : XCTestCase
 

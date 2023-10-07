@@ -1,6 +1,6 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
-#include "SF2Lib/Configuration.h"
+#include "SF2Lib/Configuration.hpp"
 
 @implementation Configuration
 
