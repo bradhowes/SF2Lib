@@ -21,6 +21,8 @@ struct Engine
                                      AudioBufferList* output, const AURenderEvent* realtimeEventListHead,
                                      AURenderPullInputBlock pullInputBlock);
 
+  std::string activePresetName() const;
+
 private:
   Render::Engine::Engine* impl_;
 };

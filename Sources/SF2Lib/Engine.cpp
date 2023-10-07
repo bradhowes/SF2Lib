@@ -29,3 +29,8 @@ SF2::Engine::processAndRender(const AudioTimeStamp *timestamp, UInt32 frameCount
   return impl_->processAndRender(timestamp, frameCount, outputBusNumber, output, realtimeEventListHead, pullInputBlock);
 }
 
+std::string
+SF2::Engine::activePresetName() const
+{
+  return impl_->activePresetName();
+}
