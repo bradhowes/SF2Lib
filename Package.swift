@@ -30,7 +30,7 @@ let package = Package(
         "Render/README.md"
       ],
       resources: [
-        .process("Resources", localization: nil)
+        .process("Resources")
       ],
       publicHeadersPath: "include",
       cxxSettings: [

@@ -5,7 +5,7 @@
 #include <XCTest/XCTest.h>
 
 #include "../SampleBasedContexts.hpp"
-#include "../TestResources.h"
+#include "../TestResources.hpp"
 
 #include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/Render/Voice/Sample/NormalizedSampleSource.hpp"

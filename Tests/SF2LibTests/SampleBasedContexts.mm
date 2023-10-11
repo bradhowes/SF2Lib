@@ -7,7 +7,7 @@
 #import "SF2Lib/Configuration.hpp"
 
 #include "SampleBasedContexts.hpp"
-#include "TestResources.h"
+#include "TestResources.hpp"
 
 using namespace SF2;
 using namespace SF2::Render;

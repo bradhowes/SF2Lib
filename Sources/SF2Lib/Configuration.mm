@@ -4,6 +4,10 @@
 
 @implementation Configuration
 
+@synthesize config = _config;
+@synthesize loggingBase = _loggingBase;
+@synthesize testsPlayAudio = _testsPlayAudio;
+
 static Configuration* shared = NULL;
 static dispatch_once_t onceToken;
 
@@ -28,7 +32,7 @@ static dispatch_once_t onceToken;
 
 + (nullable NSString* )locate:(NSString*)name ofType:(NSString*)type {
   NSArray<NSBundle*>* allBundles = [NSBundle allBundles];
-  for (int index = 0; index < [allBundles count]; ++index) {
+  for (NSUInteger index = 0; index < [allBundles count]; ++index) {
     NSBundle* bundle = [allBundles objectAtIndex:index];
     NSString* bundleIdent = bundle.bundleIdentifier;
     NSLog(@"bundle: %@ - %@", bundleIdent, bundle.resourcePath);
@@ -37,7 +41,7 @@ static dispatch_once_t onceToken;
       bundle = [[NSBundle alloc] initWithPath:found];
       bundleIdent = bundle.bundleIdentifier;
       NSLog(@"bundle: %@ - %@", bundleIdent, bundle.resourcePath);
-      NSString* found = [bundle pathForResource:name ofType:@"plist"];
+      found = [bundle pathForResource:name ofType:@"plist"];
       if (found != NULL) return found;
     }
   }
@@ -76,15 +80,18 @@ static dispatch_once_t onceToken;
 #endif
 
 - (instancetype)init:(nullable NSDictionary*)overrides {
-  if (self = [super init]) {
+  if ((self = [super init])) {
     NSString* path = [Configuration getConfigurationPath];
     NSMutableDictionary* config = [[NSMutableDictionary alloc] init];
-    [config addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:path]];
-    if (overrides != NULL) {
-      [config addEntriesFromDictionary:overrides];
+    NSDictionary* fromFile = [NSDictionary dictionaryWithContentsOfFile:path];
+    if (fromFile != nullptr) [config addEntriesFromDictionary:fromFile];
+    if (overrides != nullptr) {
+      NSDictionary* ors = overrides;
+      [config addEntriesFromDictionary:ors];
     }
     _config = config;
-    _loggingBase = _config[@"loggingBase"];
+    NSString* loggingBase = _config[@"loggingBase"];
+    _loggingBase = loggingBase != nullptr ? loggingBase : @"???";
     NSNumber* tmp = _config[@"testsPlayAudio"];
     _testsPlayAudio = tmp != NULL && [tmp boolValue] == YES;
   }

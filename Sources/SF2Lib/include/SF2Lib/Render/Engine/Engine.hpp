@@ -100,8 +100,8 @@ public:
    */
   void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
   {
-    os_signpost_interval_begin(log_, renderSignpost_, "renderInto", "voices: %lu frameCount: %d",
-                               oldestActive_.size(), frameCount);
+//    os_signpost_interval_begin(log_, renderSignpost_, "renderInto", "voices: %lu frameCount: %d",
+//                               oldestActive_.size(), frameCount);
     for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
       auto voiceIndex = *pos;
       auto& voice{voices_[voiceIndex]};
@@ -115,8 +115,8 @@ public:
         ++pos;
       }
     }
-    os_signpost_interval_end(log_, renderSignpost_, "renderInto", "voices: %lu frameCount: %d",
-                             oldestActive_.size(), frameCount);
+//    os_signpost_interval_end(log_, renderSignpost_, "renderInto", "voices: %lu frameCount: %d",
+//                             oldestActive_.size(), frameCount);
   }
 
   /// API for EventProcessor

@@ -2,8 +2,11 @@
 
 #pragma once
 
+#include <memory>
 #include <Foundation/Foundation.h>
 #include <CoreAudioKit/CoreAudioKit.h>
+
+#include <string>
 
 namespace SF2 {
 
@@ -24,7 +27,7 @@ struct Engine
   std::string activePresetName() const;
 
 private:
-  Render::Engine::Engine* impl_;
+  std::shared_ptr<Render::Engine::Engine> impl_;
 };
 
 } // SF2::DSP namespaces

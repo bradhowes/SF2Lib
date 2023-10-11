@@ -1,7 +1,7 @@
 // Copyright © 2021 Brad Howes. All rights reserved.
 //
 
-#import "TestResources.h"
+#import "TestResources.hpp"
 
 @implementation TestResources : NSObject
 
