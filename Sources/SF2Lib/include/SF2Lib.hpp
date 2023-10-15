@@ -29,14 +29,19 @@ struct Engine
 
   size_t activeVoiceCount() const noexcept;
 
+  SWIFT_RETURNS_INDEPENDENT_VALUE
   NSData* createLoadSysExec(const std::string& path, size_t preset) const noexcept;
 
+  SWIFT_RETURNS_INDEPENDENT_VALUE
   NSData* createUseIndex(size_t index) const noexcept;
 
+  SWIFT_RETURNS_INDEPENDENT_VALUE
   NSData* createResetCommand() const noexcept;
 
+  SWIFT_RETURNS_INDEPENDENT_VALUE
   NSArray<NSData*>* createUseBankProgram(uint16_t bank, uint8_t program) const noexcept;
 
+  SWIFT_RETURNS_INDEPENDENT_VALUE
   NSData* createChannelMessage(uint8_t channelMessage, uint8_t value) const noexcept;
 
   bool monophonicModeEnabled() const noexcept;
