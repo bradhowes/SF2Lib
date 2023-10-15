@@ -2,6 +2,7 @@
 
 #include "SF2Lib.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
+#include "SF2Lib/MIDI/MIDI.hpp"
 
 namespace Eng = SF2::Render::Engine;
 
@@ -32,7 +33,39 @@ SF2::Engine::processAndRender(const AudioTimeStamp *timestamp, UInt32 frameCount
 }
 
 std::string
-SF2::Engine::activePresetName() const
+SF2::Engine::activePresetName() const noexcept
 {
   return impl_->activePresetName();
+}
+
+NSData*
+SF2::Engine::createLoadSysExec(const std::string& path, size_t preset) const noexcept
+{
+  auto value = SF2::Render::Engine::Engine::createLoadSysExec(path, preset);
+  auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
+  return data;
+}
+
+std::vector<uint8_t>
+SF2::Engine::createUseIndex(size_t index) const noexcept
+{
+  return SF2::Render::Engine::Engine::createUseIndex(index);
+}
+
+std::vector<uint8_t>
+SF2::Engine::createResetCommand() const noexcept
+{
+  return SF2::Render::Engine::Engine::createResetCommand();
+}
+
+std::vector<std::vector<uint8_t>>
+SF2::Engine::createUseBankProgram(uint16_t bank, uint8_t program) const noexcept
+{
+  return SF2::Render::Engine::Engine::createUseBankProgram(bank, program);
+}
+
+std::vector<uint8_t> 
+SF2::Engine::createChannelMessage(uint8_t channelMessage, uint8_t value) const noexcept
+{
+  return SF2::Render::Engine::Engine::createChannelMessage(MIDI::ControlChange(channelMessage), value);
 }
