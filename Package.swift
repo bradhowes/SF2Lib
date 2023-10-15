@@ -172,17 +172,9 @@ let package = Package(
         .define("PLAY_AUDIO", to: "0"),
         .unsafeFlags([
           "-Wno-newline-eof", // resource_bundle_accessor.h is missing newline at end of file
-//          "-x", "objective-c++", // treat source files as Obj-C++ files
         ], .none)
       ],
-      linkerSettings: [
-//        .linkedFramework("Accelerate", .none),
-//        .linkedFramework("AudioToolbox", .none),
-//        .linkedFramework("AVFoundation", .none),
-//        .linkedFramework("QuartzCore", .none),
-//        .linkedFramework("Foundation", .none),
-//        .linkedFramework("XCTest", .none),
-      ]
+      linkerSettings: []
     )
   ],
   cxxLanguageStandard: .cxx20
