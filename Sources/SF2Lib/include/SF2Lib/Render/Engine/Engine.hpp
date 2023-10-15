@@ -100,8 +100,6 @@ public:
    */
   void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
   {
-//    os_signpost_interval_begin(log_, renderSignpost_, "renderInto", "voices: %lu frameCount: %d",
-//                               oldestActive_.size(), frameCount);
     for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
       auto voiceIndex = *pos;
       auto& voice{voices_[voiceIndex]};
@@ -115,8 +113,6 @@ public:
         ++pos;
       }
     }
-//    os_signpost_interval_end(log_, renderSignpost_, "renderInto", "voices: %lu frameCount: %d",
-//                             oldestActive_.size(), frameCount);
   }
 
   /// API for EventProcessor
@@ -346,11 +342,11 @@ private:
   AUParameterTree* parameterTree_{nullptr};
 
   size_t portamentoRateMillisecondsPerSemitone_{100};
-  PhonicMode phonicMode_{PhonicMode::poly};
+  std::atomic<PhonicMode> phonicMode_{PhonicMode::poly};
 
-  bool oneVoicePerKeyModeEnabled_{false};
-  bool portamentoModeEnabled_{false};
-  bool retriggerModeEnabled_{true};
+  std::atomic<bool> oneVoicePerKeyModeEnabled_{false};
+  std::atomic<bool> portamentoModeEnabled_{false};
+  std::atomic<bool> retriggerModeEnabled_{true};
 
   os_log_t log_;
   os_signpost_id_t renderSignpost_;

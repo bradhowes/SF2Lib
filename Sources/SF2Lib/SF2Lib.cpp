@@ -46,26 +46,73 @@ SF2::Engine::createLoadSysExec(const std::string& path, size_t preset) const noe
   return data;
 }
 
-std::vector<uint8_t>
+NSData*
 SF2::Engine::createUseIndex(size_t index) const noexcept
 {
-  return SF2::Render::Engine::Engine::createUseIndex(index);
+  auto value = SF2::Render::Engine::Engine::createUseIndex(index);
+  auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
+  return data;
 }
 
-std::vector<uint8_t>
+NSData*
 SF2::Engine::createResetCommand() const noexcept
 {
-  return SF2::Render::Engine::Engine::createResetCommand();
+  auto value = SF2::Render::Engine::Engine::createResetCommand();
+  auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
+  return data;
 }
 
-std::vector<std::vector<uint8_t>>
+NSArray<NSData*>*
 SF2::Engine::createUseBankProgram(uint16_t bank, uint8_t program) const noexcept
 {
-  return SF2::Render::Engine::Engine::createUseBankProgram(bank, program);
+  auto value = SF2::Render::Engine::Engine::createUseBankProgram(bank, program);
+  auto data = [[NSMutableArray alloc] initWithCapacity:value.size()];
+  for (const auto& msg : value) {
+    [data addObject:[[NSMutableData alloc] initWithBytes:msg.data() length:msg.size()]];
+  }
+  return data;
 }
 
-std::vector<uint8_t> 
-SF2::Engine::createChannelMessage(uint8_t channelMessage, uint8_t value) const noexcept
+NSData*
+SF2::Engine::createChannelMessage(uint8_t channelMessage, uint8_t content) const noexcept
 {
-  return SF2::Render::Engine::Engine::createChannelMessage(MIDI::ControlChange(channelMessage), value);
+  auto value = SF2::Render::Engine::Engine::createChannelMessage(MIDI::ControlChange(channelMessage), content );
+  auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
+  return data;
+}
+
+size_t
+SF2::Engine::activeVoiceCount() const noexcept
+{
+  return impl_->activeVoiceCount();
+}
+
+bool
+SF2::Engine::monophonicModeEnabled() const noexcept
+{
+  return impl_->monophonicModeEnabled();
+}
+
+bool
+SF2::Engine::polyphonicModeEnabled() const noexcept
+{
+  return impl_->polyphonicModeEnabled();
+}
+
+bool
+SF2::Engine::portamentoModeEnabled() const noexcept
+{
+  return impl_->portamentoModeEnabled();
+}
+
+bool
+SF2::Engine::oneVoicePerKeyModeEnabled() const noexcept
+{
+  return impl_->oneVoicePerKeyModeEnabled();
+}
+
+bool
+SF2::Engine::retriggerModeEnabled() const noexcept
+{
+  return impl_->retriggerModeEnabled();
 }
