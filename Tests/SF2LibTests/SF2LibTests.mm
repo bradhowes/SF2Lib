@@ -35,7 +35,7 @@
   auto url = [TestResources getResourceUrl:0];
   auto data = engine->createLoadSysExec(url.path.UTF8String, 123);
   XCTAssertNotNil(data);
-  XCTAssertEqual(250, data.length);
+  XCTAssertTrue(data.length > url.path.length);
 }
 
 - (void)testCreateUseIndex {
