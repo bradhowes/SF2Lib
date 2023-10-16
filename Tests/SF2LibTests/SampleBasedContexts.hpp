@@ -212,26 +212,19 @@ struct PresetTestContextBase
   }
 
   static inline const SF2::Float epsilon = epsilonValue();
-  static NSURL* getUrl(int urlIndex);
-  static std::string getPath(int urlIndex);
   static BOOL playAudioInTests();
 
   PresetTestContextBase(int urlIndex, SF2::Float sampleRate)
   :
-  url_{getUrl(urlIndex)},
-  file_{url_.path.UTF8String},
-  presets_{},
-  sampleRate_{sampleRate}
+  urlIndex_{urlIndex}, sampleRate_{sampleRate}, presets_{}
   {
-    auto response = file_.load();
-    if (response != SF2::IO::File::LoadResponse::ok) throw response;
-    presets_.build(file_);
+    presets_.build(getFile(urlIndex));
   }
 
   const SF2::Render::Preset& preset(int presetIndex) const {
     const auto& p{presets_[presetIndex].configuration()};
     std::cout << "Using preset: " << presetIndex << " " << p.name() << " " << p.bank() << "/" << p.program()
-    << " " << url_.path.UTF8String << std::endl;
+    << " " << getUrl(urlIndex_).path.UTF8String << std::endl;
     return presets_[presetIndex];
   }
 
@@ -260,16 +253,18 @@ struct PresetTestContextBase
     return makeState(found[0]);
   }
 
-  const NSURL* url() const { return url_; }
-  const std::string path() const { return url_.path.UTF8String; }
-  const SF2::IO::File& file() const { return file_; }
-  SF2::Float sampleRate() const { return sampleRate_; }
+  const NSURL* url() const { return getUrl(urlIndex_); }
+  const std::string path() const { return url().path.UTF8String; }
+  const SF2::IO::File& file() const { return getFile(urlIndex_); }
+  int fd() const { return ::open(path().c_str(), O_RDONLY); }
 
-  /// @return open file descriptor to the SF2 file
-  int fd() const { return ::open(url_.path.UTF8String, O_RDONLY); }
+private:
+  static NSURL* getUrl(int urlIndex);
+  static SF2::IO::File& getFile(int urlIndex);
 
-  NSURL* url_;
-  SF2::IO::File file_;
+  // SF2::Float sampleRate() const { return sampleRate_; }
+
+  int urlIndex_;
   SF2::Render::PresetCollection presets_;
   SF2::MIDI::ChannelState channelState_;
   SF2::Float sampleRate_;

@@ -52,17 +52,9 @@ File::load() noexcept
 {
   if (fd_ != -1) return LoadResponse::ok;
 
-  // FIXME: this will not work one iOS devices I do not think
-  // Strip off the 'file://' bit if present.
-  auto pos = path_.find("file://");
-  auto c_path = path_.c_str() + (pos == std::string::npos ? 0 : 7);
-
-  std::clog << "trying to open: " << c_path << '\n';
+  auto c_path = path_.c_str();
   auto fd = Closer(::open(c_path, O_RDONLY));
-  if (!fd.is_valid()) {
-    std::clog << "failed to open - " << strerror(errno) << '\n';
-    return LoadResponse::notFound;
-  }
+  if (!fd.is_valid()) return LoadResponse::notFound;
 
   off_t fileSize = ::lseek(*fd, 0, SEEK_END);
   if (fileSize < 16) return LoadResponse::invalidFormat;

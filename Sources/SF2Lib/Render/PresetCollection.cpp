@@ -40,7 +40,6 @@ PresetCollection::operator[](size_t index) const noexcept
 size_t
 PresetCollection::locatePresetIndex(uint16_t bank, uint16_t program) const noexcept
 {
-
   // Search for the first entry that is not less than the value being searched for (uses binary search).
   Entity::Preset config{bank, program};
   auto found = std::lower_bound(presets_.begin(), presets_.end(), config,

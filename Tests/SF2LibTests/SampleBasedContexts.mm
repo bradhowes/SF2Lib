@@ -17,9 +17,9 @@ NSURL* PresetTestContextBase::getUrl(int urlIndex)
   return [TestResources getResourceUrl:urlIndex];
 }
 
-std::string PresetTestContextBase::getPath(int urlIndex)
+SF2::IO::File& PresetTestContextBase::getFile(int urlIndex)
 {
-  return [TestResources getResourceUrl:urlIndex].path.UTF8String;
+  return [TestResources getFile:urlIndex];
 }
 
 BOOL PresetTestContextBase::playAudioInTests() {
