@@ -12,30 +12,32 @@
 
 using namespace SF2::IO;
 
-File::File(std::string path) :
-path_{path},
-fd_{-1}
-{
-}
-
-File::File(const char* path) : File::File(std::string(path)) {}
-
-File::~File() noexcept
-{
-  if (fd_ >= 0) ::close(fd_);
-}
-
-
+// Manage a file descriptor that was opened elsewhere. If still held upon destruction, close it.
 struct Closer
 {
+  /**
+   Constructor that takes ownership of the given file descriptor.
+
+   @param fd the file descriptor to manage
+   */
   explicit Closer(int fd) : fd_{fd} {}
 
+  /**
+   Destructor that closes the held file descriptor if it is valid.
+   */
   ~Closer() { if (is_valid()) ::close(fd_); }
 
+  /// returns the held file descriptor
   int operator *() const { return fd_; }
 
+  /// returns true if the held file descriptor is not -1
   bool is_valid() const { return fd_ != -1; }
 
+  /**
+   Release ownership of the held file descriptor.
+
+   @returns the file descriptor
+   */
   int release() noexcept {
     int tmp = -1;
     std::swap(tmp, fd_);
@@ -47,12 +49,28 @@ private:
 };
 
 
+File::File(std::string path) : path_{path}, fd_{-1} {}
+
+File::File(const char* path) : File::File(std::string(path)) {}
+
+File::~File() noexcept { if (fd_ >= 0) ::close(fd_); }
+
 File::LoadResponse
 File::load() noexcept
 {
+  static const std::string prefix = "file://";
+
   if (fd_ != -1) return LoadResponse::ok;
 
-  auto c_path = path_.c_str();
+  std::cout << "loading: " << path_ << std::endl;
+
+  // NOTE: not sure about this being the best approach when on iOS. Probably better to use Foundation FileManager to
+  // open the file and hopefully obtain a low-level file descriptor that we can then use to process the contents.
+  auto offset = path_.find(prefix) == std::string::npos ? 0 : prefix.size();
+  auto c_path = path_.c_str() + offset;
+
+  std::cout << "loading: " << c_path << std::endl;
+
   auto fd = Closer(::open(c_path, O_RDONLY));
   if (!fd.is_valid()) return LoadResponse::notFound;
 
