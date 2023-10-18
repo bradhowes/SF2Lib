@@ -13,6 +13,11 @@
 #include "SF2Lib/Render/Voice/State/GenValue.hpp"
 #include "SF2Lib/Render/Voice/State/Modulator.hpp"
 
+namespace SF2::Render::Zone {
+class Instrument;
+class Preset;
+}
+
 namespace SF2::Render::Voice::State {
 
 class Config;
@@ -33,6 +38,9 @@ public:
   using Amount = Entity::Generator::Amount;
   using Index = Entity::Generator::Index;
   using Definition = Entity::Generator::Definition;
+
+  struct Tester;
+  friend struct Tester;
 
   /**
    Create new state vector with a given sample rate.
@@ -82,31 +90,28 @@ public:
   void prepareForVoice(const Config& config) noexcept;
 
   /**
-   Set a generator value. Should only be called with a value from an InstrumentZone. It can be set twice, once by a
-   global instrument generator setting, and again by a non-global instrument generator setting, the latter one
-   replacing the first.
+   Configure the state with the settings from the given instrument. Sets absolute generator values and creates
+   any custom modulators defined in the instrument.
+
+   @param instrument the instrument to use
+   */
+
+  void configureWith(const Zone::Instrument& instrument) noexcept;
+
+  /**
+   Refine the state with settings from the given preset. Adds adjustments to the generator values.
+
+   @param preset the preset to use
+   */
+  void configureWith(const Zone::Preset& preset) noexcept;
+
+  /**
+   Set a generator value with a value from a MIDI NPRN controller or the AUParameterTree.
 
    @param gen the generator to set
    @param value the value to use
    */
-  void setValue(Index gen, int value) noexcept { gens_[gen].setValue(value); }
-
-  /**
-   Set a generator's adjustment value. Should only be called with a value from a PresetZone. It can be invoked twice,
-   once by a global preset setting, and again by a non-global preset generator setting, the latter one replacing the
-   first.
-
-   @param gen the generator to set
-   @param value the value to use
-   */
-  void setAdjustment(Index gen, int value) noexcept { gens_[gen].setAdjustment(value); }
-
-  /**
-   Install a modulator.
-
-   @param modulator the modulator to install
-   */
-  void addModulator(const Entity::Modulator::Modulator& modulator) noexcept;
+  void setLiveValue(Index gen, int value) noexcept { gens_[gen].setLiveValue(value); }
 
   /**
    Obtain a generator value without any adjustments from modulators. This is the sum of values set by zone generator
@@ -161,6 +166,34 @@ public:
   void dump() noexcept;
 
 private:
+
+  /**
+   Set a generator value. Should only be called with a value from an InstrumentZone. It can be set twice, once by a
+   global instrument generator setting, and again by a non-global instrument generator setting, the latter one
+   replacing the first.
+
+   @param gen the generator to set
+   @param value the value to use
+   */
+  void setValue(Index gen, int value) noexcept { gens_[gen].setValue(value); }
+
+  /**
+   Set a generator's adjustment value. Should only be called with a value from a PresetZone. It can be invoked twice,
+   once by a global preset setting, and again by a non-global preset generator setting, the latter one replacing the
+   first.
+
+   @param gen the generator to set
+   @param value the value to use
+   */
+  void setAdjustment(Index gen, int value) noexcept { gens_[gen].setAdjustment(value); }
+
+  /**
+   Install a modulator.
+
+   @param modulator the modulator to install
+   */
+  void addModulator(const Entity::Modulator::Modulator& modulator) noexcept;
+
   void clear() noexcept;
 
   Entity::Generator::GeneratorValueArray<GenValue> gens_;

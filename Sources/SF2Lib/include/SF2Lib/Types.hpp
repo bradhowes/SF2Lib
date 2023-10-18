@@ -139,4 +139,20 @@ public:
   }
 };
 
+/**
+ Convert a boolean value into an AUValue (float)
+
+ @param value the value to convert
+ @returns 1.0 for `true` and 0.0 for `false`
+ */
+inline static AUValue fromBool(bool value) noexcept { return value ? 1.0 : 0.0; }
+
+/**
+ Convert an AUValue (float) into a boolean value
+
+ @param value the value to convert
+ @returns 1.0 for `true` and 0.0 for `false`
+ */
+inline static bool toBool(AUValue value) noexcept { return value >= 0.5; }
+
 } // end namespace SF2

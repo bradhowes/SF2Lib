@@ -18,6 +18,8 @@ class Engine;
 class Parameters
 {
 public:
+  using Index = Entity::Generator::Index;
+  using State = Voice::State::State;
 
   enum struct EngineParameterAddress : AUParameterAddress
   {
@@ -43,11 +45,20 @@ public:
   void reset() noexcept;
 
   /**
+   Set a parameter value due to an AUParameterTree entry change. Note that this is called from the real-time
+   render thread.
+
+   @param index the index of the generator that is being changed
+   @param value the new value for the generator
+   */
+  void setLiveValue(Index index, int value) noexcept;
+
+  /**
    Apply any changed values to the given voice state.
 
    @param state the state to update
    */
-  void applyAll(SF2::Render::Voice::State::State& state) noexcept;
+  void applyChanged(State& state) noexcept;
 
   /**
    Apply one changed value to the given voice state.
@@ -55,14 +66,15 @@ public:
    @param state the state to update
    @param index the generator to update
    */
-  void applyOne(SF2::Render::Voice::State::State& state, Entity::Generator::Index index) noexcept;
+  void applyOne(State& state, Index index) noexcept;
 
+  /// @returns the AUParameterTree defined for the engine
   AUParameterTree* parameterTree() const noexcept { return parameterTree_; }
 
 private:
 
   /**
-   Notification that the given AUParameter has a new value
+   Notification that the given AUParameter has a new value.
 
    @param parameter the parameter that changed
    @param value the new value
@@ -77,7 +89,7 @@ private:
    */
   AUValue provideValue(AUParameter* parameter) noexcept;
 
-  static AUParameter* makeGeneratorParameter(Entity::Generator::Index index) noexcept;
+  static AUParameter* makeGeneratorParameter(Index index) noexcept;
 
   static AUParameter* makeBooleanParameter(NSString* name, EngineParameterAddress, bool value) noexcept;
 

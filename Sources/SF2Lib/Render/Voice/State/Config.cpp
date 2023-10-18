@@ -33,14 +33,14 @@ Config::sampleSource() const noexcept
 }
 
 void
-Config::apply(State& state) const noexcept
+Config::applyTo(State& state) const noexcept
 {
   // Use Instrument zones to set absolute values. Do the global state first, then allow instruments to change
   // their settings.
-  if (globalInstrument_ != nullptr) globalInstrument_->apply(state);
-  instrument_.apply(state);
+  if (globalInstrument_ != nullptr) state.configureWith(*globalInstrument_);
+  state.configureWith(instrument_);
 
   // Presets apply refinements to absolute values set from instruments zones above.
-  if (globalPreset_ != nullptr) globalPreset_->refine(state);
-  preset_.refine(state);
+  if (globalPreset_ != nullptr) state.configureWith(*globalPreset_);
+  state.configureWith(preset_);
 }

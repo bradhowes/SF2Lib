@@ -215,31 +215,31 @@ struct EnvelopeTestInjector {
   auto gen = Volume(1);
   gen.configure(state);
 
-  state.setValue(State::State::Index::sustainVolumeEnvelope, 0);
+  sst.setValue(state, State::State::Index::sustainVolumeEnvelope, 0);
   gen.configure(state);
   XCTAssertEqualWithAccuracy(1.0, EnvelopeTestInjector::sustain(gen), epsilon);
 
-  state.setValue(State::State::Index::sustainVolumeEnvelope, 120);
+  sst.setValue(state, State::State::Index::sustainVolumeEnvelope, 120);
   gen.configure(state);
 
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
   XCTAssertEqualWithAccuracy(0.251188643151, EnvelopeTestInjector::sustain(gen), epsilon);
 
-  state.setValue(State::State::Index::sustainVolumeEnvelope, 500);
+  sst.setValue(state, State::State::Index::sustainVolumeEnvelope, 500);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
   XCTAssertEqualWithAccuracy(0.00316227766017, EnvelopeTestInjector::sustain(gen), epsilon);
 
-  state.setValue(State::State::Index::sustainVolumeEnvelope, 900);
+  sst.setValue(state, State::State::Index::sustainVolumeEnvelope, 900);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
   XCTAssertEqualWithAccuracy(3.16227766017e-05, EnvelopeTestInjector::sustain(gen), epsilon);
 
-  state.setValue(State::State::Index::sustainVolumeEnvelope, 960);
+  sst.setValue(state, State::State::Index::sustainVolumeEnvelope, 960);
   gen.configure(state);
   XCTAssertEqualWithAccuracy(1.58489319246e-05, EnvelopeTestInjector::sustain(gen), epsilon);
 
-  state.setValue(State::State::Index::sustainVolumeEnvelope, 1440);
+  sst.setValue(state, State::State::Index::sustainVolumeEnvelope, 1440);
   gen.configure(state);
   XCTAssertEqualWithAccuracy(0.0, EnvelopeTestInjector::sustain(gen), epsilon);
 }
@@ -249,22 +249,22 @@ struct EnvelopeTestInjector {
   auto gen = Modulation(1);
   gen.configure(state);
 
-  state.setValue(State::State::Index::sustainModulatorEnvelope, 0);
+  sst.setValue(state, State::State::Index::sustainModulatorEnvelope, 0);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
   XCTAssertEqualWithAccuracy(1.0, EnvelopeTestInjector::sustain(gen), epsilon);
 
-  state.setValue(State::State::Index::sustainModulatorEnvelope, 100);
+  sst.setValue(state, State::State::Index::sustainModulatorEnvelope, 100);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
   XCTAssertEqualWithAccuracy(0.9, EnvelopeTestInjector::sustain(gen), epsilon);
 
-  state.setValue(State::State::Index::sustainModulatorEnvelope, 500);
+  sst.setValue(state, State::State::Index::sustainModulatorEnvelope, 500);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
   XCTAssertEqualWithAccuracy(0.5, EnvelopeTestInjector::sustain(gen), epsilon);
 
-  state.setValue(State::State::Index::sustainModulatorEnvelope, 900);
+  sst.setValue(state, State::State::Index::sustainModulatorEnvelope, 900);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
   XCTAssertEqualWithAccuracy(0.1, EnvelopeTestInjector::sustain(gen), epsilon);
@@ -275,13 +275,13 @@ struct EnvelopeTestInjector {
   auto gen = Volume(1);
 
   // 1s hold duration
-  s1.setValue(State::State::Index::holdVolumeEnvelope, 0);
+  sst.setValue(s1, State::State::Index::holdVolumeEnvelope, 0);
   gen.configure(s1);
   auto duration = gen.stage(StageIndex::hold).durationInSamples();
   XCTAssertEqualWithAccuracy(s1.sampleRate(), duration, epsilon);
 
   // Track keyboard such that octave increase results in 0.5 x hold duration
-  s1.setValue(State::State::Index::midiKeyToVolumeEnvelopeHold, 100);
+  sst.setValue(s1, State::State::Index::midiKeyToVolumeEnvelopeHold, 100);
   // For key 60 there is no scaling so no adjustment to hold duration
   gen.configure(s1);
   duration = gen.stage(StageIndex::hold).durationInSamples();
@@ -289,24 +289,24 @@ struct EnvelopeTestInjector {
 
   // An octave increase should halve the duration.
   auto s2 = contexts.context2.makeState(0, 72, 32);
-  s2.setValue(State::State::Index::holdVolumeEnvelope, 0);
-  s2.setValue(State::State::Index::midiKeyToVolumeEnvelopeHold, 100);
+  sst.setValue(s2, State::State::Index::holdVolumeEnvelope, 0);
+  sst.setValue(s2, State::State::Index::midiKeyToVolumeEnvelopeHold, 100);
   gen.configure(s2);
   duration = gen.stage(StageIndex::hold).durationInSamples();
   XCTAssertEqualWithAccuracy(s2.sampleRate() / 2.0, duration, epsilon);
 
   // An octave decrease should double the duration.
   auto s3 = contexts.context2.makeState(0, 48, 32);
-  s3.setValue(State::State::Index::holdVolumeEnvelope, 0);
-  s3.setValue(State::State::Index::midiKeyToVolumeEnvelopeHold, 100);
+  sst.setValue(s3, State::State::Index::holdVolumeEnvelope, 0);
+  sst.setValue(s3, State::State::Index::midiKeyToVolumeEnvelopeHold, 100);
   gen.configure(s3);
   duration = gen.stage(StageIndex::hold).durationInSamples();
   XCTAssertEqualWithAccuracy(s3.sampleRate() * 2.0, duration, epsilon);
 
   // Validate spec scenario
   auto s4 = contexts.context2.makeState(0, 36, 32);
-  s4.setValue(State::State::Index::midiKeyToVolumeEnvelopeHold, 50);
-  s4.setValue(State::State::Index::holdVolumeEnvelope, -7973);
+  sst.setValue(s4, State::State::Index::midiKeyToVolumeEnvelopeHold, 50);
+  sst.setValue(s4, State::State::Index::holdVolumeEnvelope, -7973);
   gen.configure(s4);
   duration = gen.stage(StageIndex::hold).durationInSamples();
   XCTAssertEqualWithAccuracy(960, duration, 0.000001);

@@ -4,6 +4,8 @@
 
 #include "SF2Lib/Render/Voice/State/Config.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
+#include "SF2Lib/Render/Zone/Instrument.hpp"
+#include "SF2Lib/Render/Zone/Preset.hpp"
 
 using namespace SF2::Render::Voice::State;
 
@@ -41,10 +43,35 @@ void
 State::prepareForVoice(const Config& config) noexcept
 {
   clear();
-  config.apply(*this);
+  config.applyTo(*this);
   eventKey_ = config.eventKey();
   eventVelocity_ = config.eventVelocity();
   updateStateMods();
+}
+
+void
+State::configureWith(const Zone::Instrument& instrument) noexcept {
+  // Generator state settings
+  std::for_each(instrument.generators().cbegin(), instrument.generators().cend(),
+                [this](const Entity::Generator::Generator& generator) {
+    setValue(generator.index(), generator.value());
+  });
+
+  // Modulator definitions
+  std::for_each(instrument.modulators().cbegin(), instrument.modulators().cend(),
+                [this](const Entity::Modulator::Modulator& modulator) {
+    addModulator(modulator);
+  });
+}
+
+void
+State::configureWith(const Zone::Preset& preset) noexcept {
+  std::for_each(preset.generators().cbegin(), preset.generators().cend(),
+                [this](const Entity::Generator::Generator& generator) {
+    if (generator.definition().isAvailableInPreset()) {
+      setAdjustment(generator.index(), generator.value());
+    }
+  });
 }
 
 void

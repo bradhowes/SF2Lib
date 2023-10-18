@@ -6,13 +6,12 @@
 
 using namespace SF2::Entity::Generator;
 using namespace SF2::Render::Engine;
-
-inline static AUValue fromBool(bool value) noexcept { return value ? 1.0 : 0.0; }
-inline static bool toBool(AUValue value) noexcept { return value >= 0.5; }
+using namespace SF2::Render::Voice::State;
 
 Parameters::Parameters(Engine& engine)
 : engine_{engine}, parameterTree_{makeTree()}, log_{os_log_create("SF2Lib", "Parameters")}, anyChanged_{false}
 {
+  //NOTE: this is *not* for the real-time rendering thread. It should only be used to convey changes to a UI.
   parameterTree_.implementorValueObserver = ^(AUParameter* parameter, AUValue value) { valueChanged(parameter, value); };
   parameterTree_.implementorValueProvider = ^(AUParameter* parameter) { return provideValue(parameter); };
 }
@@ -25,7 +24,7 @@ Parameters::reset() noexcept
 }
 
 void
-Parameters::applyAll(SF2::Render::Voice::State::State& state) noexcept
+Parameters::applyChanged(State& state) noexcept
 {
   if (!anyChanged_) return;
   for (auto index : IndexIterator()) {
@@ -34,49 +33,23 @@ Parameters::applyAll(SF2::Render::Voice::State::State& state) noexcept
 }
 
 void
-Parameters::applyOne(SF2::Render::Voice::State::State& state, Index index) noexcept
+Parameters::applyOne(State& state, Index index) noexcept
 {
-  state.setValue(index, values_[index]);
+  state.setLiveValue(index, values_[index]);
+}
+
+void
+Parameters::setLiveValue(Index index, int value) noexcept
+{
+  values_[index] = value;
+  changed_[index] = true;
+  anyChanged_ = true;
 }
 
 void
 Parameters::valueChanged(AUParameter* parameter, AUValue value) noexcept
 {
   os_log_info(log_, "valueChanged - %llu %f", [parameter address], value);
-  auto rawIndex = parameter.address;
-  if (rawIndex < 0) return;
-  if (rawIndex < valueOf(Index::numValues)) {
-    auto index = Index(rawIndex);
-    const auto& def = Definition::definition(index);
-    values_[index] = def.clamp(int(std::round(value)));
-    changed_[index] = true;
-    anyChanged_ = true;
-    engine_.notifyParameterChanged(index);
-  } else if (rawIndex >= valueOf(EngineParameterAddress::portamentoModeEnabled) &&
-             rawIndex < valueOf(EngineParameterAddress::firstUnusedAddress)) {
-    auto address = EngineParameterAddress(rawIndex);
-    switch (address) {
-      case EngineParameterAddress::portamentoModeEnabled:
-        engine_.setPortamentoModeEnabled(toBool(value));
-        return;
-      case EngineParameterAddress::portamentoRate:
-        engine_.setPortamentoRate(size_t(value));
-        return;
-      case EngineParameterAddress::oneVoicePerKeyModeEnabled:
-        engine_.setOneVoicePerKeyModeEnabled(toBool(value));
-        return;
-      case EngineParameterAddress::polyphonicModeEnabled:
-        engine_.setPhonicMode(value >= 0.5 ? Engine::PhonicMode::poly : Engine::PhonicMode::mono);
-        return;
-      case EngineParameterAddress::activeVoiceCount:
-        return;
-      case EngineParameterAddress::retriggerModeEnabled:
-        engine_.setRetriggerModeEnabled(toBool(value));
-        return;
-      case EngineParameterAddress::firstUnusedAddress:
-        return;
-    }
-  }
 }
 
 AUValue
@@ -93,12 +66,12 @@ Parameters::provideValue(AUParameter* parameter) noexcept
              rawIndex < valueOf(EngineParameterAddress::firstUnusedAddress)) {
     auto address = EngineParameterAddress(rawIndex);
     switch (address) {
-      case EngineParameterAddress::portamentoModeEnabled:     return toBool(engine_.portamentoModeEnabled());
+      case EngineParameterAddress::portamentoModeEnabled:     return SF2::toBool(engine_.portamentoModeEnabled());
       case EngineParameterAddress::portamentoRate:            return engine_.portamentoRate();
-      case EngineParameterAddress::oneVoicePerKeyModeEnabled: return toBool(engine_.oneVoicePerKeyModeEnabled());
-      case EngineParameterAddress::polyphonicModeEnabled:     return toBool(engine_.polyphonicModeEnabled());
+      case EngineParameterAddress::oneVoicePerKeyModeEnabled: return SF2::toBool(engine_.oneVoicePerKeyModeEnabled());
+      case EngineParameterAddress::polyphonicModeEnabled:     return SF2::toBool(engine_.polyphonicModeEnabled());
       case EngineParameterAddress::activeVoiceCount:          return engine_.activeVoiceCount();
-      case EngineParameterAddress::retriggerModeEnabled:      return toBool(engine_.retriggerModeEnabled());
+      case EngineParameterAddress::retriggerModeEnabled:      return SF2::toBool(engine_.retriggerModeEnabled());
       case EngineParameterAddress::firstUnusedAddress:        return 0.0;
     }
   } else {

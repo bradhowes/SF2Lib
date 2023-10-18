@@ -11,10 +11,12 @@
 #include "SF2Lib/Configuration.hpp"
 #include "SF2Lib/Render/Preset.hpp"
 #include "SF2Lib/Render/Voice/Sample/Generator.hpp"
+#include "SF2Lib/Render/Voice/State/State.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
 
 using namespace SF2;
 using namespace SF2::Render;
+using namespace SF2::Render::Voice::State;
 
 @interface VoiceTests : SamplePlayingTestCase
 @end
@@ -435,14 +437,14 @@ using namespace SF2::Render;
     note.start();
     [self renderInto:buffer voices:note forCount: keyReleaseCount startingAt: 0 afterRenderSample:^(size_t index) {
       int vibrato = int(100.0 * index / sampleCount);
-      note[0].state().setValue(Voice::State::State::Index::vibratoLFOToPitch, vibrato);
+      sst.setValue(note[0].state(), Voice::State::State::Index::vibratoLFOToPitch, vibrato);
     }];
 
     note.releaseKey();
 
     [self renderInto:buffer voices:note forCount: sampleCount - keyReleaseCount startingAt: keyReleaseCount afterRenderSample:^(size_t index) {
       int vibrato = int(100.0 * index / sampleCount);
-      note[0].state().setValue(Voice::State::State::Index::vibratoLFOToPitch, vibrato);
+      sst.setValue(note[0].state(), Voice::State::State::Index::vibratoLFOToPitch, vibrato);
     }];
 
     samples.push_back([buffer left][0]);
@@ -496,9 +498,9 @@ using namespace SF2::Render;
   // Configure note to take 1.5s to attack and release
   for (auto& note : notes) {
     for (auto voiceIndex = 0; voiceIndex < note.count(); ++voiceIndex) {
-      note[voiceIndex].state().setValue(Voice::State::State::Index::attackVolumeEnvelope, DSP::secondsToCents(1.5));
-      note[voiceIndex].state().setValue(Voice::State::State::Index::releaseVolumeEnvelope, DSP::secondsToCents(1.5));
-      note[voiceIndex].state().setValue(Voice::State::State::Index::sampleModes, 1);
+      sst.setValue(note[voiceIndex].state(), Voice::State::State::Index::attackVolumeEnvelope, DSP::secondsToCents(1.5));
+      sst.setValue(note[voiceIndex].state(), Voice::State::State::Index::releaseVolumeEnvelope, DSP::secondsToCents(1.5));
+      sst.setValue(note[voiceIndex].state(), Voice::State::State::Index::sampleModes, 1);
     }
     note.start();
   }
@@ -568,13 +570,13 @@ using namespace SF2::Render;
 
     for (auto voiceIndex = 0; voiceIndex < note.count(); ++voiceIndex) {
       // Configure volume envelope for 2s attack.
-      note[voiceIndex].state().setValue(Voice::State::State::Index::attackVolumeEnvelope, 1200);
-      note[voiceIndex].state().setAdjustment(Voice::State::State::Index::attackVolumeEnvelope, 0);
+      sst.setValue(note[voiceIndex].state(), Voice::State::State::Index::attackVolumeEnvelope, 1200);
+      sst.setAdjustment(note[voiceIndex].state(), Voice::State::State::Index::attackVolumeEnvelope, 0);
       // Configure volume envelope for 2s release.
-      note[voiceIndex].state().setValue(Voice::State::State::Index::releaseVolumeEnvelope, 1200);
-      note[voiceIndex].state().setAdjustment(Voice::State::State::Index::releaseVolumeEnvelope, 0);
+      sst.setValue(note[voiceIndex].state(), Voice::State::State::Index::releaseVolumeEnvelope, 1200);
+      sst.setAdjustment(note[voiceIndex].state(), Voice::State::State::Index::releaseVolumeEnvelope, 0);
       // Configure sample generator to loop until volume envelope is done.
-      note[voiceIndex].state().setValue(Voice::State::State::Index::sampleModes, 1);
+      sst.setValue(note[voiceIndex].state(), Voice::State::State::Index::sampleModes, 1);
       note[voiceIndex].start();
     }
     [self renderInto:buffer voices:note forCount: keyReleaseCount startingAt: 0];
@@ -692,15 +694,15 @@ using namespace SF2::Render;
   auto& voice = state[0];
 
   XCTAssertEqual(Voice::Voice::LoopingMode::none, voice.loopingMode());
-  voice.state().setValue(Voice::State::State::Index::sampleModes, -1);
+  sst.setValue(voice.state(), Voice::State::State::Index::sampleModes, -1);
   XCTAssertEqual(Voice::Voice::LoopingMode::none, voice.loopingMode());
-  voice.state().setValue(Voice::State::State::Index::sampleModes, 1);
+  sst.setValue(voice.state(), Voice::State::State::Index::sampleModes, 1);
   XCTAssertEqual(Voice::Voice::LoopingMode::activeEnvelope, voice.loopingMode());
-  voice.state().setValue(Voice::State::State::Index::sampleModes, 2);
+  sst.setValue(voice.state(), Voice::State::State::Index::sampleModes, 2);
   XCTAssertEqual(Voice::Voice::LoopingMode::none, voice.loopingMode());
-  voice.state().setValue(Voice::State::State::Index::sampleModes, 3);
+  sst.setValue(voice.state(), Voice::State::State::Index::sampleModes, 3);
   XCTAssertEqual(Voice::Voice::LoopingMode::duringKeyPress, voice.loopingMode());
-  voice.state().setValue(Voice::State::State::Index::sampleModes, 4);
+  sst.setValue(voice.state(), Voice::State::State::Index::sampleModes, 4);
   XCTAssertEqual(Voice::Voice::LoopingMode::none, voice.loopingMode());
 }
 

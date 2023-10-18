@@ -45,23 +45,23 @@ using namespace SF2::Entity::Modulator;
 - (void)testKey {
   State::State state{contexts.context2.makeState(0, 64, 32)};
   XCTAssertEqual(64, state.key());
-  state.setValue(Index::forcedMIDIKey, 1);
+  sst.setValue(state, Index::forcedMIDIKey, 1);
   XCTAssertEqual(1, state.key());
 }
 
 - (void)testVelocity {
   State::State state{contexts.context2.makeState(0, 64, 32)};
   XCTAssertEqual(32, state.velocity());
-  state.setValue(Index::forcedMIDIVelocity, 0);
+  sst.setValue(state, Index::forcedMIDIVelocity, 0);
   XCTAssertEqual(0, state.velocity());
 }
 
 - (void)testModulatedValue {
   State::State state{contexts.context2.makeState(0, 60, 32)};
-  state.setValue(Index::holdVolumeEnvelope, 100);
-  state.setAdjustment(Index::holdVolumeEnvelope, 0);
+  sst.setValue(state, Index::holdVolumeEnvelope, 100);
+  sst.setAdjustment(state, Index::holdVolumeEnvelope, 0);
   XCTAssertEqualWithAccuracy(100.0, state.modulated(Index::holdVolumeEnvelope), 0.000001);
-  state.setAdjustment(Index::holdVolumeEnvelope, 50);
+  sst.setAdjustment(state, Index::holdVolumeEnvelope, 50);
   XCTAssertEqualWithAccuracy(150.0, state.modulated(Index::holdVolumeEnvelope), 0.000001);
 }
 
@@ -82,7 +82,7 @@ using namespace SF2::Entity::Modulator;
 
   Source bad1(Source::GeneralIndex(1));
   Modulator badMod1(bad1, Index::initialAttenuation, 123);
-  state.addModulator(badMod1);
+  sst.addModulator(state, badMod1);
   XCTAssertEqual(10, state.modulatorCount());
 }
 
@@ -92,7 +92,7 @@ using namespace SF2::Entity::Modulator;
   auto mod = Modulator(Source(Source::GeneralIndex::noteOnVelocity).negative().concave(),
                        Index::initialAttenuation,
                        345);
-  state.addModulator(mod);
+  sst.addModulator(state, mod);
   state.updateStateMods();
   XCTAssertEqual(10, state.modulatorCount());
   XCTAssertEqual(100, state.channelState().continuousControllerValue(MIDI::ControlChange(7)));
@@ -104,7 +104,7 @@ using namespace SF2::Entity::Modulator;
   auto mod = Modulator(Source(Source::GeneralIndex::noteOnKey).negative().concave(),
                        Index::initialAttenuation,
                        -123);
-  state.addModulator(mod);
+  sst.addModulator(state, mod);
   state.updateStateMods();
   XCTAssertEqual(11, state.modulatorCount());
   XCTAssertEqual(100, state.channelState().continuousControllerValue(MIDI::ControlChange(7)));

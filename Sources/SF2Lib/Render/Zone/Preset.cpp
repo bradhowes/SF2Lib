@@ -19,19 +19,3 @@ Preset::instrument() const
   if (instrument_ == nullptr) throw std::runtime_error("global preset zone has no instrument");
   return *instrument_;
 }
-
-/**
- Apply the zone to the given voice state by adjusting the nominal value of the generators in the zone.
-
- @param state the voice state to update
- */
-void
-Preset::refine(Voice::State::State& state) const noexcept
-{
-  const auto& gens{generators()};
-  std::for_each(gens.cbegin(), gens.cend(), [&](const Entity::Generator::Generator& generator) {
-    if (generator.definition().isAvailableInPreset()) {
-      state.setAdjustment(generator.index(), generator.value());
-    }
-  });
-}

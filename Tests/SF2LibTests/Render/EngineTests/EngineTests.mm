@@ -38,67 +38,62 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testPortamento {
-  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-  auto pt = engine.parameterTree();
-  auto pr = [pt parameterWithAddress:SF2::valueOf(Parameters::EngineParameterAddress::portamentoRate)];
-  auto pe = [pt parameterWithAddress:SF2::valueOf(Parameters::EngineParameterAddress::portamentoModeEnabled)];
+  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
+  auto& engine{harness.engine()};
 
   XCTAssertFalse(engine.portamentoModeEnabled());
-  pe.value = 1.0;
+  harness.setParameter(Parameters::EngineParameterAddress::portamentoModeEnabled, 1.0);
   XCTAssertTrue(engine.portamentoModeEnabled());
-  pr.value = 12345;
+
+  harness.setParameter(Parameters::EngineParameterAddress::portamentoRate, 12345);
   XCTAssertEqual(12345, engine.portamentoRate());
 
-  [pr setValue:987];
+  harness.setParameter(Parameters::EngineParameterAddress::portamentoRate, 987);
   XCTAssertEqual(987, engine.portamentoRate());
-  XCTAssertEqual(987, pr.value);
 
-  [pe setValue:0.0];
+  harness.setParameter(Parameters::EngineParameterAddress::portamentoModeEnabled, 0.0);
   XCTAssertFalse(engine.portamentoModeEnabled());
-  XCTAssertEqual(0.0, pe.value);
 }
 
 - (void)testPhonicMode {
-  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-  auto pt = engine.parameterTree();
-  auto pe = [pt parameterWithAddress:SF2::valueOf(Parameters::EngineParameterAddress::polyphonicModeEnabled)];
+  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
+  auto& engine{harness.engine()};
 
   XCTAssertTrue(engine.polyphonicModeEnabled());
   XCTAssertFalse(engine.monophonicModeEnabled());
-  XCTAssertEqual(1.0, pe.value);
 
-  pe.value = 0.0;
+  harness.setParameter(Parameters::EngineParameterAddress::polyphonicModeEnabled, 0.0);
   XCTAssertFalse(engine.polyphonicModeEnabled());
   XCTAssertTrue(engine.monophonicModeEnabled());
-  XCTAssertEqual(0.0, pe.value);
 
-  pe.value = 1.0;
+  harness.setParameter(Parameters::EngineParameterAddress::polyphonicModeEnabled, 1.0);
   XCTAssertTrue(engine.polyphonicModeEnabled());
   XCTAssertFalse(engine.monophonicModeEnabled());
-  XCTAssertEqual(1.0, pe.value);
 }
 
 - (void)testOneVoicePerKey {
-  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-  auto pt = engine.parameterTree();
-  auto ov = [pt parameterWithAddress:SF2::valueOf(Parameters::EngineParameterAddress::oneVoicePerKeyModeEnabled)];
+  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
+  auto& engine{harness.engine()};
 
   XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
-  ov.value = 1.0;
+
+  harness.setParameter(Parameters::EngineParameterAddress::oneVoicePerKeyModeEnabled, 1.0);
   XCTAssertTrue(engine.oneVoicePerKeyModeEnabled());
-  ov.value = 0.0;
+
+  harness.setParameter(Parameters::EngineParameterAddress::oneVoicePerKeyModeEnabled, 0.0);
   XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
 }
 
 - (void)testRetriggering {
-  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
-  auto pt = engine.parameterTree();
-  auto rt = [pt parameterWithAddress:SF2::valueOf(Parameters::EngineParameterAddress::retriggerModeEnabled)];
-  XCTAssertEqual(1.0, rt.value);
+  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
+  auto& engine{harness.engine()};
+
   XCTAssertTrue(engine.retriggerModeEnabled());
-  rt.value = 0.0;
+
+  harness.setParameter(Parameters::EngineParameterAddress::retriggerModeEnabled, 0.0);
   XCTAssertFalse(engine.retriggerModeEnabled());
-  rt.value = 1.0;
+
+  harness.setParameter(Parameters::EngineParameterAddress::retriggerModeEnabled, 1.0);
   XCTAssertTrue(engine.retriggerModeEnabled());
 }
 
@@ -1306,16 +1301,14 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  auto address = valueOf(Parameters::EngineParameterAddress::oneVoicePerKeyModeEnabled);
-  AUParameter* param = [engine.parameterTree() parameterWithAddress:address];
-
+  auto address = Parameters::EngineParameterAddress::oneVoicePerKeyModeEnabled;
   harness.load(contexts.context0.path(), 0);
 
   int seconds = 1;
   auto mixer{harness.createMixer(seconds)};
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  param.value = false;
+  harness.setParameter(Parameters::EngineParameterAddress::oneVoicePerKeyModeEnabled, 0.0);
   XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
 
   std::vector<AUValue> samples;
@@ -1331,7 +1324,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(2, engine.activeVoiceCount());
 
   harness.sendAllOff();
-  param.value = true;
+  harness.setParameter(Parameters::EngineParameterAddress::oneVoicePerKeyModeEnabled, 1.0);
   XCTAssertTrue(engine.oneVoicePerKeyModeEnabled());
 
   harness.sendNoteOn(60);
@@ -1393,8 +1386,7 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  auto address = valueOf(Index::pan);
-  AUParameter* param = [engine.parameterTree() parameterWithAddress:address];
+  auto address = Index::pan;
 
   harness.load(contexts.context0.path(), 18);
 
@@ -1414,7 +1406,7 @@ using namespace SF2::Render::Engine;
   // Pan left
   auto steps = int(harness.renders() * 0.2);
   for (auto step = 1_F; step <= steps; ++step) {
-    param.value = step / steps * -500_F;
+    harness.setParameter(Index::pan, step / steps * -500_F);
     harness.renderOnce(mixer);
     samples.push_back(harness.lastDrySample(0));
     samples.push_back(harness.lastDrySample(1));
@@ -1422,13 +1414,13 @@ using namespace SF2::Render::Engine;
 
   // Pan back to center
   for (auto step = steps - 1_F; step >= 0_F; --step) {
-    param.value = step / steps * -500_F;
+    harness.setParameter(Index::pan, step / steps * -500_F);
     harness.renderOnce(mixer);
   }
 
   // Pan right
   for (auto step = 1_F; step <= steps; ++step) {
-    param.value = step / steps * 500_F;
+    harness.setParameter(Index::pan, step / steps * 500_F);
     harness.renderOnce(mixer);
     samples.push_back(harness.lastDrySample(0));
     samples.push_back(harness.lastDrySample(1));
@@ -1436,7 +1428,7 @@ using namespace SF2::Render::Engine;
 
   // Pan back to center
   for (auto step = steps - 1_F; step >= 0_F; --step) {
-    param.value = step / steps * 500_F;
+    harness.setParameter(Index::pan, step / steps * 500_F);
     harness.renderOnce(mixer);
   }
 

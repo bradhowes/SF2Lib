@@ -16,8 +16,7 @@ using namespace SF2::Render;
 using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
 
-@interface ModulatorTests : XCTestCase {
-  Float epsilon;
+@interface ModulatorTests : SamplePlayingTestCase {
   std::unique_ptr<MIDI::ChannelState> channelState;
   std::unique_ptr<State::State> state;
 };
@@ -35,16 +34,16 @@ using namespace SF2::Entity::Generator;
 
 - (void)testKeyVelocityToInitialAttenuation {
   const Entity::Modulator::Modulator& config{Entity::Modulator::Modulator::defaults[0]};
-  state->setValue(Index::forcedMIDIVelocity, -1);
+  sst.setValue(*state, Index::forcedMIDIVelocity, -1);
 
   State::Modulator modulator{config};
-  state->setValue(Index::forcedMIDIVelocity, 127);
+  sst.setValue(*state, Index::forcedMIDIVelocity, 127);
   XCTAssertEqualWithAccuracy(modulator.value(*state), 0.0, epsilon);
 
-  state->setValue(Index::forcedMIDIVelocity, 64);
+  sst.setValue(*state, Index::forcedMIDIVelocity, 64);
   XCTAssertEqualWithAccuracy(modulator.value(*state), 119.049498788827904, epsilon);
 
-  state->setValue(Index::forcedMIDIVelocity, 1);
+  sst.setValue(*state, Index::forcedMIDIVelocity, 1);
   XCTAssertEqualWithAccuracy(modulator.value(*state), 841.521488382382699, epsilon);
 
   // std::cout << modulator.description() << '\n';
@@ -54,16 +53,16 @@ using namespace SF2::Entity::Generator;
 
 - (void)testKeyVelocityToFilterCutoff {
   const Entity::Modulator::Modulator& config{Entity::Modulator::Modulator::defaults[1]};
-  state->setValue(Index::forcedMIDIVelocity, -1);
+  sst.setValue(*state, Index::forcedMIDIVelocity, -1);
 
   State::Modulator modulator{config};
-  state->setValue(Index::forcedMIDIVelocity, 127);
+  sst.setValue(*state, Index::forcedMIDIVelocity, 127);
   XCTAssertEqualWithAccuracy(modulator.value(*state), -18.75, epsilon);
 
-  state->setValue(Index::forcedMIDIVelocity, 64);
+  sst.setValue(*state, Index::forcedMIDIVelocity, 64);
   XCTAssertEqualWithAccuracy(modulator.value(*state), -1200.0, epsilon);
 
-  state->setValue(Index::forcedMIDIVelocity, 1);
+  sst.setValue(*state, Index::forcedMIDIVelocity, 1);
   XCTAssertEqualWithAccuracy(modulator.value(*state), config.amount() * 127.0 / 128.0, epsilon);
 }
 
@@ -201,9 +200,9 @@ using namespace SF2::Entity::Generator;
   auto src = Source(Source::GeneralIndex::noteOnKey);
   State::Modulator mod{Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(), Transformer())};
   XCTAssertEqualWithAccuracy(0.0, mod.value(*state), epsilon);
-  state->setValue(Index::forcedMIDIKey, 64);
+  sst.setValue(*state, Index::forcedMIDIKey, 64);
   XCTAssertEqualWithAccuracy(1.5, mod.value(*state), epsilon);
-  state->setValue(Index::forcedMIDIKey, 127);
+  sst.setValue(*state, Index::forcedMIDIKey, 127);
   XCTAssertEqualWithAccuracy(2.9765625, mod.value(*state), epsilon);
 }
 
@@ -211,9 +210,9 @@ using namespace SF2::Entity::Generator;
   auto src = Source(Source::GeneralIndex::noteOnVelocity);
   State::Modulator mod{Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(), Transformer())};
   XCTAssertEqualWithAccuracy(0.0, mod.value(*state), epsilon);
-  state->setValue(Index::forcedMIDIVelocity, 64);
+  sst.setValue(*state, Index::forcedMIDIVelocity, 64);
   XCTAssertEqualWithAccuracy(1.5, mod.value(*state), epsilon);
-  state->setValue(Index::forcedMIDIVelocity, 127);
+  sst.setValue(*state, Index::forcedMIDIVelocity, 127);
   XCTAssertEqualWithAccuracy(2.9765625, mod.value(*state), epsilon);
 }
 
@@ -221,7 +220,7 @@ using namespace SF2::Entity::Generator;
   auto src = Source(Source::GeneralIndex::keyPressure);
   State::Modulator mod{Modulator(src, Index::sustainVolumeEnvelope, 3.0, Source(), Transformer())};
   XCTAssertEqualWithAccuracy(0.0, mod.value(*state), epsilon);
-  state->setValue(Index::forcedMIDIKey, 100);
+  sst.setValue(*state, Index::forcedMIDIKey, 100);
   channelState->setNotePressure(100, 64);
   XCTAssertEqualWithAccuracy(1.5, mod.value(*state), epsilon);
   channelState->setNotePressure(100, 127);

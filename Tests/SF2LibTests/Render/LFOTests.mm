@@ -26,13 +26,10 @@ struct LFOTestInjector {
 };
 }
 
-@interface LFOTests : XCTestCase
+@interface LFOTests : SamplePlayingTestCase
 @end
 
-@implementation LFOTests {
-  SampleBasedContexts contexts;
-  SF2::Float epsilon;
-}
+@implementation LFOTests
 
 - (void)setUp {
   epsilon = PresetTestContextBase::epsilonValue();
@@ -106,18 +103,18 @@ struct LFOTestInjector {
   State::State state{contexts.context2.makeState(0, 64, 32)};
   auto osc = VibLFO(state.sampleRate());
 
-  state.setValue(Generator::Index::delayVibratoLFO, -32768);
-  state.setValue(Generator::Index::frequencyVibratoLFO, 0);
+  sst.setValue(state, Generator::Index::delayVibratoLFO, -32768);
+  sst.setValue(state, Generator::Index::frequencyVibratoLFO, 0);
   osc.configure(state);
 
   XCTAssertEqual(lti.delaySampleCount(osc).val, 0);
   XCTAssertEqualWithAccuracy(lti.increment(osc).val, 0.000681316576304, epsilon);
 
-  state.setValue(Generator::Index::delayVibratoLFO, -7972); // ~10 msec
+  sst.setValue(state, Generator::Index::delayVibratoLFO, -7972); // ~10 msec
   osc.configure(state);
 
   XCTAssertEqual(lti.delaySampleCount(osc).val, 480);
-  state.setValue(Generator::Index::delayVibratoLFO, 0);
+  sst.setValue(state, Generator::Index::delayVibratoLFO, 0);
 }
 
 @end

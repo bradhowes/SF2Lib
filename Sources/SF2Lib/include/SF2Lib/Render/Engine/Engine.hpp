@@ -118,10 +118,7 @@ public:
   }
 
   /// API for EventProcessor
-  void doParameterEvent(const AUParameterEvent& event) noexcept
-  {
-    os_log_debug(log_, "setParameterEvent - address: %llu value: %f", event.parameterAddress, event.value);
-  }
+  void doParameterEvent(const AUParameterEvent& event) noexcept;
 
   /// API for EventProcessor
   void doRenderingStateChanged(bool state) noexcept { if (!state) allOff(); }

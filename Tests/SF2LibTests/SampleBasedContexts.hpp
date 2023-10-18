@@ -10,8 +10,10 @@
 #include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
+#include "SF2Lib/Render/Engine/Parameters.hpp"
 #include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Preset.hpp"
+#include "SF2Lib/Render/Voice/State/State.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
 
 struct TestEngineHarness {
@@ -137,6 +139,20 @@ struct TestEngineHarness {
     midiEvent.data[0] = SF2::valueOf(SF2::MIDI::CoreEvent::reset);
     midiEvent.length = 1;
     engine_.doMIDIEvent(midiEvent);
+  }
+
+  void setParameter(SF2::Render::Engine::Parameters::EngineParameterAddress address, AUValue value) noexcept {
+    auto event = AUParameterEvent();
+    event.parameterAddress = SF2::valueOf(address);
+    event.value = value;
+    engine_.doParameterEvent(event);
+  }
+
+  void setParameter(SF2::Entity::Generator::Index index, AUValue value) noexcept {
+    auto event = AUParameterEvent();
+    event.parameterAddress = SF2::valueOf(index);
+    event.value = value;
+    engine_.doParameterEvent(event);
   }
 
 private:
@@ -292,9 +308,16 @@ struct SampleBasedContexts {
   PresetTestContext<2> context2;
 };
 
+struct SF2::Render::Voice::State::State::Tester {
+  void setValue(State& state, Index index, int value) { state.setValue(index, value); }
+  void setAdjustment(State& state, Index index, int value) { state.setAdjustment(index, value); }
+  void addModulator(State& state, const Entity::Modulator::Modulator& mod) { state.addModulator(mod); }
+};
+
 @interface SamplePlayingTestCase : XCTestCase <AVAudioPlayerDelegate> {
   SF2::Float epsilon;
   SampleBasedContexts contexts;
+  SF2::Render::Voice::State::State::Tester sst;
 }
 
 @property (nonatomic, retain) AVAudioPlayer* player;

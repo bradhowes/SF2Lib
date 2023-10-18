@@ -1,6 +1,7 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
 #include "SF2Lib/Utils/Base64.hpp"
+#include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
 #include "SF2Lib/IO/File.hpp"
 
@@ -160,6 +161,45 @@ Engine::applyPedals() noexcept
   visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
     voice.releaseKey(releaseKeyState);
   });
+}
+
+void
+Engine::doParameterEvent(const AUParameterEvent& event) noexcept {
+  // NOTE: this is running in the real-time render thread.
+  os_log_debug(log_, "doParameterEvent - address: %llu value: %f", event.parameterAddress, event.value);
+  auto rawIndex = event.parameterAddress;
+  auto value = event.value;
+  if (rawIndex < 0) return;
+  if (rawIndex < valueOf(Entity::Generator::Index::numValues)) {
+    auto index = Entity::Generator::Index(rawIndex);
+    const auto& def = Entity::Generator::Definition::definition(index);
+    parameters_.setLiveValue(index, def.clamp(int(std::round(value))));
+    notifyParameterChanged(index);
+  } else if (rawIndex >= valueOf(Parameters::EngineParameterAddress::portamentoModeEnabled) &&
+             rawIndex < valueOf(Parameters::EngineParameterAddress::firstUnusedAddress)) {
+    auto address = Parameters::EngineParameterAddress(rawIndex);
+    switch (address) {
+      case Parameters::EngineParameterAddress::portamentoModeEnabled:
+        setPortamentoModeEnabled(SF2::toBool(value));
+        return;
+      case Parameters::EngineParameterAddress::portamentoRate:
+        setPortamentoRate(size_t(value));
+        return;
+      case Parameters::EngineParameterAddress::oneVoicePerKeyModeEnabled:
+        setOneVoicePerKeyModeEnabled(SF2::toBool(value));
+        return;
+      case Parameters::EngineParameterAddress::polyphonicModeEnabled:
+        setPhonicMode(SF2::toBool(value) ? Engine::PhonicMode::poly : Engine::PhonicMode::mono);
+        return;
+      case Parameters::EngineParameterAddress::activeVoiceCount:
+        return;
+      case Parameters::EngineParameterAddress::retriggerModeEnabled:
+        setRetriggerModeEnabled(SF2::toBool(value));
+        return;
+      case Parameters::EngineParameterAddress::firstUnusedAddress:
+        return;
+    }
+  }
 }
 
 void
@@ -502,7 +542,7 @@ Engine::startVoice(const Config& config) noexcept
   auto voiceIndex = getVoice();
   if (voiceIndex != voices_.size()) {
     voices_[voiceIndex].configure(config);
-    parameters_.applyAll(voices_[voiceIndex].state());
+    parameters_.applyChanged(voices_[voiceIndex].state());
     voices_[voiceIndex].start();
     oldestActive_.add(voiceIndex);
   }

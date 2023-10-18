@@ -49,15 +49,15 @@ public:
   /// @returns value of `exclusiveClass` generator for an instrument if it is set, or 0 if not found.
   int exclusiveClass() const noexcept { return exclusiveClass_; }
 
-private:
-
   /**
    Update a state with the various zone configurations. This is done once during the initialization of a Voice with a
    Config instance.
 
    @param state the voice state to update
    */
-  void apply(State& state) const noexcept;
+  void applyTo(State& state) const noexcept;
+
+private:
 
   const Zone::Preset& preset_;
   const Zone::Preset* globalPreset_;
@@ -66,8 +66,6 @@ private:
   int eventKey_;
   int eventVelocity_;
   int exclusiveClass_;
-
-  friend State;  /// Grant access to `apply`.
 };
 
 } // namespace SF2::Render
