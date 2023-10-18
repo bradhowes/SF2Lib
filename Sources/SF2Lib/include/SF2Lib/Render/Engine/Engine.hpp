@@ -54,7 +54,9 @@ public:
          size_t minimumNoteDurationMilliseconds = 10) noexcept;
 
   size_t minimumNoteDurationSamples() const noexcept
-  { return static_cast<size_t>(ceil(minimumNoteDurationMilliseconds_ / 1000_F * sampleRate_)); }
+  {
+    return static_cast<size_t>(ceil(minimumNoteDurationMilliseconds_ / 1000_F * sampleRate_));
+  }
 
   /// @returns maximum number of voices available for simultaneous rendering
   size_t voiceCount() const noexcept { return voices_.size(); }
@@ -116,7 +118,8 @@ public:
   }
 
   /// API for EventProcessor
-  void doParameterEvent(const AUParameterEvent& event) noexcept {
+  void doParameterEvent(const AUParameterEvent& event) noexcept
+  {
     os_log_debug(log_, "setParameterEvent - address: %llu value: %f", event.parameterAddress, event.value);
   }
 
@@ -165,14 +168,50 @@ public:
   /// @returns true if Engine is in polyphonic mode (default)
   bool polyphonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::poly; }
 
-  static std::vector<uint8_t> createLoadSysExec(const std::string& path, size_t preset) noexcept;
+  /**
+   Utility class method that creates a MIDI SysEx command to load a SF2 file at the given path and to activate
+   the preset at the given index.
 
+   @param path the location of the SF2 file to load
+   @param index the index of the preset to activate
+   @returns array of MIDI bytes
+   */
+  static std::vector<uint8_t> createLoadSysEx(const std::string& path, size_t index) noexcept;
+
+  /**
+   Utility class method that creates a MIDI SysEx command to activate the preset at the given index in the
+   currently loaded SF2 file. This is the same as `createLoadSysExec` with a zero-length string.
+
+   @param index the index of the preset to activate
+   @returns array of MIDI bytes
+   */
   static std::vector<uint8_t> createUseIndex(size_t index) noexcept;
 
+  /**
+   Utility class method that creates a MIDI channel command to reset the engine. This stops all voices and resets the
+   MIDI channel state.
+
+   @returns array of MIDI bytes
+   */
   static std::vector<uint8_t> createResetCommand() noexcept;
 
+  /**
+   Utility class method that creates a collection of MIDI commands that will direct the engine to activate the preset
+   at the given bank and program values.
+
+   @param bank the bank to activate (0-16383)
+   @param program the program in the bank to activate (0-127)
+   @returns array of an array of MIDI bytes
+   */
   static std::vector<std::vector<uint8_t>> createUseBankProgram(uint16_t bank, uint8_t program) noexcept;
 
+  /**
+   Utility class method that creates a MIDI command to send the given channel message with the given value
+
+   @param channelMessage the MIDI channel message to send
+   @param value the value to provide in the channel message
+   @returns array of MIDI bytes
+   */
   static std::vector<uint8_t> createChannelMessage(MIDI::ControlChange channelMessage, uint8_t value) noexcept;
 
 private:
@@ -188,43 +227,60 @@ private:
   IO::File::LoadResponse load(const std::string& path, size_t index) noexcept;
 
   /**
-   Activate the preset at the given index. NOTE: this is not thread-safe. When running in a render thread, one should
-   use the program controller change MIDI command to perform a preset change.
+   Activate the preset at the given index.
+
+   NOTE: this is not thread-safe. When running in a render thread, it is expected that this is only executed due to
+   an incoming MIDI command.
 
    @param index the preset to use
    */
   void usePresetWithIndex(size_t index);
 
   /**
-   Activate the preset at the given bank/program. NOTE: this is not thread-safe. When running in a render thread,
-   one should use the bank/program controller change MIDI commands to perform a preset change.
+   Activate the preset at the given bank/program.
+
+   NOTE: this is not thread-safe. When running in a render thread, it is expected that this is only executed due to
+   an incoming MIDI command.
 
    @param bank the bank to use
    @param program the program in the bank to use
    */
   void usePresetWithBankProgram(uint16_t bank, uint16_t program);
 
+  /// Reset the engine to a known state. All keys are released, all voices are off, and the MIDI channel state is reset
+  /// to initial state.
+  void reset() noexcept;
+
   /**
-   Turn off all voices, making them all available for rendering. NOTE: this is not thread-safe. When running in a
-   render thread, one should use a MIDI command to stop all notes.
+   Turn off all voices, making them all available for rendering. 
+
+   NOTE: this is not thread-safe. When running in a render thread, it is expected that this is only executed due to
+   an incoming MIDI command.
    */
   void allOff() noexcept;
 
+  /**
+   Release all keys -- all MIDI note ON events that have not seen a note OFF event. Unlike, `allOff` this does not
+   stop audio.
+   */
   void releaseKeys() noexcept;
   
   /**
    Tell any voices playing the current MIDI key that the key has been released. The voice will continue to render until
    it figures out that it is done.
 
-   NOTE: this is not thread-safe. When running in a render thread, one should use a MIDI command to stop a note.
+   NOTE: this is not thread-safe. When running in a render thread, it is expected that this is only executed due to
+   an incoming MIDI command.
 
    @param key the MIDI key that was released
    */
   void noteOff(int key) noexcept;
 
   /**
-   Activate one or more voices to play a MIDI key with the given velocity. NOTE: this is not thread-safe. When running
-   in a render thread, one should use a MIDI command to start a note.
+   Activate one or more voices to play a MIDI key with the given velocity.
+
+   NOTE: this is not thread-safe. When running in a render thread, it is expected that this is only executed due to
+   an incoming MIDI command.
 
    @param key the MIDI key to play
    @param velocity the MIDI velocity to play at
@@ -233,6 +289,7 @@ private:
 
   /**
    Set the portamento (glissando/glide) mode. Note that this is only applicable in monophonic mode.
+
    NOTE: only settable via AUParameter change
 
    @param value enable portamento mode if true
@@ -278,20 +335,36 @@ private:
   /**
    Set the "phonic" mode of the synthesizer.
 
-   NOTE: only settable via AUParameter change
+   NOTE: only settable via AUParameter change or MIDI channel message
 
    @param mode the mode to enter
    */
   void setPhonicMode(PhonicMode mode) noexcept { phonicMode_ = mode; }
 
+  /**
+   Visit each active voice with a method that accepts two parameters: a `Voice` reference and a `ReleaseKeyState`
+   reference that contains the current pedal state.
+
+   @param visitor the method to invoke
+   */
   template <typename Visitor>
-  void visitActiveVoice(Visitor visitor) noexcept {
+  void visitActiveVoice(Visitor visitor) noexcept
+  {
     auto releaseKeyState = Voice::ReleaseKeyState{minimumNoteDurationSamples(), channelState_.pedalState()};
     visitActiveVoice(visitor, releaseKeyState);
   }
 
+  /**
+   Visit each active voice with a method that accepts two parameters: a `Voice` reference and a `ReleaseKeyState`
+   reference that contains the current pedal state. As a side-effect, if a voice is no longer active, it will make it
+   available for future note ON events.
+
+   @param visitor the method to invoke
+   @param releaseKeyState the state of the pedal controllers
+   */
   template <typename Visitor>
-  void visitActiveVoice(Visitor visitor, const Voice::ReleaseKeyState releaseKeyState) noexcept {
+  void visitActiveVoice(Visitor visitor, const Voice::ReleaseKeyState releaseKeyState) noexcept
+  {
     for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
       auto voiceIndex = *pos;
       auto& voice{voices_[voiceIndex]};
@@ -306,11 +379,17 @@ private:
   }
 
   void initialize(Float sampleRate) noexcept;
+
   void stopAllExclusiveVoices(int exclusiveClass) noexcept;
+
   void stopSameKeyVoices(int eventKey) noexcept;
+
   size_t getVoice() noexcept;
+
   void startVoice(const Config& config) noexcept;
+
   OldestActiveVoiceCache::iterator stopVoice(size_t voiceIndex) noexcept;
+
   void notifyActiveVoicesChannelStateChanged() noexcept;
 
   void processChannelMessage(MIDI::ControlChange cc, uint8_t value) noexcept;
@@ -338,8 +417,6 @@ private:
   std::unique_ptr<IO::File> file_{};
   PresetCollection presets_{};
   size_t activePreset_{0};
-
-  AUParameterTree* parameterTree_{nullptr};
 
   size_t portamentoRateMillisecondsPerSemitone_{100};
   std::atomic<PhonicMode> phonicMode_{PhonicMode::poly};

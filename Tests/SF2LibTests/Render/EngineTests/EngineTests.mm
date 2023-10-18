@@ -1296,7 +1296,7 @@ using namespace SF2::Render::Engine;
   NSLog(@"path: %@", path);
   std::string tmp([path cStringUsingEncoding: NSUTF8StringEncoding],
                   [path lengthOfBytesUsingEncoding: NSUTF8StringEncoding]);
-  auto payload = engine.createLoadSysExec(tmp, 234);
+  auto payload = engine.createLoadSysEx(tmp, 234);
   harness.sendRaw(payload);
   std::cout << engine.activePresetName() << '\n';
   XCTAssertEqual(std::string("SFX"), engine.activePresetName());

@@ -171,30 +171,30 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
   auto event = MIDI::CoreEvent(midiEvent.data[0] < 0xF0 ? (midiEvent.data[0] & 0xF0) : midiEvent.data[0]);
   switch (event) {
     case MIDI::CoreEvent::noteOff:
-      os_log_info(log_, "doMIDIEvent - noteOff: %hhd", midiEvent.data[1]);
       if (midiEvent.length > 1) {
+        os_log_info(log_, "doMIDIEvent - noteOff: %hhd", midiEvent.data[1]);
         noteOff(midiEvent.data[1]);
       }
       break;
 
     case MIDI::CoreEvent::noteOn:
-      os_log_info(log_, "doMIDIEvent - noteOn: %hhd %hhd", midiEvent.data[1], midiEvent.data[2]);
       if (midiEvent.length == 3) {
+        os_log_info(log_, "doMIDIEvent - noteOn: %hhd %hhd", midiEvent.data[1], midiEvent.data[2]);
         noteOn(midiEvent.data[1], midiEvent.data[2]);
       }
       break;
 
     case MIDI::CoreEvent::keyPressure:
-      os_log_info(log_, "doMIDIEvent - keyPressure: %hhd %hhd", midiEvent.data[1], midiEvent.data[2]);
       if (midiEvent.length == 3) {
+        os_log_info(log_, "doMIDIEvent - keyPressure: %hhd %hhd", midiEvent.data[1], midiEvent.data[2]);
         channelState_.setNotePressure(midiEvent.data[1], midiEvent.data[2]);
         notifyActiveVoicesChannelStateChanged();
       }
       break;
 
     case MIDI::CoreEvent::controlChange:
-      os_log_info(log_, "doMIDIEvent - controlChange: %hhX %hhX", midiEvent.data[1], midiEvent.data[2]);
       if (midiEvent.length == 3) {
+        os_log_info(log_, "doMIDIEvent - controlChange: %hhX %hhX", midiEvent.data[1], midiEvent.data[2]);
         auto what = MIDI::ControlChange(midiEvent.data[1]);
         auto data = midiEvent.data[2];
         if (midiEvent.data[1] < 120) {
@@ -206,23 +206,23 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::programChange:
-      os_log_info(log_, "doMIDIEvent - programChange: %hhd", midiEvent.data[1]);
       if (midiEvent.length == 2) {
+        os_log_info(log_, "doMIDIEvent - programChange: %hhd", midiEvent.data[1]);
         changeProgram(midiEvent.data[1]);
       }
       break;
 
     case MIDI::CoreEvent::channelPressure:
-      os_log_info(log_, "doMIDIEvent - channelPressure: %hhd", midiEvent.data[1]);
       if (midiEvent.length == 2) {
+        os_log_info(log_, "doMIDIEvent - channelPressure: %hhd", midiEvent.data[1]);
         channelState_.setChannelPressure(midiEvent.data[1]);
         notifyActiveVoicesChannelStateChanged();
       }
       break;
 
     case MIDI::CoreEvent::pitchBend:
-      os_log_info(log_, "doMIDIEvent - pitchBend: %hhd %hhd", midiEvent.data[1], midiEvent.data[2]);
       if (midiEvent.length == 3) {
+        os_log_info(log_, "doMIDIEvent - pitchBend: %hhd %hhd", midiEvent.data[1], midiEvent.data[2]);
         int bend = (midiEvent.data[2] << 7) | midiEvent.data[1];
         channelState_.setPitchWheelValue(bend);
         notifyActiveVoicesChannelStateChanged();
@@ -234,22 +234,15 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       if (midiEvent.data[1] == 0x7e && midiEvent.data[midiEvent.length - 1] == 0xF7) {
         switch (midiEvent.data[2]) {
           case 0x00:
-            // System-Exclusive command for loading URL in SF2Engine:
-            //
-            //   0 0xF0 - System Exclusive
-            //   1 0x7E - non-realtime ID
-            //   2 0x00 - unused subtype
-            //   3 0xAA - MSB of the preset to load
-            //   4 0xBB - LSB of the preset to load
-            //   5 ...  - N Base-64 encoded URL bytes
-            // 5+N 0xF7 - EOX
-            //
             if (midiEvent.length >= 6) {
               loadFromMIDI(midiEvent);
+            } else {
+              os_log_debug(log_, "doMIDIEvent - systemExclusive ignored due to length < 6");
             }
             break;
 
           default:
+            os_log_debug(log_, "doMIDIEvent - systemExclusive ignored");
             break;
         }
       }
@@ -257,11 +250,11 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 
     case MIDI::CoreEvent::reset:
       os_log_info(log_, "doMIDIEvent - reset");
-      allOff();
-      channelState_.reset();
+      reset();
       break;
 
     default:
+      os_log_debug(log_, "doMIDIEvent - ignored %hhX", midiEvent.data[0]);
       break;
   }
 }
@@ -276,8 +269,7 @@ Engine::processChannelMessage(MIDI::ControlChange channelMessage, uint8_t value)
       break;
 
     case MIDI::ControlChange::resetAllControllers:
-      allOff();
-      channelState_.reset();
+      reset();
       break;
 
 //    case MIDI::ControlChange::localControl:
@@ -373,7 +365,7 @@ Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
 }
 
 std::vector<uint8_t>
-Engine::createLoadSysExec(const std::string& path, size_t preset) noexcept
+Engine::createLoadSysEx(const std::string& path, size_t preset) noexcept
 {
   auto encoded = path.empty() ? "" : SF2::Utils::Base64::encode(path);
   auto nameOffset = 5;
@@ -392,7 +384,7 @@ Engine::createLoadSysExec(const std::string& path, size_t preset) noexcept
 std::vector<uint8_t>
 Engine::createUseIndex(size_t index) noexcept
 {
-  return createLoadSysExec("", index);
+  return createLoadSysEx("", index);
 }
 
 std::vector<uint8_t>
@@ -526,4 +518,12 @@ Engine::stopVoice(size_t voiceIndex) noexcept
   available_.push_back(voiceIndex);
   os_signpost_interval_end(log_, stopVoiceSignpost_, "stopVoice", "");
   return pos;
+}
+
+void
+Engine::reset() noexcept
+{
+  os_log_info(log_, "reset");
+  allOff();
+  channelState_.reset();
 }

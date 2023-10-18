@@ -39,9 +39,9 @@ SF2::Engine::activePresetName() const noexcept
 }
 
 NSData*
-SF2::Engine::createLoadSysExec(const std::string& path, size_t preset) const noexcept
+SF2::Engine::createLoadSysEx(const std::string& path, size_t preset) const noexcept
 {
-  auto value = SF2::Render::Engine::Engine::createLoadSysExec(path, preset);
+  auto value = SF2::Render::Engine::Engine::createLoadSysEx(path, preset);
   auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
   return data;
 }
