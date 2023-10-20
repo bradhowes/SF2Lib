@@ -73,6 +73,7 @@ Parameters::provideValue(AUParameter* parameter) noexcept
       case EngineParameterAddress::activeVoiceCount:          return engine_.activeVoiceCount();
       case EngineParameterAddress::retriggerModeEnabled:      return SF2::toBool(engine_.retriggerModeEnabled());
       case EngineParameterAddress::firstUnusedAddress:        return 0.0;
+      default: return 0.0;
     }
   } else {
     return 0.0;
@@ -117,8 +118,11 @@ Parameters::makeBooleanParameter(NSString* name, EngineParameterAddress address,
 AUParameterTree*
 Parameters::makeTree() noexcept
 {
-  NSMutableArray* definitions = [[NSMutableArray alloc] initWithCapacity:valueOf(Index::numValues)];
+  // This is a bit too large due to various unused generators found in the spec.
+  auto capacity = NSUInteger(valueOf(Index::numValues) + engineParameterCount);
+  auto definitions = [[NSMutableArray alloc] initWithCapacity:capacity];
 
+  // Add definitions for all generators that are used by the SF2Lib engine
   for (auto index : IndexIterator()) {
     const auto& definition = Definition::definition(index);
     if (definition.valueKind() == Definition::ValueKind::UNUSED) {
@@ -129,6 +133,8 @@ Parameters::makeTree() noexcept
     [definitions addObject:param];
   }
 
+  // Add definitions for the MIDI continuous controllers (CC) defined in the SF2 spec that can affect SF2Lib engine
+  // rendering.
   [definitions addObject:makeBooleanParameter(@"portamentoModeEnabled",
                                               EngineParameterAddress::portamentoModeEnabled,
                                               engine_.portamentoModeEnabled())];
@@ -141,7 +147,6 @@ Parameters::makeTree() noexcept
   [definitions addObject:makeBooleanParameter(@"retriggerModeEnabled",
                                               EngineParameterAddress::retriggerModeEnabled,
                                               engine_.retriggerModeEnabled())];
-
   auto flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable;
   auto param = [AUParameterTree createParameterWithIdentifier:@"portamentoRate"
                                                          name:@"portamentoRate"

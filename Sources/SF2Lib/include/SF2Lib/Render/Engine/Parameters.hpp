@@ -23,14 +23,24 @@ public:
 
   enum struct EngineParameterAddress : AUParameterAddress
   {
-    portamentoModeEnabled = 1000,
+    // Pretty sure this is large enough to never overlap with SF generator indices now and in the future
+    // (SoundFont spec v2.01 defines 59)
+    firstEngineParameterAddress = 1000,
+
+    portamentoModeEnabled = firstEngineParameterAddress,
     portamentoRate,
     oneVoicePerKeyModeEnabled,
     polyphonicModeEnabled,
     activeVoiceCount,
     retriggerModeEnabled,
-    firstUnusedAddress
+    firstUnusedAddress,
+
+    lastEngineParameterAddressPlusOne
   };
+
+  /// Number of engine parameters to be found in the AUParameterTree
+  static constexpr size_t engineParameterCount = (valueOf(EngineParameterAddress::lastEngineParameterAddressPlusOne) -
+                                                  valueOf(EngineParameterAddress::firstEngineParameterAddress));
 
   /**
    Construct new instance for the given Engine

@@ -198,6 +198,8 @@ Engine::doParameterEvent(const AUParameterEvent& event) noexcept {
         return;
       case Parameters::EngineParameterAddress::firstUnusedAddress:
         return;
+      default:
+        return;
     }
   }
 }
