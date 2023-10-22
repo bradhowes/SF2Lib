@@ -407,7 +407,7 @@ Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
 }
 
 std::vector<uint8_t>
-Engine::createLoadSysEx(const std::string& path, size_t preset) noexcept
+Engine::createLoadFileUseIndex(const std::string& path, size_t preset) noexcept
 {
   auto encoded = path.empty() ? "" : SF2::Utils::Base64::encode(path);
   auto nameOffset = 5;
@@ -426,7 +426,7 @@ Engine::createLoadSysEx(const std::string& path, size_t preset) noexcept
 std::vector<uint8_t>
 Engine::createUseIndex(size_t index) noexcept
 {
-  return createLoadSysEx("", index);
+  return createLoadFileUseIndex("", index);
 }
 
 std::vector<uint8_t>

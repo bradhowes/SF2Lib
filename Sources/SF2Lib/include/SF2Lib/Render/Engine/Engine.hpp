@@ -173,7 +173,7 @@ public:
    @param index the index of the preset to activate
    @returns array of MIDI bytes
    */
-  static std::vector<uint8_t> createLoadSysEx(const std::string& path, size_t index) noexcept;
+  static std::vector<uint8_t> createLoadFileUseIndex(const std::string& path, size_t index) noexcept;
 
   /**
    Utility class method that creates a MIDI SysEx command to activate the preset at the given index in the

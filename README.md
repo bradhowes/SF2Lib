@@ -82,6 +82,13 @@ Addional performance gains could be had by following the approach of FluidSynth 
 changes to most of the modulators and generators. Furthermore, one could check the pending MIDI event list to see if it
 is empty, and choose a path that supports vectorized rendering.
 
+# Swift Integration
+
+All of the code in this package is C++/Objective C but the Swift package now depends on Swift 5.9 in order to obtain 
+access to the Swift C++ bridging that is now available. This is only used in the `SF2Lib.hpp` and `SF2Lib.cpp` files to 
+declare a Swift-compatible interface to the C++ SF2::Render::Engine::Engine class, here named `SF2::Engine`. This 
+interface creates and uses a pointer to an SF2::Render::Engine::Engine object so that it can hide all implementation
+details from the Swift bridging framework.
 
 # Credits
 

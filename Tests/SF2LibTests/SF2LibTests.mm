@@ -31,9 +31,9 @@
   XCTAssertEqual("", value);
 }
 
-- (void)testCreateLoadSysExec {
+- (void)testCreateLoadFileUseIndex {
   auto url = [TestResources getResourceUrl:0];
-  auto data = engine->createLoadSysEx(url.path.UTF8String, 123);
+  auto data = engine->createLoadFileUseIndex(url.path.UTF8String, 123);
   XCTAssertNotNil(data);
   XCTAssertTrue(data.length > url.path.length);
 }
