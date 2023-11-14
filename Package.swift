@@ -5,20 +5,12 @@ import PackageDescription
 let package = Package(
   name: "SF2Lib",
   platforms: [.iOS(.v13), .macOS(.v10_15), .tvOS(.v12)],
-  products: [
-    .library(
-      name: "SF2Lib",
-      targets: ["SF2Lib"])
-  ],
-  dependencies: [
-    .package(url: "https://github.com/bradhowes/AUv3Support", branch: "main")
-  ],
+  products: [.library(name: "SF2Lib", targets: ["SF2Lib"])],
+  dependencies: [.package(url: "https://github.com/bradhowes/AUv3Support", branch: "main")],
   targets: [
     .target(
       name: "SF2Lib",
-      dependencies: [
-        .product(name: "AUv3-DSP-Headers", package: "AUv3Support", condition: .none),
-      ],
+      dependencies: [.product(name: "AUv3-DSP-Headers", package: "AUv3Support", condition: .none)],
       path: "Sources/SF2Lib",
       exclude: [
         "DSP/README.md",
@@ -29,9 +21,7 @@ let package = Package(
         "MIDI/README.md",
         "Render/README.md"
       ],
-      resources: [
-        .process("Resources")
-      ],
+      resources: [.process("Resources")],
       publicHeadersPath: "include",
       cxxSettings: [
         .define("USE_ACCELERATE", to: "1", .none),
