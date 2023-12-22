@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <Accelerate/Accelerate.h>
+#include <AudioToolbox/AUParameters.h>
 #include <cmath>
 #include <concepts>
 

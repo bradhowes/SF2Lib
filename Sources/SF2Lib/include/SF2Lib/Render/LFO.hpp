@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <os/log.h>
 #include <cmath>
 
 #include "SF2Lib/DSP.hpp"

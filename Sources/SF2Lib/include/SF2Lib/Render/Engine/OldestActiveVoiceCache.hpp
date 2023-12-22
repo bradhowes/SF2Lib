@@ -1,7 +1,8 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
 #pragma once
-#include <functional>
+#include <os/log.h>
+
 #include <list>
 #include <vector>
 

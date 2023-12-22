@@ -1,5 +1,7 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
+#include <os/log.h>
+
 #include "SF2Lib/Render/Engine/OldestActiveVoiceCache.hpp"
 
 using namespace SF2::Render::Engine;

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <os/log.h>
+
 #include <algorithm>
 #include <cmath>
 #include <limits>

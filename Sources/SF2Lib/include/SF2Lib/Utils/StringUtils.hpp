@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "SF2Lib/Types.hpp"
 
 namespace SF2::Utils {
