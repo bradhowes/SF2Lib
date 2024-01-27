@@ -10,8 +10,10 @@
 namespace SF2::Entity::Generator {
 
 /**
- Enumeration of valid SF2 generators. This is a strongly-typed version of the integer values found in the spec. The
- comments below come from the spec (with some editing -- see section 8.1.3)
+ Enumeration of valid SF2 generators according to the SF2 spec. This is a strongly-typed version of the integer values
+ found in the spec. The comments below come from the spec (with some editing -- see section 8.1.3)
+
+ Those enum values tagged with a "USED" comment are used by the rendering engine.
  */
 enum struct Index : size_t {
   /**
@@ -453,7 +455,7 @@ public:
 
    @returns this iterator
    */
-  IndexIterator operator++() noexcept {
+  inline IndexIterator operator++() noexcept {
     ++value_;
     return *this;
   }
@@ -466,10 +468,10 @@ public:
   inline Index operator*() const noexcept { return static_cast<Index>(value_); }
 
   /// @return iterator that points to first Index enum value.
-  static IndexIterator begin() noexcept { return {}; }
+  static inline IndexIterator begin() noexcept { return {}; }
 
   /// @return iterator that points to last Index enum value + 1.
-  static IndexIterator end() noexcept { return {Index::numValues}; }
+  static inline IndexIterator end() noexcept { return {Index::numValues}; }
 
   friend std::strong_ordering operator<=>(const IndexIterator& lhs, const IndexIterator& rhs) noexcept = default;
 

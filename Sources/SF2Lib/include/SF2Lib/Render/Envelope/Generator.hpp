@@ -109,6 +109,7 @@ public:
   /// @returns true if in the release stage
   inline bool isRelease() const noexcept { return stageIndex_ == StageIndex::release; }
 
+  /// @returns number of samples remaining in the current state
   inline int counter() const noexcept { return counter_; }
 
   /// @returns stage at given index

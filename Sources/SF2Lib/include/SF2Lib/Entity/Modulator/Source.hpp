@@ -62,7 +62,7 @@ public:
   /// The bit that flags the polarity of the controller mapping
   inline static const uint16_t polarityBit = (1 << 9);
 
-  Source() noexcept : bits_{0} {};
+  Source() = default;
 
   explicit Source(uint16_t bits) noexcept : bits_{bits} {}
 
@@ -160,7 +160,7 @@ private:
   uint16_t polarity() const noexcept { return bits_ & polarityBit; }
   uint16_t direction() const noexcept { return bits_ & directionBit; }
 
-  uint16_t bits_{0};
+  uint16_t bits_{};
 };
 
 } // end namespace SF2::Entity::Modulator

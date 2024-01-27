@@ -13,7 +13,7 @@ class Version {
 public:
   inline static const size_t entity_size = 4;
 
-  Version() noexcept : wMajor{0}, wMinor{0} {}
+  Version() = default;
 
   /**
    Constructor that reads from file.
@@ -30,8 +30,8 @@ public:
   void dump(const std::string& indent) const noexcept;
 
 private:
-  uint16_t wMajor;
-  uint16_t wMinor;
+  uint16_t wMajor{};
+  uint16_t wMinor{};
 };
 
 } // end namespace SF2::Entity

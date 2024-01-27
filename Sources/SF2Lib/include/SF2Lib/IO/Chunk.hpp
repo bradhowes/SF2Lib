@@ -21,7 +21,7 @@ public:
    Constructor
 
    @param tag the chunk's Tag type
-   @param size the number of bytes held by the chunk
+   @param size the number of bytes held by the chunk as read from a file
    @param pos the file position where the contents of the chunk is to be found
    */
   Chunk(Tag tag, uint32_t size, Pos pos);

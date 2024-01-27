@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "SF2Lib/Entity/Entity.hpp"
+#include "SF2Lib/IO/Pos.hpp"
 
 namespace SF2::Entity {
 
@@ -10,7 +10,7 @@ namespace SF2::Entity {
  Memory layout of 'phdr' entry in sound font. The size of this is defined to be 38 bytes, but due
  to alignment/padding the struct below is 40 bytes.
  */
-class Preset : public Entity {
+class Preset {
 public:
   inline static const size_t entity_size = 38;
 
@@ -21,6 +21,12 @@ public:
    */
   explicit Preset(IO::Pos& pos) noexcept;
 
+  /**
+   Construct a pseudo-Preset that is only used to locate a Preset in a file.
+
+   @param bank the bank to look in
+   @param program the program to locate in the given bank
+   */
   Preset(uint16_t bank, uint16_t program) noexcept;
 
   /// @returns name of the preset
@@ -36,7 +42,7 @@ public:
   uint16_t bank() const noexcept { return wBank; }
 
   /// @returns the index of the first zone of the preset
-  uint16_t firstZoneIndex() const noexcept { return wPresetBagNdx; }
+  size_t firstZoneIndex() const noexcept { return wPresetBagNdx; }
 
   uint32_t library() const noexcept { return dwLibrary; }
 
@@ -45,7 +51,9 @@ public:
   uint32_t morphology() const noexcept { return dwMorphology; }
 
   /// @returns the number of preset zones
-  size_t zoneCount() const noexcept;
+  size_t zoneCount() const noexcept {
+    return (this + 1)->firstZoneIndex() - firstZoneIndex();
+  }
 
   /// Write out description of the preset to std::cout
   void dump(const std::string& indent, size_t index) const noexcept;

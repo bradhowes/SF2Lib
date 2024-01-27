@@ -2,12 +2,13 @@
 
 #pragma once
 
-#include "SF2Lib/Entity/Entity.hpp"
+#include "SF2Lib/IO/Pos.hpp"
 #include "SF2Lib/Entity/Generator/Definition.hpp"
 #include "SF2Lib/Entity/Generator/Index.hpp"
 
 /**
- Classes involved in describing an SF2 generator that provides or "generates" a value that is used to render audio.
+ Classes involved in describing an SF2 generator that provides or "generates" a value that is used to control some aspect of
+ the audio rendering process.
  */
 namespace SF2::Entity::Generator {
 
@@ -15,12 +16,12 @@ namespace SF2::Entity::Generator {
  Memory layout of a 'pgen'/'igen' entry. The size of this is defined to be 4. Each instance represents a generator
  configuration.
  */
-class Generator : public Entity {
+class Generator {
 public:
   static inline const size_t entity_size = 4;
 
   /**
-   Constructor from file.
+   Construct from file.
 
    @param pos location in file to read
    */

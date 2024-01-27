@@ -5,7 +5,7 @@
 #include <array>
 #include <string>
 
-#include "SF2Lib/Entity/Entity.hpp"
+#include "SF2Lib/IO/Pos.hpp"
 #include "SF2Lib/Entity/Generator/Definition.hpp"
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
@@ -29,7 +29,7 @@ namespace SF2::Entity::Modulator {
  If there are duplicates, the second occurrence wins. This is also how modulators can override those that were defined
  either by default or in an instrument or preset zone.
  */
-class Modulator : public Entity {
+class Modulator {
 public:
   inline static size_t entity_size = 10;
 

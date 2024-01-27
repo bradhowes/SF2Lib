@@ -21,8 +21,10 @@ public:
     linear = 0
   };
 
+  /**
+   Default constructor for a linear transformer.
+   */
   Transformer() noexcept : bits_{SF2::valueOf(Kind::linear)} {}
-  explicit Transformer(uint16_t bits) noexcept : bits_{bits} {}
 
   /// @returns the kind of transform to apply
   Kind kind() const noexcept { return Kind::linear; }

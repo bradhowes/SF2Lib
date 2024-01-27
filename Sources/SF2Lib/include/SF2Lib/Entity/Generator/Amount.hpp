@@ -46,7 +46,7 @@ private:
     uint16_t wAmount;
     int16_t shAmount;
     uint8_t ranges[2];
-  } raw_{0};
+  } raw_{};
 };
 
 } // end namespace SF2::Entity::Generator

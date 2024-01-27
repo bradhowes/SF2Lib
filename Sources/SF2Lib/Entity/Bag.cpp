@@ -13,20 +13,6 @@ Bag::Bag(IO::Pos& pos) noexcept
   pos = pos.readInto(*this);
 }
 
-size_t
-Bag::generatorCount() const noexcept
-{
-  int value = (this + 1)->firstGeneratorIndex() - firstGeneratorIndex();
-  return static_cast<size_t>(value);
-}
-
-size_t
-Bag::modulatorCount() const noexcept
-{
-  int value = (this + 1)->firstModulatorIndex() - firstModulatorIndex();
-  return static_cast<size_t>(value);
-}
-
 void
 Bag::dump(const std::string& indent, size_t index) const noexcept
 {

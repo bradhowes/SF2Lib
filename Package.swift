@@ -6,14 +6,13 @@ let package = Package(
   name: "SF2Lib",
   platforms: [.iOS(.v13), .macOS(.v10_15), .tvOS(.v12)],
   products: [.library(name: "SF2Lib", targets: ["SF2Lib"])],
-  dependencies: [.package(url: "https://github.com/bradhowes/AUv3Support", branch: "main")],
+  dependencies: [.package(url: "https://github.com/bradhowes/AUv3Support", from: "9.1.0")],
   targets: [
     .target(
       name: "SF2Lib",
       dependencies: [.product(name: "AUv3-DSP-Headers", package: "AUv3Support", condition: .none)],
       path: "Sources/SF2Lib",
       exclude: [
-        "DSP/README.md",
         "Entity/README.md",
         "Entity/Generator/README.md",
         "Entity/Modulator/README.md",
@@ -27,6 +26,8 @@ let package = Package(
         .define("USE_ACCELERATE", to: "1", .none),
         // Set to 1 to assert if std::vector[] index is invalid
         .define("CHECKED_VECTOR_INDEXING", to: "0", .none),
+        // NOTE: having unsafeFlags set will cause SPM to deny use of this package by version. You must instead
+        // point to a comnmit hash to use.
         .unsafeFlags([
           "-O3",
           "-pedantic",

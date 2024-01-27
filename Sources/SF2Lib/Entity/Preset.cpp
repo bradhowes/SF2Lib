@@ -28,14 +28,6 @@ dwMorphology{}
   ;
 }
 
-size_t
-Preset::zoneCount() const noexcept
-{
-  int value = (this + 1)->firstZoneIndex() - firstZoneIndex();
-  return static_cast<size_t>(value);
-}
-
-
 void
 Preset::dump(const std::string& indent, size_t index) const noexcept
 {

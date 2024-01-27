@@ -20,13 +20,6 @@ Instrument::name() const noexcept
   return std::string(achInstName);
 }
 
-size_t
-Instrument::zoneCount() const noexcept
-{
-  int value = (this + 1)->firstZoneIndex() - firstZoneIndex();
-  return static_cast<size_t>(value);
-}
-
 void
 Instrument::dump(const std::string& indent, size_t index) const noexcept
 {

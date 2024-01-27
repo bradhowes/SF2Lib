@@ -5,7 +5,7 @@
 #include <string>
 
 #include "SF2Lib/Types.hpp"
-#include "SF2Lib/Entity/Entity.hpp"
+#include "SF2Lib/IO/Pos.hpp"
 
 namespace SF2::Entity {
 
@@ -28,7 +28,7 @@ namespace SF2::Entity {
  dwStartloop must be less than dwEndloop-31, and dwEndloop must be less than dwEnd-7. If these constraints are not met,
  the sound may optionally not be played if the hardware cannot support artifact-free playback for the parameters given.
  */
-class SampleHeader : public Entity {
+class SampleHeader {
 public:
   inline static const size_t entity_size = 46;
 
@@ -41,7 +41,9 @@ public:
   };
 
   /**
-   Construct new instance from SF2 file
+   Construct from file.
+
+   @param pos location in file to read
    */
   explicit SampleHeader(IO::Pos& pos) noexcept;
 
@@ -123,7 +125,7 @@ public:
   /// @returns number of samples between the start and end indices.
   size_t sampleSize() const noexcept { return endIndex() - startIndex(); }
 
-  uint16_t sampleLinkIndex() const noexcept { return sampleLink; }
+  size_t sampleLinkIndex() const noexcept { return sampleLink; }
 
   void dump(const std::string& indent, size_t index) const noexcept;
 

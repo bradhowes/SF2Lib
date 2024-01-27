@@ -124,13 +124,15 @@ public:
   bool isUnsignedValue() const noexcept { return valueKind_ < ValueKind::signedShort; }
 
   /**
-   Obtain the value from a generator Amount instance. The SF2 spec defines `unsigned` and `signed` values, but in
-   general we work in signed space.
+   Obtain the value from a generator's Amount instance. The SF2 spec defines `unsigned` and `signed` values, but in
+   general we work in signed space. Further, an SF2 file only contains 16-bit values, but we promote to the native
+   integer type (most likely 32 or 64 bit size) before doing anything with it.
 
    @param amount the container holding the value to extract
    @returns extracted value
    */
   int valueOf(const Amount& amount) const noexcept {
+    static_assert(sizeof(decltype(amount.unsignedAmount())) < sizeof(int), "Undefined behavior - sizeof(int) == sizeof(uint16)");
     return isUnsignedValue() ? amount.unsignedAmount() : amount.signedAmount();
   }
 

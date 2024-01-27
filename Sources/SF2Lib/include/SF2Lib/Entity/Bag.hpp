@@ -5,8 +5,11 @@
 #include <cstdint>
 #include <string>
 
-#include "SF2Lib/Entity/Entity.hpp"
+#include "SF2Lib/IO/Pos.hpp"
 
+/**
+ Collection of types that mirror data structures defined in the SF2 spec. These are all read-only representations.
+ */
 namespace SF2::Entity {
 
 /**
@@ -18,28 +21,32 @@ namespace SF2::Entity {
  operate in this way have a terminating instance whose index value is the total number of generators or
  modulators in the preset or instrument zones.
  */
-class Bag : public Entity {
+class Bag {
 public:
   inline static const size_t entity_size = 4;
 
   /**
-   Constructor that reads from file.
+   Construct instance from values in file.
 
    @param pos location to read from
    */
   explicit Bag(IO::Pos& pos) noexcept;
 
   /// @returns first generator index in this collection
-  uint16_t firstGeneratorIndex() const noexcept { return wGenNdx; }
+  size_t firstGeneratorIndex() const noexcept { return wGenNdx; }
 
   /// @returns number of generators in this collection
-  size_t generatorCount() const noexcept;
+  size_t generatorCount() const noexcept {
+    return (this + 1)->firstGeneratorIndex() - firstGeneratorIndex();
+  }
 
   /// @returns first modulator index in this collection
-  uint16_t firstModulatorIndex() const noexcept { return wModNdx; }
+  size_t firstModulatorIndex() const noexcept { return wModNdx; }
 
   /// @returns number of modulators in this collection
-  size_t modulatorCount() const noexcept;
+  size_t modulatorCount() const noexcept {
+    return (this + 1)->firstModulatorIndex() - firstModulatorIndex();
+  }
 
   /**
    Utility for displaying bag contents on output stream.
