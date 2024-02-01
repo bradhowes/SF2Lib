@@ -145,14 +145,14 @@ struct TestEngineHarness {
     auto event = AUParameterEvent();
     event.parameterAddress = SF2::valueOf(address);
     event.value = value;
-    engine_.doParameterEvent(event);
+    engine_.doParameterEvent(event, 0);
   }
 
   void setParameter(SF2::Entity::Generator::Index index, AUValue value) noexcept {
     auto event = AUParameterEvent();
     event.parameterAddress = SF2::valueOf(index);
     event.value = value;
-    engine_.doParameterEvent(event);
+    engine_.doParameterEvent(event, 0);
   }
 
 private:

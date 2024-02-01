@@ -7,15 +7,9 @@
 namespace Eng = SF2::Render::Engine;
 
 SF2::Engine::Engine(double sampleRate, NSUInteger voiceCount)
-: impl_{new Eng::Engine(sampleRate, voiceCount,
-                        Eng::Engine::Interpolator::cubic4thOrder)}
+: impl_{new Eng::Engine(sampleRate, voiceCount, Eng::Engine::Interpolator::cubic4thOrder)}
 {
   ;
-}
-
-SF2::Engine::~Engine()
-{
-  impl_.reset();
 }
 
 void

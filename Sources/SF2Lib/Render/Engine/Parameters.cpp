@@ -41,6 +41,7 @@ Parameters::applyOne(State& state, Index index) noexcept
 void
 Parameters::setLiveValue(Index index, int value) noexcept
 {
+  /// TODO: support ramping
   values_[index] = value;
   changed_[index] = true;
   anyChanged_ = true;

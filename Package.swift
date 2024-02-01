@@ -6,7 +6,7 @@ let package = Package(
   name: "SF2Lib",
   platforms: [.iOS(.v13), .macOS(.v10_15), .tvOS(.v12)],
   products: [.library(name: "SF2Lib", targets: ["SF2Lib"])],
-  dependencies: [.package(url: "https://github.com/bradhowes/AUv3Support", from: "9.1.0")],
+  dependencies: [.package(url: "https://github.com/bradhowes/AUv3Support", from: "10.1.0")],
   targets: [
     .target(
       name: "SF2Lib",

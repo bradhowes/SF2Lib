@@ -163,45 +163,47 @@ Engine::applyPedals() noexcept
   });
 }
 
-void
-Engine::doParameterEvent(const AUParameterEvent& event) noexcept {
+AUAudioFrameCount
+Engine::doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount duration) noexcept {
   // NOTE: this is running in the real-time render thread.
   os_log_debug(log_, "doParameterEvent - address: %llu value: %f", event.parameterAddress, event.value);
   auto rawIndex = event.parameterAddress;
   auto value = event.value;
-  if (rawIndex < 0) return;
+  if (rawIndex < 0) return 0;
   if (rawIndex < valueOf(Entity::Generator::Index::numValues)) {
     auto index = Entity::Generator::Index(rawIndex);
     const auto& def = Entity::Generator::Definition::definition(index);
     parameters_.setLiveValue(index, def.clamp(int(std::round(value))));
     notifyParameterChanged(index);
+    return duration;
   } else if (rawIndex >= valueOf(Parameters::EngineParameterAddress::portamentoModeEnabled) &&
              rawIndex < valueOf(Parameters::EngineParameterAddress::firstUnusedAddress)) {
     auto address = Parameters::EngineParameterAddress(rawIndex);
     switch (address) {
       case Parameters::EngineParameterAddress::portamentoModeEnabled:
         setPortamentoModeEnabled(SF2::toBool(value));
-        return;
+        break;
       case Parameters::EngineParameterAddress::portamentoRate:
         setPortamentoRate(size_t(value));
-        return;
+        break;
       case Parameters::EngineParameterAddress::oneVoicePerKeyModeEnabled:
         setOneVoicePerKeyModeEnabled(SF2::toBool(value));
-        return;
+        break;
       case Parameters::EngineParameterAddress::polyphonicModeEnabled:
         setPhonicMode(SF2::toBool(value) ? Engine::PhonicMode::poly : Engine::PhonicMode::mono);
-        return;
+        break;
       case Parameters::EngineParameterAddress::activeVoiceCount:
-        return;
+        break;
       case Parameters::EngineParameterAddress::retriggerModeEnabled:
         setRetriggerModeEnabled(SF2::toBool(value));
-        return;
+        break;
       case Parameters::EngineParameterAddress::firstUnusedAddress:
-        return;
+        break;
       default:
-        return;
+        break;
     }
   }
+  return 0;
 }
 
 void

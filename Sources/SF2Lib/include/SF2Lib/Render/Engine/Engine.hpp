@@ -118,7 +118,7 @@ public:
   }
 
   /// API for EventProcessor
-  void doParameterEvent(const AUParameterEvent& event) noexcept;
+  AUAudioFrameCount doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount duration) noexcept;
 
   /// API for EventProcessor
   void doRenderingStateChanged(bool state) noexcept { if (!state) allOff(); }
@@ -418,9 +418,9 @@ private:
   size_t portamentoRateMillisecondsPerSemitone_{100};
   std::atomic<PhonicMode> phonicMode_{PhonicMode::poly};
 
-  std::atomic<bool> oneVoicePerKeyModeEnabled_{false};
-  std::atomic<bool> portamentoModeEnabled_{false};
-  std::atomic<bool> retriggerModeEnabled_{true};
+  std::atomic<bool> oneVoicePerKeyModeEnabled_ = ATOMIC_VAR_INIT(false);
+  std::atomic<bool> portamentoModeEnabled_ = ATOMIC_VAR_INIT(false);
+  std::atomic<bool> retriggerModeEnabled_ = ATOMIC_VAR_INIT(true);
 
   os_log_t log_;
   os_signpost_id_t renderSignpost_;

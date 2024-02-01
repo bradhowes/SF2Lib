@@ -30,7 +30,7 @@ struct Engine
   /**
    Destructor for the instance.
    */
-  ~Engine();
+  ~Engine() = default;
 
   /**
    Set the rendering format to be when rendering in CoreAudio infrastructure.
