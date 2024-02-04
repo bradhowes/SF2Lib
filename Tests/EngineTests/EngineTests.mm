@@ -1,13 +1,13 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import "TestResources.hpp"
-#import "SF2Lib.hpp"
+#import "Engine.hpp"
 
-@interface SF2LibTests : XCTestCase
+@interface EngineTests : XCTestCase
 
 @end
 
-@implementation SF2LibTests {
+@implementation EngineTests {
   SF2::Engine* engine;
 }
 

@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
-#import <SF2Lib/IO/File.hpp>
+
+#import "SF2Lib/IO/File.hpp"
 
 @interface TestResources : NSObject
 

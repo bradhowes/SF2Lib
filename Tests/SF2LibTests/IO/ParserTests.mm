@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 
-#include "../SampleBasedContexts.hpp"
+#include "SampleBasedContexts.hpp"
 
 #include "SF2Lib/IO/Parser.hpp"
 #include "SF2Lib/IO/Tag.hpp"

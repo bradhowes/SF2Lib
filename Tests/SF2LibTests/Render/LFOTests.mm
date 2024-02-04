@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "../SampleBasedContexts.hpp"
+#include "SampleBasedContexts.hpp"
 
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/LFO.hpp"

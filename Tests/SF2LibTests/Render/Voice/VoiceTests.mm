@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "../../SampleBasedContexts.hpp"
+#include "SampleBasedContexts.hpp"
 
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/Configuration.hpp"

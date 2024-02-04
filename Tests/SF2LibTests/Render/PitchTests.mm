@@ -2,7 +2,7 @@
 
 #include <XCTest/XCTest.h>
 
-#include "../SampleBasedContexts.hpp"
+#include "SampleBasedContexts.hpp"
 #include "SF2Lib/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Envelope/Generator.hpp"
 #include "SF2Lib/Render/LFO.hpp"

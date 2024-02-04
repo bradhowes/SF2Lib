@@ -4,7 +4,7 @@
 
 #include <XCTest/XCTest.h>
 
-#include "../../SampleBasedContexts.hpp"
+#include "SampleBasedContexts.hpp"
 
 #include "SF2Lib/Render/PresetCollection.hpp"
 

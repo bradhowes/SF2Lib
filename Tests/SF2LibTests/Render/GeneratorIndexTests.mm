@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "../SampleBasedContexts.hpp"
+#include "SampleBasedContexts.hpp"
 
 #include "SF2Lib/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Voice/Sample/Index.hpp"

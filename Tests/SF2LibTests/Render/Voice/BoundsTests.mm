@@ -2,7 +2,7 @@
 
 #include <XCTest/XCTest.h>
 #include "SF2Lib/Render/Voice/Sample/Bounds.hpp"
-#include "../../SampleBasedContexts.hpp"
+#include "SampleBasedContexts.hpp"
 
 using namespace SF2;
 using namespace SF2::Entity;

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <memory>
 
-#include "../../SampleBasedContexts.hpp"
+#include "SampleBasedContexts.hpp"
 
 #include "SF2Lib/Entity/Generator/Index.hpp"
 #include "SF2Lib/Entity/Modulator/Modulator.hpp"

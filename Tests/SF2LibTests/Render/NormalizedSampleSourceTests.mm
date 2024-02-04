@@ -3,7 +3,7 @@
 #include <XCTest/XCTest.h>
 #include <vector>
 
-#include "../SampleBasedContexts.hpp"
+#include "SampleBasedContexts.hpp"
 
 #include "SF2Lib/Types.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"

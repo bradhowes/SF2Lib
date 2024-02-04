@@ -9,6 +9,23 @@ let package = Package(
   dependencies: [.package(url: "https://github.com/bradhowes/AUv3Support", from: "10.1.0")],
   targets: [
     .target(
+      name: "Engine",
+      dependencies: ["SF2Lib"],
+      path: "Sources/Engine",
+      publicHeadersPath: "include"
+    ),
+    .target(
+      name: "TestUtils",
+      dependencies: ["SF2Lib"],
+      path: "SOurces/TestUtils",
+      resources: [.process("Resources")],
+      publicHeadersPath: ""
+    ),
+    .testTarget(
+      name: "EngineTests",
+      dependencies: ["Engine", "TestUtils"]
+    ),
+    .target(
       name: "SF2Lib",
       dependencies: [.product(name: "AUv3-DSP-Headers", package: "AUv3Support", condition: .none)],
       path: "Sources/SF2Lib",
@@ -26,8 +43,8 @@ let package = Package(
         .define("USE_ACCELERATE", to: "1", .none),
         // Set to 1 to assert if std::vector[] index is invalid
         .define("CHECKED_VECTOR_INDEXING", to: "0", .none),
-        // NOTE: having unsafeFlags set will cause SPM to deny use of this package by version. You must instead
-        // point to a comnmit hash to use.
+        // NOTE: having unsafeFlags set will cause SPM to deny use of this package by version.
+        // Use the Engine target instead of this.
         .unsafeFlags([
           "-O3",
           "-pedantic",
@@ -154,10 +171,7 @@ let package = Package(
     ),
     .testTarget(
       name: "SF2LibTests",
-      dependencies: ["SF2Lib"],
-      resources: [
-        .process("Resources"),
-      ],
+      dependencies: ["SF2Lib", "TestUtils"],
       cxxSettings: [
         // Set to 1 to play audio in tests. Set to 0 to keep silent.
         .define("PLAY_AUDIO", to: "0"),

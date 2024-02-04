@@ -2,7 +2,7 @@
 
 #include <XCTest/XCTest.h>
 
-#include "../SampleBasedContexts.hpp"
+#include "SampleBasedContexts.hpp"
 #include "SF2Lib/Entity/Modulator/Source.hpp"
 #include "SF2Lib/MIDI/ValueTransformer.hpp"
 

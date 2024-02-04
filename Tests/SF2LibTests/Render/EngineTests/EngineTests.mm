@@ -6,7 +6,7 @@
 
 #include <XCTest/XCTest.h>
 
-#include "../../SampleBasedContexts.hpp"
+#include "SampleBasedContexts.hpp"
 
 #include "SF2Lib/Configuration.hpp"
 #include "SF2Lib/Utils/Base64.hpp"
