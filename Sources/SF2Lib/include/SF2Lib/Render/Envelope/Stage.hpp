@@ -20,7 +20,6 @@ namespace SF2::Render::Envelope {
 class Stage
 {
 public:
-  Stage() = default;
 
   /**
    Generate a configuration that will emit a constant value for a fixed or indefinite time.

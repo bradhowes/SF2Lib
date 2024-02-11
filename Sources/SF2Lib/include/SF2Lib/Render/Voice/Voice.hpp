@@ -55,12 +55,6 @@ public:
   /// Allow move operations during construction to support std::vector
   Voice(Voice&&) noexcept = default;
 
-  ~Voice() noexcept = default;
-
-  Voice(const Voice&) = delete;
-  Voice& operator=(const Voice&) noexcept = delete;
-  Voice& operator=(Voice&&) noexcept = delete;
-
   /**
    Set the sample rate to use for rendering.
 

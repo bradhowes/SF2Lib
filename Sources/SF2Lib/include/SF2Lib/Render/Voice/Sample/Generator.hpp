@@ -120,7 +120,7 @@ private:
     return (*sampleSource_)[whole - 1];
   }
 
-  Bounds bounds_;
+  Bounds bounds_{};
   Index index_;
   const InterpolatorProc interpolatorProc_;
   const NormalizedSampleSource* sampleSource_{nullptr};

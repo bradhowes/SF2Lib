@@ -28,11 +28,6 @@ struct Engine
   Engine(double sampleRate, NSUInteger voiceCount);
 
   /**
-   Destructor for the instance.
-   */
-  ~Engine() = default;
-
-  /**
    Set the rendering format to be when rendering in CoreAudio infrastructure.
 
    @param busCount the number of busses to support. This will be at least one, and each bus will be stereo.

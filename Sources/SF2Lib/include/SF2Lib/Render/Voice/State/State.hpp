@@ -71,10 +71,6 @@ public:
   /// Allow move operations during construction to support std::vector
   State(State&&) = default;
 
-  State(const State&) = delete;
-  State& operator=(const State&) noexcept = delete;
-  State& operator=(State&&) noexcept = delete;
-
   /**
    Set the sample rate to use for rendering
 
