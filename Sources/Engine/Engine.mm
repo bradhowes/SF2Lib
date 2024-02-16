@@ -12,6 +12,11 @@ SF2::Engine::Engine(double sampleRate, NSUInteger voiceCount)
   ;
 }
 
+SF2::Engine::~Engine() noexcept
+{
+  ;
+}
+
 void
 SF2::Engine::setRenderingFormat(NSInteger busCount, AVAudioFormat *format, AUAudioFrameCount maxFramesToRender)
 {

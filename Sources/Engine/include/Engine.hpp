@@ -27,6 +27,8 @@ struct Engine
    */
   Engine(double sampleRate, NSUInteger voiceCount);
 
+  ~Engine() noexcept;
+
   /**
    Set the rendering format to be when rendering in CoreAudio infrastructure.
 
@@ -127,7 +129,7 @@ struct Engine
   bool retriggerModeEnabled() const noexcept;
 
 private:
-  std::shared_ptr<Render::Engine::Engine> impl_;
+  std::unique_ptr<Render::Engine::Engine> impl_;
 };
 
 } // SF2::DSP namespaces

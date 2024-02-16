@@ -52,7 +52,7 @@ struct FileInfo
   const std::vector<PresetInfo> getPresets() const noexcept { return presets_; }
 
 private:
-  std::shared_ptr<IO::File> impl_;
+  std::unique_ptr<IO::File> impl_;
   std::vector<PresetInfo> presets_;
 };
 
