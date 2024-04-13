@@ -30,8 +30,15 @@ Chunk::extract() const noexcept
 }
 
 void
-Chunk::extractSamples(std::vector<int16_t>& buffer) const noexcept
+Chunk::extractNormalizedSamples(SampleVector& buffer) const noexcept
 {
-  buffer.resize(size() / sizeof(int16_t), 0);
-  begin().readInto(buffer.data(), size());
+  static const Float normalizationScale = 1.0_F / Float(1 << 15);
+  std::vector<int16_t> rawSamples;
+  rawSamples.resize(size() / sizeof(int16_t), 0);
+
+  begin().readInto(rawSamples.data(), size());
+
+  buffer.resize(rawSamples.size(), 0.0_F);
+  Accelerated<Float>::conversionProc(rawSamples.data(), 1, buffer.data(), 1, rawSamples.size());
+  Accelerated<Float>::scaleProc(buffer.data(), 1, &normalizationScale, buffer.data(), 1, buffer.size());
 }

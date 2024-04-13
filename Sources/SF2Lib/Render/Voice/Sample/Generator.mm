@@ -10,5 +10,4 @@ Generator::configure(const NormalizedSampleSource& sampleSource, const State& st
   bounds_ = Bounds::make(sampleSource.header(), state);
   index_.configure(bounds_);
   sampleSource_ = &sampleSource;
-  sampleSource_->load();
 }

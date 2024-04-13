@@ -50,11 +50,12 @@ public:
   std::string extract() const noexcept;
 
   /**
-   Read samples into a buffer.
+   Read normalized samples into a buffer. The original SF2 samples are in 16-bit. This routine converts those into
+   `double` values that are between -1.0 and 1.0.
 
-   @param buffer to hold the 16-bit audio samples
+   @param buffer to hold the normalized Float values from 16-bit audio samples
    */
-  void extractSamples(std::vector<int16_t>& buffer) const noexcept;
+  void extractNormalizedSamples(SampleVector& buffer) const noexcept;
 
 private:
   uint32_t paddedSize() const noexcept { return size_ + (size_ & 1); }

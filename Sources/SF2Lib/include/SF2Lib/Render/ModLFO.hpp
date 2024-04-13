@@ -6,6 +6,9 @@
 
 namespace SF2::Render {
 
+/**
+ LFO for modulating purposes in the audio rendering flow.
+ */
 class ModLFO : public LFO
 {
 public:
@@ -17,6 +20,11 @@ public:
 
   ModLFO(Float sampleRate) noexcept : LFO(sampleRate, "ModLFO") {}
 
+  /**
+   Configure the modulating LFO using the state parameters.
+
+   @param state the state parameters to use
+   */
   void configure(Voice::State::State& state) noexcept {
     LFO::configure(state.sampleRate(),
                    DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyModulatorLFO)),

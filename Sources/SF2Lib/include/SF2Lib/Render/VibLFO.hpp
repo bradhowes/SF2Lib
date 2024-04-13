@@ -6,6 +6,9 @@
 
 namespace SF2::Render {
 
+/**
+ LFO for vibrato purposes in the audio rendering flow.
+ */
 class VibLFO : public LFO
 {
 public:
@@ -17,6 +20,11 @@ public:
 
   VibLFO(Float sampleRate) noexcept : LFO(sampleRate, "ModLFO") {}
 
+  /**
+   Configure the vibrato LFO using the state parameters.
+
+   @param state the state parameters to use
+   */
   void configure(Voice::State::State& state) noexcept {
     LFO::configure(state.sampleRate(),
                    DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyVibratoLFO)),

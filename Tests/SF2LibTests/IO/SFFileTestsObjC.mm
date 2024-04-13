@@ -98,7 +98,6 @@ using namespace SF2::Render::Voice::Sample;
   // file.presets()[0].dump("", 0);
 
   auto samples = file.sampleSourceCollection()[0];
-  samples.load();
   XCTAssertEqual(samples.size(), 115504);
 
   XCTAssertEqualWithAccuracy(samples[0], -0.00103759765625, 0.000001);
@@ -107,7 +106,6 @@ using namespace SF2::Render::Voice::Sample;
 - (void)testSamples {
   const auto& file = contexts->context2.file();
   auto samples = file.sampleSourceCollection()[0];
-  samples.load();
 
   off_t sampleOffset = 246;
   XCTAssertEqual(samples.size(), 115504);

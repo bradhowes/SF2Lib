@@ -8,46 +8,10 @@
 #include "SF2Lib/Entity/Instrument.hpp"
 #include "SF2Lib/Entity/Preset.hpp"
 #include "SF2Lib/IO/ChunkList.hpp"
+#include "SF2Lib/IO/Closer.hpp"
 #include "SF2Lib/IO/File.hpp"
 
 using namespace SF2::IO;
-
-// Manage a file descriptor that was opened elsewhere. If still held upon destruction, close it.
-struct Closer
-{
-  /**
-   Constructor that takes ownership of the given file descriptor.
-
-   @param fd the file descriptor to manage
-   */
-  explicit Closer(int fd) : fd_{fd} {}
-
-  /**
-   Destructor that closes the held file descriptor if it is valid.
-   */
-  ~Closer() { if (is_valid()) ::close(fd_); }
-
-  /// returns the held file descriptor
-  int operator *() const { return fd_; }
-
-  /// returns true if the held file descriptor is not -1
-  bool is_valid() const { return fd_ != -1; }
-
-  /**
-   Release ownership of the held file descriptor.
-
-   @returns the file descriptor
-   */
-  int release() noexcept {
-    int tmp = -1;
-    std::swap(tmp, fd_);
-    return tmp;
-  }
-
-private:
-  int fd_{-1};
-};
-
 
 File::File(std::string path) : path_{path}, fd_{-1} {}
 
@@ -80,7 +44,7 @@ File::load() noexcept
   size_ = fileSize;
   sampleDataBegin_ = 0;
   sampleDataEnd_ = 0;
-  rawSamples_.clear();
+  normalizedSamples_.clear();
 
   try {
     auto riff = Pos(*fd, 0, size_).makeChunkList();
@@ -117,7 +81,7 @@ File::load() noexcept
           case Tags::igen: instrumentZoneGenerators_.load(chunk); break;
           case Tags::imod: instrumentZoneModulators_.load(chunk); break;
           case Tags::shdr: sampleHeaders_.load(chunk); break;
-          case Tags::smpl: chunk.extractSamples(rawSamples_); break;
+          case Tags::smpl: chunk.extractNormalizedSamples(normalizedSamples_); break;
           default:
             break;
         }
@@ -136,7 +100,7 @@ File::load() noexcept
   });
 
   // Build the collection of normalized samples.
-  sampleSourceCollection_.build(rawSamples_.data());
+  sampleSourceCollection_.build(normalizedSamples_);
 
   fd_ = fd.release();
   return LoadResponse::ok;

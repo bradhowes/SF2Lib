@@ -11,18 +11,17 @@ SampleSourceCollection::SampleSourceCollection(const SF2::IO::ChunkItems<Entity:
 }
 
 void
-SampleSourceCollection::build(const int16_t* rawSamples)
+SampleSourceCollection::build(const SampleVector& normalizedSamples)
 {
   for (const auto& header : sampleHeaders_) {
     auto key{makeKey(header)};
     auto found = collection_.find(key);
     if (found == collection_.end()) {
-      auto [it, ok] = collection_.emplace(key, Voice::Sample::NormalizedSampleSource{rawSamples, header});
+      auto [it, ok] = collection_.emplace(key, Voice::Sample::NormalizedSampleSource{normalizedSamples, header});
       if (!ok) throw std::runtime_error("failed to insert sample source");
     }
   }
 }
-
 
 const Voice::Sample::NormalizedSampleSource&
 SampleSourceCollection::operator[](size_t index) const

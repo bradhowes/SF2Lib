@@ -27,7 +27,7 @@ using namespace SF2::Render::Voice::Sample;
 
 static SF2::Entity::SampleHeader header{0, 6, 3, 5, 100, 69, 0}; // 0: start, 1: end, 2: loop start, 3: loop end
 static SF2::MIDI::ChannelState channelState;
-static int16_t values[8] = {10000, -20000, 30000, 20000, 10000, -10000, -20000, -30000};
+static SF2::SampleVector values = {1.0, -1.0, 0.5, 0.25, -0.25, -0.5, -0.6, -0.7};
 
 - (void)setUp {
   contexts = new SampleBasedContexts;
@@ -40,28 +40,14 @@ static int16_t values[8] = {10000, -20000, 30000, 20000, 10000, -10000, -20000, 
 
 - (void)testLoad {
   NormalizedSampleSource source{values, header};
-  XCTAssertEqual(source.size(), 0);
-  XCTAssertFalse(source.isLoaded());
+  XCTAssertEqual(source.size(), 52);
   XCTAssertEqual(0, source.header().startIndex());
   XCTAssertEqual(6, source.header().endIndex());
 
-  source.load();
-
-  XCTAssertTrue(source.isLoaded());
   XCTAssertEqual(source.size(), source.header().endIndex() + NormalizedSampleSource::sizePaddingAfterEnd);
-  XCTAssertEqual(source[0], values[0] * NormalizedSampleSource::normalizationScale);
-  XCTAssertEqual(source[1], values[1] * NormalizedSampleSource::normalizationScale);
+  XCTAssertEqual(source[0], values[0]);
+  XCTAssertEqual(source[1], values[1]);
 }
-
-- (void)testUnload {
-  NormalizedSampleSource source{values, header};
-  source.load();
-  XCTAssertTrue(source.isLoaded());
-  source.unload();
-  XCTAssertFalse(source.isLoaded());
-  XCTAssertEqual(source.size(), 0);
-}
-
 
 - (void)testLoadSamplesPerformance0 {
   const auto& file = contexts->context0.file();

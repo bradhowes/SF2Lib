@@ -3,6 +3,8 @@
 #pragma once
 
 #include <memory>
+#include <vector>
+
 #include <Foundation/Foundation.h>
 #include <CoreAudioKit/CoreAudioKit.h>
 #include <string>

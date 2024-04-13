@@ -5,6 +5,7 @@
 #include <AudioToolbox/AUParameters.h>
 #include <cmath>
 #include <concepts>
+#include <vector>
 
 namespace SF2 {
 
@@ -13,6 +14,7 @@ namespace SF2 {
  (32-bit float) only when necessary.
  */
 using Float = double;
+using SampleVector = std::vector<Float>;
 
 #ifndef __AVAudioTypes_h__
 using AUValue = float;

@@ -36,11 +36,8 @@ Voice::configure(const State::Config& config) noexcept
   os_signpost_interval_begin(log_, configSignpost_, "start");
 
   state_.prepareForVoice(config);
-
-  const auto& sampleSource{config.sampleSource()};
-  sampleSource.load();
-  sampleGenerator_.configure(sampleSource, state_);
-  pitch_.configure(sampleSource.header());
+  sampleGenerator_.configure(config.sampleSource(), state_);
+  pitch_.configure(config.sampleSource().header());
 
   os_signpost_interval_end(log_, configSignpost_, "end");
 }

@@ -21,7 +21,7 @@ public:
 
   explicit SampleSourceCollection(const IO::ChunkItems<Entity::SampleHeader>& sampleHeaders) noexcept;
 
-  void build(const int16_t* rawSamples);
+  void build(const SampleVector& normalizedSamples);
 
   const Voice::Sample::NormalizedSampleSource& operator[](size_t index) const;
 
