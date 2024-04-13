@@ -44,7 +44,8 @@ File::load() noexcept
   size_ = fileSize;
   sampleDataBegin_ = 0;
   sampleDataEnd_ = 0;
-  normalizedSamples_.clear();
+
+  SampleVector normalizedSamples;
 
   try {
     auto riff = Pos(*fd, 0, size_).makeChunkList();
@@ -81,7 +82,7 @@ File::load() noexcept
           case Tags::igen: instrumentZoneGenerators_.load(chunk); break;
           case Tags::imod: instrumentZoneModulators_.load(chunk); break;
           case Tags::shdr: sampleHeaders_.load(chunk); break;
-          case Tags::smpl: chunk.extractNormalizedSamples(normalizedSamples_); break;
+          case Tags::smpl: chunk.extractNormalizedSamples(normalizedSamples); break;
           default:
             break;
         }
@@ -100,7 +101,7 @@ File::load() noexcept
   });
 
   // Build the collection of normalized samples.
-  sampleSourceCollection_.build(normalizedSamples_);
+  sampleSourceCollection_.build(normalizedSamples);
 
   fd_ = fd.release();
   return LoadResponse::ok;

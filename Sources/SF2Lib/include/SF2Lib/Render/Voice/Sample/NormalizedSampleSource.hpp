@@ -31,7 +31,8 @@ public:
   samples_{allSamples.begin() + header.startIndex(), allSamples.begin() + header.endIndex()}, header_{header}
   {
     // Append 46 zeros to end of the samples
-    samples_.resize(samples_.size() + sizePaddingAfterEnd, 0.0_F);
+    auto size = samples_.size() + sizePaddingAfterEnd;
+    samples_.resize(size);
   }
 
   /// @returns number of samples in the canonical representation
