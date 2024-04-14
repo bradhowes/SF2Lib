@@ -133,17 +133,6 @@ let package = Package(
       swiftSettings: [.interoperabilityMode(.Cxx)]
     ),
     .target(
-      name: "TestUtils",
-      dependencies: ["SF2Lib"],
-      path: "SOurces/TestUtils",
-      resources: [.process("Resources")],
-      publicHeadersPath: ""
-    ),
-    .testTarget(
-      name: "EngineTests",
-      dependencies: ["Engine", "TestUtils"]
-    ),
-    .target(
       name: "SF2Lib",
       dependencies: [.product(name: "AUv3-DSP-Headers", package: "AUv3Support", condition: .none)],
       path: "Sources/SF2Lib",
@@ -172,12 +161,25 @@ let package = Package(
         .linkedFramework("AVFoundation", .none),
       ]
     ),
+    .target(
+      name: "TestUtils",
+      dependencies: ["SF2Lib"],
+      path: "Sources/TestUtils",
+      resources: [.process("Resources")],
+      publicHeadersPath: "",
+      cxxSettings: [
+        // Set to 1 to play audio in tests. Set to 0 to keep silent.
+        .define("PLAY_AUDIO", to: "0", .none),
+      ]
+    ),
+    .testTarget(
+      name: "EngineTests",
+      dependencies: ["Engine", "TestUtils"]
+    ),
     .testTarget(
       name: "SF2LibTests",
       dependencies: ["SF2Lib", "TestUtils"],
       cxxSettings: [
-        // Set to 1 to play audio in tests. Set to 0 to keep silent.
-        .define("PLAY_AUDIO", to: "0"),
         .unsafeFlags([
           "-Wno-newline-eof", // resource_bundle_accessor.h is missing newline at end of file
         ], .none)

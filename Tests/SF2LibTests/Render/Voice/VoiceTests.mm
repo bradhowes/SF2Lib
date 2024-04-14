@@ -25,7 +25,7 @@ using namespace SF2::Render::Voice::State;
 
 - (void)setUp {
   [super setUp];
-  self.playAudio = NO;
+  // self.playAudio = NO;
 }
 
 - (void)testVoiceRepeatedRenderGeneratesSameOutputRolandPiano {
