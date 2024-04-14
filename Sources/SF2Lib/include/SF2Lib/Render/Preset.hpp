@@ -37,7 +37,7 @@ public:
    @param instruments the collection of instruments that apply to the preset
    @param config the SF2 preset definition
    */
-  Preset(const IO::File& file, const InstrumentCollection& instruments, const Entity::Preset& config) noexcept;
+  Preset(IO::File& file, const InstrumentCollection& instruments, const Entity::Preset& config) noexcept;
 
   /**
    Locate preset/instrument zones for the given key/velocity values. There can be more than one match, often due to

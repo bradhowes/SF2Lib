@@ -234,10 +234,14 @@ struct PresetTestContextBase
   :
   urlIndex_{urlIndex}, sampleRate_{sampleRate}, presets_{}
   {
-    presets_.build(getFile(urlIndex));
+    ;
   }
 
   const SF2::Render::Preset& preset(int presetIndex) const {
+    // Lazily create the PresetCollection for the file when first asked for a preset.
+    if (presets_.empty()) {
+     const_cast<PresetTestContextBase*>(this)->presets_.build(getFile(urlIndex_));
+    }
     const auto& p{presets_[presetIndex].configuration()};
     std::cout << "Using preset: " << presetIndex << " " << p.name() << " " << p.bank() << "/" << p.program()
     << " " << getUrl(urlIndex_).path.UTF8String << std::endl;
@@ -271,7 +275,7 @@ struct PresetTestContextBase
 
   const NSURL* url() const { return getUrl(urlIndex_); }
   const std::string path() const { return url().path.UTF8String; }
-  const SF2::IO::File& file() const { return getFile(urlIndex_); }
+  SF2::IO::File& file() const { return getFile(urlIndex_); }
   int fd() const { return ::open(path().c_str(), O_RDONLY); }
 
 private:

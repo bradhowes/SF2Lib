@@ -33,8 +33,6 @@ File::load() noexcept
   auto offset = path_.find(prefix) == std::string::npos ? 0 : prefix.size();
   auto c_path = path_.c_str() + offset;
 
-  std::cout << "loading: " << c_path << std::endl;
-
   auto fd = Closer(::open(c_path, O_RDONLY));
   if (!fd.is_valid()) return LoadResponse::notFound;
 
@@ -42,8 +40,6 @@ File::load() noexcept
   if (fileSize < 16) return LoadResponse::invalidFormat;
 
   size_ = fileSize;
-  sampleDataBegin_ = 0;
-  sampleDataEnd_ = 0;
 
   try {
     auto riff = Pos(*fd, 0, size_).makeChunkList();
@@ -80,7 +76,7 @@ File::load() noexcept
           case Tags::igen: instrumentZoneGenerators_.load(chunk); break;
           case Tags::imod: instrumentZoneModulators_.load(chunk); break;
           case Tags::shdr: sampleHeaders_.load(chunk); break;
-          case Tags::smpl: chunk.extractNormalizedSamples(normalizedSamples_); break;
+          case Tags::smpl: sampleDataBegin_ = chunk.begin(); break;
           default:
             break;
         }
@@ -98,11 +94,42 @@ File::load() noexcept
     return presets_[aIndex] < presets_[bIndex];
   });
 
-  // Build the collection of normalized samples.
-  sampleSourceCollection_.build(normalizedSamples_);
-
   fd_ = fd.release();
   return LoadResponse::ok;
+}
+
+const SF2::Render::SampleSourceCollection&
+File::sampleSourceCollection()
+{
+  if (sampleSourceCollection_.empty()) {
+    os_log_debug(log_, "loading samples");
+    extractNormalizedSamples();
+    os_log_debug(log_, "building sample map");
+    sampleSourceCollection_.build(normalizedSamples_, sampleHeaders_);
+    os_log_debug(log_, "done");
+  }
+  return sampleSourceCollection_;
+}
+
+void
+File::extractNormalizedSamples() {
+  static const size_t batchSampleCount = 40 * 1024;
+  static const Float normalizationScale = 1.0_F / Float(1 << 15);
+
+  auto pos = sampleDataBegin_;
+  size_t remainingSamples = pos.available() / sizeof(int16_t);
+  normalizedSamples_.resize(remainingSamples);
+  std::vector<int16_t> rawSamples(batchSampleCount);
+
+  auto ptr = normalizedSamples_.data();
+  while (remainingSamples > 0) {
+    auto sampleCount = std::min(remainingSamples, batchSampleCount);
+    remainingSamples -= sampleCount;
+    pos = pos.readInto(rawSamples.data(), sampleCount * sizeof(int16_t));
+    Accelerated<Float>::conversionProc(rawSamples.data(), 1, ptr, 1, sampleCount);
+    Accelerated<Float>::scaleProc(ptr, 1, &normalizationScale, ptr, 1, sampleCount);
+    ptr += sampleCount;
+  }
 }
 
 void

@@ -8,7 +8,7 @@
 using namespace SF2::Render;
 
 void
-PresetCollection::build(const SF2::IO::File& file)
+PresetCollection::build(SF2::IO::File& file)
 {
   clear();
   instruments_.build(file);

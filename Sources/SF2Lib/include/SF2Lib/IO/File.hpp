@@ -61,6 +61,8 @@ public:
    */
   LoadResponse load() noexcept;
 
+  void loadSamples() noexcept;
+
   /// @returns true if the file has been loaded successfully.
   bool loaded() const noexcept { return fd_ != -1; }
 
@@ -112,9 +114,7 @@ public:
   const ChunkItems<Entity::SampleHeader>& sampleHeaders() const noexcept { return sampleHeaders_; };
 
   /// @returns reference to collection of SampleSource entities.
-  const Render::SampleSourceCollection& sampleSourceCollection() const noexcept {
-    return sampleSourceCollection_;
-  }
+  const Render::SampleSourceCollection& sampleSourceCollection();
 
   /// @returns reference to collection of preset indices that order the Preset entities by bank and program.
   const std::vector<size_t>& presetIndicesOrderedByBankProgram() const noexcept {
@@ -129,11 +129,13 @@ public:
 
 private:
 
+  void extractNormalizedSamples();
+
   std::string path_;
   int fd_{-1};
   off_t size_{0};
-  off_t sampleDataBegin_{0};
-  off_t sampleDataEnd_{0};
+  Pos sampleDataBegin_{-1, 0, 0};
+
   Entity::Version soundFontVersion_{};
   Entity::Version fileVersion_{};
 
@@ -155,10 +157,12 @@ private:
   ChunkItems<Entity::Generator::Generator> instrumentZoneGenerators_{};
   ChunkItems<Entity::Modulator::Modulator> instrumentZoneModulators_{};
   ChunkItems<Entity::SampleHeader> sampleHeaders_{};
-  Render::SampleSourceCollection sampleSourceCollection_{sampleHeaders_};
+  Render::SampleSourceCollection sampleSourceCollection_;
   SampleVector normalizedSamples_;
 
   std::vector<size_t> presetIndicesOrderedByBankProgram_{};
+
+  const os_log_t log_{os_log_create("SF2Lib", "File")};
 };
 
 } // end namespace SF2::IO

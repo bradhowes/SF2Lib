@@ -24,7 +24,7 @@ public:
 
    @param file the file to build with
    */
-  void build(const IO::File& file) noexcept;
+  void build(IO::File& file) noexcept;
 
   void clear() noexcept;
 

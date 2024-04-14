@@ -27,7 +27,7 @@ public:
    @param file the SF2 file that was loaded
    @param config the SF2 file entity that defines the instrument
    */
-  Instrument(const IO::File& file, const Entity::Instrument& config) noexcept;
+  Instrument(IO::File& file, const Entity::Instrument& config) noexcept;
 
   /**
    Locate the instrument zones that apply to the given key/velocity values.

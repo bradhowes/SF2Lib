@@ -80,7 +80,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)testParsing3 {
-  const auto& file = contexts->context2.file();
+  auto& file = contexts->context2.file();
 
   XCTAssertEqual(1, file.presets().size());
   XCTAssertEqual(6, file.presetZones().size());
@@ -104,7 +104,7 @@ using namespace SF2::Render::Voice::Sample;
 }
 
 - (void)testSamples {
-  const auto& file = contexts->context2.file();
+  auto& file = contexts->context2.file();
   auto samples = file.sampleSourceCollection()[0];
 
   off_t sampleOffset = 246;

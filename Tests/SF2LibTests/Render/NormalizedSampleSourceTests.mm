@@ -50,7 +50,7 @@ static SF2::SampleVector values = {1.0, -1.0, 0.5, 0.25, -0.25, -0.5, -0.6, -0.7
 }
 
 - (void)testLoadSamplesPerformance0 {
-  const auto& file = contexts->context0.file();
+  auto& file = contexts->context0.file();
   auto sampleEntries = file.sampleHeaders().size();
   XCTAssertEqual(sampleEntries, 495);
 
@@ -62,7 +62,7 @@ static SF2::SampleVector values = {1.0, -1.0, 0.5, 0.25, -0.25, -0.5, -0.6, -0.7
 }
 
 - (void)testLoadSamplesPerformance1 {
-  const auto& file = contexts->context1.file();
+  auto& file = contexts->context1.file();
   auto sampleEntries = file.sampleHeaders().size();
   XCTAssertEqual(sampleEntries, 864);
 
@@ -74,7 +74,7 @@ static SF2::SampleVector values = {1.0, -1.0, 0.5, 0.25, -0.25, -0.5, -0.6, -0.7
 }
 
 - (void)testLoadSamplesPerformance2 {
-  const auto& file = contexts->context2.file();
+  auto& file = contexts->context2.file();
   auto sampleEntries = file.sampleHeaders().size();
   XCTAssertEqual(sampleEntries, 24);
 

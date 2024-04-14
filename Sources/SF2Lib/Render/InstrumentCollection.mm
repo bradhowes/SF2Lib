@@ -8,7 +8,7 @@
 using namespace SF2::Render;
 
 void
-InstrumentCollection::build(const SF2::IO::File& file) noexcept
+InstrumentCollection::build(SF2::IO::File& file) noexcept
 {
   const auto& definitions = file.instruments();
   auto count = definitions.size();

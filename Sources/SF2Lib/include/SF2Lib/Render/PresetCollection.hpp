@@ -24,9 +24,11 @@ public:
 
    @param file the data to use to build the preset collection
    */
-  void build(const IO::File& file);
+  void build(IO::File& file);
 
   void clear() noexcept;
+
+  bool empty() const noexcept { return presets_.empty(); }
 
   /// @returns the number of presets in the collection.
   size_t size() const noexcept { return presets_.size(); }

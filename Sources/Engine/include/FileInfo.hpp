@@ -16,8 +16,8 @@ namespace Entity { class Preset; }
 namespace IO { class File; }
 
 /**
- Wrapper class for the SF2::Render::Engine that exposes a minimal API for Swift/C++ bridging. This perhaps better
- belongs in its own package.
+ A light-weight SF2 loader that provides meta data and preset information. It does not load samples nor does it
+ create the render entities such as the preset and instrument zones.
  */
 struct FileInfo
 {
