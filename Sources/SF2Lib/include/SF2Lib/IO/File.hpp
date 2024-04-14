@@ -156,6 +156,7 @@ private:
   ChunkItems<Entity::Modulator::Modulator> instrumentZoneModulators_{};
   ChunkItems<Entity::SampleHeader> sampleHeaders_{};
   Render::SampleSourceCollection sampleSourceCollection_{sampleHeaders_};
+  SampleVector normalizedSamples_;
 
   std::vector<size_t> presetIndicesOrderedByBankProgram_{};
 };
