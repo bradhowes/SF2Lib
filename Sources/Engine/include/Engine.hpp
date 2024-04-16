@@ -30,14 +30,17 @@ struct Engine
   ~Engine() noexcept;
 
   /**
-   Set the rendering format to be when rendering in CoreAudio infrastructure.
+   Set the rendering format to be when rendering in CoreAudio infrastructure. After returning from this call,
+   the engine will be ready to process and render samples -- though no sound will be emitted until a SF2 file
+   is installed and a preset is chosen.
 
    @param busCount the number of busses to support. This will be at least one, and each bus will be stereo.
    @param format the format to use for rendering
    @param maxFramesToRender the max number of frames to be seen in a `processAndRender` call. A frame consists of one
    sample per channel in a bus. For stereo, N frames = 2N audio samples.
+   @returns `true` if engine can start rendering
    */
-  void setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender);
+  bool setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender);
 
   /**
    Request to render samples. May be called on a real-time thread by the CoreAudio framework. Note that
@@ -74,21 +77,21 @@ struct Engine
    preset. This should be sent to the engine via a MIDI control connection; this method only creates the bytes to send.
 
    @param path the full path of the SF2 file to load
-   @param index the index of the preset in the file to use
+   @param preset the index of the preset in the file to use
    @returns MIDI SYSEX command as a byte sequence
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  NSData* createLoadFileUseIndex(const std::string& path, size_t index) const noexcept;
+  NSData* createLoadFileUsePreset(const std::string& path, size_t preset) const noexcept;
 
   /**
    Obtain an `NSData` instance containing a MIDI SYSEX command that will ask the engine to use a different preset from
    the currently-loaded SF2 file (set by an earlier `createLoadFileUseIndex` request).
 
-   @param index the index of the preset in the current file to use
+   @param preset the index of the preset in the current file to use
    @returns MIDI SYSEX command as a byte sequence
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  NSData* createUseIndex(size_t index) const noexcept;
+  NSData* createUsePreset(size_t preset) const noexcept;
 
   /**
    Obtain an `NSData` instance containing MIDI command to reset the engine. This will stop playing any notes and reset

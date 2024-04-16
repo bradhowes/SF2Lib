@@ -173,16 +173,16 @@ public:
    @param index the index of the preset to activate
    @returns array of MIDI bytes
    */
-  static std::vector<uint8_t> createLoadFileUseIndex(const std::string& path, size_t index) noexcept;
+  static std::vector<uint8_t> createLoadFileUsePreset(const std::string& path, size_t preset) noexcept;
 
   /**
    Utility class method that creates a MIDI SysEx command to activate the preset at the given index in the
    currently loaded SF2 file. This is the same as `createLoadSysExec` with a zero-length string.
 
-   @param index the index of the preset to activate
+   @param preset the index of the preset to activate
    @returns array of MIDI bytes
    */
-  static std::vector<uint8_t> createUseIndex(size_t index) noexcept;
+  static std::vector<uint8_t> createUsePreset(size_t preset) noexcept;
 
   /**
    Utility class method that creates a MIDI channel command to reset the engine. This stops all voices and resets the

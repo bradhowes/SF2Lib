@@ -22,8 +22,7 @@
 
 - (void)testSetRenderingFormat {
   auto audioFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:48000.0 channels:2];
-  engine->setRenderingFormat(3, audioFormat, 512);
-  // There is no way to check this right now
+  XCTAssertTrue(engine->setRenderingFormat(3, audioFormat, 512));
 }
 
 - (void)testActivePresetName {
@@ -33,13 +32,13 @@
 
 - (void)testCreateLoadFileUseIndex {
   auto url = [TestResources getResourceUrl:0];
-  auto data = engine->createLoadFileUseIndex(url.path.UTF8String, 123);
+  auto data = engine->createLoadFileUsePreset(url.path.UTF8String, 123);
   XCTAssertNotNil(data);
   XCTAssertTrue(data.length > url.path.length);
 }
 
 - (void)testCreateUseIndex {
-  auto data = engine->createUseIndex(59);
+  auto data = engine->createUsePreset(59);
   XCTAssertNotNil(data);
   XCTAssertEqual(6, data.length);
 }

@@ -1291,7 +1291,7 @@ using namespace SF2::Render::Engine;
   NSLog(@"path: %@", path);
   std::string tmp([path cStringUsingEncoding: NSUTF8StringEncoding],
                   [path lengthOfBytesUsingEncoding: NSUTF8StringEncoding]);
-  auto payload = engine.createLoadFileUseIndex(tmp, 234);
+  auto payload = engine.createLoadFileUsePreset(tmp, 234);
   harness.sendRaw(payload);
   std::cout << engine.activePresetName() << '\n';
   XCTAssertEqual(std::string("SFX"), engine.activePresetName());
@@ -1748,12 +1748,12 @@ using namespace SF2::Render::Engine;
   auto& engine{harness.engine()};
   harness.load(contexts.context0.path(), 0);
   XCTAssertEqual("Piano 1", engine.activePresetName());
-  harness.sendRaw(engine.createUseIndex(1));
+  harness.sendRaw(engine.createUsePreset(1));
   XCTAssertEqual("Piano 2", engine.activePresetName());
-  harness.sendRaw(engine.createUseIndex(128));
+  harness.sendRaw(engine.createUsePreset(128));
   std::clog << engine.activePresetName() << '\n';
   XCTAssertEqual("SynthBass101", engine.activePresetName());
-  harness.sendRaw(engine.createUseIndex(engine.presetCount() - 1));
+  harness.sendRaw(engine.createUsePreset(engine.presetCount() - 1));
   std::clog << engine.activePresetName() << '\n';
   XCTAssertEqual("SFX", engine.activePresetName());
 }

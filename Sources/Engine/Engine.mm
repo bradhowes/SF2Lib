@@ -17,10 +17,11 @@ SF2::Engine::~Engine() noexcept
   ;
 }
 
-void
+bool
 SF2::Engine::setRenderingFormat(NSInteger busCount, AVAudioFormat *format, AUAudioFrameCount maxFramesToRender)
 {
   impl_->setRenderingFormat(busCount, format, maxFramesToRender);
+  return impl_->isRendering();
 }
 
 AUAudioUnitStatus
@@ -38,17 +39,17 @@ SF2::Engine::activePresetName() const noexcept
 }
 
 NSData*
-SF2::Engine::createLoadFileUseIndex(const std::string& path, size_t preset) const noexcept
+SF2::Engine::createLoadFileUsePreset(const std::string& path, size_t preset) const noexcept
 {
-  auto value = SF2::Render::Engine::Engine::createLoadFileUseIndex(path, preset);
+  auto value = SF2::Render::Engine::Engine::createLoadFileUsePreset(path, preset);
   auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
   return data;
 }
 
 NSData*
-SF2::Engine::createUseIndex(size_t index) const noexcept
+SF2::Engine::createUsePreset(size_t preset) const noexcept
 {
-  auto value = SF2::Render::Engine::Engine::createUseIndex(index);
+  auto value = SF2::Render::Engine::Engine::createUsePreset(preset);
   auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
   return data;
 }
