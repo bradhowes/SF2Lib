@@ -7,6 +7,16 @@ using namespace SF2::Render::Envelope;
 
 static constexpr Float lowerBoundTimecents = -12'000.0;
 
+const Generator::StateNameArray Generator::stageNames_ = {
+  "DELAY",
+  "ATTACK",
+  "HOLD",
+  "DECAY",
+  "SUSTAIN",
+  "RELEASE",
+  "IDLE"
+};
+
 /**
  Obtain a generator value that is scaled by the MIDI key value. Per the spec, key 60 is unchanged. Keys higher will
  scale positively, and keys lower than 60 will scale negatively.
@@ -107,12 +117,13 @@ Generator::gate(bool noteOn) noexcept
   }
 }
 
-void
+Float
 Generator::stop() noexcept
 {
   stageIndex_ = StageIndex::idle;
   counter_ = 0;
   value_ = 0_F;
+  return value_;
 }
 
 void

@@ -22,7 +22,7 @@ struct ChunkItemsSupport {
 
  Like most of the IO namespace, instances of this class are essentially immutable.
 
- @arg T is the entity type to hold in this container
+ @arg T is the entity type found in this container
  */
 template <EntityDerivedType T>
 class ChunkItems : private ChunkItemsSupport

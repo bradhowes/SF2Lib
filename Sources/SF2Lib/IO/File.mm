@@ -136,7 +136,6 @@ void
 File::dump() const noexcept {
   std::cout << "|-ifil"; soundFontVersion_.dump("|-ifil");
   std::cout << "|-iver"; fileVersion_.dump("|-iver");
-
   std::cout << "|-phdr"; presets_.dump("|-phdr: ");
   std::cout << "|-pbag"; presetZones_.dump("|-pbag: ");
   std::cout << "|-pgen"; presetZoneGenerators_.dump("|-pgen: ");

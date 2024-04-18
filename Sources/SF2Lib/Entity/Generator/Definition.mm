@@ -69,7 +69,7 @@ GeneratorValueArray<Definition> const Definition::definitions_{
   D{N(startAddressOffset),                   ValueKind::offset,	    shortIntRange, false, NRPNMultiplier::x1},
   D{N(endAddressOffset),                     ValueKind::offset,	    shortIntRange, false, NRPNMultiplier::x1},
   D{N(startLoopAddressOffset),               ValueKind::offset,     shortIntRange, false, NRPNMultiplier::x1},
-  D{N(endLoopAddressOffset),                 ValueKind::offset, 	  shortIntRange, false, NRPNMultiplier::x1},
+  D{N(endLoopAddressOffset),                 ValueKind::offset, 	shortIntRange, false, NRPNMultiplier::x1},
   D{N(startAddressCoarseOffset),       ValueKind::coarseOffset,     shortIntRange, false, NRPNMultiplier::x1},
   // 5
   D{N(modulatorLFOToPitch),             ValueKind::signedCents,	{-12'000, 12'000}, true,  NRPNMultiplier::x2},
@@ -90,7 +90,7 @@ GeneratorValueArray<Definition> const Definition::definitions_{
   D{N(unused2),                              ValueKind::UNUSED,	      unusedRange, false, NRPNMultiplier::x1},
   D{N(unused3),                              ValueKind::UNUSED,	      unusedRange, false, NRPNMultiplier::x1},
   // 20
-  D{N(unused4),                              ValueKind::UNUSED, 	    unusedRange, false, NRPNMultiplier::x1},
+  D{N(unused4),                              ValueKind::UNUSED, 	  unusedRange, false, NRPNMultiplier::x1},
   D{N(delayModulatorLFO),           ValueKind::signedTimeCents,	{-12'000,  5'000}, true,  NRPNMultiplier::x2},
   D{N(frequencyModulatorLFO),  ValueKind::signedFrequencyCents,	{-16'000,  4'500}, true,  NRPNMultiplier::x4},
   D{N(delayVibratoLFO),             ValueKind::signedTimeCents,	{-12'000,  5'000}, true,  NRPNMultiplier::x2},
@@ -117,8 +117,8 @@ GeneratorValueArray<Definition> const Definition::definitions_{
   D{N(midiKeyToVolumeEnvelopeDecay),    ValueKind::signedShort,	{ -1'200,  1'200}, true,  NRPNMultiplier::x1},
   D{N(instrument),                    ValueKind::unsignedShort,    ushortIntRange, true,  NRPNMultiplier::x1},
   D{N(reserved1),                            ValueKind::UNUSED,       unusedRange, false, NRPNMultiplier::x1},
-  D{N(keyRange),                              ValueKind::range, 	       keyRange, true,  NRPNMultiplier::x1},
-  D{N(velocityRange),                         ValueKind::range, 	       keyRange, true,  NRPNMultiplier::x1},
+  D{N(keyRange),                              ValueKind::range, 	     keyRange, true,  NRPNMultiplier::x1},
+  D{N(velocityRange),                         ValueKind::range, 	     keyRange, true,  NRPNMultiplier::x1},
   // 45
   D{N(startLoopAddressCoarseOffset),   ValueKind::coarseOffset,	    shortIntRange, false, NRPNMultiplier::x1},
   D{N(forcedMIDIKey),                   ValueKind::signedShort,      neg1KeyRange, false, NRPNMultiplier::x1},
@@ -135,5 +135,5 @@ GeneratorValueArray<Definition> const Definition::definitions_{
   D{N(reserved3),                            ValueKind::UNUSED,	      unusedRange, false, NRPNMultiplier::x1},
   D{N(scaleTuning),                   ValueKind::unsignedShort,	{      0,   1200}, true,  NRPNMultiplier::x1},
   D{N(exclusiveClass),                ValueKind::unsignedShort,          keyRange, false, NRPNMultiplier::x1},
-  D{N(overridingRootKey),               ValueKind::signedShort, 		 neg1KeyRange, false, NRPNMultiplier::x1},
+  D{N(overridingRootKey),               ValueKind::signedShort, 	 neg1KeyRange, false, NRPNMultiplier::x1},
 };

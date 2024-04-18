@@ -23,7 +23,7 @@
  */
 namespace SF2::Render::Envelope {
 
-/// Stages defined in the SF2 2.01 spec (except for the `idle` state).
+/// Stages defined in the SF2 2.01 spec (except for the `idle` state -- there is no Stage entity for it).
 enum struct StageIndex : size_t {
   delay = 0,
   attack,
@@ -66,12 +66,16 @@ enum struct StageIndex : size_t {
  durations to zero.
  */
 class Generator {
+  /// Collection of Stage entities that define the duration of part of the envelope.
+  using StageArray = std::array<Stage, SF2::valueOf(StageIndex::numStages)>;
+  /// Stage names for logging.  NOTE: extra name is due to 'idle' state that does not have a Stage entity.
+  using StateNameArray = EnumIndexableValueArray<const char*, StageIndex, valueOf(StageIndex::numStages) + 1>;
 
   /**
    Collection of states for all of the stages in an SF2 envelope. Provides for indexing by StageIndex values.
    */
-  struct Stages : public std::array<Stage, SF2::valueOf(StageIndex::numStages)> {
-    using super = std::array<Stage, SF2::valueOf(StageIndex::numStages)>;
+  struct Stages : public StageArray {
+    using super = StageArray;
     Stage& operator[](const StageIndex& index) { return super::operator[](SF2::valueOf(index)); }
     const Stage& operator[](const StageIndex& index) const { return super::operator[](SF2::valueOf(index)); }
   };
@@ -83,13 +87,17 @@ public:
   /**
    Set the status of a note playing. When true, the envelope begins proper. When set to false, the envelope will
    jump to the release stage.
+
+   @param noteOn new value for the gate
    */
   void gate(bool noteOn) noexcept;
 
   /**
    Stop the envelope generator. All future requests for its value will report 0.0.
+
+   @returns 0.0
    */
-  void stop() noexcept;
+  Float stop() noexcept;
 
   /// @returns current stage index
   StageIndex activeIndex() const { return stageIndex_; }
@@ -144,15 +152,10 @@ protected:
   inline Float getNextValue() noexcept {
     if (!checkForNextStage()) return 0_F;
     value_ = stages_[stageIndex_].next(value_);
-    if (value_ < 0_F) { // Do not check for 0.0 since that is a valid starting state.
-      stop();
-    } else {
-      if (value_ > 1_F) {
-        value_ = 1_F;
-      }
-      --counter_;
-      checkForNextStage();
-    }
+    if (value_ < 0_F) return stop();
+    if (value_ > 1_F) value_ = 1_F;
+    --counter_;
+    checkForNextStage();
     return value_;
   }
 
@@ -162,26 +165,14 @@ protected:
 
 private:
 
-  static const char* stageName(StageIndex index) noexcept {
-    switch (index) {
-      case StageIndex::delay:   return "DELAY";
-      case StageIndex::attack:  return "ATTACK";
-      case StageIndex::hold:    return "HOLD";
-      case StageIndex::decay:   return "DECAY";
-      case StageIndex::sustain: return "SUSTAIN";
-      case StageIndex::release: return "RELEASE";
-      case StageIndex::idle:    return "IDLE";
-    }
-  }
-
   /**
    Enter a new stage.
 
    @param next the stage to enter
    */
   inline void enterStage(StageIndex next) noexcept {
-    os_log_info(log_, "enterStage %zu - old: %s new: %s value: %f", voiceIndex_, stageName(stageIndex_),
-                stageName(next), value_);
+    os_log_info(log_, "enterStage %zu - old: %s new: %s value: %f", voiceIndex_, stageNames_[stageIndex_],
+                stageNames_[next], value_);
     stageIndex_ = next;
     if (next != StageIndex::idle) {
       counter_ = stages_[stageIndex_].durationInSamples();
@@ -196,13 +187,13 @@ private:
   inline bool checkForNextStage() noexcept {
     while (counter_ == 0) {
       switch (stageIndex_) {
-        case StageIndex::delay:   enterStage(StageIndex::attack); continue;
-        case StageIndex::attack:  enterStage(StageIndex::hold); continue;
-        case StageIndex::hold:    enterStage(StageIndex::decay); continue;
-        case StageIndex::decay:   enterStage(StageIndex::sustain); continue;
-        case StageIndex::sustain: enterStage(StageIndex::release); continue; // this will actually never happen
-        case StageIndex::release: stop(); return false;
-        case StageIndex::idle:    return false;
+        case StageIndex::delay:     enterStage(StageIndex::attack); continue;
+        case StageIndex::attack:    enterStage(StageIndex::hold); continue;
+        case StageIndex::hold:      enterStage(StageIndex::decay); continue;
+        case StageIndex::decay:     enterStage(StageIndex::sustain); continue;
+        case StageIndex::sustain:   enterStage(StageIndex::release); continue; // this will actually never happen
+        case StageIndex::release:   stop(); return false;
+        case StageIndex::idle:      return false;
       }
     }
     return true;
@@ -216,6 +207,8 @@ private:
   const char* logTag_;
   const size_t voiceIndex_;
   const os_log_t log_;
+
+  static const StateNameArray stageNames_;
 };
 
 } // namespace SF2::Render::Envelope
