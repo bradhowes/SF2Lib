@@ -1,33 +1,43 @@
 // Copyright © 2023 Brad Howes. All rights reserved.
 
-#include "FileInfo.hpp"
+#include "Engine.hpp"
 #include "SF2Lib/Entity/Preset.hpp"
 #include "SF2Lib/IO/File.hpp"
 
-SF2::FileInfo::PresetInfo::PresetInfo(const SF2::Entity::Preset& preset) noexcept
+SF2PresetInfo::SF2PresetInfo(const SF2::Entity::Preset& preset)
 : name_{preset.name()}, bank_{preset.bank()}, program_{preset.program()}
 {}
 
-SF2::FileInfo::FileInfo(const char* path)
+SF2FileInfo::SF2FileInfo(const char* path)
 : impl_{new SF2::IO::File(path)}
 {}
 
-SF2::FileInfo::FileInfo(std::string path)
+SF2FileInfo::SF2FileInfo(std::string path)
 : impl_{new SF2::IO::File(path)}
 {}
+
+SF2FileInfo::~SF2FileInfo() {}
 
 bool
-SF2::FileInfo::load()
+SF2FileInfo::load()
 {
-  if (impl_->load() != IO::File::LoadResponse::ok) return false;
-  presets_.reserve(impl_->presetIndicesOrderedByBankProgram().size());
-  for (auto index : impl_->presetIndicesOrderedByBankProgram()) {
-    presets_.emplace_back(impl_->presets()[index]);
-  }
+  if (impl_->load() != SF2::IO::File::LoadResponse::ok) return false;
   return true;
 }
 
-const std::string& SF2::FileInfo::embeddedName() const noexcept { return impl_->embeddedName(); }
-const std::string& SF2::FileInfo::embeddedAuthor() const noexcept { return impl_->embeddedAuthor(); }
-const std::string& SF2::FileInfo::embeddedComment() const noexcept { return impl_->embeddedComment(); }
-const std::string& SF2::FileInfo::embeddedCopyright() const noexcept { return impl_->embeddedCopyright(); }
+std::string SF2FileInfo::embeddedName() const noexcept { return impl_->embeddedName(); }
+std::string SF2FileInfo::embeddedAuthor() const noexcept { return impl_->embeddedAuthor(); }
+std::string SF2FileInfo::embeddedComment() const noexcept { return impl_->embeddedComment(); }
+std::string SF2FileInfo::embeddedCopyright() const noexcept { return impl_->embeddedCopyright(); }
+
+size_t
+SF2FileInfo::size() const noexcept {
+  return impl_->presets().size();
+}
+
+SF2PresetInfo
+SF2FileInfo::operator[](size_t index) const noexcept {
+  auto chunkIndex = impl_->presetIndicesOrderedByBankProgram()[index];
+  auto preset = impl_->presets()[chunkIndex];
+  return SF2PresetInfo(preset);
+}

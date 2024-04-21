@@ -6,26 +6,26 @@
 
 namespace Eng = SF2::Render::Engine;
 
-SF2::Engine::Engine(double sampleRate, NSUInteger voiceCount)
+SF2Engine::SF2Engine(double sampleRate, NSUInteger voiceCount)
 : impl_{new Eng::Engine(sampleRate, voiceCount, Eng::Engine::Interpolator::cubic4thOrder)}
 {
   ;
 }
 
-SF2::Engine::~Engine() noexcept
+SF2Engine::~SF2Engine() noexcept
 {
   ;
 }
 
 bool
-SF2::Engine::setRenderingFormat(NSInteger busCount, AVAudioFormat *format, AUAudioFrameCount maxFramesToRender)
+SF2Engine::setRenderingFormat(NSInteger busCount, AVAudioFormat *format, AUAudioFrameCount maxFramesToRender)
 {
   impl_->setRenderingFormat(busCount, format, maxFramesToRender);
   return impl_->isRendering();
 }
 
 AUAudioUnitStatus
-SF2::Engine::processAndRender(const AudioTimeStamp *timestamp, UInt32 frameCount, NSInteger outputBusNumber,
+SF2Engine::processAndRender(const AudioTimeStamp *timestamp, UInt32 frameCount, NSInteger outputBusNumber,
                               AudioBufferList *output, const AURenderEvent *realtimeEventListHead,
                               AURenderPullInputBlock pullInputBlock)
 {
@@ -33,13 +33,13 @@ SF2::Engine::processAndRender(const AudioTimeStamp *timestamp, UInt32 frameCount
 }
 
 std::string
-SF2::Engine::activePresetName() const noexcept
+SF2Engine::activePresetName() const noexcept
 {
   return impl_->activePresetName();
 }
 
 NSData*
-SF2::Engine::createLoadFileUsePreset(const std::string& path, size_t preset) const noexcept
+SF2Engine::createLoadFileUsePreset(const std::string& path, size_t preset) const noexcept
 {
   auto value = SF2::Render::Engine::Engine::createLoadFileUsePreset(path, preset);
   auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
@@ -47,7 +47,7 @@ SF2::Engine::createLoadFileUsePreset(const std::string& path, size_t preset) con
 }
 
 NSData*
-SF2::Engine::createUsePreset(size_t preset) const noexcept
+SF2Engine::createUsePreset(size_t preset) const noexcept
 {
   auto value = SF2::Render::Engine::Engine::createUsePreset(preset);
   auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
@@ -55,7 +55,7 @@ SF2::Engine::createUsePreset(size_t preset) const noexcept
 }
 
 NSData*
-SF2::Engine::createResetCommand() const noexcept
+SF2Engine::createResetCommand() const noexcept
 {
   auto value = SF2::Render::Engine::Engine::createResetCommand();
   auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
@@ -63,7 +63,7 @@ SF2::Engine::createResetCommand() const noexcept
 }
 
 NSArray<NSData*>*
-SF2::Engine::createUseBankProgram(uint16_t bank, uint8_t program) const noexcept
+SF2Engine::createUseBankProgram(uint16_t bank, uint8_t program) const noexcept
 {
   auto value = SF2::Render::Engine::Engine::createUseBankProgram(bank, program);
   auto data = [[NSMutableArray alloc] initWithCapacity:value.size()];
@@ -74,45 +74,45 @@ SF2::Engine::createUseBankProgram(uint16_t bank, uint8_t program) const noexcept
 }
 
 NSData*
-SF2::Engine::createChannelMessage(uint8_t channelMessage, uint8_t content) const noexcept
+SF2Engine::createChannelMessage(uint8_t channelMessage, uint8_t content) const noexcept
 {
-  auto value = SF2::Render::Engine::Engine::createChannelMessage(MIDI::ControlChange(channelMessage), content );
+  auto value = SF2::Render::Engine::Engine::createChannelMessage(SF2::MIDI::ControlChange(channelMessage), content );
   auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
   return data;
 }
 
 size_t
-SF2::Engine::activeVoiceCount() const noexcept
+SF2Engine::activeVoiceCount() const noexcept
 {
   return impl_->activeVoiceCount();
 }
 
 bool
-SF2::Engine::monophonicModeEnabled() const noexcept
+SF2Engine::monophonicModeEnabled() const noexcept
 {
   return impl_->monophonicModeEnabled();
 }
 
 bool
-SF2::Engine::polyphonicModeEnabled() const noexcept
+SF2Engine::polyphonicModeEnabled() const noexcept
 {
   return impl_->polyphonicModeEnabled();
 }
 
 bool
-SF2::Engine::portamentoModeEnabled() const noexcept
+SF2Engine::portamentoModeEnabled() const noexcept
 {
   return impl_->portamentoModeEnabled();
 }
 
 bool
-SF2::Engine::oneVoicePerKeyModeEnabled() const noexcept
+SF2Engine::oneVoicePerKeyModeEnabled() const noexcept
 {
   return impl_->oneVoicePerKeyModeEnabled();
 }
 
 bool
-SF2::Engine::retriggerModeEnabled() const noexcept
+SF2Engine::retriggerModeEnabled() const noexcept
 {
   return impl_->retriggerModeEnabled();
 }
