@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import "TestResources.hpp"
-#import "FileInfo.hpp"
+#import "Engine.hpp"
 
 @interface FileInfoTests : XCTestCase
 
@@ -10,16 +10,16 @@
 @implementation FileInfoTests
 
 - (void)testLoading {
-  auto fi1 = SF2::FileInfo("a.b");
+  auto fi1 = SF2FileInfo("a.b");
   XCTAssertFalse(fi1.load());
   auto url = [TestResources getResourceUrl:0];
-  auto fi2 = SF2::FileInfo(url.path.UTF8String);
+  auto fi2 = SF2FileInfo(url.path.UTF8String);
   XCTAssertTrue(fi2.load());
 }
 
 - (void)testEmbeddedContent0 {
   auto url = [TestResources getResourceUrl: 0];
-  auto fi1 = SF2::FileInfo(url.path.UTF8String);
+  auto fi1 = SF2FileInfo(url.path.UTF8String);
   fi1.load();
   XCTAssertTrue(std::string("Free Font GM Ver. 3.2") == fi1.embeddedName());
   XCTAssertTrue(std::string("") == fi1.embeddedAuthor());
@@ -29,7 +29,7 @@
 
 - (void)testEmbeddedContent1 {
   auto url = [TestResources getResourceUrl: 1];
-  auto fi1 = SF2::FileInfo(url.path.UTF8String);
+  auto fi1 = SF2FileInfo(url.path.UTF8String);
   fi1.load();
   XCTAssertTrue(std::string("GeneralUser GS MuseScore version 1.442") == fi1.embeddedName());
   XCTAssertTrue(std::string("S. Christian Collins") == fi1.embeddedAuthor());
@@ -39,7 +39,7 @@
 
 - (void)testEmbeddedContent2 {
   auto url = [TestResources getResourceUrl: 2];
-  auto fi1 = SF2::FileInfo(url.path.UTF8String);
+  auto fi1 = SF2FileInfo(url.path.UTF8String);
   fi1.load();
   XCTAssertTrue(std::string("User Bank") == fi1.embeddedName());
   XCTAssertTrue(std::string("Vienna Master") == fi1.embeddedAuthor());
@@ -49,20 +49,20 @@
 
 - (void)testPresetInfo {
   auto url = [TestResources getResourceUrl: 0];
-  auto fi1 = SF2::FileInfo(url.path.UTF8String);
+  auto fi1 = SF2FileInfo(url.path.UTF8String);
   fi1.load();
-  XCTAssertEqual(235, fi1.getPresets().size());
-  auto presetInfo = fi1.getPresets()[0];
+  XCTAssertEqual(235, fi1.size());
+  auto presetInfo = fi1[0];
   XCTAssertTrue(std::string("Piano 1") == presetInfo.name());
   XCTAssertEqual(0, presetInfo.bank());
   XCTAssertEqual(0, presetInfo.program());
 
-  presetInfo = fi1.getPresets()[2];
+  presetInfo = fi1[2];
   XCTAssertTrue(std::string("Piano 3") == presetInfo.name());
   XCTAssertEqual(0, presetInfo.bank());
   XCTAssertEqual(2, presetInfo.program());
 
-  presetInfo = fi1.getPresets()[234];
+  presetInfo = fi1[234];
   XCTAssertTrue(std::string("SFX") == presetInfo.name());
   XCTAssertEqual(128, presetInfo.bank());
   XCTAssertEqual(56, presetInfo.program());
