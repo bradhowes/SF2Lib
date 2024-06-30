@@ -7,8 +7,9 @@
 using namespace SF2::Render::Engine;
 
 OldestActiveVoiceCache::OldestActiveVoiceCache(size_t maxVoiceCount) noexcept
-: leastRecentlyUsed_(Allocator(maxVoiceCount)), log_{os_log_create("SF2Lib", "OldestActiveVoiceCache")}
+: leastRecentlyUsed_(std::size_t(0)), log_{os_log_create("SF2Lib", "OldestActiveVoiceCache")}
 {
+  assert(maxVoiceCount <= Allocator::maxNodeCount);
   iterators_.assign(maxVoiceCount, leastRecentlyUsed_.end());
 }
 

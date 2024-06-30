@@ -418,9 +418,9 @@ private:
   size_t portamentoRateMillisecondsPerSemitone_{100};
   std::atomic<PhonicMode> phonicMode_{PhonicMode::poly};
 
-  std::atomic<bool> oneVoicePerKeyModeEnabled_ = ATOMIC_VAR_INIT(false);
-  std::atomic<bool> portamentoModeEnabled_ = ATOMIC_VAR_INIT(false);
-  std::atomic<bool> retriggerModeEnabled_ = ATOMIC_VAR_INIT(true);
+  std::atomic<bool> oneVoicePerKeyModeEnabled_{false};
+  std::atomic<bool> portamentoModeEnabled_{false};
+  std::atomic<bool> retriggerModeEnabled_{true};
 
   os_log_t log_;
   os_signpost_id_t renderSignpost_;

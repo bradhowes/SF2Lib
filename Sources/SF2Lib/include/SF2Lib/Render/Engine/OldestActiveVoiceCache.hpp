@@ -26,7 +26,7 @@ namespace SF2::Render::Engine {
 class OldestActiveVoiceCache
 {
 public:
-  using Allocator = Utils::ListNodeAllocator<size_t>;
+  using Allocator = Utils::ListNodeAllocator<size_t, 128>;
   using iterator = std::list<size_t, Allocator>::iterator;
   using const_iterator = std::list<size_t, Allocator>::const_iterator;
 

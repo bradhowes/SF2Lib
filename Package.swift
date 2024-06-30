@@ -123,7 +123,7 @@ let package = Package(
     .library(name: "SF2Lib", targets: ["SF2Lib"]),
     .library(name: "Engine", targets: ["Engine"])
   ],
-  dependencies: [.package(url: "https://github.com/bradhowes/AUv3Support", from: "11.0.0")],
+  dependencies: [.package(url: "https://github.com/bradhowes/AUv3Support", from: "11.1.2")],
   targets: [
     .target(
       name: "Engine",
