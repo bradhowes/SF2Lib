@@ -8,11 +8,11 @@
 @end
 
 @implementation EngineTests {
-  SF2::Engine* engine;
+  SF2Engine* engine;
 }
 
 - (void)setUp {
-  engine = new SF2::Engine(48000.0, 48);
+  engine = new SF2Engine(48000.0, 48);
 }
 
 - (void)tearDown {
