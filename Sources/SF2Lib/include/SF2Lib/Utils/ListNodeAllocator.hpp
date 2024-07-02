@@ -63,9 +63,11 @@ public:
    Deallocate a node.
 
    @param p pointer to node to deallocate.
+   @param count number of nodes to deallocate
    */
   void deallocate(value_type* p, std::size_t count) noexcept
   {
+    assert(count == 1);
     auto ptr = reinterpret_cast<Node*>(p);
     ptr->next = freeList_;
     freeList_ = ptr;
@@ -80,85 +82,4 @@ private:
   void* memoryBlock_{nullptr};
 };
 
-//template <typename T, typename U>
-//inline bool operator == (const ListNodeAllocator<T>&, const ListNodeAllocator<U>&) noexcept {
-//  return false;
-//}
-//
-//template <typename T, typename U>
-//inline bool operator != (const ListNodeAllocator<T>&, const ListNodeAllocator<U>&) noexcept {
-//  return true;
-//}
-
 }
-
-//
-//template<typename T, size_t num_items>
-//class MyAllocator
-//{
-//public:
-//  using value_type = T;
-//  using pointer = T*;
-//  using const_pointer = const T*;
-//  using void_pointer = std::nullptr_t;
-//  using const_void_pointer = const std::nullptr_t;
-//  using reference = T&;
-//  using const_reference = const T&;
-//  using size_type = std::size_t;
-//  using difference_type = std::ptrdiff_t;
-//
-//  /* should copy assign the allocator when copy assigning container */
-//  using propagate_on_container_copy_assignment = std::true_type;
-//
-//  /* should move assign the allocator when move assigning container */
-//  using propagate_on_container_move_assignment = std::true_type;
-//
-//  /* should swap the allocator when swapping the container */
-//  using propagate_on_container_swap = std::true_type;
-//
-//  /* two allocators does not always compare equal */
-//  using is_always_equal = std::false_type;
-//
-//  MyAllocator() : m_index(0) {};
-//  ~MyAllocator() noexcept = default;
-//
-//  template<typename U>
-//  struct rebind {
-//    using other = MyAllocator<U, num_items>;
-//  };
-//
-//  [[nodiscard]] pointer allocate(size_type n) {
-//    if (m_index+n >= num_items)
-//      throw std::bad_alloc();
-//
-//    pointer ret = &m_buffer[m_index];
-//    m_index += n;
-//    return ret;
-//
-//  }
-//
-//  void deallocate(pointer p, size_type n) {
-//    (void) p;
-//    (void) n;
-//    /* do nothing */
-//  }
-//
-//  size_type max_size() {
-//    return num_items;
-//  }
-//
-//
-//  bool operator==(const MyAllocator& other) noexcept {
-//    /* storage allocated by one allocator cannot be freed by another */
-//    return false;
-//  }
-//
-//  bool operator!=(const MyAllocator& other) noexcept {
-//    /* storage allocated by one allocator cannot be freed by another */
-//    return !(*this == other);
-//  }
-//
-//private:
-//  value_type m_buffer[num_items];
-//  size_t m_index;
-//};
