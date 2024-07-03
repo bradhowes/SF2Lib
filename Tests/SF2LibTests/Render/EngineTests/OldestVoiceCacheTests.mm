@@ -13,7 +13,7 @@ using namespace SF2::Render::Engine;
 @implementation OldestVoiceCacheTests
 
 - (void)testCache {
-  OldestActiveVoiceCache cache{8};
+  OldestActiveVoiceCache<96> cache{};
   XCTAssertTrue(cache.empty());
   XCTAssertEqual(cache.size(), 0);
   cache.add(0);
@@ -21,7 +21,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(cache.size(), 1);
   cache.add(1);
   XCTAssertEqual(cache.size(), 2);
-  XCTAssertEqual(0, cache.takeOldest());
+  cache.remove(0);
   XCTAssertEqual(cache.size(), 1);
   XCTAssertFalse(cache.empty());
   XCTAssertEqual(1, cache.takeOldest());
@@ -29,13 +29,21 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(cache.size(), 0);
 }
 
+- (void)testLimits {
+  OldestActiveVoiceCache<96> cache{};
+  for (auto index = 0; index < 96; ++index) {
+    cache.add(index);
+  }
+  XCTAssertEqual(cache.size(), 96);
+}
+
 - (void)testTiming {
   NSArray* metrics = @[XCTPerformanceMetric_WallClockTime];
   [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
-    OldestActiveVoiceCache cache{8};
+    OldestActiveVoiceCache<96> cache{};
     [self startMeasuring];
-    for (auto iteration = 0; iteration < 100; ++iteration) {
-      for (auto index = 0; index < 8; ++index) {
+    for (auto iteration = 0; iteration < 100'000; ++iteration) {
+      for (auto index = 0; index < 96; ++index) {
         cache.add(index);
       }
       while (!cache.empty()) {

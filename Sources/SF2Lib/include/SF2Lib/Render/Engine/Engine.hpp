@@ -38,6 +38,9 @@ class Engine : public DSPHeaders::EventProcessor<Engine> {
   friend super;
 
 public:
+  /// Maximum number of voices that can be supported by the engine
+  static inline constexpr size_t maxVoiceCount = 128;
+
   using Config = Voice::State::Config;
   using Voice = Voice::Voice;
   using Interpolator = Render::Voice::Sample::Interpolator;
@@ -46,7 +49,7 @@ public:
    Construct new engine and its voices.
 
    @param sampleRate the expected sample rate to use
-   @param voiceCount the maximum number of individual voices to support
+   @param voiceCount the maximum number of individual voices to support (must be <= maxVoiceCount)
    @param interpolator the type of interpolation to use when rendering samples
    @param minimumNoteDurationMilliseconds the minimum duration of a note-on/note-off sequence for a voice.
    */
@@ -385,7 +388,7 @@ private:
 
   void startVoice(const Config& config) noexcept;
 
-  OldestActiveVoiceCache::iterator stopVoice(size_t voiceIndex) noexcept;
+  OldestActiveVoiceCache<maxVoiceCount>::iterator stopVoice(size_t voiceIndex) noexcept;
 
   void notifyActiveVoicesChannelStateChanged() noexcept;
 
@@ -409,7 +412,7 @@ private:
 
   std::vector<Voice> voices_{};
   std::vector<size_t> available_{};
-  OldestActiveVoiceCache oldestActive_;
+  OldestActiveVoiceCache<maxVoiceCount> oldestActive_;
 
   std::unique_ptr<IO::File> file_{};
   PresetCollection presets_{};

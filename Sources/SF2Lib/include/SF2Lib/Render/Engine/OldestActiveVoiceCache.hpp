@@ -4,10 +4,10 @@
 #include <os/log.h>
 
 #include <list>
+#include <memory_resource>
 #include <vector>
 
 #include "SF2Lib/Types.hpp"
-#include "SF2Lib/Utils/ListNodeAllocator.hpp"
 
 namespace SF2::Render::Engine {
 
@@ -20,36 +20,50 @@ namespace SF2::Render::Engine {
 
  This vector is indexed by the voice index that is unique to each voice.
 
- The internal std::list uses a custom allocator that guarantees there are no allocations/frees during changes in the
- std::list container.
+ The internal std::pmr::list uses a fixed-sized PMR allocator that guarantees there are no allocations/frees during
+ changes in the std::pmr::list container.
  */
+template <size_t MaxVoiceCount>
 class OldestActiveVoiceCache
 {
 public:
-  using Allocator = Utils::ListNodeAllocator<size_t, 128>;
-  using iterator = std::list<size_t, Allocator>::iterator;
-  using const_iterator = std::list<size_t, Allocator>::const_iterator;
+  static inline constexpr size_t maxVoiceCount_ = MaxVoiceCount;
+
+  using iterator = std::pmr::list<size_t>::iterator;
+  using const_iterator = std::pmr::list<size_t>::const_iterator;
 
   /**
    Constructor. Allocates nodes in the cache for a maximum number of voices.
-
-   @param maxVoiceCount the number of voices to support
    */
-  OldestActiveVoiceCache(size_t maxVoiceCount) noexcept;
+  OldestActiveVoiceCache() noexcept
+  : iterators_(maxVoiceCount_, leastRecentlyUsed_.end()), log_{os_log_create("SF2Lib", "OldestActiveVoiceCache")}
+  {
+    ;
+  }
 
   /**
    Add a voice to the cache. It must not already be in the cache.
 
    @param voiceIndex the unique ID of the voice
    */
-  void add(size_t voiceIndex) noexcept;
+  void add(size_t voiceIndex) noexcept
+  {
+    iterators_[voiceIndex] = leastRecentlyUsed_.insert(leastRecentlyUsed_.begin(), voiceIndex);
+  }
 
   /**
    Remove a voice from the cache. It must be in the cache.
 
    @param voiceIndex the unique ID of the voice
+
+   @returns iterator of the voice slot that was removed
    */
-  iterator remove(size_t voiceIndex) noexcept;
+  iterator remove(size_t voiceIndex) noexcept
+  {
+    auto pos = leastRecentlyUsed_.erase(iterators_[voiceIndex]);
+    iterators_[voiceIndex] = leastRecentlyUsed_.end();
+    return pos;
+  }
 
   /**
    Remove the oldest voice. There must be at least one active voice in the cache (really, the size of the list should
@@ -57,7 +71,13 @@ public:
 
    @returns index of the voice that was taken from the cache
    */
-  size_t takeOldest() noexcept;
+  size_t takeOldest() noexcept
+  {
+    size_t oldest = leastRecentlyUsed_.back();
+    iterators_[oldest] = leastRecentlyUsed_.end();
+    leastRecentlyUsed_.pop_back();
+    return oldest;
+  }
 
   /// @returns true if the cache is empty
   bool empty() const noexcept { return leastRecentlyUsed_.empty(); }
@@ -81,8 +101,12 @@ public:
   void clear() noexcept { while (!empty()) takeOldest(); }
 
 private:
-  std::list<size_t, Allocator> leastRecentlyUsed_;
-  std::vector<std::list<size_t>::iterator> iterators_{};
+  std::array<std::byte, MaxVoiceCount * sizeof(size_t) * 8> buffer_; // TODO: calculate proper size
+  std::pmr::monotonic_buffer_resource mbr_{buffer_.data(), buffer_.size(), std::pmr::null_memory_resource()};
+  std::pmr::unsynchronized_pool_resource pr_{&mbr_};
+  std::pmr::polymorphic_allocator<size_t> allocator_{&pr_};
+  std::pmr::list<size_t> leastRecentlyUsed_{allocator_};
+  std::pmr::vector<iterator> iterators_{};
   os_log_t log_;
 };
 

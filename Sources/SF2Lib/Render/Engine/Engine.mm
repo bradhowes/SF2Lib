@@ -12,7 +12,7 @@ Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
 sampleRate_{sampleRate},
 minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
 parameters_{*this},
-oldestActive_{voiceCount},
+oldestActive_{},
 log_{os_log_create("SF2Lib", "Engine")},
 renderSignpost_{os_signpost_id_generate(log_)},
 noteOnSignpost_{os_signpost_id_generate(log_)},
@@ -20,6 +20,8 @@ noteOffSignpost_{os_signpost_id_generate(log_)},
 startVoiceSignpost_{os_signpost_id_generate(log_)},
 stopVoiceSignpost_{os_signpost_id_generate(log_)}
 {
+  assert(voiceCount <= maxVoiceCount);
+
   available_.reserve(voiceCount);
   voices_.reserve(voiceCount);
   for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex) {
@@ -553,7 +555,7 @@ Engine::startVoice(const Config& config) noexcept
   os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice", "");
 }
 
-OldestActiveVoiceCache::iterator
+OldestActiveVoiceCache<Engine::maxVoiceCount>::iterator
 Engine::stopVoice(size_t voiceIndex) noexcept
 {
   os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice", "");
