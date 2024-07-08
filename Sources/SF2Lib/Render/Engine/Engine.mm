@@ -12,7 +12,7 @@ Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
 sampleRate_{sampleRate},
 minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
 parameters_{*this},
-oldestActive_{},
+oldestVoiceIndices_{voiceCount},
 log_{os_log_create("SF2Lib", "Engine")},
 renderSignpost_{os_signpost_id_generate(log_)},
 noteOnSignpost_{os_signpost_id_generate(log_)},
@@ -22,11 +22,9 @@ stopVoiceSignpost_{os_signpost_id_generate(log_)}
 {
   assert(voiceCount <= maxVoiceCount);
 
-  available_.reserve(voiceCount);
   voices_.reserve(voiceCount);
   for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex) {
     voices_.emplace_back(sampleRate, channelState_, voiceIndex, interpolator);
-    available_.push_back(voiceIndex);
   }
 }
 
@@ -92,10 +90,8 @@ Engine::usePresetWithBankProgram(uint16_t bank, uint16_t program)
 void
 Engine::allOff() noexcept
 {
-  while (!oldestActive_.empty()) {
-    auto voiceIndex = oldestActive_.takeOldest();
-    voices_[voiceIndex].stop();
-    available_.push_back(voiceIndex);
+  for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
+    pos = stopVoice(*pos);
   }
 }
 
@@ -503,7 +499,7 @@ Engine::initialize(Float sampleRate) noexcept
 void
 Engine::stopAllExclusiveVoices(int exclusiveClass) noexcept
 {
-  for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
+  for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
     auto voiceIndex = *pos;
     if (voices_[voiceIndex].exclusiveClass() == exclusiveClass) {
       pos = stopVoice(voiceIndex);
@@ -516,7 +512,7 @@ Engine::stopAllExclusiveVoices(int exclusiveClass) noexcept
 void
 Engine::stopSameKeyVoices(int eventKey) noexcept
 {
-  for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
+  for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
     auto voiceIndex = *pos;
     if (voices_[voiceIndex].initiatingKey() == eventKey) {
       pos = stopVoice(voiceIndex);
@@ -526,42 +522,24 @@ Engine::stopSameKeyVoices(int eventKey) noexcept
   }
 }
 
-size_t
-Engine::getVoice() noexcept
-{
-  size_t found = voices_.size();
-  if (!available_.empty()) {
-    found = available_.back();
-    available_.pop_back();
-  } else if (!oldestActive_.empty()) {
-    found = oldestActive_.takeOldest();
-  }
-
-  return found;
-}
-
 void
 Engine::startVoice(const Config& config) noexcept
 {
   os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice", "");
   os_log_info(log_, "startVoice");
-  auto voiceIndex = getVoice();
-  if (voiceIndex != voices_.size()) {
-    voices_[voiceIndex].configure(config);
-    parameters_.applyChanged(voices_[voiceIndex].state());
-    voices_[voiceIndex].start();
-    oldestActive_.add(voiceIndex);
-  }
+  auto voiceIndex = oldestVoiceIndices_.voiceOn();
+  voices_[voiceIndex].configure(config);
+  parameters_.applyChanged(voices_[voiceIndex].state());
+  voices_[voiceIndex].start();
   os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice", "");
 }
 
-OldestActiveVoiceCache<Engine::maxVoiceCount>::iterator
+OldestVoiceCollection<Engine::maxVoiceCount>::iterator
 Engine::stopVoice(size_t voiceIndex) noexcept
 {
   os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice", "");
   voices_[voiceIndex].stop();
-  auto pos = oldestActive_.remove(voiceIndex);
-  available_.push_back(voiceIndex);
+  auto pos = oldestVoiceIndices_.voiceOff(voiceIndex);
   os_signpost_interval_end(log_, stopVoiceSignpost_, "stopVoice", "");
   return pos;
 }

@@ -14,7 +14,7 @@
 #include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
-#include "SF2Lib/Render/Engine/OldestActiveVoiceCache.hpp"
+#include "SF2Lib/Render/Engine/OldestVoiceCollection.hpp"
 #include "SF2Lib/Render/Engine/Parameters.hpp"
 #include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
@@ -91,7 +91,7 @@ public:
   size_t presetCount() const noexcept { return presets_.size(); }
 
   /// @return the number of active voices
-  size_t activeVoiceCount() const noexcept { return oldestActive_.size(); }
+  size_t activeVoiceCount() const noexcept { return oldestVoiceIndices_.active(); }
 
   /**
    Render samples to the given stereo output buffers. The buffers are guaranteed to be able to hold `frameCount`
@@ -105,15 +105,14 @@ public:
    */
   void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
   {
-    for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
+    for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
       auto voiceIndex = *pos;
       auto& voice{voices_[voiceIndex]};
       if (voice.isActive()) {
         voice.renderInto(mixer, frameCount);
       }
       if (voice.isDone()) {
-        pos = oldestActive_.remove(voiceIndex);
-        available_.push_back(voiceIndex);
+        pos = oldestVoiceIndices_.voiceOff(voiceIndex);
       } else {
         ++pos;
       }
@@ -356,8 +355,7 @@ private:
 
   /**
    Visit each active voice with a method that accepts two parameters: a `Voice` reference and a `ReleaseKeyState`
-   reference that contains the current pedal state. As a side-effect, if a voice is no longer active, it will make it
-   available for future note ON events.
+   reference that contains the current pedal state.
 
    @param visitor the method to invoke
    @param releaseKeyState the state of the pedal controllers
@@ -365,12 +363,11 @@ private:
   template <typename Visitor>
   void visitActiveVoice(Visitor visitor, const Voice::ReleaseKeyState releaseKeyState) noexcept
   {
-    for (auto pos = oldestActive_.begin(); pos != oldestActive_.end(); ) {
+    for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
       auto voiceIndex = *pos;
       auto& voice{voices_[voiceIndex]};
       if (!voice.isActive()) {
-        pos = oldestActive_.remove(voiceIndex);
-        available_.push_back(voiceIndex);
+        pos = oldestVoiceIndices_.voiceOff(voiceIndex);
       } else {
         visitor(voice, releaseKeyState);
         ++pos;
@@ -384,11 +381,9 @@ private:
 
   void stopSameKeyVoices(int eventKey) noexcept;
 
-  size_t getVoice() noexcept;
-
   void startVoice(const Config& config) noexcept;
 
-  OldestActiveVoiceCache<maxVoiceCount>::iterator stopVoice(size_t voiceIndex) noexcept;
+  OldestVoiceCollection<maxVoiceCount>::iterator stopVoice(size_t voiceIndex) noexcept;
 
   void notifyActiveVoicesChannelStateChanged() noexcept;
 
@@ -411,8 +406,7 @@ private:
   Parameters parameters_;
 
   std::vector<Voice> voices_{};
-  std::vector<size_t> available_{};
-  OldestActiveVoiceCache<maxVoiceCount> oldestActive_;
+  OldestVoiceCollection<maxVoiceCount> oldestVoiceIndices_;
 
   std::unique_ptr<IO::File> file_{};
   PresetCollection presets_{};

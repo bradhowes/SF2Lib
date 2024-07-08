@@ -1341,8 +1341,8 @@ using namespace SF2::Render::Engine;
 
   XCTAssertEqualWithAccuracy(-0.00523802358657, samples[0], epsilon);
   XCTAssertEqualWithAccuracy(-0.00267931469716, samples[1], epsilon);
-  XCTAssertEqualWithAccuracy(-0.00523802358657, samples[2], epsilon);
-  XCTAssertEqualWithAccuracy(-0.00197477918118, samples[3], epsilon);
+  XCTAssertEqualWithAccuracy(-0.00621262798086, samples[2], epsilon);
+  XCTAssertEqualWithAccuracy(-0.000403643760365, samples[3], epsilon);
 
   XCTAssertNotEqualWithAccuracy(samples[1], samples[3], epsilon);
 
