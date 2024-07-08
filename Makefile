@@ -13,6 +13,7 @@ default: test
 clean:
 	@echo "-- removing coverage.txt percentage.txt "$(DERIVED_DATA_MACOS)" "$(DERIVED_DATA_IOS)""
 	@-rm -rf coverage.txt percentage.txt "$(DERIVED_DATA_MACOS)" "$(DERIVED_DATA_IOS)"
+	@ls -ld /Applications/Xcode*
 
 resolve-deps: clean
 	swift package resolve
