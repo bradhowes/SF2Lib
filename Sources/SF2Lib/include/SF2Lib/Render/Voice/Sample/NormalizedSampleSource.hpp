@@ -29,8 +29,8 @@ public:
    */
   NormalizedSampleSource(const SampleVector& allSamples, const Entity::SampleHeader& header) noexcept :
   header_{header},
-  span_(std::ranges::next(allSamples.begin(), header.startIndex()),
-        std::ranges::next(allSamples.begin(), header.endIndex() + sizePaddingAfterEnd))
+  span_(std::ranges::next(allSamples.begin(), long(header.startIndex())),
+        std::ranges::next(allSamples.begin(), long(header.endIndex() + sizePaddingAfterEnd)))
   {
   }
 

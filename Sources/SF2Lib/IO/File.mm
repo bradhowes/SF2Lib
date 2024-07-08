@@ -117,7 +117,8 @@ File::extractNormalizedSamples() {
   static const Float normalizationScale = 1.0_F / Float(1 << 15);
 
   auto pos = sampleDataBegin_;
-  size_t remainingSamples = pos.available() / sizeof(int16_t);
+  assert(pos.available() >= 0);
+  size_t remainingSamples = size_t(pos.available()) / sizeof(int16_t);
   normalizedSamples_.resize(remainingSamples);
   std::vector<int16_t> rawSamples(batchSampleCount);
 

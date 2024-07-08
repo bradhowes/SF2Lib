@@ -49,6 +49,6 @@ post: percentage
 report: coverage.txt
 	@xcrun xccov view --report $(DERIVED_DATA_MACOS)/Logs/Test/*.xcresult --files-for-target SF2Lib
 
-test: test-ios post
+test: post test-ios
 
 .PHONY: test post percentage coverage test-macos test-ios resolve-deps clean

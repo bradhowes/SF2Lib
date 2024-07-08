@@ -173,7 +173,7 @@ public:
    the preset at the given index.
 
    @param path the location of the SF2 file to load
-   @param index the index of the preset to activate
+   @param preset the index of the preset to activate
    @returns array of MIDI bytes
    */
   static std::vector<uint8_t> createLoadFileUsePreset(const std::string& path, size_t preset) noexcept;
