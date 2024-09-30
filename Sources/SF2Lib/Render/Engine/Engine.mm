@@ -53,11 +53,9 @@ Engine::load(const std::string& path, size_t index) noexcept
   allOff();
   auto file = std::make_unique<IO::File>(path);
   auto response = file->load();
-  os_log_info(log_, "load - response %d", valueOf(response));
   if (response == IO::File::LoadResponse::ok) {
     file_.swap(file);
     presets_.build(*file_);
-    os_log_info(log_, "load - built %zu presets", presets_.size());
     usePresetWithIndex(index);
   }
   return response;
@@ -118,7 +116,6 @@ Engine::noteOn(int key, int velocity) noexcept
     }
   }
 
-  os_log_info(log_, "noteOn - number of voices: %lu", configs.size());
   for (const Config& config : configs) {
     startVoice(config);
   }
@@ -164,7 +161,6 @@ Engine::applyPedals() noexcept
 AUAudioFrameCount
 Engine::doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount duration) noexcept {
   // NOTE: this is running in the real-time render thread.
-  os_log_debug(log_, "doParameterEvent - address: %llu value: %f", event.parameterAddress, event.value);
   auto rawIndex = event.parameterAddress;
   auto value = event.value;
   if (rawIndex < 0) return 0;
@@ -214,21 +210,18 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
   switch (event) {
     case MIDI::CoreEvent::noteOff:
       if (midiEvent.length > 1) {
-        os_log_info(log_, "doMIDIEvent - noteOff: %hhd", midiEvent.data[1]);
         noteOff(midiEvent.data[1]);
       }
       break;
 
     case MIDI::CoreEvent::noteOn:
       if (midiEvent.length == 3) {
-        os_log_info(log_, "doMIDIEvent - noteOn: %hhd %hhd", midiEvent.data[1], midiEvent.data[2]);
         noteOn(midiEvent.data[1], midiEvent.data[2]);
       }
       break;
 
     case MIDI::CoreEvent::keyPressure:
       if (midiEvent.length == 3) {
-        os_log_info(log_, "doMIDIEvent - keyPressure: %hhd %hhd", midiEvent.data[1], midiEvent.data[2]);
         channelState_.setNotePressure(midiEvent.data[1], midiEvent.data[2]);
         notifyActiveVoicesChannelStateChanged();
       }
@@ -236,7 +229,6 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 
     case MIDI::CoreEvent::controlChange:
       if (midiEvent.length == 3) {
-        os_log_info(log_, "doMIDIEvent - controlChange: %hhX %hhX", midiEvent.data[1], midiEvent.data[2]);
         auto what = MIDI::ControlChange(midiEvent.data[1]);
         auto data = midiEvent.data[2];
         if (midiEvent.data[1] < 120) {
@@ -249,14 +241,12 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 
     case MIDI::CoreEvent::programChange:
       if (midiEvent.length == 2) {
-        os_log_info(log_, "doMIDIEvent - programChange: %hhd", midiEvent.data[1]);
         changeProgram(midiEvent.data[1]);
       }
       break;
 
     case MIDI::CoreEvent::channelPressure:
       if (midiEvent.length == 2) {
-        os_log_info(log_, "doMIDIEvent - channelPressure: %hhd", midiEvent.data[1]);
         channelState_.setChannelPressure(midiEvent.data[1]);
         notifyActiveVoicesChannelStateChanged();
       }
@@ -264,7 +254,6 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 
     case MIDI::CoreEvent::pitchBend:
       if (midiEvent.length == 3) {
-        os_log_info(log_, "doMIDIEvent - pitchBend: %hhd %hhd", midiEvent.data[1], midiEvent.data[2]);
         int bend = (midiEvent.data[2] << 7) | midiEvent.data[1];
         channelState_.setPitchWheelValue(bend);
         notifyActiveVoicesChannelStateChanged();
@@ -272,7 +261,6 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::systemExclusive:
-      os_log_info(log_, "doMIDIEvent - systemExclusive: %hhX %hhX", midiEvent.data[1], midiEvent.data[2]);
       if (midiEvent.data[1] == 0x7e && midiEvent.data[midiEvent.length - 1] == 0xF7) {
         switch (midiEvent.data[2]) {
           case 0x00:
@@ -291,7 +279,6 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::reset:
-      os_log_info(log_, "doMIDIEvent - reset");
       reset();
       break;
 
@@ -304,7 +291,6 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 void
 Engine::processChannelMessage(MIDI::ControlChange channelMessage, uint8_t value) noexcept
 {
-  os_log_info(log_, "processChannelMessage - %hhX %hhX", valueOf(channelMessage), value);
   switch (channelMessage) {
     case MIDI::ControlChange::allSoundOff:
       allOff();
@@ -360,16 +346,13 @@ Engine::processControlChange(MIDI::ControlChange cc, uint8_t value) noexcept
 
   if (!previousPedalState.sostenutoPedalActive) {
     if (currentPedalState.sostenutoPedalActive) {
-      os_log_debug(log_, "processControlChange - using sostenuto pedal");
       applySostenutoPedal();
     }
   } else {
-    os_log_debug(log_, "processControlChange - releasing sostenuto pedal");
     doRelease = !currentPedalState.sostenutoPedalActive;
   }
 
   if (previousPedalState.sustainPedalActive && !currentPedalState.sustainPedalActive) {
-    os_log_debug(log_, "processControlChange - releasing sustain pedal");
     doRelease = true;
   }
 
@@ -399,7 +382,6 @@ Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
   if (midiEvent.length > 6) {
     size_t count = midiEvent.length - 6;
     auto path = Utils::Base64::decode(data + 5, count);
-    os_log_info(log_, "loadFromMIDI BEGIN - %{public}s index: %zu", path.c_str(), index);
     load(path, index);
   } else {
     usePresetWithIndex(index);
@@ -526,7 +508,6 @@ void
 Engine::startVoice(const Config& config) noexcept
 {
   os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice", "");
-  os_log_info(log_, "startVoice");
   auto voiceIndex = oldestVoiceIndices_.voiceOn();
   voices_[voiceIndex].configure(config);
   parameters_.applyChanged(voices_[voiceIndex].state());
@@ -547,7 +528,6 @@ Engine::stopVoice(size_t voiceIndex) noexcept
 void
 Engine::reset() noexcept
 {
-  os_log_info(log_, "reset");
   allOff();
   channelState_.reset();
 }

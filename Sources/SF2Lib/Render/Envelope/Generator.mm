@@ -87,30 +87,15 @@ log_{os_log_create("SF2Lib", logTag)}
   stages_[StageIndex::decay].setDecay(sustainLevel_, int(round(sampleRate * decay)));
   stages_[StageIndex::sustain].setSustain();
   stages_[StageIndex::release].setRelease(int(round(sampleRate * release)));
-
-  os_log_debug(log_, "%zu delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %d / %f release %d / %f",
-               voiceIndex_,
-               stages_[StageIndex::delay].durationInSamples(),
-               stages_[StageIndex::attack].durationInSamples(),
-               stages_[StageIndex::attack].increment(),
-               stages_[StageIndex::hold].durationInSamples(),
-               stages_[StageIndex::decay].durationInSamples(),
-               stages_[StageIndex::decay].increment(),
-               sustain,
-               sustainLevel_,
-               stages_[StageIndex::release].durationInSamples(),
-               stages_[StageIndex::release].increment());
 }
 
 void
 Generator::gate(bool noteOn) noexcept
 {
   if (noteOn) {
-    os_log_debug(log_, "%s starting %zu", logTag_, voiceIndex_);
     value_ = 0_F;
     enterStage(StageIndex::delay);
   } else {
-    os_log_debug(log_, "%s releasing %zu", logTag_, voiceIndex_);
     if (stageIndex_ != StageIndex::idle) {
       enterStage(StageIndex::release);
     }
@@ -163,20 +148,6 @@ Generator::configureVolumeEnvelope(const State& state) noexcept
 
   auto releaseTimecents = state.modulated(Index::releaseVolumeEnvelope);
   stages_[StageIndex::release].setRelease(durationInSamples(releaseTimecentsToSeconds(releaseTimecents)));
-
-  os_log_debug(log_, "%zu - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %f / %f release %d / %f",
-               voiceIndex_,
-               stages_[StageIndex::delay].durationInSamples(),
-               stages_[StageIndex::attack].durationInSamples(),
-               stages_[StageIndex::attack].increment(),
-               stages_[StageIndex::hold].durationInSamples(),
-               stages_[StageIndex::decay].durationInSamples(),
-               stages_[StageIndex::decay].increment(),
-               sustainCents,
-               sustainLevel_,
-               stages_[StageIndex::release].durationInSamples(),
-               stages_[StageIndex::release].increment());
-
   gate(true);
 }
 
@@ -218,19 +189,5 @@ Generator::configureModulationEnvelope(const State& state) noexcept
 
   auto releaseTimecents = state.modulated(Index::releaseModulatorEnvelope);
   stages_[StageIndex::release].setRelease(durationInSamples(releaseTimecentsToSeconds(releaseTimecents)));
-
-  os_log_debug(log_, "%zu - delay: %d attack: %d / %f hold: %d decay: %d / %f sustain: %f / %f release %d / %f",
-               voiceIndex_,
-               stages_[StageIndex::delay].durationInSamples(),
-               stages_[StageIndex::attack].durationInSamples(),
-               stages_[StageIndex::attack].increment(),
-               stages_[StageIndex::hold].durationInSamples(),
-               stages_[StageIndex::decay].durationInSamples(),
-               stages_[StageIndex::decay].increment(),
-               sustainCents,
-               sustainLevel_,
-               stages_[StageIndex::release].durationInSamples(),
-               stages_[StageIndex::release].increment());
-
   gate(true);
 }

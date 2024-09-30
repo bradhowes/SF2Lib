@@ -102,11 +102,8 @@ const SF2::Render::SampleSourceCollection&
 File::sampleSourceCollection()
 {
   if (sampleSourceCollection_.empty()) {
-    os_log_debug(log_, "loading samples");
     extractNormalizedSamples();
-    os_log_debug(log_, "building sample map");
     sampleSourceCollection_.build(normalizedSamples_, sampleHeaders_);
-    os_log_debug(log_, "done");
   }
   return sampleSourceCollection_;
 }

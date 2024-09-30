@@ -171,8 +171,6 @@ private:
    @param next the stage to enter
    */
   inline void enterStage(StageIndex next) noexcept {
-    os_log_info(log_, "enterStage %zu - old: %s new: %s value: %f", voiceIndex_, stageNames_[stageIndex_],
-                stageNames_[next], value_);
     stageIndex_ = next;
     if (next != StageIndex::idle) {
       counter_ = stages_[stageIndex_].durationInSamples();
