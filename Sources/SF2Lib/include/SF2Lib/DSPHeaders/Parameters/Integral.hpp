@@ -5,7 +5,7 @@
 #import <cmath>
 #import <AVFoundation/AVFoundation.h>
 
-#import "DSPHeaders/Parameters/Base.hpp"
+#import "SF2Lib/DSPHeaders/Parameters/Base.hpp"
 
 namespace DSPHeaders::Parameters {
 

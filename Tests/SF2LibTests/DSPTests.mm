@@ -6,8 +6,32 @@
 #include <iomanip>
 
 #include "SampleBasedContexts.hpp"
+
+// Include everything in DSPHeaders to make sure everything is OK.
+
+#include "SF2Lib/DSPHeaders/Biquad.hpp"
+#include "SF2Lib/DSPHeaders/BusBufferFacet.hpp"
+#include "SF2Lib/DSPHeaders/BusBuffers.hpp"
+#include "SF2Lib/DSPHeaders/BusSampleBuffer.hpp"
+#include "SF2Lib/DSPHeaders/Concepts.hpp"
 #include "SF2Lib/DSPHeaders/ConstMath.hpp"
+#include "SF2Lib/DSPHeaders/DelayBuffer.hpp"
 #include "SF2Lib/DSPHeaders/DSP.hpp"
+#include "SF2Lib/DSPHeaders/EventProcessor.hpp"
+#include "SF2Lib/DSPHeaders/InstrusiveReferenceCounted.hpp"
+#include "SF2Lib/DSPHeaders/LFO.hpp"
+#include "SF2Lib/DSPHeaders/PhaseIncrement.hpp"
+#include "SF2Lib/DSPHeaders/PhaseShifter.hpp"
+#include "SF2Lib/DSPHeaders/Parameters/Base.hpp"
+#include "SF2Lib/DSPHeaders/Parameters/Bool.hpp"
+#include "SF2Lib/DSPHeaders/Parameters/Float.hpp"
+#include "SF2Lib/DSPHeaders/Parameters/Integral.hpp"
+#include "SF2Lib/DSPHeaders/Parameters/Milliseconds.hpp"
+#include "SF2Lib/DSPHeaders/Parameters/Percentage.hpp"
+#include "SF2Lib/DSPHeaders/Parameters/Transformer.hpp"
+#include "SF2Lib/DSPHeaders/TypeErasedKernel.hpp"
+#include "SF2Lib/DSPHeaders/Types.hpp"
+
 #include "SF2Lib/DSP.hpp"
 
 using namespace DSPHeaders::DSP;

@@ -212,11 +212,11 @@ struct Coefficients {
     b2 += change.b2;
   }
 
-  ValueType a0; /// A0 coefficient in numerator
-  ValueType a1; /// A1 coefficient in numerator
-  ValueType a2; /// A2 coefficient in numerator
-  ValueType b1; /// B1 coefficient in denominator
-  ValueType b2; /// B2 coefficient in denominator
+  ValueType a0{0.0}; /// A0 coefficient in numerator
+  ValueType a1{0.0}; /// A1 coefficient in numerator
+  ValueType a2{0.0}; /// A2 coefficient in numerator
+  ValueType b1{0.0}; /// B1 coefficient in denominator
+  ValueType b2{0.0}; /// B2 coefficient in denominator
 };
 
 /**

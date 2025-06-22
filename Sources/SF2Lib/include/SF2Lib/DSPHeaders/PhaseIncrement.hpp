@@ -6,7 +6,7 @@
 #import <cmath>
 
 #import "DSP.hpp"
-#import "DSPHeaders/Parameters/Float.hpp"
+#import "SF2Lib/DSPHeaders/Parameters/Float.hpp"
 
 namespace DSPHeaders {
 

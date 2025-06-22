@@ -6,8 +6,8 @@
 #import <cmath>
 
 #import "DSP.hpp"
-#import "DSPHeaders/Parameters/Float.hpp"
-#import "DSPHeaders/PhaseIncrement.hpp"
+#import "SF2Lib/DSPHeaders/Parameters/Float.hpp"
+#import "SF2Lib/DSPHeaders/PhaseIncrement.hpp"
 
 enum class LFOWaveform { sinusoid, triangle, sawtooth, square};
 

@@ -181,6 +181,8 @@ public:
     auto modLFOValCB{modLFO.val * -state_.modulated(Index::modulatorLFOToVolume)};
     auto gain{initialAttenuation_ * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB)};
 
+    // FIXME: disable low-pass filter until settings are properly calculated
+#if ENABLE_LOWPASS_FILTER == 1
     // Calculate the low-pass filter parameters. Only the frequency can be affected by an LFO or mod envelope, but both
     // can have external modulators attached to their primary state value.
     auto frequency{(state_.modulated(Index::initialFilterCutoff) +
@@ -194,8 +196,10 @@ public:
         (volumeEnvelope_.isRelease() && gain < DSP::NoiseFloor)) {
       stop();
     }
-
-     return filtered;
+    return sample * gain; // filtered;
+#else
+    return sample * gain; // filtered;
+#endif
   }
 
   /**

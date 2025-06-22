@@ -1,25 +1,35 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
 #include "SF2Lib/DSP.hpp"
-#include "SF2Lib/Render/LFO.hpp"
+#include "SF2Lib/Render/LowPassFilter.hpp"
 
 using namespace SF2::Render;
 
-LFO::LFO(Float sampleRate, const char* logTag) noexcept :
-log_{os_log_create("SF2Lib", logTag)}
+LowPassFilter::LowPassFilter(Float sampleRate) noexcept :
+filter_{Coefficients()},
+sampleRate_{sampleRate},
+lastFrequency_{defaultFrequency},
+lastResonance_{defaultResonance}
 {
-  configure(sampleRate, 0_F, -12'000_F);
-}
-
-LFO::LFO(Float sampleRate, const char* logTag, Float frequency, Float delay) :
-log_{os_log_create("SF2Lib", logTag)}
-{
-  configure(sampleRate, frequency, delay);
+  updateSettings(defaultFrequency, defaultResonance);
 }
 
 void
-LFO::configure(Float sampleRate, Float frequency, Float delay)
+LowPassFilter::updateSettings(Float frequency, Float resonance) noexcept
 {
-  delaySampleCount_ = static_cast<size_t>(sampleRate * delay);
-  increment_ = frequency / sampleRate * 4_F;
+  lastFrequency_ = frequency;
+  lastResonance_ = resonance;
+
+  // Bounds taken from FluidSynth, where the upper bound serves as an anti-aliasing filter, just below the
+  // Nyquist frequency.
+  frequency = DSP::clamp(DSP::centsToFrequency(frequency), 5_F, 0.45_F * sampleRate_);
+  resonance = DSP::centibelsToResonance(resonance);
+  filter_.setCoefficients(Coefficients::LPF2(sampleRate_, frequency, resonance));
+}
+
+void
+LowPassFilter::setSampleRate(Float sampleRate) noexcept
+{
+  sampleRate_ = sampleRate;
+  updateSettings(lastFrequency_, lastResonance_);
 }
