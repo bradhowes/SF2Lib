@@ -5,7 +5,7 @@
 #import <cmath>
 #import <vector>
 
-#import "DSPHeaders/DSP.hpp"
+#import "SF2Lib/DSPHeaders/DSP.hpp"
 
 namespace DSPHeaders {
 
