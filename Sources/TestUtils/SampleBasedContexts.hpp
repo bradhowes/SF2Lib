@@ -16,6 +16,8 @@
 #include "SF2Lib/Render/Voice/State/State.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
 
+#include "SF2Lib/DSPHeaders/BusBufferFacet.hpp"
+
 struct TestEngineHarness {
   using Engine = SF2::Render::Engine::Engine;
   using Mixer = SF2::Render::Engine::Mixer;
@@ -163,9 +165,9 @@ private:
   AVAudioPCMBuffer* chorusBuffer_{nullptr};
   AVAudioPCMBuffer* reverbBuffer_{nullptr};
   AVAudioFrameCount duration_{0};
-  DSPHeaders::BufferFacet dryFacet_;
-  DSPHeaders::BufferFacet chorusFacet_;
-  DSPHeaders::BufferFacet reverbFacet_;
+  DSPHeaders::BusBufferFacet dryFacet_;
+  DSPHeaders::BusBufferFacet chorusFacet_;
+  DSPHeaders::BusBufferFacet reverbFacet_;
   int renderIndex_{0};
 };
 

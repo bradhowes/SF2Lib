@@ -116,6 +116,8 @@ let unsafeFlags = [
   "-x", "objective-c++", // treat source files as Obj-C++ files
 ]
 
+let playAudio = "1"
+
 let package = Package(
   name: "SF2Lib",
   platforms: [.iOS(.v13), .macOS(.v10_15), .tvOS(.v12)],
@@ -123,7 +125,6 @@ let package = Package(
     .library(name: "SF2Lib", targets: ["SF2Lib"]),
     .library(name: "Engine", targets: ["Engine"])
   ],
-  dependencies: [.package(url: "https://github.com/bradhowes/AUv3Support", from: "11.1.2")],
   targets: [
     .target(
       name: "Engine",
@@ -134,7 +135,6 @@ let package = Package(
     ),
     .target(
       name: "SF2Lib",
-      dependencies: [.product(name: "AUv3-DSP-Headers", package: "AUv3Support", condition: .none)],
       path: "Sources/SF2Lib",
       exclude: [
         "Entity/README.md",
@@ -169,17 +169,23 @@ let package = Package(
       publicHeadersPath: "",
       cxxSettings: [
         // Set to 1 to play audio in tests. Set to 0 to keep silent.
-        .define("PLAY_AUDIO", to: "0", .none),
+        .define("PLAY_AUDIO", to: playAudio, .none),
       ]
     ),
     .testTarget(
       name: "EngineTests",
-      dependencies: ["Engine", "TestUtils"]
+      dependencies: ["Engine", "TestUtils"],
+      cxxSettings: [
+        // Set to 1 to play audio in tests. Set to 0 to keep silent.
+        .define("PLAY_AUDIO", to: playAudio, .none),
+      ]
     ),
     .testTarget(
       name: "SF2LibTests",
       dependencies: ["SF2Lib", "TestUtils"],
       cxxSettings: [
+        // Set to 1 to play audio in tests. Set to 0 to keep silent.
+        .define("PLAY_AUDIO", to: playAudio, .none),
         .unsafeFlags([
           "-Wno-newline-eof", // resource_bundle_accessor.h is missing newline at end of file
         ], .none)
@@ -187,5 +193,5 @@ let package = Package(
       linkerSettings: []
     )
   ],
-  cxxLanguageStandard: .cxx20
+  cxxLanguageStandard: .cxx2b
 )

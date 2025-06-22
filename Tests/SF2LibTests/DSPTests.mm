@@ -6,8 +6,8 @@
 #include <iomanip>
 
 #include "SampleBasedContexts.hpp"
-#include "DSPHeaders/ConstMath.hpp"
-#include "DSPHeaders/DSP.hpp"
+#include "SF2Lib/DSPHeaders/ConstMath.hpp"
+#include "SF2Lib/DSPHeaders/DSP.hpp"
 #include "SF2Lib/DSP.hpp"
 
 using namespace DSPHeaders::DSP;

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <Accelerate/Accelerate.h>
 
 namespace SF2 {

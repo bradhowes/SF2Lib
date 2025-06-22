@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "DSPHeaders/BusBuffers.hpp"
+#include "SF2Lib/DSPHeaders/BusBuffers.hpp"
 
 namespace SF2::Render::Engine {
 

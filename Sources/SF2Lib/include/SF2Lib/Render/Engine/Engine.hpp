@@ -9,7 +9,7 @@
 #include <set>
 #include <vector>
 
-#include "DSPHeaders/EventProcessor.hpp"
+#include "SF2Lib/DSPHeaders/EventProcessor.hpp"
 
 #include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
