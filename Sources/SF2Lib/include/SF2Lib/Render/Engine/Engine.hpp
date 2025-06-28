@@ -193,7 +193,7 @@ public:
 
    @returns array of MIDI bytes
    */
-  static std::array<uint8_t, 3> createResetCommand() noexcept;
+  static std::array<uint8_t, 1> createResetCommand() noexcept;
 
   /**
    Utility class method that creates a collection of MIDI commands that will direct the engine to activate the preset

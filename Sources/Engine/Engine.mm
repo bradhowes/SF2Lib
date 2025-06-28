@@ -50,7 +50,7 @@ SF2Engine::createUsePreset(size_t preset) noexcept
   return SF2::Render::Engine::Engine::createUsePreset(preset);
 }
 
-std::array<uint8_t, 3>
+std::array<uint8_t, 1>
 SF2Engine::createResetCommand() noexcept
 {
   return SF2::Render::Engine::Engine::createResetCommand();

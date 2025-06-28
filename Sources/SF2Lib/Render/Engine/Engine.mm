@@ -411,13 +411,11 @@ Engine::createUsePreset(size_t preset) noexcept
   return createLoadFileUsePreset("", preset);
 }
 
-std::array<uint8_t, 3>
+std::array<uint8_t, 1>
 Engine::createResetCommand() noexcept
 {
-  return std::array<uint8_t, 3>{
-    SF2::valueOf(MIDI::CoreEvent::reset),
-    0,
-    0
+  return std::array<uint8_t, 1>{
+    SF2::valueOf(MIDI::CoreEvent::reset)
   };
 }
 

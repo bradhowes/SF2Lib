@@ -43,7 +43,7 @@
 
 - (void)testCreateResetCommand {
   auto data = engine->createResetCommand();
-  XCTAssertEqual(3, data.size());
+  XCTAssertEqual(1, data.size());
 }
 
 - (void)testCreateUseBankProgram {

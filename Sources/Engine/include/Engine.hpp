@@ -109,7 +109,7 @@ struct SF2Engine
    @returns MIDI command as a byte sequence
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  static std::array<uint8_t, 3> createResetCommand() noexcept;
+  static std::array<uint8_t, 1> createResetCommand() noexcept;
 
   /**
    Obtain an array of `NSData` instances containing MIDI commands to set the desired bank and program to use.
