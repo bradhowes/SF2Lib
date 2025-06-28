@@ -185,7 +185,7 @@ public:
    @param preset the index of the preset to activate
    @returns array of MIDI bytes
    */
-  static std::array<uint8_t, 6> createUsePreset(size_t preset) noexcept;
+  static std::vector<uint8_t> createUsePreset(size_t preset) noexcept;
 
   /**
    Utility class method that creates a MIDI channel command to reset the engine. This stops all voices and resets the
@@ -193,7 +193,7 @@ public:
 
    @returns array of MIDI bytes
    */
-  static std::array<uint8_t, 1> createResetCommand() noexcept;
+  static std::array<uint8_t, 3> createResetCommand() noexcept;
 
   /**
    Utility class method that creates a collection of MIDI commands that will direct the engine to activate the preset
@@ -203,7 +203,7 @@ public:
    @param program the program in the bank to activate (0-127)
    @returns array of an array of MIDI bytes
    */
-  static std::array<uint8_t, 8> createUseBankProgram(uint16_t bank, uint8_t program) noexcept;
+  static std::array<uint8_t, 9> createUseBankProgram(uint16_t bank, uint8_t program) noexcept;
 
   /**
    Utility class method that creates a MIDI command to send the given channel message with the given value

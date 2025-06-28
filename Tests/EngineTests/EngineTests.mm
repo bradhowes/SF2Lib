@@ -33,32 +33,27 @@
 - (void)testCreateLoadFileUseIndex {
   auto url = [TestResources getResourceUrl:0];
   auto data = engine->createLoadFileUsePreset(url.path.UTF8String, 123);
-  XCTAssertNotNil(data);
-  XCTAssertTrue(data.length > url.path.length);
+  XCTAssertTrue(data.size() > url.path.length);
 }
 
 - (void)testCreateUseIndex {
   auto data = engine->createUsePreset(59);
-  XCTAssertNotNil(data);
-  XCTAssertEqual(6, data.length);
+  XCTAssertEqual(6, data.size());
 }
 
 - (void)testCreateResetCommand {
   auto data = engine->createResetCommand();
-  XCTAssertNotNil(data);
-  XCTAssertEqual(1, data.length);
+  XCTAssertEqual(3, data.size());
 }
 
 - (void)testCreateUseBankProgram {
   auto data = engine->createUseBankProgram(1, 43);
-  XCTAssertNotNil(data);
-  XCTAssertEqual(3, data.count);
+  XCTAssertEqual(9, data.size());
 }
 
 - (void)testCreateChannelMessage {
   auto data = engine->createChannelMessage(0xFE, 0x01);
-  XCTAssertNotNil(data);
-  XCTAssertEqual(3, data.length);
+  XCTAssertEqual(3, data.size());
 }
 
 - (void)testActiveVoiceCount {

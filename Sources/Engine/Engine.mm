@@ -44,19 +44,19 @@ SF2Engine::createLoadFileUsePreset(const std::string& path, size_t preset) noexc
   return SF2::Render::Engine::Engine::createLoadFileUsePreset(path, preset);
 }
 
-std::array<uint8_t, 6>
+std::vector<uint8_t>
 SF2Engine::createUsePreset(size_t preset) noexcept
 {
   return SF2::Render::Engine::Engine::createUsePreset(preset);
 }
 
-std::array<uint8_t, 1>
+std::array<uint8_t, 3>
 SF2Engine::createResetCommand() noexcept
 {
   return SF2::Render::Engine::Engine::createResetCommand();
 }
 
-std::array<uint8_t, 8>
+std::array<uint8_t, 9>
 SF2Engine::createUseBankProgram(uint16_t bank, uint8_t program) noexcept
 {
   return SF2::Render::Engine::Engine::createUseBankProgram(bank, program);

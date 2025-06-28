@@ -240,13 +240,13 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::programChange:
-      if (midiEvent.length == 2) {
+      if (midiEvent.length >= 2) {
         changeProgram(midiEvent.data[1]);
       }
       break;
 
     case MIDI::CoreEvent::channelPressure:
-      if (midiEvent.length == 2) {
+      if (midiEvent.length >= 2) {
         channelState_.setChannelPressure(midiEvent.data[1]);
         notifyActiveVoicesChannelStateChanged();
       }
@@ -405,27 +405,19 @@ Engine::createLoadFileUsePreset(const std::string& path, size_t preset) noexcept
   return data;
 }
 
-std::array<uint8_t, 6>
+std::vector<uint8_t>
 Engine::createUsePreset(size_t preset) noexcept
 {
-  assert(preset <= (127 * 128 + 127));
-  auto presetMSB = uint8_t(preset / 128u);
-  auto presetLSB = uint8_t(preset - presetMSB * 128u);
-  return std::array<uint8_t, 6>{
-    SF2::valueOf(MIDI::CoreEvent::systemExclusive),
-    0x7E, // Custom command for SF2Lib
-    0x00, // unused subtype
-    presetMSB,
-    presetLSB,
-    0xF7
-  };
+  return createLoadFileUsePreset("", preset);
 }
 
-std::array<uint8_t, 1>
+std::array<uint8_t, 3>
 Engine::createResetCommand() noexcept
 {
-  return std::array<uint8_t, 1>{
-    SF2::valueOf(MIDI::CoreEvent::reset)
+  return std::array<uint8_t, 3>{
+    SF2::valueOf(MIDI::CoreEvent::reset),
+    0,
+    0
   };
 }
 
@@ -439,13 +431,13 @@ Engine::createChannelMessage(MIDI::ControlChange channelMessage, uint8_t value) 
   };
 }
 
-std::array<uint8_t, 8>
+std::array<uint8_t, 9>
 Engine::createUseBankProgram(uint16_t bank, uint8_t program) noexcept
 {
   assert(bank < 128 * 128 && program < 128);
   auto bankMSB = uint8_t(bank / 128u);
   auto bankLSB = uint8_t(bank - bankMSB * 128u);
-  return std::array<uint8_t, 8>{
+  return std::array<uint8_t, 9>{
     SF2::valueOf(MIDI::CoreEvent::controlChange),
     SF2::valueOf(MIDI::ControlChange::bankSelectMSB),
     bankMSB,
@@ -453,7 +445,8 @@ Engine::createUseBankProgram(uint16_t bank, uint8_t program) noexcept
     SF2::valueOf(MIDI::ControlChange::bankSelectLSB),
     bankLSB,
     SF2::valueOf(MIDI::CoreEvent::programChange),
-    program
+    program,
+    0
   };
 }
 
