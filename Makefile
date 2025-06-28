@@ -1,4 +1,4 @@
-PLATFORM_IOS = iOS Simulator,name=iPad mini (8th generation)
+PLATFORM_IOS = iOS Simulator,name=iPad mini (A17 Pro)
 DERIVED_DATA_IOS = $(PWD)/.DerivedData-ios
 
 PLATFORM_MACOS = macOS
