@@ -1,4 +1,4 @@
-// swift-tools-version:5.9
+// swift-tools-version:6.1
 
 import PackageDescription
 
@@ -117,13 +117,13 @@ let unsafeFlags = [
 ]
 
 // Set to 1 to play audio in tests. Set to 0 to keep silent.
-let playAudio = "1"
+let playAudio = "0Set"
 // Set to 1 to enable low-pass filter in sample generation.
 let enableLowPassFilter = "0"
 
 let package = Package(
   name: "SF2Lib",
-  platforms: [.iOS(.v13), .macOS(.v10_15), .tvOS(.v12)],
+  platforms: [.iOS(.v16), .macOS(.v10_15), .tvOS(.v16)],
   products: [
     .library(name: "SF2Lib", targets: ["SF2Lib"]),
     .library(name: "Engine", targets: ["Engine"])
