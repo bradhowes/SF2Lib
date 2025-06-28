@@ -38,47 +38,46 @@ SF2Engine::activePresetName() const noexcept
   return impl_->activePresetName();
 }
 
-NSData*
-SF2Engine::createLoadFileUsePreset(const std::string& path, size_t preset) const noexcept
+std::vector<uint8_t>
+SF2Engine::createLoadFileUsePreset(const std::string& path, size_t preset) noexcept
 {
-  auto value = SF2::Render::Engine::Engine::createLoadFileUsePreset(path, preset);
-  auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
-  return data;
+  return SF2::Render::Engine::Engine::createLoadFileUsePreset(path, preset);
 }
 
-NSData*
-SF2Engine::createUsePreset(size_t preset) const noexcept
+std::array<uint8_t, 6>
+SF2Engine::createUsePreset(size_t preset) noexcept
 {
-  auto value = SF2::Render::Engine::Engine::createUsePreset(preset);
-  auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
-  return data;
+  return SF2::Render::Engine::Engine::createUsePreset(preset);
 }
 
-NSData*
-SF2Engine::createResetCommand() const noexcept
+std::array<uint8_t, 1>
+SF2Engine::createResetCommand() noexcept
 {
-  auto value = SF2::Render::Engine::Engine::createResetCommand();
-  auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
-  return data;
+  return SF2::Render::Engine::Engine::createResetCommand();
 }
 
-NSArray<NSData*>*
-SF2Engine::createUseBankProgram(uint16_t bank, uint8_t program) const noexcept
+std::array<uint8_t, 8>
+SF2Engine::createUseBankProgram(uint16_t bank, uint8_t program) noexcept
 {
-  auto value = SF2::Render::Engine::Engine::createUseBankProgram(bank, program);
-  auto data = [[NSMutableArray alloc] initWithCapacity:value.size()];
-  for (const auto& msg : value) {
-    [data addObject:[[NSMutableData alloc] initWithBytes:msg.data() length:msg.size()]];
-  }
-  return data;
+  return SF2::Render::Engine::Engine::createUseBankProgram(bank, program);
 }
 
-NSData*
-SF2Engine::createChannelMessage(uint8_t channelMessage, uint8_t content) const noexcept
+std::array<uint8_t, 3>
+SF2Engine::createChannelMessage(uint8_t channelMessage, uint8_t content) noexcept
 {
-  auto value = SF2::Render::Engine::Engine::createChannelMessage(SF2::MIDI::ControlChange(channelMessage), content );
-  auto data = [[NSMutableData alloc] initWithBytes:value.data() length:value.size()];
-  return data;
+  return SF2::Render::Engine::Engine::createChannelMessage(SF2::MIDI::ControlChange(channelMessage), content );
+}
+
+std::array<uint8_t, 3>
+SF2Engine::createAllNotesOff() noexcept
+{
+  return SF2::Render::Engine::Engine::createAllNotesOff();
+}
+
+std::array<uint8_t, 3>
+SF2Engine::createAllSoundOff() noexcept
+{
+  return SF2::Render::Engine::Engine::createAllSoundOff();
 }
 
 size_t

@@ -190,16 +190,15 @@ public:
                     state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv.val)};
     auto resonance{state_.modulated(Index::initialFilterResonance)};
     auto filtered{filter_.transform(frequency, resonance, sample * gain)};
+#endif
 
     if (!sampleGenerator_.isActive() ||
         !volumeEnvelope_.isActive() ||
         (volumeEnvelope_.isRelease() && gain < DSP::NoiseFloor)) {
       stop();
     }
+
     return sample * gain; // filtered;
-#else
-    return sample * gain; // filtered;
-#endif
   }
 
   /**

@@ -401,61 +401,60 @@ Engine::createLoadFileUsePreset(const std::string& path, size_t preset) noexcept
   data[3] = static_cast<uint8_t>(preset / 128); // MSB of preset value
   data[4] = static_cast<uint8_t>(preset - data[3] * 128); // LSB of preset value
   std::copy_n(encoded.begin(), encoded.size(), data.begin() + nameOffset);
-  data[size -1] = 0xF7;
+  data[size - 1] = 0xF7;
   return data;
 }
 
-std::vector<uint8_t>
+std::array<uint8_t, 6>
 Engine::createUsePreset(size_t preset) noexcept
 {
-  return createLoadFileUsePreset("", preset);
+  assert(preset <= (127 * 128 + 127));
+  auto presetMSB = uint8_t(preset / 128u);
+  auto presetLSB = uint8_t(preset - presetMSB * 128u);
+  return std::array<uint8_t, 6>{
+    SF2::valueOf(MIDI::CoreEvent::systemExclusive),
+    0x7E, // Custom command for SF2Lib
+    0x00, // unused subtype
+    presetMSB,
+    presetLSB,
+    0xF7
+  };
 }
 
-std::vector<uint8_t>
+std::array<uint8_t, 1>
 Engine::createResetCommand() noexcept
 {
-  auto data = std::vector<uint8_t>(1, uint8_t(0));
-  data[0] = SF2::valueOf(MIDI::CoreEvent::reset);
-  return data;
+  return std::array<uint8_t, 1>{
+    SF2::valueOf(MIDI::CoreEvent::reset)
+  };
 }
 
-std::vector<uint8_t>
+std::array<uint8_t, 3>
 Engine::createChannelMessage(MIDI::ControlChange channelMessage, uint8_t value) noexcept
 {
-  auto data = std::vector<uint8_t>(3, uint8_t(0));
-  data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
-  data[1] = SF2::valueOf(channelMessage);
-  data[2] = value;
-  return data;
+  return std::array<uint8_t, 3>{
+    SF2::valueOf(MIDI::CoreEvent::controlChange),
+    SF2::valueOf(channelMessage),
+    value
+  };
 }
 
-std::vector<std::vector<uint8_t>>
+std::array<uint8_t, 8>
 Engine::createUseBankProgram(uint16_t bank, uint8_t program) noexcept
 {
   assert(bank < 128 * 128 && program < 128);
-  auto commands = std::vector<std::vector<uint8_t>>();
-  commands.reserve(3);
-
   auto bankMSB = uint8_t(bank / 128u);
   auto bankLSB = uint8_t(bank - bankMSB * 128u);
-  auto data = std::vector<uint8_t>(3, uint8_t(0));
-  data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
-  data[1] = SF2::valueOf(MIDI::ControlChange::bankSelectMSB);
-  data[2] = bankMSB;
-  commands.push_back(data);
-
-  data = std::vector<uint8_t>(3, uint8_t(0));
-  data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
-  data[1] = SF2::valueOf(MIDI::ControlChange::bankSelectLSB);
-  data[2] = bankLSB;
-  commands.push_back(data);
-
-  data = std::vector<uint8_t>(2, uint8_t(0));
-  data[0] = SF2::valueOf(MIDI::CoreEvent::programChange);
-  data[1] = program;
-  commands.push_back(data);
-
-  return commands;
+  return std::array<uint8_t, 8>{
+    SF2::valueOf(MIDI::CoreEvent::controlChange),
+    SF2::valueOf(MIDI::ControlChange::bankSelectMSB),
+    bankMSB,
+    SF2::valueOf(MIDI::CoreEvent::controlChange),
+    SF2::valueOf(MIDI::ControlChange::bankSelectLSB),
+    bankLSB,
+    SF2::valueOf(MIDI::CoreEvent::programChange),
+    program
+  };
 }
 
 void

@@ -59,10 +59,12 @@ public:
     if (active_ < slots_.size()) ++active_;
     if (wasLastActive) partition_ = leastRecentlyUsed_.end();
 
+    std::clog << "voiceOn: " << voiceIndex << std::endl;
     return voiceIndex;
   }
 
   iterator voiceOff(size_t voiceIndex) noexcept {
+    std::clog << "voiceOff: " << voiceIndex << std::endl;
     assert(active_ > 0);
     --active_;
     // Remove voice from list

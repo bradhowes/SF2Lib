@@ -2,10 +2,13 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
+#include <string>
+#include <vector>
+
 #include <Foundation/Foundation.h>
 #include <CoreAudioKit/CoreAudioKit.h>
-#include <string>
 #include <swift/bridging>
 
 /**
@@ -87,7 +90,7 @@ struct SF2Engine
    @returns MIDI SYSEX command as a byte sequence
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  NSData* createLoadFileUsePreset(const std::string& path, size_t preset) const noexcept;
+  static std::vector<uint8_t> createLoadFileUsePreset(const std::string& path, size_t preset) noexcept;
 
   /**
    Obtain an `NSData` instance containing a MIDI SYSEX command that will ask the engine to use a different preset from
@@ -97,7 +100,7 @@ struct SF2Engine
    @returns MIDI SYSEX command as a byte sequence
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  NSData* createUsePreset(size_t preset) const noexcept;
+  static std::array<uint8_t, 6> createUsePreset(size_t preset) noexcept;
 
   /**
    Obtain an `NSData` instance containing MIDI command to reset the engine. This will stop playing any notes and reset
@@ -106,7 +109,7 @@ struct SF2Engine
    @returns MIDI command as a byte sequence
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  NSData* createResetCommand() const noexcept;
+  static std::array<uint8_t, 1> createResetCommand() noexcept;
 
   /**
    Obtain an array of `NSData` instances containing MIDI commands to set the desired bank and program to use.
@@ -114,7 +117,7 @@ struct SF2Engine
    @returns array of MIDI commands to be sent to engine
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  NSArray<NSData*>* createUseBankProgram(uint16_t bank, uint8_t program) const noexcept;
+  static std::array<uint8_t, 8> createUseBankProgram(uint16_t bank, uint8_t program) noexcept;
 
   /**
    Obtain an `NSData` instance containing MIDI command to send a channel message to the engine.
@@ -124,7 +127,13 @@ struct SF2Engine
    @returns MIDI command as a byte sequence
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  NSData* createChannelMessage(uint8_t channelMessage, uint8_t value) const noexcept;
+  static std::array<uint8_t, 3> createChannelMessage(uint8_t channelMessage, uint8_t value) noexcept;
+
+  SWIFT_RETURNS_INDEPENDENT_VALUE
+  static std::array<uint8_t, 3> createAllNotesOff() noexcept;
+
+  SWIFT_RETURNS_INDEPENDENT_VALUE
+  static std::array<uint8_t, 3> createAllSoundOff() noexcept;
 
   /// @returns true if the monophonic mode is enabled
   bool monophonicModeEnabled() const noexcept;

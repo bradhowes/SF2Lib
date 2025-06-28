@@ -105,10 +105,10 @@ enum struct ControlChange : uint8_t {
   rpnMSB = 0x65, // used
 
   // Channel messages
-  allSoundOff = 0x78, // used
-  resetAllControllers = 0x79, // used
+  allSoundOff = 0x78, // used (120)
+  resetAllControllers = 0x79, // used (121)
   localControl = 0x7A,
-  allNotesOff = 0x7B, // used
+  allNotesOff = 0x7B, // used (123)
   omniOff = 0x7C,
   omniOn = 0x7D,
   monoOn = 0x7E, // used
