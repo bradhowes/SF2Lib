@@ -117,7 +117,7 @@ let unsafeFlags = [
 ]
 
 // Set to 1 to play audio in tests. Set to 0 to keep silent.
-let playAudio = "0Set"
+let playAudio = "0"
 // Set to 1 to enable low-pass filter in sample generation.
 let enableLowPassFilter = "0"
 
