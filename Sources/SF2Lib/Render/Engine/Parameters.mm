@@ -63,8 +63,8 @@ Parameters::provideValue(AUParameter* parameter) noexcept
     auto index = Index(rawIndex);
     const auto& def = Definition::definition(index);
     return def.clamp(values_[Index(rawIndex)]);
-  } else if (rawIndex >= valueOf(EngineParameterAddress::portamentoModeEnabled) &&
-             rawIndex < valueOf(EngineParameterAddress::firstUnusedAddress)) {
+  } else if (rawIndex >= valueOf(EngineParameterAddress::firstEngineParameterAddress) &&
+             rawIndex < valueOf(EngineParameterAddress::lastEngineParameterAddressPlusOne)) {
     auto address = EngineParameterAddress(rawIndex);
     switch (address) {
       case EngineParameterAddress::portamentoModeEnabled:     return SF2::toBool(engine_.portamentoModeEnabled());
@@ -73,8 +73,7 @@ Parameters::provideValue(AUParameter* parameter) noexcept
       case EngineParameterAddress::polyphonicModeEnabled:     return SF2::toBool(engine_.polyphonicModeEnabled());
       case EngineParameterAddress::activeVoiceCount:          return engine_.activeVoiceCount();
       case EngineParameterAddress::retriggerModeEnabled:      return SF2::toBool(engine_.retriggerModeEnabled());
-      case EngineParameterAddress::firstUnusedAddress:        return 0.0;
-      default: return 0.0;
+      default: break;
     }
   } else {
     return 0.0;

@@ -1,12 +1,8 @@
 // Copyright © 2023 Brad Howes. All rights reserved.
 
-#include "Engine.hpp"
+#include "SF2FileInfo.hpp"
 #include "SF2Lib/Entity/Preset.hpp"
 #include "SF2Lib/IO/File.hpp"
-
-SF2PresetInfo::SF2PresetInfo(const SF2::Entity::Preset& preset)
-: name_{preset.name()}, bank_{preset.bank()}, program_{preset.program()}
-{}
 
 SF2FileInfo::SF2FileInfo(const char* path)
 : impl_{new SF2::IO::File(path)}
@@ -39,5 +35,5 @@ SF2PresetInfo
 SF2FileInfo::operator[](size_t index) const noexcept {
   auto chunkIndex = impl_->presetIndicesOrderedByBankProgram()[index];
   auto preset = impl_->presets()[chunkIndex];
-  return SF2PresetInfo(preset);
+  return {preset};
 }

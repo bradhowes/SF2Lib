@@ -31,6 +31,12 @@ class Config;
  The intent for the `State` class is to treat it just as a collection of generator values, and to let other classes
  perform transformations on the values held here. As such, generator-specific functionality should not exist here but
  in function-specific classes such as Envelope::Generator or Voice::Sample::Pitch.
+
+ State values can also change due to external MIDI events via MIDI CC mappings through defined modulators. Further,
+ state values can change due to AUParameterTree changes, with values changed by a UI control or by MIDI event mapping.
+
+ Remember that this is a per-voice setting, and each voice only operates with one SF2 instrument. This makes it somewhat
+ tedious right now to manipulate an generator like the VCA attack across all instruments assigned to a key.
  */
 class State
 {

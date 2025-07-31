@@ -170,8 +170,8 @@ Engine::doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount durati
     parameters_.setLiveValue(index, def.clamp(int(std::round(value))));
     notifyParameterChanged(index);
     return duration;
-  } else if (rawIndex >= valueOf(Parameters::EngineParameterAddress::portamentoModeEnabled) &&
-             rawIndex < valueOf(Parameters::EngineParameterAddress::firstUnusedAddress)) {
+  } else if (rawIndex >= valueOf(Parameters::EngineParameterAddress::firstEngineParameterAddress) &&
+             rawIndex < valueOf(Parameters::EngineParameterAddress::lastEngineParameterAddressPlusOne)) {
     auto address = Parameters::EngineParameterAddress(rawIndex);
     switch (address) {
       case Parameters::EngineParameterAddress::portamentoModeEnabled:
@@ -190,8 +190,6 @@ Engine::doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount durati
         break;
       case Parameters::EngineParameterAddress::retriggerModeEnabled:
         setRetriggerModeEnabled(SF2::toBool(value));
-        break;
-      case Parameters::EngineParameterAddress::firstUnusedAddress:
         break;
       default:
         break;

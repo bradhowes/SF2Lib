@@ -16,7 +16,6 @@
  */
 
 namespace SF2 {
-namespace Entity { class Preset; }
 namespace IO { class File; }
 namespace Render { namespace Engine { class Engine; } }
 }
@@ -148,62 +147,4 @@ struct SF2Engine
 
 private:
   std::shared_ptr<SF2::Render::Engine::Engine> impl_;
-};
-
-struct SF2PresetInfo {
-
-  SF2PresetInfo(std::string name, int bank, int program) : name_{name}, bank_{bank}, program_{program} {}
-
-  SF2PresetInfo(const SF2::Entity::Preset& preset);
-
-  SWIFT_RETURNS_INDEPENDENT_VALUE
-  std::string name() const noexcept { return name_; }
-
-  int bank() const noexcept { return bank_; }
-
-  int program() const noexcept { return program_; }
-
-private:
-  std::string name_;
-  int bank_;
-  int program_;
-};
-
-/**
- A light-weight SF2 loader that provides meta data and preset information. It does not load samples nor does it
- create the render entities such as the preset and instrument zones.
- */
-struct SF2FileInfo
-{
-  SF2FileInfo(const char* path);
-
-  SF2FileInfo(std::string path);
-
-  ~SF2FileInfo();
-
-  bool load();
-
-  /// @returns the embedded name in the file
-  SWIFT_RETURNS_INDEPENDENT_VALUE
-  std::string embeddedName() const noexcept;
-
-  /// @returns the embedded author name in the file
-  SWIFT_RETURNS_INDEPENDENT_VALUE
-  std::string embeddedAuthor() const noexcept;
-
-  /// @returns any embedded comment in the file
-  SWIFT_RETURNS_INDEPENDENT_VALUE
-  std::string embeddedComment() const noexcept;
-
-  /// @returns any embedded copyright notice in the file
-  SWIFT_RETURNS_INDEPENDENT_VALUE
-  std::string embeddedCopyright() const noexcept;
-
-  size_t size() const noexcept;
-
-  SWIFT_RETURNS_INDEPENDENT_VALUE
-  SF2PresetInfo operator[](size_t index) const noexcept;
-
-private:
-  std::shared_ptr<SF2::IO::File> impl_;
 };

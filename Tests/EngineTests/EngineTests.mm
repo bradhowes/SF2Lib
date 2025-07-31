@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import "TestResources.hpp"
-#import "Engine.hpp"
+#import "SF2Engine.hpp"
 
 @interface EngineTests : XCTestCase
 

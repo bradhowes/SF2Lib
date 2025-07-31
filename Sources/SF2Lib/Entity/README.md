@@ -5,4 +5,4 @@ some classes where alignment requirements cause the size of an entity to not mat
 classes are clearly identified and they have the proper loading mechanism to accommodate the layout padding.
 
 NOTE: these entities should be considered read-only. There are currently no writing facilities for saving changes made
-to one.
+to one. The SF2Lib 

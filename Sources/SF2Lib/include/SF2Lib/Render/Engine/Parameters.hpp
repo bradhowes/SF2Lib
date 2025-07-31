@@ -12,8 +12,9 @@ namespace SF2::Render::Engine {
 class Engine;
 
 /**
- Collection of AUParameter definitions which are used to generate an AUParameterTree for controlling SF2 generates
- while rendering.
+ Collection of AUParameter definitions which are used to generate an AUParameterTree for controlling SF2 generators
+ while rendering. There are two sets of parameters: global settings for the engine, and settings that affect the state
+ of a voice/instrument that is rendering audio.
  */
 class Parameters
 {
@@ -21,20 +22,20 @@ public:
   using Index = Entity::Generator::Index;
   using State = Voice::State::State;
 
+  /**
+   Enumeration of engine-specific (global) parameters
+   */
   enum struct EngineParameterAddress : AUParameterAddress
   {
     // Pretty sure this is large enough to never overlap with SF generator indices now and in the future
     // (SoundFont spec v2.01 defines 59)
     firstEngineParameterAddress = 1000,
-
     portamentoModeEnabled = firstEngineParameterAddress,
     portamentoRate,
-    oneVoicePerKeyModeEnabled,
+    oneVoicePerKeyModeEnabled, // aka mono
     polyphonicModeEnabled,
     activeVoiceCount,
     retriggerModeEnabled,
-    firstUnusedAddress,
-
     lastEngineParameterAddressPlusOne
   };
 
@@ -107,7 +108,9 @@ private:
 
   Engine& engine_;
   AUParameterTree* parameterTree_{nullptr};
+  // Current parameter settings.
   Entity::Generator::GeneratorValueArray<int> values_{};
+  // Indicator that value was changed by external source since last check.
   Entity::Generator::GeneratorValueArray<bool> changed_{};
   os_log_t log_;
   bool anyChanged_;
