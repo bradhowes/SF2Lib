@@ -117,9 +117,11 @@ let unsafeFlags = [
 ]
 
 // Set to 1 to play audio in tests. Set to 0 to keep silent.
-let playAudio = "0"
+let playAudio = "1"
 // Set to 1 to enable low-pass filter in sample generation.
 let enableLowPassFilter = "0"
+// Set to 1 to enable C++ bounds checking
+let checkedVectorIndexing = "0"
 
 let package = Package(
   name: "SF2Lib",
@@ -129,7 +131,7 @@ let package = Package(
     .library(name: "Engine", targets: ["Engine"])
   ],
   dependencies: [
-    // .package(url: "https://github.com/bradhowes/auv3-support", from: "1.0.0"),
+    // .package(url: "https://github.com/bradhowes/DSPHeaders", from: "1.0.0"),
     .package(path: "../DSPHeaders"),
   ],
   targets: [
