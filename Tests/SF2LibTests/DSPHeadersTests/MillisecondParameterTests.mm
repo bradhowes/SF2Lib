@@ -3,7 +3,7 @@
 #import <XCTest/XCTest.h>
 #import <vector>
 
-#import "SF2Lib/DSPHeaders/Parameters/Milliseconds.hpp"
+#import "DSPHeaders/Parameters/Milliseconds.hpp"
 
 using namespace DSPHeaders::Parameters;
 

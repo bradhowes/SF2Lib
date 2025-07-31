@@ -3,9 +3,9 @@
 #import <XCTest/XCTest.h>
 #import <cmath>
 
-#import "SF2Lib/DSPHeaders/DSP.hpp"
-#import "SF2Lib/DSPHeaders/EventProcessor.hpp"
-#import "SF2Lib/DSPHeaders/Parameters/Float.hpp"
+#import "DSPHeaders/DSP.hpp"
+#import "DSPHeaders/EventProcessor.hpp"
+#import "DSPHeaders/Parameters/Float.hpp"
 
 using namespace DSPHeaders;
 
@@ -13,7 +13,7 @@ struct MockEffect : public EventProcessor<MockEffect>
 {
   using super = EventProcessor<MockEffect>;
 
-  MockEffect() : super() {
+  MockEffect() : super("MockEffect") {
     registerParameter(param_);
   }
 
@@ -35,7 +35,7 @@ struct MockEffect : public EventProcessor<MockEffect>
     return address == 1 ? param_.getPending() : 0.0;
   }
 
-  void doRendering(NSInteger outputBusNumber, BusBuffers, BusBuffers, AUAudioFrameCount frameCount) {
+  void doRendering(BusBuffers, BusBuffers, AUAudioFrameCount frameCount) {
     paramValues_.push_back(param_.frameValue());
     frameCounts_.push_back(frameCount);
   }
@@ -332,9 +332,9 @@ struct MockEffectWithRenderingStateChanged : public EventProcessor<MockEffectWit
 {
   using super = EventProcessor<MockEffectWithRenderingStateChanged>;
 
-  MockEffectWithRenderingStateChanged() : super() { registerParameters({param1_, param2_}); }
+  MockEffectWithRenderingStateChanged() : super("MockEngine") { registerParameters({param1_, param2_}); }
 
-  void doRendering(NSInteger outputBusNumber, BusBuffers, BusBuffers, AUAudioFrameCount frameCount) {}
+  void doRendering(BusBuffers, BusBuffers, AUAudioFrameCount frameCount) {}
   void doRenderingStateChanged(bool rendering) { ++renderingStateChanges_; }
   void checkForTreeBasedParameterChanges() { super::checkForTreeBasedParameterChanges(); }
 
@@ -381,11 +381,11 @@ struct MockEffectWithMIDI : public EventProcessor<MockEffectWithMIDI>
 {
   using super = EventProcessor<MockEffectWithMIDI>;
 
-  MockEffectWithMIDI() : super() { registerParameter(param_); }
+  MockEffectWithMIDI() : super("MockEffectWithMIDI") { registerParameter(param_); }
 
   void doMIDIEvent(const AUMIDIEvent&) { midiEvents_ += 1; }
 
-  void doRendering(NSInteger outputBusNumber, BusBuffers, BusBuffers, AUAudioFrameCount frameCount) {}
+  void doRendering(BusBuffers, BusBuffers, AUAudioFrameCount frameCount) {}
 
   Parameters::Float param_{0};
   int midiEvents_{0};

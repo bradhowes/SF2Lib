@@ -3,7 +3,7 @@
 #import <XCTest/XCTest.h>
 #import <cmath>
 #import <iostream>
-#import "SF2Lib/DSPHeaders/DSP.hpp"
+#import "DSPHeaders/DSP.hpp"
 
 using namespace DSPHeaders;
 

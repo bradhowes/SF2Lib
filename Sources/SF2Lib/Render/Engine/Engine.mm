@@ -8,7 +8,7 @@
 using namespace SF2::Render::Engine;
 
 Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
-               size_t minimumNoteDurationMilliseconds) noexcept : super(),
+               size_t minimumNoteDurationMilliseconds) noexcept : super("Engine"),
 sampleRate_{sampleRate},
 minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
 parameters_{*this},

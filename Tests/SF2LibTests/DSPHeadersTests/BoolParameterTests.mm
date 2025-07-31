@@ -3,7 +3,7 @@
 #import <XCTest/XCTest.h>
 #import <vector>
 
-#import "SF2Lib/DSPHeaders/Parameters/Bool.hpp"
+#import "DSPHeaders/Parameters/Bool.hpp"
 
 using namespace DSPHeaders::Parameters;
 

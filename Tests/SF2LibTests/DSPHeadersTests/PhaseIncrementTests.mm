@@ -3,7 +3,7 @@
 #import <XCTest/XCTest.h>
 #import <vector>
 
-#import "SF2Lib/DSPHeaders/LFO.hpp"
+#import "DSPHeaders/LFO.hpp"
 
 using namespace DSPHeaders;
 

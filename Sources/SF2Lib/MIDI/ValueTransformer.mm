@@ -4,7 +4,7 @@
 #include <functional>
 #include <iostream>
 
-#include "SF2Lib/DSPHeaders/ConstMath.hpp"
+#include "DSPHeaders/ConstMath.hpp"
 
 #include "SF2Lib/DSP.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"

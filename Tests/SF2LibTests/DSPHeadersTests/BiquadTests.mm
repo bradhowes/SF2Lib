@@ -3,7 +3,7 @@
 #import <XCTest/XCTest.h>
 
 #import "Pirkle/fxobjects.h"
-#import "SF2Lib/DSPHeaders/Biquad.hpp"
+#import "DSPHeaders/Biquad.hpp"
 
 using namespace DSPHeaders;
 

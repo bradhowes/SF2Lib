@@ -4,8 +4,8 @@
 #import <cmath>
 
 #import "Pirkle/fxobjects.h"
-#import "SF2Lib/DSPHeaders/LFO.hpp"
-#import "SF2Lib/DSPHeaders/PhaseShifter.hpp"
+#import "DSPHeaders/LFO.hpp"
+#import "DSPHeaders/PhaseShifter.hpp"
 
 using namespace DSPHeaders;
 

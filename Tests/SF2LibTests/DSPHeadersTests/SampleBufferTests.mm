@@ -3,7 +3,7 @@
 #import <XCTest/XCTest.h>
 #import <vector>
 
-#import "SF2Lib/DSPHeaders/EventProcessor.hpp"
+#import "DSPHeaders/EventProcessor.hpp"
 
 using namespace DSPHeaders;
 

@@ -123,10 +123,14 @@ let enableLowPassFilter = "0"
 
 let package = Package(
   name: "SF2Lib",
-  platforms: [.iOS(.v16), .macOS(.v10_15), .tvOS(.v16)],
+  platforms: [.iOS(.v16), .macOS(.v14), .tvOS(.v16)],
   products: [
     .library(name: "SF2Lib", targets: ["SF2Lib"]),
     .library(name: "Engine", targets: ["Engine"])
+  ],
+  dependencies: [
+    // .package(url: "https://github.com/bradhowes/auv3-support", from: "1.0.0"),
+    .package(path: "../DSPHeaders"),
   ],
   targets: [
     .target(
@@ -138,6 +142,9 @@ let package = Package(
     ),
     .target(
       name: "SF2Lib",
+      dependencies: [
+        .product(name: "DSPHeaders", package: "DSPHeaders")
+      ],
       path: "Sources/SF2Lib",
       exclude: [
         "Entity/README.md",
@@ -167,7 +174,10 @@ let package = Package(
     ),
     .target(
       name: "TestUtils",
-      dependencies: ["SF2Lib"],
+      dependencies: [
+        "SF2Lib",
+        .product(name: "DSPHeaders", package: "DSPHeaders")
+      ],
       path: "Sources/TestUtils",
       resources: [.process("Resources")],
       publicHeadersPath: "",

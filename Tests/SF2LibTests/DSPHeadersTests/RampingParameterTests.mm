@@ -3,7 +3,7 @@
 #import <XCTest/XCTest.h>
 #import <vector>
 
-#import "SF2Lib/DSPHeaders/Parameters/Float.hpp"
+#import "DSPHeaders/Parameters/Float.hpp"
 
 using namespace DSPHeaders::Parameters;
 

@@ -3,7 +3,7 @@
 #include <XCTest/XCTest.h>
 #include <cmath>
 
-#include "SF2Lib/DSPHeaders/ConstMath.hpp"
+#include "DSPHeaders/ConstMath.hpp"
 
 using namespace DSPHeaders;
 

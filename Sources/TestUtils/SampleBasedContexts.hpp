@@ -7,6 +7,8 @@
 #include <AVFoundation/AVFoundation.h>
 #include <XCTest/XCTest.h>
 
+#include "DSPHeaders/BusBufferFacet.hpp"
+
 #include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
@@ -15,8 +17,6 @@
 #include "SF2Lib/Render/Preset.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
-
-#include "SF2Lib/DSPHeaders/BusBufferFacet.hpp"
 
 struct TestEngineHarness {
   using Engine = SF2::Render::Engine::Engine;

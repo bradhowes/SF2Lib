@@ -5,7 +5,7 @@
 #import <iostream>
 #import <vector>
 
-#import "SF2Lib/DSPHeaders/DelayBuffer.hpp"
+#import "DSPHeaders/DelayBuffer.hpp"
 
 using namespace DSPHeaders;
 

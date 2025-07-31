@@ -10,7 +10,7 @@
 #include <set>
 #include <vector>
 
-#include "SF2Lib/DSPHeaders/EventProcessor.hpp"
+#include "DSPHeaders/EventProcessor.hpp"
 
 #include "SF2Lib/IO/File.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
@@ -130,14 +130,10 @@ public:
   void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
 
   /// API for EventProcessor
-  void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs,
-                   AUAudioFrameCount frameCount) noexcept
-  {
-    if (outputBusNumber == 0) {
-      // All of the work is done when working with output bus 0. If wired correctly, busses 1 and 2 will
-      // use the buffered values that were created here.
-      renderInto(Mixer(outs, busBuffers(1), busBuffers(2)), frameCount);
-    }
+  void doRendering(DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs, AUAudioFrameCount frameCount) noexcept {
+    // All of the work is done when working with output bus 0. If wired correctly, busses 1 and 2 will
+    // use the buffered values that were created here.
+    renderInto(Mixer(outs, busBuffers(1), busBuffers(2)), frameCount);
   }
 
   /**
