@@ -131,8 +131,8 @@ let package = Package(
     .library(name: "Engine", targets: ["Engine"])
   ],
   dependencies: [
-    // .package(url: "https://github.com/bradhowes/DSPHeaders", from: "1.0.0"),
-    .package(path: "../DSPHeaders"),
+    .package(url: "https://github.com/bradhowes/DSPHeaders", from: "1.0.0"),
+    // .package(path: "../DSPHeaders"),
   ],
   targets: [
     .target(
