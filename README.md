@@ -1,8 +1,8 @@
-[![CI](https://github.com/bradhowes/SF2Lib/workflows/CI/badge.svg)](https://github.com/bradhowes/SF2Lib/actions/workflows/CI.yml)
-[![COV](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bradhowes/dbe62f18182c82eb36dc1030819bc54b/raw/SF2Lib-coverage.json)](https://github.com/bradhowes/SF2Lib/blob/main/.github/workflows/CI.yml)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbradhowes%2FSF2Lib%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/bradhowes/SF2Lib)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbradhowes%2FSF2Lib%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/bradhowes/SF2Lib)
-[![License: MIT](https://img.shields.io/badge/License-MIT-A31F34.svg)](https://opensource.org/licenses/MIT)
+[![CI][status]][ci]
+[![COV][cov]][ci]
+[![][spiv]][spi]
+[![][spip]][spi]
+[![License: MIT][mit]][licenses]
 
 # SF2Lib - a SoundFont (SF2) synthesizer in C++
 
@@ -18,8 +18,8 @@ the AudioToolbox and Accelerate frameworks available. The goal is to be a simple
 as a competent SF2 audio renderer whose output can be fed to any sort of audio processing chain, but it would probably
 take some effort to remove it from the Apple ecosystem.
 
-Note that this package depends on some general DSP headers and audio classes from my
-[AUv3Support](https://github.com/bradhowes/AUv3Support) package which is used by my various AUv3 extensions.
+Note that this package depends on some general DSP headers and audio classes from my [DSPHeaders][dsp] package which is
+also used by my various AUv3 extensions.
 
 # SF2 Spec Support
 
@@ -96,3 +96,13 @@ All of the code has been written by myself over the course of several years, but
 other projects, especially [FluidSynth](https://www.fluidsynth.org) and their wealth of knowledge in all things SF2.
 In particular, if there is any confusion about what the SF2 spec means, I rely on their interpretation in code. That
 said, any misrepresentations of SF2 functionality are of my own doing.
+
+[ci]: https://github.com/bradhowes/SF2Lib/actions/workflows/CI.yml
+[status]: https://github.com/bradhowes/SF2Lib/workflows/CI/badge.svg
+[cov]: https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bradhowes/dbe62f18182c82eb36dc1030819bc54b/raw/SF2Lib-coverage.json
+[spi]: https://swiftpackageindex.com/bradhowes/SF2Lib
+[spiv]: https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbradhowes%2FSF2Lib%2Fbadge%3Ftype%3Dswift-versions
+[spip]: https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbradhowes%2FSF2Lib%2Fbadge%3Ftype%3Dplatforms
+[mit]: https://img.shields.io/badge/License-MIT-A31F34.svg
+[license]: https://opensource.org/licenses/MIT
+[dsp]: https://github.com/bradhowes/DSPHeaders
