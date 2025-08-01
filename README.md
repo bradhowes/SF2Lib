@@ -2,7 +2,7 @@
 [![COV][cov]][ci]
 [![][spiv]][spi]
 [![][spip]][spi]
-[![License: MIT][mit]][licenses]
+[![][mit]][license]
 
 # SF2Lib - a SoundFont (SF2) synthesizer in C++
 
