@@ -14,3 +14,7 @@ coverage.txt
 percentage.txt
 WD
 WD.xcresult/
+coverage_iOS.txt
+coverage_macOS.txt
+percentage_iOS.txt
+percentage_macOS.txt
