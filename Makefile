@@ -1,55 +1,53 @@
 PLATFORM_IOS = iOS Simulator,name=iPad mini (A17 Pro)
-DERIVED_DATA_IOS = $(PWD)/.DerivedData-ios
-
 PLATFORM_MACOS = macOS
-DERIVED_DATA_MACOS = $(PWD)/.DerivedData-macos
+XCCOV = xcrun xccov view --report --only-targets
+SCHEME = 'SF2Lib-Package (Release)'
+BUILD_FLAGS = -skipMacroValidation -skipPackagePluginValidation -enableCodeCoverage YES -scheme $(SCHEME)
 
-TARGET = SF2Lib
-QUIET = -quiet
-SCHEME = -scheme 'SF2Lib-Package (Release)'
+default: report
 
-default: test
+test-iOS:
+	rm -rf "$(PWD)/.DerivedData-iOS"
+	USE_UNSAFE_FLAGS="1" set -o pipefail && xcodebuild test \
+		$(BUILD_FLAGS) \
+		-derivedDataPath "$(PWD)/.DerivedData-iOS" \
+		-destination platform="$(PLATFORM_IOS)" \
+		| xcbeautify --renderer github-actions
+
+coverage-iOS: test-iOS
+	$(XCCOV) $(PWD)/.DerivedData-iOS/Logs/Test/*.xcresult > coverage_iOS.txt
+	echo "iOS Coverage:"
+	cat coverage_iOS.txt
+
+percentage-iOS: coverage-iOS
+	awk '/ SF2Lib / { print $$4 }' coverage_iOS.txt > percentage_iOS.txt
+	echo "iOS Coverage Pct:"
+	cat percentage_iOS.txt
+
+test-macOS:
+	rm -rf "$(PWD)/.DerivedData-macOS"
+	USE_UNSAFE_FLAGS="1" set -o pipefail && xcodebuild test \
+		$(BUILD_FLAGS) \
+		-derivedDataPath "$(PWD)/.DerivedData-macOS" \
+		-destination platform="$(PLATFORM_MACOS)" \
+		| xcbeautify --renderer github-actions
+
+coverage-macOS: test-macOS
+	$(XCCOV) $(PWD)/.DerivedData-macOS/Logs/Test/*.xcresult > coverage_macOS.txt
+	echo "macOS Coverage:"
+	cat coverage_macOS.txt
+
+percentage-macOS: coverage-macOS
+	awk '/ SF2Lib / { print $$4 }' coverage_macOS.txt > percentage_macOS.txt
+	echo "macOS Coverage Pct:"
+	cat percentage_macOS.txt
+
+report: percentage-iOS percentage-macOS
+	@if [[ -n "$$GITHUB_ENV" ]]; then \
+        echo "PERCENTAGE=$$(< percentage_macOS.txt)" >> $$GITHUB_ENV; \
+    fi
+
+.PHONY: report test-iOS test-macOS coverage-iOS coverage-macOS coverage-iOS percentage-macOS percentage-iOS
 
 clean:
-	@echo "-- removing coverage.txt percentage.txt "$(DERIVED_DATA_MACOS)" "$(DERIVED_DATA_IOS)""
-	@-rm -rf coverage.txt percentage.txt "$(DERIVED_DATA_MACOS)" "$(DERIVED_DATA_IOS)"
-	@ls -ld /Applications/Xcode*
-
-resolve-deps: clean
-	swift package resolve
-
-test-ios: resolve-deps
-	xcodebuild test \
-		$(QUIET) \
-		$(SCHEME) \
-		-derivedDataPath "$(DERIVED_DATA_IOS)" \
-		-destination platform="$(PLATFORM_IOS)"
-
-test-macos: resolve-deps
-	xcodebuild test \
-		$(QUIET) \
-		$(SCHEME) \
-		-derivedDataPath "$(DERIVED_DATA_MACOS)" \
-		-destination platform="$(PLATFORM_MACOS)" \
-		-enableCodeCoverage YES
-
-coverage: test-macos
-	@xcrun xccov view --report $(DERIVED_DATA_MACOS)/Logs/Test/*.xcresult --files-for-target SF2Lib
-	@xcrun xccov view --report --only-targets $(DERIVED_DATA_MACOS)/Logs/Test/*.xcresult > coverage.txt
-	@cat coverage.txt
-
-percentage: coverage
-	@awk '/ $(TARGET) / { if ($$3 > 0) print $$4; }' coverage.txt > percentage.txt
-	@cat percentage.txt
-
-post: percentage
-	@if [[ -n "$$GITHUB_ENV" ]]; then \
-		echo "PERCENTAGE=$$(< percentage.txt)" >> $$GITHUB_ENV; \
-	fi
-
-report: coverage.txt
-	@xcrun xccov view --report $(DERIVED_DATA_MACOS)/Logs/Test/*.xcresult --files-for-target SF2Lib
-
-test: post test-ios
-
-.PHONY: test post percentage coverage test-macos test-ios resolve-deps clean
+	-rm -rf $(PWD)/.DerivedData-macOS $(PWD)/.DerivedData-iOS coverage*.txt percentage*.txt
