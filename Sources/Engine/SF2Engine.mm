@@ -32,6 +32,12 @@ SF2Engine::processAndRender(const AudioTimeStamp *timestamp, UInt32 frameCount, 
   return impl_->processAndRender(timestamp, frameCount, outputBusNumber, output, realtimeEventListHead, pullInputBlock);
 }
 
+AUParameterTree*
+SF2Engine::getParameterTree() const noexcept
+{
+  return impl_->parameterTree();
+}
+
 std::string
 SF2Engine::activePresetName() const noexcept
 {

@@ -80,6 +80,8 @@ struct SF2Engine
   /// @returns current number of active voices
   size_t activeVoiceCount() const noexcept;
 
+  AUParameterTree* getParameterTree() const noexcept;
+
   /**
    Obtain an `NSData` instance containing a MIDI SYSEX command that can be sent to load an SF2 file and use a given
    preset. This should be sent to the engine via a MIDI control connection; this method only creates the bytes to send.
