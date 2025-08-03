@@ -13,7 +13,7 @@ sampleRate_{sampleRate},
 minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
 parameters_{*this},
 oldestVoiceIndices_{voiceCount},
-log_{os_log_create("SF2Lib", "Engine")},
+log_{Log::create("Engine")},
 renderSignpost_{os_signpost_id_generate(log_)},
 noteOnSignpost_{os_signpost_id_generate(log_)},
 noteOffSignpost_{os_signpost_id_generate(log_)},
@@ -47,6 +47,24 @@ Engine::activePresetName() const noexcept
   return hasActivePreset() ? presets_[activePreset_].configuration().name() : "";
 }
 
+int
+Engine::activeProgramIndex() const noexcept
+{
+  return hasActivePreset() ? presets_[activePreset_].configuration().program() : -1;
+}
+
+int
+Engine::activeBankIndex() const noexcept
+{
+  return hasActivePreset() ? presets_[activePreset_].configuration().bank() : -1;
+}
+
+int
+Engine::activePresetIndex() const noexcept
+{
+  return hasActivePreset() ? int(activePreset_) : -1;
+}
+
 SF2::IO::File::LoadResponse
 Engine::load(const std::string& path, size_t index) noexcept
 {
@@ -76,13 +94,8 @@ Engine::usePresetWithIndex(size_t index)
 void
 Engine::usePresetWithBankProgram(uint16_t bank, uint16_t program)
 {
-  allOff();
   auto index = presets_.locatePresetIndex(bank, program);
-  if (index >= presets_.size()) {
-    index = presets_.size();
-  }
-  activePreset_ = index;
-  parameters_.reset();
+  usePresetWithIndex(index);
 }
 
 void
@@ -166,8 +179,7 @@ Engine::doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount durati
   if (rawIndex < 0) return 0;
   if (rawIndex < valueOf(Entity::Generator::Index::numValues)) {
     auto index = Entity::Generator::Index(rawIndex);
-    const auto& def = Entity::Generator::Definition::definition(index);
-    parameters_.setLiveValue(index, def.clamp(int(std::round(value))));
+    parameters_.setLiveValue(index, value);
     notifyParameterChanged(index);
     return duration;
   } else if (rawIndex >= valueOf(Parameters::EngineParameterAddress::firstEngineParameterAddress) &&
@@ -496,7 +508,8 @@ void
 Engine::startVoice(const Config& config) noexcept
 {
   os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice", "");
-  auto voiceIndex = oldestVoiceIndices_.voiceOn();
+  auto voiceIndex = oldestVoiceIndices_.voiceAcquire();
+  os_log_info(log_, "startVoice - %lu", voiceIndex);
   voices_[voiceIndex].configure(config);
   parameters_.applyChanged(voices_[voiceIndex].state());
   voices_[voiceIndex].start();
@@ -507,8 +520,9 @@ OldestVoiceCollection<Engine::maxVoiceCount>::iterator
 Engine::stopVoice(size_t voiceIndex) noexcept
 {
   os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice", "");
+  os_log_info(log_, "stopVoice - %lu", voiceIndex);
   voices_[voiceIndex].stop();
-  auto pos = oldestVoiceIndices_.voiceOff(voiceIndex);
+  auto pos = oldestVoiceIndices_.voiceRelease(voiceIndex);
   os_signpost_interval_end(log_, stopVoiceSignpost_, "stopVoice", "");
   return pos;
 }

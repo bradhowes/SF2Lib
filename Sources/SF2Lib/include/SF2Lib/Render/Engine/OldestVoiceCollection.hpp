@@ -31,7 +31,7 @@ public:
    @param voiceCount the number of voices to hold in the collection. Must be <= `MaxVoiceCount`.
    */
   OldestVoiceCollection(size_t voiceCount) noexcept
-  : slots_(voiceCount, leastRecentlyUsed_.end()), log_{os_log_create("SF2Lib", "OldestActiveVoiceCache")}
+  : slots_(voiceCount, leastRecentlyUsed_.end())
   {
     for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex) {
       slots_[voiceIndex] = leastRecentlyUsed_.emplace(leastRecentlyUsed_.begin(), voiceIndex);
@@ -46,7 +46,7 @@ public:
 
    @returns index of the voice
    */
-  size_t voiceOn() noexcept
+  size_t voiceAcquire() noexcept
   {
     // Get the oldest voice index
     size_t voiceIndex = leastRecentlyUsed_.back();
@@ -62,7 +62,7 @@ public:
     return voiceIndex;
   }
 
-  iterator voiceOff(size_t voiceIndex) noexcept {
+  iterator voiceRelease(size_t voiceIndex) noexcept {
     assert(active_ > 0);
     --active_;
     // Remove voice from list
@@ -111,7 +111,8 @@ private:
   std::pmr::vector<iterator> slots_{allocator_};
   size_t active_;
   iterator partition_;
-  os_log_t log_;
+
+  const os_log_t log_{Log::create("OldestVoiceCollection")};
 };
 
 } // end namespace SF2::Render::Engine

@@ -66,19 +66,11 @@ constexpr Float midiKeyModulatorEnvelopeDecayAdjustment(const Generator::State& 
   return midiKeyEnvelopeScaling(state, Generator::Index::midiKeyToModulatorEnvelopeDecay);
 }
 
-Generator::Generator(size_t voiceIndex, const char* logTag) noexcept :
-logTag_{logTag},
-voiceIndex_{voiceIndex},
-log_{os_log_create("SF2Lib", logTag)}
-{
-  ;
-}
+Generator::Generator(size_t voiceIndex, const char* logTag) noexcept : log_{Log::create(logTag)} {}
 
 Generator::Generator(Float sampleRate, const char* logTag, size_t voiceIndex, Float delay, Float attack, Float hold,
                      Float decay, int sustain, Float release) noexcept :
-logTag_{logTag},
-voiceIndex_{voiceIndex},
-log_{os_log_create("SF2Lib", logTag)}
+log_{Log::create(logTag)}
 {
   sustainLevel_ = 1_F - sustain / 1'000_F;
   stages_[StageIndex::delay].setDelay(int(round(sampleRate * delay)));

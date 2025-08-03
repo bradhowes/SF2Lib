@@ -40,7 +40,10 @@ protected:
 
    @param sampleRate the sample rate being used
    */
-  LFO(Float sampleRate, const char* logTag) noexcept;
+  LFO(Float sampleRate, const char* logTag) noexcept : log_{Log::create(logTag)}
+  {
+    configure(sampleRate, 0_F, -12'000_F);
+  }
 
   /**
    Construct new LFO. NOTE: this is only used in tests.
@@ -49,7 +52,10 @@ protected:
    @param frequency the frequency of the LFO in cycles per second (Hz)
    @param delay the number of seconds to delay the start of the LFO
    */
-  LFO(Float sampleRate, const char* logTag, Float frequency, Float delay);
+  LFO(Float sampleRate, const char* logTag, Float frequency, Float delay) : log_{Log::create(logTag)}
+  {
+    configure(sampleRate, frequency, delay);
+  }
 
   /**
    Advance the current value of the LFO to the next value. NOTE: this is automatically done by `getNextValue` method.

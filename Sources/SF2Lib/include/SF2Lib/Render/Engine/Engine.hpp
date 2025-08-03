@@ -88,6 +88,12 @@ public:
   /// @returns name of the active preset or empty string if none is active
   std::string activePresetName() const noexcept;
 
+  int activeProgramIndex() const noexcept;
+
+  int activeBankIndex() const noexcept;
+
+  int activePresetIndex() const noexcept;
+
   /// @returns number of presets available.
   size_t presetCount() const noexcept { return presets_.size(); }
 
@@ -113,7 +119,7 @@ public:
         voice.renderInto(mixer, frameCount);
       }
       if (voice.isDone()) {
-        pos = oldestVoiceIndices_.voiceOff(voiceIndex);
+        pos = oldestVoiceIndices_.voiceRelease(voiceIndex);
       } else {
         ++pos;
       }
@@ -374,7 +380,7 @@ private:
       auto voiceIndex = *pos;
       auto& voice{voices_[voiceIndex]};
       if (!voice.isActive()) {
-        pos = oldestVoiceIndices_.voiceOff(voiceIndex);
+        pos = oldestVoiceIndices_.voiceRelease(voiceIndex);
       } else {
         visitor(voice, releaseKeyState);
         ++pos;
@@ -426,7 +432,7 @@ private:
   std::atomic<bool> portamentoModeEnabled_{false};
   std::atomic<bool> retriggerModeEnabled_{true};
 
-  os_log_t log_;
+  const os_log_t log_;
   os_signpost_id_t renderSignpost_;
   os_signpost_id_t noteOnSignpost_;
   os_signpost_id_t noteOffSignpost_;

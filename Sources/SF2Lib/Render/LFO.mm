@@ -5,18 +5,6 @@
 
 using namespace SF2::Render;
 
-LFO::LFO(Float sampleRate, const char* logTag) noexcept :
-log_{os_log_create("SF2Lib", logTag)}
-{
-  configure(sampleRate, 0_F, -12'000_F);
-}
-
-LFO::LFO(Float sampleRate, const char* logTag, Float frequency, Float delay) :
-log_{os_log_create("SF2Lib", logTag)}
-{
-  configure(sampleRate, frequency, delay);
-}
-
 void
 LFO::configure(Float sampleRate, Float frequency, Float delay)
 {

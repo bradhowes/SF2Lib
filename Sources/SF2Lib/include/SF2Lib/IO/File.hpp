@@ -162,7 +162,7 @@ private:
 
   std::vector<size_t> presetIndicesOrderedByBankProgram_{};
 
-  const os_log_t log_{os_log_create("SF2Lib", "File")};
+  const os_log_t log_{Log::create("File")};
 };
 
 } // end namespace SF2::IO

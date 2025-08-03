@@ -16,17 +16,17 @@ using namespace SF2::Render::Engine;
   OldestVoiceCollection<96> cache{3};
   XCTAssertTrue(cache.empty());
   XCTAssertEqual(cache.size(), 3);
-  auto v1 = cache.voiceOn();
+  auto v1 = cache.voiceAcquire();
   XCTAssertEqual(v1, 0);
   XCTAssertFalse(cache.empty());
   XCTAssertEqual(cache.active(), 1);
-  auto v2 = cache.voiceOn();
+  auto v2 = cache.voiceAcquire();
   XCTAssertEqual(v2, 1);
   XCTAssertEqual(cache.active(), 2);
-  cache.voiceOff(v1);
+  cache.voiceRelease(v1);
   XCTAssertEqual(cache.active(), 1);
   XCTAssertFalse(cache.empty());
-  cache.voiceOff(v2);
+  cache.voiceRelease(v2);
   XCTAssertTrue(cache.empty());
   XCTAssertEqual(cache.size(), 3);
 }
@@ -41,16 +41,16 @@ static int countActive(const OldestVoiceCollection<96>& cache) noexcept {
 - (void)testLimits {
   OldestVoiceCollection<96> cache{96};
   XCTAssertEqual(countActive(cache), 0);
-  for (auto index = 0; index < 96; ++index) cache.voiceOn();
+  for (auto index = 0; index < 96; ++index) cache.voiceAcquire();
   XCTAssertEqual(countActive(cache), 96);
-  for (auto index = 0; index < 96; ++index) cache.voiceOn();
+  for (auto index = 0; index < 96; ++index) cache.voiceAcquire();
   XCTAssertEqual(countActive(cache), 96);
-  for (auto index = 0; index < 96; ++index) cache.voiceOn();
+  for (auto index = 0; index < 96; ++index) cache.voiceAcquire();
   XCTAssertEqual(countActive(cache), 96);
 
-  for (auto index = 0; index < 96; index += 2) cache.voiceOff(index);
+  for (auto index = 0; index < 96; index += 2) cache.voiceRelease(index);
   XCTAssertEqual(countActive(cache), 48);
-  for (auto index = 1; index < 96; index += 2) cache.voiceOff(index);
+  for (auto index = 1; index < 96; index += 2) cache.voiceRelease(index);
   XCTAssertEqual(countActive(cache), 0);
 }
 
@@ -60,9 +60,9 @@ static int countActive(const OldestVoiceCollection<96>& cache) noexcept {
     OldestVoiceCollection<96> cache{96};
     [self startMeasuring];
     for (auto iteration = 0; iteration < 50'000; ++iteration) {
-      for (auto index = 0; index < 96; ++index) cache.voiceOn();
-      for (auto index = 0; index < 96; ++index) cache.voiceOn();
-      for (auto index = 96; index < 0; ++index) cache.voiceOff(index - 1);
+      for (auto index = 0; index < 96; ++index) cache.voiceAcquire();
+      for (auto index = 0; index < 96; ++index) cache.voiceAcquire();
+      for (auto index = 96; index < 0; ++index) cache.voiceRelease(index - 1);
     }
     [self stopMeasuring];
   }];

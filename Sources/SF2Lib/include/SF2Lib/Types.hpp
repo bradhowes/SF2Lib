@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <os/log.h>
+
 #include <AudioToolbox/AUParameters.h>
 #include <cmath>
 #include <concepts>
@@ -110,7 +112,9 @@ public:
   /**
    Set all values in the array to the default value for the template type.
    */
-  void zero() { this->fill(ElementType()); }
+  void zero() {
+    this->fill(ElementType());
+  }
 
   /**
    Obtain the value at the given index
@@ -147,7 +151,11 @@ public:
  @param value the value to convert
  @returns 1.0 for `true` and 0.0 for `false`
  */
-inline static AUValue fromBool(bool value) noexcept { return value ? 1.0 : 0.0; }
+template <typename T>
+AUValue fromBool(T value) {
+  static_assert(std::is_same_v<T, bool>);
+  return value ? 1.0 : 0.0;
+}
 
 /**
  Convert an AUValue (float) into a boolean value
@@ -155,6 +163,16 @@ inline static AUValue fromBool(bool value) noexcept { return value ? 1.0 : 0.0; 
  @param value the value to convert
  @returns 1.0 for `true` and 0.0 for `false`
  */
-inline static bool toBool(AUValue value) noexcept { return value >= 0.5; }
+template <typename T>
+bool toBool(T value) {
+  static_assert(std::is_same_v<T, AUValue>);
+  return value >= 0.5;
+}
+
+struct Log {
+  inline static const char* subsystem = "com.braysoftware.SF2Lib";
+
+  inline static const os_log_t create(const char* category) { return os_log_create(subsystem, category); }
+};
 
 } // end namespace SF2

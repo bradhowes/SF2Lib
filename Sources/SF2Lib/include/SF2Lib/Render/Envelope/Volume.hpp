@@ -17,29 +17,36 @@ class Volume : public Generator
 {
 public:
 
+  /**
+   Type-specific wrapper for envelope value to help ensure proper use of the right value in signal flows.
+   */
   struct Value {
-    Value(Float v) noexcept : val{v} {}
     const Float val;
   };
 
-  explicit Volume(size_t voiceIndex) : Generator(voiceIndex, "VolGen") {}
+  /**
+   Create a volume envelope for a voice
+
+   @param voiceIndex the unique index for the voice (used for logging)
+   */
+  inline explicit Volume(size_t voiceIndex) : Generator(voiceIndex, "VolGen") {}
 
   /**
    Create new envelope for volume changes over time.
 
    @param state the state holding the generator values for the envelope definition
    */
-  void configure(const State& state) noexcept { configureVolumeEnvelope(state); }
+  inline void configure(const State& state) noexcept { configureVolumeEnvelope(state); }
 
   /// @returns the current envelope value.
-  inline Value value() const noexcept { return Generator::value(); }
+  inline Value value() const noexcept { return {Generator::value()}; }
 
   /**
    Calculate the next envelope value. This must be called on every sample for proper timing of the stages.
 
    @returns the new envelope value.
    */
-  inline Value getNextValue() noexcept { return Generator::getNextValue(); }
+  inline Value getNextValue() noexcept { return {Generator::getNextValue()}; }
 
 private:
   Volume(Float sampleRate, size_t voiceIndex, Float delay, Float attack, Float hold, Float decay,

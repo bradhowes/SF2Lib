@@ -202,8 +202,6 @@ private:
   int counter_{0};
   Float value_{0_F};
   Float sustainLevel_{0_F};
-  const char* logTag_;
-  const size_t voiceIndex_;
   const os_log_t log_;
 
   static const StateNameArray stageNames_;

@@ -9,9 +9,9 @@ using namespace SF2::Render::Engine;
 using namespace SF2::Render::Voice::State;
 
 Parameters::Parameters(Engine& engine)
-: engine_{engine}, parameterTree_{makeTree()}, log_{os_log_create("SF2Lib", "Parameters")}, anyChanged_{false}
+: engine_{engine}
 {
-  //NOTE: this is *not* for the real-time rendering thread. It should only be used to convey changes to a UI.
+  makeTree();
   parameterTree_.implementorValueObserver = ^(AUParameter* parameter, AUValue value) { valueChanged(parameter, value); };
   parameterTree_.implementorValueProvider = ^(AUParameter* parameter) { return provideValue(parameter); };
 }
@@ -19,6 +19,7 @@ Parameters::Parameters(Engine& engine)
 void
 Parameters::reset() noexcept
 {
+  os_log_info(log_, "reset");
   changed_.fill(false);
   anyChanged_ = false;
 }
@@ -26,58 +27,123 @@ Parameters::reset() noexcept
 void
 Parameters::applyChanged(State& state) noexcept
 {
-  if (!anyChanged_) return;
+  auto anyChanged = anyChanged_.load();
+  os_log_info(log_, "applyChanged - %d", anyChanged);
+  if (!anyChanged) {
+    return;
+  }
+
   for (auto index : IndexIterator()) {
-    if (changed_[index]) applyOne(state, index);
+    if (changed_[index]) {
+      applyOne(state, index);
+    }
   }
 }
 
 void
 Parameters::applyOne(State& state, Index index) noexcept
 {
+  os_log_info(log_, "applyOne - %lu %d", index, changed_[index]);
   state.setLiveValue(index, values_[index]);
 }
 
 void
-Parameters::setLiveValue(Index index, int value) noexcept
+Parameters::setLiveValue(Index index, AUValue value) noexcept
 {
-  /// TODO: support ramping
-  values_[index] = value;
+  const auto& def = Entity::Generator::Definition::definition(index);
+  auto clamped = def.clamp(std::round(value));
+  os_log_info(log_, "setLiveValue - index: %lu value: %f clamped: %f", index, value, clamped);
+  values_[index] = clamped;
   changed_[index] = true;
-  anyChanged_ = true;
+  anyChanged_.store(true);
 }
 
 void
 Parameters::valueChanged(AUParameter* parameter, AUValue value) noexcept
 {
-  os_log_info(log_, "valueChanged - %llu %f", [parameter address], value);
+  os_log_info(log_, "valueChanged - %llu %s %f", parameter.address, parameter.identifier.UTF8String, value);
+  auto rawIndex = parameter.address;
+  if (rawIndex < 0) return;
+  if (rawIndex < valueOf(Index::numValues)) {
+    setLiveValue(Index(rawIndex), value);
+  } else if (rawIndex >= valueOf(EngineParameterAddress::firstEngineParameterAddress) &&
+             rawIndex < valueOf(EngineParameterAddress::lastEngineParameterAddressPlusOne)) {
+    auto address = EngineParameterAddress(rawIndex);
+    switch (address) {
+      case EngineParameterAddress::portamentoModeEnabled:
+        engine_.setPortamentoModeEnabled(SF2::toBool(value));
+        break;
+      case EngineParameterAddress::portamentoRate:
+        engine_.setPortamentoRate(value);
+        break;
+      case EngineParameterAddress::oneVoicePerKeyModeEnabled:
+        engine_.setOneVoicePerKeyModeEnabled(SF2::toBool(value));
+        break;
+      case EngineParameterAddress::polyphonicModeEnabled:
+        engine_.setPhonicMode(SF2::toBool(value) ?
+                              SF2::Render::Engine::Engine::PhonicMode::poly :
+                              SF2::Render::Engine::Engine::PhonicMode::mono);
+        break;
+      case EngineParameterAddress::retriggerModeEnabled:
+        engine_.setRetriggerModeEnabled(SF2::toBool(value));
+        break;
+      default: break;
+    }
+  }
 }
 
 AUValue
 Parameters::provideValue(AUParameter* parameter) noexcept
 {
-  os_log_info(log_, "provideValue - %llu", [parameter address]);
   auto rawIndex = parameter.address;
-  if (rawIndex < 0) return 0.0;
-  if (rawIndex < valueOf(Index::numValues)) {
+  AUValue value;
+  if (rawIndex < 0) {
+    value = 0.0;
+  }
+  else if (rawIndex < valueOf(Index::numValues)) {
     auto index = Index(rawIndex);
     const auto& def = Definition::definition(index);
-    return def.clamp(values_[Index(rawIndex)]);
+    value = def.clamp(values_[index]);
   } else if (rawIndex >= valueOf(EngineParameterAddress::firstEngineParameterAddress) &&
              rawIndex < valueOf(EngineParameterAddress::lastEngineParameterAddressPlusOne)) {
     auto address = EngineParameterAddress(rawIndex);
     switch (address) {
-      case EngineParameterAddress::portamentoModeEnabled:     return SF2::toBool(engine_.portamentoModeEnabled());
-      case EngineParameterAddress::portamentoRate:            return engine_.portamentoRate();
-      case EngineParameterAddress::oneVoicePerKeyModeEnabled: return SF2::toBool(engine_.oneVoicePerKeyModeEnabled());
-      case EngineParameterAddress::polyphonicModeEnabled:     return SF2::toBool(engine_.polyphonicModeEnabled());
-      case EngineParameterAddress::activeVoiceCount:          return engine_.activeVoiceCount();
-      case EngineParameterAddress::retriggerModeEnabled:      return SF2::toBool(engine_.retriggerModeEnabled());
+      case EngineParameterAddress::portamentoModeEnabled:
+        value = SF2::fromBool(engine_.portamentoModeEnabled());
+        break;
+      case EngineParameterAddress::portamentoRate:
+        value = engine_.portamentoRate();
+        break;
+      case EngineParameterAddress::oneVoicePerKeyModeEnabled:
+        value = SF2::fromBool(engine_.oneVoicePerKeyModeEnabled());
+        break;
+      case EngineParameterAddress::polyphonicModeEnabled:
+        value = SF2::fromBool(engine_.polyphonicModeEnabled());
+        break;
+      case EngineParameterAddress::activeVoiceCount:
+        value = engine_.activeVoiceCount();
+        break;
+      case EngineParameterAddress::retriggerModeEnabled:
+        value = SF2::fromBool(engine_.retriggerModeEnabled());
+        break;
+      case EngineParameterAddress::isRendering:
+        value = SF2::fromBool(engine_.isRendering());
+        break;
+      case EngineParameterAddress::activeProgramIndex:
+        value = engine_.activeProgramIndex();
+        break;
+      case EngineParameterAddress::activeBankIndex:
+        value = engine_.activeBankIndex();
+        break;
+      case EngineParameterAddress::activePresetIndex:
+        value = engine_.activePresetIndex();
+        break;
       default: break;
     }
-  } else {
-    return 0.0;
   }
+
+  os_log_info(log_, "provideValue - %llu %s %f", parameter.address, parameter.identifier.UTF8String, value);
+  return value;
 }
 
 AUParameter*
@@ -115,9 +181,11 @@ Parameters::makeBooleanParameter(NSString* name, EngineParameterAddress address,
   return param;
 }
 
-AUParameterTree*
+void
 Parameters::makeTree() noexcept
 {
+  os_log_info(log_, "makeTree");
+
   // This is a bit too large due to various unused generators found in the spec.
   auto capacity = NSUInteger(valueOf(Index::numValues) + engineParameterCount);
   auto definitions = [[NSMutableArray alloc] initWithCapacity:capacity];
@@ -147,6 +215,9 @@ Parameters::makeTree() noexcept
   [definitions addObject:makeBooleanParameter(@"retriggerModeEnabled",
                                               EngineParameterAddress::retriggerModeEnabled,
                                               engine_.retriggerModeEnabled())];
+  [definitions addObject:makeBooleanParameter(@"isRendering",
+                                              EngineParameterAddress::isRendering,
+                                              engine_.isRendering())];
   auto flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable;
   auto param = [AUParameterTree createParameterWithIdentifier:@"portamentoRate"
                                                          name:@"portamentoRate"
@@ -172,5 +243,35 @@ Parameters::makeTree() noexcept
                                                                   flags:flags
                                                            valueStrings:nullptr
                                                     dependentParameters:nullptr]];
-  return [AUParameterTree createTreeWithChildren:definitions];
+  [definitions addObject:[AUParameterTree createParameterWithIdentifier:@"activeProgramIndex"
+                                                                   name:@"activeProgramIndex"
+                                                                address:valueOf(EngineParameterAddress::activeProgramIndex)
+                                                                    min:0
+                                                                    max:127
+                                                                   unit:kAudioUnitParameterUnit_Generic
+                                                               unitName:nullptr
+                                                                  flags:flags
+                                                           valueStrings:nullptr
+                                                    dependentParameters:nullptr]];
+  [definitions addObject:[AUParameterTree createParameterWithIdentifier:@"activeBankIndex"
+                                                                   name:@"activeBankIndex"
+                                                                address:valueOf(EngineParameterAddress::activeBankIndex)
+                                                                    min:0
+                                                                    max:127
+                                                                   unit:kAudioUnitParameterUnit_Generic
+                                                               unitName:nullptr
+                                                                  flags:flags
+                                                           valueStrings:nullptr
+                                                    dependentParameters:nullptr]];
+  [definitions addObject:[AUParameterTree createParameterWithIdentifier:@"activePresetIndex"
+                                                                   name:@"activePresetIndex"
+                                                                address:valueOf(EngineParameterAddress::activePresetIndex)
+                                                                    min:0
+                                                                    max:65535
+                                                                   unit:kAudioUnitParameterUnit_Generic
+                                                               unitName:nullptr
+                                                                  flags:flags
+                                                           valueStrings:nullptr
+                                                    dependentParameters:nullptr]];
+  parameterTree_ = [AUParameterTree createTreeWithChildren:definitions];
 }

@@ -251,7 +251,7 @@ private:
   bool sostenutoActive_{false};
 
   const size_t voiceIndex_;
-  const os_log_t log_{os_log_create("SF2Lib", "Voice")};
+  const os_log_t log_{Log::create("Voice")};
   const os_signpost_id_t configSignpost_{os_signpost_id_generate(log_)};
   const os_signpost_id_t startSignpost_{os_signpost_id_generate(log_)};
 };

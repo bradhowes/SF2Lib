@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include <CoreAudioKit/CoreAudioKit.h>
 
 #include "SF2Lib/Entity/Generator/Index.hpp"
@@ -36,6 +38,10 @@ public:
     polyphonicModeEnabled,
     activeVoiceCount,
     retriggerModeEnabled,
+    isRendering,
+    activeProgramIndex,
+    activeBankIndex,
+    activePresetIndex,
     lastEngineParameterAddressPlusOne
   };
 
@@ -56,20 +62,20 @@ public:
   void reset() noexcept;
 
   /**
+   Apply any changed values to the given voice state.
+
+   @param state the state to update
+   */
+  void applyChanged(State& state) noexcept;
+
+  /**
    Set a parameter value due to an AUParameterTree entry change. Note that this is called from the real-time
    render thread.
 
    @param index the index of the generator that is being changed
    @param value the new value for the generator
    */
-  void setLiveValue(Index index, int value) noexcept;
-
-  /**
-   Apply any changed values to the given voice state.
-
-   @param state the state to update
-   */
-  void applyChanged(State& state) noexcept;
+  void setLiveValue(Index index, AUValue value) noexcept;
 
   /**
    Apply one changed value to the given voice state.
@@ -104,7 +110,7 @@ private:
 
   static AUParameter* makeBooleanParameter(NSString* name, EngineParameterAddress, bool value) noexcept;
 
-  AUParameterTree* makeTree() noexcept;
+  void makeTree() noexcept;
 
   Engine& engine_;
   AUParameterTree* parameterTree_{nullptr};
@@ -112,8 +118,8 @@ private:
   Entity::Generator::GeneratorValueArray<int> values_{};
   // Indicator that value was changed by external source since last check.
   Entity::Generator::GeneratorValueArray<bool> changed_{};
-  os_log_t log_;
-  bool anyChanged_;
+  std::atomic<bool> anyChanged_{false};
+  const os_log_t log_{Log::create("Parameters")};
 };
 
 }
