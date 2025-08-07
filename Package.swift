@@ -125,14 +125,14 @@ let checkedVectorIndexing = "0"
 
 let package = Package(
   name: "SF2Lib",
-  platforms: [.iOS(.v16), .macOS(.v14), .tvOS(.v16)],
+  platforms: [.iOS(.v14), .macOS(.v14), .tvOS(.v16)],
   products: [
     .library(name: "SF2File", targets: ["SF2File"]),
     .library(name: "SF2Lib", targets: ["SF2Lib"]),
     .library(name: "Engine", targets: ["Engine"])
   ],
   dependencies: [
-    .package(url: "https://github.com/bradhowes/DSPHeaders", from: "1.0.0"),
+    .package(url: "https://github.com/bradhowes/DSPHeaders", from: "1.0.7"),
     // .package(path: "../DSPHeaders"),
   ],
   targets: [
