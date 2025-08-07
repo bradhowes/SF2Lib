@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 
-#import "SF2Lib/Utils/StringUtils.hpp"
+#import "SF2Util/StringUtils.hpp"
 
 @interface StringUtilsTests : XCTestCase
 

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "DSPHeaders/Biquad.hpp"
-#include "SF2Lib/Types.hpp"
+#include "SF2Util/Types.hpp"
 
 namespace SF2::Render {
 

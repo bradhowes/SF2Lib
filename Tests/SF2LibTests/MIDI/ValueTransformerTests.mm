@@ -3,7 +3,7 @@
 #include <XCTest/XCTest.h>
 
 #include "SampleBasedContexts.hpp"
-#include "SF2Lib/Entity/Modulator/Source.hpp"
+#include "SF2File/Entity/Modulator/Source.hpp"
 #include "SF2Lib/MIDI/ValueTransformer.hpp"
 
 using namespace SF2::MIDI;

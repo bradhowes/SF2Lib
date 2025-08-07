@@ -1,6 +1,6 @@
 #include <Foundation/Foundation.h>
 
-#include "SF2Lib/Entity/Generator/Definition.hpp"
+#include "SF2File/Entity/Generator/Definition.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
 #include "SF2Lib/Render/Engine/Parameters.hpp"
 

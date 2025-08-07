@@ -2,7 +2,7 @@
 //
 
 #import "TestResources.hpp"
-#import "SF2Lib/IO/File.hpp"
+#import "SF2File/IO/File.hpp"
 
 #include <pthread.h>
 

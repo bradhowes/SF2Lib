@@ -4,7 +4,7 @@
 
 #include <concepts>
 
-#include "SF2Lib/Entity/Generator/Amount.hpp"
+#include "SF2File/Entity/Generator/Amount.hpp"
 
 namespace SF2::Render {
 

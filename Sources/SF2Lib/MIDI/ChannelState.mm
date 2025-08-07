@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "SF2Lib/Entity/Generator/Definition.hpp"
+#include "SF2File/Entity/Generator/Definition.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
 
 using namespace SF2::MIDI;

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 
-#import "SF2Lib/Utils/Base64.hpp"
+#import "SF2Util/Base64.hpp"
 
 @interface Base64Tests : XCTestCase
 

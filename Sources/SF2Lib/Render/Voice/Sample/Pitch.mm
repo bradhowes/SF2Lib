@@ -1,6 +1,6 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
-#include "SF2Lib/Entity/SampleHeader.hpp"
+#include "SF2File/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Voice/Sample/Pitch.hpp"
 
 using namespace SF2::Render::Voice::Sample;

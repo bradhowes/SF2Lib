@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "SF2Lib/DSP.hpp"
+#include "SF2Util/DSP.hpp"
 #include "SF2Lib/Render/Envelope/Modulation.hpp"
 #include "SF2Lib/Render/ModLFO.hpp"
 #include "SF2Lib/Render/VibLFO.hpp"

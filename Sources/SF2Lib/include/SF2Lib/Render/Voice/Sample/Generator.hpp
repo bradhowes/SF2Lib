@@ -7,11 +7,11 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <vector>
 
-#include "SF2Lib/DSP.hpp"
-#include "SF2Lib/Entity/SampleHeader.hpp"
+#include "SF2Util/DSP.hpp"
+#include "SF2File/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Voice/Sample/Bounds.hpp"
 #include "SF2Lib/Render/Voice/Sample/Index.hpp"
-#include "SF2Lib/Render/Voice/Sample/NormalizedSampleSource.hpp"
+#include "SF2File/IO/NormalizedSampleSource.hpp"
 #include "SF2Lib/Render/Voice/Sample/Pitch.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
@@ -47,7 +47,7 @@ public:
    @param sampleSource the samples to use for rendering
    @param state the state configuration for the voice
    */
-  void configure(const NormalizedSampleSource& sampleSource, const State& state) noexcept;
+  void configure(const IO::NormalizedSampleSource& sampleSource, const State& state) noexcept;
 
   /// Begin rendering samples from the generator.
   void start() noexcept { index_.start(); }
@@ -123,7 +123,7 @@ private:
   Bounds bounds_{};
   Index index_;
   const InterpolatorProc interpolatorProc_;
-  const NormalizedSampleSource* sampleSource_{nullptr};
+  const IO::NormalizedSampleSource* sampleSource_{nullptr};
 };
 
 } // namespace SF2::Render::Sample

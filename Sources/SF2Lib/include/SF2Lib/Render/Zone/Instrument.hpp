@@ -21,10 +21,10 @@ public:
    @param sampleSources the samples for all of the instruments in the SF2 file
    */
   Instrument(GeneratorCollection&& gens, ModulatorCollection&& mods,
-             const SampleSourceCollection& sampleSources) noexcept;
+             const IO::SampleSourceCollection& sampleSources) noexcept;
 
   /// @returns the sample buffer registered to this zone. Throws exception if zone is global
-  const Render::Voice::Sample::NormalizedSampleSource& sampleSource() const;
+  const IO::NormalizedSampleSource& sampleSource() const;
 
   /**
    Apply the instrument zone to the given voice state. Sets the nominal value of the generators in the zone.
@@ -34,7 +34,7 @@ public:
   void apply(Voice::State::State& state) const noexcept;
 
 private:
-  const Render::Voice::Sample::NormalizedSampleSource* sampleSource_;
+  const IO::NormalizedSampleSource* sampleSource_;
 };
 
 } // namespace SF2::Render

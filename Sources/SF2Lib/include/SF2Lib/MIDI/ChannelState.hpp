@@ -6,7 +6,7 @@
 #include <array>
 #include <cmath>
 
-#include "SF2Lib/Entity/Generator/Index.hpp"
+#include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/MIDI/MIDI.hpp"
 #include "SF2Lib/MIDI/Note.hpp"
 

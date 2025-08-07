@@ -6,7 +6,7 @@
 
 #include "DSPHeaders/ConstMath.hpp"
 
-#include "SF2Lib/DSP.hpp"
+#include "SF2Util/DSP.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/MIDI/ValueTransformer.hpp"
 

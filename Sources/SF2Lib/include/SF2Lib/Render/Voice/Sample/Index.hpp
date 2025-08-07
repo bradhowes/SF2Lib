@@ -5,7 +5,7 @@
 #include <limits>
 #include <utility>
 
-#include "SF2Lib/Entity/SampleHeader.hpp"
+#include "SF2File/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Voice/Sample/Bounds.hpp"
 
 namespace SF2::Render::Voice::Sample {

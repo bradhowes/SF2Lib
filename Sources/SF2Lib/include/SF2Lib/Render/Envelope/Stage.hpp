@@ -6,7 +6,7 @@
 #include <iostream>
 #include <limits>
 
-#include "SF2Lib/DSP.hpp"
+#include "SF2Util/DSP.hpp"
 
 namespace SF2::Render::Envelope {
 

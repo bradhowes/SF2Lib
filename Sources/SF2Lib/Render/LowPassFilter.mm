@@ -1,6 +1,6 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
-#include "SF2Lib/DSP.hpp"
+#include "SF2Util/DSP.hpp"
 #include "SF2Lib/Render/LowPassFilter.hpp"
 
 using namespace SF2::Render;

@@ -9,7 +9,7 @@
 #include "SampleBasedContexts.hpp"
 
 #include "SF2Lib/Configuration.hpp"
-#include "SF2Lib/Utils/Base64.hpp"
+#include "SF2Util/Base64.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
 
 using namespace SF2;

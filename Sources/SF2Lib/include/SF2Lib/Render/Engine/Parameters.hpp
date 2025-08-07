@@ -6,7 +6,7 @@
 
 #include <CoreAudioKit/CoreAudioKit.h>
 
-#include "SF2Lib/Entity/Generator/Index.hpp"
+#include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
 namespace SF2::Render::Engine {

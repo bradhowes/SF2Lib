@@ -127,6 +127,7 @@ let package = Package(
   name: "SF2Lib",
   platforms: [.iOS(.v16), .macOS(.v14), .tvOS(.v16)],
   products: [
+    .library(name: "SF2File", targets: ["SF2File"]),
     .library(name: "SF2Lib", targets: ["SF2Lib"]),
     .library(name: "Engine", targets: ["Engine"])
   ],
@@ -145,17 +146,11 @@ let package = Package(
     .target(
       name: "SF2Lib",
       dependencies: [
+        "SF2File",
+        "SF2Util",
         .product(name: "DSPHeaders", package: "DSPHeaders")
       ],
       path: "Sources/SF2Lib",
-      exclude: [
-        "Entity/README.md",
-        "Entity/Generator/README.md",
-        "Entity/Modulator/README.md",
-        "IO/README.md",
-        "MIDI/README.md",
-        "Render/README.md"
-      ],
       resources: [.process("Resources")],
       publicHeadersPath: "include",
       cxxSettings: [
@@ -170,6 +165,46 @@ let package = Package(
       ],
       linkerSettings: [
         .linkedFramework("Accelerate", .none),
+        .linkedFramework("AudioToolbox", .none),
+        .linkedFramework("AVFoundation", .none),
+      ]
+    ),
+    .target(
+      name: "SF2File",
+      dependencies: [
+        "SF2Util",
+        .product(name: "DSPHeaders", package: "DSPHeaders")
+      ],
+      path: "Sources/SF2File",
+      publicHeadersPath: "include",
+      cxxSettings: [
+        .define("USE_ACCELERATE", to: "1", .none),
+        // Set to 1 to assert if std::vector[] index is invalid
+        .define("CHECKED_VECTOR_INDEXING", to: "0", .none),
+      ],
+      swiftSettings: [
+        .define("APPLICATION_EXTENSION_API_ONLY")
+      ],
+      linkerSettings: [
+        .linkedFramework("AudioToolbox", .none),
+        .linkedFramework("AVFoundation", .none),
+      ]
+    ),
+    .target(
+      name: "SF2Util",
+      dependencies: [
+        .product(name: "DSPHeaders", package: "DSPHeaders")
+      ],
+      path: "Sources/SF2Util",
+      publicHeadersPath: "include",
+      cxxSettings: [
+        // Set to 1 to assert if std::vector[] index is invalid
+        .define("CHECKED_VECTOR_INDEXING", to: "0", .none),
+      ],
+      swiftSettings: [
+        .define("APPLICATION_EXTENSION_API_ONLY")
+      ],
+      linkerSettings: [
         .linkedFramework("AudioToolbox", .none),
         .linkedFramework("AVFoundation", .none),
       ]

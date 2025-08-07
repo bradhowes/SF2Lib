@@ -5,8 +5,8 @@
 #include <os/log.h>
 #include <cmath>
 
-#include "SF2Lib/DSP.hpp"
-#include "SF2Lib/Entity/Generator/Index.hpp"
+#include "SF2Util/DSP.hpp"
+#include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
 namespace SF2::Render {

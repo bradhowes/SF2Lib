@@ -4,8 +4,8 @@
 
 #include <iostream>
 
-#include "SF2Lib/Entity/Modulator/Modulator.hpp"
-#include "SF2Lib/Entity/Modulator/Source.hpp"
+#include "SF2File/Entity/Modulator/Modulator.hpp"
+#include "SF2File/Entity/Modulator/Source.hpp"
 #include "SF2Lib/MIDI/MIDI.hpp"
 #include "SF2Lib/MIDI/ValueTransformer.hpp"
 

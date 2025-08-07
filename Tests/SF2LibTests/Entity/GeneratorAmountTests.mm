@@ -4,7 +4,7 @@
 
 #include <XCTest/XCTest.h>
 
-#include "SF2Lib/Entity/Generator/Amount.hpp"
+#include "SF2File/Entity/Generator/Amount.hpp"
 
 using namespace SF2::Entity::Generator;
 

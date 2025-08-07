@@ -3,8 +3,8 @@
 
 #include "SampleBasedContexts.hpp"
 
-#include "SF2Lib/IO/Parser.hpp"
-#include "SF2Lib/IO/Tag.hpp"
+#include "SF2File/IO/Parser.hpp"
+#include "SF2File/IO/Tag.hpp"
 
 @interface ParserTests : XCTestCase
 

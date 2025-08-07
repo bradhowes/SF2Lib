@@ -1,9 +1,9 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
-#include "SF2Lib/Utils/Base64.hpp"
-#include "SF2Lib/Entity/Generator/Index.hpp"
+#include "SF2Util/Base64.hpp"
+#include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
-#include "SF2Lib/IO/File.hpp"
+#include "SF2File/IO/File.hpp"
 
 using namespace SF2::Render::Engine;
 

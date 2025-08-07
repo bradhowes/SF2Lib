@@ -1,8 +1,8 @@
 // Copyright © 2023 Brad Howes. All rights reserved.
 
 #include "SF2FileInfo.hpp"
-#include "SF2Lib/Entity/Preset.hpp"
-#include "SF2Lib/IO/File.hpp"
+#include "SF2File/Entity/Preset.hpp"
+#include "SF2File/IO/File.hpp"
 
 SF2FileInfo::SF2FileInfo(const char* path)
 : impl_{new SF2::IO::File(path)}

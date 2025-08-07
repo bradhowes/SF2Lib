@@ -5,11 +5,11 @@
 #include <functional>
 #include <vector>
 
-#include "SF2Lib/Entity/Bag.hpp"
-#include "SF2Lib/Entity/Generator/Generator.hpp"
-#include "SF2Lib/Entity/Modulator/Modulator.hpp"
-#include "SF2Lib/IO/ChunkItems.hpp"
-#include "SF2Lib/IO/File.hpp"
+#include "SF2File/Entity/Bag.hpp"
+#include "SF2File/Entity/Generator/Generator.hpp"
+#include "SF2File/Entity/Modulator/Modulator.hpp"
+#include "SF2File/IO/ChunkItems.hpp"
+#include "SF2File/IO/File.hpp"
 #include "SF2Lib/Render/Zone/Zone.hpp"
 
 namespace SF2::Render::Zone {

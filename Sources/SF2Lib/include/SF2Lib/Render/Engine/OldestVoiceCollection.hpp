@@ -7,7 +7,7 @@
 #include <memory_resource>
 #include <vector>
 
-#include "SF2Lib/Types.hpp"
+#include "SF2Util/Types.hpp"
 
 namespace SF2::Render::Engine {
 

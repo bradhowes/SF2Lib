@@ -8,7 +8,7 @@ class Preset;
 
 }
 
-namespace SF2::Render::Voice::Sample {
+namespace SF2::IO {
 class NormalizedSampleSource;
 }
 
@@ -38,7 +38,7 @@ public:
          const Zone::Instrument* globalInstrument, int eventKey, int eventVelocity) noexcept;
 
   /// @returns the buffer of audio samples to use for rendering
-  const Sample::NormalizedSampleSource& sampleSource() const noexcept;
+  const IO::NormalizedSampleSource& sampleSource() const noexcept;
 
   /// @returns original MIDI key that triggered the voice
   int eventKey() const noexcept { return eventKey_; }

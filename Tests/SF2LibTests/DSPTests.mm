@@ -32,7 +32,7 @@
 #include "DSPHeaders/TypeErasedKernel.hpp"
 #include "DSPHeaders/Types.hpp"
 
-#include "SF2Lib/DSP.hpp"
+#include "SF2Util/DSP.hpp"
 
 using namespace DSPHeaders::DSP;
 using namespace SF2;

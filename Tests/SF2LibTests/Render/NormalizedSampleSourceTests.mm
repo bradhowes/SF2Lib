@@ -5,12 +5,15 @@
 
 #include "SampleBasedContexts.hpp"
 
-#include "SF2Lib/Types.hpp"
+#include "SF2Util/Types.hpp"
+#include "SF2File/IO/NormalizedSampleSource.hpp"
+
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Envelope/Generator.hpp"
 #include "SF2Lib/Render/LFO.hpp"
 #include "SF2Lib/Render/Voice/Sample/Generator.hpp"
 
+using namespace SF2::IO;
 using namespace SF2::Render;
 using namespace SF2::Render::Envelope;
 using namespace SF2::Render::Voice;

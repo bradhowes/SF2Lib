@@ -4,8 +4,8 @@
 
 #include <vector>
 
-#include "SF2Lib/Types.hpp"
-#include "SF2Lib/Entity/Modulator/Source.hpp"
+#include "SF2Util/Types.hpp"
+#include "SF2File/Entity/Modulator/Source.hpp"
 
 namespace SF2::MIDI {
 

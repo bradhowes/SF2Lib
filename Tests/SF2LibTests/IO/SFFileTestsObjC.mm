@@ -7,10 +7,11 @@
 #include "SampleBasedContexts.hpp"
 #include "TestResources.hpp"
 
-#include "SF2Lib/IO/File.hpp"
-#include "SF2Lib/Render/Voice/Sample/NormalizedSampleSource.hpp"
+#include "SF2File/IO/File.hpp"
+#include "SF2File/IO/NormalizedSampleSource.hpp"
 
 using namespace SF2;
+using namespace SF2::IO;
 using namespace SF2::Render;
 using namespace SF2::Render::Voice::Sample;
 

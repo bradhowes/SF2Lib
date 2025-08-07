@@ -7,8 +7,8 @@
 #include <numeric>
 #include <vector>
 
-#include "SF2Lib/Entity/Generator/Generator.hpp"
-#include "SF2Lib/Entity/Generator/Index.hpp"
+#include "SF2File/Entity/Generator/Generator.hpp"
+#include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Voice/State/GenValue.hpp"
 #include "SF2Lib/Render/Voice/State/Modulator.hpp"

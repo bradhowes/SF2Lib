@@ -4,7 +4,7 @@
 
 #include <XCTest/XCTest.h>
 
-#include "SF2Lib/IO/Chunk.hpp"
+#include "SF2File/IO/Chunk.hpp"
 
 using namespace SF2::IO;
 

@@ -5,8 +5,8 @@
 
 #include "SampleBasedContexts.hpp"
 
-#include "SF2Lib/Entity/Generator/Index.hpp"
-#include "SF2Lib/Entity/Modulator/Modulator.hpp"
+#include "SF2File/Entity/Generator/Index.hpp"
+#include "SF2File/Entity/Modulator/Modulator.hpp"
 #include "SF2Lib/Render/Voice/State/Modulator.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 

@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "SF2Lib/IO/File.hpp"
+#include "SF2File/IO/File.hpp"
 #include "SF2Lib/Render/InstrumentCollection.hpp"
 
 using namespace SF2::Render;

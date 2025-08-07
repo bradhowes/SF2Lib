@@ -4,7 +4,7 @@
 
 #include "SampleBasedContexts.hpp"
 
-#include "SF2Lib/Entity/SampleHeader.hpp"
+#include "SF2File/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Voice/Sample/Index.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
