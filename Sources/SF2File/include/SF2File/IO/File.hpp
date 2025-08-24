@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -162,7 +162,7 @@ private:
 
   std::vector<size_t> presetIndicesOrderedByBankProgram_{};
 
-  const os_log_t log_{Log::create("File")};
+  os_log_t log_{Log::create("File")};
 };
 
 } // end namespace SF2::IO
