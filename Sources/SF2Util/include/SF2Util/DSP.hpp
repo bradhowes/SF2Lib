@@ -240,7 +240,7 @@ inline static Float tenthPercentageToNormalized(Float value) noexcept {
 
 /**
  Quickly convert absolute cents value into a frequency. Valid inputs are 0 - 13,508 which translates to
- 6.875 Hz - 28 kHz (20,004.35). Higher values could be supported but for no real reason in SF2Lib.
+ 6.875 Hz - 28 kHz (28,143.74). Higher values could be supported but for no real reason in SF2Lib.
 
  @param value the value in cents to convert
  @returns frequency of the given cents value
