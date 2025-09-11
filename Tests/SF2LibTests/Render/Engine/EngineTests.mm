@@ -1291,7 +1291,7 @@ using namespace SF2::Render::Engine;
   NSLog(@"path: %@", path);
   std::string tmp([path cStringUsingEncoding: NSUTF8StringEncoding],
                   [path lengthOfBytesUsingEncoding: NSUTF8StringEncoding]);
-  auto payload = engine.createLoadFileUsePreset(tmp, 234);
+  auto payload = engine.createLoadFileUsePresetPayload(tmp, 234);
   harness.sendRaw(payload);
   std::cout << engine.activePresetName() << '\n';
   XCTAssertEqual(std::string("SFX"), engine.activePresetName());
@@ -1748,12 +1748,12 @@ using namespace SF2::Render::Engine;
   auto& engine{harness.engine()};
   harness.load(contexts.context0.path(), 0);
   XCTAssertEqual("Piano 1", engine.activePresetName());
-  harness.sendRaw(engine.createUsePreset(1));
+  harness.sendRaw(engine.createUsePresetPayload(1));
   XCTAssertEqual("Piano 2", engine.activePresetName());
-  harness.sendRaw(engine.createUsePreset(128));
+  harness.sendRaw(engine.createUsePresetPayload(128));
   std::clog << engine.activePresetName() << '\n';
   XCTAssertEqual("SynthBass101", engine.activePresetName());
-  harness.sendRaw(engine.createUsePreset(engine.presetCount() - 1));
+  harness.sendRaw(engine.createUsePresetPayload(engine.presetCount() - 1));
   std::clog << engine.activePresetName() << '\n';
   XCTAssertEqual("SFX", engine.activePresetName());
 }
@@ -1764,13 +1764,13 @@ using namespace SF2::Render::Engine;
   auto& engine{harness.engine()};
   harness.load(contexts.context0.path(), 0);
   XCTAssertEqual("Piano 1", engine.activePresetName());
-  harness.sendRaw(engine.createUseBankProgram(0, 1));
+  harness.sendRaw(engine.createUseBankProgramPayload(0, 1));
   std::clog << engine.activePresetName() << '\n';
   XCTAssertEqual("Piano 2", engine.activePresetName());
-  harness.sendRaw(engine.createUseBankProgram(1, 38));
+  harness.sendRaw(engine.createUseBankProgramPayload(1, 38));
   std::clog << engine.activePresetName() << '\n';
   XCTAssertEqual("SynthBass101", engine.activePresetName());
-  harness.sendRaw(engine.createUseBankProgram(128, 56));
+  harness.sendRaw(engine.createUseBankProgramPayload(128, 56));
   std::clog << engine.activePresetName() << '\n';
  }
 
@@ -1785,7 +1785,7 @@ using namespace SF2::Render::Engine;
 
   harness.sendNoteOn(60);
   XCTAssertEqual(1, engine.activeVoiceCount());
-  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::allSoundOff, 0));
+  harness.sendRaw(engine.createChannelMessagePayload(MIDI::ControlChange::allSoundOff, 0));
   XCTAssertEqual(0, engine.activeVoiceCount());
 }
 
@@ -1800,7 +1800,7 @@ using namespace SF2::Render::Engine;
 
   harness.sendNoteOn(60);
   XCTAssertEqual(1, engine.activeVoiceCount());
-  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::allNotesOff, 0));
+  harness.sendRaw(engine.createChannelMessagePayload(MIDI::ControlChange::allNotesOff, 0));
   XCTAssertEqual(1, engine.activeVoiceCount());
 }
 
@@ -1819,7 +1819,7 @@ using namespace SF2::Render::Engine;
 
   harness.sendNoteOn(60);
   XCTAssertEqual(1, engine.activeVoiceCount());
-  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::resetAllControllers, 0));
+  harness.sendRaw(engine.createChannelMessagePayload(MIDI::ControlChange::resetAllControllers, 0));
   XCTAssertEqual(0, engine.channelState().continuousControllerValue(MIDI::ControlChange::bankSelectLSB));
   XCTAssertEqual(0, engine.activeVoiceCount());
 }
@@ -1834,7 +1834,7 @@ using namespace SF2::Render::Engine;
 
   harness.sendNoteOn(60);
   XCTAssertEqual(1, engine.activeVoiceCount());
-  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::monoOn, 0));
+  harness.sendRaw(engine.createChannelMessagePayload(MIDI::ControlChange::monoOn, 0));
   XCTAssertTrue(engine.monophonicModeEnabled());
   XCTAssertEqual(0, engine.activeVoiceCount());
 }
@@ -1845,12 +1845,12 @@ using namespace SF2::Render::Engine;
   auto& engine{harness.engine()};
   harness.load(contexts.context0.path(), 0);
 
-  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::monoOn, 0));
+  harness.sendRaw(engine.createChannelMessagePayload(MIDI::ControlChange::monoOn, 0));
   XCTAssertTrue(engine.monophonicModeEnabled());
 
   harness.sendNoteOn(60);
   XCTAssertEqual(1, engine.activeVoiceCount());
-  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::polyOn, 0));
+  harness.sendRaw(engine.createChannelMessagePayload(MIDI::ControlChange::polyOn, 0));
   XCTAssertFalse(engine.monophonicModeEnabled());
   XCTAssertEqual(0, engine.activeVoiceCount());
 }
@@ -1863,7 +1863,7 @@ using namespace SF2::Render::Engine;
 
   harness.sendNoteOn(60);
   XCTAssertEqual(1, engine.activeVoiceCount());
-  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::omniOff, 0));
+  harness.sendRaw(engine.createChannelMessagePayload(MIDI::ControlChange::omniOff, 0));
   XCTAssertEqual(0, engine.activeVoiceCount());
 }
 
@@ -1875,7 +1875,7 @@ using namespace SF2::Render::Engine;
 
   harness.sendNoteOn(60);
   XCTAssertEqual(1, engine.activeVoiceCount());
-  harness.sendRaw(engine.createChannelMessage(MIDI::ControlChange::omniOn, 0));
+  harness.sendRaw(engine.createChannelMessagePayload(MIDI::ControlChange::omniOn, 0));
   XCTAssertEqual(0, engine.activeVoiceCount());
 }
 

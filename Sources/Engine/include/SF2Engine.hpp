@@ -88,20 +88,27 @@ struct SF2Engine
 
    @param path the full path of the SF2 file to load
    @param preset the index of the preset in the file to use
+   @param gain initial attenuation (dB) in range [-96.0, +12.0] where -96.0 is no audio, 0.0 is no attenuation,
+   and +12.0 is 4x increase in audio
+   @param pan initial pan in range [-1.0, +1.0] where -1 is left-only, and +1 is right-only output.
    @returns MIDI SYSEX command as a byte sequence
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  static std::vector<uint8_t> createLoadFileUsePreset(const std::string& path, size_t preset) noexcept;
+  static std::vector<uint8_t> createLoadFileUsePresetPayload(const std::string& path, size_t preset, double gain = 0.0,
+                                                             double pan = 0.0) noexcept;
 
   /**
    Obtain an `NSData` instance containing a MIDI SYSEX command that will ask the engine to use a different preset from
    the currently-loaded SF2 file (set by an earlier `createLoadFileUseIndex` request).
 
    @param preset the index of the preset in the current file to use
+   @param gain initial attenuation (dB) in range [-96.0, +12.0] where -96.0 is no audio, 0.0 is no attenuation,
+   and +12.0 is 4x increase in audio
+   @param pan initial pan in range [-1.0, +1.0] where -1 is left-only, and +1 is right-only output.
    @returns MIDI SYSEX command as a byte sequence
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  static std::vector<uint8_t> createUsePreset(size_t preset) noexcept;
+  static std::vector<uint8_t> createUsePresetPayload(size_t preset, double gain = 0.0, double pan = 0.0) noexcept;
 
   /**
    Obtain an `NSData` instance containing MIDI command to reset the engine. This will stop playing any notes and reset
@@ -110,7 +117,7 @@ struct SF2Engine
    @returns MIDI command as a byte sequence
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  static std::array<uint8_t, 1> createResetCommand() noexcept;
+  static std::array<uint8_t, 1> createResetCommandPayload() noexcept;
 
   /**
    Obtain an array of `NSData` instances containing MIDI commands to set the desired bank and program to use.
@@ -118,7 +125,7 @@ struct SF2Engine
    @returns array of MIDI commands to be sent to engine
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  static std::array<uint8_t, 9> createUseBankProgram(uint16_t bank, uint8_t program) noexcept;
+  static std::array<uint8_t, 9> createUseBankProgramPayload(uint16_t bank, uint8_t program) noexcept;
 
   /**
    Obtain an `NSData` instance containing MIDI command to send a channel message to the engine.
@@ -128,13 +135,13 @@ struct SF2Engine
    @returns MIDI command as a byte sequence
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  static std::array<uint8_t, 3> createChannelMessage(uint8_t channelMessage, uint8_t value) noexcept;
+  static std::array<uint8_t, 3> createChannelMessagePayload(uint8_t channelMessage, uint8_t value) noexcept;
 
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  static std::array<uint8_t, 3> createAllNotesOff() noexcept;
+  static std::array<uint8_t, 3> createAllNotesOffPayload() noexcept;
 
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  static std::array<uint8_t, 3> createAllSoundOff() noexcept;
+  static std::array<uint8_t, 3> createAllSoundOffPayload() noexcept;
 
   /// @returns true if the monophonic mode is enabled
   bool monophonicModeEnabled() const noexcept;

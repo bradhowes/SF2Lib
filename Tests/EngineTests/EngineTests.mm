@@ -32,27 +32,27 @@
 
 - (void)testCreateLoadFileUseIndex {
   auto url = [TestResources getResourceUrl:0];
-  auto data = engine->createLoadFileUsePreset(url.path.UTF8String, 123);
+  auto data = engine->createLoadFileUsePresetPayload(url.path.UTF8String, 123);
   XCTAssertTrue(data.size() > url.path.length);
 }
 
 - (void)testCreateUseIndex {
-  auto data = engine->createUsePreset(59);
-  XCTAssertEqual(6, data.size());
+  auto data = engine->createUsePresetPayload(59);
+  XCTAssertEqual(28, data.size());
 }
 
 - (void)testCreateResetCommand {
-  auto data = engine->createResetCommand();
+  auto data = engine->createResetCommandPayload();
   XCTAssertEqual(1, data.size());
 }
 
 - (void)testCreateUseBankProgram {
-  auto data = engine->createUseBankProgram(1, 43);
+  auto data = engine->createUseBankProgramPayload(1, 43);
   XCTAssertEqual(9, data.size());
 }
 
 - (void)testCreateChannelMessage {
-  auto data = engine->createChannelMessage(0xFE, 0x01);
+  auto data = engine->createChannelMessagePayload(0xFE, 0x01);
   XCTAssertEqual(3, data.size());
 }
 

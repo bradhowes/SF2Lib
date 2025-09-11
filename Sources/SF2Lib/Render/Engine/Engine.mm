@@ -385,44 +385,51 @@ Engine::notifyActiveVoicesChannelStateChanged() noexcept
   visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState&) { voice.channelStateChanged(); });
 }
 
+struct LoadPresetSysExPayload {
+  size_t preset;
+  double gain;
+  double pan;
+};
+
 void
 Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
   const uint8_t* data = midiEvent.data;
-  size_t index = data[3] * 128u + data[4];
-  if (midiEvent.length > 6) {
-    size_t count = midiEvent.length - 6;
-    auto path = Utils::Base64::decode(data + 5, count);
-    load(path, index);
+  auto payload = LoadPresetSysExPayload();
+  std::memcpy(&payload, &data[3], sizeof(LoadPresetSysExPayload));
+  if (midiEvent.length > sizeof(LoadPresetSysExPayload) + 4) {
+    size_t count = midiEvent.length - (sizeof(LoadPresetSysExPayload) + 3);
+    auto path = Utils::Base64::decode(data + 3 + sizeof(LoadPresetSysExPayload), count);
+    load(path, payload.preset);
   } else {
-    usePresetWithIndex(index);
+    usePresetWithIndex(payload.preset);
   }
 }
 
 std::vector<uint8_t>
-Engine::createLoadFileUsePreset(const std::string& path, size_t preset) noexcept
+Engine::createLoadFileUsePresetPayload(const std::string& path, size_t preset, double gain, double pan) noexcept
 {
+  auto payload = LoadPresetSysExPayload{preset, gain, pan};
+  auto payloadSize = sizeof(LoadPresetSysExPayload);
   auto encoded = path.empty() ? "" : SF2::Utils::Base64::encode(path);
-  auto nameOffset = 5;
-  auto size = encoded.size() + size_t(nameOffset + 1);
-  auto data = std::vector<uint8_t>(size, uint8_t(0));
+  auto total = 3 + payloadSize + encoded.size() + 1; // 3 for header bytes, 1 for 0xF7 terminator
+  auto data = std::vector<uint8_t>(total, uint8_t(0));
   data[0] = SF2::valueOf(MIDI::CoreEvent::systemExclusive);
   data[1] = 0x7E; // Custom command for SF2Lib
   data[2] = 0x00; // unused subtype
-  data[3] = static_cast<uint8_t>(preset / 128); // MSB of preset value
-  data[4] = static_cast<uint8_t>(preset - data[3] * 128); // LSB of preset value
-  std::copy_n(encoded.begin(), encoded.size(), data.begin() + nameOffset);
-  data[size - 1] = 0xF7;
+  std::memcpy(&data[3], reinterpret_cast<uint8_t*>(&payload), payloadSize);
+  std::memcpy(&data[3 + payloadSize], encoded.data(), encoded.size());
+  data[total - 1] = 0xF7;
   return data;
 }
 
 std::vector<uint8_t>
-Engine::createUsePreset(size_t preset) noexcept
+Engine::createUsePresetPayload(size_t preset, double gain, double pan) noexcept
 {
-  return createLoadFileUsePreset("", preset);
+  return createLoadFileUsePresetPayload("", preset, gain, pan);
 }
 
 std::array<uint8_t, 1>
-Engine::createResetCommand() noexcept
+Engine::createResetCommandPayload() noexcept
 {
   return std::array<uint8_t, 1>{
     SF2::valueOf(MIDI::CoreEvent::reset)
@@ -430,7 +437,7 @@ Engine::createResetCommand() noexcept
 }
 
 std::array<uint8_t, 3>
-Engine::createChannelMessage(MIDI::ControlChange channelMessage, uint8_t value) noexcept
+Engine::createChannelMessagePayload(MIDI::ControlChange channelMessage, uint8_t value) noexcept
 {
   return std::array<uint8_t, 3>{
     SF2::valueOf(MIDI::CoreEvent::controlChange),
@@ -440,7 +447,7 @@ Engine::createChannelMessage(MIDI::ControlChange channelMessage, uint8_t value) 
 }
 
 std::array<uint8_t, 9>
-Engine::createUseBankProgram(uint16_t bank, uint8_t program) noexcept
+Engine::createUseBankProgramPayload(uint16_t bank, uint8_t program) noexcept
 {
   assert(bank < 128 * 128 && program < 128);
   auto bankMSB = uint8_t(bank / 128u);

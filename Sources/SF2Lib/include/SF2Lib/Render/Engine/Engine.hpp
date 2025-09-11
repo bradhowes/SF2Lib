@@ -176,9 +176,13 @@ public:
 
    @param path the location of the SF2 file to load
    @param preset the index of the preset to activate
+   @param gain initial attenuation (dB) in range [-96.0, +12.0] where -96.0 is no audio, 0.0 is no attenuation,
+   and +12.0 is 4x increase in audio
+   @param pan initial pan in range [-1.0, +1.0] where -1 is left-only, and +1 is right-only output.
    @returns array of MIDI bytes
    */
-  static std::vector<uint8_t> createLoadFileUsePreset(const std::string& path, size_t preset) noexcept;
+  static std::vector<uint8_t> createLoadFileUsePresetPayload(const std::string& path, size_t preset, double gain = 0.0,
+                                                             double pan = 0.0) noexcept;
 
   /**
    Utility class method that creates a MIDI SysEx command to activate the preset at the given index in the
@@ -187,7 +191,7 @@ public:
    @param preset the index of the preset to activate
    @returns array of MIDI bytes
    */
-  static std::vector<uint8_t> createUsePreset(size_t preset) noexcept;
+  static std::vector<uint8_t> createUsePresetPayload(size_t preset, double gain = 0.0, double pan = 0.0) noexcept;
 
   /**
    Utility class method that creates a MIDI channel command to reset the engine. This stops all voices and resets the
@@ -195,7 +199,7 @@ public:
 
    @returns array of MIDI bytes
    */
-  static std::array<uint8_t, 1> createResetCommand() noexcept;
+  static std::array<uint8_t, 1> createResetCommandPayload() noexcept;
 
   /**
    Utility class method that creates a collection of MIDI commands that will direct the engine to activate the preset
@@ -205,7 +209,7 @@ public:
    @param program the program in the bank to activate (0-127)
    @returns array of an array of MIDI bytes
    */
-  static std::array<uint8_t, 9> createUseBankProgram(uint16_t bank, uint8_t program) noexcept;
+  static std::array<uint8_t, 9> createUseBankProgramPayload(uint16_t bank, uint8_t program) noexcept;
 
   /**
    Utility class method that creates a MIDI command to send the given channel message with the given value
@@ -214,16 +218,16 @@ public:
    @param value the value to provide in the channel message
    @returns array of MIDI bytes
    */
-  static std::array<uint8_t, 3> createChannelMessage(MIDI::ControlChange channelMessage, uint8_t value = 0) noexcept;
+  static std::array<uint8_t, 3> createChannelMessagePayload(MIDI::ControlChange channelMessage, uint8_t value = 0) noexcept;
 
-  static std::array<uint8_t, 3> createAllNotesOff() noexcept
+  static std::array<uint8_t, 3> createAllNotesOffPayload() noexcept
   {
-    return createChannelMessage(MIDI::ControlChange::allNotesOff);
+    return createChannelMessagePayload(MIDI::ControlChange::allNotesOff);
   }
 
-  static std::array<uint8_t, 3> createAllSoundOff() noexcept
+  static std::array<uint8_t, 3> createAllSoundOffPayload() noexcept
   {
-    return createChannelMessage(MIDI::ControlChange::allSoundOff);
+    return createChannelMessagePayload(MIDI::ControlChange::allSoundOff);
   }
 
 private:

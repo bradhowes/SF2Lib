@@ -45,45 +45,45 @@ SF2Engine::activePresetName() const noexcept
 }
 
 std::vector<uint8_t>
-SF2Engine::createLoadFileUsePreset(const std::string& path, size_t preset) noexcept
+SF2Engine::createLoadFileUsePresetPayload(const std::string& path, size_t preset, double gain, double pan) noexcept
 {
-  return SF2::Render::Engine::Engine::createLoadFileUsePreset(path, preset);
+  return SF2::Render::Engine::Engine::createLoadFileUsePresetPayload(path, preset, gain, pan);
 }
 
 std::vector<uint8_t>
-SF2Engine::createUsePreset(size_t preset) noexcept
+SF2Engine::createUsePresetPayload(size_t preset, double gain, double pan) noexcept
 {
-  return SF2::Render::Engine::Engine::createUsePreset(preset);
+  return SF2::Render::Engine::Engine::createUsePresetPayload(preset, gain, pan);
 }
 
 std::array<uint8_t, 1>
-SF2Engine::createResetCommand() noexcept
+SF2Engine::createResetCommandPayload() noexcept
 {
-  return SF2::Render::Engine::Engine::createResetCommand();
+  return SF2::Render::Engine::Engine::createResetCommandPayload();
 }
 
 std::array<uint8_t, 9>
-SF2Engine::createUseBankProgram(uint16_t bank, uint8_t program) noexcept
+SF2Engine::createUseBankProgramPayload(uint16_t bank, uint8_t program) noexcept
 {
-  return SF2::Render::Engine::Engine::createUseBankProgram(bank, program);
+  return SF2::Render::Engine::Engine::createUseBankProgramPayload(bank, program);
 }
 
 std::array<uint8_t, 3>
-SF2Engine::createChannelMessage(uint8_t channelMessage, uint8_t content) noexcept
+SF2Engine::createChannelMessagePayload(uint8_t channelMessage, uint8_t content) noexcept
 {
-  return SF2::Render::Engine::Engine::createChannelMessage(SF2::MIDI::ControlChange(channelMessage), content );
+  return SF2::Render::Engine::Engine::createChannelMessagePayload(SF2::MIDI::ControlChange(channelMessage), content );
 }
 
 std::array<uint8_t, 3>
-SF2Engine::createAllNotesOff() noexcept
+SF2Engine::createAllNotesOffPayload() noexcept
 {
-  return SF2::Render::Engine::Engine::createAllNotesOff();
+  return SF2::Render::Engine::Engine::createAllNotesOffPayload();
 }
 
 std::array<uint8_t, 3>
-SF2Engine::createAllSoundOff() noexcept
+SF2Engine::createAllSoundOffPayload() noexcept
 {
-  return SF2::Render::Engine::Engine::createAllSoundOff();
+  return SF2::Render::Engine::Engine::createAllSoundOffPayload();
 }
 
 size_t
