@@ -8,6 +8,7 @@ default: report
 
 test-iOS:
 	rm -rf "$(PWD)/.DerivedData-iOS"
+	xcodebuild -list
 	USE_UNSAFE_FLAGS="1" set -o pipefail && xcodebuild test \
 		$(BUILD_FLAGS) \
 		-derivedDataPath "$(PWD)/.DerivedData-iOS" \
