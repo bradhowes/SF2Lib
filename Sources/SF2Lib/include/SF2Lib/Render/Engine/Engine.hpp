@@ -14,6 +14,7 @@
 
 #include "SF2File/IO/File.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
+#include "SF2Lib/MIDI/GeneratorOverride.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Engine/OldestVoiceCollection.hpp"
 #include "SF2Lib/Render/Engine/Parameters.hpp"
@@ -174,24 +175,13 @@ public:
    Utility class method that creates a MIDI SysEx command to load a SF2 file at the given path and to activate
    the preset at the given index.
 
-   @param path the location of the SF2 file to load
-   @param preset the index of the preset to activate
-   @param gain initial attenuation (dB) in range [-96.0, +12.0] where -96.0 is no audio, 0.0 is no attenuation,
-   and +12.0 is 4x increase in audio
-   @param pan initial pan in range [-1.0, +1.0] where -1 is left-only, and +1 is right-only output.
+   @param filePath the location of the SF2 file to load
+   @param presetIndex the index of the preset to activate
+   @param overrides collection of SF2 generator values to apply
    @returns array of MIDI bytes
    */
-  static std::vector<uint8_t> createLoadFileUsePresetPayload(const std::string& path, size_t preset, double gain = 0.0,
-                                                             double pan = 0.0) noexcept;
-
-  /**
-   Utility class method that creates a MIDI SysEx command to activate the preset at the given index in the
-   currently loaded SF2 file. This is the same as `createLoadSysExec` with a zero-length string.
-
-   @param preset the index of the preset to activate
-   @returns array of MIDI bytes
-   */
-  static std::vector<uint8_t> createUsePresetPayload(size_t preset, double gain = 0.0, double pan = 0.0) noexcept;
+  static std::vector<uint8_t> createLoadFileUsePresetPayload(const std::string& filePath, size_t presetIndex,
+                                                             const std::vector<SF2::MIDI::GeneratorOverride>& overrides) noexcept;
 
   /**
    Utility class method that creates a MIDI channel command to reset the engine. This stops all voices and resets the
@@ -410,7 +400,7 @@ private:
 
   void changeProgram(uint8_t program) noexcept;
 
-  void loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept;
+  bool loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept;
 
   void applySostenutoPedal() noexcept;
 

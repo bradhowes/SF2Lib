@@ -26,8 +26,8 @@ SF2Engine::setRenderingFormat(NSInteger busCount, AVAudioFormat *format, AUAudio
 
 AUAudioUnitStatus
 SF2Engine::processAndRender(const AudioTimeStamp *timestamp, UInt32 frameCount, NSInteger outputBusNumber,
-                              AudioBufferList *output, const AURenderEvent *realtimeEventListHead,
-                              AURenderPullInputBlock pullInputBlock)
+                            AudioBufferList *output, const AURenderEvent *realtimeEventListHead,
+                            AURenderPullInputBlock pullInputBlock)
 {
   return impl_->processAndRender(timestamp, frameCount, outputBusNumber, output, realtimeEventListHead, pullInputBlock);
 }
@@ -45,15 +45,10 @@ SF2Engine::activePresetName() const noexcept
 }
 
 std::vector<uint8_t>
-SF2Engine::createLoadFileUsePresetPayload(const std::string& path, size_t preset, double gain, double pan) noexcept
+SF2Engine::createLoadFileUsePresetPayload(const std::string& filePath, size_t presetIndex,
+                                          const SF2::MIDI::GeneratorOverrideVector& overrides) noexcept
 {
-  return SF2::Render::Engine::Engine::createLoadFileUsePresetPayload(path, preset, gain, pan);
-}
-
-std::vector<uint8_t>
-SF2Engine::createUsePresetPayload(size_t preset, double gain, double pan) noexcept
-{
-  return SF2::Render::Engine::Engine::createUsePresetPayload(preset, gain, pan);
+  return SF2::Render::Engine::Engine::createLoadFileUsePresetPayload(filePath, presetIndex, overrides);
 }
 
 std::array<uint8_t, 1>

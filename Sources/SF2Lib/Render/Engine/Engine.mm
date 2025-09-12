@@ -1,5 +1,8 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
+#include <cstdint>
+#include <vector>
+
 #include "SF2Util/Base64.hpp"
 #include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
@@ -274,9 +277,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       if (midiEvent.data[1] == 0x7e && midiEvent.data[midiEvent.length - 1] == 0xF7) {
         switch (midiEvent.data[2]) {
           case 0x00:
-            if (midiEvent.length >= 6) {
-              loadFromMIDI(midiEvent);
-            } else {
+            if (!loadFileAndPresetFromSysEx(midiEvent)) {
               os_log_debug(log_, "doMIDIEvent - systemExclusive ignored due to length < 6");
             }
             break;
@@ -386,46 +387,73 @@ Engine::notifyActiveVoicesChannelStateChanged() noexcept
 }
 
 struct LoadPresetSysExPayload {
-  size_t preset;
-  double gain;
-  double pan;
+  uint8_t sysExBegin;    // 0
+  uint8_t manufacturer;  // 1
+  uint8_t model;         // 2
+  // Here lies 5 bytes of padding
+  size_t presetIndex;    // 8
+  size_t overrideCount;  // 16
+  // SF2::MIDI::GeneratorOverride overrides[1];
+  // char filePath[1];
+  // uint8_t sysExEnd;   // 25 is smallest payload size
+
+  static constexpr size_t minPayloadSize = 25;
+
+  static std::vector<uint8_t> make(const SF2::MIDI::GeneratorOverrideVector& overrides,
+                                   const std::string& filePath, size_t presetIndex) noexcept {
+    auto encodedFilePath = filePath.empty() ? std::string("") : SF2::Utils::Base64::encode(filePath);
+    auto payloadSize = (sizeof(LoadPresetSysExPayload)
+                        + overrides.size() * sizeof(SF2::MIDI::GeneratorOverride)
+                        + encodedFilePath.size()) + 1;
+    auto bytes = std::vector<uint8_t>(payloadSize, 0);
+    auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
+    payload->sysExBegin = SF2::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
+    payload->manufacturer = 0x7E;
+    payload->model = 0x00;
+    payload->presetIndex = presetIndex;
+    payload->overrideCount = overrides.size();
+    auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>((bytes.data() + sizeof(LoadPresetSysExPayload)));
+    auto pos2 = std::copy(overrides.begin(), overrides.end(), pos1);
+    auto pos3 = reinterpret_cast<uint8_t*>(std::copy(encodedFilePath.begin(), encodedFilePath.end(),
+                                                     reinterpret_cast<char*>(pos2)));
+    *pos3++ = 0xF7;
+
+    assert(pos3 - bytes.data() == bytes.size());
+    assert(bytes.size() >= minPayloadSize);
+
+    return bytes;
+  }
 };
 
-void
-Engine::loadFromMIDI(const AUMIDIEvent& midiEvent) noexcept {
-  const uint8_t* data = midiEvent.data;
-  auto payload = LoadPresetSysExPayload();
-  std::memcpy(&payload, &data[3], sizeof(LoadPresetSysExPayload));
-  if (midiEvent.length > sizeof(LoadPresetSysExPayload) + 4) {
-    size_t count = midiEvent.length - (sizeof(LoadPresetSysExPayload) + 3);
-    auto path = Utils::Base64::decode(data + 3 + sizeof(LoadPresetSysExPayload), count);
-    load(path, payload.preset);
-  } else {
-    usePresetWithIndex(payload.preset);
+bool
+Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
+  if (midiEvent.length < LoadPresetSysExPayload::minPayloadSize) {
+    return false;
   }
+
+  const uint8_t* bytes = midiEvent.data;
+  auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes);
+  auto presetIndex = payload->presetIndex;
+  auto overrideCount = payload->overrideCount;
+  auto pos1 = reinterpret_cast<const SF2::MIDI::GeneratorOverride*>(payload + 1);
+  auto overrides = std::vector<MIDI::GeneratorOverride>(pos1, pos1 + overrideCount);
+  auto pathStart = reinterpret_cast<const uint8_t*>(pos1 + overrideCount);
+  auto pathCount = (bytes + midiEvent.length) - pathStart - 1;
+  auto path = pathCount == 0 ? std::string("") : Utils::Base64::decode(pathStart, pathCount);
+  if (!path.empty()) {
+    load(path, presetIndex);
+  } else {
+    usePresetWithIndex(presetIndex);
+  }
+
+  return true;
 }
 
 std::vector<uint8_t>
-Engine::createLoadFileUsePresetPayload(const std::string& path, size_t preset, double gain, double pan) noexcept
+Engine::createLoadFileUsePresetPayload(const std::string& filePath, size_t presetIndex,
+                                       const MIDI::GeneratorOverrideVector& overrides) noexcept
 {
-  auto payload = LoadPresetSysExPayload{preset, gain, pan};
-  auto payloadSize = sizeof(LoadPresetSysExPayload);
-  auto encoded = path.empty() ? "" : SF2::Utils::Base64::encode(path);
-  auto total = 3 + payloadSize + encoded.size() + 1; // 3 for header bytes, 1 for 0xF7 terminator
-  auto data = std::vector<uint8_t>(total, uint8_t(0));
-  data[0] = SF2::valueOf(MIDI::CoreEvent::systemExclusive);
-  data[1] = 0x7E; // Custom command for SF2Lib
-  data[2] = 0x00; // unused subtype
-  std::memcpy(&data[3], reinterpret_cast<uint8_t*>(&payload), payloadSize);
-  std::memcpy(&data[3 + payloadSize], encoded.data(), encoded.size());
-  data[total - 1] = 0xF7;
-  return data;
-}
-
-std::vector<uint8_t>
-Engine::createUsePresetPayload(size_t preset, double gain, double pan) noexcept
-{
-  return createLoadFileUsePresetPayload("", preset, gain, pan);
+  return LoadPresetSysExPayload::make(overrides, filePath, presetIndex);
 }
 
 std::array<uint8_t, 1>

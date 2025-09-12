@@ -9,6 +9,8 @@
 
 #include <Foundation/Foundation.h>
 #include <CoreAudioKit/CoreAudioKit.h>
+#include <SF2Lib/MIDI/GeneratorOverride.hpp>
+
 #include <swift/bridging>
 
 /**
@@ -83,32 +85,16 @@ struct SF2Engine
   AUParameterTree* getParameterTree() const noexcept;
 
   /**
-   Obtain an `NSData` instance containing a MIDI SYSEX command that can be sent to load an SF2 file and use a given
+   Obtain MIDI payload containing a MIDI SYSEX command that can be sent to load an SF2 file and use a given
    preset. This should be sent to the engine via a MIDI control connection; this method only creates the bytes to send.
 
    @param path the full path of the SF2 file to load
    @param preset the index of the preset in the file to use
-   @param gain initial attenuation (dB) in range [-96.0, +12.0] where -96.0 is no audio, 0.0 is no attenuation,
-   and +12.0 is 4x increase in audio
-   @param pan initial pan in range [-1.0, +1.0] where -1 is left-only, and +1 is right-only output.
    @returns MIDI SYSEX command as a byte sequence
    */
   SWIFT_RETURNS_INDEPENDENT_VALUE
-  static std::vector<uint8_t> createLoadFileUsePresetPayload(const std::string& path, size_t preset, double gain = 0.0,
-                                                             double pan = 0.0) noexcept;
-
-  /**
-   Obtain an `NSData` instance containing a MIDI SYSEX command that will ask the engine to use a different preset from
-   the currently-loaded SF2 file (set by an earlier `createLoadFileUseIndex` request).
-
-   @param preset the index of the preset in the current file to use
-   @param gain initial attenuation (dB) in range [-96.0, +12.0] where -96.0 is no audio, 0.0 is no attenuation,
-   and +12.0 is 4x increase in audio
-   @param pan initial pan in range [-1.0, +1.0] where -1 is left-only, and +1 is right-only output.
-   @returns MIDI SYSEX command as a byte sequence
-   */
-  SWIFT_RETURNS_INDEPENDENT_VALUE
-  static std::vector<uint8_t> createUsePresetPayload(size_t preset, double gain = 0.0, double pan = 0.0) noexcept;
+  static std::vector<uint8_t> createLoadFileUsePresetPayload(const std::string& filePath, size_t presetIndex,
+                                                             const SF2::MIDI::GeneratorOverrideVector& overrides) noexcept;
 
   /**
    Obtain an `NSData` instance containing MIDI command to reset the engine. This will stop playing any notes and reset

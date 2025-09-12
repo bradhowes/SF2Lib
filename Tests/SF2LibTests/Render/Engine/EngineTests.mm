@@ -1291,7 +1291,9 @@ using namespace SF2::Render::Engine;
   NSLog(@"path: %@", path);
   std::string tmp([path cStringUsingEncoding: NSUTF8StringEncoding],
                   [path lengthOfBytesUsingEncoding: NSUTF8StringEncoding]);
-  auto payload = engine.createLoadFileUsePresetPayload(tmp, 234);
+  auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
+  overrides.emplace_back(123, 456);
+  auto payload = engine.createLoadFileUsePresetPayload(tmp, 234, overrides);
   harness.sendRaw(payload);
   std::cout << engine.activePresetName() << '\n';
   XCTAssertEqual(std::string("SFX"), engine.activePresetName());
@@ -1746,14 +1748,16 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
+  auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
   harness.load(contexts.context0.path(), 0);
   XCTAssertEqual("Piano 1", engine.activePresetName());
-  harness.sendRaw(engine.createUsePresetPayload(1));
+  auto payload = engine.createLoadFileUsePresetPayload("", 1, overrides);
+  harness.sendRaw(payload);
   XCTAssertEqual("Piano 2", engine.activePresetName());
-  harness.sendRaw(engine.createUsePresetPayload(128));
+  harness.sendRaw(engine.createLoadFileUsePresetPayload("", 128, overrides));
   std::clog << engine.activePresetName() << '\n';
   XCTAssertEqual("SynthBass101", engine.activePresetName());
-  harness.sendRaw(engine.createUsePresetPayload(engine.presetCount() - 1));
+  harness.sendRaw(engine.createLoadFileUsePresetPayload("", engine.presetCount() - 1, overrides));
   std::clog << engine.activePresetName() << '\n';
   XCTAssertEqual("SFX", engine.activePresetName());
 }
