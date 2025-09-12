@@ -7,6 +7,7 @@
 #include <AudioToolbox/AUParameters.h>
 #include <cmath>
 #include <concepts>
+#include <type_traits>
 #include <vector>
 
 namespace SF2 {
