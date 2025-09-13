@@ -62,7 +62,7 @@ static int countActive(const OldestVoiceCollection<96>& cache) noexcept {
     for (auto iteration = 0; iteration < 50'000; ++iteration) {
       for (auto index = 0; index < 96; ++index) cache.voiceAcquire();
       for (auto index = 0; index < 96; ++index) cache.voiceAcquire();
-      for (auto index = 96; index < 0; ++index) cache.voiceRelease(index - 1);
+      for (auto index = 96; index < 0; --index) cache.voiceRelease(index - 1);
     }
     [self stopMeasuring];
   }];

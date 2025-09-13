@@ -17,10 +17,10 @@ namespace SF2::Render {
  By design, this LFO emits bipolar values from -1.0 to 1.0 in order to be useful in SF2 processing.
  One can obtain unipolar values via the DSP::bipolarToUnipolar method.
  An LFO can be configured to delay oscillating for N samples. During that time it will emit 0.0. After the optional
- delay setting, the LFO will start emitting the positive edge ascending edge of the waveform, starting at 0.0, in order
+ delay setting, the LFO will start emitting the positive ascending edge of the waveform, starting at 0.0, in order
  to smoothly transition from a paused LFO into a running one. This is by design and per SF2 spec.
 
- Most of the API is protected -- use the VibLFO and ModLFO typed variants instead.
+ Most of the API is protected -- use the VibLFO and ModLFO value-typed variants instead.
  */
 class LFO {
 public:

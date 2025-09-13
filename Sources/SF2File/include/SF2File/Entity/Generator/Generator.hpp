@@ -28,10 +28,10 @@ public:
   explicit Generator(IO::Pos& pos) noexcept;
 
   /// @returns index of the generator as an enumerated type
-  Index index() const noexcept { return index_.index(); }
+  inline Index index() const noexcept { return index_.index(); }
 
   /// @returns value configured for the generator
-  Amount amount() const noexcept { return amount_; }
+  inline Amount amount() const noexcept { return amount_; }
 
   /// @returns meta-data for the generator
   const Definition& definition() const noexcept;
@@ -40,7 +40,7 @@ public:
   const std::string& name() const noexcept;
 
   /// @returns the configured value of a generator
-  int value() const noexcept { return definition().valueOf(amount_); }
+  inline int value() const noexcept { return definition().valueOf(amount_); }
 
   std::ostream& dump(const std::string& indent, size_t index) const noexcept;
 

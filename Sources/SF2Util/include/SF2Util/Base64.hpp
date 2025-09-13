@@ -1,9 +1,6 @@
 #pragma once
 
-#include <cstddef>
-#include <iostream>
-#include <memory>
-#include <limits>
+#include <string>
 
 namespace SF2::Utils {
 
@@ -39,10 +36,6 @@ struct Base64 {
    @returns Base-64 character sequence
    */
   static std::string encode(const std::string& input) noexcept;
-
-private:
-  static const int decoder[256];
-  static const char encoder[65];
 };
 
 } // end namespace SF2::Utils

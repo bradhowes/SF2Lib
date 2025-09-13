@@ -18,14 +18,14 @@ public:
     const Float val;
   };
 
-  ModLFO(Float sampleRate) noexcept : LFO(sampleRate, "ModLFO") {}
+  explicit ModLFO(Float sampleRate) noexcept : LFO(sampleRate, "ModLFO") {}
 
   /**
    Configure the modulating LFO using the state parameters.
 
    @param state the state parameters to use
    */
-  void configure(Voice::State::State& state) noexcept {
+  inline void configure(Voice::State::State& state) noexcept {
     LFO::configure(state.sampleRate(),
                    DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyModulatorLFO)),
                    DSP::centsToSeconds(state.modulated(Entity::Generator::Index::delayModulatorLFO)));

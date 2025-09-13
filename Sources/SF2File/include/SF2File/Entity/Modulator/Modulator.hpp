@@ -62,21 +62,21 @@ public:
             Transformer transform = Transformer()) noexcept;
 
   /// @returns the source of data for the modulator
-  const Source& source() const noexcept { return sfModSrcOper; }
+  inline const Source& source() const noexcept { return sfModSrcOper; }
 
   /// @returns the destination (generator) for the modulator
-  Generator::Index generatorDestination() const noexcept {
+  inline Generator::Index generatorDestination() const noexcept {
     return Generator::Index(sfModDestOper);
   }
 
   /// @returns the maximum deviation that a modulator can apply to a generator
-  int16_t amount() const noexcept { return modAmount; }
+  inline int16_t amount() const noexcept { return modAmount; }
 
   /// @returns the second source of data for the modulator
-  const Source& amountSource() const noexcept { return sfModAmtSrcOper; }
+  inline const Source& amountSource() const noexcept { return sfModAmtSrcOper; }
 
   /// @returns the transform to apply to values created by the modulator
-  const Transformer& transformer() const noexcept { return sfModTransOper; }
+  inline const Transformer& transformer() const noexcept { return sfModTransOper; }
 
   /// @returns textual description of the modulator
   std::string description() const noexcept;
@@ -87,7 +87,7 @@ public:
    @param rhs the modulator to compare with
    @returns true if this modulator is equivalent to `rhs`
    */
-  bool operator ==(const Modulator& rhs) const noexcept {
+  inline bool operator ==(const Modulator& rhs) const noexcept {
     return (sfModSrcOper == rhs.sfModSrcOper &&
             sfModDestOper == rhs.sfModDestOper &&
             sfModAmtSrcOper == rhs.sfModAmtSrcOper);
@@ -99,7 +99,7 @@ public:
    @param rhs the modulator to compare with
    @return true if this modulator is not equivalent to `rhs`
    */
-  bool operator !=(const Modulator& rhs) const noexcept { return !operator==(rhs); }
+  inline bool operator !=(const Modulator& rhs) const noexcept { return !operator==(rhs); }
 
   void dump(const std::string& indent, size_t index) const noexcept;
 

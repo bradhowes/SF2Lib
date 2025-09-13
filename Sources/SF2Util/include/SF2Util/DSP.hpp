@@ -7,7 +7,6 @@
 #include <cmath>
 #include <iosfwd>
 
-// #include "DSPHeaders/ConstMath.hpp"
 #include "DSPHeaders/DSP.hpp"
 #include "SF2Util/Types.hpp"
 
@@ -16,21 +15,21 @@
 namespace SF2::DSP {
 
 /// Maximum absolute cents that will be used for frequencies. This corresponds to 20 kHz.
-inline static const int MaximumAbsoluteCents = 13'508;
+inline static constexpr int MaximumAbsoluteCents = 13'508;
 
 /// Number of cents in an octave
-inline static const int CentsPerOctave = 1'200;
+inline static constexpr int CentsPerOctave = 1'200;
 
 /// Attenuated samples at or below this value should be inaudible at 100 dB dynamic range.
-inline static const Float NoiseFloor = 0.00001_F;
-inline static const Float NoiseFloorCentiBels = 960_F;
+inline static constexpr Float NoiseFloor = 0.00001_F;
+inline static constexpr Float NoiseFloorCentiBels = 960_F;
 
 /// Maximum attenuation defined by SF2 spec.
-inline constexpr Float MaximumAttenuationCentiBels = 1'440_F;
+inline static constexpr Float MaximumAttenuationCentiBels = 1'440_F;
 
 /// Lowest note frequency that we can generate. This corresponds to C-1 in MIDI nomenclature
 /// (440 * pow(2.0, (N - 69) / 12))
-inline static const Float LowestNoteFrequency = 8.17579891564370697665253828745335_F;
+inline static constexpr Float LowestNoteFrequency = 8.17579891564370697665253828745335_F;
 
 inline constexpr Float clamp(Float value, Float lowerBounds, Float upperBounds) noexcept {
   return std::clamp(value, lowerBounds, upperBounds);
@@ -40,7 +39,7 @@ inline constexpr Float clamp(Float value, Float lowerBounds, Float upperBounds) 
  Lookup table for converting centibels to attenuation.
  */
 struct AttenuationLookup {
-  inline static Float query(int centibels) noexcept {
+  inline static constexpr Float query(int centibels) noexcept {
     return lookup_[static_cast<size_t>(std::clamp<int>(centibels, 0, int(TableSize - 1)))];
   }
 
@@ -69,7 +68,7 @@ private:
  @param value value in centibels to convert
  @returns attenuation value
  */
-inline static Float centibelsToAttenuation(Float value) noexcept {
+inline static constexpr Float centibelsToAttenuation(Float value) noexcept {
   if (value >= MaximumAttenuationCentiBels) return 0_F;
   if (value <= 0_F) return 1_F;
   return AttenuationLookup::query(int(nearbyint(value)));
@@ -81,7 +80,7 @@ inline static Float centibelsToAttenuation(Float value) noexcept {
  @param value value in centibels to convert
  @returns attenuation value
  */
-inline static Float centibelsToAttenuationInterpolated(Float value) noexcept {
+inline static constexpr Float centibelsToAttenuationInterpolated(Float value) noexcept {
   auto index = int(value);
   auto partial = value - index;
   return Float(DSPHeaders::DSP::Interpolation::linear(partial,
@@ -95,7 +94,7 @@ inline static Float centibelsToAttenuationInterpolated(Float value) noexcept {
 struct CentsPartialLookup {
 
   /// @return the value frequency for the given cents.
-  inline static Float query(int cents) noexcept {
+  inline static constexpr Float query(int cents) noexcept {
     return lookup_[static_cast<size_t>(std::clamp<int>(cents, 0, int(TableSize - 1)))];
   }
 
@@ -125,7 +124,7 @@ inline static Float centsPartialLookup(int value) noexcept { return CentsPartial
 struct Power2Lookup {
 
   /// @return the value 2 ^ cents
-  inline static Float query(int cents) noexcept {
+  inline static constexpr Float query(int cents) noexcept {
     return lookup_[static_cast<size_t>(std::clamp<int>(cents + Offset, 0, int(TableSize - 1)))];
   }
 
@@ -151,7 +150,7 @@ inline static Float power2Lookup(int cents) noexcept { return Power2Lookup::quer
  contains. I don't see a reason for the one extra element.
  */
 struct PanLookup {
-  inline static void query(Float pan, Float& left, Float& right) noexcept {
+  inline static constexpr void query(Float pan, Float& left, Float& right) noexcept {
     int index = std::clamp(static_cast<int>(std::round(pan)), -500, 500);
     left = lookup_[static_cast<size_t>(-index + 500)];
     right = lookup_[static_cast<size_t>(index + 500)];
@@ -174,7 +173,9 @@ private:
  @param left reference to storage for the left gain
  @param right reference to storage for the right gain
  */
-inline static void panLookup(Float value, Float& left, Float& right) noexcept { PanLookup::query(value, left, right); }
+inline static constexpr void panLookup(Float value, Float& left, Float& right) noexcept {
+  PanLookup::query(value, left, right);
+}
 
 /**
  Convert cents value into a power of 2. There are 1200 cents per power of 2.
@@ -182,7 +183,7 @@ inline static void panLookup(Float value, Float& left, Float& right) noexcept { 
  @param value the value to convert
  @returns power of 2 value
  */
-inline static Float centsToPower2(Float value) noexcept { return std::exp2(value / CentsPerOctave); }
+inline static constexpr Float centsToPower2(Float value) noexcept { return std::exp2(value / CentsPerOctave); }
 
 /**
  Convert cents value into seconds, where there are 1200 cents per power of 2.
@@ -190,7 +191,7 @@ inline static Float centsToPower2(Float value) noexcept { return std::exp2(value
  @param value the number to convert in time cents
  @returns duration in seconds
  */
-inline static Float centsToSeconds(Float value) noexcept { return centsToPower2(value); }
+inline static constexpr Float centsToSeconds(Float value) noexcept { return centsToPower2(value); }
 
 /**
  Convert seconds into log2 cents. This is the inverse of `centsToSeconds`.
@@ -198,7 +199,7 @@ inline static Float centsToSeconds(Float value) noexcept { return centsToPower2(
  @param value the number to convert in seconds
  @returns duration in time cents
  */
-inline static Float secondsToCents(Float value) noexcept { return std::log2(value * CentsPerOctave); }
+inline static constexpr Float secondsToCents(Float value) noexcept { return std::log2(value * CentsPerOctave); }
 
 /**
  Convert cents to frequency, with 0 being 8.175798 Hz. Values are clamped to [-16000, 4500].
@@ -206,7 +207,7 @@ inline static Float secondsToCents(Float value) noexcept { return std::log2(valu
  @param value the value to convert
  @returns frequency in Hz
  */
-inline static Float lfoCentsToFrequency(Float value) noexcept {
+inline static constexpr Float lfoCentsToFrequency(Float value) noexcept {
   return LowestNoteFrequency * centsToPower2(clamp(value, -16'000_F, 4'500_F));
 }
 
@@ -216,7 +217,7 @@ inline static Float lfoCentsToFrequency(Float value) noexcept {
 
  @param value the value to convert
  */
-inline static Float centibelsToResonance(Float value) noexcept {
+inline static constexpr Float centibelsToResonance(Float value) noexcept {
   return Float(std::pow(10_F, (clamp(value, 0_F, 960_F) - 30.1_F) / 200_F));
 }
 
@@ -226,7 +227,7 @@ inline static Float centibelsToResonance(Float value) noexcept {
  @param value cutoff value
  @returns clamped cutoff value
  */
-inline static Float clampFilterCutoff(Float value) noexcept { return clamp(value, 1'500_F, 20'000_F); }
+inline static constexpr Float clampFilterCutoff(Float value) noexcept { return clamp(value, 1'500_F, 20'000_F); }
 
 /**
  Convert integer from integer [0-1000] into [0.0-1.0]
@@ -234,7 +235,7 @@ inline static Float clampFilterCutoff(Float value) noexcept { return clamp(value
  @param value percentage value expressed as tenths
  @returns normalized value between 0 and 1.
  */
-inline static Float tenthPercentageToNormalized(Float value) noexcept {
+inline static constexpr Float tenthPercentageToNormalized(Float value) noexcept {
   return clamp(value * Float(0.001_F), 0_F, 1_F);
 }
 

@@ -39,7 +39,7 @@ public:
   explicit Collection(size_t zoneCount) noexcept : zones_{} { zones_.reserve(zoneCount); }
 
   /// @returns number of zones in the collection (including the optional global one)
-  size_t size() const noexcept { return zones_.size(); }
+  inline size_t size() const noexcept { return zones_.size(); }
 
   /**
    Locate the zone(s) that match the given key/velocity pair.
@@ -59,10 +59,10 @@ public:
   }
 
   /// @returns true if first zone in collection is a global zone
-  bool hasGlobal() const noexcept { return !zones_.empty() && zones_.front().isGlobal(); }
+  inline bool hasGlobal() const noexcept { return !zones_.empty() && zones_.front().isGlobal(); }
 
   /// @returns pointer to global zone or nullptr if there is not one
-  const T* global() const noexcept { return hasGlobal() ? &zones_.front() : nullptr; }
+  inline const T* global() const noexcept { return hasGlobal() ? &zones_.front() : nullptr; }
 
   /**
    Add a zone with the given args. Note that empty zones (no generators and no modulators) are dropped, as are any

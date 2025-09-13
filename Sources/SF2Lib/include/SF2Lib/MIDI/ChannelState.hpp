@@ -38,7 +38,9 @@ public:
    @param key the key (note) to set
    @param value the pressure value to record
    */
-  void setNotePressure(int key, uint8_t value) noexcept { checkedVectorIndexing(notePressureValues_, key) = value; }
+  inline void setNotePressure(int key, uint8_t value) noexcept {
+    checkedVectorIndexing(notePressureValues_, key) = value;
+  }
 
   /**
    Get the pressure for a given key.
@@ -46,17 +48,17 @@ public:
    @param key the key to get
    @returns the current pressure value for a key
    */
-  uint8_t notePressure(int key) const noexcept { return checkedVectorIndexing(notePressureValues_, key); }
+  inline uint8_t notePressure(int key) const noexcept { return checkedVectorIndexing(notePressureValues_, key); }
 
   /**
    Set the channel pressure.
 
    @param value the pressure value to record
    */
-  void setChannelPressure(uint8_t value) noexcept { channelPressure_ = value; }
+  inline void setChannelPressure(uint8_t value) noexcept { channelPressure_ = value; }
 
   /// @returns the current channel pressure
-  uint8_t channelPressure() const noexcept { return channelPressure_; }
+  inline uint8_t channelPressure() const noexcept { return channelPressure_; }
 
   /**
    Set the pitch wheel value. For MIDI v1 this is a 14-bit value [0-8191] and at rest, it should report out a value
@@ -64,12 +66,12 @@ public:
 
    @param value the pitch wheel value
    */
-  void setPitchWheelValue(int value) noexcept {
+  inline void setPitchWheelValue(int value) noexcept {
     pitchWheelValue_ = std::clamp(value, 0, maxPitchWheelValue);
   }
 
   /// @returns the current pitch wheel value
-  int pitchWheelValue() const noexcept { return pitchWheelValue_; }
+  inline int pitchWheelValue() const noexcept { return pitchWheelValue_; }
 
   /**
    Set the pitch wheel sensitivity value. Default is 200 cents which results in 2 note jump in either direction of the
@@ -77,10 +79,10 @@ public:
 
    @param value the sensitivity value to record
    */
-  void setPitchWheelSensitivity(int value) noexcept { pitchWheelSensitivity_ = value; }
+  inline void setPitchWheelSensitivity(int value) noexcept { pitchWheelSensitivity_ = value; }
 
   /// @returns the current pitch wheel sensitivity value
-  int pitchWheelSensitivity() const noexcept { return pitchWheelSensitivity_; }
+  inline int pitchWheelSensitivity() const noexcept { return pitchWheelSensitivity_; }
 
   /**
    Set the continuous controller value.
@@ -96,7 +98,9 @@ public:
    @param cc the controller ID to get
    @returns the controller value
    */
-  uint8_t continuousControllerValue(MIDI::ControlChange cc) const noexcept { return continuousControllerValues_[cc]; }
+  inline uint8_t continuousControllerValue(MIDI::ControlChange cc) const noexcept {
+    return continuousControllerValues_[cc];
+  }
 
   /**
    Get the NRPN value for associated with a generator.
@@ -104,13 +108,13 @@ public:
    @param index the generator ID to fetch
    @returns the NRPN value for the generator
    */
-  int nrpnValue(Entity::Generator::Index index) const noexcept { return nrpnValues_[index]; }
+  inline int nrpnValue(Entity::Generator::Index index) const noexcept { return nrpnValues_[index]; }
 
   /// @returns true if currently decoding a generator index
-  bool isActivelyDecoding() const noexcept { return activeDecoding_; }
+  inline bool isActivelyDecoding() const noexcept { return activeDecoding_; }
 
   /// @returns the currently decoded generator index
-  size_t nrpnIndex() const noexcept { return nrpnIndex_; }
+  inline size_t nrpnIndex() const noexcept { return nrpnIndex_; }
 
   /**
    State of control pedals -- those that have ON/OFF values.
@@ -122,7 +126,7 @@ public:
   };
 
   /// @returns current state of control pedals.
-  PedalState pedalState() const noexcept { return pedalState_; }
+  inline PedalState pedalState() const noexcept { return pedalState_; }
 
   void dump() const noexcept;
 

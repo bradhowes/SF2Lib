@@ -116,12 +116,26 @@ let unsafeFlags = [
   "-x", "objective-c++", // treat source files as Obj-C++ files
 ]
 
-// Set to 1 to play audio in tests. Set to 0 to keep silent.
-let playAudio = "0"
-// Set to 1 to enable low-pass filter in sample generation.
-let enableLowPassFilter = "0"
 // Set to 1 to enable C++ bounds checking
 let checkedVectorIndexing = "0"
+// Set to 1 to enable low-pass filter in sample generation (once sound quality bugs are fixed)
+let enableLowPassFilter = "0"
+// Set to 1 to play audio in tests. Set to 0 to keep silent.
+let playAudio = "1"
+// Set to 1 to enable Accelerate framework
+let useAccelerate = "1"
+
+let cxxSettings: [CXXSetting] = [
+  .define("CHECKED_VECTOR_INDEXING", to: checkedVectorIndexing, .none),
+  .define("ENABLE_LOWPASS_FILTER", to: enableLowPassFilter, .none),
+  .define("PLAY_AUDIO", to: playAudio, .none),
+  .define("USE_ACCELERATE", to: useAccelerate, .none),
+  // .unsafeFlags(unsafeFlags)
+]
+
+let swiftSettings: [SwiftSetting] = [
+  .define("APPLICATION_EXTENSION_API_ONLY")
+]
 
 let package = Package(
   name: "SF2Lib",
@@ -153,16 +167,8 @@ let package = Package(
       path: "Sources/SF2Lib",
       resources: [.process("Resources")],
       publicHeadersPath: "include",
-      cxxSettings: [
-        .define("USE_ACCELERATE", to: "1", .none),
-        .define("ENABLE_LOWPASS_FILTER", to: enableLowPassFilter, .none),
-        // Set to 1 to assert if std::vector[] index is invalid
-        .define("CHECKED_VECTOR_INDEXING", to: "0", .none),
-        // .unsafeFlags(unsafeFlags)
-      ],
-      swiftSettings: [
-        .define("APPLICATION_EXTENSION_API_ONLY")
-      ],
+      cxxSettings: cxxSettings,
+      swiftSettings: swiftSettings,
       linkerSettings: [
         .linkedFramework("Accelerate", .none),
         .linkedFramework("AudioToolbox", .none),
@@ -177,14 +183,8 @@ let package = Package(
       ],
       path: "Sources/SF2File",
       publicHeadersPath: "include",
-      cxxSettings: [
-        .define("USE_ACCELERATE", to: "1", .none),
-        // Set to 1 to assert if std::vector[] index is invalid
-        .define("CHECKED_VECTOR_INDEXING", to: "0", .none),
-      ],
-      swiftSettings: [
-        .define("APPLICATION_EXTENSION_API_ONLY")
-      ],
+      cxxSettings: cxxSettings,
+      swiftSettings: swiftSettings,
       linkerSettings: [
         .linkedFramework("AudioToolbox", .none),
         .linkedFramework("AVFoundation", .none),
@@ -197,13 +197,8 @@ let package = Package(
       ],
       path: "Sources/SF2Util",
       publicHeadersPath: "include",
-      cxxSettings: [
-        // Set to 1 to assert if std::vector[] index is invalid
-        .define("CHECKED_VECTOR_INDEXING", to: "0", .none),
-      ],
-      swiftSettings: [
-        .define("APPLICATION_EXTENSION_API_ONLY")
-      ],
+      cxxSettings: cxxSettings,
+      swiftSettings: swiftSettings,
       linkerSettings: [
         .linkedFramework("AudioToolbox", .none),
         .linkedFramework("AVFoundation", .none),
@@ -218,27 +213,17 @@ let package = Package(
       path: "Sources/TestUtils",
       resources: [.process("Resources")],
       publicHeadersPath: "",
-      cxxSettings: [
-        // Set to 1 to play audio in tests. Set to 0 to keep silent.
-        .define("ENABLE_LOWPASS_FILTER", to: enableLowPassFilter, .none),
-        .define("PLAY_AUDIO", to: playAudio, .none),
-      ]
+      cxxSettings: cxxSettings
     ),
     .testTarget(
       name: "EngineTests",
       dependencies: ["Engine", "TestUtils"],
-      cxxSettings: [
-        // Set to 1 to play audio in tests. Set to 0 to keep silent.
-        .define("ENABLE_LOWPASS_FILTER", to: enableLowPassFilter, .none),
-        .define("PLAY_AUDIO", to: playAudio, .none),
-      ]
+      cxxSettings: cxxSettings
     ),
     .testTarget(
       name: "SF2LibTests",
       dependencies: ["SF2Lib", "TestUtils"],
-      cxxSettings: [
-        .define("ENABLE_LOWPASS_FILTER", to: enableLowPassFilter, .none),
-        .define("PLAY_AUDIO", to: playAudio, .none),
+      cxxSettings: cxxSettings + [
         .unsafeFlags([
           "-Wno-newline-eof", // resource_bundle_accessor.h is missing newline at end of file
         ], .none)

@@ -28,10 +28,10 @@ public:
 
   void clear() noexcept;
 
-  bool empty() const noexcept { return presets_.empty(); }
+  inline bool empty() const noexcept { return presets_.empty(); }
 
   /// @returns the number of presets in the collection.
-  size_t size() const noexcept { return presets_.size(); }
+  inline size_t size() const noexcept { return presets_.size(); }
 
   /// @returns the preset at a given index.
   const Preset& operator[](size_t index) const noexcept;

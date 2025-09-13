@@ -79,21 +79,21 @@ public:
   explicit Source(CC cc) noexcept : bits_{static_cast<uint16_t>((cc.value & indexMask) | ccBit)} {}
 
   /// Generate new Source that flows in the increasing direction
-  Source positive() const noexcept { return Source(bits_ & ~directionBit); }
+  inline Source positive() const noexcept { return Source(bits_ & ~directionBit); }
   /// Generate new Source that flows in the decreasing direction
-  Source negative() const noexcept { return Source(bits_ |  directionBit); }
+  inline Source negative() const noexcept { return Source(bits_ |  directionBit); }
   /// Generate new Source that is unipolar [0 - 1]
-  Source unipolar() const noexcept { return Source(bits_ & ~polarityBit); }
+  inline Source unipolar() const noexcept { return Source(bits_ & ~polarityBit); }
   /// Generate new Source that is bipolar [-1 - +1]
-  Source bipolar()  const noexcept { return Source(bits_ |  polarityBit); }
+  inline Source bipolar()  const noexcept { return Source(bits_ |  polarityBit); }
   /// Generate new Source that is linear
-  Source linear() noexcept { return continuity(ContinuityType::linear); }
+  inline Source linear() noexcept { return continuity(ContinuityType::linear); }
   /// Generate new Source that is concave
-  Source concave() noexcept { return continuity(ContinuityType::concave); }
+  inline Source concave() noexcept { return continuity(ContinuityType::concave); }
   /// Generate new Source that is convex
-  Source convex() noexcept { return continuity(ContinuityType::convex); }
+  inline Source convex() noexcept { return continuity(ContinuityType::convex); }
   /// Generate new Source that is gated (either 0/-1 or 1)
-  Source switched() noexcept { return continuity(ContinuityType::switched); }
+  inline Source switched() noexcept { return continuity(ContinuityType::switched); }
 
   /// @returns true if the source is valid
   bool isValid() const noexcept {
@@ -110,55 +110,55 @@ public:
   }
 
   /// @returns true if the source is a continuous controller (CC)
-  bool isContinuousController() const noexcept { return (bits_ & ccBit) ? true : false; }
+  inline bool isContinuousController() const noexcept { return (bits_ & ccBit) ? true : false; }
   /// @returns true if the source is a general controller
-  bool isGeneralController() const noexcept { return !isContinuousController(); }
+  inline bool isGeneralController() const noexcept { return !isContinuousController(); }
   /// @returns true if the source acts in a unipolar manner
-  bool isUnipolar() const noexcept { return polarity() == 0; }
+  inline bool isUnipolar() const noexcept { return polarity() == 0; }
   /// @returns true if the source acts in a bipolar manner
-  bool isBipolar() const noexcept { return !isUnipolar(); }
+  inline bool isBipolar() const noexcept { return !isUnipolar(); }
   /// @returns true if the source values go from small to large as the controller goes from min to max
-  bool isPositive() const noexcept { return direction() == 0; }
+  inline bool isPositive() const noexcept { return direction() == 0; }
   /// @returns true if the source values go from large to small as the controller goes from min to max
-  bool isNegative() const noexcept { return !isPositive(); }
+  inline bool isNegative() const noexcept { return !isPositive(); }
 
   /// @returns the index of the general controller
-  GeneralIndex generalIndex() const noexcept { return GeneralIndex(rawIndex()); }
+  inline GeneralIndex generalIndex() const noexcept { return GeneralIndex(rawIndex()); }
 
   /// @returns largest value the controller will return.
-  ControllerRange controllerRange() const noexcept {
+  inline ControllerRange controllerRange() const noexcept {
     if (!isContinuousController() && generalIndex() == GeneralIndex::pitchWheel) return ControllerRange::_8192;
     return ControllerRange::_128;
   }
 
   /// @returns the index of the continuous controller
-  CC ccIndex() const noexcept { return CC(rawIndex()); }
+  inline CC ccIndex() const noexcept { return CC(rawIndex()); }
 
   /// @returns the continuity type for the controller values
-  ContinuityType type() const noexcept { return ContinuityType(rawType()); }
+  inline ContinuityType type() const noexcept { return ContinuityType(rawType()); }
 
   /// @returns the name of the continuity type
   std::string continuityTypeName() const noexcept { return isValid() ? std::string(typeNames[rawType()]) : "N/A"; }
   /// @returns a description of the Source
   std::string description() const noexcept;
 
-  bool operator ==(const Source& rhs) const noexcept { return bits_ == rhs.bits_; }
-  bool operator !=(const Source& rhs) const noexcept { return bits_ != rhs.bits_; }
+  inline bool operator ==(const Source& rhs) const noexcept { return bits_ == rhs.bits_; }
+  inline bool operator !=(const Source& rhs) const noexcept { return bits_ != rhs.bits_; }
 
   friend std::ostream& operator<<(std::ostream& os, const Source& mod) noexcept;
 
 private:
 
-  Source continuity(ContinuityType continuity) const noexcept {
+  inline Source continuity(ContinuityType continuity) const noexcept {
     return Source(static_cast<uint16_t>((bits_ & 0x3FF) | (uint16_t(continuity) << 10)));
   }
 
   static inline const char* typeNames[] = { "linear", "concave", "convex", "switched" };
 
-  uint16_t rawIndex() const noexcept { return bits_ & indexMask; }
-  uint16_t rawType() const noexcept { return bits_ >> 10; }
-  uint16_t polarity() const noexcept { return bits_ & polarityBit; }
-  uint16_t direction() const noexcept { return bits_ & directionBit; }
+  inline uint16_t rawIndex() const noexcept { return bits_ & indexMask; }
+  inline uint16_t rawType() const noexcept { return bits_ >> 10; }
+  inline uint16_t polarity() const noexcept { return bits_ & polarityBit; }
+  inline uint16_t direction() const noexcept { return bits_ & directionBit; }
 
   uint16_t bits_{};
 };

@@ -29,16 +29,16 @@ public:
   Amount() = default;
 
   /// @returns unsigned integer value
-  uint16_t unsignedAmount() const noexcept { return raw_.wAmount; }
+  inline uint16_t unsignedAmount() const noexcept { return raw_.wAmount; }
 
   /// @returns signed integer value
-  int16_t signedAmount() const noexcept { return raw_.shAmount; }
+  inline int16_t signedAmount() const noexcept { return raw_.shAmount; }
 
   /// @returns low value of a range (0-255)
-  int low() const noexcept { return int(raw_.ranges[0]); }
+  inline int low() const noexcept { return int(raw_.ranges[0]); }
 
   /// @returns high value of a range (0-255)
-  int high() const noexcept { return int(raw_.ranges[1]); }
+  inline int high() const noexcept { return int(raw_.ranges[1]); }
 
 private:
 

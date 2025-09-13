@@ -16,7 +16,9 @@ class Engine;
 /**
  Collection of AUParameter definitions which are used to generate an AUParameterTree for controlling SF2 generators
  while rendering. There are two sets of parameters: global settings for the engine, and settings that affect the state
- of a voice/instrument that is rendering audio.
+ of a voice/instrument that is rendering audio. The parameter ID for the global settings are found in the
+ `EngineParameterAddress` enum, while the SF2 generator parameter IDs match those of the SF2 generator enum found in
+ `SF2::Entity::Generator`.
  */
 class Parameters
 {

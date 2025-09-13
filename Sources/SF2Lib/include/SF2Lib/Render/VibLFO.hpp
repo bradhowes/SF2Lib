@@ -18,14 +18,14 @@ public:
     const Float val;
   };
 
-  VibLFO(Float sampleRate) noexcept : LFO(sampleRate, "ModLFO") {}
+  explicit VibLFO(Float sampleRate) noexcept : LFO(sampleRate, "ModLFO") {}
 
   /**
    Configure the vibrato LFO using the state parameters.
 
    @param state the state parameters to use
    */
-  void configure(Voice::State::State& state) noexcept {
+  inline void configure(Voice::State::State& state) noexcept {
     LFO::configure(state.sampleRate(),
                    DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyVibratoLFO)),
                    DSP::centsToSeconds(state.modulated(Entity::Generator::Index::delayVibratoLFO)));
@@ -46,7 +46,7 @@ public:
   inline Value value() const noexcept { return {LFO::value()}; }
 
 private:
-  VibLFO(Float sampleRate, Float frequency, Float delay) : LFO(sampleRate, "ModLFO", frequency, delay) {}
+  VibLFO(Float sampleRate, Float frequency, Float delay) : LFO(sampleRate, "VibLFO", frequency, delay) {}
 
   friend struct LFOTestInjector;
 };
