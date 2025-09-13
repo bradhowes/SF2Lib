@@ -52,14 +52,14 @@ public:
 
    @returns collection count
    */
-  size_t size() const noexcept { return items_.size() - 1; }
+  inline size_t size() const noexcept { return items_.size() - 1; }
 
   /**
    Determine if collection is empty
 
    @returns true if so
    */
-  bool empty() const noexcept { return items_.size() < 2; }
+  inline bool empty() const noexcept { return items_.size() < 2; }
 
   /**
    Obtain a (read-only) reference to an entity in the collection.
@@ -67,7 +67,7 @@ public:
    @param index the entity to fetch
    @returns entity reference
    */
-  const ItemType& operator[](size_t index) const noexcept { return checkedVectorIndexing(items_, index); }
+  inline const ItemType& operator[](size_t index) const noexcept { return checkedVectorIndexing(items_, index); }
 
   /**
    Obtain a read-only slice of the original collection. This is used to parcel out a run of values from a collection
@@ -87,10 +87,10 @@ public:
   }
 
   /// @returns iterator to the start of the collection
-  const_iterator begin() const noexcept { return items_.begin(); }
+  inline const_iterator begin() const noexcept { return items_.begin(); }
 
   /// @returns iterator at the end of the collection
-  const_iterator end() const noexcept { return items_.end() - 1; }
+  inline const_iterator end() const noexcept { return items_.end() - 1; }
 
   /**
    Utility to dump out the contents of the collection

@@ -25,10 +25,10 @@ struct Closer
   ~Closer() { if (is_valid()) ::close(fd_); }
 
   /// returns the held file descriptor
-  int operator *() const { return fd_; }
+  inline int operator *() const { return fd_; }
 
   /// returns true if the held file descriptor is not -1
-  bool is_valid() const { return fd_ != -1; }
+  inline bool is_valid() const { return fd_ != -1; }
 
   /**
    Release ownership of the held file descriptor.

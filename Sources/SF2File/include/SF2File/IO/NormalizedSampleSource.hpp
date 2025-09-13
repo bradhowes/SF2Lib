@@ -30,8 +30,7 @@ public:
   header_{header},
   span_(std::ranges::next(allSamples.begin(), long(header.startIndex())),
         std::ranges::next(allSamples.begin(), long(header.endIndex() + sizePaddingAfterEnd)))
-  {
-  }
+  {}
 
   /// @returns number of samples in the canonical representation
   size_t size() const noexcept { return span_.size(); }
@@ -47,7 +46,7 @@ public:
   inline Float operator[](size_t index) const noexcept { return span_[index]; }
 
   /// @returns the sample header ('shdr') of the sample stream being rendered
-  const Entity::SampleHeader& header() const noexcept { return header_; }
+  inline const Entity::SampleHeader& header() const noexcept { return header_; }
 
 private:
   const Entity::SampleHeader& header_;

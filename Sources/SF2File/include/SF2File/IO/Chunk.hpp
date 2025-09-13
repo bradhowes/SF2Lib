@@ -27,19 +27,19 @@ public:
   Chunk(Tag tag, uint32_t size, Pos pos);
 
   /// @returns the Tag type for the chunk
-  Tag tag() const noexcept { return tag_; }
+  inline Tag tag() const noexcept { return tag_; }
 
   /// @returns the size of the chunk data
-  size_t size() const noexcept { return size_; }
+  inline size_t size() const noexcept { return size_; }
 
   /// @returns the location of the first byte of the chunk data
-  Pos begin() const noexcept { return pos_; }
+  inline Pos begin() const noexcept { return pos_; }
 
   /// @returns the location after the last byte of the chunk data
-  Pos end() const noexcept { return pos_.advance(size_); }
+  inline Pos end() const noexcept { return pos_.advance(size_); }
 
   /// @returns the file position of the next chunk in the file after this one
-  Pos advance() const noexcept { return pos_.advance(paddedSize()); }
+  inline Pos advance() const noexcept { return pos_.advance(paddedSize()); }
 
   /**
    Treat the chunk data as a string of ASCII characters with a max length of 256 characters. The result is sanitized:
@@ -50,7 +50,7 @@ public:
   std::string extract() const noexcept;
 
 private:
-  uint32_t paddedSize() const noexcept { return size_ + (size_ & 1); }
+  inline uint32_t paddedSize() const noexcept { return size_ + (size_ & 1); }
 
   Tag const tag_;
   uint32_t const size_;

@@ -66,10 +66,10 @@ struct Pos {
   Pos readInto(void* buffer, size_t count) const;
 
   /// @returns the file offset represented by this instance
-  off_t offset() const noexcept { return pos_; }
+  inline off_t offset() const noexcept { return pos_; }
 
   /// @returns number of bytes available to read at this position in the file.
-  off_t available() const noexcept { return end_ - pos_; }
+  inline off_t available() const noexcept { return end_ - pos_; }
 
   /**
    Calculate new Pos value after advancing `offset` bytes forward.
@@ -80,7 +80,7 @@ struct Pos {
   Pos advance(off_t offset) const noexcept;
 
   /// @returns true if Pos is invalid
-  explicit operator bool() const noexcept { return fd_ < 0 || pos_ >= end_; }
+  inline explicit operator bool() const noexcept { return fd_ < 0 || pos_ >= end_; }
 
   /// @returns true if first Pos value is less than the second one
   friend bool operator <(const Pos& lhs, const Pos& rhs) noexcept { return lhs.pos_ < rhs.pos_; }

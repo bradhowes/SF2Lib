@@ -77,13 +77,13 @@ public:
   Tag(Tags tag) noexcept : tag_{SF2::valueOf(tag)} {}
 
   /// @returns the underlying raw value of the tag
-  uint32_t rawValue() const noexcept { return tag_; }
+  inline uint32_t rawValue() const noexcept { return tag_; }
 
   /// @returns Tags enum  value for this tag
-  Tags toTags() const noexcept { return Tags(tag_); }
+  inline Tags toTags() const noexcept { return Tags(tag_); }
 
   /// @returns the 4-character text representation of the tag
-  std::string toString() const noexcept { return std::string(reinterpret_cast<char const*>(&tag_), 4); }
+  inline std::string toString() const noexcept { return std::string(reinterpret_cast<char const*>(&tag_), 4); }
 
   /**
    Compare another Tag instance with this one for equality.
@@ -91,7 +91,7 @@ public:
    @param rhs the other value to compare against
    @returns true if the same
    */
-  bool operator ==(const Tag& rhs) const noexcept { return tag_ == rhs.tag_; }
+  inline bool operator ==(const Tag& rhs) const noexcept { return tag_ == rhs.tag_; }
 
   /**
    Compare another Tag instance with this one for inequality.
@@ -99,7 +99,7 @@ public:
    @param rhs the other value to compare against
    @returns true if not the same
    */
-  bool operator !=(const Tag& rhs) const noexcept { return tag_ != rhs.tag_; }
+  inline bool operator !=(const Tag& rhs) const noexcept { return tag_ != rhs.tag_; }
 
 private:
   uint32_t tag_;

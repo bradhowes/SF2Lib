@@ -95,6 +95,11 @@ File::load() noexcept
     return presets_[aIndex] < presets_[bIndex];
   });
 
+  // Force the conversion of the samples now instead of at first-use.
+  // TODO: consider moving to on-demand conversion to speed up load and reduce
+  // memory pressure.
+  sampleSourceCollection();
+
   fd_ = fd.release();
   return LoadResponse::ok;
 }
@@ -111,7 +116,7 @@ File::sampleSourceCollection()
 
 void
 File::extractNormalizedSamples() {
-  static const size_t batchSampleCount = 40 * 1024;
+  static const size_t batchSampleCount = 32 * 1024;
   static const Float normalizationScale = 1.0_F / Float(1 << 15);
 
   auto pos = sampleDataBegin_;
