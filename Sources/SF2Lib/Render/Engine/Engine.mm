@@ -8,13 +8,14 @@
 #include "SF2Lib/Render/Engine/Engine.hpp"
 #include "SF2File/IO/File.hpp"
 
+using namespace SF2::Entity::Generator;
 using namespace SF2::Render::Engine;
 
 Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
                size_t minimumNoteDurationMilliseconds) noexcept : super("Engine"),
 sampleRate_{sampleRate},
 minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
-parameters_{*this},
+parameters_{},
 oldestVoiceIndices_{voiceCount},
 log_{Log::create("Engine")},
 renderSignpost_{os_signpost_id_generate(log_)},
@@ -29,6 +30,8 @@ stopVoiceSignpost_{os_signpost_id_generate(log_)}
   for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex) {
     voices_.emplace_back(sampleRate, channelState_, voiceIndex, interpolator);
   }
+
+  makeTree();
 }
 
 void
@@ -185,25 +188,25 @@ Engine::doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount durati
     parameters_.setLiveValue(index, value);
     notifyParameterChanged(index);
     return duration;
-  } else if (rawIndex >= valueOf(Parameters::EngineParameterAddress::firstEngineParameterAddress) &&
-             rawIndex < valueOf(Parameters::EngineParameterAddress::lastEngineParameterAddressPlusOne)) {
-    auto address = Parameters::EngineParameterAddress(rawIndex);
+  } else if (rawIndex >= valueOf(ParameterAddress::firstParameterAddress) &&
+             rawIndex < valueOf(ParameterAddress::lastParameterAddressPlusOne)) {
+    auto address = ParameterAddress(rawIndex);
     switch (address) {
-      case Parameters::EngineParameterAddress::portamentoModeEnabled:
+      case ParameterAddress::portamentoModeEnabled:
         setPortamentoModeEnabled(SF2::toBool(value));
         break;
-      case Parameters::EngineParameterAddress::portamentoRate:
+      case ParameterAddress::portamentoRate:
         setPortamentoRate(size_t(value));
         break;
-      case Parameters::EngineParameterAddress::oneVoicePerKeyModeEnabled:
+      case ParameterAddress::oneVoicePerKeyModeEnabled:
         setOneVoicePerKeyModeEnabled(SF2::toBool(value));
         break;
-      case Parameters::EngineParameterAddress::polyphonicModeEnabled:
+      case ParameterAddress::polyphonicModeEnabled:
         setPhonicMode(SF2::toBool(value) ? Engine::PhonicMode::poly : Engine::PhonicMode::mono);
         break;
-      case Parameters::EngineParameterAddress::activeVoiceCount:
+      case ParameterAddress::activeVoiceCount:
         break;
-      case Parameters::EngineParameterAddress::retriggerModeEnabled:
+      case ParameterAddress::retriggerModeEnabled:
         setRetriggerModeEnabled(SF2::toBool(value));
         break;
       default:
@@ -376,7 +379,7 @@ void
 Engine::notifyParameterChanged(Entity::Generator::Index index) noexcept
 {
   visitActiveVoice([&](Voice& voice, const Voice::ReleaseKeyState&) {
-    parameters_.applyOne(voice.state(), index);
+    parameters_.applyOneGenerator(voice.state(), index);
   });
 }
 
@@ -548,6 +551,7 @@ Engine::startVoice(const Config& config) noexcept
   voices_[voiceIndex].configure(config);
   parameters_.applyChanged(voices_[voiceIndex].state());
   voices_[voiceIndex].start();
+  updateActiveVoiceCount();
   os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice", "");
 }
 
@@ -559,7 +563,16 @@ Engine::stopVoice(size_t voiceIndex) noexcept
   voices_[voiceIndex].stop();
   auto pos = oldestVoiceIndices_.voiceRelease(voiceIndex);
   os_signpost_interval_end(log_, stopVoiceSignpost_, "stopVoice", "");
+  updateActiveVoiceCount();
   return pos;
+}
+
+void
+Engine::updateActiveVoiceCount() noexcept
+{
+  auto value = oldestVoiceIndices_.active();
+  os_log_info(log_, "updateActiveVoiceCount - %ld", value);
+  [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::activeVoiceCount)] setValue: value];
 }
 
 void
@@ -567,4 +580,236 @@ Engine::reset() noexcept
 {
   allOff();
   channelState_.reset();
+}
+
+void
+Engine::parameterValueChanged(AUParameter* parameter, AUValue value) noexcept
+{
+  os_log_info(log_, "parameterValueChanged - %llu %s %f", parameter.address, parameter.identifier.UTF8String, value);
+  auto rawIndex = parameter.address;
+  if (rawIndex < 0) return;
+  if (rawIndex < valueOf(Index::numValues)) {
+    parameters_.setLiveValue(Index(rawIndex), value);
+  } else if (rawIndex >= valueOf(ParameterAddress::firstParameterAddress) &&
+             rawIndex < valueOf(ParameterAddress::lastParameterAddressPlusOne)) {
+    auto address = ParameterAddress(rawIndex);
+    switch (address) {
+      case ParameterAddress::portamentoModeEnabled:
+        setPortamentoModeEnabled(SF2::toBool(value));
+        break;
+      case ParameterAddress::portamentoRate:
+        setPortamentoRate(value);
+        break;
+      case ParameterAddress::oneVoicePerKeyModeEnabled:
+        setOneVoicePerKeyModeEnabled(SF2::toBool(value));
+        break;
+      case ParameterAddress::polyphonicModeEnabled:
+        setPhonicMode(SF2::toBool(value) ?
+                      SF2::Render::Engine::Engine::PhonicMode::poly :
+                      SF2::Render::Engine::Engine::PhonicMode::mono);
+        break;
+      case ParameterAddress::retriggerModeEnabled:
+        setRetriggerModeEnabled(SF2::toBool(value));
+        break;
+      default: break;
+    }
+  }
+}
+
+AUValue
+Engine::provideParameterValue(AUParameter* parameter) const noexcept
+{
+  auto rawIndex = parameter.address;
+  AUValue value;
+  if (rawIndex < 0) {
+    value = 0.0;
+  }
+  else if (rawIndex < valueOf(Index::numValues)) {
+    auto index = Index(rawIndex);
+    const auto& def = Definition::definition(index);
+    value = def.clamp(parameters_.getLiveValue(index));
+  } else if (rawIndex >= valueOf(ParameterAddress::firstParameterAddress) &&
+             rawIndex < valueOf(ParameterAddress::lastParameterAddressPlusOne)) {
+    auto address = ParameterAddress(rawIndex);
+    switch (address) {
+      case ParameterAddress::portamentoModeEnabled:
+        value = SF2::fromBool(portamentoModeEnabled());
+        break;
+      case ParameterAddress::portamentoRate:
+        value = portamentoRate();
+        break;
+      case ParameterAddress::oneVoicePerKeyModeEnabled:
+        value = SF2::fromBool(oneVoicePerKeyModeEnabled());
+        break;
+      case ParameterAddress::polyphonicModeEnabled:
+        value = SF2::fromBool(polyphonicModeEnabled());
+        break;
+      case ParameterAddress::activeVoiceCount:
+        return oldestVoiceIndices_.active();
+        break;
+      case ParameterAddress::retriggerModeEnabled:
+        value = SF2::fromBool(retriggerModeEnabled());
+        break;
+      case ParameterAddress::isRendering:
+        return isRendering();
+        break;
+      case ParameterAddress::activeProgramIndex:
+        value = activeProgramIndex();
+        break;
+      case ParameterAddress::activeBankIndex:
+        value = activeBankIndex();
+        break;
+      case ParameterAddress::activePresetIndex:
+        value = activePresetIndex();
+        break;
+      default: break;
+    }
+  }
+
+  os_log_info(log_, "provideValue - %llu %s %f", parameter.address, parameter.identifier.UTF8String, value);
+  return value;
+}
+
+AUParameter*
+Engine::makeGeneratorParameter(Index index) noexcept
+{
+  const auto& definition = Definition::definition(index);
+  NSString* name = [NSString stringWithUTF8String:definition.name().data()];
+  return [AUParameterTree createParameterWithIdentifier:name
+                                                   name:name
+                                                address:AUParameterAddress(valueOf(index))
+                                                    min:AUValue(definition.valueRange().min)
+                                                    max:AUValue(definition.valueRange().max)
+                                                   unit:AudioUnitParameterUnit::kAudioUnitParameterUnit_Generic
+                                               unitName:nullptr
+                                                  flags:0
+                                           valueStrings:nullptr
+                                    dependentParameters:nullptr];
+}
+
+AUParameter*
+Engine::makeBooleanParameter(NSString* name, ParameterAddress address, bool value) noexcept
+{
+  auto flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable;
+  auto param = [AUParameterTree createParameterWithIdentifier:name
+                                                         name:name
+                                                      address:valueOf(address)
+                                                          min:0
+                                                          max:1
+                                                         unit:kAudioUnitParameterUnit_Boolean
+                                                     unitName:nullptr
+                                                        flags:flags
+                                                 valueStrings:nullptr
+                                          dependentParameters:nullptr];
+  param.value = fromBool(value);
+  return param;
+}
+
+void
+Engine::makeTree() noexcept
+{
+  os_log_info(log_, "makeTree");
+
+  // This is a bit too large due to various unused generators found in the spec.
+  auto capacity = NSUInteger(valueOf(Index::numValues) + engineParameterCount);
+  auto definitions = [[NSMutableArray alloc] initWithCapacity:capacity];
+
+  // Add definitions for all generators that are used by the SF2Lib engine
+  for (auto index : IndexIterator()) {
+    const auto& definition = Definition::definition(index);
+    if (definition.valueKind() == Definition::ValueKind::UNUSED) {
+      continue;
+    }
+
+    auto param = makeGeneratorParameter(index);
+    [definitions addObject:param];
+  }
+
+  // Add definitions for the MIDI continuous controllers (CC) defined in the SF2 spec that can affect SF2Lib engine
+  // rendering.
+  [definitions addObject:makeBooleanParameter(@"portamentoModeEnabled",
+                                              ParameterAddress::portamentoModeEnabled,
+                                              portamentoModeEnabled())];
+  [definitions addObject:makeBooleanParameter(@"oneVoicePerKeyModeEnabled",
+                                              ParameterAddress::oneVoicePerKeyModeEnabled,
+                                              oneVoicePerKeyModeEnabled())];
+  [definitions addObject:makeBooleanParameter(@"polyphonicModeEnabled",
+                                              ParameterAddress::polyphonicModeEnabled,
+                                              polyphonicModeEnabled())];
+  [definitions addObject:makeBooleanParameter(@"retriggerModeEnabled",
+                                              ParameterAddress::retriggerModeEnabled,
+                                              retriggerModeEnabled())];
+  [definitions addObject: makeBooleanParameter(@"isRendering",
+                                               ParameterAddress::isRendering,
+                                               isRendering())];
+
+  auto flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable;
+  auto param = [AUParameterTree createParameterWithIdentifier:@"portamentoRate"
+                                                         name:@"portamentoRate"
+                                                      address:valueOf(ParameterAddress::portamentoRate)
+                                                          min:0
+                                                          max:60000
+                                                         unit:kAudioUnitParameterUnit_Milliseconds
+                                                     unitName:nullptr
+                                                        flags:flags
+                                                 valueStrings:nullptr
+                                          dependentParameters:nullptr];
+  param.value = portamentoRate();
+  [definitions addObject:param];
+
+  flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_MeterReadOnly;
+
+  [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"activeVoiceCount"
+                                                                         name:@"activeVoiceCount"
+                                                                      address:valueOf(ParameterAddress::activeVoiceCount)
+                                                                          min:0
+                                                                          max:voiceCount()
+                                                                         unit:kAudioUnitParameterUnit_Generic
+                                                                     unitName:nullptr
+                                                                        flags:flags
+                                                                 valueStrings:nullptr
+                                                          dependentParameters:nullptr]];
+
+  [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"activeProgramIndex"
+                                                                   name:@"activeProgramIndex"
+                                                                address:valueOf(ParameterAddress::activeProgramIndex)
+                                                                    min:0
+                                                                    max:127
+                                                                   unit:kAudioUnitParameterUnit_Generic
+                                                               unitName:nullptr
+                                                                  flags:flags
+                                                           valueStrings:nullptr
+                                                    dependentParameters:nullptr]];
+
+  [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"activeBankIndex"
+                                                                   name:@"activeBankIndex"
+                                                                address:valueOf(ParameterAddress::activeBankIndex)
+                                                                    min:0
+                                                                    max:127
+                                                                   unit:kAudioUnitParameterUnit_Generic
+                                                               unitName:nullptr
+                                                                  flags:flags
+                                                           valueStrings:nullptr
+                                                    dependentParameters:nullptr]];
+
+  [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"activePresetIndex"
+                                                                   name:@"activePresetIndex"
+                                                                address:valueOf(ParameterAddress::activePresetIndex)
+                                                                    min:0
+                                                                    max:65535
+                                                                   unit:kAudioUnitParameterUnit_Generic
+                                                               unitName:nullptr
+                                                                  flags:flags
+                                                           valueStrings:nullptr
+                                                    dependentParameters:nullptr]];
+
+  parameterTree_ = [AUParameterTree createTreeWithChildren:definitions];
+
+  parameterTree_.implementorValueObserver = ^(AUParameter* parameter, AUValue value) {
+    parameterValueChanged(parameter, value);
+  };
+
+  parameterTree_.implementorValueProvider = ^(AUParameter* parameter) {
+    return provideParameterValue(parameter);
+  };
 }

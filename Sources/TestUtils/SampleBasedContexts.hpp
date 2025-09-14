@@ -11,8 +11,8 @@
 
 #include "SF2File/IO/File.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
+#include "SF2Lib/Render/Engine/LiveGeneratorParameters.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
-#include "SF2Lib/Render/Engine/Parameters.hpp"
 #include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Preset.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
@@ -29,6 +29,7 @@ struct TestEngineHarness {
   {
     format_ = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
     engine_.setRenderingFormat(3, format_, 512);
+    engine_.makeTree();
   }
 
   Mixer createMixer(int seconds) noexcept
@@ -151,7 +152,7 @@ struct TestEngineHarness {
     engine_.doMIDIEvent(midiEvent);
   }
 
-  void setParameter(SF2::Render::Engine::Parameters::EngineParameterAddress address, AUValue value) noexcept {
+  void setParameter(SF2::Render::Engine::Engine::ParameterAddress address, AUValue value) noexcept {
     auto event = AUParameterEvent();
     event.parameterAddress = SF2::valueOf(address);
     event.value = value;

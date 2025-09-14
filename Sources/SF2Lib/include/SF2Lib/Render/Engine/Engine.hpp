@@ -16,8 +16,8 @@
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/MIDI/GeneratorOverride.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
+#include "SF2Lib/Render/Engine/LiveGeneratorParameters.hpp"
 #include "SF2Lib/Render/Engine/OldestVoiceCollection.hpp"
-#include "SF2Lib/Render/Engine/Parameters.hpp"
 #include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
 
@@ -48,6 +48,31 @@ public:
   using Interpolator = Render::Voice::Sample::Interpolator;
 
   /**
+   Enumeration of engine-specific (global) parameters
+   */
+  enum struct ParameterAddress : AUParameterAddress
+  {
+    // Pretty sure this is large enough to never overlap with SF generator indices now and in the future
+    // (SoundFont spec v2.01 defines 59)
+    firstParameterAddress = 1000,
+    portamentoModeEnabled = firstParameterAddress,
+    portamentoRate,
+    oneVoicePerKeyModeEnabled, // aka mono
+    polyphonicModeEnabled,
+    activeVoiceCount,
+    retriggerModeEnabled,
+    isRendering,
+    activeProgramIndex,
+    activeBankIndex,
+    activePresetIndex,
+    lastParameterAddressPlusOne
+  };
+
+  /// Number of engine parameters to be found in the AUParameterTree
+  static constexpr size_t engineParameterCount = (valueOf(ParameterAddress::lastParameterAddressPlusOne) -
+                                                  valueOf(ParameterAddress::firstParameterAddress));
+
+  /**
    Construct new engine and its voices.
 
    @param sampleRate the expected sample rate to use
@@ -58,13 +83,13 @@ public:
   Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
          size_t minimumNoteDurationMilliseconds = 10) noexcept;
 
-  size_t minimumNoteDurationSamples() const noexcept
+  inline size_t minimumNoteDurationSamples() const noexcept
   {
     return static_cast<size_t>(ceil(minimumNoteDurationMilliseconds_ / 1000_F * sampleRate_));
   }
 
   /// @returns maximum number of voices available for simultaneous rendering
-  size_t voiceCount() const noexcept { return voices_.size(); }
+  inline size_t voiceCount() const noexcept { return voices_.size(); }
 
   /**
    Update kernel and buffers to support the given format and channel count
@@ -75,13 +100,13 @@ public:
   void setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept;
 
   /// @returns the current sample rate
-  Float sampleRate() const noexcept { return sampleRate_; }
+  inline Float sampleRate() const noexcept { return sampleRate_; }
 
   /// @returns the MIDI channel state assigned to the engine
-  MIDI::ChannelState& channelState() noexcept { return channelState_; }
+  inline MIDI::ChannelState& channelState() noexcept { return channelState_; }
 
   /// @returns the MIDI channel state assigned to the engine
-  const MIDI::ChannelState& channelState() const noexcept { return channelState_; }
+  inline const MIDI::ChannelState& channelState() const noexcept { return channelState_; }
 
   /// @returns true if there is an active preset
   bool hasActivePreset() const noexcept;
@@ -96,10 +121,10 @@ public:
   int activePresetIndex() const noexcept;
 
   /// @returns number of presets available.
-  size_t presetCount() const noexcept { return presets_.size(); }
+  inline size_t presetCount() const noexcept { return presets_.size(); }
 
   /// @return the number of active voices
-  size_t activeVoiceCount() const noexcept { return oldestVoiceIndices_.active(); }
+  inline size_t activeVoiceCount() const noexcept { return oldestVoiceIndices_.active(); }
 
   /**
    Render samples to the given stereo output buffers. The buffers are guaranteed to be able to hold `frameCount`
@@ -131,13 +156,16 @@ public:
   AUAudioFrameCount doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount duration) noexcept;
 
   /// API for EventProcessor
-  void doRenderingStateChanged(bool state) noexcept { if (!state) allOff(); }
+  void doRenderingStateChanged(bool state) noexcept {
+    if (!state) allOff();
+    [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::isRendering)] setValue: SF2::fromBool(state)];
+  }
 
   /// API for EventProcessor
   void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
 
   /// API for EventProcessor
-  void doRendering(DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs, AUAudioFrameCount frameCount) noexcept {
+  inline void doRendering(DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs, AUAudioFrameCount frameCount) noexcept {
     // All of the work is done when working with output bus 0. If wired correctly, busses 1 and 2 will
     // use the buffered values that were created here.
     renderInto(Mixer(outs, busBuffers(1), busBuffers(2)), frameCount);
@@ -151,25 +179,28 @@ public:
   void notifyParameterChanged(Entity::Generator::Index index) noexcept;
 
   /// @returns the AUParameterTree for the engine.
-  AUParameterTree* parameterTree() const noexcept { return parameters_.parameterTree(); }
+  inline AUParameterTree* parameterTree() const noexcept {
+    assert(parameterTree_ !=  nullptr);
+    return parameterTree_;
+  }
 
   /// @returns true if portamento mode is enabled
-  bool portamentoModeEnabled() const noexcept { return portamentoModeEnabled_; }
+  inline bool portamentoModeEnabled() const noexcept { return portamentoModeEnabled_; }
 
   /// @returns the rate of change from one note to another expressed as milliseconds per semitone change
-  size_t portamentoRate() const noexcept { return portamentoRateMillisecondsPerSemitone_; }
+  inline size_t portamentoRate() const noexcept { return portamentoRateMillisecondsPerSemitone_; }
 
   /// @returns true if only one voice will play at the same time for the same MIDI key
-  bool oneVoicePerKeyModeEnabled() const noexcept { return oneVoicePerKeyModeEnabled_; }
+  inline bool oneVoicePerKeyModeEnabled() const noexcept { return oneVoicePerKeyModeEnabled_; }
 
   /// @returns true if a new note ON for the same key will use a new envelopes or will simply inherit the active one.
-  bool retriggerModeEnabled() const noexcept { return retriggerModeEnabled_; }
+  inline bool retriggerModeEnabled() const noexcept { return retriggerModeEnabled_; }
 
   /// @returns true if Engine is in monophonic mode
-  bool monophonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::mono; }
+  inline bool monophonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::mono; }
 
   /// @returns true if Engine is in polyphonic mode (default)
-  bool polyphonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::poly; }
+  inline bool polyphonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::poly; }
 
   /**
    Utility class method that creates a MIDI SysEx command to load a SF2 file at the given path and to activate
@@ -210,17 +241,33 @@ public:
    */
   static std::array<uint8_t, 3> createChannelMessagePayload(MIDI::ControlChange channelMessage, uint8_t value = 0) noexcept;
 
-  static std::array<uint8_t, 3> createAllNotesOffPayload() noexcept
+  inline static std::array<uint8_t, 3> createAllNotesOffPayload() noexcept
   {
     return createChannelMessagePayload(MIDI::ControlChange::allNotesOff);
   }
 
-  static std::array<uint8_t, 3> createAllSoundOffPayload() noexcept
+  inline static std::array<uint8_t, 3> createAllSoundOffPayload() noexcept
   {
     return createChannelMessagePayload(MIDI::ControlChange::allSoundOff);
   }
 
 private:
+  using Index = Entity::Generator::Index;
+
+  static AUParameter* makeGeneratorParameter(Index index) noexcept;
+
+  static AUParameter* makeBooleanParameter(NSString* name, ParameterAddress, bool value) noexcept;
+
+  void parameterValueChanged(AUParameter* parameter, AUValue value) noexcept;
+
+  AUValue provideParameterValue(AUParameter* parameter) const noexcept;
+
+  void updateActiveVoiceCount() noexcept;
+
+  /**
+   Create the audio unit parameter tree.
+   */
+  void makeTree() noexcept;
 
   /**
    Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
@@ -300,7 +347,7 @@ private:
 
    @param value enable portamento mode if true
    */
-  void setPortamentoModeEnabled(bool value) noexcept { portamentoModeEnabled_ = value; }
+  inline void setPortamentoModeEnabled(bool value) noexcept { portamentoModeEnabled_ = value; }
 
   /**
    Set the rate at which the note transitions from the old pitch to the new pitch. This is expressed as milliseconds
@@ -310,7 +357,7 @@ private:
 
    @param value the rate in milliseconds
    */
-  void setPortamentoRate(size_t value) noexcept { portamentoRateMillisecondsPerSemitone_ = value; }
+  inline void setPortamentoRate(size_t value) noexcept { portamentoRateMillisecondsPerSemitone_ = value; }
 
   /**
    Set the "one voice per key" mode. When enabled, playing the same MIDI note will stop any active previous note. When
@@ -320,7 +367,7 @@ private:
 
    @param value enable if true
    */
-  void setOneVoicePerKeyModeEnabled(bool value) noexcept { oneVoicePerKeyModeEnabled_ = value; }
+  inline void setOneVoicePerKeyModeEnabled(bool value) noexcept { oneVoicePerKeyModeEnabled_ = value; }
 
   /**
    Controls the retriggering of the volume and modulation envelopes when pressing the same key.
@@ -329,7 +376,7 @@ private:
 
    @param value enable if true
    */
-  void setRetriggerModeEnabled(bool value) noexcept { retriggerModeEnabled_ = value; }
+  inline void setRetriggerModeEnabled(bool value) noexcept { retriggerModeEnabled_ = value; }
 
   /// The note playing mode of the engine.
   enum class PhonicMode
@@ -345,7 +392,7 @@ private:
 
    @param mode the mode to enter
    */
-  void setPhonicMode(PhonicMode mode) noexcept { phonicMode_ = mode; }
+  inline void setPhonicMode(PhonicMode mode) noexcept { phonicMode_ = mode; }
 
   /**
    Visit each active voice with a method that accepts two parameters: a `Voice` reference and a `ReleaseKeyState`
@@ -410,7 +457,17 @@ private:
   size_t minimumNoteDurationMilliseconds_{0};
 
   MIDI::ChannelState channelState_{};
-  Parameters parameters_;
+  LiveGeneratorParameters parameters_;
+
+  AUParameterTree* parameterTree_;
+
+  // Read-only parameters that reflect the current state of the engine.
+//  AUParameter* activeVoiceCountParameter_{nullptr};
+//  AUParameter* isRenderingParameter_{nullptr};
+//  AUParameter* activeProgramIndex_{nullptr};
+//  AUParameter* activeBankIndex_{nullptr};
+//  AUParameter* activePresetIndex_{nullptr};
+//  AUParameter* lastLoadFinished_{nullptr};
 
   std::vector<Voice> voices_{};
   OldestVoiceCollection<maxVoiceCount> oldestVoiceIndices_;
@@ -421,10 +478,10 @@ private:
 
   size_t portamentoRateMillisecondsPerSemitone_{100};
 
-  std::atomic<PhonicMode> phonicMode_{PhonicMode::poly};
-  std::atomic<bool> oneVoicePerKeyModeEnabled_{false};
-  std::atomic<bool> portamentoModeEnabled_{false};
-  std::atomic<bool> retriggerModeEnabled_{true};
+  PhonicMode phonicMode_{PhonicMode::poly};
+  bool oneVoicePerKeyModeEnabled_{false};
+  bool portamentoModeEnabled_{false};
+  bool retriggerModeEnabled_{true};
 
   const os_log_t log_;
   os_signpost_id_t renderSignpost_;

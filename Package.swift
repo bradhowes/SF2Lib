@@ -121,7 +121,7 @@ let checkedVectorIndexing = "0"
 // Set to 1 to enable low-pass filter in sample generation (once sound quality bugs are fixed)
 let enableLowPassFilter = "0"
 // Set to 1 to play audio in tests. Set to 0 to keep silent.
-let playAudio = "1"
+let playAudio = "0"
 // Set to 1 to enable Accelerate framework
 let useAccelerate = "1"
 
