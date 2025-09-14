@@ -108,7 +108,7 @@ public:
   void configureWith(const Zone::Preset& preset) noexcept;
 
   /**
-   Set a generator value with a value from a MIDI NPRN controller or the AUParameterTree.
+   Set a generator value with a value from a MIDI NPRN controller or AUParameterTree node.
 
    @param gen the generator to set
    @param value the value to use
