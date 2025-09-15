@@ -152,7 +152,7 @@ struct TestEngineHarness {
     engine_.doMIDIEvent(midiEvent);
   }
 
-  void setParameter(SF2::Render::Engine::Engine::ParameterAddress address, AUValue value) noexcept {
+  void setParameter(SF2::Render::Engine::ParameterAddress address, AUValue value) noexcept {
     auto event = AUParameterEvent();
     event.parameterAddress = SF2::valueOf(address);
     event.value = value;

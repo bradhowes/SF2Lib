@@ -42,16 +42,16 @@ using namespace SF2::Render::Engine;
   auto& engine{harness.engine()};
 
   XCTAssertFalse(engine.portamentoModeEnabled());
-  harness.setParameter(Engine::ParameterAddress::portamentoModeEnabled, 1.0);
+  harness.setParameter(ParameterAddress::portamentoModeEnabled, 1.0);
   XCTAssertTrue(engine.portamentoModeEnabled());
 
-  harness.setParameter(Engine::ParameterAddress::portamentoRate, 12345);
+  harness.setParameter(ParameterAddress::portamentoRate, 12345);
   XCTAssertEqual(12345, engine.portamentoRate());
 
-  harness.setParameter(Engine::ParameterAddress::portamentoRate, 987);
+  harness.setParameter(ParameterAddress::portamentoRate, 987);
   XCTAssertEqual(987, engine.portamentoRate());
 
-  harness.setParameter(Engine::ParameterAddress::portamentoModeEnabled, 0.0);
+  harness.setParameter(ParameterAddress::portamentoModeEnabled, 0.0);
   XCTAssertFalse(engine.portamentoModeEnabled());
 }
 
@@ -62,11 +62,11 @@ using namespace SF2::Render::Engine;
   XCTAssertTrue(engine.polyphonicModeEnabled());
   XCTAssertFalse(engine.monophonicModeEnabled());
 
-  harness.setParameter(Engine::ParameterAddress::polyphonicModeEnabled, 0.0);
+  harness.setParameter(ParameterAddress::polyphonicModeEnabled, 0.0);
   XCTAssertFalse(engine.polyphonicModeEnabled());
   XCTAssertTrue(engine.monophonicModeEnabled());
 
-  harness.setParameter(Engine::ParameterAddress::polyphonicModeEnabled, 1.0);
+  harness.setParameter(ParameterAddress::polyphonicModeEnabled, 1.0);
   XCTAssertTrue(engine.polyphonicModeEnabled());
   XCTAssertFalse(engine.monophonicModeEnabled());
 }
@@ -77,10 +77,10 @@ using namespace SF2::Render::Engine;
 
   XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
 
-  harness.setParameter(Engine::ParameterAddress::oneVoicePerKeyModeEnabled, 1.0);
+  harness.setParameter(ParameterAddress::oneVoicePerKeyModeEnabled, 1.0);
   XCTAssertTrue(engine.oneVoicePerKeyModeEnabled());
 
-  harness.setParameter(Engine::ParameterAddress::oneVoicePerKeyModeEnabled, 0.0);
+  harness.setParameter(ParameterAddress::oneVoicePerKeyModeEnabled, 0.0);
   XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
 }
 
@@ -90,10 +90,10 @@ using namespace SF2::Render::Engine;
 
   XCTAssertTrue(engine.retriggerModeEnabled());
 
-  harness.setParameter(Engine::ParameterAddress::retriggerModeEnabled, 0.0);
+  harness.setParameter(ParameterAddress::retriggerModeEnabled, 0.0);
   XCTAssertFalse(engine.retriggerModeEnabled());
 
-  harness.setParameter(Engine::ParameterAddress::retriggerModeEnabled, 1.0);
+  harness.setParameter(ParameterAddress::retriggerModeEnabled, 1.0);
   XCTAssertTrue(engine.retriggerModeEnabled());
 }
 
@@ -1303,14 +1303,14 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  auto address = Engine::ParameterAddress::oneVoicePerKeyModeEnabled;
+  auto address = ParameterAddress::oneVoicePerKeyModeEnabled;
   harness.load(contexts.context0.path(), 0);
 
   int seconds = 1;
   auto mixer{harness.createMixer(seconds)};
   XCTAssertEqual(0, engine.activeVoiceCount());
 
-  harness.setParameter(Engine::ParameterAddress::oneVoicePerKeyModeEnabled, 0.0);
+  harness.setParameter(ParameterAddress::oneVoicePerKeyModeEnabled, 0.0);
   XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
 
   std::vector<AUValue> samples;
@@ -1326,7 +1326,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(2, engine.activeVoiceCount());
 
   harness.sendAllOff();
-  harness.setParameter(Engine::ParameterAddress::oneVoicePerKeyModeEnabled, 1.0);
+  harness.setParameter(ParameterAddress::oneVoicePerKeyModeEnabled, 1.0);
   XCTAssertTrue(engine.oneVoicePerKeyModeEnabled());
 
   harness.sendNoteOn(60);
@@ -1355,7 +1355,7 @@ using namespace SF2::Render::Engine;
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  auto address = valueOf(Engine::ParameterAddress::activeVoiceCount);
+  auto address = valueOf(ParameterAddress::activeVoiceCount);
   AUParameter* param = [engine.parameterTree() parameterWithAddress: address];
   harness.load(contexts.context0.path(), 0);
 

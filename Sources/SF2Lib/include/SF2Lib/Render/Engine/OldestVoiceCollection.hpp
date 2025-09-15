@@ -30,8 +30,7 @@ public:
 
    @param voiceCount the number of voices to hold in the collection. Must be <= `MaxVoiceCount`.
    */
-  OldestVoiceCollection(size_t voiceCount) noexcept
-  : slots_(voiceCount, leastRecentlyUsed_.end())
+  OldestVoiceCollection(size_t voiceCount) noexcept : slots_(voiceCount, leastRecentlyUsed_.end())
   {
     for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex) {
       slots_[voiceIndex] = leastRecentlyUsed_.emplace(leastRecentlyUsed_.begin(), voiceIndex);

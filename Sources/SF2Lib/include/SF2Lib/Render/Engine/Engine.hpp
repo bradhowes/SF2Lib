@@ -15,9 +15,10 @@
 #include "SF2File/IO/File.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/MIDI/GeneratorOverride.hpp"
-#include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Engine/LiveGeneratorParameters.hpp"
+#include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Engine/OldestVoiceCollection.hpp"
+#include "SF2Lib/Render/Engine/ParameterAddress.hpp"
 #include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
 
@@ -46,27 +47,6 @@ public:
   using Config = Voice::State::Config;
   using Voice = Voice::Voice;
   using Interpolator = Render::Voice::Sample::Interpolator;
-
-  /**
-   Enumeration of engine-specific (global) parameters
-   */
-  enum struct ParameterAddress : AUParameterAddress
-  {
-    // Pretty sure this is large enough to never overlap with SF generator indices now and in the future
-    // (SoundFont spec v2.01 defines 59)
-    firstParameterAddress = 1000,
-    portamentoModeEnabled = firstParameterAddress,
-    portamentoRate,
-    oneVoicePerKeyModeEnabled, // aka mono
-    polyphonicModeEnabled,
-    activeVoiceCount,
-    retriggerModeEnabled,
-    isRendering,
-    activeProgramIndex,
-    activeBankIndex,
-    activePresetIndex,
-    lastParameterAddressPlusOne
-  };
 
   /// Number of engine parameters to be found in the AUParameterTree
   static constexpr size_t engineParameterCount = (valueOf(ParameterAddress::lastParameterAddressPlusOne) -
@@ -145,7 +125,7 @@ public:
         voice.renderInto(mixer, frameCount);
       }
       if (voice.isDone()) {
-        pos = oldestVoiceIndices_.voiceRelease(voiceIndex);
+        pos = stopVoice(voiceIndex);
       } else {
         ++pos;
       }

@@ -141,9 +141,9 @@ let package = Package(
   name: "SF2Lib",
   platforms: [.iOS(.v14), .macOS(.v14), .tvOS(.v16)],
   products: [
+    .library(name: "Engine", targets: ["Engine"]),
     .library(name: "SF2File", targets: ["SF2File"]),
-    .library(name: "SF2Lib", targets: ["SF2Lib"]),
-    .library(name: "Engine", targets: ["Engine"])
+    .library(name: "SF2Lib", targets: ["SF2Lib"])
   ],
   dependencies: [
     .package(url: "https://github.com/bradhowes/DSPHeaders", from: "1.0.7"),
