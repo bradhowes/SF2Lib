@@ -22,6 +22,7 @@ namespace SF2::Render::Engine {
     activeProgramIndex,
     activeBankIndex,
     activePresetIndex,
+    lastLoadFinished,
     lastParameterAddressPlusOne
   };
 

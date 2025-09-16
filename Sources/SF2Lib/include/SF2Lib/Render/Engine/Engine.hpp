@@ -409,6 +409,8 @@ private:
     }
   }
 
+  void bumpLastLoadFinished() noexcept;
+
   void initialize(Float sampleRate) noexcept;
 
   void stopAllExclusiveVoices(int exclusiveClass) noexcept;
@@ -469,6 +471,8 @@ private:
   os_signpost_id_t noteOffSignpost_;
   os_signpost_id_t startVoiceSignpost_;
   os_signpost_id_t stopVoiceSignpost_;
+
+  Float lastLoadFinishedCounter_;
 
   friend struct ::TestEngineHarness;
   friend class Parameters;

@@ -449,6 +449,8 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
     usePresetWithIndex(presetIndex);
   }
 
+  bumpLastLoadFinished();
+
   return true;
 }
 
@@ -576,6 +578,15 @@ Engine::updateActiveVoiceCount() noexcept
 }
 
 void
+Engine::bumpLastLoadFinished() noexcept
+{
+  os_log_info(log_, "bumpLastLoadFinished");
+  auto param = [parameterTree_ parameterWithAddress: valueOf(ParameterAddress::lastLoadFinished)];
+  lastLoadFinishedCounter_ += 0.0001;
+  [param setValue: lastLoadFinishedCounter_];
+}
+
+void
 Engine::reset() noexcept
 {
   allOff();
@@ -661,6 +672,9 @@ Engine::provideParameterValue(AUParameter* parameter) const noexcept
         break;
       case ParameterAddress::activePresetIndex:
         value = activePresetIndex();
+        break;
+      case ParameterAddress::lastLoadFinished:
+        value = lastLoadFinishedCounter_;
         break;
       default: break;
     }
@@ -802,6 +816,17 @@ Engine::makeTree() noexcept
                                                                   flags:flags
                                                            valueStrings:nullptr
                                                     dependentParameters:nullptr]];
+
+  [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"lastLoadFinished"
+                                                                    name:@"lastLoadFinished"
+                                                                 address:valueOf(ParameterAddress::lastLoadFinished)
+                                                                     min:-1.0e-8
+                                                                     max:+1.0e+8
+                                                                    unit:kAudioUnitParameterUnit_Generic
+                                                                unitName:nullptr
+                                                                   flags:flags
+                                                            valueStrings:nullptr
+                                                     dependentParameters:nullptr]];
 
   parameterTree_ = [AUParameterTree createTreeWithChildren:definitions];
 
