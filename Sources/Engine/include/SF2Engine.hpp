@@ -29,7 +29,7 @@ namespace Render { namespace Engine { class Engine; } }
  Wrapper class for the SF2::Render::Engine that exposes a minimal API for Swift/C++ bridging. This perhaps better
  belongs in its own package.
  */
-struct SF2Engine
+struct SWIFT_ESCAPABLE SF2Engine
 {
   /**
    Constructs a new Engine.
