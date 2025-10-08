@@ -79,7 +79,6 @@ struct SWIFT_ESCAPABLE SF2Engine
 
    @returns preset name or ""
    */
-  SWIFT_RETURNS_INDEPENDENT_VALUE
   std::string activePresetName() const noexcept;
 
   /// @returns current number of active voices
@@ -95,9 +94,8 @@ struct SWIFT_ESCAPABLE SF2Engine
    @param preset the index of the preset in the file to use
    @returns MIDI SYSEX command as a byte sequence
    */
-  SWIFT_RETURNS_INDEPENDENT_VALUE
-  static std::vector<uint8_t> createLoadFileUsePresetPayload(const std::string& filePath, size_t presetIndex,
-                                                             const SF2::MIDI::GeneratorOverrideVector& overrides) noexcept;
+  static std::vector<uint8_t> createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex) noexcept;
+  // SF2::MIDI::GeneratorOverrideVector overrides) noexcept;
 
   /**
    Obtain an `NSData` instance containing MIDI command to reset the engine. This will stop playing any notes and reset
@@ -105,7 +103,6 @@ struct SWIFT_ESCAPABLE SF2Engine
 
    @returns MIDI command as a byte sequence
    */
-  SWIFT_RETURNS_INDEPENDENT_VALUE
   static std::array<uint8_t, 1> createResetCommandPayload() noexcept;
 
   /**
@@ -113,7 +110,6 @@ struct SWIFT_ESCAPABLE SF2Engine
 
    @returns array of MIDI commands to be sent to engine
    */
-  SWIFT_RETURNS_INDEPENDENT_VALUE
   static std::array<uint8_t, 9> createUseBankProgramPayload(uint16_t bank, uint8_t program) noexcept;
 
   /**
@@ -123,13 +119,10 @@ struct SWIFT_ESCAPABLE SF2Engine
    @param value the value to send along with the command
    @returns MIDI command as a byte sequence
    */
-  SWIFT_RETURNS_INDEPENDENT_VALUE
   static std::array<uint8_t, 3> createChannelMessagePayload(uint8_t channelMessage, uint8_t value) noexcept;
 
-  SWIFT_RETURNS_INDEPENDENT_VALUE
   static std::array<uint8_t, 3> createAllNotesOffPayload() noexcept;
 
-  SWIFT_RETURNS_INDEPENDENT_VALUE
   static std::array<uint8_t, 3> createAllSoundOffPayload() noexcept;
 
   /// @returns true if the monophonic mode is enabled
@@ -145,4 +138,4 @@ struct SWIFT_ESCAPABLE SF2Engine
 
 private:
   std::shared_ptr<SF2::Render::Engine::Engine> impl_;
-};
+} SWIFT_IMMORTAL_REFERENCE;

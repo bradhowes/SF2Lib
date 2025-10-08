@@ -45,9 +45,10 @@ SF2Engine::activePresetName() const noexcept
 }
 
 std::vector<uint8_t>
-SF2Engine::createLoadFileUsePresetPayload(const std::string& filePath, size_t presetIndex,
-                                          const SF2::MIDI::GeneratorOverrideVector& overrides) noexcept
+SF2Engine::createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex) noexcept
+//                                          SF2::MIDI::GeneratorOverrideVector overrides) noexcept
 {
+  SF2::MIDI::GeneratorOverrideVector overrides;
   return SF2::Render::Engine::Engine::createLoadFileUsePresetPayload(filePath, presetIndex, overrides);
 }
 
