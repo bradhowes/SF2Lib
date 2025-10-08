@@ -32,19 +32,19 @@
 
 - (void)testCreateLoadFileUseIndexNoOverrides {
   auto url = [TestResources getResourceUrl:0];
-  auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
-  auto data = engine->createLoadFileUsePresetPayload(url.path.UTF8String, 123, overrides);
+  // auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
+  auto data = engine->createLoadFileUsePresetPayload(url.path.UTF8String, 123);
   XCTAssertTrue(data.size() > url.path.length);
 }
 
-- (void)testCreateLoadFileUseIndexWithOverrides {
-  auto url = [TestResources getResourceUrl:0];
-  auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
-  overrides.emplace_back(123, 456);
-  overrides.emplace_back(124, -23);
-  auto data = engine->createLoadFileUsePresetPayload(url.path.UTF8String, 123, overrides);
-  XCTAssertTrue(data.size() > url.path.length);
-}
+//- (void)testCreateLoadFileUseIndexWithOverrides {
+//  auto url = [TestResources getResourceUrl:0];
+//  auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
+//  overrides.emplace_back(123, 456);
+//  overrides.emplace_back(124, -23);
+//  auto data = engine->createLoadFileUsePresetPayload(url.path.UTF8String, 123, overrides);
+//  XCTAssertTrue(data.size() > url.path.length);
+//}
 
 - (void)testCreateResetCommand {
   auto data = engine->createResetCommandPayload();
