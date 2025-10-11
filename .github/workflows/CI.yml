@@ -12,8 +12,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Select Xcode 26
-      run: ls /Applications/Xcode* && sudo xcode-select -s /Applications/Xcode_26.app
+    - name: Select Xcode Xcode_26.0.1
+      run: ls -l /Applications && sudo xcode-select -s /Applications/Xcode_26.0.1.app
     - name: Build, test, and code coverage
       run: make
     - name: Create Coverage Badge
