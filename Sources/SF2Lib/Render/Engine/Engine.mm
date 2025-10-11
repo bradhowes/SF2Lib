@@ -82,6 +82,7 @@ Engine::load(const std::string& path, size_t index) noexcept
     presets_.build(*file_);
     usePresetWithIndex(index);
   }
+
   return response;
 }
 
@@ -95,6 +96,7 @@ Engine::usePresetWithIndex(size_t index)
   }
   activePreset_ = index;
   parameters_.reset();
+  bumpLastLoadFinished();
 }
 
 void
@@ -448,8 +450,6 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
   } else {
     usePresetWithIndex(presetIndex);
   }
-
-  bumpLastLoadFinished();
 
   return true;
 }

@@ -231,6 +231,8 @@ public:
     return createChannelMessagePayload(MIDI::ControlChange::allSoundOff);
   }
 
+  inline Float lastLoadFinishedCounter() const noexcept { return lastLoadFinishedCounter_; }
+
 private:
   using Index = Entity::Generator::Index;
 
@@ -472,7 +474,7 @@ private:
   os_signpost_id_t startVoiceSignpost_;
   os_signpost_id_t stopVoiceSignpost_;
 
-  Float lastLoadFinishedCounter_;
+  Float lastLoadFinishedCounter_{0.0};
 
   friend struct ::TestEngineHarness;
   friend class Parameters;

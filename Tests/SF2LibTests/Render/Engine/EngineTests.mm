@@ -35,6 +35,7 @@ using namespace SF2::Render::Engine;
   XCTAssertFalse(engine.portamentoModeEnabled());
   XCTAssertEqual(100, engine.portamentoRate());
   XCTAssertTrue(engine.retriggerModeEnabled());
+  XCTAssertEqual(0.0, engine.lastLoadFinishedCounter());
 }
 
 - (void)testPortamento {
@@ -101,15 +102,22 @@ using namespace SF2::Render::Engine;
   auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
   auto& engine{harness.engine()};
   XCTAssertFalse(engine.hasActivePreset());
+  XCTAssertEqualWithAccuracy(engine.lastLoadFinishedCounter(), 0.0, 0.00005);
 
   harness.load(contexts.context0.path(), 0);
+  XCTAssertEqualWithAccuracy(engine.lastLoadFinishedCounter(), 0.0001, 0.00005);
 
   XCTAssertEqual(harness.load(contexts.context0.path(), 0), SF2::IO::File::LoadResponse::ok);
   XCTAssertEqual(engine.presetCount(), 235);
+  XCTAssertEqualWithAccuracy(engine.lastLoadFinishedCounter(), 0.0002, 0.00005);
+
   XCTAssertTrue(engine.hasActivePreset());
   XCTAssertEqual(harness.load(contexts.context1.path(), 10000), SF2::IO::File::LoadResponse::ok);
+  XCTAssertEqualWithAccuracy(engine.lastLoadFinishedCounter(), 0.0003, 0.00005);
+
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqual(harness.load(contexts.context2.path(), 0), SF2::IO::File::LoadResponse::ok);
+  XCTAssertEqualWithAccuracy(engine.lastLoadFinishedCounter(), 0.0004, 0.00005);
 }
 
 - (void)testUsePresetByIndex {
