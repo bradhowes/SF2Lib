@@ -34,6 +34,11 @@ stopVoiceSignpost_{os_signpost_id_generate(log_)}
   makeTree();
 }
 
+Engine::~Engine() noexcept
+{
+  os_log_info(log_, "~Engine");
+}
+
 void
 Engine::setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept
 {

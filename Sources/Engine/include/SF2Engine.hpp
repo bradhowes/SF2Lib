@@ -31,6 +31,14 @@ namespace Render { namespace Engine { class Engine; } }
  */
 struct SWIFT_ESCAPABLE SF2Engine
 {
+  SF2Engine() noexcept;
+
+  ~SF2Engine() noexcept;
+
+  SF2Engine(const SF2Engine&) = default;
+
+  SF2Engine(SF2Engine&&) = default;
+
   /**
    Constructs a new Engine.
 
@@ -38,9 +46,7 @@ struct SWIFT_ESCAPABLE SF2Engine
    call to `setRenderingFormat`.
    @param voiceCount the max number of voices to allow to simultaneously render
    */
-  SF2Engine(double sampleRate, NSUInteger voiceCount);
-
-  ~SF2Engine() noexcept;
+  void create(double sampleRate, NSUInteger voiceCount);
 
   /**
    Set the rendering format to be when rendering in CoreAudio infrastructure. After returning from this call,
@@ -53,7 +59,9 @@ struct SWIFT_ESCAPABLE SF2Engine
    sample per channel in a bus. For stereo, N frames = 2N audio samples.
    @returns `true` if engine can start rendering
    */
-  bool setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender);
+  bool setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) const noexcept;
+
+  AUInternalRenderBlock getRenderBlock() const noexcept;
 
   /**
    Request to render samples. May be called on a real-time thread by the CoreAudio framework. Note that
@@ -71,7 +79,7 @@ struct SWIFT_ESCAPABLE SF2Engine
    */
   AUAudioUnitStatus processAndRender(const AudioTimeStamp* timestamp, UInt32 frameCount, NSInteger outputBusNumber,
                                      AudioBufferList* output, const AURenderEvent* realtimeEventListHead,
-                                     AURenderPullInputBlock pullInputBlock);
+                                     AURenderPullInputBlock pullInputBlock) const noexcept;
 
   /**
    Obtain the name of the active preset being used by the engine. This will be an empty string ("") for the case where
@@ -138,4 +146,5 @@ struct SWIFT_ESCAPABLE SF2Engine
 
 private:
   std::shared_ptr<SF2::Render::Engine::Engine> impl_;
-} SWIFT_IMMORTAL_REFERENCE;
+
+} SWIFT_SELF_CONTAINED;

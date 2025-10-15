@@ -63,6 +63,8 @@ public:
   Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
          size_t minimumNoteDurationMilliseconds = 10) noexcept;
 
+  ~Engine() noexcept;
+
   inline size_t minimumNoteDurationSamples() const noexcept
   {
     return static_cast<size_t>(ceil(minimumNoteDurationMilliseconds_ / 1000_F * sampleRate_));
@@ -444,15 +446,6 @@ private:
   LiveGeneratorParameters parameters_;
 
   AUParameterTree* parameterTree_;
-
-  // Read-only parameters that reflect the current state of the engine.
-//  AUParameter* activeVoiceCountParameter_{nullptr};
-//  AUParameter* isRenderingParameter_{nullptr};
-//  AUParameter* activeProgramIndex_{nullptr};
-//  AUParameter* activeBankIndex_{nullptr};
-//  AUParameter* activePresetIndex_{nullptr};
-//  AUParameter* lastLoadFinished_{nullptr};
-
   std::vector<Voice> voices_{};
   OldestVoiceCollection<maxVoiceCount> oldestVoiceIndices_;
 
