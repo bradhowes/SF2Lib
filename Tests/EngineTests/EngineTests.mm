@@ -12,7 +12,8 @@
 }
 
 - (void)setUp {
-  engine = new SF2Engine(48000.0, 48);
+  engine = new SF2Engine();
+  engine->create(48000.0, 48);
 }
 
 - (void)tearDown {
