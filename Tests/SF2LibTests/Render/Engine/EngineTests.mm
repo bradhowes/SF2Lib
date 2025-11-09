@@ -35,7 +35,7 @@ using namespace SF2::Render::Engine;
   XCTAssertFalse(engine.portamentoModeEnabled());
   XCTAssertEqual(100, engine.portamentoRate());
   XCTAssertTrue(engine.retriggerModeEnabled());
-  XCTAssertEqual(0.0, engine.lastLoadFinishedCounter());
+  XCTAssertEqual(Engine::minLastLoadFinished, engine.lastLoadFinishedCounter());
 }
 
 - (void)testPortamento {
@@ -1390,6 +1390,25 @@ using namespace SF2::Render::Engine;
   // Should be harmless
   param.value = 99;
   XCTAssertEqual(0, param.value);
+}
+
+- (void)testEngineParameterTreeHasGenerators
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  auto flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable;
+
+  for (auto index: IndexIterator()) {
+    const auto& definition = Definition::definition(index);
+    if (definition.valueKind() == Definition::ValueKind::UNUSED) {
+      continue;
+    }
+
+    auto address = AUParameterAddress(valueOf(index));
+    AUParameter* param = [engine.parameterTree() parameterWithAddress: address];
+    XCTAssertNotNil(param);
+    XCTAssertEqual(flags, [param flags]);
+  }
 }
 
 - (void)testEngineParameterControlChangeForPanning

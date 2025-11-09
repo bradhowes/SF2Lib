@@ -587,7 +587,7 @@ Engine::bumpLastLoadFinished() noexcept
 {
   os_log_info(log_, "bumpLastLoadFinished");
   auto param = [parameterTree_ parameterWithAddress: valueOf(ParameterAddress::lastLoadFinished)];
-  lastLoadFinishedCounter_ += 0.0001;
+  lastLoadFinishedCounter_ += lastLoadFinishedChange;
   [param setValue: lastLoadFinishedCounter_];
 }
 
@@ -694,6 +694,7 @@ Engine::makeGeneratorParameter(Index index) noexcept
 {
   const auto& definition = Definition::definition(index);
   NSString* name = [NSString stringWithUTF8String:definition.name().data()];
+  auto flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable;
   return [AUParameterTree createParameterWithIdentifier:name
                                                    name:name
                                                 address:AUParameterAddress(valueOf(index))
@@ -701,7 +702,7 @@ Engine::makeGeneratorParameter(Index index) noexcept
                                                     max:AUValue(definition.valueRange().max)
                                                    unit:AudioUnitParameterUnit::kAudioUnitParameterUnit_Generic
                                                unitName:nullptr
-                                                  flags:0
+                                                  flags:flags
                                            valueStrings:nullptr
                                     dependentParameters:nullptr];
 }
@@ -733,7 +734,10 @@ Engine::makeTree() noexcept
   auto capacity = NSUInteger(valueOf(Index::numValues) + engineParameterCount);
   auto definitions = [[NSMutableArray alloc] initWithCapacity:capacity];
 
-  // Add definitions for all generators that are used by the SF2Lib engine
+  // Add definitions for all generators that are used by the SF2Lib engine. The first address will be
+  // Generator::Index::startAddressOffset (0), and the last will be Generator::Index::overridingRootKey (58).
+  // Note that not all addresses between 0 and 58 are valid; some of the Generator:Index values are tagged as unused,
+  // and there will be no parameter defined for those.
   for (auto index : IndexIterator()) {
     const auto& definition = Definition::definition(index);
     if (definition.valueKind() == Definition::ValueKind::UNUSED) {
@@ -822,12 +826,12 @@ Engine::makeTree() noexcept
                                                            valueStrings:nullptr
                                                     dependentParameters:nullptr]];
 
+  // We do not care about actual value, only that a change took place in the engine. Should we use a binary flip/flop?
   [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"lastLoadFinished"
                                                                     name:@"lastLoadFinished"
                                                                  address:valueOf(ParameterAddress::lastLoadFinished)
-                                                                     min:-1.0e-8
-                                                                     max:+1.0e+8
-                                                                    unit:kAudioUnitParameterUnit_Generic
+                                                                     min:minLastLoadFinished
+                                                                     max:maxLastLoadFinished                                                                    unit:kAudioUnitParameterUnit_Generic
                                                                 unitName:nullptr
                                                                    flags:flags
                                                             valueStrings:nullptr
