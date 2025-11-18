@@ -14,18 +14,18 @@
 
 using namespace SF2::IO;
 
-File::File(std::string path) : path_{path}, fd_{-1} {}
+File::File(std::string path) : path_{path}, loaded_{false} {}
 
 File::File(const char* path) : File::File(std::string(path)) {}
 
-File::~File() noexcept { if (fd_ >= 0) ::close(fd_); }
+File::~File() noexcept {}
 
 File::LoadResponse
 File::load() noexcept
 {
   static const std::string prefix = "file://";
 
-  if (fd_ != -1) return LoadResponse::ok;
+  if (loaded_) return LoadResponse::ok;
 
   std::cout << "loading: " << path_ << std::endl;
 
@@ -87,7 +87,7 @@ File::load() noexcept
     return LoadResponse::invalidFormat;
   }
 
-  // Create a indirection index that provides the presets ordered by bank/program ordering.
+  // Create an indirection index that provides the presets ordered by bank/program ordering.
   presetIndicesOrderedByBankProgram_.resize(presets_.size());
   std::iota(presetIndicesOrderedByBankProgram_.begin(), presetIndicesOrderedByBankProgram_.end(), 0);
   std::sort(presetIndicesOrderedByBankProgram_.begin(), presetIndicesOrderedByBankProgram_.end(),
@@ -100,7 +100,6 @@ File::load() noexcept
   // memory pressure.
   sampleSourceCollection();
 
-  fd_ = fd.release();
   return LoadResponse::ok;
 }
 
@@ -114,8 +113,16 @@ File::sampleSourceCollection()
   return sampleSourceCollection_;
 }
 
+/**
+ Load the 16-bit INT samples from the file and convert to normalized floating point (+/- 1.0). The conversion happens
+ batches using the Accelerated framework (if enabled). NOTE: this approach processes all of the sample data from an
+ SF2 file in one-shot rather than restricting to preset samples and postponing until first attempt to use a preset.
+ Doing the latter approach should reduce load times for large SF2 files, at the cost of increasing a preset load time
+ the first time it is accesed. Further it would lower the initial memory required to use an SF2 file.
+ */
 void
 File::extractNormalizedSamples() {
+  // 32K seems to be a good value to use for speed.
   static const size_t batchSampleCount = 32 * 1024;
   static const Float normalizationScale = 1.0_F / Float(1 << 15);
 

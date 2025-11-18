@@ -16,12 +16,23 @@ namespace IO { class File; }
  */
 struct SWIFT_ESCAPABLE SF2FileInfo
 {
-  // SF2FileInfo(const char* path);
+  /**
+   Construct new instance with the contents from the given file.
 
+   @param path the location of the file to load
+   */
   SF2FileInfo(std::string path);
 
+  /**
+   Destructor. Currently does nothing.
+   */
   ~SF2FileInfo();
 
+  /**
+   Attempt to load the file pointed to in the constructor.
+
+   @returns `true` if loading succeeded, `false` otherwise
+   */
   bool load();
 
   /// @returns the embedded name in the file
@@ -36,8 +47,15 @@ struct SWIFT_ESCAPABLE SF2FileInfo
   /// @returns any embedded copyright notice in the file
   std::string embeddedCopyright() const noexcept;
 
+  /// @returns the number of presets found in the file
   size_t size() const noexcept;
 
+  /**
+   Obtain an `SF2PresetInfo` for the preset at the given index.
+
+   @param index the preset to reference. Must be between 0 and size() - 1.
+   @returns SF2PresetInfo for the indicated preset
+   */
   SF2PresetInfo operator[](size_t index) const noexcept;
 
 private:

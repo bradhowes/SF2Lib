@@ -64,7 +64,7 @@ public:
   void loadSamples() noexcept;
 
   /// @returns true if the file has been loaded successfully.
-  inline bool loaded() const noexcept { return fd_ != -1; }
+  inline bool loaded() const noexcept { return loaded_; }
 
   /// @returns the embedded name in the file
   inline const std::string& embeddedName() const noexcept { return embeddedName_; }
@@ -132,7 +132,7 @@ private:
   void extractNormalizedSamples();
 
   std::string path_;
-  int fd_{-1};
+  bool loaded_{false};
   off_t size_{0};
   Pos sampleDataBegin_{-1, 0, 0};
 

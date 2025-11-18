@@ -28,16 +28,33 @@ namespace Render { namespace Engine { class Engine; } }
 }
 
 /**
- Wrapper class for the SF2::Render::Engine that exposes a minimal API for Swift/C++ bridging.
+ Wrapper class for the SF2::Render::Engine that exposes a minimal API for Swift/C++ bridging. Note that with this
+ wrapper, there is no direct way to manipulate the held SF2::Render::Engine::Engin entity. The expectation is that
+ an instance of SF2Engine will be held within an AUv3 plugin component, which an receive changes via its AUParameterTree
+ or via MIDI commands. This class exposes various `create` methods that return proper MIDI v1 commands. In particular,
+ the `createLoadFileUsePresetPayload` returns a MIDI SysEx sequence that indicates an SF2 file to load and a preset in
+ that file to use.
  */
 struct SWIFT_ESCAPABLE SF2Engine
 {
+  /**
+   Default constructor. Does not allocate anything.
+   */
   SF2Engine() noexcept;
 
+  /**
+   Destructor. Only for logging of reference count of any allocated Engine.
+   */
   ~SF2Engine() noexcept;
 
+  /**
+   Default copy constructor.
+   */
   SF2Engine(const SF2Engine&) = default;
 
+  /**
+   Default move constructor.
+   */
   SF2Engine(SF2Engine&&) = default;
 
   /**
@@ -62,6 +79,9 @@ struct SWIFT_ESCAPABLE SF2Engine
    */
   bool setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) const noexcept;
 
+  /**
+   Obtain a render block to be used to invoke the `processAndRender` method below.
+   */
   AUInternalRenderBlock getRenderBlock() const noexcept;
 
   /**
@@ -122,7 +142,7 @@ struct SWIFT_ESCAPABLE SF2Engine
   static std::array<uint8_t, 9> createUseBankProgramPayload(uint16_t bank, uint8_t program) noexcept;
 
   /**
-   Obtain an `NSData` instance containing MIDI command to send a channel message to the engine.
+   Obtain an array of 3 bytes containing MIDI command to send a channel message to the engine.
 
    @param channelMessage indicates the channel message to send
    @param value the value to send along with the command
@@ -130,8 +150,18 @@ struct SWIFT_ESCAPABLE SF2Engine
    */
   static std::array<uint8_t, 3> createChannelMessagePayload(uint8_t channelMessage, uint8_t value) noexcept;
 
+  /**
+   Obtain an array of 3 bytes containing MIDI command to stop any and all active notes.
+
+   @returns MIDI command as a byte sequence
+   */
   static std::array<uint8_t, 3> createAllNotesOffPayload() noexcept;
 
+  /**
+   Obtain an array of 3 bytes containing MIDI command to stop all sound rendering.
+
+   @returns MIDI command as a byte sequence
+   */
   static std::array<uint8_t, 3> createAllSoundOffPayload() noexcept;
 
   /// @returns true if the monophonic mode is enabled

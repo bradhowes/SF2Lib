@@ -7,8 +7,8 @@
 namespace SF2::IO {
 
 /**
- Manage a file descriptor that was opened elsewhere. If still held upon destruction, close it. This is currently used
- to track close a file descriptor due to an exception that exits the scope that contains the Closer instance.
+ Manage a file descriptor that was opened elsewhere so that when the `Closure` instance is destroyed, the held
+ file descriptor is closed.
  */
 struct Closer
 {
@@ -24,25 +24,14 @@ struct Closer
    */
   ~Closer() { if (is_valid()) ::close(fd_); }
 
-  /// returns the held file descriptor
+  /// @returns the held file descriptor
   inline int operator *() const { return fd_; }
 
-  /// returns true if the held file descriptor is not -1
+  /// @returns true if the held file descriptor is valid
   inline bool is_valid() const { return fd_ != -1; }
 
-  /**
-   Release ownership of the held file descriptor.
-
-   @returns the file descriptor
-   */
-  int release() noexcept {
-    int tmp = -1;
-    std::swap(tmp, fd_);
-    return tmp;
-  }
-
 private:
-  int fd_{-1};
+  int fd_;
 };
 
 } // end namespace SF2::IO
