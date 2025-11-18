@@ -1,4 +1,4 @@
-// Copyright © 2023 Brad Howes. All rights reserved.
+// Copyright © 2023, 2025 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -28,8 +28,7 @@ namespace Render { namespace Engine { class Engine; } }
 }
 
 /**
- Wrapper class for the SF2::Render::Engine that exposes a minimal API for Swift/C++ bridging. This perhaps better
- belongs in its own package.
+ Wrapper class for the SF2::Render::Engine that exposes a minimal API for Swift/C++ bridging.
  */
 struct SWIFT_ESCAPABLE SF2Engine
 {
