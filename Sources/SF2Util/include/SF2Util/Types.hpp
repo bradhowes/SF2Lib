@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -173,7 +173,7 @@ bool toBool(T value) {
 struct Log {
   inline static const char* subsystem = "com.braysoftware.SF2Lib";
 
-  inline static const os_log_t create(const char* category) { return os_log_create(subsystem, category); }
+  inline static os_log_t create(const char* category) { return os_log_create(subsystem, category); }
 };
 
 } // end namespace SF2

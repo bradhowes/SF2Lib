@@ -1,13 +1,13 @@
 {
-  "originHash" : "7911968a9a7a84b37d2f9f2f94296c7f6a811410b032973f255d74af36773302",
+  "originHash" : "476a9c5695b18e56732c06e71e54bef438ded1ebe4dc2185a46716c55c5e66c1",
   "pins" : [
     {
       "identity" : "dspheaders",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bradhowes/DSPHeaders",
       "state" : {
-        "revision" : "ca5acb5814a831123ef5b1adbbcf23c2dacba08a",
-        "version" : "1.0.8"
+        "revision" : "6ab85805cc0990817daa63aaa8aeb5541a2a826f",
+        "version" : "1.1.0"
       }
     }
   ],

@@ -1,4 +1,4 @@
-// Copyright © 2020 Brad Howes. All rights reserved.
+// Copyright © 2020, 2025 Brad Howes. All rights reserved.
 
 #include <AVFoundation/AVFoundation.h>
 
@@ -139,7 +139,7 @@ using namespace SF2::Render::Voice::State;
 }
 
 - (void)testRolandPianoRender {
-  auto notes = contexts.context0.makeVoicesCollection(0, {69, 73, 76});
+  auto notes = contexts.context2.makeVoicesCollection(0, {69, 73, 76});
   int seconds = 1;
   int sampleCount = notes.front().sampleRate() * seconds;
   AVAudioPCMBuffer* buffer = [self allocateBufferFor:notes.front() capacity:sampleCount];
@@ -185,19 +185,67 @@ using namespace SF2::Render::Voice::State;
   }
   else if constexpr (std::is_same_v<Float, double>) {
     XCTAssertEqualWithAccuracy(0, samples[0], epsilon);
-    XCTAssertEqualWithAccuracy(-0.00220142956823, samples[1], epsilon);
-    XCTAssertEqualWithAccuracy(-0.00214024679735, samples[2], epsilon);
-    XCTAssertEqualWithAccuracy(0.00237721414305, samples[3], epsilon);
+    XCTAssertEqualWithAccuracy(0.0195536408573, samples[1], epsilon);
+    XCTAssertEqualWithAccuracy(0.016074301675, samples[2], epsilon);
+    XCTAssertEqualWithAccuracy(0.0174025036395, samples[3], epsilon);
     XCTAssertEqualWithAccuracy(0, samples[4], epsilon);
-    XCTAssertEqualWithAccuracy(-0.000606141693424, samples[5], epsilon);
-    XCTAssertEqualWithAccuracy(-0.000649725960102, samples[6], epsilon);
-    XCTAssertEqualWithAccuracy(0.00271704629995, samples[7], epsilon);
+    XCTAssertEqualWithAccuracy(0.010263078846, samples[5], epsilon);
+    XCTAssertEqualWithAccuracy(0.0116023216397, samples[6], epsilon);
+    XCTAssertEqualWithAccuracy(0.021610384807, samples[7], epsilon);
     XCTAssertEqualWithAccuracy(0, samples[8], epsilon);
-    XCTAssertEqualWithAccuracy(-0.00411727419123, samples[9], epsilon);
-    XCTAssertEqualWithAccuracy(-0.00430837459862, samples[10], epsilon);
-    XCTAssertEqualWithAccuracy(-0.00325549324043, samples[11], epsilon);
+    XCTAssertEqualWithAccuracy(0.0184140242636, samples[9], epsilon);
+    XCTAssertEqualWithAccuracy(0.0189595278352, samples[10], epsilon);
+    XCTAssertEqualWithAccuracy(0.0198329165578, samples[11], epsilon);
   }
 
+  [self playSamples: buffer count: sampleCount];
+}
+
+- (void)testRolandReleaseDuration {
+  auto notes = contexts.context0.makeVoicesCollection(0, {69});
+  int seconds = 10;
+  int sampleCount = notes.front().sampleRate() * seconds;
+  AVAudioPCMBuffer* buffer = [self allocateBufferFor:notes.front() capacity:sampleCount];
+
+  size_t voiceSampleCount = sampleCount;
+  size_t keyReleaseCount = voiceSampleCount * 0.05;
+
+  std::vector<AUValue> samples;
+  size_t start = 0;
+
+  for (auto& note : notes) {
+    note.start();
+    [self renderInto:buffer voices:note forCount: keyReleaseCount startingAt: start];
+    note.releaseKey();
+    [self renderInto:buffer voices:note forCount: voiceSampleCount - keyReleaseCount
+          startingAt: start + keyReleaseCount];
+
+    samples.push_back([buffer left][start]);
+    samples.push_back([buffer left][start + keyReleaseCount - 1]);
+    samples.push_back([buffer left][start + keyReleaseCount]);
+    samples.push_back([buffer left][start + voiceSampleCount - 1]);
+
+    start += voiceSampleCount;
+  }
+
+  [self dumpSamples:samples];
+
+  XCTAssertEqual(4 * notes.size(), samples.size());
+
+  if constexpr (std::is_same_v<Float, float>) {
+    XCTAssertEqualWithAccuracy(0, samples[0], epsilon);
+    XCTAssertEqualWithAccuracy(0.128517314792, samples[1], epsilon);
+    XCTAssertEqualWithAccuracy(0.107323430479, samples[2], epsilon);
+    XCTAssertEqualWithAccuracy(0.11131759733, samples[3], epsilon);
+  }
+  else if constexpr (std::is_same_v<Float, double>) {
+    XCTAssertEqualWithAccuracy(0, samples[0], epsilon);
+    XCTAssertEqualWithAccuracy(-0.000481556257, samples[1], epsilon);
+    XCTAssertEqualWithAccuracy(-0.00077776791295, samples[2], epsilon);
+    XCTAssertEqualWithAccuracy(0, samples[3], epsilon);
+  }
+
+  self.playAudio = YES;
   [self playSamples: buffer count: sampleCount];
 }
 

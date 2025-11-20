@@ -146,7 +146,7 @@ let package = Package(
     .library(name: "SF2Lib", targets: ["SF2Lib"])
   ],
   dependencies: [
-    .package(url: "https://github.com/bradhowes/DSPHeaders", from: "1.0.7"),
+    .package(url: "https://github.com/bradhowes/DSPHeaders", from: "1.1.0"),
     // .package(path: "../DSPHeaders"),
   ],
   targets: [
