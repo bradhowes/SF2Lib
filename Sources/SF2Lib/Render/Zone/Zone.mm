@@ -38,7 +38,7 @@ MIDIRange
 Zone::GetKeyRange(const GeneratorCollection& generators) noexcept
 {
   if (generators.size() > 0 && generators[0].get().index() == Entity::Generator::Index::keyRange) {
-    return MIDIRange(generators[0].get().amount());
+    return MIDIRange(generators[0].get().amount().low(), generators[0].get().amount().high());
   }
   return all;
 }
@@ -54,5 +54,6 @@ Zone::GetVelocityRange(const GeneratorCollection& generators) noexcept
   else if (generators.size() > 0 && generators[0].get().index() == Entity::Generator::Index::velocityRange) {
     index = 0;
   }
-  return index == -1 ? all : MIDIRange(generators[size_t(index)].get().amount());
+  return index == -1 ? all : MIDIRange(generators[size_t(index)].get().amount().low(),
+                                       generators[size_t(index)].get().amount().high());
 }

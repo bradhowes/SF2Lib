@@ -12,24 +12,36 @@ using namespace SF2::Render;
 using namespace SF2::Render::Voice;
 
 @interface PresetTests : XCTestCase
+
+@property (nonatomic) SampleBasedContexts* contexts;
+
 @end
 
-@implementation PresetTests {
-SampleBasedContexts contexts;
+@implementation PresetTests
+
+@synthesize contexts;
+
+- (void)setUp {
+  self.contexts = new SampleBasedContexts();
+  [super setUp];
 }
 
+- (void)tearDown {
+  delete self.contexts;
+  [super tearDown];
+}
 - (void)testRolandPianoPreset {
-  auto& file{contexts.context2.file()};
-  XCTAssertEqual(1, file.presets().size());
+  auto& file{self.contexts->context2.file()};
+  XCTAssertEqual(size_t(1), file.presets().size());
 
-  Preset preset{contexts.context2.preset(0)};
-  XCTAssertEqual(6, preset.zones().size());
+  Preset preset{self.contexts->context2.preset(0)};
+  XCTAssertEqual(size_t(6), preset.zones().size());
   XCTAssertFalse(preset.hasGlobalZone());
 
   auto found = preset.find(64, 10);
-  XCTAssertEqual(2, found.size());
+  XCTAssertEqual(size_t(2), found.size());
 
-  State::State left = contexts.context2.makeState(found[0]);
+  State::State left = self.contexts->context2.makeState(found[0]);
   XCTAssertEqual(-500, left.unmodulated(Entity::Generator::Index::pan));
   XCTAssertEqual(1902, left.unmodulated(Entity::Generator::Index::releaseVolumeEnvelope));
   XCTAssertEqual(7437, left.unmodulated(Entity::Generator::Index::initialFilterCutoff));
@@ -39,7 +51,7 @@ SampleBasedContexts contexts;
   XCTAssertEqual(0, left.unmodulated(Entity::Generator::Index::endAddressOffset));
   XCTAssertEqual(0, left.unmodulated(Entity::Generator::Index::endAddressCoarseOffset));
 
-  State::State right = contexts.context2.makeState(found[1]);
+  State::State right = self.contexts->context2.makeState(found[1]);
   XCTAssertEqual(500, right.unmodulated(Entity::Generator::Index::pan));
   XCTAssertEqual(1902, right.unmodulated(Entity::Generator::Index::releaseVolumeEnvelope));
   XCTAssertEqual(7437, right.unmodulated(Entity::Generator::Index::initialFilterCutoff));

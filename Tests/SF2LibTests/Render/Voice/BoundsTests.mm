@@ -22,8 +22,8 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
   auto state = State::State(48'000.0, channelState);
   auto bounds = Bounds::make(sampleHeaderNoLoop, state);
 
-  XCTAssertEqual(bounds.startPos(), 0);
-  XCTAssertEqual(bounds.endPos(), 139 - 11);
+  XCTAssertEqual(bounds.startPos(), size_t(0));
+  XCTAssertEqual(bounds.endPos(), size_t(139 - 11));
   XCTAssertFalse(bounds.hasLoop());
 }
 
@@ -31,22 +31,22 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
   auto channelState = MIDI::ChannelState();
   auto state = State::State(48'000.0, channelState);
 
-  sst.setValue(state, SF2::Entity::Generator::Index::startAddressOffset, 1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startAddressOffset, 1);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 1);
+    XCTAssertEqual(bounds.startPos(), size_t(1));
     XCTAssertEqual(bounds.endPos(), sampleHeaderNoLoop.sampleSize());
     XCTAssertFalse(bounds.hasLoop());
   }
 
-  sst.setValue(state, SF2::Entity::Generator::Index::startAddressOffset, -1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startAddressOffset, -1);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 0);
+    XCTAssertEqual(bounds.startPos(), size_t(0));
     XCTAssertEqual(bounds.endPos(), sampleHeaderNoLoop.sampleSize());
   }
 
-  sst.setValue(state, SF2::Entity::Generator::Index::startAddressOffset, 1000);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startAddressOffset, 1000);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
     XCTAssertEqual(bounds.startPos(), bounds.endPos());
@@ -57,26 +57,26 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 - (void)testStartOffsetCoarse {
   auto channelState = MIDI::ChannelState();
   auto state = State::State(48'000.0, channelState);
-  sst.setValue(state, SF2::Entity::Generator::Index::startAddressOffset, -32760);
-  sst.setValue(state, SF2::Entity::Generator::Index::startAddressCoarseOffset, 1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startAddressOffset, -32760);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startAddressCoarseOffset, 1);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 8);
+    XCTAssertEqual(bounds.startPos(), size_t(8));
     XCTAssertEqual(bounds.endPos(), sampleHeaderNoLoop.sampleSize());
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startAddressOffset, -32761);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startAddressOffset, -32761);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 7);
+    XCTAssertEqual(bounds.startPos(), size_t(7));
     XCTAssertEqual(bounds.endPos(), sampleHeaderNoLoop.sampleSize());
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startAddressCoarseOffset, 0);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startAddressCoarseOffset, 0);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 0);
+    XCTAssertEqual(bounds.startPos(), size_t(0));
     XCTAssertEqual(bounds.endPos(), sampleHeaderNoLoop.sampleSize());
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startAddressCoarseOffset, 2);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startAddressCoarseOffset, 2);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
     XCTAssertEqual(bounds.startPos(), bounds.endPos());
@@ -88,17 +88,17 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
   auto channelState = MIDI::ChannelState();
   auto state = State::State(48'000.0, channelState);
 
-  sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, -1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, -1);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 0);
+    XCTAssertEqual(bounds.startPos(), size_t(0));
     XCTAssertEqual(bounds.endPos(), sampleHeaderNoLoop.sampleSize() - 1);
   }
   // Positive values are useless here
-  sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 1);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 0);
+    XCTAssertEqual(bounds.startPos(), size_t(0));
     XCTAssertEqual(bounds.endPos(), sampleHeaderNoLoop.sampleSize());
   }
 }
@@ -106,42 +106,42 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 - (void)testEndOffsetCoarse {
   auto channelState = MIDI::ChannelState();
   auto state = State::State(48'000.0, channelState);
-  sst.setValue(state, SF2::Entity::Generator::Index::endAddressCoarseOffset, -1);
-  sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 32760);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressCoarseOffset, -1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 32760);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 0);
-    XCTAssertEqual(bounds.endPos(), 120);
+    XCTAssertEqual(bounds.startPos(), size_t(0));
+    XCTAssertEqual(bounds.endPos(), size_t(120));
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 32761);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 32761);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 0);
-    XCTAssertEqual(bounds.endPos(), 121);
+    XCTAssertEqual(bounds.startPos(), size_t(0));
+    XCTAssertEqual(bounds.endPos(), size_t(121));
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 32759);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 32759);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 0);
-    XCTAssertEqual(bounds.endPos(), 119);
+    XCTAssertEqual(bounds.startPos(), size_t(0));
+    XCTAssertEqual(bounds.endPos(), size_t(119));
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 32759 - 130);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 32759 - 130);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 0);
-    XCTAssertEqual(bounds.endPos(), 0);
+    XCTAssertEqual(bounds.startPos(), size_t(0));
+    XCTAssertEqual(bounds.endPos(), size_t(0));
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 0);
-  sst.setValue(state, SF2::Entity::Generator::Index::endAddressCoarseOffset, -2);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 0);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressCoarseOffset, -2);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 0);
-    XCTAssertEqual(bounds.endPos(), 0);
+    XCTAssertEqual(bounds.startPos(), size_t(0));
+    XCTAssertEqual(bounds.endPos(), size_t(0));
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::endAddressCoarseOffset, 1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressCoarseOffset, 1);
   {
     auto bounds = Bounds::make(sampleHeaderNoLoop, state);
-    XCTAssertEqual(bounds.startPos(), 0);
+    XCTAssertEqual(bounds.startPos(), size_t(0));
     XCTAssertEqual(bounds.endPos(), sampleHeaderNoLoop.sampleSize());
   }
 }
@@ -151,40 +151,40 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
   auto state = State::State(48'000.0, channelState);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startPos(), 0);
-    XCTAssertEqual(bounds.startLoopPos(), 43);
-    XCTAssertEqual(bounds.endLoopPos(), 90);
-    XCTAssertEqual(bounds.endPos(), 128);
+    XCTAssertEqual(bounds.startPos(), size_t(0));
+    XCTAssertEqual(bounds.startLoopPos(), size_t(43));
+    XCTAssertEqual(bounds.endLoopPos(), size_t(90));
+    XCTAssertEqual(bounds.endPos(), size_t(128));
     XCTAssertEqual(bounds.hasLoop(), true);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, -1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, -1);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startLoopPos(), 42);
+    XCTAssertEqual(bounds.startLoopPos(), size_t(42));
     XCTAssertEqual(bounds.hasLoop(), true);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, -43);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, -43);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startLoopPos(), 0);
-    XCTAssertEqual(bounds.endLoopPos(), 90);
-    XCTAssertEqual(bounds.endPos(), 128);
+    XCTAssertEqual(bounds.startLoopPos(), size_t(0));
+    XCTAssertEqual(bounds.endLoopPos(), size_t(90));
+    XCTAssertEqual(bounds.endPos(), size_t(128));
     XCTAssertEqual(bounds.hasLoop(), false);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 80);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 80);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startLoopPos(), 123);
-    XCTAssertEqual(bounds.endLoopPos(), 90);
-    XCTAssertEqual(bounds.endPos(), 128);
+    XCTAssertEqual(bounds.startLoopPos(), size_t(123));
+    XCTAssertEqual(bounds.endLoopPos(), size_t(90));
+    XCTAssertEqual(bounds.endPos(), size_t(128));
     XCTAssertEqual(bounds.hasLoop(), false);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 90);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 90);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startLoopPos(), 128);
-    XCTAssertEqual(bounds.endLoopPos(), 90);
-    XCTAssertEqual(bounds.endPos(), 128);
+    XCTAssertEqual(bounds.startLoopPos(), size_t(128));
+    XCTAssertEqual(bounds.endLoopPos(), size_t(90));
+    XCTAssertEqual(bounds.endPos(), size_t(128));
     XCTAssertEqual(bounds.hasLoop(), false);
   }
 }
@@ -192,31 +192,31 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 - (void)testStartLoopOffsetCoarse {
   auto channelState = MIDI::ChannelState();
   auto state = State::State(48'000.0, channelState);
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 1);
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, -32760);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, -32760);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startLoopPos(), 43 + 32768 - 32760);
+    XCTAssertEqual(bounds.startLoopPos(), size_t(43 + 32768 - 32760));
     XCTAssertEqual(bounds.hasLoop(), true);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, -1);
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 32750);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, -1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 32750);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startLoopPos(), 43 - 32768 + 32750);
+    XCTAssertEqual(bounds.startLoopPos(), size_t(43 - 32768 + 32750));
     XCTAssertEqual(bounds.hasLoop(), true);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 2);
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 0);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 2);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 0);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startLoopPos(), 128);
+    XCTAssertEqual(bounds.startLoopPos(), size_t(128));
     XCTAssertEqual(bounds.hasLoop(), false);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, -2);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, -2);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startLoopPos(), 0);
+    XCTAssertEqual(bounds.startLoopPos(), size_t(0));
     XCTAssertEqual(bounds.hasLoop(), false);
   }
 }
@@ -226,40 +226,40 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
   auto state = State::State(48'000.0, channelState);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startPos(), 0);
-    XCTAssertEqual(bounds.startLoopPos(), 43);
-    XCTAssertEqual(bounds.endLoopPos(), 90);
-    XCTAssertEqual(bounds.endPos(), 128);
+    XCTAssertEqual(bounds.startPos(), size_t(0));
+    XCTAssertEqual(bounds.startLoopPos(), size_t(43));
+    XCTAssertEqual(bounds.endLoopPos(), size_t(90));
+    XCTAssertEqual(bounds.endPos(), size_t(128));
     XCTAssertEqual(bounds.hasLoop(), true);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::endLoopAddressOffset, 1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endLoopAddressOffset, 1);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.endLoopPos(), 91);
+    XCTAssertEqual(bounds.endLoopPos(), size_t(91));
     XCTAssertEqual(bounds.hasLoop(), true);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::endLoopAddressOffset, 40);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endLoopAddressOffset, 40);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.endLoopPos(), 128);
+    XCTAssertEqual(bounds.endLoopPos(), size_t(128));
     XCTAssertEqual(bounds.hasLoop(), true);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::endLoopAddressOffset, -1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endLoopAddressOffset, -1);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.endLoopPos(), 89);
+    XCTAssertEqual(bounds.endLoopPos(), size_t(89));
     XCTAssertEqual(bounds.hasLoop(), true);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::endLoopAddressOffset, -47);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endLoopAddressOffset, -47);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.endLoopPos(), 43);
+    XCTAssertEqual(bounds.endLoopPos(), size_t(43));
     XCTAssertEqual(bounds.hasLoop(), false);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::endLoopAddressOffset, -100);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::endLoopAddressOffset, -100);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.endLoopPos(), 0);
+    XCTAssertEqual(bounds.endLoopPos(), size_t(0));
     XCTAssertEqual(bounds.hasLoop(), false);
   }
 }
@@ -267,31 +267,31 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 - (void)testEndLoopOffsetCoarse {
   auto channelState = MIDI::ChannelState();
   auto state = State::State(48'000.0, channelState);
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 1);
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, -32760);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, -32760);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startLoopPos(), 43 + 32768 - 32760);
+    XCTAssertEqual(bounds.startLoopPos(), size_t(43 + 32768 - 32760));
     XCTAssertEqual(bounds.hasLoop(), true);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, -1);
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 32750);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, -1);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 32750);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startLoopPos(), 43 - 32768 + 32750);
+    XCTAssertEqual(bounds.startLoopPos(), size_t(43 - 32768 + 32750));
     XCTAssertEqual(bounds.hasLoop(), true);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 2);
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 0);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 2);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 0);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startLoopPos(), 128);
+    XCTAssertEqual(bounds.startLoopPos(), size_t(128));
     XCTAssertEqual(bounds.hasLoop(), false);
   }
-  sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, -2);
+  self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, -2);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
-    XCTAssertEqual(bounds.startLoopPos(), 0);
+    XCTAssertEqual(bounds.startLoopPos(), size_t(0));
     XCTAssertEqual(bounds.hasLoop(), false);
   }
 }

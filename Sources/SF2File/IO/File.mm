@@ -18,8 +18,6 @@ File::File(std::string path) : path_{path}, loaded_{false} {}
 
 File::File(const char* path) : File::File(std::string(path)) {}
 
-File::~File() noexcept {}
-
 File::LoadResponse
 File::load() noexcept
 {

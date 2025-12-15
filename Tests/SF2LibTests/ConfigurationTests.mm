@@ -35,7 +35,7 @@
 
 - (void)testAlternate {
   auto bundles = [NSBundle allBundles];
-  for (int index = 0; index < bundles.count; ++index) {
+  for (size_t index = 0; index < bundles.count; ++index) {
     NSBundle* bundle = [bundles objectAtIndex:index];
     auto z = [Configuration getConfigurationPath: @"Configuration" from: bundle];
     XCTAssertNotNil(z);

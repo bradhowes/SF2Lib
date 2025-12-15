@@ -21,31 +21,35 @@ using namespace SF2::Render::Voice::Sample;
 
 @interface NormalizedSampleSourceTests : XCTestCase
 
+@property (nonatomic) SampleBasedContexts* contexts;
+@property (assign, nonatomic) SF2::Float epsilon;
+
 @end
 
-@implementation NormalizedSampleSourceTests {
-  SampleBasedContexts* contexts;
-  SF2::Float epsilon;
-}
+@implementation NormalizedSampleSourceTests
+
+@synthesize contexts;
+@synthesize epsilon;
 
 static SF2::Entity::SampleHeader header{0, 6, 3, 5, 100, 69, 0}; // 0: start, 1: end, 2: loop start, 3: loop end
 static SF2::MIDI::ChannelState channelState;
 static SF2::SampleVector values = {1.0, -1.0, 0.5, 0.25, -0.25, -0.5, -0.6, -0.7};
 
 - (void)setUp {
-  contexts = new SampleBasedContexts;
-  epsilon = PresetTestContextBase::epsilonValue();
+  self.contexts = new SampleBasedContexts;
+  self.epsilon = PresetTestContextBase::epsilonValue();
+  [super setUp];
 }
 
 - (void)tearDown {
-  delete contexts;
+  delete self.contexts;
 }
 
 - (void)testLoad {
   NormalizedSampleSource source{values, header};
-  XCTAssertEqual(source.size(), 52);
-  XCTAssertEqual(0, source.header().startIndex());
-  XCTAssertEqual(6, source.header().endIndex());
+  XCTAssertEqual(source.size(), size_t(52));
+  XCTAssertEqual(size_t(0), source.header().startIndex());
+  XCTAssertEqual(size_t(6), source.header().endIndex());
 
   XCTAssertEqual(source.size(), source.header().endIndex() + NormalizedSampleSource::sizePaddingAfterEnd);
   XCTAssertEqual(source[0], values[0]);
@@ -53,37 +57,37 @@ static SF2::SampleVector values = {1.0, -1.0, 0.5, 0.25, -0.25, -0.5, -0.6, -0.7
 }
 
 - (void)testLoadSamplesPerformance0 {
-  auto& file = contexts->context0.file();
+  auto& file = self.contexts->context0.file();
   auto sampleEntries = file.sampleHeaders().size();
-  XCTAssertEqual(sampleEntries, 495);
+  XCTAssertEqual(sampleEntries, size_t(495));
 
   [self measureBlock:^{
     for (size_t index = 0; index < sampleEntries; ++index) {
-      auto samples = file.sampleSourceCollection()[index];
+      auto _ = file.sampleSourceCollection()[index];
     }
   }];
 }
 
 - (void)testLoadSamplesPerformance1 {
-  auto& file = contexts->context1.file();
+  auto& file = self.contexts->context1.file();
   auto sampleEntries = file.sampleHeaders().size();
-  XCTAssertEqual(sampleEntries, 864);
+  XCTAssertEqual(sampleEntries, size_t(864));
 
   [self measureBlock:^{
     for (size_t index = 0; index < sampleEntries; ++index) {
-      auto samples = file.sampleSourceCollection()[index];
+      auto _ = file.sampleSourceCollection()[index];
     }
   }];
 }
 
 - (void)testLoadSamplesPerformance2 {
-  auto& file = contexts->context2.file();
+  auto& file = self.contexts->context2.file();
   auto sampleEntries = file.sampleHeaders().size();
-  XCTAssertEqual(sampleEntries, 24);
+  XCTAssertEqual(sampleEntries, size_t(24));
 
   [self measureBlock:^{
     for (size_t index = 0; index < sampleEntries; ++index) {
-      auto samples = file.sampleSourceCollection()[index];
+      auto _ = file.sampleSourceCollection()[index];
     }
   }];
 }

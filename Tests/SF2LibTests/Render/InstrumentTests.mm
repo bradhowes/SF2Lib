@@ -12,14 +12,22 @@ using namespace SF2::Render;
 using namespace SF2::Render::Voice;
 
 @interface InstrumentTests : XCTestCase
+
+@property (nonatomic) SampleBasedContexts* contexts;
+
 @end
 
-@implementation InstrumentTests {
-  SampleBasedContexts contexts;
+@implementation InstrumentTests
+
+@synthesize contexts;
+
+- (void)setUp {
+  self.contexts = new SampleBasedContexts();
+  [super setUp];
 }
 
 - (void)testRolandPianoInstrument {
-  auto& file{contexts.context2.file()};
+  auto& file{self.contexts->context2.file()};
 
   Instrument instrument(file, file.instruments()[0]);
   XCTAssertEqual(std::string("Instrument6"), instrument.configuration().name());
@@ -27,7 +35,7 @@ using namespace SF2::Render::Voice;
   XCTAssertTrue(instrument.hasGlobalZone());
 
   auto zones = instrument.filter(64, 10);
-  XCTAssertEqual(2, zones.size());
+  XCTAssertEqual(size_t(2), zones.size());
   XCTAssertFalse(zones[0].get().isGlobal());
   XCTAssertNotEqual(nullptr, &zones[0].get().sampleSource());
 

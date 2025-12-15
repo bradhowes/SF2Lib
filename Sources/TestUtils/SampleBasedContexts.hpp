@@ -32,9 +32,9 @@ struct TestEngineHarness {
     engine_.makeTree();
   }
 
-  Mixer createMixer(int seconds) noexcept
+  Mixer createMixer(double seconds) noexcept
   {
-    duration_ = seconds * engine_.sampleRate();
+    duration_ = AVAudioFrameCount(seconds * engine_.sampleRate());
     dryBuffer_ = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format_ frameCapacity:duration_];
     dryFacet_.setChannelCount(2);
     dryFacet_.assignBufferList(dryBuffer_.mutableAudioBufferList);
@@ -53,13 +53,13 @@ struct TestEngineHarness {
     return Mixer(dry, chorus, reverb);
   }
 
-  int renderOnce(Mixer& mixer) noexcept {
+  AVAudioFrameCount renderOnce(Mixer& mixer) noexcept {
     engine_.renderInto(mixer, maxFramesToRender_);
     mixer.shiftOver(maxFramesToRender_);
     return ++renderIndex_;
   }
 
-  void renderUntil(Mixer& mixer, int limit) noexcept {
+  void renderUntil(Mixer& mixer, AVAudioFrameCount limit) noexcept {
     while (renderIndex_ < limit) {
       engine_.renderInto(mixer, maxFramesToRender_);
       mixer.shiftOver(maxFramesToRender_);
@@ -101,9 +101,9 @@ struct TestEngineHarness {
   AUValue lastChorusSample() noexcept { return chorusFacet_.busBuffers()[0][-1]; }
   AUValue lastReverbSample() noexcept { return reverbFacet_.busBuffers()[0][-1]; }
 
-  AUValue lastDrySample(int channel) noexcept { return dryFacet_.busBuffers()[channel][-1]; }
-  AUValue lastChorusSample(int channel) noexcept { return chorusFacet_.busBuffers()[channel][-1]; }
-  AUValue lastReverbSample(int channel) noexcept { return reverbFacet_.busBuffers()[channel][-1]; }
+  AUValue lastDrySample(size_t channel) noexcept { return dryFacet_.busBuffers()[channel][-1]; }
+  AUValue lastChorusSample(size_t channel) noexcept { return chorusFacet_.busBuffers()[channel][-1]; }
+  AUValue lastReverbSample(size_t channel) noexcept { return reverbFacet_.busBuffers()[channel][-1]; }
 
   template <typename T>
   void sendRaw(const T& command) noexcept {
@@ -123,7 +123,7 @@ struct TestEngineHarness {
     auto rawEvent = std::vector<uint8_t>(sizeof(AUMIDIEvent) + command.size(), uint8_t(0));
     AUMIDIEvent& event = *reinterpret_cast<AUMIDIEvent*>(rawEvent.data());
     event.eventSampleTime = AUEventSampleTimeImmediate;
-    event.length = command.size();
+    event.length = uint16_t(command.size());
     ::memcpy(event.data, command.data(), command.size());
     engine_.doMIDIEvent(event);
   }
@@ -177,7 +177,7 @@ private:
   DSPHeaders::BusBufferFacet dryFacet_;
   DSPHeaders::BusBufferFacet chorusFacet_;
   DSPHeaders::BusBufferFacet reverbFacet_;
-  int renderIndex_{0};
+  AVAudioFrameCount renderIndex_{0};
 };
 
 
@@ -210,7 +210,7 @@ struct TestVoiceCollection {
   void stop() { for (auto& voice : voices_) voice.stop(); }
 
   void releaseKey() {
-    auto releaseKeyState = SF2::Render::Voice::Voice::ReleaseKeyState{1, false, false};
+    auto releaseKeyState = SF2::Render::Voice::Voice::ReleaseKeyState{1, {false, false}};
     for (auto& voice : voices_) voice.releaseKey(releaseKeyState);
   }
 
@@ -241,14 +241,14 @@ struct PresetTestContextBase
   static inline const SF2::Float epsilon = epsilonValue();
   static BOOL playAudioInTests();
 
-  PresetTestContextBase(int urlIndex, SF2::Float sampleRate)
+  PresetTestContextBase(size_t urlIndex, SF2::Float sampleRate)
   :
-  urlIndex_{urlIndex}, sampleRate_{sampleRate}, presets_{}
+  urlIndex_{urlIndex}, presets_{}, sampleRate_{sampleRate}
   {
     ;
   }
 
-  const SF2::Render::Preset& preset(int presetIndex) const {
+  const SF2::Render::Preset& preset(size_t presetIndex) const {
     // Lazily create the PresetCollection for the file when first asked for a preset.
     if (presets_.empty()) {
      const_cast<PresetTestContextBase*>(this)->presets_.build(getFile(urlIndex_));
@@ -259,12 +259,12 @@ struct PresetTestContextBase
     return presets_[presetIndex];
   }
 
-  TestVoiceCollection makeVoiceCollection(int presetIndex, int midiNote, int midiVelocity = 64) {
+  TestVoiceCollection makeVoiceCollection(size_t presetIndex, int midiNote, int midiVelocity = 64) {
     channelState_.reset();
     return {midiNote, midiVelocity, preset(presetIndex), sampleRate_, channelState_};
   }
 
-  std::vector<TestVoiceCollection> makeVoicesCollection(int presetIndex, const std::vector<int>& midiNotes,
+  std::vector<TestVoiceCollection> makeVoicesCollection(size_t presetIndex, const std::vector<int>& midiNotes,
                                                         int midiVelocity = 64) {
     std::vector<TestVoiceCollection> notes;
     for (auto midiNote : midiNotes) {
@@ -279,7 +279,7 @@ struct PresetTestContextBase
     return state;
   }
 
-  SF2::Render::Voice::State::State makeState(int presetIndex, int midiKey, int midiVelocity) const {
+  SF2::Render::Voice::State::State makeState(size_t presetIndex, int midiKey, int midiVelocity) const {
     auto found{preset(presetIndex).find(midiKey, midiVelocity)};
     return makeState(found[0]);
   }
@@ -290,12 +290,12 @@ struct PresetTestContextBase
   int fd() const { return ::open(path().c_str(), O_RDONLY); }
 
 private:
-  static NSURL* getUrl(int urlIndex);
-  static SF2::IO::File& getFile(int urlIndex);
+  static NSURL* getUrl(size_t urlIndex);
+  static SF2::IO::File& getFile(size_t urlIndex);
 
   // SF2::Float sampleRate() const { return sampleRate_; }
 
-  int urlIndex_;
+  size_t urlIndex_;
   SF2::Render::PresetCollection presets_;
   SF2::MIDI::ChannelState channelState_;
   SF2::Float sampleRate_;
@@ -329,28 +329,27 @@ struct SF2::Render::Voice::State::State::Tester {
   void addModulator(State& state, const Entity::Modulator::Modulator& mod) { state.addModulator(mod); }
 };
 
-@interface SamplePlayingTestCase : XCTestCase <AVAudioPlayerDelegate> {
-  SF2::Float epsilon;
-  SampleBasedContexts contexts;
-  SF2::Render::Voice::State::State::Tester sst;
-}
+@interface SamplePlayingTestCase : XCTestCase <AVAudioPlayerDelegate>
 
+@property (nonatomic) SF2::Render::Voice::State::State::Tester sst;
+@property (nonatomic) SampleBasedContexts* contexts;
 @property (nonatomic, retain) AVAudioPlayer* player;
 @property (nonatomic, retain) XCTestExpectation* playedAudioExpectation;
 @property (nonatomic, retain) NSURL* audioFileURL;
-@property (nonatomic, retain) AVAudioPCMBuffer* buffer;
+@property (nonatomic, retain) AVAudioPCMBuffer* samplesBuffer;
 @property (nonatomic) BOOL deleteFile;
 @property (nonatomic) BOOL playAudio;
+@property (nonatomic) SF2::Float epsilon;
 
-- (void)playSamples:(AVAudioPCMBuffer*)buffer count:(int)sampleCount;
+- (void)playSamples:(AVAudioPCMBuffer*)buffer count:(AVAudioFrameCount)sampleCount;
 
-- (AVAudioPCMBuffer*)allocateBufferFor:(const TestVoiceCollection&)voices capacity:(int)sampleCount;
-- (AVAudioPCMBuffer*)allocateBuffer:(SF2::Float)sampleRate numberOfChannels:(int)channels capacity:(int)sampleCount;
+- (AVAudioPCMBuffer*)allocateBufferFor:(const TestVoiceCollection&)voices capacity:(AVAudioFrameCount)sampleCount;
+- (AVAudioPCMBuffer*)allocateBuffer:(SF2::Float)sampleRate numberOfChannels:(AVAudioChannelCount)channels capacity:(AVAudioFrameCount)sampleCount;
 
-- (size_t)renderInto:(AVAudioPCMBuffer*)buffer mono:(SF2::Render::Voice::Voice&)left forCount:(size_t)sampleCount startingAt:(size_t)offset;
-- (size_t)renderInto:(AVAudioPCMBuffer*)buffer left:(SF2::Render::Voice::Voice&)left right:(SF2::Render::Voice::Voice&)right forCount:(size_t)sampleCount startingAt:(size_t)offset;
-- (size_t)renderInto:(AVAudioPCMBuffer*)buffer voices:(TestVoiceCollection&)voices forCount:(size_t)sampleCount startingAt:(size_t)offset;
-- (size_t)renderInto:(AVAudioPCMBuffer*)buffer voices:(TestVoiceCollection&)voices forCount:(size_t)sampleCount startingAt:(size_t)offset afterRenderSample:(void (^)(size_t))block;
+- (size_t)renderInto:(AVAudioPCMBuffer*)buffer mono:(SF2::Render::Voice::Voice&)left forCount:(AVAudioFrameCount)sampleCount startingAt:(size_t)offset;
+- (size_t)renderInto:(AVAudioPCMBuffer*)buffer left:(SF2::Render::Voice::Voice&)left right:(SF2::Render::Voice::Voice&)right forCount:(AVAudioFrameCount)sampleCount startingAt:(size_t)offset;
+- (size_t)renderInto:(AVAudioPCMBuffer*)buffer voices:(TestVoiceCollection&)voices forCount:(AVAudioFrameCount)sampleCount startingAt:(size_t)offset;
+- (size_t)renderInto:(AVAudioPCMBuffer*)buffer voices:(TestVoiceCollection&)voices forCount:(AVAudioFrameCount)sampleCount startingAt:(size_t)offset afterRenderSample:(void (^)(size_t))block;
 
 - (void)dumpPresets:(const SF2::IO::File&)file;
 - (void)dumpSamples:(const std::vector<AUValue>&)samples;

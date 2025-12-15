@@ -29,15 +29,15 @@ using namespace SF2::Entity::Generator;
 }
 
 - (void)testRangeConversion {
-  Range<uint8_t> range(Amount(0x3200));
+  Range<int> range(Amount(0x3200).low(), Amount(0x3200).high());
   XCTAssertEqual(0, range.low());
   XCTAssertEqual(50, range.high());
 
-  range = Range<uint8_t>(Amount(0x7F7F));
+  range = Range<int>(Amount(0x7F7F).low(), Amount(0x7F7F).high());
   XCTAssertEqual(127, range.low());
   XCTAssertEqual(127, range.high());
 
-  range = Range<uint8_t>(Amount(0x00FF));
+  range = Range<int>(Amount(0x00FF).low(), Amount(0x00FF).high());
   XCTAssertEqual(255, range.low());
   XCTAssertEqual(0, range.high());
 }

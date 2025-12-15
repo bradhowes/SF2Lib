@@ -5,8 +5,8 @@
 @interface TestResources : NSObject
 
 + (NSArray<NSURL*>*)getInitSoundFontUrls;
-+ (NSURL*)getResourceUrl:(int)index;
-+ (NSURL*)getBadResourceUrl:(int)index;
-+ (SF2::IO::File&)getFile:(int)index;
++ (NSURL*)getResourceUrl:(NSUInteger)index;
++ (NSURL*)getBadResourceUrl:(NSUInteger)index;
++ (SF2::IO::File&)getFile:(NSUInteger)index;
 
 @end

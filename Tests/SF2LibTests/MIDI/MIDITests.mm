@@ -10,9 +10,10 @@
 using namespace SF2;
 using namespace SF2::MIDI;
 
-@interface MIDITests : XCTestCase {
-  Float epsilon;
-}
+@interface MIDITests : XCTestCase
+
+@property (nonatomic) Float epsilon;
+
 @end
 
 //@implementation MIDITests

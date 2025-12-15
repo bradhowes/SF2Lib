@@ -26,10 +26,8 @@ public:
 
   /**
    Create a volume envelope for a voice
-
-   @param voiceIndex the unique index for the voice (used for logging)
    */
-  inline explicit Volume(size_t voiceIndex) : Generator(voiceIndex, "VolGen") {}
+  inline explicit Volume() : Generator("VolGen") {}
 
   /**
    Create new envelope for volume changes over time.
@@ -49,9 +47,8 @@ public:
   inline Value getNextValue() noexcept { return {Generator::getNextValue()}; }
 
 private:
-  Volume(Float sampleRate, size_t voiceIndex, Float delay, Float attack, Float hold, Float decay,
-         int sustain, Float release) noexcept :
-  Generator(sampleRate, "VolGen", voiceIndex, delay, attack, hold, decay, sustain, release) {}
+  Volume(Float sampleRate, Float delay, Float attack, Float hold, Float decay, int sustain, Float release) noexcept :
+  Generator(sampleRate, "VolGen", delay, attack, hold, decay, sustain, release) {}
 
   friend struct EnvelopeTestInjector;
 };

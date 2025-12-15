@@ -46,7 +46,7 @@ SF2Engine::getRenderBlock() const noexcept {
                             AUAudioFrameCount frameCount, NSInteger outputBusNumber, AudioBufferList* _Nonnull output,
                             const AURenderEvent* __nullable realtimeEventListHead,
                             AURenderPullInputBlock __nullable __unsafe_unretained pullInputBlock) {
-    return engine->processAndRender(timestamp, frameCount, outputBusNumber, output, realtimeEventListHead, pullInputBlock);
+    return engine->processAndRender(timestamp, frameCount, outputBusNumber, output, realtimeEventListHead, nullptr);
   };
 }
 
@@ -55,7 +55,7 @@ SF2Engine::processAndRender(const AudioTimeStamp* timestamp, UInt32 frameCount, 
                             AudioBufferList* output, const AURenderEvent* realtimeEventListHead,
                             AURenderPullInputBlock pullInputBlock) const noexcept
 {
-  return impl_->processAndRender(timestamp, frameCount, outputBusNumber, output, realtimeEventListHead, pullInputBlock);
+  return impl_->processAndRender(timestamp, frameCount, outputBusNumber, output, realtimeEventListHead, nullptr);
 }
 
 AUParameterTree*

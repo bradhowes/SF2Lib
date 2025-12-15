@@ -31,7 +31,7 @@ public:
 
    @param range the union value to use for range bounds
    */
-  explicit Range(const Entity::Generator::Amount& range) noexcept : Range(range.low(), range.high()) {}
+  // explicit Range(const Entity::Generator::Amount& range) noexcept : Range(range.low(), range.high()) {}
 
   /**
    Determine if a given value is within the defined range.

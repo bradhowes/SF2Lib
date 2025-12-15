@@ -43,9 +43,9 @@ class Engine : public DSPHeaders::EventProcessor<Engine> {
 public:
   /// Maximum number of voices that can be supported by the engine
   static inline constexpr size_t maxVoiceCount{128};
-  static inline constexpr Float minLastLoadFinished{-1.0e-8};
-  static inline constexpr Float maxLastLoadFinished{ 1.0e-8};
-  static inline constexpr Float lastLoadFinishedChange{0.0001};
+  static inline constexpr AUValue minLastLoadFinished{AUValue(-1.0e-4)};
+  static inline constexpr AUValue maxLastLoadFinished{AUValue(1.0e+6)};
+  static inline constexpr AUValue lastLoadFinishedChange{AUValue(0.0001)};
 
   using Config = Voice::State::Config;
   using Voice = Voice::Voice;
@@ -463,14 +463,13 @@ private:
   bool portamentoModeEnabled_{false};
   bool retriggerModeEnabled_{true};
 
-  const os_log_t log_;
   os_signpost_id_t renderSignpost_;
   os_signpost_id_t noteOnSignpost_;
   os_signpost_id_t noteOffSignpost_;
   os_signpost_id_t startVoiceSignpost_;
   os_signpost_id_t stopVoiceSignpost_;
 
-  Float lastLoadFinishedCounter_{minLastLoadFinished};
+  AUValue lastLoadFinishedCounter_{minLastLoadFinished};
 
   friend struct ::TestEngineHarness;
   friend class Parameters;

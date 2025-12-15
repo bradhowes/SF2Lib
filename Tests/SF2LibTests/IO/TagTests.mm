@@ -15,11 +15,11 @@ using namespace SF2::IO;
 
 - (void)testPack4Chars {
   uint32_t value = Pack4Chars("abcd");
-  XCTAssertEqual(1684234849, value);
+  XCTAssertEqual(uint32_t(1684234849), value);
 }
 
 - (void)testRiff {
-  XCTAssertEqual(1179011410, SF2::valueOf(Tags::riff));
+  XCTAssertEqual(uint32_t(1179011410), SF2::valueOf(Tags::riff));
 }
 
 /**

@@ -37,7 +37,7 @@ LiveGeneratorParameters::setLiveValue(Index index, AUValue value) noexcept
   const auto& def = Entity::Generator::Definition::definition(index);
   auto clamped = def.clamp(std::round(value));
   os_log_info(log_, "setLiveValue - index: %lu value: %f clamped: %f", index, value, clamped);
-  liveValues_[index] = clamped;
+  liveValues_[index] = int(clamped);
   isChanged_[index] = true;
   anyChanged_ = true;
 }

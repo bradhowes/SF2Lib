@@ -85,14 +85,14 @@ using namespace SF2::Entity::Modulator;
 
 - (void)testContinuousIndices {
   for (auto bits : {1, 2, 3, 4, 31, 64, 97, 119}) {
-    Source s{Source(Source::CC(bits))};
+    Source s{Source(Source::CC(uint16_t(bits)))};
     XCTAssertTrue(s.isValid());
     XCTAssertTrue(s.isContinuousController());
     XCTAssertEqual(bits, s.ccIndex().value);
   }
 
   for (auto bits : {0, 6, 32, 63, 98, 101, 120, 127}) {
-    Source s{Source(Source::CC(bits))};
+    Source s{Source(Source::CC(uint16_t(bits)))};
     XCTAssertFalse(s.isValid());
     XCTAssertTrue(s.isContinuousController());
   }

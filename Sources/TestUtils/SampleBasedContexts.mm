@@ -12,12 +12,14 @@
 using namespace SF2;
 using namespace SF2::Render;
 
-NSURL* PresetTestContextBase::getUrl(int urlIndex)
+typedef AUValue* AUValuePtr;
+
+NSURL* PresetTestContextBase::getUrl(size_t urlIndex)
 {
   return [TestResources getResourceUrl:urlIndex];
 }
 
-SF2::IO::File& PresetTestContextBase::getFile(int urlIndex)
+SF2::IO::File& PresetTestContextBase::getFile(size_t urlIndex)
 {
   return [TestResources getFile:urlIndex];
 }
@@ -33,6 +35,16 @@ BOOL PresetTestContextBase::playAudioInTests() {
 
 @implementation SamplePlayingTestCase
 
+@synthesize sst;
+@synthesize contexts;
+@synthesize player;
+@synthesize playedAudioExpectation;
+@synthesize audioFileURL;
+@synthesize samplesBuffer;
+@synthesize deleteFile;
+@synthesize playAudio;
+@synthesize epsilon;
+
 - (NSString *)pathForTemporaryFile
 {
   CFUUIDRef uuid = CFUUIDCreate(NULL);
@@ -46,15 +58,23 @@ BOOL PresetTestContextBase::playAudioInTests() {
 
 - (void)setUp
 {
-  epsilon = PresetTestContextBase::epsilonValue();
+  self.contexts = new SampleBasedContexts();
+  self.epsilon = PresetTestContextBase::epsilonValue();
   self.deleteFile = YES;
   self.playAudio = PresetTestContextBase::playAudioInTests();
 }
 
+- (void)tearDown
+{
+  delete self.contexts;
+  [super tearDown];
+}
+
 - (void)cleanup
 {
-  if (self.deleteFile) {
-    [[NSFileManager defaultManager] removeItemAtPath:[self.audioFileURL path]  error:NULL];
+  NSString* path = [self.audioFileURL path];
+  if (self.deleteFile && path != nullptr) {
+    [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
   }
 }
 
@@ -69,7 +89,7 @@ BOOL PresetTestContextBase::playAudioInTests() {
   [self cleanup];
 }
 
-- (void)playSamples:(AVAudioPCMBuffer*)buffer count:(int)sampleCount
+- (void)playSamples:(AVAudioPCMBuffer*)buffer count:(AVAudioFrameCount)sampleCount
 {
   if (!self.playAudio) {
     [self cleanup];
@@ -119,12 +139,12 @@ BOOL PresetTestContextBase::playAudioInTests() {
   }];
 }
 
-AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount)
+AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, AVAudioFrameCount sampleCount)
 {
   AVAudioPCMBuffer* buffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:sampleCount];
   AudioBufferList* bufferList = buffer.mutableAudioBufferList;
 
-  for (int index = 0; index < format.channelCount; ++index) {
+  for (AVAudioChannelCount index = 0; index < format.channelCount; ++index) {
     UInt32 byteCount = sampleCount * sizeof(AUValue);
     bufferList->mBuffers[index].mDataByteSize = byteCount;
     memset(bufferList->mBuffers[index].mData, 0, byteCount);
@@ -133,28 +153,27 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount)
   return buffer;
 }
 
-- (AVAudioPCMBuffer*)allocateBuffer:(SF2::Float)sampleRate numberOfChannels:(int)channels capacity:(int)sampleCount
+- (AVAudioPCMBuffer*)allocateBuffer:(SF2::Float)sampleRate numberOfChannels:(AVAudioChannelCount)channels capacity:(AVAudioFrameCount)sampleCount
 {
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:channels];
   return makeBuffer(format, sampleCount);
 }
 
-- (AVAudioPCMBuffer*)allocateBufferFor:(const TestVoiceCollection&)voices capacity:(int)sampleCount
+- (AVAudioPCMBuffer*)allocateBufferFor:(const TestVoiceCollection&)voices capacity:(AVAudioFrameCount)sampleCount
 {
-  int channelCount = int(voices.count());
   AVAudioFormat* format = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:voices.sampleRate()
-                                                                         channels:channelCount];
+                                                                         channels:AVAudioChannelCount(voices.count())];
   return makeBuffer(format, sampleCount);
 }
 
 - (size_t)renderInto:(AVAudioPCMBuffer*)buffer
                 mono:(SF2::Render::Voice::Voice&)voice
-            forCount:(size_t)sampleCount
+            forCount:(AVAudioFrameCount)sampleCount
           startingAt:(size_t)offset
 {
   AUValue* ptr = [buffer left] + offset;
-  for (auto index = 0; index < sampleCount; ++index) {
-    auto sample = voice.renderSample();
+  for (size_t index = 0; index < sampleCount; ++index) {
+    auto sample = AUValue(voice.renderSample());
     *ptr++ += sample;
   }
   return offset + sampleCount;
@@ -162,14 +181,14 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount)
 
 - (size_t)renderInto:(AVAudioPCMBuffer*)buffer
               voices:(TestVoiceCollection&)voices
-            forCount:(size_t)sampleCount
+            forCount:(AVAudioFrameCount)sampleCount
           startingAt:(size_t)offset
 {
   for (size_t channel = 0; channel < voices.count(); ++channel) {
     auto into = [buffer channel: channel] + offset;
     auto& voice{voices[channel]};
-    for (auto index = 0; index < sampleCount; ++index) {
-      *into++ += voice.renderSample();
+    for (size_t index = 0; index < sampleCount; ++index) {
+      *into++ += AUValue(voice.renderSample());
     }
   }
   return offset + sampleCount;
@@ -177,15 +196,15 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount)
 
 - (size_t)renderInto:(AVAudioPCMBuffer*)buffer
               voices:(TestVoiceCollection&)voices
-            forCount:(size_t)sampleCount
+            forCount:(AVAudioFrameCount)sampleCount
           startingAt:(size_t)offset
    afterRenderSample:(void (^)(size_t))block
 {
   for (size_t channel = 0; channel < voices.count(); ++channel) {
     auto into = [buffer channel:channel] + offset;
     auto& voice{voices[channel]};
-    for (auto index = 0; index < sampleCount; ++index) {
-      *into++ += voice.renderSample();
+    for (size_t index = 0; index < sampleCount; ++index) {
+      *into++ += AUValue(voice.renderSample());
       block(index + offset);
     }
   }
@@ -195,14 +214,14 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount)
 - (size_t)renderInto:(AVAudioPCMBuffer*)buffer
                 left:(SF2::Render::Voice::Voice&)left
                right:(SF2::Render::Voice::Voice&)right
-            forCount:(size_t)sampleCount
+            forCount:(AVAudioFrameCount)sampleCount
           startingAt:(size_t)offset
 {
   AUValue* samplesLeft = [buffer left] + offset;
   AUValue* samplesRight = [buffer right] + offset;
-  for (auto index = 0; index < sampleCount; ++index) {
-    *samplesLeft++ += left.renderSample();
-    *samplesRight++ += right.renderSample();
+  for (size_t index = 0; index < sampleCount; ++index) {
+    *samplesLeft++ += AUValue(left.renderSample());
+    *samplesRight++ += AUValue(right.renderSample());
   }
   return offset + sampleCount;
 }
@@ -218,7 +237,7 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount)
 - (void)dumpSamples:(const std::vector<AUValue>&)samples
 {
   std::cout << std::setprecision(12);
-  for (auto index = 0; index < samples.size(); ++index) {
+  for (size_t index = 0; index < samples.size(); ++index) {
     std::cout << "XCTAssertEqualWithAccuracy(" << samples[index] << ", samples[" << index << "], epsilon);\n";
   }
 }
@@ -229,9 +248,9 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount)
 
 - (void)normalize:(size_t)voices
 {
-  for (int channel = 0; channel < self.format.channelCount; ++channel) {
+  for (AVAudioChannelCount channel = 0; channel < self.format.channelCount; ++channel) {
     auto count = self.mutableAudioBufferList->mBuffers[channel].mDataByteSize / sizeof(AUValue);
-    auto ptr = (AUValue*)(self.mutableAudioBufferList->mBuffers[channel].mData);
+    auto ptr = AUValuePtr(self.mutableAudioBufferList->mBuffers[channel].mData);
     while (count-- > 0) {
       *ptr++ /= AUValue(voices);
     }
@@ -239,15 +258,15 @@ AVAudioPCMBuffer* makeBuffer(AVAudioFormat* format, int sampleCount)
 }
 
 - (AUValue*)left {
-  return (AUValue*)(self.mutableAudioBufferList->mBuffers[0].mData);
+  return AUValuePtr(self.mutableAudioBufferList->mBuffers[0].mData);
 }
 
 - (AUValue*)right {
-  return (AUValue*)(self.mutableAudioBufferList->mBuffers[1].mData);
+  return AUValuePtr(self.mutableAudioBufferList->mBuffers[1].mData);
 }
 
 - (AUValue*)channel:(size_t)index {
-  return (AUValue*)(self.mutableAudioBufferList->mBuffers[index].mData);
+  return AUValuePtr(self.mutableAudioBufferList->mBuffers[index].mData);
 }
 
 @end

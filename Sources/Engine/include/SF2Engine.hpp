@@ -119,8 +119,8 @@ struct SWIFT_ESCAPABLE SF2Engine
    Obtain MIDI payload containing a MIDI SYSEX command that can be sent to load an SF2 file and use a given
    preset. This should be sent to the engine via a MIDI control connection; this method only creates the bytes to send.
 
-   @param path the full path of the SF2 file to load
-   @param preset the index of the preset in the file to use
+   @param filePath the full path of the SF2 file to load
+   @param presetIndex the index of the preset in the file to use
    @returns MIDI SYSEX command as a byte sequence
    */
   static std::vector<uint8_t> createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex) noexcept;

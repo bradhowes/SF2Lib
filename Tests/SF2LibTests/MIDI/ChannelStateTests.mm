@@ -10,15 +10,18 @@
 
 using namespace SF2::MIDI;
 
-@interface ChannelStateTests : XCTestCase {
-  SF2::Float epsilon;
-}
+@interface ChannelStateTests : XCTestCase
+
+@property (nonatomic) SF2::Float epsilon;
+
 @end
 
 @implementation ChannelStateTests
 
+@synthesize epsilon;
+
 - (void)setUp {
-  epsilon = PresetTestContextBase::epsilonValue();
+  self.epsilon = PresetTestContextBase::epsilonValue();
 }
 
 - (void)testInit {
@@ -116,7 +119,7 @@ using namespace SF2::MIDI;
 
   for (int index = 0; index < 128; ++index) {
     if (index < 0x62 || index > 0x65){
-      channel.setContinuousControllerValue(ControlChange(index), index);
+      channel.setContinuousControllerValue(ControlChange(index), uint8_t(index));
     }
   }
 
@@ -149,7 +152,7 @@ using namespace SF2::MIDI;
 
   // Only activate on 120 nrpnMSB
   for (auto value = 0; value < 128; ++ value) {
-    channelState.setContinuousControllerValue(ControlChange::nrpnMSB, value);
+    channelState.setContinuousControllerValue(ControlChange::nrpnMSB, uint8_t(value));
     XCTAssertEqual(channelState.isActivelyDecoding(), value == 120);
   }
 
@@ -180,28 +183,28 @@ using namespace SF2::MIDI;
   channelState.setContinuousControllerValue(ControlChange::nrpnMSB, 120);
 
   channelState.setContinuousControllerValue(ControlChange::nrpnLSB, 31);
-  XCTAssertEqual(31, channelState.nrpnIndex());
+  XCTAssertEqual(size_t(31), channelState.nrpnIndex());
 
   channelState.setContinuousControllerValue(ControlChange::nrpnLSB, 60);
-  XCTAssertEqual(60, channelState.nrpnIndex());
+  XCTAssertEqual(size_t(60), channelState.nrpnIndex());
 
   channelState.setContinuousControllerValue(ControlChange::nrpnLSB, 100);
-  XCTAssertEqual(160, channelState.nrpnIndex());
+  XCTAssertEqual(size_t(160), channelState.nrpnIndex());
   channelState.setContinuousControllerValue(ControlChange::nrpnLSB, 100);
-  XCTAssertEqual(260, channelState.nrpnIndex());
+  XCTAssertEqual(size_t(260), channelState.nrpnIndex());
 
   channelState.setContinuousControllerValue(ControlChange::nrpnLSB, 101);
-  XCTAssertEqual(1260, channelState.nrpnIndex());
+  XCTAssertEqual(size_t(1260), channelState.nrpnIndex());
   channelState.setContinuousControllerValue(ControlChange::nrpnLSB, 101);
-  XCTAssertEqual(2260, channelState.nrpnIndex());
+  XCTAssertEqual(size_t(2260), channelState.nrpnIndex());
 
   channelState.setContinuousControllerValue(ControlChange::nrpnLSB, 102);
-  XCTAssertEqual(12260, channelState.nrpnIndex());
+  XCTAssertEqual(size_t(12260), channelState.nrpnIndex());
   channelState.setContinuousControllerValue(ControlChange::nrpnLSB, 102);
-  XCTAssertEqual(22260, channelState.nrpnIndex());
+  XCTAssertEqual(size_t(22260), channelState.nrpnIndex());
 
   channelState.setContinuousControllerValue(ControlChange::nrpnLSB, 1);
-  XCTAssertEqual(1, channelState.nrpnIndex());
+  XCTAssertEqual(size_t(1), channelState.nrpnIndex());
 }
 
 - (void)testOutOfRangeNRPNIndexing {
@@ -221,13 +224,13 @@ using namespace SF2::MIDI;
   channelState.setContinuousControllerValue(ControlChange::dataEntryMSB, 123);
   auto z = (123 << 7) - 8192;
   XCTAssertEqual(channelState.nrpnValue(SF2::Entity::Generator::Index(56)), z);
-  XCTAssertEqual(56, channelState.nrpnIndex());
+  XCTAssertEqual(size_t(56), channelState.nrpnIndex());
 
   channelState.setContinuousControllerValue(ControlChange::dataEntryLSB, 123);
   channelState.setContinuousControllerValue(ControlChange::dataEntryMSB, 21);
   z = ((21 << 7) | 123) - 8192;
   XCTAssertEqual(channelState.nrpnValue(SF2::Entity::Generator::Index(56)), z);
-  XCTAssertEqual(56, channelState.nrpnIndex());
+  XCTAssertEqual(size_t(56), channelState.nrpnIndex());
 }
 
 @end

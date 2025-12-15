@@ -3,7 +3,7 @@
 import PackageDescription
 
 let unsafeFlags = [
-  "-O3",
+  "-g",
   "-pedantic",
   "-Wall",
   "-Wassign-enum",
@@ -116,26 +116,36 @@ let unsafeFlags = [
   "-x", "objective-c++", // treat source files as Obj-C++ files
 ]
 
-// Set to 1 to enable C++ bounds checking
-let checkedVectorIndexing = "0"
-// Set to 1 to enable low-pass filter in sample generation (once sound quality bugs are fixed)
-let enableLowPassFilter = "0"
-// Set to 1 to play audio in tests. Set to 0 to keep silent.
-let playAudio = "0"
-// Set to 1 to enable Accelerate framework
-let useAccelerate = "1"
+// Set to true to enable C++ bounds checking
+let checkedVectorIndexing = false
+// Set to true to enable low-pass filter in sample generation (once sound quality bugs are fixed)
+let enableLowPassFilter = false
+// Set to true to play audio in tests. Set to false to keep silent.
+let playAudio = false
+// Set to true to enable Accelerate framework
+let useAccelerate = true
+// Set to true to use local DSPHeaders sources
+let useLocalDSPHeaders = false
 
 let cxxSettings: [CXXSetting] = [
-  .define("CHECKED_VECTOR_INDEXING", to: checkedVectorIndexing, .none),
-  .define("ENABLE_LOWPASS_FILTER", to: enableLowPassFilter, .none),
-  .define("PLAY_AUDIO", to: playAudio, .none),
-  .define("USE_ACCELERATE", to: useAccelerate, .none),
-  // .unsafeFlags(unsafeFlags)
+  .define("CHECKED_VECTOR_INDEXING", to: checkedVectorIndexing ? "1" : "0", .none),
+  .define("ENABLE_LOWPASS_FILTER", to: enableLowPassFilter ? "1" : "0", .none),
+  .define("PLAY_AUDIO", to: playAudio ? "1" : "0", .none),
+  .define("USE_ACCELERATE", to: useAccelerate ? "1" : "0", .none),
+  .unsafeFlags(unsafeFlags)
 ]
 
 let swiftSettings: [SwiftSetting] = [
   .define("APPLICATION_EXTENSION_API_ONLY")
 ]
+
+let dspHeaders: Package.Dependency = useLocalDSPHeaders ? .package(
+  name: "DSPHeaders",
+  path: "/Users/howes/src/Mine/DSPHeaders"
+) : .package(
+  url: "https://github.com/bradhowes/DSPHeaders",
+  from: "1.2.1"
+)
 
 let package = Package(
   name: "SF2Lib",
@@ -146,8 +156,7 @@ let package = Package(
     .library(name: "SF2Lib", targets: ["SF2Lib"])
   ],
   dependencies: [
-    .package(url: "https://github.com/bradhowes/DSPHeaders", from: "1.1.0"),
-    // .package(path: "../DSPHeaders"),
+    dspHeaders
   ],
   targets: [
     .target(

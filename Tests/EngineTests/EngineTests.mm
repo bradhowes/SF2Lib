@@ -4,37 +4,35 @@
 #import "SF2Engine.hpp"
 
 @interface EngineTests : XCTestCase
-
+@property (nonatomic) SF2Engine* engine;
 @end
 
-@implementation EngineTests {
-  SF2Engine* engine;
-}
+@implementation EngineTests
+
+@synthesize engine;
 
 - (void)setUp {
-  engine = new SF2Engine();
-  engine->create(48000.0, 48);
+  self.engine = new SF2Engine();
+  self.engine->create(48000.0, 48);
 }
 
 - (void)tearDown {
-  delete engine;
-  engine = nullptr;
 }
 
 - (void)testSetRenderingFormat {
   auto audioFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:48000.0 channels:2];
-  XCTAssertTrue(engine->setRenderingFormat(3, audioFormat, 512));
+  XCTAssertTrue(self.engine->setRenderingFormat(3, audioFormat, 512));
 }
 
 - (void)testActivePresetName {
-  auto value = engine->activePresetName();
+  auto value = self.engine->activePresetName();
   XCTAssertEqual("", value);
 }
 
 - (void)testCreateLoadFileUseIndexNoOverrides {
   auto url = [TestResources getResourceUrl:0];
   // auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
-  auto data = engine->createLoadFileUsePresetPayload(url.path.UTF8String, 123);
+  auto data = self.engine->createLoadFileUsePresetPayload(url.path.UTF8String, 123);
   XCTAssertTrue(data.size() > url.path.length);
 }
 
@@ -48,42 +46,42 @@
 //}
 
 - (void)testCreateResetCommand {
-  auto data = engine->createResetCommandPayload();
-  XCTAssertEqual(1, data.size());
+  auto data = self.engine->createResetCommandPayload();
+  XCTAssertEqual(size_t(1), data.size());
 }
 
 - (void)testCreateUseBankProgram {
-  auto data = engine->createUseBankProgramPayload(1, 43);
-  XCTAssertEqual(9, data.size());
+  auto data = self.engine->createUseBankProgramPayload(1, 43);
+  XCTAssertEqual(size_t(9), data.size());
 }
 
 - (void)testCreateChannelMessage {
-  auto data = engine->createChannelMessagePayload(0xFE, 0x01);
-  XCTAssertEqual(3, data.size());
+  auto data = self.engine->createChannelMessagePayload(0xFE, 0x01);
+  XCTAssertEqual(size_t(3), data.size());
 }
 
 - (void)testActiveVoiceCount {
-  XCTAssertEqual(0, engine->activeVoiceCount());
+  XCTAssertEqual(size_t(0), self.engine->activeVoiceCount());
 }
 
 - (void)testMonophonicModeEnabled {
-  XCTAssertEqual(false, engine->monophonicModeEnabled());
+  XCTAssertEqual(false, self.engine->monophonicModeEnabled());
 }
 
 - (void)testPolyphonicModeEnabled {
-  XCTAssertEqual(true, engine->polyphonicModeEnabled());
+  XCTAssertEqual(true, self.engine->polyphonicModeEnabled());
 }
 
 - (void)testPortamentoModeEnabled {
-  XCTAssertEqual(false, engine->portamentoModeEnabled());
+  XCTAssertEqual(false, self.engine->portamentoModeEnabled());
 }
 
 - (void)testkOneVoicePerKeyModeEnabled {
-  XCTAssertEqual(false, engine->oneVoicePerKeyModeEnabled());
+  XCTAssertEqual(false, self.engine->oneVoicePerKeyModeEnabled());
 }
 
 - (void)testRetriggerModeEnabled {
-  XCTAssertEqual(true, engine->retriggerModeEnabled());
+  XCTAssertEqual(true, self.engine->retriggerModeEnabled());
 }
 
 @end

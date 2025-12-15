@@ -52,7 +52,7 @@
   auto url = [TestResources getResourceUrl: 0];
   auto fi1 = SF2FileInfo(url.path.UTF8String);
   fi1.load();
-  XCTAssertEqual(235, fi1.size());
+  XCTAssertEqual(size_t(235), fi1.size());
   auto presetInfo = fi1[0];
   XCTAssertTrue(std::string("Piano 1") == presetInfo.name());
   XCTAssertEqual(0, presetInfo.bank());

@@ -17,16 +17,16 @@ static std::vector<SF2::IO::File> files_;
 void initSoundFontUrls() {
   soundFontUrls_ = [TestResources getInitSoundFontUrls];
   files_.reserve(soundFontUrls_.count);
-  for (int index = 0; index < soundFontUrls_.count; ++index) {
+  for (size_t index = 0; index < soundFontUrls_.count; ++index) {
     auto url = [soundFontUrls_ objectAtIndex:index];
-    NSLog(@"getSoundFontUrls[%d] = %@", index, url);
+    NSLog(@"getSoundFontUrls[%lu] = %@", index, url);
     auto isBad = [url.absoluteString containsString:@"ZZZ"];
     if (!isBad) {
       files_.emplace_back(url.path.UTF8String);
       files_.back().load();
     }
   }
-  NSLog(@"soundFontUrls: %lu files: %zu", (unsigned long)soundFontUrls_.count, files_.size());
+  NSLog(@"soundFontUrls: %lu files: %zu", soundFontUrls_.count, files_.size());
 }
 
 @implementation TestResources : NSObject
@@ -63,21 +63,21 @@ void initSoundFontUrls() {
   return soundFontUrls_;
 }
 
-+ (NSURL*)getResourceUrl:(int)urlIndex
++ (NSURL*)getResourceUrl:(NSUInteger)urlIndex
 {
   auto urls = [TestResources getSoundFontUrls];
   auto url = [[urls filteredArrayUsingPredicate:onlyGood] objectAtIndex:urlIndex];
   return url;
 }
 
-+ (NSURL*)getBadResourceUrl:(int)urlIndex
++ (NSURL*)getBadResourceUrl:(NSUInteger)urlIndex
 {
   auto urls = [TestResources getSoundFontUrls];
   auto url = [[urls filteredArrayUsingPredicate:onlyBad] objectAtIndex:urlIndex];
   return url;
 }
 
-+ (SF2::IO::File&)getFile:(int)index
++ (SF2::IO::File&)getFile:(NSUInteger)index
 {
   pthread_once(&soundFontUrls_init_, initSoundFontUrls);
   return files_[index];

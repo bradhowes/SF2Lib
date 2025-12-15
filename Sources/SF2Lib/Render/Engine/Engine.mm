@@ -12,12 +12,11 @@ using namespace SF2::Entity::Generator;
 using namespace SF2::Render::Engine;
 
 Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
-               size_t minimumNoteDurationMilliseconds) noexcept : super("Engine"),
+               size_t minimumNoteDurationMilliseconds) noexcept : super(Log::create("Engine")),
 sampleRate_{sampleRate},
 minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
 parameters_{},
 oldestVoiceIndices_{voiceCount},
-log_{Log::create("Engine")},
 renderSignpost_{os_signpost_id_generate(log_)},
 noteOnSignpost_{os_signpost_id_generate(log_)},
 noteOffSignpost_{os_signpost_id_generate(log_)},
@@ -79,6 +78,7 @@ Engine::activePresetIndex() const noexcept
 SF2::IO::File::LoadResponse
 Engine::load(const std::string& path, size_t index) noexcept
 {
+  os_log_info(log_, "load - path: '%s' index: %lu", path.c_str(), index);
   allOff();
   auto file = std::make_unique<IO::File>(path);
   auto response = file->load();
@@ -226,24 +226,36 @@ Engine::doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount durati
 void
 Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 {
-  if (midiEvent.length < 1) return;
-  if (midiEvent.data[0] < 0x80) return;
+  os_log_info(log_, "doMIDIEvent BEGIN - %d", midiEvent.length);
+
+  if (midiEvent.length < 1) {
+    os_log_info(log_, "doMIDIEvent BEGIN - no bytes");
+    return;
+  }
+
+  if (midiEvent.data[0] < 0x80) {
+    os_log_info(log_, "doMIDIEvent END - invalid first byte %d", midiEvent.data[0]);
+    return;
+  }
 
   auto event = MIDI::CoreEvent(midiEvent.data[0] < 0xF0 ? (midiEvent.data[0] & 0xF0) : midiEvent.data[0]);
   switch (event) {
     case MIDI::CoreEvent::noteOff:
+      os_log_info(log_, "doMIDIEvent noteOff");
       if (midiEvent.length > 1) {
         noteOff(midiEvent.data[1]);
       }
       break;
 
     case MIDI::CoreEvent::noteOn:
+      os_log_info(log_, "doMIDIEvent noteOn");
       if (midiEvent.length == 3) {
         noteOn(midiEvent.data[1], midiEvent.data[2]);
       }
       break;
 
     case MIDI::CoreEvent::keyPressure:
+      os_log_info(log_, "doMIDIEvent keyPressure");
       if (midiEvent.length == 3) {
         channelState_.setNotePressure(midiEvent.data[1], midiEvent.data[2]);
         notifyActiveVoicesChannelStateChanged();
@@ -251,6 +263,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::controlChange:
+      os_log_info(log_, "doMIDIEvent controlChange");
       if (midiEvent.length == 3) {
         auto what = MIDI::ControlChange(midiEvent.data[1]);
         auto data = midiEvent.data[2];
@@ -263,12 +276,14 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::programChange:
+      os_log_info(log_, "doMIDIEvent programChange");
       if (midiEvent.length >= 2) {
         changeProgram(midiEvent.data[1]);
       }
       break;
 
     case MIDI::CoreEvent::channelPressure:
+      os_log_info(log_, "doMIDIEvent channelPressure");
       if (midiEvent.length >= 2) {
         channelState_.setChannelPressure(midiEvent.data[1]);
         notifyActiveVoicesChannelStateChanged();
@@ -276,6 +291,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::pitchBend:
+      os_log_info(log_, "doMIDIEvent pitchBend");
       if (midiEvent.length == 3) {
         int bend = (midiEvent.data[2] << 7) | midiEvent.data[1];
         channelState_.setPitchWheelValue(bend);
@@ -284,34 +300,39 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::systemExclusive:
+      os_log_info(log_, "doMIDIEvent systemExclusive");
       if (midiEvent.data[1] == 0x7e && midiEvent.data[midiEvent.length - 1] == 0xF7) {
         switch (midiEvent.data[2]) {
           case 0x00:
             if (!loadFileAndPresetFromSysEx(midiEvent)) {
-              os_log_debug(log_, "doMIDIEvent - systemExclusive ignored due to length < 6");
+              os_log_info(log_, "doMIDIEvent - systemExclusive ignored due to length < 6");
             }
             break;
 
           default:
-            os_log_debug(log_, "doMIDIEvent - systemExclusive ignored");
+            os_log_info(log_, "doMIDIEvent - systemExclusive ignored");
             break;
         }
       }
       break;
 
     case MIDI::CoreEvent::reset:
+      os_log_info(log_, "doMIDIEvent reset");
       reset();
       break;
 
     default:
-      os_log_debug(log_, "doMIDIEvent - ignored %hhX", midiEvent.data[0]);
+      os_log_info(log_, "doMIDIEvent - ignored %hhX", midiEvent.data[0]);
       break;
   }
+
+  os_log_info(log_, "doMIDIEvent END");
 }
 
 void
 Engine::processChannelMessage(MIDI::ControlChange channelMessage, uint8_t value) noexcept
 {
+  os_log_info(log_, "processChannelMessage - %d value: %d", channelMessage, value);
   switch (channelMessage) {
     case MIDI::ControlChange::allSoundOff:
       allOff();
@@ -428,7 +449,7 @@ struct LoadPresetSysExPayload {
                                                      reinterpret_cast<char*>(pos2)));
     *pos3++ = 0xF7;
 
-    assert(pos3 - bytes.data() == bytes.size());
+    assert(pos3 - bytes.data() == long(bytes.size()));
     assert(bytes.size() >= minPayloadSize);
 
     return bytes;
@@ -437,7 +458,10 @@ struct LoadPresetSysExPayload {
 
 bool
 Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
+  os_log_info(log_, "loadFileAndPresetFromSysEx BEGIN");
+
   if (midiEvent.length < LoadPresetSysExPayload::minPayloadSize) {
+    os_log_info(log_, "loadFileAndPresetFromSysEx END: invalid midi payload %d", midiEvent.length);
     return false;
   }
 
@@ -448,7 +472,7 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
   auto pos1 = reinterpret_cast<const SF2::MIDI::GeneratorOverride*>(payload + 1);
   auto overrides = std::vector<MIDI::GeneratorOverride>(pos1, pos1 + overrideCount);
   auto pathStart = reinterpret_cast<const uint8_t*>(pos1 + overrideCount);
-  auto pathCount = (bytes + midiEvent.length) - pathStart - 1;
+  auto pathCount = size_t((bytes + midiEvent.length) - pathStart) - 1;
   auto path = pathCount == 0 ? std::string("") : Utils::Base64::decode(pathStart, pathCount);
   if (!path.empty()) {
     load(path, presetIndex);
@@ -456,6 +480,7 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
     usePresetWithIndex(presetIndex);
   }
 
+  os_log_info(log_, "loadFileAndPresetFromSysEx END");
   return true;
 }
 
@@ -588,7 +613,7 @@ Engine::bumpLastLoadFinished() noexcept
   os_log_info(log_, "bumpLastLoadFinished");
   auto param = [parameterTree_ parameterWithAddress: valueOf(ParameterAddress::lastLoadFinished)];
   lastLoadFinishedCounter_ += lastLoadFinishedChange;
-  [param setValue: lastLoadFinishedCounter_];
+  [param setValue: AUValue(lastLoadFinishedCounter_)];
 }
 
 void
@@ -614,7 +639,7 @@ Engine::parameterValueChanged(AUParameter* parameter, AUValue value) noexcept
         setPortamentoModeEnabled(SF2::toBool(value));
         break;
       case ParameterAddress::portamentoRate:
-        setPortamentoRate(value);
+        setPortamentoRate(value >= 0 ? size_t(value) : 0);
         break;
       case ParameterAddress::oneVoicePerKeyModeEnabled:
         setOneVoicePerKeyModeEnabled(SF2::toBool(value));
@@ -636,11 +661,8 @@ AUValue
 Engine::provideParameterValue(AUParameter* parameter) const noexcept
 {
   auto rawIndex = parameter.address;
-  AUValue value;
-  if (rawIndex < 0) {
-    value = 0.0;
-  }
-  else if (rawIndex < valueOf(Index::numValues)) {
+  AUValue value = 0.0;
+  if (rawIndex >= 0 && rawIndex < valueOf(Index::numValues)) {
     auto index = Index(rawIndex);
     const auto& def = Definition::definition(index);
     value = def.clamp(parameters_.getLiveValue(index));
@@ -662,13 +684,11 @@ Engine::provideParameterValue(AUParameter* parameter) const noexcept
         break;
       case ParameterAddress::activeVoiceCount:
         return oldestVoiceIndices_.active();
-        break;
       case ParameterAddress::retriggerModeEnabled:
         value = SF2::fromBool(retriggerModeEnabled());
         break;
       case ParameterAddress::isRendering:
         return isRendering();
-        break;
       case ParameterAddress::activeProgramIndex:
         value = activeProgramIndex();
         break;
@@ -728,7 +748,7 @@ Engine::makeBooleanParameter(NSString* name, ParameterAddress address, bool valu
 void
 Engine::makeTree() noexcept
 {
-  os_log_info(log_, "makeTree");
+  os_log_info(log_, "makeTree BEGIN");
 
   // This is a bit too large due to various unused generators found in the spec.
   auto capacity = NSUInteger(valueOf(Index::numValues) + engineParameterCount);
@@ -831,7 +851,8 @@ Engine::makeTree() noexcept
                                                                     name:@"lastLoadFinished"
                                                                  address:valueOf(ParameterAddress::lastLoadFinished)
                                                                      min:minLastLoadFinished
-                                                                     max:maxLastLoadFinished                                                                    unit:kAudioUnitParameterUnit_Generic
+                                                                     max:maxLastLoadFinished
+                                                                    unit:kAudioUnitParameterUnit_Generic
                                                                 unitName:nullptr
                                                                    flags:flags
                                                             valueStrings:nullptr
@@ -846,4 +867,6 @@ Engine::makeTree() noexcept
   parameterTree_.implementorValueProvider = ^(AUParameter* parameter) {
     return provideParameterValue(parameter);
   };
+
+  os_log_info(log_, "makeTree END");
 }

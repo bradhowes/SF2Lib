@@ -42,11 +42,6 @@ public:
    */
   File(std::string path);
 
-  /**
-   Custom destructor. Closes file that was opened in constructor.
-   */
-  ~File() noexcept;
-
   enum class LoadResponse {
     ok,
     notFound,

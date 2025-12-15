@@ -128,13 +128,11 @@ protected:
   /**
    Construct a NULL generator, one that will never emit any non-zero values. To be useful, a generator must be
    configured with a State that holds the stage definitions to use.
-
-   @param voiceIndex the voice index this belongs to
    */
-  Generator(size_t voiceIndex, const char* logTag) noexcept;
+  Generator(const char* logTag) noexcept;
 
   /// NOTE: only used for testing via EnvelopeTestInjector
-  Generator(Float sampleRate, const char* logTag, size_t voiceIndex, Float delay, Float attack, Float hold, Float decay,
+  Generator(Float sampleRate, const char* logTag, Float delay, Float attack, Float hold, Float decay,
             int sustain, Float release) noexcept;
 
   /// @returns configured sustain level. NOTE: only used for testing

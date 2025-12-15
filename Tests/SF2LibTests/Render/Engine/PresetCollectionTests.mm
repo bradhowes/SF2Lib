@@ -13,28 +13,35 @@ using namespace SF2::Render::Engine;
 
 @interface PresetCollectionTests : XCTestCase
 
+@property (nonatomic) SampleBasedContexts* contexts;
+
 @end
 
-@implementation PresetCollectionTests {
-  SampleBasedContexts contexts;
+@implementation PresetCollectionTests
+
+@synthesize contexts;
+
+- (void)setUp {
+  self.contexts = new SampleBasedContexts();
+  [super setUp];
 }
 
 - (void)testLoading {
   PresetCollection presets;
-  XCTAssertEqual(0, presets.size());
+  XCTAssertEqual(size_t(0), presets.size());
 
-  presets.build(contexts.context0.file());
-  XCTAssertEqual(235, presets.size());
+  presets.build(self.contexts->context0.file());
+  XCTAssertEqual(size_t(235), presets.size());
 
   presets.clear();
-  XCTAssertEqual(0, presets.size());
+  XCTAssertEqual(size_t(0), presets.size());
 }
 
 - (void)testOrdering {
   PresetCollection presets;
-  presets.build(contexts.context0.file());
+  presets.build(self.contexts->context0.file());
 
-  XCTAssertEqual(presets.size(), 235);
+  XCTAssertEqual(presets.size(), size_t(235));
 
   XCTAssertEqual(presets[0].configuration().name(), "Piano 1");
   XCTAssertEqual(presets[0].configuration().bank(), 0);
@@ -63,7 +70,7 @@ using namespace SF2::Render::Engine;
 
 - (void)testLocate {
   PresetCollection presets;
-  presets.build(contexts.context0.file());
+  presets.build(self.contexts->context0.file());
   XCTAssertEqual(presets.locatePreset(0, 0)->configuration().name(), "Piano 1");
   // std::cout << presets.locate(128, 0)->name() << '\n';
   XCTAssertEqual(presets.locatePreset(128, 0)->configuration().name(), "Standard");
@@ -71,7 +78,7 @@ using namespace SF2::Render::Engine;
 
   XCTAssertEqual(presets.locatePreset(127, 0), nullptr);
   XCTAssertEqual(presets.locatePreset(128, 57), nullptr);
-  XCTAssertEqual(presets.locatePreset(-1, -1), nullptr);
+  XCTAssertEqual(presets.locatePreset(uint16_t(-1), uint16_t(-1)), nullptr);
 }
 
 @end
