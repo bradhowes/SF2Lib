@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <numeric>
+#include <type_traits>
 
 #include "DSPHeaders/Accelerated.hpp"
 
@@ -133,12 +134,14 @@ File::extractNormalizedSamples() {
   std::vector<int16_t> rawSamples(batchSampleCount);
 
   auto ptr = normalizedSamples_.data();
+  using elemType = std::remove_pointer_t<decltype(ptr)>;
+
   while (remainingSamples > 0) {
     auto sampleCount = std::min(remainingSamples, batchSampleCount);
     remainingSamples -= sampleCount;
     pos = pos.readInto(rawSamples.data(), sampleCount * sizeof(int16_t));
-    DSPHeaders::Accelerated<Float>::conversionProc(rawSamples.data(), 1, ptr, 1, sampleCount);
-    DSPHeaders::Accelerated<Float>::scaleProc(ptr, 1, &normalizationScale, ptr, 1, sampleCount);
+    DSPHeaders::Accelerated<elemType>::conversionProc(rawSamples.data(), 1, ptr, 1, sampleCount);
+    DSPHeaders::Accelerated<elemType>::scaleProc(ptr, 1, &normalizationScale, ptr, 1, sampleCount);
     ptr += sampleCount;
   }
 }

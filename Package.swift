@@ -121,7 +121,13 @@ extension Package.Dependency {
 
 extension Array where Element == SwiftSetting {
   static var swiftSettings: [SwiftSetting] {
-    [.define("APPLICATION_EXTENSION_API_ONLY")]
+    [
+      .enableExperimentalFeature("StrictConcurrency"),
+      .interoperabilityMode(.Cxx),
+      .strictMemorySafety(),
+      .swiftLanguageMode(.v6),
+      .define("APPLICATION_EXTENSION_API_ONLY")
+    ]
   }
 }
 
