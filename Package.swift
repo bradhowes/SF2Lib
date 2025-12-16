@@ -12,6 +12,8 @@ let playAudioDuringTests = true
 let useAccelerate = true
 // Set to true to use local DSPHeaders sources
 let useLocalDSPHeaders = false
+// Set to true to enable unsafe C++ flags -- only to be used for development/debugging
+let useUnsafeFlags = false
 
 let package = Package(
   name: "SF2Lib",
@@ -235,14 +237,13 @@ extension Array where Element == CXXSetting {
       "-Wunused-variable",
       // "-Wzero-as-null-pointer-constant",
       "-Wzero-length-array",
+      "-x", "objective-c++"
     ]
     return [
       .define("CHECKED_VECTOR_INDEXING", to: checkedVectorIndexing ? "1" : "0", .when(configuration: .debug)),
       .define("ENABLE_LOWPASS_FILTER", to: enableLowPassFilter ? "1" : "0", .none),
       .define("PLAY_AUDIO", to: playAudioDuringTests ? "1" : "0", .when(configuration: .debug)),
-      .define("USE_ACCELERATE", to: useAccelerate ? "1" : "0", .none),
-      .unsafeFlags(unsafeFlags, .when(configuration: .debug)),
-      .unsafeFlags(["-x", "objective-c++"], .none)
-    ]
+      .define("USE_ACCELERATE", to: useAccelerate ? "1" : "0", .none)
+    ] + (useUnsafeFlags ? [.unsafeFlags(unsafeFlags, .when(configuration: .debug))] : [])
   }
 }
