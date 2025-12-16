@@ -6,6 +6,8 @@
 #include <memory>
 #include <numeric>
 
+#include "DSPHeaders/Accelerated.hpp"
+
 #include "SF2File/Entity/Instrument.hpp"
 #include "SF2File/Entity/Preset.hpp"
 #include "SF2File/IO/ChunkList.hpp"
@@ -135,8 +137,8 @@ File::extractNormalizedSamples() {
     auto sampleCount = std::min(remainingSamples, batchSampleCount);
     remainingSamples -= sampleCount;
     pos = pos.readInto(rawSamples.data(), sampleCount * sizeof(int16_t));
-    Accelerated<Float>::conversionProc(rawSamples.data(), 1, ptr, 1, sampleCount);
-    Accelerated<Float>::scaleProc(ptr, 1, &normalizationScale, ptr, 1, sampleCount);
+    DSPHeaders::Accelerated<Float>::conversionProc(rawSamples.data(), 1, ptr, 1, sampleCount);
+    DSPHeaders::Accelerated<Float>::scaleProc(ptr, 1, &normalizationScale, ptr, 1, sampleCount);
     ptr += sampleCount;
   }
 }

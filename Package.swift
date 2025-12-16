@@ -3,7 +3,7 @@
 import PackageDescription
 
 let unsafeFlags = [
-  "-g",
+  "-O3",
   "-pedantic",
   "-Wall",
   "-Wassign-enum",
@@ -121,19 +121,25 @@ let checkedVectorIndexing = false
 // Set to true to enable low-pass filter in sample generation (once sound quality bugs are fixed)
 let enableLowPassFilter = false
 // Set to true to play audio in tests. Set to false to keep silent.
-let playAudio = false
+let playAudio = true
 // Set to true to enable Accelerate framework
 let useAccelerate = true
 // Set to true to use local DSPHeaders sources
 let useLocalDSPHeaders = false
+// Set to true to use "unsafe" C++ flags (here, unsafe means that there is no checking by SPM that they are valid for the compile
+// chain being used).
+let useUnsafeFlags = false // ProcessInfo.processInfo.environment["USE_UNSAFE_FLAGS"] != nil
 
-let cxxSettings: [CXXSetting] = [
+var cxxSettings: [CXXSetting] = [
   .define("CHECKED_VECTOR_INDEXING", to: checkedVectorIndexing ? "1" : "0", .none),
   .define("ENABLE_LOWPASS_FILTER", to: enableLowPassFilter ? "1" : "0", .none),
   .define("PLAY_AUDIO", to: playAudio ? "1" : "0", .none),
-  .define("USE_ACCELERATE", to: useAccelerate ? "1" : "0", .none),
-  .unsafeFlags(unsafeFlags)
+  .define("USE_ACCELERATE", to: useAccelerate ? "1" : "0", .none)
 ]
+
+if useUnsafeFlags {
+  cxxSettings.append(.unsafeFlags(unsafeFlags, .when(configuration: .debug)))
+}
 
 let swiftSettings: [SwiftSetting] = [
   .define("APPLICATION_EXTENSION_API_ONLY")

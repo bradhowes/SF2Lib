@@ -150,10 +150,19 @@ public:
   void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
 
   /// API for EventProcessor
-  inline void doRendering(DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs, AUAudioFrameCount frameCount) noexcept {
+  inline void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs,
+                          AUAudioFrameCount frameCount) noexcept {
     // All of the work is done when working with output bus 0. If wired correctly, busses 1 and 2 will
-    // use the buffered values that were created here.
-    renderInto(Mixer(outs, busBuffers(1), busBuffers(2)), frameCount);
+    // hold the buffered values that were created here.
+    if (outputBusNumber == 0) {
+
+      // The voices will add their samples to the mixer so clear them here.
+      outs.clear(frameCount);
+      busBuffers(1).clear(frameCount);
+      busBuffers(2).clear(frameCount);
+
+      renderInto(Mixer(outs, busBuffers(1), busBuffers(2)), frameCount);
+    }
   }
 
   /**

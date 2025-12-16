@@ -5,7 +5,6 @@
 #include <span>
 #include <vector>
 
-#include "SF2Util/Accelerated.hpp"
 #include "SF2File/Entity/SampleHeader.hpp"
 
 namespace SF2::IO {

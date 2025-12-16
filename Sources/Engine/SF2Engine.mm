@@ -45,7 +45,9 @@ SF2Engine::getRenderBlock() const noexcept {
   return ^AUAudioUnitStatus(AudioUnitRenderActionFlags* _Nonnull actionFlags, const AudioTimeStamp* _Nonnull timestamp,
                             AUAudioFrameCount frameCount, NSInteger outputBusNumber, AudioBufferList* _Nonnull output,
                             const AURenderEvent* __nullable realtimeEventListHead,
-                            AURenderPullInputBlock __nullable __unsafe_unretained pullInputBlock) {
+                            AURenderPullInputBlock __nullable __unsafe_unretained) {
+    // NOTE: do not pass on the AURenderPullInputBlock since we are the source of all audio. Doing so will result in an AU error
+    // from the render routine resulting in no audio output.
     return engine->processAndRender(timestamp, frameCount, outputBusNumber, output, realtimeEventListHead, nullptr);
   };
 }
@@ -53,7 +55,7 @@ SF2Engine::getRenderBlock() const noexcept {
 AUAudioUnitStatus
 SF2Engine::processAndRender(const AudioTimeStamp* timestamp, UInt32 frameCount, NSInteger outputBusNumber,
                             AudioBufferList* output, const AURenderEvent* realtimeEventListHead,
-                            AURenderPullInputBlock pullInputBlock) const noexcept
+                            AURenderPullInputBlock) const noexcept
 {
   return impl_->processAndRender(timestamp, frameCount, outputBusNumber, output, realtimeEventListHead, nullptr);
 }

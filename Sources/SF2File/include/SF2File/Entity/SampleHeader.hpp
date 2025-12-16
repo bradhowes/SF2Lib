@@ -19,14 +19,12 @@ namespace SF2::Entity {
 
  From the SF2 spec:
 
- The values of dwStart, dwEnd, dwStartloop, and dwEndloop must all be within the range of the sample data field
- included in the SoundFont compatible bank or referenced in the sound ROM. Also, to allow a variety of hardware
- platforms to be able to reproduce the data, the samples have a minimum length of 48 data points, a minimum loop size
- of 32 data points and a minimum of 8 valid points prior to dwStartloop and after dwEndloop. Thus dwStart must be less
- than dwStartloop-7,
-
- dwStartloop must be less than dwEndloop-31, and dwEndloop must be less than dwEnd-7. If these constraints are not met,
- the sound may optionally not be played if the hardware cannot support artifact-free playback for the parameters given.
+ > The values of dwStart, dwEnd, dwStartloop, and dwEndloop must all be within the range of the sample data field included in the
+ > SoundFont compatible bank or referenced in the sound ROM. Also, to allow a variety of hardware platforms to be able to reproduce
+ > the data, the samples have a minimum length of 48 data points, a minimum loop size of 32 data points and a minimum of 8 valid
+ > points prior to dwStartloop and after dwEndloop. Thus dwStart must be less than dwStartloop-7, dwStartloop must be less than
+ > dwEndloop-31, and dwEndloop must be less than dwEnd-7. If these constraints are not met, the sound may optionally not be played
+ > if the hardware cannot support artifact-free playback for the parameters given.
  */
 class SampleHeader {
 public:

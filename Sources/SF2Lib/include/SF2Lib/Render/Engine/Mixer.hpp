@@ -42,7 +42,7 @@ public:
   }
 
   /**
-   Command the individual BusBuffer instances to shift forward by `frames` frames.
+   Command the individual BusBuffer instances to shift forward by `frames` frames. NOTE: only used in tests.
 
    @param frames the number of frames to shift over
    */
