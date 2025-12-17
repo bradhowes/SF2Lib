@@ -17,7 +17,7 @@ struct ChunkItemsSupport {
 
 /**
  Container of SF2 entities. All SF2 containers are homogenous (all entities in the container have the same type).
- Compared to the `ChunkType` type, this class holds actual values from an SF2 file while the former just knows
+ Compared to the `Chunk` type, this class holds actual values from an SF2 file while the former just knows
  where in the file to find the values.
 
  Like most of the IO namespace, instances of this class are essentially immutable.
@@ -34,7 +34,7 @@ public:
   using const_iterator = typename std::vector<ItemType>::const_iterator;
   using ItemRefCollection = std::vector<std::reference_wrapper<ItemType const>>;
 
-  /// Definition of the size in bytes of each item in the collection
+  /// Definition of the size in bytes of each item in the collection (no padding).
   inline static const size_t itemSize = T::entity_size;
 
   /// Constructor for an empty collection.

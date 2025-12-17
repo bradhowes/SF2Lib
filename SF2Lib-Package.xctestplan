@@ -1,0 +1,31 @@
+{
+  "configurations" : [
+    {
+      "id" : "B60D9317-725E-4883-ADF6-EDDB3B0E2FF5",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "EngineTests",
+        "name" : "EngineTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "SF2LibTests",
+        "name" : "SF2LibTests"
+      }
+    }
+  ],
+  "version" : 1
+}

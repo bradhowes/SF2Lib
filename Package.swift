@@ -11,8 +11,9 @@ let playAudioDuringTests = true
 // Set to true to enable Accelerate framework
 let useAccelerate = true
 // Set to true to use local DSPHeaders sources
-let useLocalDSPHeaders = false
+let useLocalDSPHeaders = true
 // Set to true to enable unsafe C++ flags -- only to be used for development/debugging
+// NOTE: enable for performance testing
 let useUnsafeFlags = false
 
 let package = Package(
@@ -134,6 +135,7 @@ extension Array where Element == SwiftSetting {
 extension Array where Element == CXXSetting {
   static var cxxSettings: [CXXSetting] {
     let unsafeFlags = [
+      "-O3",
       "-pedantic",
       "-Wall",
       "-Wassign-enum",

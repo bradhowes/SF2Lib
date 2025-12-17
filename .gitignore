@@ -1,3 +1,5 @@
+.cache/
+cmake/
 .DS_Store
 /.build
 /Packages

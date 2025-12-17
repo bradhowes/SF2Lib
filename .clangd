@@ -1,0 +1,4 @@
+CompileFlags:
+  Add: [-xobjective-c++, -std=c++23, -fobjc-arc]
+  Compiler: clang++
+  CompilationDatabase: cmake

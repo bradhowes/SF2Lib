@@ -35,25 +35,26 @@ public:
   /// @returns name of the preset
   std::string name() const noexcept { return achPresetName; }
 
-  /// @returns preset number for this patch
+  /// @returns program number for the preset
   uint16_t program() const noexcept { return wPreset; }
 
-  /// @returns bank number for the patch
+  /// @returns bank number for the preset
   uint16_t bank() const noexcept { return wBank; }
 
   /// @returns the index of the first zone of the preset
   size_t firstZoneIndex() const noexcept { return wPresetBagNdx; }
 
+  /// @returns meta data with the name of the library where the preset is from (may be empty)
   uint32_t library() const noexcept { return dwLibrary; }
 
+  /// @returns meta data with the genre of the sound (may be empty)
   uint32_t genre() const noexcept { return dwGenre; }
 
+  /// @returns meta data that classifies the sound (may be empty)
   uint32_t morphology() const noexcept { return dwMorphology; }
 
   /// @returns the number of preset zones
-  size_t zoneCount() const noexcept {
-    return (this + 1)->firstZoneIndex() - firstZoneIndex();
-  }
+  size_t zoneCount() const noexcept { return (this + 1)->firstZoneIndex() - firstZoneIndex(); }
 
   /// Write out description of the preset to std::cout
   void dump(const std::string& indent, size_t index) const noexcept;
