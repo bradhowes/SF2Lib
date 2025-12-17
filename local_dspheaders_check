@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 #
-# Crude check that Package.swift does not enable 'useUnsafeFlags' in Package.swift' file --
-# doing so can break downstream consumers of this package by preventing release builds. A
-# more sound approach would be to write the check in Swift.
+# Crude check that Package.swift does not enable 'useLocalDSPHeaders' in Package.swift' file --
+# doing so can break the CI build since there will not be a DSPHeaders repo installed locally.
+# A more sound approach would be to write the check in Swift.
 
 import sys
 import re
