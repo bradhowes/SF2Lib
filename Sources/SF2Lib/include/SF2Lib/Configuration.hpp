@@ -17,16 +17,10 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)reset;
 + (nullable NSString*)getConfigurationPath;
 
-#if defined(SWIFTPM_MODULE_BUNDLE)
-
 + (nullable NSString *)getConfigurationPath:(NSString *)name
                                        from:(nullable NSBundle *)bundle;
 
-#else
-
 + (nullable NSString*)locate:(NSString*)name ofType:(NSString*)type;
-
-#endif
 
 @end
 

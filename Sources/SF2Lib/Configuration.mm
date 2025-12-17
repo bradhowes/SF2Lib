@@ -48,8 +48,6 @@ static dispatch_once_t onceToken;
   return NULL;
 }
 
-#if defined(SWIFTPM_MODULE_BUNDLE)
-
 + (nullable NSString*)getConfigurationPath:(NSString*)name from:(nullable NSBundle*)bundle {
   if (bundle) {
     NSString* found = [bundle pathForResource:name ofType:@"plist"];
@@ -57,6 +55,9 @@ static dispatch_once_t onceToken;
   }
   return [Configuration locate:name ofType:@"plist"];
 }
+
+
+#if defined(SWIFTPM_MODULE_BUNDLE)
 
 + (NSString*)getConfigurationPath {
   return [Configuration getConfigurationPath: @"Configuration" from: SWIFTPM_MODULE_BUNDLE];
