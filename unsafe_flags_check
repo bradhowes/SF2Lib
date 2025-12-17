@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+#
+# Crude check that Package.swift does not enable 'useUnsafeFlags' in Package.swift' file --
+# doing so can break downstream consumers of this package by preventing release builds. A
+# more sound approach would be to write the check in Swift.
+
+import sys
+import re
+
+pat = re.compile('^let *useUnsafeFlags *= true')
+
+if __name__ == '__main__':
+    if 'Package.swift' in sys.argv:
+        with open('Package.swift') as fd:
+            for line in fd.readlines():
+                if pat.match(line):
+                    print('** FOUND:', line)
+                    sys.exit(1)
+    sys.exit(0)

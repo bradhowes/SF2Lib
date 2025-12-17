@@ -1,0 +1,20 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0
+  hooks:
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+  - id: check-yaml
+  - id: check-added-large-files
+- repo: local
+  hooks:
+  - id: unsafe-flags-check
+    name: Check for unsafeFlags being used
+    entry: ./unsafe_flags_check
+    language: unsupported
+  - id: use-local-dspheaders-check
+    name: Check for useLocalDSPHeaders being used # let useLocalDSPHeaders = false
+    entry: ./local_dspheaders_check
+    language: unsupported
