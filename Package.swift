@@ -4,16 +4,25 @@ import PackageDescription
 
 // Set to true to enable C++ bounds checking
 let checkedVectorIndexing = false
+
 // Set to true to enable low-pass filter in sample generation (once sound quality bugs are fixed)
 let enableLowPassFilter = false
+
 // Set to true to play audio in tests.
 let playAudioDuringTests = true
+
 // Set to true to enable Accelerate framework
 let useAccelerate = true
+
 // Set to true to use local DSPHeaders sources
+// NOTE: do NOT commit when set to true or else CI pipeline builds will break. There is a pre-commit hook
+// `local_dspheaders_check` that can be used to prevent this from happening.
 let useLocalDSPHeaders = false
+
 // Set to true to enable unsafe C++ flags -- only to be used for development/debugging
-// NOTE: enable for performance testing
+// NOTE: do NOT commit when set to true or else downstream release builds may break. There is a pre-commit hook
+// `unsafe_flags_check` that can be used to prevent this from happening.
+
 let useUnsafeFlags = false
 
 let package = Package(
