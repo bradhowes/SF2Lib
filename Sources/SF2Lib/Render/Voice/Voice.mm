@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
 #include <cmath>
 #include <utility>
@@ -13,20 +13,19 @@ using namespace SF2::MIDI;
 using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
 
-Voice::Voice(Float sampleRate, const ChannelState& channelState, size_t voiceIndex,
-             Sample::Interpolator interpolator) noexcept :
-state_{sampleRate, channelState},
-loopingMode_{LoopingMode::none},
-pitch_{state_},
-sampleGenerator_{interpolator},
-volumeEnvelope_{},
-modulatorEnvelope_{},
-modulatorLFO_{sampleRate},
-vibratoLFO_{sampleRate},
-filter_{sampleRate},
-active_{false},
-keyDown_{false},
-voiceIndex_{voiceIndex}
+Voice::Voice(Float sampleRate, const ChannelState &channelState, size_t voiceIndex, Sample::Interpolator interpolator) noexcept
+  : state_{sampleRate, channelState},
+    loopingMode_{LoopingMode::none},
+    pitch_{state_},
+    sampleGenerator_{interpolator},
+    volumeEnvelope_{},
+    modulatorEnvelope_{},
+    modulatorLFO_{sampleRate},
+    vibratoLFO_{sampleRate},
+    filter_{sampleRate},
+    active_{false},
+    keyDown_{false},
+    voiceIndex_{voiceIndex}
 {}
 
 void

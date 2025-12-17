@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
 #include <iostream>
 #include <sstream>
@@ -54,13 +54,12 @@ int Modulator::ValueProvider::pitchWheelSensitivity(const State& state) const no
   return value;
 }
 
-Modulator::Modulator(const EntityMod::Modulator& configuration) noexcept :
-configuration_{configuration},
-amount_{configuration.amount()},
-primaryValue_{makeValueProvider(configuration.source())},
-primaryTransform_{configuration.source()},
-secondaryValue_{makeValueProvider(configuration.amountSource())},
-secondaryTransform_{configuration.amountSource()}
+Modulator::Modulator(const EntityMod::Modulator &configuration) noexcept
+  : configuration_{configuration}, amount_{configuration.amount()},
+    primaryValue_{makeValueProvider(configuration.source())},
+    primaryTransform_{configuration.source()},
+    secondaryValue_{makeValueProvider(configuration.amountSource())},
+    secondaryTransform_{configuration.amountSource()}
 {}
 
 Modulator::ValueProvider

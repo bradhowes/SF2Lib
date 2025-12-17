@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
 #include <cstdint>
 #include <vector>
@@ -11,17 +11,17 @@
 using namespace SF2::Entity::Generator;
 using namespace SF2::Render::Engine;
 
-Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
-               size_t minimumNoteDurationMilliseconds) noexcept : super(Log::create("Engine")),
-sampleRate_{sampleRate},
-minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
-parameters_{},
-oldestVoiceIndices_{voiceCount},
-renderSignpost_{os_signpost_id_generate(log_)},
-noteOnSignpost_{os_signpost_id_generate(log_)},
-noteOffSignpost_{os_signpost_id_generate(log_)},
-startVoiceSignpost_{os_signpost_id_generate(log_)},
-stopVoiceSignpost_{os_signpost_id_generate(log_)}
+Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator, size_t minimumNoteDurationMilliseconds) noexcept
+  : super(Log::create("Engine")),
+    sampleRate_{sampleRate},
+    minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
+    parameters_{},
+    oldestVoiceIndices_{voiceCount},
+    renderSignpost_{os_signpost_id_generate(log_)},
+    noteOnSignpost_{os_signpost_id_generate(log_)},
+    noteOffSignpost_{os_signpost_id_generate(log_)},
+    startVoiceSignpost_{os_signpost_id_generate(log_)},
+    stopVoiceSignpost_{os_signpost_id_generate(log_)}
 {
   assert(voiceCount <= maxVoiceCount);
 

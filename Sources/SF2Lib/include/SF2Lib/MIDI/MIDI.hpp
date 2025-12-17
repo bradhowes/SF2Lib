@@ -1,6 +1,8 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
 #pragma once
+
+#include <stdint.h>
 
 /**
  Collection of enums and types used to represent MIDI v1 values and state.

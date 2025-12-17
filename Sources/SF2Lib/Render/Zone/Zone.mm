@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
 #include <limits>
 
@@ -8,12 +8,11 @@ using namespace SF2::Render::Zone;
 
 MIDIRange const Zone::all = MIDIRange(0, 255);
 
-Zone::Zone(GeneratorCollection&& gens, ModulatorCollection&& mods, Entity::Generator::Index terminal) :
-generators_{std::move(gens)},
-modulators_{std::move(mods)},
-keyRange_{GetKeyRange(generators_)},
-velocityRange_{GetVelocityRange(generators_)},
-isGlobal_{IsGlobal(generators_, terminal, modulators_)}
+Zone::Zone(GeneratorCollection &&gens, ModulatorCollection &&mods, Entity::Generator::Index terminal)
+  : generators_{std::move(gens)}, modulators_{std::move(mods)},
+    keyRange_{GetKeyRange(generators_)},
+    velocityRange_{GetVelocityRange(generators_)},
+    isGlobal_{IsGlobal(generators_, terminal, modulators_)}
 {
   if (generators_.empty() && modulators_.empty()) throw std::runtime_error("empty zone created");
 }

@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
 #include "SF2File/IO/NormalizedSampleSource.hpp"
 #include "SF2Lib/Render/Voice/State/Config.hpp"
@@ -7,15 +7,12 @@
 
 using namespace SF2::Render::Voice::State;
 
-Config::Config(const Zone::Preset& preset, const Zone::Preset* globalPreset, const Zone::Instrument& instrument,
-               const Zone::Instrument* globalInstrument, int eventKey, int eventVelocity) noexcept :
-preset_{preset},
-globalPreset_{globalPreset},
-instrument_{instrument},
-globalInstrument_{globalInstrument},
-eventKey_{eventKey},
-eventVelocity_{eventVelocity},
-exclusiveClass_{0}
+Config::Config(const Zone::Preset &preset, const Zone::Preset *globalPreset,
+               const Zone::Instrument &instrument,
+               const Zone::Instrument *globalInstrument, int eventKey,
+               int eventVelocity) noexcept
+  : preset_{preset}, globalPreset_{globalPreset}, instrument_{instrument}, globalInstrument_{globalInstrument},
+    eventKey_{eventKey}, eventVelocity_{eventVelocity}, exclusiveClass_{0}
 {
   for (const auto& box : instrument_.generators()) {
     const auto& gen{box.get()};

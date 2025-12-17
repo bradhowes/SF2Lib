@@ -1,6 +1,11 @@
 # Semi-hacky way to get Emacs eglot with clangd to work OK on macOS. The use of Cmake here is solely for the purposes of
 # generating a cmake/compile_commands.json file with the list of sources. There is an existing Makefile which is used
 # for the Github CI pipeline, and it can also be used via the command-line.
+#
+# To rebuild the compile_commands.json file:
+#
+#   % cmake -S . -G "Unix Makefiles" -B cmake
+#
 
 cmake_minimum_required(VERSION 4.2)
 

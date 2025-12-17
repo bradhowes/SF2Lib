@@ -1,15 +1,15 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
 #include "SF2Util/DSP.hpp"
 #include "SF2Lib/Render/LowPassFilter.hpp"
 
 using namespace SF2::Render;
 
-LowPassFilter::LowPassFilter(Float sampleRate) noexcept :
-filter_{Coefficients()},
-sampleRate_{sampleRate},
-lastFrequency_{defaultFrequency},
-lastResonance_{defaultResonance}
+LowPassFilter::LowPassFilter(Float sampleRate) noexcept
+  : filter_{Coefficients()},
+    sampleRate_{sampleRate},
+    lastFrequency_{defaultFrequency},
+    lastResonance_{defaultResonance}
 {
   updateSettings(defaultFrequency, defaultResonance);
 }

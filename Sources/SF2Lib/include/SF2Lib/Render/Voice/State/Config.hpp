@@ -1,11 +1,10 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
 #pragma once
 
 namespace SF2::Render::Zone {
 class Instrument;
 class Preset;
-
 }
 
 namespace SF2::IO {

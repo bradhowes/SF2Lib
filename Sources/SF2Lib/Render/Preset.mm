@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
 #include "SF2File/IO/File.hpp"
 #include "SF2Lib/Render/Preset.hpp"
@@ -6,7 +6,7 @@
 using namespace SF2::Render;
 
 Preset::Preset(IO::File& file, const InstrumentCollection& instruments, const Entity::Preset& config) noexcept
-: WithCollectionBase<Zone::Preset, Entity::Preset>(config.zoneCount(), config)
+  : WithCollectionBase<Zone::Preset, Entity::Preset>(config.zoneCount(), config)
 {
   for (const Entity::Bag& bag : file.presetZones().slice(config.firstZoneIndex(), config.zoneCount())) {
     zones_.add(Entity::Generator::Index::instrument,

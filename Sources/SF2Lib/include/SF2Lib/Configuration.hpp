@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -16,8 +16,17 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)shared;
 + (void)reset;
 + (nullable NSString*)getConfigurationPath;
-+ (nullable NSString*)getConfigurationPath:(NSString*)name from:(nullable NSBundle*)bundle;
+
+#if defined(SWIFTPM_MODULE_BUNDLE)
+
++ (nullable NSString *)getConfigurationPath:(NSString *)name
+                                       from:(nullable NSBundle *)bundle;
+
+#else
+
 + (nullable NSString*)locate:(NSString*)name ofType:(NSString*)type;
+
+#endif
 
 @end
 
