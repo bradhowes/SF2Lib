@@ -11,7 +11,7 @@ let playAudioDuringTests = true
 // Set to true to enable Accelerate framework
 let useAccelerate = true
 // Set to true to use local DSPHeaders sources
-let useLocalDSPHeaders = true
+let useLocalDSPHeaders = false
 // Set to true to enable unsafe C++ flags -- only to be used for development/debugging
 // NOTE: enable for performance testing
 let useUnsafeFlags = false
