@@ -26,8 +26,11 @@ Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator, s
   assert(voiceCount <= maxVoiceCount);
 
   voices_.reserve(voiceCount);
+  durationBuckets_.reserve(voiceCount);
+
   for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex) {
     voices_.emplace_back(sampleRate, channelState_, voiceIndex, interpolator);
+    durationBuckets_.emplace_back(0.0);
   }
 
   makeTree();
@@ -122,8 +125,8 @@ Engine::allOff() noexcept
 void
 Engine::noteOn(int key, int velocity) noexcept
 {
-  os_signpost_interval_begin(log_, noteOnSignpost_, "noteOn", "key: %d vel: %d", key, velocity);
   if (! hasActivePreset()) return;
+  os_signpost_interval_begin(log_, noteOnSignpost_, "noteOn");
 
   if (channelState_.pedalState().softPedalActive) {
     velocity /= 2;
@@ -145,19 +148,19 @@ Engine::noteOn(int key, int velocity) noexcept
   for (const Config& config : configs) {
     startVoice(config);
   }
-  os_signpost_interval_end(log_, noteOnSignpost_, "noteOn", "key: %d vel: %d", key, velocity);
+  os_signpost_interval_end(log_, noteOnSignpost_, "noteOn");
 }
 
 void
 Engine::noteOff(int key) noexcept
 {
-  os_signpost_interval_begin(log_, noteOffSignpost_, "noteOff", "key: %d", key);
+  os_signpost_interval_begin(log_, noteOffSignpost_, "noteOff");
   visitActiveVoice([=](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
     if (voice.initiatingKey() == key) {
       voice.releaseKey(releaseKeyState);
     }
   });
-  os_signpost_interval_end(log_, noteOffSignpost_, "noteOff", "key: %d", key);
+  os_signpost_interval_end(log_, noteOffSignpost_, "noteOff");
 }
 
 void
@@ -587,7 +590,7 @@ Engine::startVoice(const Config& config) noexcept
   os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice", "");
 }
 
-OldestVoiceCollection<Engine::maxVoiceCount>::iterator
+OldestVoiceCollection<maxVoiceCount>::iterator
 Engine::stopVoice(size_t voiceIndex) noexcept
 {
   os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice", "");
@@ -605,6 +608,20 @@ Engine::updateActiveVoiceCount() noexcept
   auto value = oldestVoiceIndices_.active();
   os_log_info(log_, "updateActiveVoiceCount - %ld", value);
   [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::activeVoiceCount)] setValue: value];
+}
+
+void
+Engine::updateDurationParameters() noexcept
+{
+  for (size_t durationBucketIndex = 0; durationBucketIndex < durationBuckets_.size(); ++durationBucketIndex) {
+    auto value = durationBuckets_[durationBucketIndex];
+    if (value > 0.0) {
+      AUParameterAddress address = valueOf(ParameterAddress::renderDurationVoices1) + durationBucketIndex;
+      assert(address < valueOf(ParameterAddress::lastParameterAddressPlusOne));
+      [[parameterTree_ parameterWithAddress: address] setValue: value];
+      durationBuckets_[durationBucketIndex] = 0.0;
+    }
+  }
 }
 
 void
@@ -857,6 +874,22 @@ Engine::makeTree() noexcept
                                                                    flags:flags
                                                             valueStrings:nullptr
                                                      dependentParameters:nullptr]];
+
+  // Generate the buckets for render durations based on number of active voices
+  for (size_t durationBucketIndex = 0; durationBucketIndex < durationBuckets_.size(); ++durationBucketIndex) {
+    auto name = [NSString stringWithFormat:@"renderDuration%ld", durationBucketIndex];
+    AUParameterAddress address = valueOf(ParameterAddress::renderDurationVoices1) + durationBucketIndex;
+    [definitions addObject: [AUParameterTree createParameterWithIdentifier:name
+                                                                      name:name
+                                                                   address:address
+                                                                       min:0.0
+                                                                       max:10000.0
+                                                                      unit:kAudioUnitParameterUnit_Milliseconds
+                                                                  unitName:nullptr
+                                                                     flags:flags
+                                                              valueStrings:nullptr
+                                                       dependentParameters:nullptr]];
+  }
 
   parameterTree_ = [AUParameterTree createTreeWithChildren:definitions];
 

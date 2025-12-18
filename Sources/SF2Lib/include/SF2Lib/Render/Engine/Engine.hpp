@@ -21,6 +21,7 @@
 #include "SF2Lib/Render/Engine/ParameterAddress.hpp"
 #include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
+#include "SF2Util/Timer.hpp"
 
 struct TestEngineHarness;
 
@@ -42,7 +43,6 @@ class Engine : public DSPHeaders::EventProcessor<Engine> {
 
 public:
   /// Maximum number of voices that can be supported by the engine
-  static inline constexpr size_t maxVoiceCount{128};
   static inline constexpr AUValue minLastLoadFinished{AUValue(-1.0e-4)};
   static inline constexpr AUValue maxLastLoadFinished{AUValue(1.0e+6)};
   static inline constexpr AUValue lastLoadFinishedChange{AUValue(0.0001)};
@@ -121,8 +121,17 @@ public:
    @param mixer collection of buffers to render into
    @param frameCount number of samples to render.
    */
-  void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
+  inline void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
   {
+    auto durationBucketIndex = activeVoiceCount();
+    if (durationBucketIndex == 0) {
+      updateDurationParameters();
+      return;
+    }
+
+    os_signpost_interval_begin(log_, renderSignpost_, "renderInto");
+
+    auto entryTime = Utils::Timer::now();
     for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
       auto voiceIndex = *pos;
       auto& voice{voices_[voiceIndex]};
@@ -135,19 +144,10 @@ public:
         ++pos;
       }
     }
+
+    durationBuckets_[durationBucketIndex - 1] = Utils::Timer::milliseconds(Utils::Timer::delta(entryTime));
+    os_signpost_interval_end(log_, renderSignpost_, "renderInto");
   }
-
-  /// API for EventProcessor
-  AUAudioFrameCount doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount duration) noexcept;
-
-  /// API for EventProcessor
-  void doRenderingStateChanged(bool state) noexcept {
-    if (!state) allOff();
-    [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::isRendering)] setValue: SF2::fromBool(state)];
-  }
-
-  /// API for EventProcessor
-  void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
 
   /// API for EventProcessor
   inline void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs,
@@ -164,6 +164,18 @@ public:
       renderInto(Mixer(outs, busBuffers(1), busBuffers(2)), frameCount);
     }
   }
+
+  /// API for EventProcessor
+  AUAudioFrameCount doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount duration) noexcept;
+
+  /// API for EventProcessor
+  void doRenderingStateChanged(bool state) noexcept {
+    if (!state) allOff();
+    [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::isRendering)] setValue: SF2::fromBool(state)];
+  }
+
+  /// API for EventProcessor
+  void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
 
   /**
    Notify all active voices with a parameter change.
@@ -260,6 +272,8 @@ private:
 
   void updateActiveVoiceCount() noexcept;
 
+  void updateDurationParameters() noexcept;
+
   /**
    Create the audio unit parameter tree.
    */
@@ -301,7 +315,7 @@ private:
   void reset() noexcept;
 
   /**
-   Turn off all voices, making them all available for rendering. 
+   Turn off all voices, making them all available for rendering.
 
    NOTE: this is not thread-safe. When running in a render thread, it is expected that this is only executed due to
    an incoming MIDI command.
@@ -313,7 +327,7 @@ private:
    stop audio.
    */
   void releaseKeys() noexcept;
-  
+
   /**
    Tell any voices playing the current MIDI key that the key has been released. The voice will continue to render until
    it figures out that it is done.
@@ -479,6 +493,7 @@ private:
   os_signpost_id_t stopVoiceSignpost_;
 
   AUValue lastLoadFinishedCounter_{minLastLoadFinished};
+  std::vector<AUValue> durationBuckets_;
 
   friend struct ::TestEngineHarness;
   friend class Parameters;

@@ -3,6 +3,7 @@
 #include <AudioUnit/AudioUnit.h>
 
 namespace SF2::Render::Engine {
+  static inline constexpr size_t maxVoiceCount{128};
 
   /**
    Enumeration of engine-specific parameters. Some are read-only to communicate engine state to others.
@@ -23,6 +24,9 @@ namespace SF2::Render::Engine {
     activeBankIndex,
     activePresetIndex,
     lastLoadFinished,
+    // NOTE: keep these at the end.
+    renderDurationVoices1,
+    renderDurationLast = renderDurationVoices1 + maxVoiceCount - 1,
     lastParameterAddressPlusOne
   };
 

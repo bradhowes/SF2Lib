@@ -8,8 +8,8 @@ let checkedVectorIndexing = false
 // Set to true to enable low-pass filter in sample generation (once sound quality bugs are fixed)
 let enableLowPassFilter = false
 
-// Set to true to play audio in tests.
-let playAudioDuringTests = true
+// Set to true to play audio generated in tests.
+let playAudioDuringTests = false
 
 // Set to true to enable Accelerate framework
 let useAccelerate = true
@@ -22,7 +22,6 @@ let useLocalDSPHeaders = false
 // Set to true to enable unsafe C++ flags -- only to be used for development/debugging
 // NOTE: do NOT commit when set to true or else downstream release builds may break. There is a pre-commit hook
 // `unsafe_flags_check` that can be used to prevent this from happening.
-
 let useUnsafeFlags = false
 
 let package = Package(
