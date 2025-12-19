@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <os/signpost.h>
+
 #include <array>
 #include <functional>
 #include <map>
@@ -10,6 +12,7 @@
 #include <set>
 #include <vector>
 
+#include "DSPHeaders/BusBuffers.hpp"
 #include "DSPHeaders/EventProcessor.hpp"
 
 #include "SF2File/IO/File.hpp"
@@ -63,8 +66,7 @@ public:
    @param interpolator the type of interpolation to use when rendering samples
    @param minimumNoteDurationMilliseconds the minimum duration of a note-on/note-off sequence for a voice.
    */
-  Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
-         size_t minimumNoteDurationMilliseconds = 10) noexcept;
+  Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator, size_t minimumNoteDurationMilliseconds = 10) noexcept;
 
   ~Engine() noexcept;
 
@@ -121,49 +123,11 @@ public:
    @param mixer collection of buffers to render into
    @param frameCount number of samples to render.
    */
-  inline void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
-  {
-    auto durationBucketIndex = activeVoiceCount();
-    if (durationBucketIndex == 0) {
-      updateDurationParameters();
-      return;
-    }
-
-    os_signpost_interval_begin(log_, renderSignpost_, "renderInto");
-
-    auto entryTime = Utils::Timer::now();
-    for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
-      auto voiceIndex = *pos;
-      auto& voice{voices_[voiceIndex]};
-      if (voice.isActive()) {
-        voice.renderInto(mixer, frameCount);
-      }
-      if (voice.isDone()) {
-        pos = stopVoice(voiceIndex);
-      } else {
-        ++pos;
-      }
-    }
-
-    durationBuckets_[durationBucketIndex - 1] = Utils::Timer::milliseconds(Utils::Timer::delta(entryTime));
-    os_signpost_interval_end(log_, renderSignpost_, "renderInto");
-  }
+  void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept;
 
   /// API for EventProcessor
-  inline void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs,
-                          AUAudioFrameCount frameCount) noexcept {
-    // All of the work is done when working with output bus 0. If wired correctly, busses 1 and 2 will
-    // hold the buffered values that were created here.
-    if (outputBusNumber == 0) {
-
-      // The voices will add their samples to the mixer so clear them here.
-      outs.clear(frameCount);
-      busBuffers(1).clear(frameCount);
-      busBuffers(2).clear(frameCount);
-
-      renderInto(Mixer(outs, busBuffers(1), busBuffers(2)), frameCount);
-    }
-  }
+  void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers ins, DSPHeaders::BusBuffers outs,
+                   AUAudioFrameCount frameCount) noexcept;
 
   /// API for EventProcessor
   AUAudioFrameCount doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount duration) noexcept;
@@ -273,6 +237,17 @@ private:
   void updateActiveVoiceCount() noexcept;
 
   void updateDurationParameters() noexcept;
+
+  /**
+   Render samples to the given stereo output buffers. The buffers are guaranteed to be able to hold `frameCount`
+   samples, and `frameCount` will never be more than the `maxFramesToRender` value given to the `setRenderingFormat`.
+
+   NOTE: everything from this point on should be inlined as much as possible for speed. This is executed in a real-time
+   rendering thread.
+
+   @param mixer collection of buffers to render into
+   @param frameCount number of samples to render.
+   */
 
   /**
    Create the audio unit parameter tree.
@@ -441,7 +416,7 @@ private:
 
   void bumpLastLoadFinished() noexcept;
 
-  void initialize(Float sampleRate) noexcept;
+  void initialize(Float sampleRate, AUAudioFrameCount maxFrameCount) noexcept;
 
   void stopAllExclusiveVoices(int exclusiveClass) noexcept;
 
@@ -494,6 +469,7 @@ private:
 
   AUValue lastLoadFinishedCounter_{minLastLoadFinished};
   std::vector<AUValue> durationBuckets_;
+  uint64_t nanosecondsPerSample_; // 1.0 / sampleRate * 1.0E9
 
   friend struct ::TestEngineHarness;
   friend class Parameters;

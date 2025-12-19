@@ -744,7 +744,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqualWithAccuracy(0.0019038640894, samples[2], self.epsilon);
   XCTAssertEqualWithAccuracy(0.00263028102927, samples[3], self.epsilon);
   XCTAssertEqualWithAccuracy(0.0211724154651, samples[4], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.000255482824286, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.000254703074461, samples[5], self.epsilon);
   XCTAssertEqualWithAccuracy(7.80675327405e-05, samples[6], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.duration()];

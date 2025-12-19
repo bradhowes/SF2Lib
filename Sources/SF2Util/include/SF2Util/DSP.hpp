@@ -14,14 +14,16 @@
 /// are in the DSPHeaders::DSP namespace of AUv3Support package.
 namespace SF2::DSP {
 
+using namespace DSPHeaders;
+
 /// Maximum absolute cents that will be used for frequencies. This corresponds to 20 kHz.
 inline static constexpr int MaximumAbsoluteCents = 13'508;
 
 /// Number of cents in an octave
 inline static constexpr int CentsPerOctave = 1'200;
 
-/// Attenuated samples at or below this value should be inaudible at 100 dB dynamic range.
-inline static constexpr Float NoiseFloor = 0.00001_F;
+/// Attenuated samples at or below this value should be inaudible
+inline static constexpr Float NoiseFloor = 0.0001_F;
 inline static constexpr Float NoiseFloorCentiBels = 960_F;
 
 /// Maximum attenuation defined by SF2 spec.
