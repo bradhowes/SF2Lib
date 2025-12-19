@@ -243,7 +243,7 @@ using namespace SF2::Render::Voice::State;
     XCTAssertEqualWithAccuracy(0, samples[3], self.epsilon);
   }
 
-  self.playAudio = YES;
+  // self.playAudio = YES;
   [self playSamples: buffer count: sampleCount];
 }
 
@@ -544,8 +544,8 @@ using namespace SF2::Render::Voice::State;
   // Configure note to take 1.5s to attack and release
   for (auto& note : notes) {
     for (size_t voiceIndex = 0; voiceIndex < note.count(); ++voiceIndex) {
-      self.sst.setValue(note[voiceIndex].state(), Voice::State::State::Index::attackVolumeEnvelope, int(DSP::secondsToCents(1.5)));
-      self.sst.setValue(note[voiceIndex].state(), Voice::State::State::Index::releaseVolumeEnvelope, int(DSP::secondsToCents(1.5)));
+      self.sst.setValue(note[voiceIndex].state(), Voice::State::State::Index::attackVolumeEnvelope, int(::DSP::secondsToCents(1.5)));
+      self.sst.setValue(note[voiceIndex].state(), Voice::State::State::Index::releaseVolumeEnvelope, int(::DSP::secondsToCents(1.5)));
       self.sst.setValue(note[voiceIndex].state(), Voice::State::State::Index::sampleModes, 1);
     }
     note.start();

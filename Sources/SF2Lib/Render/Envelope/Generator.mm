@@ -31,23 +31,23 @@ constexpr Float midiKeyEnvelopeScaling(const Generator::State& state, Generator:
 }
 
 constexpr Float delayTimecentsToSeconds(Float value) noexcept {
-  return (value <= -32'768.0) ? 0.0 : DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5'000.0));
+  return (value <= -32'768.0) ? 0.0 : ::DSP::centsToSeconds(::DSP::clamp(value, lowerBoundTimecents, 5'000.0));
 }
 
 constexpr Float attackTimecentsToSeconds(Float value) noexcept {
-  return (value <= -32'768.0) ? 0.0 : DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 8'000.0));
+  return (value <= -32'768.0) ? 0.0 : ::DSP::centsToSeconds(::DSP::clamp(value, lowerBoundTimecents, 8'000.0));
 }
 
 constexpr Float holdTimecentsToSeconds(Float value) noexcept {
-  return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5'000.0));
+  return ::DSP::centsToSeconds(::DSP::clamp(value, lowerBoundTimecents, 5'000.0));
 }
 
 constexpr Float decayTimecentsToSeconds(Float value) noexcept {
-  return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 8'000.0));
+  return ::DSP::centsToSeconds(::DSP::clamp(value, lowerBoundTimecents, 8'000.0));
 }
 
 constexpr Float releaseTimecentsToSeconds(Float value) noexcept {
-  return DSP::centsToSeconds(DSP::clamp(value, lowerBoundTimecents, 5'000.0));
+  return ::DSP::centsToSeconds(::DSP::clamp(value, lowerBoundTimecents, 5'000.0));
 }
 
 constexpr Float midiKeyVolumeEnvelopeHoldAdjustment(const Generator::State& state) noexcept {

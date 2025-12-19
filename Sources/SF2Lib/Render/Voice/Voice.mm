@@ -22,7 +22,7 @@ Voice::Voice(Float sampleRate, const ChannelState &channelState, size_t voiceInd
     modulatorEnvelope_{},
     modulatorLFO_{sampleRate},
     vibratoLFO_{sampleRate},
-    filter_{sampleRate},
+    filter_{},
     active_{false},
     keyDown_{false},
     voiceIndex_{voiceIndex}
@@ -57,7 +57,6 @@ Voice::start() noexcept
 
   active_ = true;
   keyDown_ = true;
-  filter_.reset();
 
   loopingMode_ = loopingMode();
   initialAttenuation_ = DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));
