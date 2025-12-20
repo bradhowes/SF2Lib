@@ -882,6 +882,7 @@ using namespace SF2::Render::Engine;
 
   [self dumpSamples: samples];
 
+  self.epsilon = 1.0e-6;
   XCTAssertEqualWithAccuracy(0.00463884416967630386, samples[0], self.epsilon);
   XCTAssertEqualWithAccuracy(0.00463884416967630386, samples[1], self.epsilon);
   XCTAssertEqualWithAccuracy(0.000323427491821348667, samples[2], self.epsilon);
