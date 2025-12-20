@@ -32,8 +32,8 @@ struct LFOTestInjector {
 @implementation LFOTests
 
 - (void)setUp {
-  self.epsilon = PresetTestContextBase::epsilonValue();
   [super setUp];
+  self.epsilon = PresetTestContextBase::epsilonValue();
 }
 
 - (void)tearDown {

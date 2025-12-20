@@ -23,6 +23,7 @@ using namespace SF2::Render::Engine;
 
 - (void)setUp {
   [super setUp];
+  self.epsilon = PresetTestContextBase::epsilon;
   // self.playAudio = YES;
 }
 
@@ -173,7 +174,6 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testRolandPianoChordRenderLinear {
-  self.epsilon = 1.0e-12;
   auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
@@ -255,7 +255,6 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testRolandPianoChordRenderCubic4thOrder {
-  self.epsilon = 1.0e-12;
   auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
@@ -882,7 +881,6 @@ using namespace SF2::Render::Engine;
 
   [self dumpSamples: samples];
 
-  self.epsilon = 1.0e-6;
   XCTAssertEqualWithAccuracy(0.00463884416967630386, samples[0], self.epsilon);
   XCTAssertEqualWithAccuracy(0.00463884416967630386, samples[1], self.epsilon);
   XCTAssertEqualWithAccuracy(0.000323427491821348667, samples[2], self.epsilon);

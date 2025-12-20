@@ -26,6 +26,7 @@ using namespace SF2::Render::Voice::Sample;
 @synthesize channelState;
 
 - (void)setUp {
+  [super setUp];
   self.epsilon = PresetTestContextBase::epsilonValue();
   self.channelState = new MIDI::ChannelState();
 }

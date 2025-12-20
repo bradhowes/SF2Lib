@@ -28,6 +28,7 @@ using namespace SF2::Render::Voice::Sample;
 @synthesize epsilon;
 
 - (void)setUp {
+  [super setUp];
   self.contexts = new SampleBasedContexts;
   self.epsilon = PresetTestContextBase::epsilonValue();
 }

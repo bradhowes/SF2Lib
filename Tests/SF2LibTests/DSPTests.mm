@@ -49,6 +49,7 @@ using namespace SF2::DSP;
 @synthesize epsilon;
 
 - (void)setUp {
+  [super setUp];
   self.epsilon = PresetTestContextBase::epsilonValue();
 }
 
