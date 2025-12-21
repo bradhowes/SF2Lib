@@ -25,7 +25,7 @@ void SF2Engine::create(double sampleRate, NSUInteger voiceCount)
 {
   std::cout << "SF2Engine::create" << std::endl;
   assert(impl_.get() == nullptr);
-  impl_.reset(new Eng::Engine(sampleRate, voiceCount, Eng::Engine::Interpolator::cubic4thOrder));
+  impl_.reset(new Eng::Engine(sampleRate, voiceCount, Eng::Engine::Interpolator::cubic4thOrder, 0.85));
 }
 
 bool

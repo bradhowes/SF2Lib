@@ -61,10 +61,15 @@ public:
    @param sampleRate the expected sample rate to use
    @param voiceCount the maximum number of individual voices to support (must be <= maxVoiceCount)
    @param interpolator the type of interpolation to use when rendering samples
+   @param renderingTimeBudgetScaling scaling to apply to frameCount time budget (disable time budget checking if <= 0.0)
    @param minimumNoteDurationMilliseconds the minimum duration of a note-on/note-off sequence for a voice.
    */
-  Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator,
-         size_t minimumNoteDurationMilliseconds = 10) noexcept;
+  Engine(Float sampleRate,
+         size_t voiceCount,
+         Interpolator interpolator,
+         double renderingTimeBudgetScaling, // = 0.85,
+         size_t minimumNoteDurationMilliseconds = 10
+         ) noexcept;
 
   ~Engine() noexcept;
 
@@ -470,7 +475,7 @@ private:
   std::vector<AUValue> durationBuckets_;
 
   uint64_t renderingTimeBudgetIntervalNanoseconds_;
-  double renderingTimeBudgetScaling_{0.85};
+  double renderingTimeBudgetScaling_;
 
   friend struct ::TestEngineHarness;
   friend class Parameters;

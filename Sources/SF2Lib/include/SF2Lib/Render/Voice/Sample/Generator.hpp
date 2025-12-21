@@ -26,7 +26,8 @@ enum struct Interpolator {
  Generator of new samples from a stream of original samples, properly scaled to sound correct for the output sample
  rate and the desired output frequency. We know the original samples' sample rate and root frequency, so we can do some
  simple math to calculate a proper increment to use when iterating through the original samples, and with some proper
- interpolation we should end up with something that does not sound too harsh.
+ interpolation we should end up with something that does not sound too harsh after submitting the new samples through a
+ low-pass filter to remove any aliasing.
  */
 class Generator {
 public:

@@ -25,7 +25,7 @@ struct TestEngineHarness {
 
   TestEngineHarness(SF2::Float sampleRate, size_t voiceCount = 96,
                     Interpolator interpolator = Interpolator::cubic4thOrder) noexcept :
-  engine_{sampleRate, voiceCount, interpolator}
+  engine_{sampleRate, voiceCount, interpolator, -1.0}
   {
     format_ = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
     engine_.setRenderingFormat(3, format_, 512);

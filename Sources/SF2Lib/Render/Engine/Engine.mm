@@ -11,7 +11,8 @@
 using namespace SF2::Entity::Generator;
 using namespace SF2::Render::Engine;
 
-Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator, size_t minimumNoteDurationMilliseconds) noexcept
+Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator, double renderingTimeBudgetScaling,
+               size_t minimumNoteDurationMilliseconds) noexcept
   : super(Log::create("Engine")),
     sampleRate_{sampleRate},
     minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
@@ -21,7 +22,8 @@ Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator, s
     noteOnSignpost_{os_signpost_id_generate(log_)},
     noteOffSignpost_{os_signpost_id_generate(log_)},
     startVoiceSignpost_{os_signpost_id_generate(log_)},
-    stopVoiceSignpost_{os_signpost_id_generate(log_)}
+    stopVoiceSignpost_{os_signpost_id_generate(log_)},
+    renderingTimeBudgetScaling_{renderingTimeBudgetScaling}
 {
   assert(voiceCount <= maxVoiceCount);
 
@@ -198,7 +200,9 @@ Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
 
   os_signpost_interval_begin(log_, renderSignpost_, "renderInto", "voices: %lu", durationBucketIndex);
 
-  uint64_t timeBudgetNanoseconds = frameCount * renderingTimeBudgetIntervalNanoseconds_ * renderingTimeBudgetScaling_;
+  uint64_t timeBudgetNanoseconds = renderingTimeBudgetScaling_ > 0.0
+  ? (frameCount * renderingTimeBudgetIntervalNanoseconds_ * renderingTimeBudgetScaling_)
+  : 0xFFFFFFFFFFFFFFFFL;
 
   auto entryTime = Utils::Timer::now();
 

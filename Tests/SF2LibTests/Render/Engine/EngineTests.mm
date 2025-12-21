@@ -27,7 +27,7 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testInit {
-  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear);
+  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear, -1.0);
   XCTAssertEqual(engine.voiceCount(), size_t(32));
   XCTAssertEqual(engine.activeVoiceCount(), size_t(0));
   XCTAssertTrue(engine.polyphonicModeEnabled());
