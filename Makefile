@@ -4,6 +4,10 @@ XCCOV = xcrun xccov view --report --only-targets
 SCHEME = 'SF2Lib-Package (Release)'
 BUILD_FLAGS = -skipMacroValidation -skipPackagePluginValidation -enableCodeCoverage YES -scheme $(SCHEME)
 
+ifeq ($(GITHUB_ENV),)
+XCB = | xcbeautify --renderer github-actions
+endif
+
 default: report
 
 test-iOS:
@@ -12,8 +16,7 @@ test-iOS:
 	USE_UNSAFE_FLAGS="1" set -o pipefail && xcodebuild test \
 		$(BUILD_FLAGS) \
 		-derivedDataPath "$(PWD)/.DerivedData-iOS" \
-		-destination platform="$(PLATFORM_IOS)" \
-		| xcbeautify --renderer github-actions
+		-destination platform="$(PLATFORM_IOS)" $(XCB)
 
 coverage-iOS: test-iOS
 	$(XCCOV) $(PWD)/.DerivedData-iOS/Logs/Test/*.xcresult > coverage_iOS.txt
@@ -30,8 +33,7 @@ test-macOS:
 	USE_UNSAFE_FLAGS="1" set -o pipefail && xcodebuild test \
 		$(BUILD_FLAGS) \
 		-derivedDataPath "$(PWD)/.DerivedData-macOS" \
-		-destination platform="$(PLATFORM_MACOS)" \
-		| xcbeautify --renderer github-actions
+		-destination platform="$(PLATFORM_MACOS)" $(XCB)
 
 coverage-macOS: test-macOS
 	$(XCCOV) $(PWD)/.DerivedData-macOS/Logs/Test/*.xcresult > coverage_macOS.txt
