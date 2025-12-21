@@ -34,7 +34,7 @@ public:
    @param chorusLevel the amount of the L+R samples to send to the chorusSend bus
    @param reverbLevel the amount of the L+R samples to send to the reverbSend bus
    */
-  inline void add(AUAudioFrameCount frame, AUValue left, AUValue right, AUValue chorusLevel, AUValue reverbLevel) noexcept
+  void add(AUAudioFrameCount frame, AUValue left, AUValue right, AUValue chorusLevel, AUValue reverbLevel) noexcept
   {
     dry_.addStereo(frame, left, right);
     if (chorusSend_.isValid()) chorusSend_.addStereo(frame, left * chorusLevel, right * chorusLevel);

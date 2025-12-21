@@ -85,9 +85,11 @@ public:
   void start() noexcept;
 
   /**
-   Quickly stop the voice. After this, it will just produce 0.0 if asked to render a sample.
+   Stop the voice. After this, it will just produce 0.0 if asked to render a sample.
    */
-  inline void stop() noexcept { active_ = false; }
+  inline void stop() noexcept {
+    active_ = false;
+  }
 
   /// @returns true if this voice is still rendering interesting samples
   bool isActive() const noexcept { return active_; }
@@ -193,9 +195,6 @@ public:
     if (!sampleGenerator_.isActive() ||
         !volumeEnvelope_.isActive() ||
         (volumeEnvelope_.isRelease() && gain < DSP::NoiseFloor)) {
-      os_log_info(log_, "stopping voice - samGen: %d volEnv: %d release: %d remaining: %d gain: %f",
-                  sampleGenerator_.isActive(), volumeEnvelope_.isActive(), volumeEnvelope_.isRelease(), volumeEnvelope_.counter(),
-                  gain);
       stop();
     }
 
@@ -208,11 +207,10 @@ public:
    @param mixer collection of buffers to mix into
    @param frameCount number of samples to render
    */
-  inline void renderInto(Engine::Mixer& mixer, SF2::AUAudioFrameCount frameCount) noexcept {
+  void renderInto(Engine::Mixer& mixer, SF2::AUAudioFrameCount frameCount) noexcept {
     SF2::AUAudioFrameCount index = 0;
-    auto chorusSend{SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend)))};
-    auto reverbSend{SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)))};
-
+    SF2::AUValue chorusSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend)));
+    SF2::AUValue reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
     for (; index < frameCount && active_; ++index) {
       Float sample{renderSample()};
       Float pan{state_.modulated(Index::pan)};

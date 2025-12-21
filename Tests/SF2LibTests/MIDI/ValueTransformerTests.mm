@@ -21,7 +21,6 @@ using Source = SF2::Entity::Modulator::Source;
 @synthesize epsilon;
 
 - (void)setUp {
-  [super setUp];
   self.epsilon = PresetTestContextBase::epsilonValue();
 }
 

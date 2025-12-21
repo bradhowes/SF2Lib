@@ -27,7 +27,6 @@ using namespace SF2::Entity::Generator;
 @synthesize state;
 
 - (void)setUp {
-  [super setUp];
   self.epsilon = PresetTestContextBase::epsilonValue();
   self.channelState = new MIDI::ChannelState();
   self.state = new State::State(44100.0, *self.channelState);

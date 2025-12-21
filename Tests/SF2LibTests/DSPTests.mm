@@ -49,7 +49,6 @@ using namespace SF2::DSP;
 @synthesize epsilon;
 
 - (void)setUp {
-  [super setUp];
   self.epsilon = PresetTestContextBase::epsilonValue();
 }
 
@@ -194,8 +193,8 @@ using namespace SF2::DSP;
 }
 
 - (void)testAttenuationLookup {
-  XCTAssertEqualWithAccuracy(1.0, SF2::DSP::AttenuationLookup::query(0), self.epsilon);
-  XCTAssertEqualWithAccuracy(6.3095734448e-08, SF2::DSP::AttenuationLookup::query(int(MaximumAttenuationCentiBels)), self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0, ::DSP::AttenuationLookup::query(0), self.epsilon);
+  XCTAssertEqualWithAccuracy(6.3095734448e-08, ::DSP::AttenuationLookup::query(int(MaximumAttenuationCentiBels)), self.epsilon);
 }
 
 - (void)testCentibelsToAttenuattionInterpolated {
@@ -267,7 +266,7 @@ static Float fluid_iir_filter_q_from_dB(Float q_dB)
 
   for (auto centibels = 0; centibels < 960; ++centibels) {
     auto fs = fluid_iir_filter_q_from_dB(centibels);
-    auto us = SF2::DSP::centibelsToResonance(centibels);
+    auto us = ::DSP::centibelsToResonance(centibels);
 
     XCTAssertEqualWithAccuracy(fs, us, getEpsilon);
   }

@@ -36,9 +36,9 @@ static SF2::MIDI::ChannelState channelState;
 static SF2::SampleVector values = {1.0, -1.0, 0.5, 0.25, -0.25, -0.5, -0.6, -0.7};
 
 - (void)setUp {
-  [super setUp];
   self.contexts = new SampleBasedContexts;
   self.epsilon = PresetTestContextBase::epsilonValue();
+  [super setUp];
 }
 
 - (void)tearDown {

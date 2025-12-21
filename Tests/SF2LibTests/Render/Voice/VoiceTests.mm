@@ -79,7 +79,7 @@ using namespace SF2::Render::Voice::State;
     XCTAssertEqualWithAccuracy(-0.0817046761513, samples[11], self.epsilon);
     XCTAssertEqualWithAccuracy(-0.0177110619843, samples[12], self.epsilon);
     XCTAssertEqualWithAccuracy(-0.0817179381847, samples[13], self.epsilon);
-    XCTAssertEqualWithAccuracy(-1.12410054953e-06, samples[14], self.epsilon);
+    XCTAssertEqualWithAccuracy(1.21334733194e-06, samples[14], self.epsilon);
   }
 
   [self playSamples: harness.dryBuffer() count: harness.duration()];

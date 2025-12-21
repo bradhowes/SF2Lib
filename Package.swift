@@ -38,10 +38,7 @@ let package = Package(
   targets: [
     .target(
       name: "Engine",
-      dependencies: [
-        "SF2Lib",
-        .product(name: "DSPHeaders", package: "DSPHeaders")
-      ],
+      dependencies: ["SF2Lib"],
       path: "Sources/Engine",
       publicHeadersPath: "include",
       swiftSettings: [.interoperabilityMode(.Cxx)]
@@ -106,20 +103,12 @@ let package = Package(
     ),
     .testTarget(
       name: "EngineTests",
-      dependencies: [
-        "Engine",
-        "TestUtils",
-        .product(name: "DSPHeaders", package: "DSPHeaders")
-      ],
+      dependencies: ["Engine", "TestUtils"],
       cxxSettings: .cxxSettings
     ),
     .testTarget(
       name: "SF2LibTests",
-      dependencies: [
-        "SF2Lib",
-        "TestUtils",
-        .product(name: "DSPHeaders", package: "DSPHeaders")
-      ],
+      dependencies: ["SF2Lib", "TestUtils"],
       cxxSettings: .cxxSettings
     )
   ],

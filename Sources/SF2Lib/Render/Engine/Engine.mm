@@ -3,8 +3,6 @@
 #include <cstdint>
 #include <vector>
 
-#include "DSPHeaders/BusBuffers.hpp"
-
 #include "SF2Util/Base64.hpp"
 #include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
@@ -47,7 +45,7 @@ void
 Engine::setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept
 {
   super::setRenderingFormat(busCount, format, maxFramesToRender);
-  initialize(Float(format.sampleRate), maxFramesToRender);
+  initialize(Float(format.sampleRate));
 }
 
 bool
@@ -187,51 +185,6 @@ Engine::applyPedals() noexcept
   visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
     voice.releaseKey(releaseKeyState);
   });
-}
-
-void
-Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
-{
-  os_signpost_interval_begin(log_, renderSignpost_, "renderInto");
-
-  auto renderBudget = 10.2e6; // frameCount * nanosecondsPerSample_;
-  auto entryTime = Utils::Timer::now();
-
-  for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
-    auto voiceIndex = *pos;
-    auto& voice{voices_[voiceIndex]};
-
-    if (Utils::Timer::delta(entryTime) < renderBudget) {
-      if (voice.isActive()) {
-        voice.renderInto(mixer, frameCount);
-      }
-      if (voice.isDone()) {
-        pos = stopVoice(voiceIndex);
-      } else {
-        ++pos;
-      }
-    } else {
-      pos = stopVoice(voiceIndex);
-    }
-  }
-
-  os_signpost_interval_end(log_, renderSignpost_, "renderInto");
-}
-
-void
-Engine::doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers ins, DSPHeaders::BusBuffers outs,
-                    AUAudioFrameCount frameCount) noexcept {
-  // All of the work is done when working with output bus 0. If wired correctly, busses 1 and 2 will
-  // hold the buffered values that were created here.
-  if (outputBusNumber > 0) return;
-
-  // The voices will add their samples to the mixer so clear them here.
-  outs.clear(frameCount);
-  busBuffers(1).clear(frameCount);
-  busBuffers(2).clear(frameCount);
-
-  if (activeVoiceCount() == 0) return;
-  renderInto(Mixer(outs, busBuffers(1), busBuffers(2)), frameCount);
 }
 
 AUAudioFrameCount
@@ -588,10 +541,9 @@ Engine::changeProgram(uint8_t program) noexcept
 }
 
 void
-Engine::initialize(Float sampleRate, AUAudioFrameCount maxFrameCount) noexcept
+Engine::initialize(Float sampleRate) noexcept
 {
   sampleRate_ = sampleRate;
-  nanosecondsPerSample_ = 1.0 / sampleRate * 1.0e9;
   allOff();
   for (auto& voice : voices_) {
     voice.setSampleRate(sampleRate);

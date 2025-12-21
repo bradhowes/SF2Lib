@@ -21,7 +21,6 @@ using namespace SF2::MIDI;
 @synthesize epsilon;
 
 - (void)setUp {
-  [super setUp];
   self.epsilon = PresetTestContextBase::epsilonValue();
 }
 

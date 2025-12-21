@@ -50,10 +50,6 @@ struct TestEngineHarness {
     reverbFacet_.assignBufferList(reverbBuffer_.mutableAudioBufferList);
     DSPHeaders::BusBuffers reverb{reverbFacet_.busBuffers()};
 
-    dry.clear(duration_);
-    chorus.clear(duration_);
-    reverb.clear(duration_);
-
     return Mixer(dry, chorus, reverb);
   }
 
