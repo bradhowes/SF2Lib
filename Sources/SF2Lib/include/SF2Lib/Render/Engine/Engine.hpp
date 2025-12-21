@@ -121,33 +121,7 @@ public:
    @param mixer collection of buffers to render into
    @param frameCount number of samples to render.
    */
-  inline void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
-  {
-    auto durationBucketIndex = activeVoiceCount();
-    if (durationBucketIndex == 0) {
-      updateDurationParameters();
-      return;
-    }
-
-    os_signpost_interval_begin(log_, renderSignpost_, "renderInto");
-
-    auto entryTime = Utils::Timer::now();
-    for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
-      auto voiceIndex = *pos;
-      auto& voice{voices_[voiceIndex]};
-      if (voice.isActive()) {
-        voice.renderInto(mixer, frameCount);
-      }
-      if (voice.isDone()) {
-        pos = stopVoice(voiceIndex);
-      } else {
-        ++pos;
-      }
-    }
-
-    durationBuckets_[durationBucketIndex - 1] = Utils::Timer::milliseconds(Utils::Timer::delta(entryTime));
-    os_signpost_interval_end(log_, renderSignpost_, "renderInto");
-  }
+  void renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept;
 
   /// API for EventProcessor
   inline void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs,
@@ -494,6 +468,9 @@ private:
 
   AUValue lastLoadFinishedCounter_{minLastLoadFinished};
   std::vector<AUValue> durationBuckets_;
+
+  uint64_t renderingTimeBudgetIntervalNanoseconds_;
+  double renderingTimeBudgetScaling_{0.85};
 
   friend struct ::TestEngineHarness;
   friend class Parameters;

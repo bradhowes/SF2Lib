@@ -187,6 +187,45 @@ Engine::applyPedals() noexcept
   });
 }
 
+void
+Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
+{
+  auto durationBucketIndex = activeVoiceCount();
+  if (durationBucketIndex == 0) {
+    updateDurationParameters();
+    return;
+  }
+
+  os_signpost_interval_begin(log_, renderSignpost_, "renderInto", "voices: %lu", durationBucketIndex);
+
+  uint64_t timeBudgetNanoseconds = frameCount * renderingTimeBudgetIntervalNanoseconds_ * renderingTimeBudgetScaling_;
+
+  auto entryTime = Utils::Timer::now();
+
+  // Iterate over the active voices -- the voices are ordered from newest to oldest. If we run out of time we will stop
+  // the oldest ones.
+  for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
+    auto voiceIndex = *pos;
+    auto& voice{voices_[voiceIndex]};
+    if (voice.isActive()) {
+      if (Utils::Timer::delta(entryTime) < timeBudgetNanoseconds) {
+        voice.renderInto(mixer, frameCount);
+      } else {
+        voice.stop();
+      }
+    }
+    if (voice.isDone()) {
+      pos = stopVoice(voiceIndex);
+    } else {
+      ++pos;
+    }
+  }
+
+  durationBuckets_[durationBucketIndex - 1] = Utils::Timer::delta(entryTime);
+
+  os_signpost_interval_end(log_, renderSignpost_, "renderInto", "voices: %lu", durationBucketIndex);
+}
+
 AUAudioFrameCount
 Engine::doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount duration) noexcept {
   // NOTE: this is running in the real-time render thread.
@@ -544,6 +583,7 @@ void
 Engine::initialize(Float sampleRate) noexcept
 {
   sampleRate_ = sampleRate;
+  renderingTimeBudgetIntervalNanoseconds_ = 1.0 / sampleRate * 1.0e9;
   allOff();
   for (auto& voice : voices_) {
     voice.setSampleRate(sampleRate);
@@ -580,24 +620,24 @@ Engine::stopSameKeyVoices(int eventKey) noexcept
 void
 Engine::startVoice(const Config& config) noexcept
 {
-  os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice", "");
+  os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice");
   auto voiceIndex = oldestVoiceIndices_.voiceAcquire();
   os_log_info(log_, "startVoice - %lu", voiceIndex);
   voices_[voiceIndex].configure(config);
   parameters_.applyChanged(voices_[voiceIndex].state());
   voices_[voiceIndex].start();
   updateActiveVoiceCount();
-  os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice", "");
+  os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice");
 }
 
 OldestVoiceCollection<maxVoiceCount>::iterator
 Engine::stopVoice(size_t voiceIndex) noexcept
 {
-  os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice", "");
+  os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice");
   os_log_info(log_, "stopVoice - %lu", voiceIndex);
   voices_[voiceIndex].stop();
   auto pos = oldestVoiceIndices_.voiceRelease(voiceIndex);
-  os_signpost_interval_end(log_, stopVoiceSignpost_, "stopVoice", "");
+  os_signpost_interval_end(log_, stopVoiceSignpost_, "stopVoice");
   updateActiveVoiceCount();
   return pos;
 }

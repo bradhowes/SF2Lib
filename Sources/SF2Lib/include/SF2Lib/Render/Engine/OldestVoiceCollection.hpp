@@ -85,13 +85,13 @@ public:
   /// @returns the number of active voices
   size_t active() const noexcept { return active_; }
 
-  /// @returns iterator to first active voice
+  /// @returns iterator to first (newest) active voice
   iterator begin() noexcept { return leastRecentlyUsed_.begin(); }
 
   /// @returns iterator to the first inactive voice, which is always the first voice after the last active one.
   iterator end() noexcept { return partition_; }
 
-  /// @returns iterator to first active voice
+  /// @returns iterator to first (newest) active voice
   const_iterator begin() const noexcept { return leastRecentlyUsed_.begin(); }
 
   /// @returns iterator to the first inactive voice, which is always the first voice after the last active one.

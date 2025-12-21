@@ -194,7 +194,7 @@ public:
 
     if (!sampleGenerator_.isActive() ||
         !volumeEnvelope_.isActive() ||
-        (volumeEnvelope_.isRelease() && gain < DSP::NoiseFloor)) {
+        (volumeEnvelope_.isRelease() && gain < 0.0001)) {
       stop();
     }
 
