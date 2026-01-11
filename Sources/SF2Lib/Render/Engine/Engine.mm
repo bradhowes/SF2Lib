@@ -83,7 +83,7 @@ Engine::activePresetIndex() const noexcept
 SF2::IO::File::LoadResponse
 Engine::load(const std::string& path, size_t index) noexcept
 {
-  os_log_info(log_, "load - path: '%s' index: %lu", path.c_str(), index);
+  os_log_info(log_, "load - path: '%{public}s' index: %lu", path.c_str(), index);
   allOff();
   auto file = std::make_unique<IO::File>(path);
   auto response = file->load();
@@ -93,6 +93,7 @@ Engine::load(const std::string& path, size_t index) noexcept
     usePresetWithIndex(index);
   }
 
+  os_log_info(log_, "load END - %d", response);
   return response;
 }
 
@@ -687,7 +688,7 @@ Engine::reset() noexcept
 void
 Engine::parameterValueChanged(AUParameter* parameter, AUValue value) noexcept
 {
-  os_log_info(log_, "parameterValueChanged - %llu %s %f", parameter.address, parameter.identifier.UTF8String, value);
+  os_log_info(log_, "parameterValueChanged - %llu %{public}s %f", parameter.address, parameter.identifier.UTF8String, value);
   auto rawIndex = parameter.address;
   if (rawIndex < 0) return;
   if (rawIndex < valueOf(Index::numValues)) {
@@ -766,7 +767,7 @@ Engine::provideParameterValue(AUParameter* parameter) const noexcept
     }
   }
 
-  os_log_info(log_, "provideValue - %llu %s %f", parameter.address, parameter.identifier.UTF8String, value);
+  os_log_info(log_, "provideValue - %llu %{public}s %f", parameter.address, parameter.identifier.UTF8String, value);
   return value;
 }
 
