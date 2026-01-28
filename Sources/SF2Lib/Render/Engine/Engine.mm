@@ -157,6 +157,7 @@ Engine::load(const std::string& path, size_t index) noexcept
   auto file = std::make_unique<IO::File>(path);
   auto response = file->load();
   if (response == IO::File::LoadResponse::ok) {
+    presets_.clear();
     file_.swap(file);
     presets_.build(*file_);
     usePresetWithIndex(index);
@@ -177,6 +178,7 @@ Engine::load(int fd, size_t index) noexcept
   auto response = file->load(fd);
 
   if (response == IO::File::LoadResponse::ok) {
+    presets_.clear();
     file_.swap(file);
     presets_.build(*file_);
     usePresetWithIndex(index);
@@ -571,34 +573,32 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
     return false;
   }
 
-  // TODO: use dispatch_async to move off real-time thread and onto workQueue.
-  //
-  // Basic approach:
-  //  - reset presets_ vector so that isActivePreset() returns false when called in real-time thread (best to make count atomic)
-  //  - stop all notes
-  //  - decode payload and install new IO::File
-  //  - recalculate presets_ to enable use by real-time thread
-  //  - dispose of allocated buffer
-  //
   const uint8_t* bytes = midiEvent.data;
-  auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes);
+  __block auto payload = std::vector<uint8_t>(bytes, bytes + midiEvent.length);
+
+  dispatch_async(workQueue_, ^{ loadFileAndPreset(std::move(payload)); });
+
+  return true;
+}
+
+void
+Engine::loadFileAndPreset(std::vector<uint8_t>&& bytes) noexcept {
+  auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes.data());
   auto presetIndex = payload->presetIndex;
   auto overrideCount = payload->overrideCount;
   auto pos1 = reinterpret_cast<const SF2::MIDI::GeneratorOverride*>(payload + 1);
   auto overrides = std::vector<MIDI::GeneratorOverride>(pos1, pos1 + overrideCount);
   auto pathStart = reinterpret_cast<const uint8_t*>(pos1 + overrideCount);
-  auto pathCount = size_t((bytes + midiEvent.length) - pathStart) - 1;
+  auto pathCount = size_t((bytes.data() + bytes.size()) - pathStart) - 1;
   auto path = pathCount == 0 ? std::string("") : Utils::Base64::decode(pathStart, pathCount);
-  bool success = false;
+
   if (!path.empty()) {
-    success = load(path, presetIndex) == SF2::IO::File::LoadResponse::ok;
+    load(path, presetIndex);
   } else {
     usePresetWithIndex(presetIndex);
-    success = true;
   }
 
-  os_log_info(log_, "loadFileAndPresetFromSysEx END - %d", success);
-  return success;
+  os_log_info(log_, "loadFileAndPreset END");
 }
 
 bool
@@ -610,23 +610,23 @@ Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
     return false;
   }
 
-  // TODO: use dispatch_async to move off real-time thread and onto workQueue.
-  //
-  // Basic approach:
-  //  - reset presets_ vector so that isActivePreset() returns false when called in real-time thread (best to make count atomic)
-  //  - stop all notes
-  //  - decode payload and install new IO::File
-  //  - recalculate presets_ to enable use by real-time thread
-  //  - dispose of allocated buffer
-  //
   const uint8_t* bytes = midiEvent.data;
-  auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes);
+  __block auto payload = std::vector<uint8_t>(bytes, bytes + midiEvent.length);
+
+  dispatch_async(workQueue_, ^{ loadBookmarkAndPreset(std::move(payload)); });
+
+  return true;
+}
+
+void
+Engine::loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept {
+  auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes.data());
   auto presetIndex = payload->presetIndex;
   auto overrideCount = payload->overrideCount;
   auto pos1 = reinterpret_cast<const SF2::MIDI::GeneratorOverride*>(payload + 1);
   auto overrides = std::vector<MIDI::GeneratorOverride>(pos1, pos1 + overrideCount);
   auto dataStart = reinterpret_cast<const uint8_t*>(pos1 + overrideCount);
-  auto dataCount = size_t((bytes + midiEvent.length) - dataStart) - 1;
+  auto dataCount = size_t((bytes.data() + bytes.size()) - dataStart) - 1;
 
   NSData* data = [NSData dataWithBytesNoCopy:(void*)dataStart length:dataCount freeWhenDone:false];
   NSData* bookmark = [data initWithBase64EncodedData:data options:0];
@@ -640,10 +640,10 @@ Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
                                                 error:&error];
 
   if (error != nil) {
-    os_log_error(log_, "loadBookmarkAndPresetFromSysEx END - error from resolving bookmark data - %{public}@", error);
+    os_log_error(log_, "loadBookmarkAndPreset END - error from resolving bookmark data - %{public}@", error);
     return false;
   } else if (resolved == nil) {
-    os_log_error(log_, "loadBookmarkAndPresetFromSysEx END - failed to resolve bookmark data (no error)");
+    os_log_error(log_, "loadBookmarkAndPreset END - failed to resolve bookmark data (no error)");
     return false;
   }
 
@@ -653,25 +653,23 @@ Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
   }
 
   error = nil;
-  __block BOOL success = NO;
 
   NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
   [coordinator coordinateReadingItemAtURL:resolved
                                   options:NSFileCoordinatorReadingWithoutChanges
                                     error:&error
                                byAccessor:^(NSURL* url) {
-    error = nil;
+    NSError* error = nil;
     NSFileHandle* fileHandle = [NSFileHandle fileHandleForReadingFromURL:url error:&error];
     if (error != nil) {
-      os_log_error(log_, "loadBookmarkAndPresetFromSysEx - failed to open file: %{public}@", error);
+      os_log_error(log_, "loadBookmarkAndPreset - failed to open file: %{public}@", error);
       return;
     }
 
-    success = load(fileHandle.fileDescriptor, presetIndex) == SF2::IO::File::LoadResponse::ok;
+    load(fileHandle.fileDescriptor, presetIndex);
   }];
 
-  os_log_info(log_, "loadBookmarkAndPresetFromSysEx END - %d", success);
-  return success;
+  os_log_info(log_, "loadBookmarkAndPreset END");
 }
 
 std::vector<uint8_t>

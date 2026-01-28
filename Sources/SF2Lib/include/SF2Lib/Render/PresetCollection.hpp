@@ -28,10 +28,10 @@ public:
 
   void clear() noexcept;
 
-  inline bool empty() const noexcept { return presets_.empty(); }
+  inline bool empty() const noexcept { return size_ == 0; }
 
   /// @returns the number of presets in the collection.
-  inline size_t size() const noexcept { return presets_.size(); }
+  inline size_t size() const noexcept { return size_; }
 
   /// @returns the preset at a given index.
   const Preset& operator[](size_t index) const noexcept;
@@ -56,6 +56,7 @@ public:
 
 private:
   std::vector<Preset> presets_{};
+  std::atomic<size_t> size_;
   InstrumentCollection instruments_;
 };
 

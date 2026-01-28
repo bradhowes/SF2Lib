@@ -83,6 +83,10 @@ struct TestEngineHarness {
     return engine_.load(path, index);
   }
 
+  typedef void (^ WorkItemBlock)();
+
+  void postWorkItem(WorkItemBlock block) { dispatch_async(engine_.workQueue_, block); }
+
   void usePresetWithIndex(size_t index) { engine_.usePresetWithIndex(index); }
 
   void usePresetWithBankProgram(uint16_t bank, uint16_t program) { engine_.usePresetWithBankProgram(bank, program); };

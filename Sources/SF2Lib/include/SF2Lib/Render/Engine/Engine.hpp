@@ -463,7 +463,11 @@ private:
 
   bool loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept;
 
+  void loadFileAndPreset(std::vector<uint8_t>&& bytes) noexcept;
+
   bool loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept;
+
+  void loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept;
 
   void applySostenutoPedal() noexcept;
 

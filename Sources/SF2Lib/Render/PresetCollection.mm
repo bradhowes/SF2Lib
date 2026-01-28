@@ -22,11 +22,14 @@ PresetCollection::build(SF2::IO::File& file)
   for (auto presetIndex : file.presetIndicesOrderedByBankProgram()) {
     presets_.emplace_back(file, instruments_, presetConfigs[presetIndex]);
   }
+
+  size_ = presets_.size();
 }
 
 void
 PresetCollection::clear() noexcept
 {
+  size_ = 0;
   presets_.clear();
   instruments_.clear();
 }
