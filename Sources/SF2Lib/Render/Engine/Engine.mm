@@ -11,6 +11,74 @@
 using namespace SF2::Entity::Generator;
 using namespace SF2::Render::Engine;
 
+struct LoadPresetSysExPayload {
+  static constexpr uint8_t manufacturerValue = 0x7E;
+  static constexpr uint8_t modelPathPayload = 0x00; // the payload holds a path string to a file
+  static constexpr uint8_t modelBookmarkPayload = 0x01; // the payload holds a bookmark to a file
+
+  uint8_t sysExBegin;    // 0
+  uint8_t manufacturer;  // 1
+  uint8_t model;         // 2
+  // Here lies 5 bytes of padding
+  size_t presetIndex;    // 8
+  size_t overrideCount;  // 16
+  // SF2::MIDI::GeneratorOverride overrides[1];
+  // char filePath[1];
+  // uint8_t sysExEnd;   // 25 is smallest payload size
+
+  static constexpr size_t minPayloadSize = 25;
+
+  static std::vector<uint8_t> make(const SF2::MIDI::GeneratorOverrideVector& overrides,
+                                   const std::string& filePath, size_t presetIndex) noexcept {
+    auto encodedFilePath = filePath.empty() ? std::string("") : SF2::Utils::Base64::encode(filePath);
+    auto payloadSize = (sizeof(LoadPresetSysExPayload)
+                        + overrides.size() * sizeof(SF2::MIDI::GeneratorOverride)
+                        + encodedFilePath.size()) + 1;
+    auto bytes = std::vector<uint8_t>(payloadSize, 0);
+    auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
+    payload->sysExBegin = SF2::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
+    payload->manufacturer = manufacturerValue;
+    payload->model = modelPathPayload;
+    payload->presetIndex = presetIndex;
+    payload->overrideCount = overrides.size();
+    auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>((bytes.data() + sizeof(LoadPresetSysExPayload)));
+    auto pos2 = std::copy(overrides.begin(), overrides.end(), pos1);
+    auto pos3 = reinterpret_cast<uint8_t*>(std::copy(encodedFilePath.begin(), encodedFilePath.end(),
+                                                     reinterpret_cast<char*>(pos2)));
+    *pos3++ = SF2::valueOf(SF2::MIDI::CoreEvent::EOX);
+
+    assert(pos3 - bytes.data() == long(bytes.size()));
+    assert(bytes.size() >= minPayloadSize);
+
+    return bytes;
+  }
+
+  static std::vector<uint8_t> make(const SF2::MIDI::GeneratorOverrideVector& overrides,
+                                   const NSData* bookmark, size_t presetIndex) noexcept {
+    NSData* encodedBookmark = [bookmark base64EncodedDataWithOptions: 0];
+    auto payloadSize = (sizeof(LoadPresetSysExPayload)
+                        + overrides.size() * sizeof(SF2::MIDI::GeneratorOverride)
+                        + encodedBookmark.length) + 1;
+    auto bytes = std::vector<uint8_t>(payloadSize, 0);
+    auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
+    payload->sysExBegin = SF2::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
+    payload->manufacturer = manufacturerValue;
+    payload->model = modelBookmarkPayload;
+    payload->presetIndex = presetIndex;
+    payload->overrideCount = overrides.size();
+    auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>((bytes.data() + sizeof(LoadPresetSysExPayload)));
+    auto pos2 = reinterpret_cast<uint8_t*>(std::copy(overrides.begin(), overrides.end(), pos1));
+    [encodedBookmark getBytes: pos2 length: encodedBookmark.length];
+    auto pos3 = pos2 + encodedBookmark.length;
+    *pos3++ = SF2::valueOf(SF2::MIDI::CoreEvent::EOX);
+
+    assert(pos3 - bytes.data() == long(bytes.size()));
+    assert(bytes.size() >= minPayloadSize);
+
+    return bytes;
+  }
+};
+
 Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator, double renderingTimeBudgetScaling,
                size_t minimumNoteDurationMilliseconds) noexcept
   : super(Log::create("Engine")),
@@ -23,7 +91,8 @@ Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator, d
     noteOffSignpost_{os_signpost_id_generate(log_)},
     startVoiceSignpost_{os_signpost_id_generate(log_)},
     stopVoiceSignpost_{os_signpost_id_generate(log_)},
-    renderingTimeBudgetScaling_{renderingTimeBudgetScaling}
+    renderingTimeBudgetScaling_{renderingTimeBudgetScaling},
+    workQueue_{dispatch_queue_create("SF2Lib::Engine", NULL)}
 {
   assert(voiceCount <= maxVoiceCount);
 
@@ -101,6 +170,7 @@ SF2::IO::File::LoadResponse
 Engine::load(int fd, size_t index) noexcept
 {
   os_log_info(log_, "load - fd: %d index: %lu", fd, index);
+
   allOff();
 
   auto file = std::make_unique<IO::File>();
@@ -304,7 +374,9 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
     return;
   }
 
-  auto event = MIDI::CoreEvent(midiEvent.data[0] < 0xF0 ? (midiEvent.data[0] & 0xF0) : midiEvent.data[0]);
+  auto event = MIDI::CoreEvent(midiEvent.data[0] < SF2::valueOf(MIDI::CoreEvent::systemExclusive)
+                               ? (midiEvent.data[0] & SF2::valueOf(MIDI::CoreEvent::systemExclusive))
+                               : midiEvent.data[0]);
   switch (event) {
     case MIDI::CoreEvent::noteOff:
       os_log_info(log_, "doMIDIEvent noteOff");
@@ -367,15 +439,16 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 
     case MIDI::CoreEvent::systemExclusive:
       os_log_info(log_, "doMIDIEvent systemExclusive");
-      if (midiEvent.data[1] == 0x7e && midiEvent.data[midiEvent.length - 1] == 0xF7) {
+      if (midiEvent.data[1] == LoadPresetSysExPayload::manufacturerValue &&
+          midiEvent.data[midiEvent.length - 1] == SF2::valueOf(MIDI::CoreEvent::EOX)) {
         switch (midiEvent.data[2]) {
-          case 0x00:
+          case LoadPresetSysExPayload::modelPathPayload:
             if (!loadFileAndPresetFromSysEx(midiEvent)) {
               os_log_info(log_, "doMIDIEvent - systemExclusive ignored due to length < 6");
             }
             break;
 
-          case 0x01:
+          case LoadPresetSysExPayload::modelBookmarkPayload:
             if (!loadBookmarkAndPresetFromSysEx(midiEvent)) {
               os_log_info(log_, "doMIDIEvent - systemExclusive ignored due to length < 6");
             }
@@ -489,74 +562,6 @@ Engine::notifyActiveVoicesChannelStateChanged() noexcept
   visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState&) { voice.channelStateChanged(); });
 }
 
-struct LoadPresetSysExPayload {
-  static constexpr uint8_t manufacturerValue = 0x7E;
-  static constexpr uint8_t modelPathPayload = 0x00; // the payload holds a path string to a file
-  static constexpr uint8_t modelBookmarkPayload = 0x01; // the payload holds a bookmark to a file
-
-  uint8_t sysExBegin;    // 0
-  uint8_t manufacturer;  // 1
-  uint8_t model;         // 2
-  // Here lies 5 bytes of padding
-  size_t presetIndex;    // 8
-  size_t overrideCount;  // 16
-  // SF2::MIDI::GeneratorOverride overrides[1];
-  // char filePath[1];
-  // uint8_t sysExEnd;   // 25 is smallest payload size
-
-  static constexpr size_t minPayloadSize = 25;
-
-  static std::vector<uint8_t> make(const SF2::MIDI::GeneratorOverrideVector& overrides,
-                                   const std::string& filePath, size_t presetIndex) noexcept {
-    auto encodedFilePath = filePath.empty() ? std::string("") : SF2::Utils::Base64::encode(filePath);
-    auto payloadSize = (sizeof(LoadPresetSysExPayload)
-                        + overrides.size() * sizeof(SF2::MIDI::GeneratorOverride)
-                        + encodedFilePath.size()) + 1;
-    auto bytes = std::vector<uint8_t>(payloadSize, 0);
-    auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
-    payload->sysExBegin = SF2::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
-    payload->manufacturer = manufacturerValue;
-    payload->model = modelPathPayload;
-    payload->presetIndex = presetIndex;
-    payload->overrideCount = overrides.size();
-    auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>((bytes.data() + sizeof(LoadPresetSysExPayload)));
-    auto pos2 = std::copy(overrides.begin(), overrides.end(), pos1);
-    auto pos3 = reinterpret_cast<uint8_t*>(std::copy(encodedFilePath.begin(), encodedFilePath.end(),
-                                                     reinterpret_cast<char*>(pos2)));
-    *pos3++ = SF2::valueOf(SF2::MIDI::CoreEvent::EOX);
-
-    assert(pos3 - bytes.data() == long(bytes.size()));
-    assert(bytes.size() >= minPayloadSize);
-
-    return bytes;
-  }
-
-  static std::vector<uint8_t> make(const SF2::MIDI::GeneratorOverrideVector& overrides,
-                                   const NSData* bookmark, size_t presetIndex) noexcept {
-    NSData* encodedBookmark = [bookmark base64EncodedDataWithOptions: 0];
-    auto payloadSize = (sizeof(LoadPresetSysExPayload)
-                        + overrides.size() * sizeof(SF2::MIDI::GeneratorOverride)
-                        + encodedBookmark.length) + 1;
-    auto bytes = std::vector<uint8_t>(payloadSize, 0);
-    auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
-    payload->sysExBegin = SF2::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
-    payload->manufacturer = manufacturerValue;
-    payload->model = modelBookmarkPayload;
-    payload->presetIndex = presetIndex;
-    payload->overrideCount = overrides.size();
-    auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>((bytes.data() + sizeof(LoadPresetSysExPayload)));
-    auto pos2 = reinterpret_cast<uint8_t*>(std::copy(overrides.begin(), overrides.end(), pos1));
-    [encodedBookmark getBytes: pos2 length: encodedBookmark.length];
-    auto pos3 = pos2 + encodedBookmark.length;
-    *pos3++ = SF2::valueOf(SF2::MIDI::CoreEvent::EOX);
-
-    assert(pos3 - bytes.data() == long(bytes.size()));
-    assert(bytes.size() >= minPayloadSize);
-
-    return bytes;
-  }
-};
-
 bool
 Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
   os_log_info(log_, "loadFileAndPresetFromSysEx BEGIN");
@@ -566,6 +571,15 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
     return false;
   }
 
+  // TODO: use dispatch_async to move off real-time thread and onto workQueue.
+  //
+  // Basic approach:
+  //  - reset presets_ vector so that isActivePreset() returns false when called in real-time thread (best to make count atomic)
+  //  - stop all notes
+  //  - decode payload and install new IO::File
+  //  - recalculate presets_ to enable use by real-time thread
+  //  - dispose of allocated buffer
+  //
   const uint8_t* bytes = midiEvent.data;
   auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes);
   auto presetIndex = payload->presetIndex;
@@ -596,6 +610,15 @@ Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
     return false;
   }
 
+  // TODO: use dispatch_async to move off real-time thread and onto workQueue.
+  //
+  // Basic approach:
+  //  - reset presets_ vector so that isActivePreset() returns false when called in real-time thread (best to make count atomic)
+  //  - stop all notes
+  //  - decode payload and install new IO::File
+  //  - recalculate presets_ to enable use by real-time thread
+  //  - dispose of allocated buffer
+  //
   const uint8_t* bytes = midiEvent.data;
   auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes);
   auto presetIndex = payload->presetIndex;

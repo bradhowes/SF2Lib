@@ -502,6 +502,8 @@ private:
   uint64_t renderingTimeBudgetIntervalNanoseconds_;
   double renderingTimeBudgetScaling_;
 
+  dispatch_queue_t workQueue_;
+
   friend struct ::TestEngineHarness;
   friend class Parameters;
 };
