@@ -60,4 +60,5 @@ struct SWIFT_ESCAPABLE SF2FileInfo
 
 private:
   std::shared_ptr<SF2::IO::File> impl_;
+  std::string path_;
 };

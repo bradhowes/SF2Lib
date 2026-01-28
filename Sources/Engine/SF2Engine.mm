@@ -80,6 +80,14 @@ SF2Engine::createLoadFileUsePresetPayload(std::string filePath, size_t presetInd
   return SF2::Render::Engine::Engine::createLoadFileUsePresetPayload(filePath, presetIndex, overrides);
 }
 
+std::vector<uint8_t>
+SF2Engine::createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetIndex) noexcept
+//                                          SF2::MIDI::GeneratorOverrideVector overrides) noexcept
+{
+  SF2::MIDI::GeneratorOverrideVector overrides;
+  return SF2::Render::Engine::Engine::createLoadBookmarkUsePresetPayload(bookmark, presetIndex, overrides);
+}
+
 std::array<uint8_t, 1>
 SF2Engine::createResetCommandPayload() noexcept
 {

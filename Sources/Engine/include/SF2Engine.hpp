@@ -121,10 +121,20 @@ struct SWIFT_ESCAPABLE SF2Engine
    @returns MIDI SYSEX command as a byte sequence
    */
   static std::vector<uint8_t> createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex) noexcept;
+
+  /**
+   Obtain MIDI payload containing a MIDI SYSEX command that can be sent to load an SF2 file and use a given
+   preset. This should be sent to the engine via a MIDI control connection; this method only creates the bytes to send.
+
+   @param bookmark the bookmark data for the URL to load
+   @param presetIndex the index of the preset in the file to use
+   @returns MIDI SYSEX command as a byte sequence
+   */
+  static std::vector<uint8_t> createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetIndex) noexcept;
   // SF2::MIDI::GeneratorOverrideVector overrides) noexcept;
 
   /**
-   Obtain an `NSData` instance containing MIDI command to reset the engine. This will stop playing any notes and reset
+   Obtain MIDI payload containing MIDI command to reset the engine. This will stop playing any notes and reset
    the MIDI controllers to a known state.
 
    @returns MIDI command as a byte sequence
@@ -132,14 +142,14 @@ struct SWIFT_ESCAPABLE SF2Engine
   static std::array<uint8_t, 1> createResetCommandPayload() noexcept;
 
   /**
-   Obtain an array of `NSData` instances containing MIDI commands to set the desired bank and program to use.
+   Obtain MIDI payload containing MIDI commands to set the desired bank and program to use.
 
    @returns array of MIDI commands to be sent to engine
    */
   static std::array<uint8_t, 9> createUseBankProgramPayload(uint16_t bank, uint8_t program) noexcept;
 
   /**
-   Obtain an array of 3 bytes containing MIDI command to send a channel message to the engine.
+   Obtain MIDI payload containing MIDI command to send a channel message to the engine.
 
    @param channelMessage indicates the channel message to send
    @param value the value to send along with the command
@@ -148,14 +158,14 @@ struct SWIFT_ESCAPABLE SF2Engine
   static std::array<uint8_t, 3> createChannelMessagePayload(uint8_t channelMessage, uint8_t value) noexcept;
 
   /**
-   Obtain an array of 3 bytes containing MIDI command to stop any and all active notes.
+   Obtain MIDI payload containing MIDI command to stop any and all active notes.
 
    @returns MIDI command as a byte sequence
    */
   static std::array<uint8_t, 3> createAllNotesOffPayload() noexcept;
 
   /**
-   Obtain an array of 3 bytes containing MIDI command to stop all sound rendering.
+   Obtain MIDI payload containing MIDI command to stop all sound rendering.
 
    @returns MIDI command as a byte sequence
    */

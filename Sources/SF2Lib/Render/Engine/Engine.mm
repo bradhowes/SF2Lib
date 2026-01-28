@@ -97,6 +97,25 @@ Engine::load(const std::string& path, size_t index) noexcept
   return response;
 }
 
+SF2::IO::File::LoadResponse
+Engine::load(int fd, size_t index) noexcept
+{
+  os_log_info(log_, "load - fd: %d index: %lu", fd, index);
+  allOff();
+
+  auto file = std::make_unique<IO::File>();
+  auto response = file->load(fd);
+
+  if (response == IO::File::LoadResponse::ok) {
+    file_.swap(file);
+    presets_.build(*file_);
+    usePresetWithIndex(index);
+  }
+
+  os_log_info(log_, "load END - %d", response);
+  return response;
+}
+
 void
 Engine::usePresetWithIndex(size_t index)
 {
@@ -356,6 +375,12 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
             }
             break;
 
+          case 0x01:
+            if (!loadBookmarkAndPresetFromSysEx(midiEvent)) {
+              os_log_info(log_, "doMIDIEvent - systemExclusive ignored due to length < 6");
+            }
+            break;
+
           default:
             os_log_info(log_, "doMIDIEvent - systemExclusive ignored");
             break;
@@ -465,6 +490,10 @@ Engine::notifyActiveVoicesChannelStateChanged() noexcept
 }
 
 struct LoadPresetSysExPayload {
+  static constexpr uint8_t manufacturerValue = 0x7E;
+  static constexpr uint8_t modelPathPayload = 0x00; // the payload holds a path string to a file
+  static constexpr uint8_t modelBookmarkPayload = 0x01; // the payload holds a bookmark to a file
+
   uint8_t sysExBegin;    // 0
   uint8_t manufacturer;  // 1
   uint8_t model;         // 2
@@ -486,15 +515,40 @@ struct LoadPresetSysExPayload {
     auto bytes = std::vector<uint8_t>(payloadSize, 0);
     auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
     payload->sysExBegin = SF2::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
-    payload->manufacturer = 0x7E;
-    payload->model = 0x00;
+    payload->manufacturer = manufacturerValue;
+    payload->model = modelPathPayload;
     payload->presetIndex = presetIndex;
     payload->overrideCount = overrides.size();
     auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>((bytes.data() + sizeof(LoadPresetSysExPayload)));
     auto pos2 = std::copy(overrides.begin(), overrides.end(), pos1);
     auto pos3 = reinterpret_cast<uint8_t*>(std::copy(encodedFilePath.begin(), encodedFilePath.end(),
                                                      reinterpret_cast<char*>(pos2)));
-    *pos3++ = 0xF7;
+    *pos3++ = SF2::valueOf(SF2::MIDI::CoreEvent::EOX);
+
+    assert(pos3 - bytes.data() == long(bytes.size()));
+    assert(bytes.size() >= minPayloadSize);
+
+    return bytes;
+  }
+
+  static std::vector<uint8_t> make(const SF2::MIDI::GeneratorOverrideVector& overrides,
+                                   const NSData* bookmark, size_t presetIndex) noexcept {
+    NSData* encodedBookmark = [bookmark base64EncodedDataWithOptions: 0];
+    auto payloadSize = (sizeof(LoadPresetSysExPayload)
+                        + overrides.size() * sizeof(SF2::MIDI::GeneratorOverride)
+                        + encodedBookmark.length) + 1;
+    auto bytes = std::vector<uint8_t>(payloadSize, 0);
+    auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
+    payload->sysExBegin = SF2::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
+    payload->manufacturer = manufacturerValue;
+    payload->model = modelBookmarkPayload;
+    payload->presetIndex = presetIndex;
+    payload->overrideCount = overrides.size();
+    auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>((bytes.data() + sizeof(LoadPresetSysExPayload)));
+    auto pos2 = reinterpret_cast<uint8_t*>(std::copy(overrides.begin(), overrides.end(), pos1));
+    [encodedBookmark getBytes: pos2 length: encodedBookmark.length];
+    auto pos3 = pos2 + encodedBookmark.length;
+    *pos3++ = SF2::valueOf(SF2::MIDI::CoreEvent::EOX);
 
     assert(pos3 - bytes.data() == long(bytes.size()));
     assert(bytes.size() >= minPayloadSize);
@@ -508,7 +562,7 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
   os_log_info(log_, "loadFileAndPresetFromSysEx BEGIN");
 
   if (midiEvent.length < LoadPresetSysExPayload::minPayloadSize) {
-    os_log_info(log_, "loadFileAndPresetFromSysEx END: invalid midi payload %d", midiEvent.length);
+    os_log_error(log_, "loadFileAndPresetFromSysEx END - invalid midi payload %d", midiEvent.length);
     return false;
   }
 
@@ -521,14 +575,80 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
   auto pathStart = reinterpret_cast<const uint8_t*>(pos1 + overrideCount);
   auto pathCount = size_t((bytes + midiEvent.length) - pathStart) - 1;
   auto path = pathCount == 0 ? std::string("") : Utils::Base64::decode(pathStart, pathCount);
+  bool success = false;
   if (!path.empty()) {
-    load(path, presetIndex);
+    success = load(path, presetIndex) == SF2::IO::File::LoadResponse::ok;
   } else {
     usePresetWithIndex(presetIndex);
+    success = true;
   }
 
-  os_log_info(log_, "loadFileAndPresetFromSysEx END");
-  return true;
+  os_log_info(log_, "loadFileAndPresetFromSysEx END - %d", success);
+  return success;
+}
+
+bool
+Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
+  os_log_info(log_, "loadBookmarkAndPresetFromSysEx BEGIN");
+
+  if (midiEvent.length < LoadPresetSysExPayload::minPayloadSize) {
+    os_log_error(log_, "loadBookmarkAndPresetFromSysEx END - invalid midi payload %d", midiEvent.length);
+    return false;
+  }
+
+  const uint8_t* bytes = midiEvent.data;
+  auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes);
+  auto presetIndex = payload->presetIndex;
+  auto overrideCount = payload->overrideCount;
+  auto pos1 = reinterpret_cast<const SF2::MIDI::GeneratorOverride*>(payload + 1);
+  auto overrides = std::vector<MIDI::GeneratorOverride>(pos1, pos1 + overrideCount);
+  auto dataStart = reinterpret_cast<const uint8_t*>(pos1 + overrideCount);
+  auto dataCount = size_t((bytes + midiEvent.length) - dataStart) - 1;
+
+  NSData* data = [NSData dataWithBytesNoCopy:(void*)dataStart length:dataCount freeWhenDone:false];
+  NSData* bookmark = [data initWithBase64EncodedData:data options:0];
+
+  __block NSError* error = nil;
+  BOOL isStale = NO;
+  NSURL* resolved = [NSURL URLByResolvingBookmarkData:bookmark
+                                              options:0
+                                        relativeToURL:nil
+                                  bookmarkDataIsStale:&isStale
+                                                error:&error];
+
+  if (error != nil) {
+    os_log_error(log_, "loadBookmarkAndPresetFromSysEx END - error from resolving bookmark data - %{public}@", error);
+    return false;
+  } else if (resolved == nil) {
+    os_log_error(log_, "loadBookmarkAndPresetFromSysEx END - failed to resolve bookmark data (no error)");
+    return false;
+  }
+
+  BOOL didStart = NO;
+  if ([resolved respondsToSelector:@selector(startAccessingSecurityScopedResource)]) {
+    didStart = [resolved startAccessingSecurityScopedResource];
+  }
+
+  error = nil;
+  __block BOOL success = NO;
+
+  NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
+  [coordinator coordinateReadingItemAtURL:resolved
+                                  options:NSFileCoordinatorReadingWithoutChanges
+                                    error:&error
+                               byAccessor:^(NSURL* url) {
+    error = nil;
+    NSFileHandle* fileHandle = [NSFileHandle fileHandleForReadingFromURL:url error:&error];
+    if (error != nil) {
+      os_log_error(log_, "loadBookmarkAndPresetFromSysEx - failed to open file: %{public}@", error);
+      return;
+    }
+
+    success = load(fileHandle.fileDescriptor, presetIndex) == SF2::IO::File::LoadResponse::ok;
+  }];
+
+  os_log_info(log_, "loadBookmarkAndPresetFromSysEx END - %d", success);
+  return success;
 }
 
 std::vector<uint8_t>
@@ -536,6 +656,13 @@ Engine::createLoadFileUsePresetPayload(const std::string& filePath, size_t prese
                                        const MIDI::GeneratorOverrideVector& overrides) noexcept
 {
   return LoadPresetSysExPayload::make(overrides, filePath, presetIndex);
+}
+
+std::vector<uint8_t>
+Engine::createLoadBookmarkUsePresetPayload(const NSData* bookmark, size_t presetIndex,
+                                           const std::vector<SF2::MIDI::GeneratorOverride>& overrides) noexcept
+{
+  return LoadPresetSysExPayload::make(overrides, bookmark, presetIndex);
 }
 
 std::array<uint8_t, 1>

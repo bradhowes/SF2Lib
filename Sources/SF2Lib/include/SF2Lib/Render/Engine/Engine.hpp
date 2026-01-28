@@ -188,8 +188,9 @@ public:
   inline bool polyphonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::poly; }
 
   /**
-   Utility class method that creates a MIDI SysEx command to load a SF2 file at the given path and to activate
-   the preset at the given index.
+   Utility class method that creates a MIDI SysEx command to load an SF2 file at the given path and to activate
+   the preset at the given index. The path must be visible and accessible by the SF2Lib process if running in a sandboxed
+   environment.
 
    @param filePath the location of the SF2 file to load
    @param presetIndex the index of the preset to activate
@@ -198,6 +199,18 @@ public:
    */
   static std::vector<uint8_t> createLoadFileUsePresetPayload(const std::string& filePath, size_t presetIndex,
                                                              const std::vector<SF2::MIDI::GeneratorOverride>& overrides) noexcept;
+
+  /**
+   Utility class method that creates a MIDI SysEx command to load a SF2 file that requires a security scope to access, and to
+   activate the preset at the given index.
+
+   @param bookmark the file's bookmarkd data for the SF2 file to load
+   @param presetIndex the index of the preset to activate
+   @param overrides collection of SF2 generator values to apply
+   @returns array of MIDI bytes
+   */
+  static std::vector<uint8_t> createLoadBookmarkUsePresetPayload(const NSData* bookmark, size_t presetIndex,
+                                                                 const std::vector<SF2::MIDI::GeneratorOverride>& overrides) noexcept;
 
   /**
    Utility class method that creates a MIDI channel command to reset the engine. This stops all voices and resets the
@@ -264,9 +277,19 @@ private:
 
    @param path the file to load from
    @param index the preset to make active
-   @returns true if the loading was successful
+   @returns IO::File::LoadResponse::OK if the loading was successful
    */
   IO::File::LoadResponse load(const std::string& path, size_t index) noexcept;
+
+  /**
+   Load the presets from an file descriptor and activate one. NOTE: this is not thread-safe. When running in a render thread,
+   one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
+
+   @param fd the file descriptor to read from
+   @param index the preset to make active
+   @returns IO::File::LoadResponse::OK if the loading was successful
+   */
+  IO::File::LoadResponse load(int fd, size_t index) noexcept;
 
   /**
    Activate the preset at the given index.
@@ -439,6 +462,8 @@ private:
   void changeProgram(uint8_t program) noexcept;
 
   bool loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept;
+
+  bool loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept;
 
   void applySostenutoPedal() noexcept;
 

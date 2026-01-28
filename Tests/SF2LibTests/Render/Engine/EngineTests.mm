@@ -1205,7 +1205,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(size_t(0), engine.activeVoiceCount());
 }
 
-- (void)testEngineMIDILoad {
+- (void)testEngineMIDILoadPath {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
@@ -1223,6 +1223,33 @@ using namespace SF2::Render::Engine;
   auto payload = engine.createLoadFileUsePresetPayload(tmp, 234, overrides);
   harness.sendRaw(payload);
   std::cout << engine.activePresetName() << '\n';
+  XCTAssertEqual(std::string("SFX"), engine.activePresetName());
+}
+
+- (void)testEngineMIDILoadBookmark {
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(self.contexts->context2.path(), 0);
+
+  XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
+
+  const NSURL* url = self.contexts->context0.url();
+  NSLog(@"URL: %@", url);
+
+  auto didStart = [url startAccessingSecurityScopedResource];
+  NSError* error = nil;
+  NSData* bookmark = [url bookmarkDataWithOptions:NSURLBookmarkCreationMinimalBookmark
+                              includingResourceValuesForKeys:nil
+                                               relativeToURL:nil
+                                                       error:&error];
+  NSData* encoded = [bookmark base64EncodedDataWithOptions:0];
+
+  auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
+  overrides.emplace_back(123, 456);
+  auto payload = engine.createLoadBookmarkUsePresetPayload(bookmark, 234, overrides);
+  harness.sendRaw(payload);
+  std::cout << engine.activePresetName() << '\n';
+
   XCTAssertEqual(std::string("SFX"), engine.activePresetName());
 }
 

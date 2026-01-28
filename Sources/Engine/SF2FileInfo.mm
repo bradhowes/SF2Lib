@@ -9,7 +9,7 @@
 //{}
 
 SF2FileInfo::SF2FileInfo(std::string path)
-: impl_{new SF2::IO::File(path)}
+: impl_{new SF2::IO::File()}, path_{path}
 {}
 
 SF2FileInfo::~SF2FileInfo() {}
@@ -17,7 +17,8 @@ SF2FileInfo::~SF2FileInfo() {}
 bool
 SF2FileInfo::load()
 {
-  if (impl_->load() != SF2::IO::File::LoadResponse::ok) return false;
+  int fd = ::open(path_.c_str(), O_RDONLY);
+  if (impl_->load(fd) != SF2::IO::File::LoadResponse::ok) return false;
   return true;
 }
 

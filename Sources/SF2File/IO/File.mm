@@ -17,6 +17,8 @@
 
 using namespace SF2::IO;
 
+File::File() : path_{}, loaded_{false} {}
+
 File::File(std::string path) : path_{path}, loaded_{false} {}
 
 File::File(const char* path) : File::File(std::string(path)) {}
@@ -25,8 +27,6 @@ File::LoadResponse
 File::load() noexcept
 {
   static const std::string prefix = "file://";
-
-  if (loaded_) return LoadResponse::ok;
 
   std::cout << "loading: " << path_ << std::endl;
 
@@ -38,13 +38,21 @@ File::load() noexcept
   auto fd = Closer(::open(c_path, O_RDONLY));
   if (!fd.is_valid()) return LoadResponse::notFound;
 
-  off_t fileSize = ::lseek(*fd, 0, SEEK_END);
+  return load(*fd);
+}
+
+File::LoadResponse
+File::load(int fd) noexcept
+{
+  if (loaded_) return LoadResponse::ok;
+
+  off_t fileSize = ::lseek(fd, 0, SEEK_END);
   if (fileSize < 16) return LoadResponse::invalidFormat;
 
   size_ = fileSize;
 
   try {
-    auto riff = Pos(*fd, 0, size_).makeChunkList();
+    auto riff = Pos(fd, 0, size_).makeChunkList();
     if (riff.tag() != Tags::riff || riff.kind() != Tags::sfbk) throw File::LoadResponse::invalidFormat;
     auto p0 = riff.begin();
     while (p0 < riff.end()) {

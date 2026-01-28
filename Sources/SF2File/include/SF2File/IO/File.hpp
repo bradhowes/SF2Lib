@@ -28,6 +28,8 @@ namespace SF2::IO {
 class File {
 public:
 
+  File();
+
   /**
    Constructor. Processes the SF2 file contents and builds up various collections based on what it finds.
 
@@ -49,12 +51,21 @@ public:
   };
 
   /**
-   Load the file given in the constructor. Note that most of the File API is valid only if that load was successful
+   Load the file given in the constructor. Note that most of the File API is valid only if `load` was successful
    and returned `LoadResponse::ok`.
 
    @returns status of the load
    */
   LoadResponse load() noexcept;
+
+  /**
+   Load the file referenced by the given file descriptor. Note that most of the File API is valid only if `load` was successful
+   and returned `LoadResponse::ok`.
+
+   @param fd the file descriptor of the file to read from
+   @returns status of the load
+   */
+  LoadResponse load(int fd) noexcept;
 
   void loadSamples() noexcept;
 
