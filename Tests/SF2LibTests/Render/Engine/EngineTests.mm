@@ -23,7 +23,7 @@ using namespace SF2::Render::Engine;
 
 - (void)setUp {
   [super setUp];
-  // self.playAudio = YES;
+  self.playAudio = YES;
 }
 
 - (void)testInit {
@@ -35,7 +35,7 @@ using namespace SF2::Render::Engine;
   XCTAssertFalse(engine.portamentoModeEnabled());
   XCTAssertEqual(size_t(100), engine.portamentoRate());
   XCTAssertTrue(engine.retriggerModeEnabled());
-  XCTAssertEqual(Engine::minLastLoadFinished, engine.lastLoadFinishedCounter());
+  XCTAssertEqual(traits::minLastLoadFinished, engine.lastLoadFinishedCounter());
 }
 
 - (void)testPortamento {

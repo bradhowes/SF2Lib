@@ -18,7 +18,7 @@
 #include "SF2Lib/Render/Engine/LiveGeneratorParameters.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Engine/OldestVoiceCollection.hpp"
-#include "SF2Lib/Render/Engine/ParameterAddress.hpp"
+#include "SF2Lib/Render/Engine/Traits.hpp"
 #include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
 #include "SF2Util/Timer.hpp"
@@ -42,18 +42,10 @@ class Engine : public DSPHeaders::EventProcessor<Engine> {
   friend super;
 
 public:
-  /// Maximum number of voices that can be supported by the engine
-  static inline constexpr AUValue minLastLoadFinished{AUValue(-1.0e-4)};
-  static inline constexpr AUValue maxLastLoadFinished{AUValue(1.0e+6)};
-  static inline constexpr AUValue lastLoadFinishedChange{AUValue(0.0001)};
 
   using Config = Voice::State::Config;
   using Voice = Voice::Voice;
   using Interpolator = Render::Voice::Sample::Interpolator;
-
-  /// Number of engine parameters to be found in the AUParameterTree
-  static constexpr size_t engineParameterCount = (valueOf(ParameterAddress::lastParameterAddressPlusOne) -
-                                                  valueOf(ParameterAddress::firstParameterAddress));
 
   /**
    Construct new engine and its voices.
@@ -252,9 +244,8 @@ public:
   inline Float lastLoadFinishedCounter() const noexcept { return lastLoadFinishedCounter_; }
 
 private:
-  using Index = Entity::Generator::Index;
 
-  static AUParameter* makeGeneratorParameter(Index index) noexcept;
+  static AUParameter* makeGeneratorParameter(Entity::Generator::Index index) noexcept;
 
   static AUParameter* makeBooleanParameter(NSString* name, ParameterAddress, bool value) noexcept;
 
@@ -451,7 +442,7 @@ private:
 
   void startVoice(const Config& config) noexcept;
 
-  OldestVoiceCollection<maxVoiceCount>::iterator stopVoice(size_t voiceIndex) noexcept;
+  OldestVoiceCollection<traits::maxVoiceCount>::iterator stopVoice(size_t voiceIndex) noexcept;
 
   void notifyActiveVoicesChannelStateChanged() noexcept;
 
@@ -481,7 +472,7 @@ private:
 
   AUParameterTree* parameterTree_;
   std::vector<Voice> voices_{};
-  OldestVoiceCollection<maxVoiceCount> oldestVoiceIndices_;
+  OldestVoiceCollection<traits::maxVoiceCount> oldestVoiceIndices_;
 
   std::unique_ptr<IO::File> file_{};
   PresetCollection presets_{};
@@ -500,7 +491,7 @@ private:
   os_signpost_id_t startVoiceSignpost_;
   os_signpost_id_t stopVoiceSignpost_;
 
-  AUValue lastLoadFinishedCounter_{minLastLoadFinished};
+  AUValue lastLoadFinishedCounter_{traits::minLastLoadFinished};
   std::vector<AUValue> durationBuckets_;
 
   uint64_t renderingTimeBudgetIntervalNanoseconds_;

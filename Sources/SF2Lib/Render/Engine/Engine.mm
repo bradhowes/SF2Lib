@@ -94,14 +94,14 @@ Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator, d
     renderingTimeBudgetScaling_{renderingTimeBudgetScaling},
     workQueue_{dispatch_queue_create("SF2Lib::Engine", NULL)}
 {
-  assert(voiceCount <= maxVoiceCount);
+  assert(voiceCount <= traits::maxVoiceCount);
 
   voices_.reserve(voiceCount);
   durationBuckets_.reserve(voiceCount);
 
   for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex) {
     voices_.emplace_back(sampleRate, channelState_, voiceIndex, interpolator);
-    durationBuckets_.emplace_back(0.0);
+    if constexpr (traits::renderDurationCollectionEnabled) { durationBuckets_.emplace_back(0.0); }
   }
 
   makeTree();
@@ -284,13 +284,15 @@ Engine::applyPedals() noexcept
 void
 Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
 {
-  auto durationBucketIndex = activeVoiceCount();
-  if (durationBucketIndex == 0) {
-    updateDurationParameters();
+  auto voiceCount = activeVoiceCount();
+  if (voiceCount == 0) {
+    if constexpr (traits::renderDurationCollectionEnabled) { updateDurationParameters(); }
     return;
   }
 
-  os_signpost_interval_begin(log_, renderSignpost_, "renderInto", "voices: %lu", durationBucketIndex);
+  if constexpr (traits::renderDurationCollectionEnabled) {
+    os_signpost_interval_begin(log_, renderSignpost_, "renderInto", "voices: %lu", voiceCount);
+  }
 
   uint64_t timeBudgetNanoseconds = renderingTimeBudgetScaling_ > 0.0
   ? (frameCount * renderingTimeBudgetIntervalNanoseconds_ * renderingTimeBudgetScaling_)
@@ -317,9 +319,10 @@ Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
     }
   }
 
-  durationBuckets_[durationBucketIndex - 1] = Utils::Timer::delta(entryTime);
-
-  os_signpost_interval_end(log_, renderSignpost_, "renderInto", "voices: %lu", durationBucketIndex);
+  if constexpr (traits::renderDurationCollectionEnabled) {
+    durationBuckets_[voiceCount - 1] = Utils::Timer::delta(entryTime);
+    os_signpost_interval_end(log_, renderSignpost_, "renderInto", "voices: %lu", voiceCount);
+  }
 }
 
 AUAudioFrameCount
@@ -783,7 +786,7 @@ Engine::startVoice(const Config& config) noexcept
   os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice");
 }
 
-OldestVoiceCollection<maxVoiceCount>::iterator
+OldestVoiceCollection<traits::maxVoiceCount>::iterator
 Engine::stopVoice(size_t voiceIndex) noexcept
 {
   os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice");
@@ -806,13 +809,15 @@ Engine::updateActiveVoiceCount() noexcept
 void
 Engine::updateDurationParameters() noexcept
 {
-  for (size_t durationBucketIndex = 0; durationBucketIndex < durationBuckets_.size(); ++durationBucketIndex) {
-    auto value = durationBuckets_[durationBucketIndex];
-    if (value > 0.0) {
-      AUParameterAddress address = valueOf(ParameterAddress::renderDurationVoices1) + durationBucketIndex;
-      assert(address < valueOf(ParameterAddress::lastParameterAddressPlusOne));
-      [[parameterTree_ parameterWithAddress: address] setValue: value];
-      durationBuckets_[durationBucketIndex] = 0.0;
+  if constexpr (traits::renderDurationCollectionEnabled) {
+    for (size_t voiceCount = 0; voiceCount < durationBuckets_.size(); ++voiceCount) {
+      auto value = durationBuckets_[voiceCount];
+      if (value > 0.0) {
+        AUParameterAddress address = valueOf(ParameterAddress::lastParameterAddressPlusOne) + voiceCount;
+        assert(address < valueOf(ParameterAddress::firstParameterAddress) + traits::engineParameterCount);
+        [[parameterTree_ parameterWithAddress: address] setValue: value];
+        durationBuckets_[voiceCount] = 0.0;
+      }
     }
   }
 }
@@ -822,7 +827,7 @@ Engine::bumpLastLoadFinished() noexcept
 {
   os_log_info(log_, "bumpLastLoadFinished");
   auto param = [parameterTree_ parameterWithAddress: valueOf(ParameterAddress::lastLoadFinished)];
-  lastLoadFinishedCounter_ += lastLoadFinishedChange;
+  lastLoadFinishedCounter_ += traits::lastLoadFinishedChange;
   [param setValue: AUValue(lastLoadFinishedCounter_)];
 }
 
@@ -839,8 +844,8 @@ Engine::parameterValueChanged(AUParameter* parameter, AUValue value) noexcept
   os_log_info(log_, "parameterValueChanged - %llu %{public}s %f", parameter.address, parameter.identifier.UTF8String, value);
   auto rawIndex = parameter.address;
   if (rawIndex < 0) return;
-  if (rawIndex < valueOf(Index::numValues)) {
-    parameters_.setLiveValue(Index(rawIndex), value);
+  if (rawIndex < valueOf(Entity::Generator::Index::numValues)) {
+    parameters_.setLiveValue(Entity::Generator::Index(rawIndex), value);
   } else if (rawIndex >= valueOf(ParameterAddress::firstParameterAddress) &&
              rawIndex < valueOf(ParameterAddress::lastParameterAddressPlusOne)) {
     auto address = ParameterAddress(rawIndex);
@@ -872,9 +877,9 @@ Engine::provideParameterValue(AUParameter* parameter) const noexcept
 {
   auto rawIndex = parameter.address;
   AUValue value = 0.0;
-  if (rawIndex >= 0 && rawIndex < valueOf(Index::numValues)) {
-    auto index = Index(rawIndex);
-    const auto& def = Definition::definition(index);
+  if (rawIndex >= 0 && rawIndex < valueOf(Entity::Generator::Index::numValues)) {
+    auto index = Entity::Generator::Index(rawIndex);
+    const auto& def = Entity::Generator::Definition::definition(index);
     value = def.clamp(parameters_.getLiveValue(index));
   } else if (rawIndex >= valueOf(ParameterAddress::firstParameterAddress) &&
              rawIndex < valueOf(ParameterAddress::lastParameterAddressPlusOne)) {
@@ -920,9 +925,9 @@ Engine::provideParameterValue(AUParameter* parameter) const noexcept
 }
 
 AUParameter*
-Engine::makeGeneratorParameter(Index index) noexcept
+Engine::makeGeneratorParameter(Entity::Generator::Index index) noexcept
 {
-  const auto& definition = Definition::definition(index);
+  const auto& definition = Entity::Generator::Definition::definition(index);
   NSString* name = [NSString stringWithUTF8String:definition.name().data()];
   auto flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable;
   return [AUParameterTree createParameterWithIdentifier:name
@@ -961,16 +966,16 @@ Engine::makeTree() noexcept
   os_log_info(log_, "makeTree BEGIN");
 
   // This is a bit too large due to various unused generators found in the spec.
-  auto capacity = NSUInteger(valueOf(Index::numValues) + engineParameterCount);
+  auto capacity = NSUInteger(traits::parameterTreeSize);
   auto definitions = [[NSMutableArray alloc] initWithCapacity:capacity];
 
   // Add definitions for all generators that are used by the SF2Lib engine. The first address will be
   // Generator::Index::startAddressOffset (0), and the last will be Generator::Index::overridingRootKey (58).
   // Note that not all addresses between 0 and 58 are valid; some of the Generator:Index values are tagged as unused,
   // and there will be no parameter defined for those.
-  for (auto index : IndexIterator()) {
-    const auto& definition = Definition::definition(index);
-    if (definition.valueKind() == Definition::ValueKind::UNUSED) {
+  for (auto index : Entity::Generator::IndexIterator()) {
+    const auto& definition = Entity::Generator::Definition::definition(index);
+    if (definition.valueKind() == Entity::Generator::Definition::ValueKind::UNUSED) {
       continue;
     }
 
@@ -1011,6 +1016,8 @@ Engine::makeTree() noexcept
   [definitions addObject:param];
 
   flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_MeterReadOnly;
+
+  // Report out various read-only states
 
   [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"activeVoiceCount"
                                                                          name:@"activeVoiceCount"
@@ -1060,28 +1067,30 @@ Engine::makeTree() noexcept
   [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"lastLoadFinished"
                                                                     name:@"lastLoadFinished"
                                                                  address:valueOf(ParameterAddress::lastLoadFinished)
-                                                                     min:minLastLoadFinished
-                                                                     max:maxLastLoadFinished
+                                                                     min:traits::minLastLoadFinished
+                                                                     max:traits::maxLastLoadFinished
                                                                     unit:kAudioUnitParameterUnit_Generic
                                                                 unitName:nullptr
                                                                    flags:flags
                                                             valueStrings:nullptr
                                                      dependentParameters:nullptr]];
 
-  // Generate the buckets for render durations based on number of active voices
-  for (size_t durationBucketIndex = 0; durationBucketIndex < durationBuckets_.size(); ++durationBucketIndex) {
-    auto name = [NSString stringWithFormat:@"renderDuration%ld", durationBucketIndex];
-    AUParameterAddress address = valueOf(ParameterAddress::renderDurationVoices1) + durationBucketIndex;
-    [definitions addObject: [AUParameterTree createParameterWithIdentifier:name
-                                                                      name:name
-                                                                   address:address
-                                                                       min:0.0
-                                                                       max:10000.0
-                                                                      unit:kAudioUnitParameterUnit_Milliseconds
-                                                                  unitName:nullptr
-                                                                     flags:flags
-                                                              valueStrings:nullptr
-                                                       dependentParameters:nullptr]];
+  if constexpr (traits::renderDurationCollectionEnabled) {
+    // Generate the buckets for render durations based on number of active voices
+    for (size_t durationBucketIndex = 0; durationBucketIndex < durationBuckets_.size(); ++durationBucketIndex) {
+      auto name = [NSString stringWithFormat:@"renderDuration%ld", durationBucketIndex];
+      AUParameterAddress address = valueOf(ParameterAddress::lastParameterAddressPlusOne) + durationBucketIndex;
+      [definitions addObject: [AUParameterTree createParameterWithIdentifier:name
+                                                                        name:name
+                                                                     address:address
+                                                                         min:0.0
+                                                                         max:10000.0
+                                                                        unit:kAudioUnitParameterUnit_Milliseconds
+                                                                    unitName:nullptr
+                                                                       flags:flags
+                                                                valueStrings:nullptr
+                                                         dependentParameters:nullptr]];
+    }
   }
 
   parameterTree_ = [AUParameterTree createTreeWithChildren:definitions];
