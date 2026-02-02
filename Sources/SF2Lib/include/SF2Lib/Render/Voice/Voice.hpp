@@ -50,8 +50,7 @@ public:
    @param voiceIndex the unique index assigned to this voice
    @param interpolator how to interpolate sample values
    */
-  Voice(Float sampleRate, const MIDI::ChannelState& channelState, size_t voiceIndex,
-        Sample::Interpolator interpolator = Sample::Interpolator::linear) noexcept;
+  Voice(size_t voiceIndex, Float sampleRate, Sample::Interpolator interpolator) noexcept;
 
   /// Allow move operations during construction to support std::vector
   Voice(Voice&&) noexcept = default;
@@ -76,7 +75,7 @@ public:
 
    @param config the voice configuration to apply
    */
-  void configure(const State::Config& config) noexcept;
+  void configure(const State::Config& config, const MIDI::ChannelState& channelState) noexcept;
 
   /**
    Start voice rendering. This initializes the envelopes and other internal state using the based on the configured
@@ -228,7 +227,7 @@ public:
   State::State& state() noexcept { return state_; }
 
   /// Notification to recalculate the mods for the voice due to a change in MIDI state.
-  void channelStateChanged() noexcept { state_.updateStateMods(); }
+  void channelStateChanged(const MIDI::ChannelState& channelState) noexcept { state_.updateStateMods(channelState); }
 
   /// Flag the voice as being affected by the sostenuto pedal.
   void useSostenuto() noexcept { sostenutoActive_ = true; }

@@ -100,7 +100,7 @@ Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator, d
   durationBuckets_.reserve(voiceCount);
 
   for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex) {
-    voices_.emplace_back(sampleRate, channelState_, voiceIndex, interpolator);
+    voices_.emplace_back(voiceIndex, sampleRate, interpolator);
     if constexpr (traits::renderDurationCollectionEnabled) { durationBuckets_.emplace_back(0.0); }
   }
 
@@ -564,7 +564,7 @@ Engine::notifyParameterChanged(Entity::Generator::Index index) noexcept
 void
 Engine::notifyActiveVoicesChannelStateChanged() noexcept
 {
-  visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState&) { voice.channelStateChanged(); });
+  visitActiveVoice([&](Voice& voice, const Voice::ReleaseKeyState&) { voice.channelStateChanged(channelState_); });
 }
 
 bool
@@ -779,7 +779,7 @@ Engine::startVoice(const Config& config) noexcept
   os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice");
   auto voiceIndex = oldestVoiceIndices_.voiceAcquire();
   os_log_info(log_, "startVoice - %lu", voiceIndex);
-  voices_[voiceIndex].configure(config);
+  voices_[voiceIndex].configure(config, channelState_);
   parameters_.applyChanged(voices_[voiceIndex].state());
   voices_[voiceIndex].start();
   updateActiveVoiceCount();

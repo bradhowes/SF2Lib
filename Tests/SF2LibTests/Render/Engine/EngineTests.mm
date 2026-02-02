@@ -23,7 +23,7 @@ using namespace SF2::Render::Engine;
 
 - (void)setUp {
   [super setUp];
-  self.playAudio = YES;
+  self.playAudio = NO;
 }
 
 - (void)testInit {
@@ -249,7 +249,6 @@ using namespace SF2::Render::Engine;
   XCTAssertEqualWithAccuracy(0.0280037727207, samples[24], self.epsilon);
   XCTAssertEqualWithAccuracy(0, samples[25], self.epsilon);
 
-  // self.playAudio = YES;
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 
@@ -330,7 +329,6 @@ using namespace SF2::Render::Engine;
   XCTAssertEqualWithAccuracy(0.0277947913855, samples[24], self.epsilon);
   XCTAssertEqualWithAccuracy(0, samples[25], self.epsilon);
 
-  // self.playAudio = YES;
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 
@@ -747,7 +745,6 @@ using namespace SF2::Render::Engine;
   XCTAssertEqualWithAccuracy(0.000254703074461, samples[5], self.epsilon);
   XCTAssertEqualWithAccuracy(7.80675327405e-05, samples[6], self.epsilon);
 
-  // self.playAudio = YES;
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 

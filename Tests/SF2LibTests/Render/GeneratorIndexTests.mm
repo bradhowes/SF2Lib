@@ -23,7 +23,7 @@ using namespace SF2::Render::Voice::Sample;
 - (void)setUp {
   SF2::Entity::SampleHeader header(0, 6, 2, 5, 100, 69, 0);
   SF2::MIDI::ChannelState channelState;
-  self.bounds = Bounds::make(header, State::State(44100.0, channelState));
+  self.bounds = Bounds::make(header, State::State(44100.0));
 }
 
 - (void)testConstruction {

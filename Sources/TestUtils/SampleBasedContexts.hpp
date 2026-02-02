@@ -197,8 +197,8 @@ struct TestVoiceCollection {
   {
     voices_.reserve(presetConfigs_.size());
     for (size_t index = 0; index < presetConfigs_.size(); ++index) {
-      voices_.emplace_back(sampleRate_, channelState_, index);
-      voices_.back().configure(presetConfigs_[index]);
+      voices_.emplace_back(index, sampleRate_, SF2::Render::Voice::Sample::Interpolator::linear);
+      voices_.back().configure(presetConfigs_[index], channelState_);
     }
   }
 
@@ -278,8 +278,8 @@ struct PresetTestContextBase
   }
 
   SF2::Render::Voice::State::State makeState(const SF2::Render::Voice::State::Config& config) const {
-    SF2::Render::Voice::State::State state(sampleRate_, channelState_);
-    state.prepareForVoice(config);
+    SF2::Render::Voice::State::State state(sampleRate_);
+    state.prepareForVoice(config, channelState_);
     return state;
   }
 
@@ -292,6 +292,7 @@ struct PresetTestContextBase
   const std::string path() const { return url().path.UTF8String; }
   SF2::IO::File& file() const { return getFile(urlIndex_); }
   int fd() const { return ::open(path().c_str(), O_RDONLY); }
+  SF2::MIDI::ChannelState& channelState() { return channelState_; }
 
 private:
   static NSURL* getUrl(size_t urlIndex);

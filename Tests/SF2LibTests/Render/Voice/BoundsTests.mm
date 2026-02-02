@@ -19,7 +19,7 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 
 - (void)testBasicNoLoop {
   auto channelState = MIDI::ChannelState();
-  auto state = State::State(48'000.0, channelState);
+  auto state = State::State(48'000.0);
   auto bounds = Bounds::make(sampleHeaderNoLoop, state);
 
   XCTAssertEqual(bounds.startPos(), size_t(0));
@@ -29,7 +29,7 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 
 - (void)testStartOffset {
   auto channelState = MIDI::ChannelState();
-  auto state = State::State(48'000.0, channelState);
+  auto state = State::State(48'000.0);
 
   self.sst.setValue(state, SF2::Entity::Generator::Index::startAddressOffset, 1);
   {
@@ -56,7 +56,7 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 
 - (void)testStartOffsetCoarse {
   auto channelState = MIDI::ChannelState();
-  auto state = State::State(48'000.0, channelState);
+  auto state = State::State(48'000.0);
   self.sst.setValue(state, SF2::Entity::Generator::Index::startAddressOffset, -32760);
   self.sst.setValue(state, SF2::Entity::Generator::Index::startAddressCoarseOffset, 1);
   {
@@ -86,7 +86,7 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 
 - (void)testEndOffset {
   auto channelState = MIDI::ChannelState();
-  auto state = State::State(48'000.0, channelState);
+  auto state = State::State(48'000.0);
 
   self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, -1);
   {
@@ -105,7 +105,7 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 
 - (void)testEndOffsetCoarse {
   auto channelState = MIDI::ChannelState();
-  auto state = State::State(48'000.0, channelState);
+  auto state = State::State(48'000.0);
   self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressCoarseOffset, -1);
   self.sst.setValue(state, SF2::Entity::Generator::Index::endAddressOffset, 32760);
   {
@@ -148,7 +148,7 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 
 - (void)testStartLoopOffset {
   auto channelState = MIDI::ChannelState();
-  auto state = State::State(48'000.0, channelState);
+  auto state = State::State(48'000.0);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
     XCTAssertEqual(bounds.startPos(), size_t(0));
@@ -191,7 +191,7 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 
 - (void)testStartLoopOffsetCoarse {
   auto channelState = MIDI::ChannelState();
-  auto state = State::State(48'000.0, channelState);
+  auto state = State::State(48'000.0);
   self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 1);
   self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, -32760);
   {
@@ -223,7 +223,7 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 
 - (void)testEndLoopOffset {
   auto channelState = MIDI::ChannelState();
-  auto state = State::State(48'000.0, channelState);
+  auto state = State::State(48'000.0);
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
     XCTAssertEqual(bounds.startPos(), size_t(0));
@@ -266,7 +266,7 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
 
 - (void)testEndLoopOffsetCoarse {
   auto channelState = MIDI::ChannelState();
-  auto state = State::State(48'000.0, channelState);
+  auto state = State::State(48'000.0);
   self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressCoarseOffset, 1);
   self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, -32760);
   {

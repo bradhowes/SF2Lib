@@ -40,13 +40,13 @@ State::clear() noexcept
 }
 
 void
-State::prepareForVoice(const Config& config) noexcept
+State::prepareForVoice(const Config& config, const MIDI::ChannelState& channelState) noexcept
 {
   clear();
   config.applyTo(*this);
   eventKey_ = config.eventKey();
   eventVelocity_ = config.eventVelocity();
-  updateStateMods();
+  updateStateMods(channelState);
 }
 
 void
@@ -91,11 +91,11 @@ State::addModulator(const Entity::Modulator::Modulator& modulator) noexcept {
 }
 
 void
-State::updateStateMods() noexcept
+State::updateStateMods(const MIDI::ChannelState& channelState) noexcept
 {
   // Overwrite a generator's mods value with the NRPN value configured for it
   std::for_each(Entity::Generator::IndexIterator::begin(), Entity::Generator::IndexIterator::end(), [&](auto index) {
-    auto value{channelState_.nrpnValue(index)};
+    auto value{channelState.nrpnValue(index)};
     if (value != 0 || value != gens_[index].mods()) {
       // std::cout << "setMod " << Definition::definition(index).name() << " = " << value << '\n';
       gens_[index].setMods(value);
@@ -104,7 +104,7 @@ State::updateStateMods() noexcept
 
   // Calculate modulator values and add to the existing generator's mods value.
   for (auto& mod : modulators_) {
-    auto value{mod.value(*this)};
+    auto value{mod.value(*this, channelState)};
     if (value != 0) {
       // std::cout << "addMod " << Definition::definition(mod.destination()).name() << " += " << value << '\n';
       gens_[mod.destination()].addMod(value);
@@ -125,5 +125,4 @@ State::dump() noexcept
   for (auto& mod : modulators_) {
     std::cout << mod.description() << '\n';
   }
-  channelState_.dump();
 }

@@ -67,7 +67,7 @@ using namespace SF2::Entity::Modulator;
 
 - (void)testInitialAttenuationValues {
   State::State state{self.contexts->context2.makeState(0, 60, 32)};
-  XCTAssertEqual(100, state.channelState().continuousControllerValue(MIDI::ControlChange(7)));
+  XCTAssertEqual(100, self.contexts->context2.channelState().continuousControllerValue(MIDI::ControlChange(7)));
   XCTAssertEqualWithAccuracy(280.982985437, state.modulated(Index::initialAttenuation), 0.000001);
 }
 
@@ -93,9 +93,9 @@ using namespace SF2::Entity::Modulator;
                        Index::initialAttenuation,
                        345);
   self.sst.addModulator(state, mod);
-  state.updateStateMods();
+  state.updateStateMods(self.contexts->context2.channelState());
   XCTAssertEqual(size_t(10), state.modulatorCount());
-  XCTAssertEqual(100, state.channelState().continuousControllerValue(MIDI::ControlChange(7)));
+  XCTAssertEqual(100, self.contexts->context2.channelState().continuousControllerValue(MIDI::ControlChange(7)));
   XCTAssertEqualWithAccuracy(127.577963886, state.modulated(Index::initialAttenuation), 0.000001);
 }
 
@@ -105,9 +105,9 @@ using namespace SF2::Entity::Modulator;
                        Index::initialAttenuation,
                        -123);
   self.sst.addModulator(state, mod);
-  state.updateStateMods();
+  state.updateStateMods(self.contexts->context2.channelState());
   XCTAssertEqual(size_t(11), state.modulatorCount());
-  XCTAssertEqual(100, state.channelState().continuousControllerValue(MIDI::ControlChange(7)));
+  XCTAssertEqual(100, self.contexts->context2.channelState().continuousControllerValue(MIDI::ControlChange(7)));
   XCTAssertEqualWithAccuracy(264.29329632, state.modulated(Index::initialAttenuation), 0.000001);
 }
 

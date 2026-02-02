@@ -13,8 +13,8 @@ using namespace SF2::MIDI;
 using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
 
-Voice::Voice(Float sampleRate, const ChannelState &channelState, size_t voiceIndex, Sample::Interpolator interpolator) noexcept
-  : state_{sampleRate, channelState},
+Voice::Voice(size_t voiceIndex, Float sampleRate, Sample::Interpolator interpolator) noexcept
+  : state_{sampleRate},
     loopingMode_{LoopingMode::none},
     pitch_{state_},
     sampleGenerator_{interpolator},
@@ -29,11 +29,11 @@ Voice::Voice(Float sampleRate, const ChannelState &channelState, size_t voiceInd
 {}
 
 void
-Voice::configure(const State::Config& config) noexcept
+Voice::configure(const State::Config& config, const MIDI::ChannelState& channelState) noexcept
 {
   os_signpost_interval_begin(log_, configSignpost_, "start");
 
-  state_.prepareForVoice(config);
+  state_.prepareForVoice(config, channelState);
   sampleGenerator_.configure(config.sampleSource(), state_);
   pitch_.configure(config.sampleSource().header());
 

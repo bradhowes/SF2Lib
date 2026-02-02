@@ -39,7 +39,9 @@ public:
 
    @param kind the interpolation to apply to the samples
    */
-  Generator(Interpolator kind) noexcept : interpolatorProc_{interpolator(kind)} {}
+  Generator(Interpolator kind = Interpolator::linear) noexcept : interpolatorProc_{interpolator(kind)} {}
+
+  void setInterpolator(Interpolator kind) noexcept { interpolatorProc_ = interpolator(kind); }
 
   /**
    Configure instance to use the given sample source. NOTE: this is invoked before start of rendering a note. This
@@ -123,7 +125,7 @@ private:
 
   Bounds bounds_{};
   Index index_;
-  const InterpolatorProc interpolatorProc_;
+  InterpolatorProc interpolatorProc_;
   const IO::NormalizedSampleSource* sampleSource_{nullptr};
 };
 

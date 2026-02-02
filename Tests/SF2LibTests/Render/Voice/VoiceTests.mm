@@ -25,7 +25,7 @@ using namespace SF2::Render::Voice::State;
 
 - (void)setUp {
   [super setUp];
-  // self.playAudio = NO;
+  self.playAudio = NO;
 }
 
 - (void)testVoiceRepeatedRenderGeneratesSameOutputRolandPiano {
@@ -243,7 +243,6 @@ using namespace SF2::Render::Voice::State;
     XCTAssertEqualWithAccuracy(0, samples[3], self.epsilon);
   }
 
-  // self.playAudio = YES;
   [self playSamples: buffer count: sampleCount];
 }
 

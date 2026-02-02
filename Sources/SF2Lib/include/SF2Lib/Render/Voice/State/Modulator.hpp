@@ -56,7 +56,7 @@ public:
 
    @returns current value of the modulator
    */
-  Float value(const State& state) const noexcept;
+  Float value(const State& state, const MIDI::ChannelState& channelState) const noexcept;
 
   /// @returns configuration of the modulator from the SF2 file. This is used to allow for comparisons between
   /// modulators.
@@ -72,21 +72,21 @@ private:
 
   // Holds a pointer to member function that determines how to generate a value for a modulator.
   struct ValueProvider {
-    using Proc = int (ValueProvider::*)(const State&) const;
+    using Proc = int (ValueProvider::*)(const State&, const MIDI::ChannelState&) const;
 
     Proc proc_{nullptr};
     const MIDI::ControlChange cc_{0};
 
     bool isActive() const noexcept { return proc_ != nullptr; }
-    int operator()(const State& state) const noexcept { return (this->*proc_)(state); }
+    int operator()(const State& state, const MIDI::ChannelState& channelState) const noexcept { return (this->*proc_)(state, channelState); }
 
-    int ccValue(const State&) const noexcept;
-    int noteOnKey(const State&) const noexcept;
-    int noteOnVelocity(const State&) const noexcept;
-    int keyPressure(const State&) const noexcept;
-    int channelPressure(const State&) const noexcept;
-    int pitchWheelValue(const State&) const noexcept;
-    int pitchWheelSensitivity(const State&) const noexcept;
+    int ccValue(const State&, const MIDI::ChannelState&) const noexcept;
+    int noteOnKey(const State&, const MIDI::ChannelState&) const noexcept;
+    int noteOnVelocity(const State&, const MIDI::ChannelState&) const noexcept;
+    int keyPressure(const State&, const MIDI::ChannelState&) const noexcept;
+    int channelPressure(const State&, const MIDI::ChannelState&) const noexcept;
+    int pitchWheelValue(const State&, const MIDI::ChannelState&) const noexcept;
+    int pitchWheelSensitivity(const State&, const MIDI::ChannelState&) const noexcept;
   };
 
   /**

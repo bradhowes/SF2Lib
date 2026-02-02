@@ -54,8 +54,8 @@ public:
    @param sampleRate the sample rate of audio being rendered
    @param channelState the MIDI channel that is in control
    */
-  State(Float sampleRate, const MIDI::ChannelState& channelState) noexcept :
-  sampleRate_{sampleRate}, eventKey_{}, eventVelocity_{}, channelState_{channelState}
+  State(Float sampleRate) noexcept :
+  sampleRate_{sampleRate}, eventKey_{}, eventVelocity_{}
   {
     clear();
   }
@@ -69,7 +69,7 @@ public:
    @param velocity the MIDI velocity to use
    */
   State(Float sampleRate, const MIDI::ChannelState& channelState, int key, int velocity = 64) noexcept :
-  sampleRate_{sampleRate}, eventKey_{key}, eventVelocity_{velocity}, channelState_{channelState}
+  sampleRate_{sampleRate}, eventKey_{key}, eventVelocity_{velocity}
   {
     clear();
   }
@@ -89,7 +89,7 @@ public:
 
    @param config the preset / instrument configuration to apply to the state
    */
-  void prepareForVoice(const Config& config) noexcept;
+  void prepareForVoice(const Config& config, const MIDI::ChannelState& channelState) noexcept;
 
   /**
    Configure the state with the settings from the given instrument. Sets absolute generator values and creates
@@ -152,14 +152,11 @@ public:
     return velocity >= 0 ? velocity : eventVelocity_;
   }
 
-  /// @returns the MIDI channel state associated with the rendering
-  const MIDI::ChannelState& channelState() const noexcept { return channelState_; }
-
   /// @returns sample rate defined at construction
   Float sampleRate() const noexcept { return sampleRate_; }
 
   /// Update the modulator values due to a change in the channel state.
-  void updateStateMods() noexcept;
+  void updateStateMods(const MIDI::ChannelState& channelState) noexcept;
 
   /// @returns number of unique attached modulators
   size_t modulatorCount() const noexcept { return modulators_.size(); }
@@ -204,7 +201,6 @@ private:
   Float sampleRate_;
   int eventKey_;
   int eventVelocity_;
-  const MIDI::ChannelState& channelState_;
 };
 
 } // namespace SF2::Render
