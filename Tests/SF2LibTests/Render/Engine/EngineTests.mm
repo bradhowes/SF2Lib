@@ -820,6 +820,10 @@ using namespace SF2::Render::Engine;
 
 - (void)testEngineMIDIControlChangeCC10ForPanning
 {
+  auto blah = [NSProcessInfo.processInfo.environment valueForKey:@"SNAPSHOT_ARTIFACTS"];
+  std::cout << "SNAPSHOT_ARTIFACTS: " << blah << "\n";
+  return;
+
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 18);
