@@ -36,6 +36,11 @@ namespace SF2::Render::Engine {
  parameter changes should be done with care. For the AUv3 use-case, this is handled by the `EventProcessor` base class
  and the AUv3 API. MIDI events and parameter changes are scheduled using dedicated APIs and the render thread sees them
  during a render request.
+
+ The engine supports a maximum of `traits::maxVoiceCount` simultaneous voices -- these are allocated all at once in one continuous
+ block of memory. However, the engine can be configured to use fewer voices at construction time via the `voiceCountLimit`. Further,
+ the engine's audio rendering routine will by default limit voices when there is the threat of delaying a render cycle and causing
+ an audio glitch.
  */
 class Engine : public DSPHeaders::EventProcessor<Engine> {
   using super = DSPHeaders::EventProcessor<Engine>;
@@ -53,7 +58,9 @@ public:
    @param sampleRate the expected sample rate to use
    @param voiceCountLimit the maximum number of individual voices to support (must be <= maxVoiceCount)
    @param interpolator the type of interpolation to use when rendering samples
-   @param renderingTimeBudgetScaling scaling to apply to frameCount time budget (disable time budget checking if <= 0.0)
+   @param renderingTimeBudgetScaling scaling to apply to the frameCount time budget (the number of nanoseconds in a render frame).
+   This value runs between 0.0  and 1.0. A value of 0.0 or negative will disable the budget check. During a render call, once the
+   time budget is reached, any remaining notes will be automatically released and silenced.
    @param minimumNoteDurationMilliseconds the minimum duration of a note-on/note-off sequence for a voice.
    */
   Engine(Float sampleRate,
