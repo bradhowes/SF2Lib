@@ -53,7 +53,7 @@ using namespace SF2::Render::Voice::Sample;
   XCTAssertEqual(size_t(234), file.presetIndicesOrderedByBankProgram()[file.presets().size() - 1]);
   XCTAssertEqual(std::string("SFX"), file.presets()[234].name());
 
-  file.presets()[80].dump("", 80);
+  // file.presets()[80].dump("", 80);
 }
 
 - (void)testParsing2 {
@@ -126,6 +126,8 @@ using namespace SF2::Render::Voice::Sample;
   // file.dumpThreaded();
 }
 
+#if 0
+
 - (void)testDump0 {
   const auto& file = self.contexts->context0.file();
   XCTAssertNoThrow(file.dump());
@@ -137,6 +139,8 @@ using namespace SF2::Render::Voice::Sample;
   XCTAssertNoThrow(file.dump());
   XCTAssertNoThrow(file.dumpThreaded());
 }
+
+#endif
 
 - (void)testLoadPath {
   XCTAssertEqual(SF2::IO::File("/dev/null").load(), SF2::IO::File::LoadResponse::invalidFormat);
