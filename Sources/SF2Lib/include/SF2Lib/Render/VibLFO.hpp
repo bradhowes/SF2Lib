@@ -18,7 +18,7 @@ public:
     const Float val;
   };
 
-  explicit VibLFO(Float sampleRate) noexcept : LFO(sampleRate, "ModLFO") {}
+  explicit VibLFO() noexcept : LFO("ModLFO") {}
 
   /**
    Configure the vibrato LFO using the state parameters.

@@ -39,7 +39,7 @@ using namespace SF2::Render::Engine;
 
     int seconds = 1;
     auto mixer{harness.createMixer(seconds)};
-    for (size_t voice = 0; voice < engine.voiceCount(); ++voice) harness.sendNoteOn(uint8_t(12 + voice));
+    for (size_t voice = 0; voice < engine.voiceCountLimit(); ++voice) harness.sendNoteOn(uint8_t(12 + voice));
 
     [self startMeasuring];
 
@@ -64,7 +64,7 @@ using namespace SF2::Render::Engine;
 
     int seconds = 1;
     auto mixer{harness.createMixer(seconds)};
-    for (size_t voice = 0; voice < engine.voiceCount(); ++voice) harness.sendNoteOn(uint8_t(12 + voice));
+    for (size_t voice = 0; voice < engine.voiceCountLimit(); ++voice) harness.sendNoteOn(uint8_t(12 + voice));
 
     [self startMeasuring];
 

@@ -28,7 +28,7 @@ using namespace SF2::Render::Engine;
 
 - (void)testInit {
   Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear, -1.0);
-  XCTAssertEqual(engine.voiceCount(), size_t(32));
+  XCTAssertEqual(engine.voiceCountLimit(), size_t(32));
   XCTAssertEqual(engine.activeVoiceCount(), size_t(0));
   XCTAssertTrue(engine.polyphonicModeEnabled());
   XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
@@ -253,6 +253,7 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testRolandPianoChordRenderCubic4thOrder {
+  // self.playAudio = YES;
   auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);

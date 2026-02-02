@@ -40,10 +40,7 @@ protected:
 
    @param sampleRate the sample rate being used
    */
-  LFO(Float sampleRate, const char* logTag) noexcept : log_{Log::create(logTag)}
-  {
-    configure(sampleRate, 0_F, -12'000_F);
-  }
+  LFO(const char* logTag) noexcept : log_{Log::create(logTag)} {}
 
   /**
    Construct new LFO. NOTE: this is only used in tests.

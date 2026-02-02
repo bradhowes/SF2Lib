@@ -51,13 +51,13 @@ public:
    Construct new engine and its voices.
 
    @param sampleRate the expected sample rate to use
-   @param voiceCount the maximum number of individual voices to support (must be <= maxVoiceCount)
+   @param voiceCountLimit the maximum number of individual voices to support (must be <= maxVoiceCount)
    @param interpolator the type of interpolation to use when rendering samples
    @param renderingTimeBudgetScaling scaling to apply to frameCount time budget (disable time budget checking if <= 0.0)
    @param minimumNoteDurationMilliseconds the minimum duration of a note-on/note-off sequence for a voice.
    */
   Engine(Float sampleRate,
-         size_t voiceCount,
+         size_t voiceCountLimit,
          Interpolator interpolator,
          double renderingTimeBudgetScaling, // = 0.85,
          size_t minimumNoteDurationMilliseconds = 10
@@ -70,8 +70,11 @@ public:
     return static_cast<size_t>(ceil(minimumNoteDurationMilliseconds_ / 1000_F * sampleRate_));
   }
 
-  /// @returns maximum number of voices available for simultaneous rendering
-  inline size_t voiceCount() const noexcept { return voices_.size(); }
+  /// @returns maximum number of voices available for simultaneous rendering in engine.
+  inline size_t maxVoiceCount() const noexcept { return traits::maxVoiceCount; }
+
+  /// @returns configured maximum number of voices available for rendering [legacy].
+  inline size_t voiceCountLimit() const noexcept { return voiceCountLimit_; }
 
   /**
    Update kernel and buffers to support the given format and channel count
@@ -471,8 +474,9 @@ private:
   LiveGeneratorParameters parameters_;
 
   AUParameterTree* parameterTree_;
-  std::vector<Voice> voices_{};
+  std::array<Voice, traits::maxVoiceCount> voices_{};
   OldestVoiceCollection<traits::maxVoiceCount> oldestVoiceIndices_;
+  std::size_t voiceCountLimit_;
 
   std::unique_ptr<IO::File> file_{};
   PresetCollection presets_{};

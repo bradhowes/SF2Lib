@@ -44,13 +44,17 @@ public:
 
   /**
    Construct a new voice renderer.
+   */
+  Voice() noexcept;
 
-   @param sampleRate the sample rate to use for generating audio
-   @param channelState the MIDI state associated with the renderer
+  /**
+   Initialize a voice renderer.
+
    @param voiceIndex the unique index assigned to this voice
+   @param sampleRate the sample rate to use for generating audio
    @param interpolator how to interpolate sample values
    */
-  Voice(size_t voiceIndex, Float sampleRate, Sample::Interpolator interpolator) noexcept;
+  void initialize(size_t voiceIndex, Float sampleRate, Sample::Interpolator interpolator) noexcept;
 
   /// Allow move operations during construction to support std::vector
   Voice(Voice&&) noexcept = default;
@@ -249,7 +253,7 @@ private:
   bool postponedRelease_{false};
   bool sostenutoActive_{false};
 
-  const size_t voiceIndex_;
+  size_t voiceIndex_;
   const os_log_t log_{Log::create("Voice")};
   const os_signpost_id_t configSignpost_{os_signpost_id_generate(log_)};
   const os_signpost_id_t startSignpost_{os_signpost_id_generate(log_)};

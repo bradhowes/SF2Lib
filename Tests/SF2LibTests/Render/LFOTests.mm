@@ -102,7 +102,7 @@ struct LFOTestInjector {
 - (void)testConfigFromState {
   LFOTestInjector lti;
   State::State state{self.contexts->context2.makeState(0, 64, 32)};
-  auto osc = VibLFO(state.sampleRate());
+  auto osc = VibLFO();
 
   self.sst.setValue(state, Generator::Index::delayVibratoLFO, -32768);
   self.sst.setValue(state, Generator::Index::frequencyVibratoLFO, 0);

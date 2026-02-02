@@ -54,7 +54,7 @@ public:
    @param sampleRate the sample rate of audio being rendered
    @param channelState the MIDI channel that is in control
    */
-  State(Float sampleRate) noexcept :
+  State(Float sampleRate = 0_F) noexcept :
   sampleRate_{sampleRate}, eventKey_{}, eventVelocity_{}
   {
     clear();

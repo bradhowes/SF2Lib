@@ -13,20 +13,27 @@ using namespace SF2::MIDI;
 using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
 
-Voice::Voice(size_t voiceIndex, Float sampleRate, Sample::Interpolator interpolator) noexcept
-  : state_{sampleRate},
+Voice::Voice() noexcept
+  : state_{},
     loopingMode_{LoopingMode::none},
     pitch_{state_},
-    sampleGenerator_{interpolator},
+    sampleGenerator_{},
     volumeEnvelope_{},
     modulatorEnvelope_{},
-    modulatorLFO_{sampleRate},
-    vibratoLFO_{sampleRate},
+    modulatorLFO_{},
+    vibratoLFO_{},
     filter_{},
     active_{false},
-    keyDown_{false},
-    voiceIndex_{voiceIndex}
+    keyDown_{false}
 {}
+
+void
+Voice::initialize(size_t voiceIndex, Float sampleRate, Sample::Interpolator interpolator) noexcept
+{
+  voiceIndex_ = voiceIndex;
+  sampleGenerator_.setInterpolator(interpolator);
+  state_.setSampleRate(sampleRate);
+}
 
 void
 Voice::configure(const State::Config& config, const MIDI::ChannelState& channelState) noexcept

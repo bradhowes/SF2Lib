@@ -18,7 +18,7 @@ public:
     const Float val;
   };
 
-  explicit ModLFO(Float sampleRate) noexcept : LFO(sampleRate, "ModLFO") {}
+  ModLFO() noexcept : LFO("ModLFO") {}
 
   /**
    Configure the modulating LFO using the state parameters.

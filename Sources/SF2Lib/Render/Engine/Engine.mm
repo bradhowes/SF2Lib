@@ -79,13 +79,14 @@ struct LoadPresetSysExPayload {
   }
 };
 
-Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator, double renderingTimeBudgetScaling,
+Engine::Engine(Float sampleRate, size_t voiceCountLimit, Interpolator interpolator, double renderingTimeBudgetScaling,
                size_t minimumNoteDurationMilliseconds) noexcept
   : super(Log::create("Engine")),
     sampleRate_{sampleRate},
     minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
     parameters_{},
-    oldestVoiceIndices_{voiceCount},
+    voiceCountLimit_{voiceCountLimit},
+    oldestVoiceIndices_{voiceCountLimit},
     renderSignpost_{os_signpost_id_generate(log_)},
     noteOnSignpost_{os_signpost_id_generate(log_)},
     noteOffSignpost_{os_signpost_id_generate(log_)},
@@ -94,13 +95,12 @@ Engine::Engine(Float sampleRate, size_t voiceCount, Interpolator interpolator, d
     renderingTimeBudgetScaling_{renderingTimeBudgetScaling},
     workQueue_{dispatch_queue_create("SF2Lib::Engine", NULL)}
 {
-  assert(voiceCount <= traits::maxVoiceCount);
+  assert(voiceCountLimit <= traits::maxVoiceCount);
 
-  voices_.reserve(voiceCount);
-  durationBuckets_.reserve(voiceCount);
+  durationBuckets_.reserve(voiceCountLimit);
 
-  for (size_t voiceIndex = 0; voiceIndex < voiceCount; ++voiceIndex) {
-    voices_.emplace_back(voiceIndex, sampleRate, interpolator);
+  for (size_t voiceIndex = 0; voiceIndex < voiceCountLimit; ++voiceIndex) {
+    voices_[voiceIndex].initialize(voiceIndex, sampleRate, interpolator);
     if constexpr (traits::renderDurationCollectionEnabled) { durationBuckets_.emplace_back(0.0); }
   }
 
@@ -1023,7 +1023,7 @@ Engine::makeTree() noexcept
                                                                          name:@"activeVoiceCount"
                                                                       address:valueOf(ParameterAddress::activeVoiceCount)
                                                                           min:0
-                                                                          max:voiceCount()
+                                                                          max:voiceCountLimit()
                                                                          unit:kAudioUnitParameterUnit_Generic
                                                                      unitName:nullptr
                                                                         flags:flags
