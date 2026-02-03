@@ -1229,6 +1229,32 @@ using namespace SF2::Render::Engine;
   // XCTAssertEqual(std::string("SFX"), engine.activePresetName());
 }
 
+- (void)testEngineMIDILoadPathEmpty {
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(self.contexts->context0.path(), 0);
+  XCTAssertEqual(std::string("Piano 1"), engine.activePresetName());
+
+  auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
+  auto payload = engine.createLoadFileUsePresetPayload("", 1, overrides);
+  harness.sendRaw(payload);
+
+  payload = engine.createLoadFileUsePresetPayload("", 2, overrides);
+  harness.sendRaw(payload);
+
+  payload = engine.createLoadFileUsePresetPayload("", 3, overrides);
+  harness.sendRaw(payload);
+
+  payload = engine.createLoadFileUsePresetPayload("", 4, overrides);
+  harness.sendRaw(payload);
+
+  auto exp = [self expectationWithDescription:@"empty queue"];
+  harness.postWorkItem(^{ [exp fulfill]; });
+  [self waitForExpectations:@[exp]];
+
+  XCTAssertEqual(std::string("E.Piano 1"), engine.activePresetName());
+}
+
 - (void)testEngineMIDILoadBookmark {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
@@ -1246,18 +1272,73 @@ using namespace SF2::Render::Engine;
                                                relativeToURL:nil
                                                        error:&error];
   NSData* encoded = [bookmark base64EncodedDataWithOptions:0];
+  if (didStart) { [url stopAccessingSecurityScopedResource]; }
 
   auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
   overrides.emplace_back(123, 456);
   auto payload = engine.createLoadBookmarkUsePresetPayload(bookmark, 234, overrides);
   harness.sendRaw(payload);
-  std::cout << engine.activePresetName() << '\n';
 
   auto exp = [self expectationWithDescription:@"empty queue"];
   harness.postWorkItem(^{ [exp fulfill]; });
   [self waitForExpectations:@[exp]];
 
   XCTAssertEqual(std::string("SFX"), engine.activePresetName());
+}
+
+- (void)testEngineMIDILoadBookmarkMultiple {
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(self.contexts->context2.path(), 0);
+
+  XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
+
+  // Enqueue three load operations to ensure that they run sequentially and only the last one matters.
+  const NSURL* url = self.contexts->context0.url();
+
+  auto didStart = [url startAccessingSecurityScopedResource];
+  NSError* error = nil;
+  NSData* bookmark = [url bookmarkDataWithOptions:NSURLBookmarkCreationMinimalBookmark
+                   includingResourceValuesForKeys:nil
+                                    relativeToURL:nil
+                                            error:&error];
+  NSData* encoded = [bookmark base64EncodedDataWithOptions:0];
+  if (didStart) { [url stopAccessingSecurityScopedResource]; }
+
+  auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
+  auto payload = engine.createLoadBookmarkUsePresetPayload(bookmark, 234, overrides);
+  harness.sendRaw(payload);
+
+  // Start a note. Should not be playing at end of test.
+  harness.sendNoteOn(64);
+
+  url = self.contexts->context1.url();
+  didStart = [url startAccessingSecurityScopedResource];
+  bookmark = [url bookmarkDataWithOptions:NSURLBookmarkCreationMinimalBookmark
+           includingResourceValuesForKeys:nil
+                            relativeToURL:nil
+                                    error:&error];
+  encoded = [bookmark base64EncodedDataWithOptions:0];
+  payload = engine.createLoadBookmarkUsePresetPayload(bookmark, 0, overrides);
+  harness.sendRaw(payload);
+
+  url = self.contexts->context2.url();
+  didStart = [url startAccessingSecurityScopedResource];
+  bookmark = [url bookmarkDataWithOptions:NSURLBookmarkCreationMinimalBookmark
+           includingResourceValuesForKeys:nil
+                            relativeToURL:nil
+                                    error:&error];
+  encoded = [bookmark base64EncodedDataWithOptions:0];
+  payload = engine.createLoadBookmarkUsePresetPayload(bookmark, 0, overrides);
+  harness.sendRaw(payload);
+
+  auto exp = [self expectationWithDescription:@"empty queue"];
+  harness.postWorkItem(^{ [exp fulfill]; });
+  [self waitForExpectations:@[exp]];
+
+  XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
+  XCTAssertEqual(1, engine.presetCount());
+  XCTAssertEqual(0, engine.activeVoiceCount());
 }
 
 - (void)testEngineOneVoicePerKey

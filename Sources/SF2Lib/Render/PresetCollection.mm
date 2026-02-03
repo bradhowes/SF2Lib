@@ -23,13 +23,13 @@ PresetCollection::build(SF2::IO::File& file)
     presets_.emplace_back(file, instruments_, presetConfigs[presetIndex]);
   }
 
-  size_ = presets_.size();
+  size_.store(presets_.size());
 }
 
 void
 PresetCollection::clear() noexcept
 {
-  size_ = 0;
+  size_.store(0);
   presets_.clear();
   instruments_.clear();
 }

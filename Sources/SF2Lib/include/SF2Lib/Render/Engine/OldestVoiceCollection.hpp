@@ -99,7 +99,9 @@ public:
 
 private:
   // TODO: calculate proper size -- testing found this sufficient for a MaxVoiceCount of 96.
-  static constexpr size_t BufferSize = 1024 * 4 + 168;
+  // static constexpr size_t BufferSize = 1024 * 4 + 168;
+  // TODO: calculate proper size -- testing found this sufficient for a MaxVoiceCount of 128.
+  static constexpr size_t BufferSize = 1024 * 6 + 128; // 168;
 
   std::array<std::byte, BufferSize> buffer_;
   std::pmr::monotonic_buffer_resource mbr_{buffer_.data(), buffer_.size(), std::pmr::null_memory_resource()};

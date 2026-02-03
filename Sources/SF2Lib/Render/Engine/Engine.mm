@@ -146,6 +146,8 @@ Engine::activeBankIndex() const noexcept
 int
 Engine::activePresetIndex() const noexcept
 {
+  // NOTE: this value is only used/reported in the AUParameterTree -- not to be used in place of `activePreset_` value which is the
+  // only real preset index value to be used in the engine.
   return hasActivePreset() ? int(activePreset_) : -1;
 }
 
@@ -191,6 +193,7 @@ Engine::load(int fd, size_t index) noexcept
 void
 Engine::usePresetWithIndex(size_t index)
 {
+  os_log_info(log_, "usePresetWithIndex BEGIN - %lu", index);
   allOff();
   if (index >= presets_.size()) {
     // Special case to flag no preset being used.
@@ -199,6 +202,9 @@ Engine::usePresetWithIndex(size_t index)
   activePreset_ = index;
   parameters_.reset();
   bumpLastLoadFinished();
+
+  NSString* name = [NSString stringWithCString:activePresetName().c_str() encoding:NSUTF8StringEncoding];
+  os_log_info(log_, "usePresetWithIndex END - %{public}@", name);
 }
 
 void
@@ -623,6 +629,8 @@ Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
 
 void
 Engine::loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept {
+  os_log_info(log_, "loadBookmarkAndPreset BEGIN");
+
   auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes.data());
   auto presetIndex = payload->presetIndex;
   auto overrideCount = payload->overrideCount;
@@ -634,7 +642,7 @@ Engine::loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept {
   NSData* data = [NSData dataWithBytesNoCopy:(void*)dataStart length:dataCount freeWhenDone:false];
   NSData* bookmark = [data initWithBase64EncodedData:data options:0];
 
-  __block NSError* error = nil;
+  NSError* error = nil;
   BOOL isStale = NO;
   NSURL* resolved = [NSURL URLByResolvingBookmarkData:bookmark
                                               options:0
@@ -644,10 +652,12 @@ Engine::loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept {
 
   if (error != nil) {
     os_log_error(log_, "loadBookmarkAndPreset END - error from resolving bookmark data - %{public}@", error);
-    return false;
+    return;
   } else if (resolved == nil) {
     os_log_error(log_, "loadBookmarkAndPreset END - failed to resolve bookmark data (no error)");
-    return false;
+    return;
+  } else {
+    os_log_error(log_, "loadBookmarkAndPreset - resolved bookmark: %{public}@", resolved);
   }
 
   BOOL didStart = NO;
@@ -668,6 +678,8 @@ Engine::loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept {
       os_log_error(log_, "loadBookmarkAndPreset - failed to open file: %{public}@", error);
       return;
     }
+
+    os_log_info(log_, "loading from resolved url - file descriptor: %d", fileHandle.fileDescriptor);
 
     load(fileHandle.fileDescriptor, presetIndex);
   }];

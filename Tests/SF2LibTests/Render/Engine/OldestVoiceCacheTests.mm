@@ -3,6 +3,7 @@
 #include <XCTest/XCTest.h>
 
 #include "SF2Lib/Render/Engine/OldestVoiceCollection.hpp"
+#include "SF2Lib/Render/Engine/Traits.hpp"
 
 using namespace SF2::Render::Engine;
 
@@ -31,7 +32,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(cache.size(), size_t(3));
 }
 
-static int countActive(const OldestVoiceCollection<96>& cache) noexcept {
+static int countActive(const OldestVoiceCollection<traits::maxVoiceCount>& cache) noexcept {
   auto active = 0;
   for (auto _ : cache) ++active;
   XCTAssertEqual(cache.active(), size_t(active));
@@ -39,30 +40,30 @@ static int countActive(const OldestVoiceCollection<96>& cache) noexcept {
 }
 
 - (void)testLimits {
-  OldestVoiceCollection<96> cache{96};
+  OldestVoiceCollection<traits::maxVoiceCount> cache{traits::maxVoiceCount};
   XCTAssertEqual(countActive(cache), 0);
-  for (auto index = 0; index < 96; ++index) cache.voiceAcquire();
-  XCTAssertEqual(countActive(cache), 96);
-  for (auto index = 0; index < 96; ++index) cache.voiceAcquire();
-  XCTAssertEqual(countActive(cache), 96);
-  for (auto index = 0; index < 96; ++index) cache.voiceAcquire();
-  XCTAssertEqual(countActive(cache), 96);
+  for (auto index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
+  XCTAssertEqual(countActive(cache), traits::maxVoiceCount);
+  for (auto index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
+  XCTAssertEqual(countActive(cache), traits::maxVoiceCount);
+  for (auto index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
+  XCTAssertEqual(countActive(cache), traits::maxVoiceCount);
 
-  for (auto index = 0; index < 96; index += 2) cache.voiceRelease(size_t(index));
-  XCTAssertEqual(countActive(cache), 48);
-  for (auto index = 1; index < 96; index += 2) cache.voiceRelease(size_t(index));
+  for (auto index = 0; index < traits::maxVoiceCount; index += 2) cache.voiceRelease(size_t(index));
+  XCTAssertEqual(countActive(cache), traits::maxVoiceCount / 2);
+  for (auto index = 1; index < traits::maxVoiceCount; index += 2) cache.voiceRelease(size_t(index));
   XCTAssertEqual(countActive(cache), 0);
 }
 
 - (void)testRepetitions {
   NSArray* metrics = @[XCTPerformanceMetric_WallClockTime];
   [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
-    OldestVoiceCollection<96> cache{96};
+    OldestVoiceCollection<traits::maxVoiceCount> cache{traits::maxVoiceCount};
     [self startMeasuring];
-    for (auto iteration = 0; iteration < 50'000; ++iteration) {
-      for (auto index = 0; index < 96; ++index) cache.voiceAcquire();
-      for (auto index = 0; index < 96; ++index) cache.voiceAcquire();
-      for (auto index = 96; index < 0; --index) cache.voiceRelease(size_t(index - 1));
+    for (auto iteration = 0; iteration < 5'000; ++iteration) {
+      for (auto index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
+      for (auto index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
+      for (auto index = traits::maxVoiceCount; index < 0; --index) cache.voiceRelease(size_t(index - 1));
     }
     [self stopMeasuring];
   }];

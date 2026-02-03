@@ -106,13 +106,22 @@ public:
   /// @returns name of the active preset or empty string if none is active
   std::string activePresetName() const noexcept;
 
+  /// @returns the program index value for the active preset, or -1 if none is active
   int activeProgramIndex() const noexcept;
 
+  /// @returns the bank index value of for the active preset, or -1 if none is active
   int activeBankIndex() const noexcept;
 
+  /**
+   NOTE: this value is only used/reported in the AUParameterTree -- not to be used in place of `activePreset_` value which is the
+   only real preset index value to be used in the engine.
+
+   @returns the current active preset index value if there is one, or else `-1`.
+   */
   int activePresetIndex() const noexcept;
 
-  /// @returns number of presets available.
+  /// @returns number of presets currently available. During an SF2 load, this becomes 0 which blocks any new voices from
+  /// being activated.
   inline size_t presetCount() const noexcept { return presets_.size(); }
 
   /// @return the number of active voices

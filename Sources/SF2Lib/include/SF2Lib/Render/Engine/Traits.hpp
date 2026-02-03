@@ -1,5 +1,6 @@
 // Copyright © 2026 Brad Howes. All rights reserved.
 
+#include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Engine/ParameterAddress.hpp"
 
 #pragma once
@@ -20,13 +21,13 @@ struct traits {
   static inline constexpr bool renderDurationCollectionEnabled = false;
 
   /// Number of engine parameters to be found in the AUParameterTree. This does *not* include the
-  static constexpr size_t engineParameterCount = ((valueOf(ParameterAddress::lastParameterAddressPlusOne) -
-                                                   valueOf(ParameterAddress::firstParameterAddress)) +
-                                                  (renderDurationCollectionEnabled ? maxVoiceCount : 0));
+  static inline constexpr size_t engineParameterCount = ((valueOf(ParameterAddress::lastParameterAddressPlusOne) -
+                                                          valueOf(ParameterAddress::firstParameterAddress)) +
+                                                         (renderDurationCollectionEnabled ? maxVoiceCount : 0));
 
   /// Total number of engine parameters to be found in the AUParameterTree (not exact due to unused indices in the list of
   /// SF2 generators)
-  static constexpr size_t parameterTreeSize = valueOf(Entity::Generator::Index::numValues) + engineParameterCount;
+  static inline constexpr size_t parameterTreeSize = valueOf(Entity::Generator::Index::numValues) + engineParameterCount;
 };
 
 }
