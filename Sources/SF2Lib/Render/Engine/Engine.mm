@@ -86,7 +86,7 @@ Engine::Engine(Float sampleRate, size_t voiceCountLimit, Interpolator interpolat
     minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
     parameters_{},
     voiceCountLimit_{voiceCountLimit},
-    oldestVoiceIndices_{voiceCountLimit},
+    oldestVoiceIndices_{},
     renderSignpost_{os_signpost_id_generate(log_)},
     noteOnSignpost_{os_signpost_id_generate(log_)},
     noteOffSignpost_{os_signpost_id_generate(log_)},
@@ -310,6 +310,7 @@ Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
   // the oldest ones.
   for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
     auto voiceIndex = *pos;
+
     auto& voice{voices_[voiceIndex]};
     if (voice.isActive()) {
       if (Utils::Timer::delta(entryTime) < timeBudgetNanoseconds) {
@@ -317,7 +318,10 @@ Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
       } else {
         voice.stop();
       }
+    } else {
+      os_log_error(log_, "renderInto - encountered active voice that is not active - %lu", voiceIndex);
     }
+
     if (voice.isDone()) {
       pos = stopVoice(voiceIndex);
     } else {
@@ -798,7 +802,7 @@ Engine::startVoice(const Config& config) noexcept
   os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice");
 }
 
-OldestVoiceCollection<traits::maxVoiceCount>::iterator
+OldestVoiceCollection::iterator
 Engine::stopVoice(size_t voiceIndex) noexcept
 {
   os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice");
@@ -813,7 +817,7 @@ Engine::stopVoice(size_t voiceIndex) noexcept
 void
 Engine::updateActiveVoiceCount() noexcept
 {
-  auto value = oldestVoiceIndices_.active();
+  auto value = oldestVoiceIndices_.activeVoiceCount();
   os_log_info(log_, "updateActiveVoiceCount - %ld", value);
   [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::activeVoiceCount)] setValue: value];
 }
@@ -910,7 +914,7 @@ Engine::provideParameterValue(AUParameter* parameter) const noexcept
         value = SF2::fromBool(polyphonicModeEnabled());
         break;
       case ParameterAddress::activeVoiceCount:
-        return oldestVoiceIndices_.active();
+        return oldestVoiceIndices_.activeVoiceCount();
       case ParameterAddress::retriggerModeEnabled:
         value = SF2::fromBool(retriggerModeEnabled());
         break;

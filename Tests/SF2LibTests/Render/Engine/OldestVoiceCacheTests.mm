@@ -14,33 +14,33 @@ using namespace SF2::Render::Engine;
 @implementation OldestVoiceCacheTests
 
 - (void)testCache {
-  OldestVoiceCollection<96> cache{3};
+  OldestVoiceCollection cache;
   XCTAssertTrue(cache.empty());
-  XCTAssertEqual(cache.size(), size_t(3));
+  XCTAssertEqual(cache.size(), traits::maxVoiceCount);
   auto v1 = cache.voiceAcquire();
   XCTAssertEqual(v1, size_t(0));
   XCTAssertFalse(cache.empty());
-  XCTAssertEqual(cache.active(), size_t(1));
+  XCTAssertEqual(cache.activeVoiceCount(), size_t(1));
   auto v2 = cache.voiceAcquire();
   XCTAssertEqual(v2, size_t(1));
-  XCTAssertEqual(cache.active(), size_t(2));
+  XCTAssertEqual(cache.activeVoiceCount(), size_t(2));
   cache.voiceRelease(v1);
-  XCTAssertEqual(cache.active(), size_t(1));
+  XCTAssertEqual(cache.activeVoiceCount(), size_t(1));
   XCTAssertFalse(cache.empty());
   cache.voiceRelease(v2);
   XCTAssertTrue(cache.empty());
-  XCTAssertEqual(cache.size(), size_t(3));
+  XCTAssertEqual(cache.size(), size_t(128));
 }
 
-static int countActive(const OldestVoiceCollection<traits::maxVoiceCount>& cache) noexcept {
+static int countActive(const OldestVoiceCollection& cache) noexcept {
   auto active = 0;
   for (auto _ : cache) ++active;
-  XCTAssertEqual(cache.active(), size_t(active));
+  XCTAssertEqual(cache.activeVoiceCount(), size_t(active));
   return active;
 }
 
 - (void)testLimits {
-  OldestVoiceCollection<traits::maxVoiceCount> cache{traits::maxVoiceCount};
+  OldestVoiceCollection cache;
   XCTAssertEqual(countActive(cache), 0);
   for (auto index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
   XCTAssertEqual(countActive(cache), traits::maxVoiceCount);
@@ -58,7 +58,7 @@ static int countActive(const OldestVoiceCollection<traits::maxVoiceCount>& cache
 - (void)testRepetitions {
   NSArray* metrics = @[XCTPerformanceMetric_WallClockTime];
   [self measureMetrics:metrics automaticallyStartMeasuring:NO forBlock:^{
-    OldestVoiceCollection<traits::maxVoiceCount> cache{traits::maxVoiceCount};
+    OldestVoiceCollection cache;
     [self startMeasuring];
     for (auto iteration = 0; iteration < 5'000; ++iteration) {
       for (auto index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();

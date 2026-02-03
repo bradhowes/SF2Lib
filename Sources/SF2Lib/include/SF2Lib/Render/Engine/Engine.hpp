@@ -125,7 +125,7 @@ public:
   inline size_t presetCount() const noexcept { return presets_.size(); }
 
   /// @return the number of active voices
-  inline size_t activeVoiceCount() const noexcept { return oldestVoiceIndices_.active(); }
+  inline size_t activeVoiceCount() const noexcept { return oldestVoiceIndices_.activeVoiceCount(); }
 
   /**
    Render samples to the given stereo output buffers. The buffers are guaranteed to be able to hold `frameCount`
@@ -417,8 +417,7 @@ private:
   inline void setPhonicMode(PhonicMode mode) noexcept { phonicMode_ = mode; }
 
   /**
-   Visit each active voice with a method that accepts two parameters: a `Voice` reference and a `ReleaseKeyState`
-   reference that contains the current pedal state.
+   Visit each active voice with a method that accepts two parameters: a `Voice` reference.
 
    @param visitor the method to invoke
    */
@@ -461,7 +460,7 @@ private:
 
   void startVoice(const Config& config) noexcept;
 
-  OldestVoiceCollection<traits::maxVoiceCount>::iterator stopVoice(size_t voiceIndex) noexcept;
+  OldestVoiceCollection::iterator stopVoice(size_t voiceIndex) noexcept;
 
   void notifyActiveVoicesChannelStateChanged() noexcept;
 
@@ -491,7 +490,7 @@ private:
 
   AUParameterTree* parameterTree_;
   std::array<Voice, traits::maxVoiceCount> voices_{};
-  OldestVoiceCollection<traits::maxVoiceCount> oldestVoiceIndices_;
+  OldestVoiceCollection oldestVoiceIndices_;
   std::size_t voiceCountLimit_;
 
   std::unique_ptr<IO::File> file_{};

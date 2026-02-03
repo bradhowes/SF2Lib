@@ -215,39 +215,40 @@ using namespace SF2::Render::Engine;
     samples.push_back(harness.lastDrySample());
   }
 
-  XCTAssertEqual(size_t(32), engine.activeVoiceCount());
+  XCTAssertEqual(size_t(42), engine.activeVoiceCount());
   harness.renderToEnd(mixer);
   samples.push_back(harness.lastDrySample());
   XCTAssertEqual(size_t(0), engine.activeVoiceCount());
 
   [self dumpSamples: samples];
 
-  XCTAssertEqualWithAccuracy(0.0585853196681, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.139635398984, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0656754374504, samples[2], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0630209818482, samples[3], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0279885157943, samples[4], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0638669133186, samples[5], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.136517599225, samples[6], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0657804235816, samples[7], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0629896596074, samples[8], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0280037727207, samples[9], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0638669133186, samples[10], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.136517599225, samples[11], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0657804235816, samples[12], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0629896596074, samples[13], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0280037727207, samples[14], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0638669133186, samples[15], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.136517599225, samples[16], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0657804235816, samples[17], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0629896596074, samples[18], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0280037727207, samples[19], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0638669133186, samples[20], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.136517599225, samples[21], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0657804235816, samples[22], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0629896596074, samples[23], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0280037727207, samples[24], self.epsilon);
-  XCTAssertEqualWithAccuracy(0, samples[25], self.epsilon);
+  auto epsilon = self.epsilon;
+  XCTAssertEqualWithAccuracy(0.0585853196681, samples[0], epsilon);
+  XCTAssertEqualWithAccuracy(0.139635398984, samples[1], epsilon);
+  XCTAssertEqualWithAccuracy(0.0656754374504, samples[2], epsilon);
+  XCTAssertEqualWithAccuracy(0.0630209818482, samples[3], epsilon);
+  XCTAssertEqualWithAccuracy(0.0279885157943, samples[4], epsilon);
+  XCTAssertEqualWithAccuracy(0.0638590604067, samples[5], epsilon);
+  XCTAssertEqualWithAccuracy(0.136500775814, samples[6], epsilon);
+  XCTAssertEqualWithAccuracy(0.0657718032598, samples[7], epsilon);
+  XCTAssertEqualWithAccuracy(0.0629670470953, samples[8], epsilon);
+  XCTAssertEqualWithAccuracy(0.0279869697988, samples[9], epsilon);
+  XCTAssertEqualWithAccuracy(0.0638560056686, samples[10], epsilon);
+  XCTAssertEqualWithAccuracy(0.136500775814, samples[11], epsilon);
+  XCTAssertEqualWithAccuracy(0.0657718032598, samples[12], epsilon);
+  XCTAssertEqualWithAccuracy(0.0629670470953, samples[13], epsilon);
+  XCTAssertEqualWithAccuracy(0.0279869697988, samples[14], epsilon);
+  XCTAssertEqualWithAccuracy(0.0638560056686, samples[15], epsilon);
+  XCTAssertEqualWithAccuracy(0.136500775814, samples[16], epsilon);
+  XCTAssertEqualWithAccuracy(0.0657718032598, samples[17], epsilon);
+  XCTAssertEqualWithAccuracy(0.0629670470953, samples[18], epsilon);
+  XCTAssertEqualWithAccuracy(0.0279869697988, samples[19], epsilon);
+  XCTAssertEqualWithAccuracy(0.0638560056686, samples[20], epsilon);
+  XCTAssertEqualWithAccuracy(0.136500775814, samples[21], epsilon);
+  XCTAssertEqualWithAccuracy(0.0657718032598, samples[22], epsilon);
+  XCTAssertEqualWithAccuracy(0.0629670470953, samples[23], epsilon);
+  XCTAssertEqualWithAccuracy(0.0279869697988, samples[24], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[25], epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
@@ -296,39 +297,40 @@ using namespace SF2::Render::Engine;
     samples.push_back(harness.lastDrySample());
   }
 
-  XCTAssertEqual(size_t(32), engine.activeVoiceCount());
+  XCTAssertEqual(size_t(42), engine.activeVoiceCount());
   harness.renderToEnd(mixer);
   samples.push_back(harness.lastDrySample());
   XCTAssertEqual(size_t(0), engine.activeVoiceCount());
 
   [self dumpSamples: samples];
 
-  XCTAssertEqualWithAccuracy(0.0584149733186, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.139659687877, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0654851198196, samples[2], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0635829642415, samples[3], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0277795381844, samples[4], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0636894926429, samples[5], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.136539652944, samples[6], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0655902549624, samples[7], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0635517537594, samples[8], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0277947913855, samples[9], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0636894926429, samples[10], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.136539652944, samples[11], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0655902549624, samples[12], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0635517537594, samples[13], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0277947913855, samples[14], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0636894926429, samples[15], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.136539652944, samples[16], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0655902549624, samples[17], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0635517537594, samples[18], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0277947913855, samples[19], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0636894926429, samples[20], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.136539652944, samples[21], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0655902549624, samples[22], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0635517537594, samples[23], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0277947913855, samples[24], self.epsilon);
-  XCTAssertEqualWithAccuracy(0, samples[25], self.epsilon);
+  auto epsilon = self.epsilon;
+  XCTAssertEqualWithAccuracy(0.0584149733186, samples[0], epsilon);
+  XCTAssertEqualWithAccuracy(0.139659687877, samples[1], epsilon);
+  XCTAssertEqualWithAccuracy(0.0654851198196, samples[2], epsilon);
+  XCTAssertEqualWithAccuracy(0.0635829642415, samples[3], epsilon);
+  XCTAssertEqualWithAccuracy(0.0277795381844, samples[4], epsilon);
+  XCTAssertEqualWithAccuracy(0.063857652247, samples[5], epsilon);
+  XCTAssertEqualWithAccuracy(0.13649687171, samples[6], epsilon);
+  XCTAssertEqualWithAccuracy(0.0657718554139, samples[7], epsilon);
+  XCTAssertEqualWithAccuracy(0.0635389462113, samples[8], epsilon);
+  XCTAssertEqualWithAccuracy(0.0277802255005, samples[9], epsilon);
+  XCTAssertEqualWithAccuracy(0.0636782422662, samples[10], epsilon);
+  XCTAssertEqualWithAccuracy(0.136522755027, samples[11], epsilon);
+  XCTAssertEqualWithAccuracy(0.0655816420913, samples[12], epsilon);
+  XCTAssertEqualWithAccuracy(0.063736461103, samples[13], epsilon);
+  XCTAssertEqualWithAccuracy(0.0279606021941, samples[14], epsilon);
+  XCTAssertEqualWithAccuracy(0.0638589933515, samples[15], epsilon);
+  XCTAssertEqualWithAccuracy(0.136534586549, samples[16], epsilon);
+  XCTAssertEqualWithAccuracy(0.0655846372247, samples[17], epsilon);
+  XCTAssertEqualWithAccuracy(0.0635286420584, samples[18], epsilon);
+  XCTAssertEqualWithAccuracy(0.0277778878808, samples[19], epsilon);
+  XCTAssertEqualWithAccuracy(0.0636785924435, samples[20], epsilon);
+  XCTAssertEqualWithAccuracy(0.136495783925, samples[21], epsilon);
+  XCTAssertEqualWithAccuracy(0.0657671317458, samples[22], epsilon);
+  XCTAssertEqualWithAccuracy(0.062967300415, samples[23], epsilon);
+  XCTAssertEqualWithAccuracy(0.0278175324202, samples[24], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[25], epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
@@ -477,6 +479,42 @@ using namespace SF2::Render::Engine;
 
   // Render rest
   harness.renderToEnd(mixer);
+  XCTAssertEqual(size_t(0), engine.activeVoiceCount());
+
+  [self playSamples: harness.dryBuffer() count: harness.duration()];
+}
+
+- (void)testEngineMIDINoteRandomNoteOff
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(self.contexts->context0.path(), 0);
+
+  int seconds = 2;
+  auto mixer{harness.createMixer(seconds)};
+  XCTAssertEqual(size_t(0), engine.activeVoiceCount());
+
+  harness.sendNoteOn(40);
+  harness.renderUntil(mixer, AVAudioFrameCount(harness.renders() * 0.2));
+
+  harness.sendNoteOff(40);
+  harness.sendNoteOff(40);
+  harness.renderUntil(mixer, AVAudioFrameCount(harness.renders() * 0.4));
+
+  harness.sendNoteOn(41);
+  harness.sendNoteOn(42);
+  harness.renderUntil(mixer, AVAudioFrameCount(harness.renders() * 0.6));
+
+  harness.sendNoteOff(41);
+  harness.sendNoteOff(41);
+  harness.renderUntil(mixer, AVAudioFrameCount(harness.renders() * 0.8));
+
+  harness.sendNoteOff(42);
+  harness.sendNoteOff(42);
+  harness.sendNoteOff(42);
+
+  harness.renderToEnd(mixer);
+
   XCTAssertEqual(size_t(0), engine.activeVoiceCount());
 
   [self playSamples: harness.dryBuffer() count: harness.duration()];

@@ -143,7 +143,8 @@ extension Array where Element == SwiftSetting {
 extension Array where Element == CXXSetting {
   static var cxxSettings: [CXXSetting] {
     let unsafeFlags = [
-      "-O3",
+      // "-O3",
+      "-g",
       "-pedantic",
       "-Wall",
       "-Wassign-enum",
