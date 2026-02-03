@@ -155,11 +155,12 @@ SF2::IO::File::LoadResponse
 Engine::load(const std::string& path, size_t index) noexcept
 {
   os_log_info(log_, "load - path: '%{public}s' index: %lu", path.c_str(), index);
-  allOff();
+
   auto file = std::make_unique<IO::File>(path);
   auto response = file->load();
+
   if (response == IO::File::LoadResponse::ok) {
-    presets_.clear();
+    forgetCurrentPresets();
     file_.swap(file);
     presets_.build(*file_);
     usePresetWithIndex(index);
@@ -174,13 +175,11 @@ Engine::load(int fd, size_t index) noexcept
 {
   os_log_info(log_, "load - fd: %d index: %lu", fd, index);
 
-  allOff();
-
   auto file = std::make_unique<IO::File>();
   auto response = file->load(fd);
 
   if (response == IO::File::LoadResponse::ok) {
-    presets_.clear();
+    forgetCurrentPresets();
     file_.swap(file);
     presets_.build(*file_);
     usePresetWithIndex(index);
@@ -194,7 +193,9 @@ void
 Engine::usePresetWithIndex(size_t index)
 {
   os_log_info(log_, "usePresetWithIndex BEGIN - %lu", index);
+
   allOff();
+
   if (index >= presets_.size()) {
     // Special case to flag no preset being used.
     index = presets_.size();
@@ -595,6 +596,15 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
 }
 
 void
+Engine::forgetCurrentPresets() noexcept {
+
+  // Stop referring to current SF2 file and presets in preparation for loading a new one. By dropping all presets, future MIDI
+  // note ON commands will be ignored.
+  allOff();
+  presets_.clear();
+}
+
+void
 Engine::loadFileAndPreset(std::vector<uint8_t>&& bytes) noexcept {
   auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes.data());
   auto presetIndex = payload->presetIndex;
@@ -606,6 +616,9 @@ Engine::loadFileAndPreset(std::vector<uint8_t>&& bytes) noexcept {
   auto path = pathCount == 0 ? std::string("") : Utils::Base64::decode(pathStart, pathCount);
 
   if (!path.empty()) {
+    // Stop referring to current SF2 file and presets. We don't know when this will be acted on, so keep future MIDI events from
+    // activating a voice until safe to do so.
+    forgetCurrentPresets();
     load(path, presetIndex);
   } else {
     usePresetWithIndex(presetIndex);

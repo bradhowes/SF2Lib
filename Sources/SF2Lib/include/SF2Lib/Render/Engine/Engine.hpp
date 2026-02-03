@@ -450,6 +450,8 @@ private:
     }
   }
 
+  void forgetCurrentPresets() noexcept;
+
   void bumpLastLoadFinished() noexcept;
 
   void initialize(Float sampleRate) noexcept;
