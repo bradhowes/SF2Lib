@@ -12,7 +12,7 @@ using namespace SF2::Render::Voice::State;
 
 namespace EntityMod = Entity::Modulator;
 
-int Modulator::ValueProvider::ccValue(const State& state, const MIDI::ChannelState& channelState) const noexcept {
+int Modulator::ValueProvider::ccValue(const State&, const MIDI::ChannelState& channelState) const noexcept {
   auto value = channelState.continuousControllerValue(cc_);
   // std::cout << "ValueProvider CC " << valueOf(cc_) << " value: " << value << "\n";
   return value;
@@ -36,19 +36,19 @@ int Modulator::ValueProvider::keyPressure(const State& state, const MIDI::Channe
   return value;
 }
 
-int Modulator::ValueProvider::channelPressure(const State& state, const MIDI::ChannelState& channelState) const noexcept {
+int Modulator::ValueProvider::channelPressure(const State&, const MIDI::ChannelState& channelState) const noexcept {
   auto value = channelState.channelPressure();
   // std::cout << "ValueProvider channelPressure " << value << "\n";
   return value;
 }
 
-int Modulator::ValueProvider::pitchWheelValue(const State& state, const MIDI::ChannelState& channelState) const noexcept {
+int Modulator::ValueProvider::pitchWheelValue(const State&, const MIDI::ChannelState& channelState) const noexcept {
   auto value = channelState.pitchWheelValue();
   // std::cout << "ValueProvider pitchWheelValue " << value << "\n";
   return value;
 }
 
-int Modulator::ValueProvider::pitchWheelSensitivity(const State& state, const MIDI::ChannelState& channelState) const noexcept {
+int Modulator::ValueProvider::pitchWheelSensitivity(const State&, const MIDI::ChannelState& channelState) const noexcept {
   auto value = channelState.pitchWheelSensitivity();
   // std::cout << "ValueProvider pitchWheelSensitivity " << value << "\n";
   return value;

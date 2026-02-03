@@ -52,7 +52,6 @@ public:
    Create new state vector with a given sample rate.
 
    @param sampleRate the sample rate of audio being rendered
-   @param channelState the MIDI channel that is in control
    */
   State(Float sampleRate = 0_F) noexcept :
   sampleRate_{sampleRate}, eventKey_{}, eventVelocity_{}
@@ -64,11 +63,10 @@ public:
    Create new state vector for testing purposes.
 
    @param sampleRate the sample rate of audio being rendered
-   @param channelState the MIDI channel that is in control
    @param key the MIDI key to use
    @param velocity the MIDI velocity to use
    */
-  State(Float sampleRate, const MIDI::ChannelState& channelState, int key, int velocity = 64) noexcept :
+  State(Float sampleRate, int key, int velocity = 64) noexcept :
   sampleRate_{sampleRate}, eventKey_{key}, eventVelocity_{velocity}
   {
     clear();

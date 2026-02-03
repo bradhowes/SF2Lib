@@ -32,8 +32,8 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(cache.size(), size_t(128));
 }
 
-static int countActive(const OldestVoiceCollection& cache) noexcept {
-  auto active = 0;
+static size_t countActive(const OldestVoiceCollection& cache) noexcept {
+  size_t active = 0;
   for (auto _ : cache) ++active;
   XCTAssertEqual(cache.activeVoiceCount(), size_t(active));
   return active;
@@ -41,18 +41,18 @@ static int countActive(const OldestVoiceCollection& cache) noexcept {
 
 - (void)testLimits {
   OldestVoiceCollection cache;
-  XCTAssertEqual(countActive(cache), 0);
-  for (auto index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
+  XCTAssertEqual(countActive(cache), size_t(0));
+  for (size_t index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
   XCTAssertEqual(countActive(cache), traits::maxVoiceCount);
-  for (auto index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
+  for (size_t index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
   XCTAssertEqual(countActive(cache), traits::maxVoiceCount);
-  for (auto index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
+  for (size_t index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
   XCTAssertEqual(countActive(cache), traits::maxVoiceCount);
 
-  for (auto index = 0; index < traits::maxVoiceCount; index += 2) cache.voiceRelease(size_t(index));
+  for (size_t index = 0; index < traits::maxVoiceCount; index += 2) cache.voiceRelease(size_t(index));
   XCTAssertEqual(countActive(cache), traits::maxVoiceCount / 2);
-  for (auto index = 1; index < traits::maxVoiceCount; index += 2) cache.voiceRelease(size_t(index));
-  XCTAssertEqual(countActive(cache), 0);
+  for (size_t index = 1; index < traits::maxVoiceCount; index += 2) cache.voiceRelease(size_t(index));
+  XCTAssertEqual(countActive(cache), size_t(0));
 }
 
 - (void)testRepetitions {
@@ -61,9 +61,9 @@ static int countActive(const OldestVoiceCollection& cache) noexcept {
     OldestVoiceCollection cache;
     [self startMeasuring];
     for (auto iteration = 0; iteration < 5'000; ++iteration) {
-      for (auto index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
-      for (auto index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
-      for (auto index = traits::maxVoiceCount; index < 0; --index) cache.voiceRelease(size_t(index - 1));
+      for (size_t index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
+      for (size_t index = 0; index < traits::maxVoiceCount; ++index) cache.voiceAcquire();
+      for (size_t index = traits::maxVoiceCount; index < 0; --index) cache.voiceRelease(size_t(index - 1));
     }
     [self stopMeasuring];
   }];

@@ -34,7 +34,7 @@ using namespace SF2::Render::Voice::Sample;
   Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sampleRate), uint8_t(key));
-  State::State state{sampleRate, *self.channelState, key};
+  State::State state{sampleRate, key};
   Pitch pitch{state};
   pitch.configure(header);
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), Modulation::Value(0.0));
@@ -45,7 +45,7 @@ using namespace SF2::Render::Voice::Sample;
   Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sampleRate), uint8_t(key));
-  State::State state{sampleRate, *self.channelState, key + 12};
+  State::State state{sampleRate, key + 12};
   Pitch pitch{state};
   pitch.configure(header);
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), Modulation::Value(0.0));
@@ -56,7 +56,7 @@ using namespace SF2::Render::Voice::Sample;
   Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sampleRate), uint8_t(key));
-  State::State state{sampleRate, *self.channelState, key + 24};
+  State::State state{sampleRate, key + 24};
   Pitch pitch{state};
   pitch.configure(header);
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), Modulation::Value(0.0));
@@ -67,7 +67,7 @@ using namespace SF2::Render::Voice::Sample;
   Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sampleRate), uint8_t(key));
-  State::State state{sampleRate, *self.channelState, key};
+  State::State state{sampleRate, key};
   Pitch pitch{state};
   self.sst.setValue(state, State::State::Index::overridingRootKey, 81);
   pitch.configure(header);
@@ -79,7 +79,7 @@ using namespace SF2::Render::Voice::Sample;
   Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sampleRate), uint8_t(key));
-  State::State state{sampleRate, *self.channelState, key + 12};
+  State::State state{sampleRate, key + 12};
   self.sst.setValue(state, State::State::Index::forcedMIDIKey, key);
   Pitch pitch{state};
   pitch.configure(header);
@@ -91,7 +91,7 @@ using namespace SF2::Render::Voice::Sample;
   Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sampleRate * 2), uint8_t(key));
-  State::State state{sampleRate, *self.channelState, key};
+  State::State state{sampleRate, key};
   Pitch pitch{state};
   pitch.configure(header);
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), Modulation::Value(0.0));
@@ -102,7 +102,7 @@ using namespace SF2::Render::Voice::Sample;
   Float sampleRate = 44100.0;
   auto key = 69;
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sampleRate / 2), uint8_t(key));
-  State::State state{sampleRate, *self.channelState, key};
+  State::State state{sampleRate, key};
   Pitch pitch{state};
   pitch.configure(header);
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), Modulation::Value(0.0));
@@ -113,7 +113,7 @@ using namespace SF2::Render::Voice::Sample;
   Float sampleRate = 44100.0;
   auto key = 69; // A4
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sampleRate), uint8_t(key), 100.0);
-  State::State state{sampleRate, *self.channelState, key - 1};
+  State::State state{sampleRate, key - 1};
   Pitch pitch{state};
   pitch.configure(header);
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), Modulation::Value(0.0));
@@ -124,7 +124,7 @@ using namespace SF2::Render::Voice::Sample;
   Float sampleRate = 44100.0;
   auto key = 69; // A4
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sampleRate), uint8_t(key), -100.0);
-  State::State state{sampleRate, *self.channelState, key + 1};
+  State::State state{sampleRate, key + 1};
   Pitch pitch{state};
   pitch.configure(header);
   auto inc = pitch.samplePhaseIncrement(ModLFO::Value(0.0), VibLFO::Value(0.0), Modulation::Value(0.0));
@@ -135,7 +135,7 @@ using namespace SF2::Render::Voice::Sample;
   Float sampleRate = 44100.0;
   auto key = 69; // A4
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sampleRate), uint8_t(key));
-  State::State state{sampleRate, *self.channelState, key + 1};
+  State::State state{sampleRate, key + 1};
   Pitch pitch{state};
   // Make every key use the same frequency as the source key.
   self.sst.setValue(state, State::State::Index::scaleTuning, 0.0);
@@ -155,7 +155,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(44100.0), uint8_t(sourceKey));
-  State::State state{44100.0, *self.channelState, eventKey};
+  State::State state{44100.0, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
 
@@ -183,7 +183,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(44100.0), uint8_t(sourceKey));
-  State::State state{44100.0, *self.channelState, eventKey};
+  State::State state{44100.0, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
 
@@ -211,7 +211,7 @@ using namespace SF2::Render::Voice::Sample;
   auto sourceKey = 69; // A4
   auto eventKey = sourceKey;
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(44100.0), uint8_t(sourceKey));
-  State::State state{44100.0, *self.channelState, eventKey};
+  State::State state{44100.0, eventKey};
   Pitch pitch{state};
   pitch.configure(header);
 
@@ -233,7 +233,7 @@ using namespace SF2::Render::Voice::Sample;
 
 - (void)testConstantRootKey {
   Entity::SampleHeader header(0, 100, 80, 90, uint32_t(44100.0), uint8_t(255));
-  State::State state{44100.0, *self.channelState, 60};
+  State::State state{44100.0, 60};
   Pitch pitch{state};
   pitch.configure(header);
 

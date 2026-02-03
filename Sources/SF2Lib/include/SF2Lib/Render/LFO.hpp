@@ -38,7 +38,7 @@ protected:
   /**
    Construct new LFO. It will have no frequency so it will never return a non-zero value.
 
-   @param sampleRate the sample rate being used
+   @param logTag the name of the LFO
    */
   LFO(const char* logTag) noexcept : log_{Log::create(logTag)} {}
 

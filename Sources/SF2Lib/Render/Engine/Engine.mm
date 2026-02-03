@@ -85,8 +85,8 @@ Engine::Engine(Float sampleRate, size_t voiceCountLimit, Interpolator interpolat
     sampleRate_{sampleRate},
     minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
     parameters_{},
-    voiceCountLimit_{voiceCountLimit},
     oldestVoiceIndices_{},
+    voiceCountLimit_{voiceCountLimit},
     renderSignpost_{os_signpost_id_generate(log_)},
     noteOnSignpost_{os_signpost_id_generate(log_)},
     noteOffSignpost_{os_signpost_id_generate(log_)},
@@ -302,7 +302,7 @@ Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
   }
 
   uint64_t timeBudgetNanoseconds = renderingTimeBudgetScaling_ > 0.0
-  ? (frameCount * renderingTimeBudgetIntervalNanoseconds_ * renderingTimeBudgetScaling_)
+  ? (frameCount * uint64_t(double(renderingTimeBudgetIntervalNanoseconds_) * renderingTimeBudgetScaling_))
   : 0xFFFFFFFFFFFFFFFFL;
 
   auto entryTime = Utils::Timer::now();
@@ -648,15 +648,15 @@ void
 Engine::loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept {
   os_log_info(log_, "loadBookmarkAndPreset BEGIN");
 
-  auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes.data());
+  auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
   auto presetIndex = payload->presetIndex;
   auto overrideCount = payload->overrideCount;
-  auto pos1 = reinterpret_cast<const SF2::MIDI::GeneratorOverride*>(payload + 1);
+  auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>(payload + 1);
   auto overrides = std::vector<MIDI::GeneratorOverride>(pos1, pos1 + overrideCount);
-  auto dataStart = reinterpret_cast<const uint8_t*>(pos1 + overrideCount);
+  auto dataStart = reinterpret_cast<uint8_t*>(pos1 + overrideCount);
   auto dataCount = size_t((bytes.data() + bytes.size()) - dataStart) - 1;
 
-  NSData* data = [NSData dataWithBytesNoCopy:(void*)dataStart length:dataCount freeWhenDone:false];
+  NSData* data = [NSData dataWithBytesNoCopy:dataStart length:dataCount freeWhenDone:false];
   NSData* bookmark = [data initWithBase64EncodedData:data options:0];
 
   NSError* error = nil;
@@ -689,10 +689,10 @@ Engine::loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept {
                                   options:NSFileCoordinatorReadingWithoutChanges
                                     error:&error
                                byAccessor:^(NSURL* url) {
-    NSError* error = nil;
-    NSFileHandle* fileHandle = [NSFileHandle fileHandleForReadingFromURL:url error:&error];
-    if (error != nil) {
-      os_log_error(log_, "loadBookmarkAndPreset - failed to open file: %{public}@", error);
+    NSError* err2 = nil;
+    NSFileHandle* fileHandle = [NSFileHandle fileHandleForReadingFromURL:url error:&err2];
+    if (err2 != nil) {
+      os_log_error(log_, "loadBookmarkAndPreset - failed to open file: %{public}@", err2);
       return;
     }
 
@@ -700,6 +700,10 @@ Engine::loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept {
 
     load(fileHandle.fileDescriptor, presetIndex);
   }];
+
+  if (didStart) {
+    [resolved stopAccessingSecurityScopedResource];
+  }
 
   os_log_info(log_, "loadBookmarkAndPreset END");
 }
@@ -768,7 +772,7 @@ void
 Engine::initialize(Float sampleRate) noexcept
 {
   sampleRate_ = sampleRate;
-  renderingTimeBudgetIntervalNanoseconds_ = 1.0 / sampleRate * 1.0e9;
+  renderingTimeBudgetIntervalNanoseconds_ = uint64_t(1.0 / sampleRate * 1.0e9);
   allOff();
   for (auto& voice : voices_) {
     voice.setSampleRate(sampleRate);

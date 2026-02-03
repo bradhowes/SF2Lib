@@ -860,7 +860,7 @@ using namespace SF2::Render::Engine;
 {
   auto blah = [NSProcessInfo.processInfo.environment valueForKey:@"SNAPSHOT_ARTIFACTS"];
   std::cout << "SNAPSHOT_ARTIFACTS: " << blah << "\n";
-  return;
+  // return;
 
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
@@ -1309,7 +1309,6 @@ using namespace SF2::Render::Engine;
                               includingResourceValuesForKeys:nil
                                                relativeToURL:nil
                                                        error:&error];
-  NSData* encoded = [bookmark base64EncodedDataWithOptions:0];
   if (didStart) { [url stopAccessingSecurityScopedResource]; }
 
   auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
@@ -1340,7 +1339,6 @@ using namespace SF2::Render::Engine;
                    includingResourceValuesForKeys:nil
                                     relativeToURL:nil
                                             error:&error];
-  NSData* encoded = [bookmark base64EncodedDataWithOptions:0];
   if (didStart) { [url stopAccessingSecurityScopedResource]; }
 
   auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
@@ -1356,7 +1354,6 @@ using namespace SF2::Render::Engine;
            includingResourceValuesForKeys:nil
                             relativeToURL:nil
                                     error:&error];
-  encoded = [bookmark base64EncodedDataWithOptions:0];
   payload = engine.createLoadBookmarkUsePresetPayload(bookmark, 0, overrides);
   harness.sendRaw(payload);
 
@@ -1366,7 +1363,6 @@ using namespace SF2::Render::Engine;
            includingResourceValuesForKeys:nil
                             relativeToURL:nil
                                     error:&error];
-  encoded = [bookmark base64EncodedDataWithOptions:0];
   payload = engine.createLoadBookmarkUsePresetPayload(bookmark, 0, overrides);
   harness.sendRaw(payload);
 
@@ -1375,8 +1371,8 @@ using namespace SF2::Render::Engine;
   [self waitForExpectations:@[exp]];
 
   XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
-  XCTAssertEqual(1, engine.presetCount());
-  XCTAssertEqual(0, engine.activeVoiceCount());
+  XCTAssertEqual(size_t(1), engine.presetCount());
+  XCTAssertEqual(size_t(0), engine.activeVoiceCount());
 }
 
 - (void)testEngineOneVoicePerKey
