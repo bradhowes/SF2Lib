@@ -19,6 +19,11 @@ let useAccelerate = true
 // `local_dspheaders_check` that can be used to prevent this from happening.
 let useLocalDSPHeaders = false
 
+// Set to true to enable unsafe C++ flags -- only to be used for development/debugging
+// NOTE: do NOT commit when set to true or else downstream release builds may break. There is a pre-commit hook
+// `unsafe_flags_check` that can be used to prevent this from happening.
+let useUnsafeFlags = false
+
 let package = Package(
   name: "SF2Lib",
   platforms: [.iOS(.v14), .macOS(.v14), .tvOS(.v16)],
@@ -118,7 +123,7 @@ extension Package.Dependency {
       path: "/Users/howes/src/Mine/DSPHeaders"
     ) : .package(
       url: "https://github.com/bradhowes/DSPHeaders",
-      from: "1.2.1"
+      from: "1.4.8"
     )
   }
 }
@@ -255,6 +260,6 @@ extension Array where Element == CXXSetting {
       .define("ENABLE_LOWPASS_FILTER", to: enableLowPassFilter ? "1" : "0", .none),
       .define("PLAY_AUDIO", to: playAudioDuringTests ? "1" : "0", .when(configuration: .debug)),
       .define("USE_ACCELERATE", to: useAccelerate ? "1" : "0", .none)
-    ] + [.unsafeFlags(unsafeFlags, .when(configuration: .debug))]
+    ] + (useUnsafeFlags ? [.unsafeFlags(unsafeFlags, .when(configuration: .debug))] : [])
   }
 }
