@@ -140,38 +140,6 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual("", engine.activePresetName());
 }
 
-- (void)testUsePresetByBankProgram {
-  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
-  auto& engine{harness.engine()};
-  XCTAssertEqual(harness.load(self.contexts->context0.path(), 0), SF2::IO::File::LoadResponse::ok);
-
-  harness.usePresetWithBankProgram(0, 0);
-  XCTAssertTrue(engine.hasActivePreset());
-  XCTAssertEqual("Piano 1", engine.activePresetName());
-  harness.usePresetWithBankProgram(0, 1);
-  XCTAssertTrue(engine.hasActivePreset());
-  std::cout << engine.activePresetName() << '\n';
-  XCTAssertEqual("Piano 2", engine.activePresetName());
-  harness.usePresetWithBankProgram(128, 56);
-  XCTAssertTrue(engine.hasActivePreset());
-  XCTAssertEqual("SFX", engine.activePresetName());
-  harness.usePresetWithBankProgram(uint16_t(-1), uint16_t(-1));
-  XCTAssertFalse(engine.hasActivePreset());
-  XCTAssertEqual("", engine.activePresetName());
-  harness.usePresetWithBankProgram(uint16_t(-1), 0);
-  XCTAssertFalse(engine.hasActivePreset());
-  XCTAssertEqual("", engine.activePresetName());
-  harness.usePresetWithBankProgram(0, uint16_t(-1));
-  XCTAssertFalse(engine.hasActivePreset());
-  XCTAssertEqual("", engine.activePresetName());
-  harness.usePresetWithBankProgram(129, 0);
-  XCTAssertFalse(engine.hasActivePreset());
-  XCTAssertEqual("", engine.activePresetName());
-  harness.usePresetWithBankProgram(0, 128);
-  XCTAssertFalse(engine.hasActivePreset());
-  XCTAssertEqual("", engine.activePresetName());
-}
-
 - (void)testRolandPianoChordRenderLinear {
   auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
   auto& engine{harness.engine()};

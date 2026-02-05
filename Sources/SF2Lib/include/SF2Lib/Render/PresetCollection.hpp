@@ -31,7 +31,7 @@ public:
   inline bool empty() const noexcept { return size_.load() == 0; }
 
   /// @returns the number of presets in the collection.
-  inline size_t size() const noexcept { return size_.load(); }
+  inline size_t size() const noexcept { return size_; }
 
   /// @returns the preset at a given index.
   const Preset& operator[](size_t index) const noexcept;

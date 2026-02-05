@@ -160,11 +160,12 @@ Engine::load(const std::string& path, size_t index) noexcept
   auto response = file->load();
 
   if (response == IO::File::LoadResponse::ok) {
-    forgetCurrentPresets();
+    presets_.clear();
     file_.swap(file);
     presets_.build(*file_);
-    usePresetWithIndex(index);
   }
+
+  usePresetWithIndex(index);
 
   os_log_info(log_, "load END - %d", response);
   return response;
@@ -179,11 +180,12 @@ Engine::load(int fd, size_t index) noexcept
   auto response = file->load(fd);
 
   if (response == IO::File::LoadResponse::ok) {
-    forgetCurrentPresets();
+    presets_.clear();
     file_.swap(file);
     presets_.build(*file_);
-    usePresetWithIndex(index);
   }
+
+  usePresetWithIndex(index);
 
   os_log_info(log_, "load END - %d", response);
   return response;
@@ -194,12 +196,13 @@ Engine::usePresetWithIndex(size_t index)
 {
   os_log_info(log_, "usePresetWithIndex BEGIN - %lu", index);
 
-  allOff();
+  presestChangeInProgress_.store(false);
 
   if (index >= presets_.size()) {
     // Special case to flag no preset being used.
     index = presets_.size();
   }
+
   activePreset_ = index;
   parameters_.reset();
   bumpLastLoadFinished();
@@ -209,15 +212,9 @@ Engine::usePresetWithIndex(size_t index)
 }
 
 void
-Engine::usePresetWithBankProgram(uint16_t bank, uint16_t program)
-{
-  auto index = presets_.locatePresetIndex(bank, program);
-  usePresetWithIndex(index);
-}
-
-void
 Engine::allOff() noexcept
 {
+  // !!! NOTE: must only be done on the render thread.
   for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
     pos = stopVoice(*pos);
   }
@@ -226,7 +223,8 @@ Engine::allOff() noexcept
 void
 Engine::noteOn(int key, int velocity) noexcept
 {
-  if (! hasActivePreset()) return;
+  if (presestChangeInProgress_.load() || !hasActivePreset()) return;
+
   os_signpost_interval_begin(log_, noteOnSignpost_, "noteOn");
 
   if (channelState_.pedalState().softPedalActive) {
@@ -587,6 +585,10 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
     return false;
   }
 
+  // Do this now to stop any future rendering.
+  allOff();
+  presestChangeInProgress_.store(true);
+
   const uint8_t* bytes = midiEvent.data;
   __block auto payload = std::vector<uint8_t>(bytes, bytes + midiEvent.length);
 
@@ -596,16 +598,9 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
 }
 
 void
-Engine::forgetCurrentPresets() noexcept {
-
-  // Stop referring to current SF2 file and presets in preparation for loading a new one. By dropping all presets, future MIDI
-  // note ON commands will be ignored.
-  allOff();
-  presets_.clear();
-}
-
-void
 Engine::loadFileAndPreset(std::vector<uint8_t>&& bytes) noexcept {
+  // !!! NOTE: we are probably *not* running in the render thread, so care must be taken when changing state in the engine.
+
   auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes.data());
   auto presetIndex = payload->presetIndex;
   auto overrideCount = payload->overrideCount;
@@ -618,7 +613,6 @@ Engine::loadFileAndPreset(std::vector<uint8_t>&& bytes) noexcept {
   if (!path.empty()) {
     // Stop referring to current SF2 file and presets. We don't know when this will be acted on, so keep future MIDI events from
     // activating a voice until safe to do so.
-    forgetCurrentPresets();
     load(path, presetIndex);
   } else {
     usePresetWithIndex(presetIndex);
@@ -636,6 +630,10 @@ Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
     return false;
   }
 
+  // Do this now to stop any future rendering.
+  allOff();
+  presestChangeInProgress_.store(true);
+
   const uint8_t* bytes = midiEvent.data;
   __block auto payload = std::vector<uint8_t>(bytes, bytes + midiEvent.length);
 
@@ -646,6 +644,8 @@ Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
 
 void
 Engine::loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept {
+  // !!! NOTE: we are probably *not* running in the render thread, so care must be taken when changing state in the engine.
+
   os_log_info(log_, "loadBookmarkAndPreset BEGIN");
 
   auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
@@ -762,10 +762,15 @@ Engine::createUseBankProgramPayload(uint16_t bank, uint8_t program) noexcept
 void
 Engine::changeProgram(uint8_t program) noexcept
 {
+  allOff();
+  presestChangeInProgress_.store(true);
+
   uint16_t msbBank = channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectMSB);
   uint16_t lsbBank = channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectLSB);
   uint16_t bank = msbBank * 128u + lsbBank;
-  usePresetWithBankProgram(bank, program);
+
+  auto index = presets_.locatePresetIndex(bank, program);
+  usePresetWithIndex(index);
 }
 
 void

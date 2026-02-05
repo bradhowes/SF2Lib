@@ -89,8 +89,6 @@ struct TestEngineHarness {
 
   void usePresetWithIndex(size_t index) { engine_.usePresetWithIndex(index); }
 
-  void usePresetWithBankProgram(uint16_t bank, uint16_t program) { engine_.usePresetWithBankProgram(bank, program); };
-
   AVAudioFrameCount maxFramesToRender() const noexcept { return maxFramesToRender_; }
 
   AVAudioPCMBuffer* dryBuffer() const noexcept { return dryBuffer_; }

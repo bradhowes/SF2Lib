@@ -311,17 +311,6 @@ private:
    */
   void usePresetWithIndex(size_t index);
 
-  /**
-   Activate the preset at the given bank/program.
-
-   NOTE: this is not thread-safe. When running in a render thread, it is expected that this is only executed due to
-   an incoming MIDI command.
-
-   @param bank the bank to use
-   @param program the program in the bank to use
-   */
-  void usePresetWithBankProgram(uint16_t bank, uint16_t program);
-
   /// Reset the engine to a known state. All keys are released, all voices are off, and the MIDI channel state is reset
   /// to initial state.
   void reset() noexcept;
@@ -498,6 +487,7 @@ private:
   std::unique_ptr<IO::File> file_{};
   PresetCollection presets_{};
   size_t activePreset_{0};
+  std::atomic<bool> presestChangeInProgress_{false};
 
   size_t portamentoRateMillisecondsPerSemitone_{100};
 
