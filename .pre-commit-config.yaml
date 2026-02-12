@@ -12,9 +12,9 @@ repos:
   hooks:
   - id: unsafe-flags-check
     name: Check for unsafeFlags being used
-    entry: ./unsafe_flags_check
+    entry: ./pre-commit-hooks/unsafe_flags_check
     language: unsupported
   - id: use-local-dspheaders-check
     name: Check for useLocalDSPHeaders being used # let useLocalDSPHeaders = false
-    entry: ./local_dspheaders_check
+    entry: ./pre-commit-hooks/local_dspheaders_check
     language: unsupported
