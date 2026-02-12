@@ -12,7 +12,7 @@ InstrumentCollection::build(SF2::IO::File& file) noexcept
 {
   const auto& definitions = file.instruments();
   auto count = definitions.size();
-  instruments_.reserve(count);
+  if (instruments_.capacity() < count) instruments_.reserve(count);
   for (size_t index = 0; index < count; ++index) {
     instruments_.emplace_back(file, definitions[index]);
   }

@@ -1230,9 +1230,16 @@ using namespace SF2::Render::Engine;
   overrides.emplace_back(123, 456);
   auto payload = engine.createLoadFileUsePresetPayload(tmp, 234, overrides);
   harness.sendRaw(payload);
+
+  // Post a sentinal work item that will tell us when the Engine's work queue is empty.
+  auto exp = [self expectationWithDescription:@"empty queue"];
+  harness.postWorkItem(^{ [exp fulfill]; });
+  [self waitForExpectations:@[exp]];
+
   std::cout << engine.activePresetName() << '\n';
 
-  // XCTAssertEqual(std::string("SFX"), engine.activePresetName());
+  XCTAssertEqual(0, engine.presetChangesPending());
+  XCTAssertEqual(std::string("SFX"), engine.activePresetName());
 }
 
 - (void)testEngineMIDILoadPathEmpty {
@@ -1254,10 +1261,12 @@ using namespace SF2::Render::Engine;
   payload = engine.createLoadFileUsePresetPayload("", 4, overrides);
   harness.sendRaw(payload);
 
+  // Post a sentinal work item that will tell us when the Engine's work queue is empty.
   auto exp = [self expectationWithDescription:@"empty queue"];
   harness.postWorkItem(^{ [exp fulfill]; });
   [self waitForExpectations:@[exp]];
 
+  XCTAssertEqual(0, engine.presetChangesPending());
   XCTAssertEqual(std::string("E.Piano 1"), engine.activePresetName());
 }
 
@@ -1284,10 +1293,12 @@ using namespace SF2::Render::Engine;
   auto payload = engine.createLoadBookmarkUsePresetPayload(bookmark, 234, overrides);
   harness.sendRaw(payload);
 
+  // Post a sentinal work item that will tell us when the Engine's work queue is empty.
   auto exp = [self expectationWithDescription:@"empty queue"];
   harness.postWorkItem(^{ [exp fulfill]; });
   [self waitForExpectations:@[exp]];
 
+  XCTAssertEqual(0, engine.presetChangesPending());
   XCTAssertEqual(std::string("SFX"), engine.activePresetName());
 }
 
@@ -1334,10 +1345,12 @@ using namespace SF2::Render::Engine;
   payload = engine.createLoadBookmarkUsePresetPayload(bookmark, 0, overrides);
   harness.sendRaw(payload);
 
+  // Post a sentinal work item that will tell us when the Engine's work queue is empty.
   auto exp = [self expectationWithDescription:@"empty queue"];
   harness.postWorkItem(^{ [exp fulfill]; });
   [self waitForExpectations:@[exp]];
 
+  XCTAssertEqual(0, engine.presetChangesPending());
   XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
   XCTAssertEqual(size_t(1), engine.presetCount());
   XCTAssertEqual(size_t(0), engine.activeVoiceCount());

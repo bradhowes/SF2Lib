@@ -6,78 +6,11 @@
 #include "SF2Util/Base64.hpp"
 #include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
+#include "SF2Lib/Render/Engine/LoadPresetSysExPayload.hpp"
 #include "SF2File/IO/File.hpp"
 
 using namespace SF2::Entity::Generator;
 using namespace SF2::Render::Engine;
-
-struct LoadPresetSysExPayload {
-  static constexpr uint8_t manufacturerValue = 0x7E;
-  static constexpr uint8_t modelPathPayload = 0x00; // the payload holds a path string to a file
-  static constexpr uint8_t modelBookmarkPayload = 0x01; // the payload holds a bookmark to a file
-
-  uint8_t sysExBegin;    // 0
-  uint8_t manufacturer;  // 1
-  uint8_t model;         // 2
-  // Here lies 5 bytes of padding
-  size_t presetIndex;    // 8
-  size_t overrideCount;  // 16
-  // SF2::MIDI::GeneratorOverride overrides[1];
-  // char filePath[1];
-  // uint8_t sysExEnd;   // 25 is smallest payload size
-
-  static constexpr size_t minPayloadSize = 25;
-
-  static std::vector<uint8_t> make(const SF2::MIDI::GeneratorOverrideVector& overrides,
-                                   const std::string& filePath, size_t presetIndex) noexcept {
-    auto encodedFilePath = filePath.empty() ? std::string("") : SF2::Utils::Base64::encode(filePath);
-    auto payloadSize = (sizeof(LoadPresetSysExPayload)
-                        + overrides.size() * sizeof(SF2::MIDI::GeneratorOverride)
-                        + encodedFilePath.size()) + 1;
-    auto bytes = std::vector<uint8_t>(payloadSize, 0);
-    auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
-    payload->sysExBegin = SF2::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
-    payload->manufacturer = manufacturerValue;
-    payload->model = modelPathPayload;
-    payload->presetIndex = presetIndex;
-    payload->overrideCount = overrides.size();
-    auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>((bytes.data() + sizeof(LoadPresetSysExPayload)));
-    auto pos2 = std::copy(overrides.begin(), overrides.end(), pos1);
-    auto pos3 = reinterpret_cast<uint8_t*>(std::copy(encodedFilePath.begin(), encodedFilePath.end(),
-                                                     reinterpret_cast<char*>(pos2)));
-    *pos3++ = SF2::valueOf(SF2::MIDI::CoreEvent::EOX);
-
-    assert(pos3 - bytes.data() == long(bytes.size()));
-    assert(bytes.size() >= minPayloadSize);
-
-    return bytes;
-  }
-
-  static std::vector<uint8_t> make(const SF2::MIDI::GeneratorOverrideVector& overrides,
-                                   const NSData* bookmark, size_t presetIndex) noexcept {
-    NSData* encodedBookmark = [bookmark base64EncodedDataWithOptions: 0];
-    auto payloadSize = (sizeof(LoadPresetSysExPayload)
-                        + overrides.size() * sizeof(SF2::MIDI::GeneratorOverride)
-                        + encodedBookmark.length) + 1;
-    auto bytes = std::vector<uint8_t>(payloadSize, 0);
-    auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
-    payload->sysExBegin = SF2::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
-    payload->manufacturer = manufacturerValue;
-    payload->model = modelBookmarkPayload;
-    payload->presetIndex = presetIndex;
-    payload->overrideCount = overrides.size();
-    auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>((bytes.data() + sizeof(LoadPresetSysExPayload)));
-    auto pos2 = reinterpret_cast<uint8_t*>(std::copy(overrides.begin(), overrides.end(), pos1));
-    [encodedBookmark getBytes: pos2 length: encodedBookmark.length];
-    auto pos3 = pos2 + encodedBookmark.length;
-    *pos3++ = SF2::valueOf(SF2::MIDI::CoreEvent::EOX);
-
-    assert(pos3 - bytes.data() == long(bytes.size()));
-    assert(bytes.size() >= minPayloadSize);
-
-    return bytes;
-  }
-};
 
 Engine::Engine(Float sampleRate, size_t voiceCountLimit, Interpolator interpolator, double renderingTimeBudgetScaling,
                size_t minimumNoteDurationMilliseconds) noexcept
@@ -154,50 +87,37 @@ Engine::activePresetIndex() const noexcept
 SF2::IO::File::LoadResponse
 Engine::load(const std::string& path, size_t index) noexcept
 {
-  os_log_info(log_, "load - path: '%{public}s' index: %lu", path.c_str(), index);
-
-  auto file = std::make_unique<IO::File>(path);
-  auto response = file->load();
-
-  if (response == IO::File::LoadResponse::ok) {
-    presets_.clear();
-    file_.swap(file);
-    presets_.build(*file_);
-  }
-
-  usePresetWithIndex(index);
-
-  os_log_info(log_, "load END - %d", response);
-  return response;
+  // Only called from unit tests -- balance the change made in usePresetWithIndex()
+  assert(presetChangesPending_.load() == 0);
+  ++presetChangesPending_;
+  return concludeLoad(path, index);
 }
 
 SF2::IO::File::LoadResponse
 Engine::load(int fd, size_t index) noexcept
 {
-  os_log_info(log_, "load - fd: %d index: %lu", fd, index);
-
-  auto file = std::make_unique<IO::File>();
-  auto response = file->load(fd);
-
-  if (response == IO::File::LoadResponse::ok) {
-    presets_.clear();
-    file_.swap(file);
-    presets_.build(*file_);
-  }
-
-  usePresetWithIndex(index);
-
-  os_log_info(log_, "load END - %d", response);
-  return response;
+  // Only called from unit tests -- balance the change made in concludeUsePresetWithIndex()
+  assert(presetChangesPending_.load() == 0);
+  ++presetChangesPending_;
+  return concludeLoad(fd, index);
 }
 
 void
 Engine::usePresetWithIndex(size_t index)
 {
+  // Only called from unit tests -- balance the change made in concludeUsePresetWithIndex()
   os_log_info(log_, "usePresetWithIndex BEGIN - %lu", index);
+  assert(presetChangesPending_.load() == 0);
+  ++presetChangesPending_;
+  concludeUsePresetWithIndex(index);
+}
 
-  presestChangeInProgress_.store(false);
+void
+Engine::concludeUsePresetWithIndex(size_t index)
+{
+  assert(presetChangesPending_.load() > 0);
 
+  --presetChangesPending_;
   if (index >= presets_.size()) {
     // Special case to flag no preset being used.
     index = presets_.size();
@@ -208,7 +128,7 @@ Engine::usePresetWithIndex(size_t index)
   bumpLastLoadFinished();
 
   NSString* name = [NSString stringWithCString:activePresetName().c_str() encoding:NSUTF8StringEncoding];
-  os_log_info(log_, "usePresetWithIndex END - %{public}@", name);
+  os_log_info(log_, "concludeUsePresetWithIndex END - %{public}@", name);
 }
 
 void
@@ -223,7 +143,7 @@ Engine::allOff() noexcept
 void
 Engine::noteOn(int key, int velocity) noexcept
 {
-  if (presestChangeInProgress_.load() || !hasActivePreset()) return;
+  if (presetChangesPending_.load() > 0 || !hasActivePreset()) return;
 
   os_signpost_interval_begin(log_, noteOnSignpost_, "noteOn");
 
@@ -371,6 +291,24 @@ Engine::doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount durati
     }
   }
   return 0;
+}
+
+void
+Engine::doRenderingStateChanged(bool state) noexcept
+{
+  if (!state) {
+    allOff();
+    // Post a sentinal item to work queue to know all pending items are done. Since the render thread is no longer operating at
+    // this point, we know there will be no more added and from now on it is safe for the Engine to be destroyed.
+    dispatch_sync(workQueue_, ^{ });
+
+    auto value = presetChangesPending_.load();
+    if (value != 0) {
+      os_log_error(log_, "doRenderingStateChanged - detected non-zero presetChangesPending at stop of render loop - %d", value);
+      presetChangesPending_.store(0);
+    }
+  }
+  [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::isRendering)] setValue: SF2::fromBool(state)];
 }
 
 void
@@ -587,7 +525,7 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
 
   // Do this now to stop any future rendering.
   allOff();
-  presestChangeInProgress_.store(true);
+  ++presetChangesPending_;
 
   const uint8_t* bytes = midiEvent.data;
   __block auto payload = std::vector<uint8_t>(bytes, bytes + midiEvent.length);
@@ -611,14 +549,33 @@ Engine::loadFileAndPreset(std::vector<uint8_t>&& bytes) noexcept {
   auto path = pathCount == 0 ? std::string("") : Utils::Base64::decode(pathStart, pathCount);
 
   if (!path.empty()) {
-    // Stop referring to current SF2 file and presets. We don't know when this will be acted on, so keep future MIDI events from
-    // activating a voice until safe to do so.
-    load(path, presetIndex);
+    concludeLoad(path, presetIndex);
   } else {
-    usePresetWithIndex(presetIndex);
+    concludeUsePresetWithIndex(presetIndex);
   }
 
   os_log_info(log_, "loadFileAndPreset END");
+}
+
+SF2::IO::File::LoadResponse
+Engine::concludeLoad(const std::string& path, size_t index) noexcept
+{
+  os_log_info(log_, "concludeLoad - path: '%{public}s' index: %lu", path.c_str(), index);
+  assert(presetChangesPending_.load() > 0);
+
+  auto file = std::make_unique<IO::File>(path);
+  auto response = file->load();
+
+  if (response == IO::File::LoadResponse::ok) {
+    presets_.clear();
+    file_.swap(file);
+    presets_.build(*file_);
+  }
+
+  concludeUsePresetWithIndex(index);
+
+  os_log_info(log_, "concludeLoad END - %d", response);
+  return response;
 }
 
 bool
@@ -632,7 +589,7 @@ Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
 
   // Do this now to stop any future rendering.
   allOff();
-  presestChangeInProgress_.store(true);
+  ++presetChangesPending_;
 
   const uint8_t* bytes = midiEvent.data;
   __block auto payload = std::vector<uint8_t>(bytes, bytes + midiEvent.length);
@@ -698,7 +655,7 @@ Engine::loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept {
 
     os_log_info(log_, "loading from resolved url - file descriptor: %d", fileHandle.fileDescriptor);
 
-    load(fileHandle.fileDescriptor, presetIndex);
+    concludeLoad(fileHandle.fileDescriptor, presetIndex);
   }];
 
   if (didStart) {
@@ -706,6 +663,27 @@ Engine::loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept {
   }
 
   os_log_info(log_, "loadBookmarkAndPreset END");
+}
+
+SF2::IO::File::LoadResponse
+Engine::concludeLoad(int fd, size_t index) noexcept
+{
+  os_log_info(log_, "concludeLoad - fd: %d index: %lu", fd, index);
+  assert(presetChangesPending_.load() > 0);
+
+  auto file = std::make_unique<IO::File>();
+  auto response = file->load(fd);
+
+  if (response == IO::File::LoadResponse::ok) {
+    presets_.clear();
+    file_.swap(file);
+    presets_.build(*file_);
+  }
+
+  concludeUsePresetWithIndex(index);
+
+  os_log_info(log_, "concludeLoad END - %d", response);
+  return response;
 }
 
 std::vector<uint8_t>
@@ -763,14 +741,14 @@ void
 Engine::changeProgram(uint8_t program) noexcept
 {
   allOff();
-  presestChangeInProgress_.store(true);
+  ++presetChangesPending_;
 
   uint16_t msbBank = channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectMSB);
   uint16_t lsbBank = channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectLSB);
   uint16_t bank = msbBank * 128u + lsbBank;
 
   auto index = presets_.locatePresetIndex(bank, program);
-  usePresetWithIndex(index);
+  concludeUsePresetWithIndex(index);
 }
 
 void

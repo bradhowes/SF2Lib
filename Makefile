@@ -13,8 +13,7 @@ default: report
 test-iOS:
 	rm -rf "$(PWD)/.DerivedData-iOS"
 	xcodebuild -list
-	USE_UNSAFE_FLAGS="1" set -o pipefail && xcodebuild test \
-		$(BUILD_FLAGS) \
+	set -o pipefail && xcodebuild test $(BUILD_FLAGS) \
 		-derivedDataPath "$(PWD)/.DerivedData-iOS" \
 		-destination platform="$(PLATFORM_IOS)" $(XCB)
 
@@ -30,8 +29,7 @@ percentage-iOS: coverage-iOS
 
 test-macOS:
 	rm -rf "$(PWD)/.DerivedData-macOS"
-	USE_UNSAFE_FLAGS="1" set -o pipefail && xcodebuild test \
-		$(BUILD_FLAGS) \
+	set -o pipefail && xcodebuild test $(BUILD_FLAGS) \
 		-derivedDataPath "$(PWD)/.DerivedData-macOS" \
 		-destination platform="$(PLATFORM_MACOS)" $(XCB)
 

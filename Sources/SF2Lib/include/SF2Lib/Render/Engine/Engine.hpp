@@ -158,11 +158,8 @@ public:
   /// API for EventProcessor
   AUAudioFrameCount doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount duration) noexcept;
 
-  /// API for EventProcessor
-  void doRenderingStateChanged(bool state) noexcept {
-    if (!state) allOff();
-    [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::isRendering)] setValue: SF2::fromBool(state)];
-  }
+  /// API for EventProcessor. Notification that the rendering thread is running (true) or stopped (false).
+  void doRenderingStateChanged(bool state) noexcept;
 
   /// API for EventProcessor
   void doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept;
@@ -262,6 +259,9 @@ public:
 
   inline Float lastLoadFinishedCounter() const noexcept { return lastLoadFinishedCounter_; }
 
+  /// @returns current number of preset changes pending in the work queue.
+  inline int presetChangesPending() const noexcept { return presetChangesPending_.load(); }
+
 private:
 
   static AUParameter* makeGeneratorParameter(Entity::Generator::Index index) noexcept;
@@ -285,6 +285,8 @@ private:
    Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
    one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
 
+   NOTE: only called from unit tests via TestEngineHarness
+
    @param path the file to load from
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
@@ -292,8 +294,19 @@ private:
   IO::File::LoadResponse load(const std::string& path, size_t index) noexcept;
 
   /**
+   Finish loading from an SF2 file. Called at the conclusion of `loadFileAndPreset()`.
+
+   @param path the file to load from
+   @param index the preset to make active
+   @returns IO::File::LoadResponse::OK if the loading was successful
+   */
+  IO::File::LoadResponse concludeLoad(const std::string& path, size_t index) noexcept;
+
+  /**
    Load the presets from an file descriptor and activate one. NOTE: this is not thread-safe. When running in a render thread,
    one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
+
+   NOTE: only called from unit tests via TestEngineHarness
 
    @param fd the file descriptor to read from
    @param index the preset to make active
@@ -302,14 +315,22 @@ private:
   IO::File::LoadResponse load(int fd, size_t index) noexcept;
 
   /**
-   Activate the preset at the given index.
+   Finish loading from an SF2 file. Called at the conclusion of `loadBookmarkAndPreset()`.
 
-   NOTE: this is not thread-safe. When running in a render thread, it is expected that this is only executed due to
-   an incoming MIDI command.
+   @param path the file to load from
+   @param index the preset to make active
+   @returns IO::File::LoadResponse::OK if the loading was successful
+   */
+  IO::File::LoadResponse concludeLoad(int fd, size_t index) noexcept;
+
+  /**
+   Activate the preset at the given index. NOTE: this is not thread-safe and is only called from unit tests via TestEngineHarness.
 
    @param index the preset to use
    */
   void usePresetWithIndex(size_t index);
+
+  void concludeUsePresetWithIndex(size_t index);
 
   /// Reset the engine to a known state. All keys are released, all voices are off, and the MIDI channel state is reset
   /// to initial state.
@@ -487,7 +508,7 @@ private:
   std::unique_ptr<IO::File> file_{};
   PresetCollection presets_{};
   size_t activePreset_{0};
-  std::atomic<bool> presestChangeInProgress_{false};
+  std::atomic<int> presetChangesPending_{0};
 
   size_t portamentoRateMillisecondsPerSemitone_{100};
 

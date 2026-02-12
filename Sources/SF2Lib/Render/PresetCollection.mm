@@ -23,12 +23,14 @@ PresetCollection::build(SF2::IO::File& file)
     presets_.emplace_back(file, instruments_, presetConfigs[presetIndex]);
   }
 
+  // At this point, the collection is safe to use from render thread.
   size_.store(presets_.size());
 }
 
 void
 PresetCollection::clear() noexcept
 {
+  // Prevent future use of this container from the render thread until it has been rebuilt via `build(file)`
   size_.store(0);
   presets_.clear();
   instruments_.clear();
@@ -37,12 +39,17 @@ PresetCollection::clear() noexcept
 const Preset&
 PresetCollection::operator[](size_t index) const noexcept
 {
+  assert(size_.load() > index);
   return checkedVectorIndexing(presets_, index);
 }
 
 size_t
 PresetCollection::locatePresetIndex(uint16_t bank, uint16_t program) const noexcept
 {
+  if (size_.load() == 0) {
+    return 0;
+  }
+
   // Search for the first entry that is not less than the value being searched for (uses binary search).
   Entity::Preset config{bank, program};
   auto found = std::lower_bound(presets_.begin(), presets_.end(), config,
