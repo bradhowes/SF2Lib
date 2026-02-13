@@ -144,7 +144,7 @@ public:
                           AUAudioFrameCount frameCount) noexcept {
     // All of the work is done when working with output bus 0. If wired correctly, busses 1 and 2 will
     // hold the buffered values that were created here.
-    if (outputBusNumber == 0) {
+    if (presetChangesPending_.load() == 0 && outputBusNumber == 0) {
 
       // The voices will add their samples to the mixer so clear them here.
       outs.clear(frameCount);
