@@ -123,7 +123,7 @@ File::sampleSourceCollection()
 }
 
 /**
- Load the 16-bit INT samples from the file and convert to normalized floating point (+/- 1.0). The conversion happens
+ Load the 16-bit INT samples from the file and convert to normalized floating point (+/- 1.0). The conversion happens in
  batches using the Accelerated framework (if enabled). NOTE: this approach processes all of the sample data from an
  SF2 file in one-shot rather than restricting to preset samples and postponing until first attempt to use a preset.
  Doing the latter approach should reduce load times for large SF2 files, at the cost of increasing a preset load time
@@ -131,15 +131,16 @@ File::sampleSourceCollection()
  */
 void
 File::extractNormalizedSamples() {
+
   // 32K seems to be a good value to use for speed.
-  static const size_t batchSampleCount = 32 * 1024;
-  static const Float normalizationScale = 1.0_F / Float(1 << 15);
+  static constexpr size_t batchSampleCount = 32 * 1024;
+  static constexpr Float normalizationScale = 1.0_F / Float(1 << 15);
 
   auto pos = sampleDataBegin_;
   assert(pos.available() >= 0);
   size_t remainingSamples = size_t(pos.available()) / sizeof(int16_t);
   normalizedSamples_.resize(remainingSamples);
-  std::vector<int16_t> rawSamples(batchSampleCount);
+  std::array<int16_t, batchSampleCount> rawSamples;
 
   auto ptr = normalizedSamples_.data();
   using elemType = std::remove_pointer_t<decltype(ptr)>;

@@ -29,10 +29,12 @@ Parser::parse(const char* path)
       auto chunk = p1.makeChunk();
       p1 = chunk.advance();
       auto p2 = p1;
-      switch (Tags(chunk.tag().rawValue())) {
+      switch (chunk.tag().toTags()) {
+
         case Tags::inam:
           info.embeddedName = chunk.extract();
           break;
+
         case Tags::icop:
           info.embeddedCopyright = chunk.extract();
           break;
@@ -46,12 +48,14 @@ Parser::parse(const char* path)
           break;
 
         case Tags::phdr:
-          p2 = chunk.begin();
-          while (p2 < chunk.end()) {
-            Entity::Preset sfp(p2);
+        {
+          auto presets = ChunkItems<Entity::Preset>();
+          presets.load(chunk);
+          info.presets.reserve(presets.size());
+          for (auto const& sfp : presets) {
             info.presets.emplace_back(sfp.name(), sfp.bank(), sfp.program());
           }
-          info.presets.pop_back();
+        }
           break;
 
         default:

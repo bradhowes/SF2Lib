@@ -122,6 +122,7 @@ private:
   ItemCollection items_{};
 
   friend class File;
+  friend class Parser;
 };
 
 } // end namespace SF2::IO

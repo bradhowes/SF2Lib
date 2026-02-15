@@ -16,8 +16,8 @@ namespace SF2::IO {
  */
 class NormalizedSampleSource {
 public:
-  inline static const Float normalizationScale = 1.0_F / Float(1 << 15);
-  inline static const size_t sizePaddingAfterEnd = 46; // SF2 spec 7.10
+  inline static constexpr Float normalizationScale = 1.0_F / Float(1 << 15);
+  inline static constexpr size_t sizePaddingAfterEnd = 46; // SF2 spec 7.10
 
   /**
    Construct a span of normalized samples defined by a SampleHeader entity.
@@ -35,7 +35,7 @@ public:
   size_t size() const noexcept { return span_.size(); }
 
   /**
-   Obtain the sample at the given index. Note that due to how the span of samples is 
+   Obtain the sample at the given index. Note that due to how the span of samples is
    defined, the indexing iz zero-based and is correct from the standpoint of a Bounds
    instance.
 

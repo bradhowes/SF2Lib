@@ -163,8 +163,8 @@ private:
   ChunkItems<Entity::Generator::Generator> instrumentZoneGenerators_{};
   ChunkItems<Entity::Modulator::Modulator> instrumentZoneModulators_{};
   ChunkItems<Entity::SampleHeader> sampleHeaders_{};
-  IO::SampleSourceCollection sampleSourceCollection_;
-  SampleVector normalizedSamples_;
+  IO::SampleSourceCollection sampleSourceCollection_{};
+  SampleVector normalizedSamples_{};
 
   std::vector<size_t> presetIndicesOrderedByBankProgram_{};
 
