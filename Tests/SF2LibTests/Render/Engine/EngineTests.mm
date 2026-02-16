@@ -23,7 +23,6 @@ using namespace SF2::Render::Engine;
 
 - (void)setUp {
   [super setUp];
-  self.playAudio = NO;
 }
 
 - (void)testInit {

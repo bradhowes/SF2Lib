@@ -81,16 +81,17 @@ Generator::Generator(Float sampleRate, const char* logTag, Float delay, Float at
 }
 
 void
-Generator::gate(bool noteOn) noexcept
+Generator::noteReleased() noexcept
 {
-  if (noteOn) {
-    value_ = 0_F;
-    enterStage(StageIndex::delay);
-  } else {
-    if (stageIndex_ != StageIndex::idle) {
-      enterStage(StageIndex::release);
-    }
+  if (stageIndex_ != StageIndex::idle) {
+    enterStage(StageIndex::release);
   }
+}
+
+void
+Generator::start() noexcept {
+  value_ = 0_F;
+  enterStage(StageIndex::delay);
 }
 
 Float
@@ -139,7 +140,8 @@ Generator::configureVolumeEnvelope(const State& state) noexcept
 
   auto releaseTimecents = state.modulated(Index::releaseVolumeEnvelope);
   stages_[StageIndex::release].setRelease(durationInSamples(releaseTimecentsToSeconds(releaseTimecents)));
-  gate(true);
+
+  start();
 }
 
 void
@@ -180,5 +182,6 @@ Generator::configureModulationEnvelope(const State& state) noexcept
 
   auto releaseTimecents = state.modulated(Index::releaseModulatorEnvelope);
   stages_[StageIndex::release].setRelease(durationInSamples(releaseTimecentsToSeconds(releaseTimecents)));
-  gate(true);
+
+  start();
 }

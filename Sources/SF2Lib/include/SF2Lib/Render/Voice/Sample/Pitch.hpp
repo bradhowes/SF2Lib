@@ -86,7 +86,7 @@ public:
 
 private:
   const State::State& state_;
-  Float phaseBase_;
+  Float phaseBase_{0.0};
 };
 
 } // namespace SF2::Render

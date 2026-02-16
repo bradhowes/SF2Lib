@@ -36,7 +36,7 @@ public:
 
    @param zoneCount the number of zones that the collection will hold
    */
-  explicit Collection(size_t zoneCount) noexcept : zones_{} { zones_.reserve(zoneCount); }
+  explicit Collection(size_t zoneCount) noexcept { zones_.reserve(zoneCount); }
 
   /// @returns number of zones in the collection (including the optional global one)
   inline size_t size() const noexcept { return zones_.size(); }
@@ -88,7 +88,7 @@ public:
   }
 
 private:
-  std::vector<T> zones_;
+  std::vector<T> zones_{};
 };
 
 } // namespace SF2::Render

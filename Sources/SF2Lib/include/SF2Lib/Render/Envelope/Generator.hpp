@@ -76,6 +76,9 @@ class Generator {
    */
   struct Stages : public StageArray {
     using super = StageArray;
+
+    Stages() : StageArray({Stage(), Stage(), Stage(), Stage(), Stage(), Stage()}) {}
+
     Stage& operator[](const StageIndex& index) { return super::operator[](SF2::valueOf(index)); }
     const Stage& operator[](const StageIndex& index) const { return super::operator[](SF2::valueOf(index)); }
   };
@@ -85,12 +88,15 @@ public:
   using State = Render::Voice::State::State;
 
   /**
-   Set the status of a note playing. When true, the envelope begins proper. When set to false, the envelope will
-   jump to the release stage.
-
-   @param noteOn new value for the gate
+   Note has been released, so jump to the release stage.
    */
-  void gate(bool noteOn) noexcept;
+  void noteReleased() noexcept;
+
+  /**
+   Start the envelope generator. NOTE: this is already called by the configure...Envelope() routines below. Harmless to call again
+   but there is no need. Unprotected for testing purposes.
+   */
+  void start() noexcept;
 
   /**
    Stop the envelope generator. All future requests for its value will report 0.0.

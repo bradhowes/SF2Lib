@@ -53,8 +53,7 @@ public:
 
    @param sampleRate the sample rate of audio being rendered
    */
-  State(Float sampleRate = 0_F) noexcept :
-  sampleRate_{sampleRate}, eventKey_{}, eventVelocity_{}
+  State(Float sampleRate = 0_F) noexcept : sampleRate_{sampleRate}, eventKey_{}, eventVelocity_{}
   {
     clear();
   }
@@ -66,8 +65,7 @@ public:
    @param key the MIDI key to use
    @param velocity the MIDI velocity to use
    */
-  State(Float sampleRate, int key, int velocity = 64) noexcept :
-  sampleRate_{sampleRate}, eventKey_{key}, eventVelocity_{velocity}
+  State(Float sampleRate, int key, int velocity = 64) noexcept : sampleRate_{sampleRate}, eventKey_{key}, eventVelocity_{velocity}
   {
     clear();
   }

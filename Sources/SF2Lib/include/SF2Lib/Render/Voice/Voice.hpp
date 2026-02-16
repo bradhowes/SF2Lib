@@ -45,7 +45,7 @@ public:
   /**
    Construct a new voice renderer.
    */
-  Voice() noexcept;
+  Voice() noexcept = default;
 
   /**
    Initialize a voice renderer.
@@ -237,15 +237,15 @@ public:
   void useSostenuto() noexcept { sostenutoActive_ = true; }
 
 private:
-  State::State state_;
-  LoopingMode loopingMode_;
-  Sample::Pitch pitch_;
-  Sample::Generator sampleGenerator_;
-  Envelope::Volume volumeEnvelope_;
-  Envelope::Modulation modulatorEnvelope_;
-  ModLFO modulatorLFO_;
-  VibLFO vibratoLFO_;
-  DSPHeaders::LowPassFilter filter_;
+  State::State state_{};
+  LoopingMode loopingMode_{LoopingMode::none};
+  Sample::Pitch pitch_{state_};
+  Sample::Generator sampleGenerator_{};
+  Envelope::Volume volumeEnvelope_{};
+  Envelope::Modulation modulatorEnvelope_{};
+  ModLFO modulatorLFO_{};
+  VibLFO vibratoLFO_{};
+  DSPHeaders::LowPassFilter filter_{};
   Float initialAttenuation_{1_F};
 
   bool active_{false};

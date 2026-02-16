@@ -29,7 +29,7 @@ public:
   /**
    Constructor. Allocates nodes in the cache for a maximum number of voices.
    */
-  OldestVoiceCollection() noexcept : slots_{}
+  OldestVoiceCollection() noexcept
   {
     for (size_t voiceIndex = 0; voiceIndex < traits::maxVoiceCount; ++voiceIndex) {
       slots_[voiceIndex] = leastRecentlyUsed_.emplace(leastRecentlyUsed_.begin(), voiceIndex);
@@ -37,7 +37,6 @@ public:
 
     // All voices are inactive at the start.
     firstInactiveVoice_ = leastRecentlyUsed_.begin();
-    activeVoiceCounter_ = 0;
   }
 
   /**
@@ -125,16 +124,16 @@ private:
   // TODO: calculate proper size -- testing found this sufficient for a MaxVoiceCount of 128.
   static constexpr size_t BufferSize = 1024 * 6 + 128; // 168;
 
-  std::array<std::byte, BufferSize> buffer_;
+  std::array<std::byte, BufferSize> buffer_{};
 
   std::pmr::monotonic_buffer_resource mbr_{buffer_.data(), buffer_.size(), std::pmr::null_memory_resource()};
   std::pmr::unsynchronized_pool_resource pr_{&mbr_};
   std::pmr::polymorphic_allocator<size_t> allocator_{&pr_};
 
   std::pmr::list<size_t> leastRecentlyUsed_{allocator_};
-  std::array<iterator, traits::maxVoiceCount> slots_;
+  std::array<iterator, traits::maxVoiceCount> slots_{};
 
-  size_t activeVoiceCounter_;
+  size_t activeVoiceCounter_{0};
 
   // The first inactive voice. This is only used to mark the range of active voices (it is the value returned by `end()`)
   iterator firstInactiveVoice_;

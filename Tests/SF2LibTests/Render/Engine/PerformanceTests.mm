@@ -23,7 +23,6 @@ using namespace SF2::Render::Engine;
 
 - (void)setUp {
   [super setUp];
-  // self.playAudio = YES;
 }
 
 // Render 1 second of audio at 48000.0 sample rate using all voices of an engine and interpolating using 4th-order cubic.

@@ -498,7 +498,7 @@ private:
   size_t minimumNoteDurationMilliseconds_{0};
 
   MIDI::ChannelState channelState_{};
-  LiveGeneratorParameters parameters_;
+  LiveGeneratorParameters parameters_{};
 
   AUParameterTree* parameterTree_;
   std::array<Voice, traits::maxVoiceCount> voices_{};

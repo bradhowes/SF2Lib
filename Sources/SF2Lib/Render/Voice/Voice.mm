@@ -13,20 +13,6 @@ using namespace SF2::MIDI;
 using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
 
-Voice::Voice() noexcept
-  : state_{},
-    loopingMode_{LoopingMode::none},
-    pitch_{state_},
-    sampleGenerator_{},
-    volumeEnvelope_{},
-    modulatorEnvelope_{},
-    modulatorLFO_{},
-    vibratoLFO_{},
-    filter_{},
-    active_{false},
-    keyDown_{false}
-{}
-
 void
 Voice::initialize(size_t voiceIndex, Float sampleRate, Sample::Interpolator interpolator) noexcept
 {
@@ -70,6 +56,7 @@ Voice::start() noexcept
 
   volumeEnvelope_.configure(state_);
   modulatorEnvelope_.configure(state_);
+
   modulatorLFO_.configure(state_);
   vibratoLFO_.configure(state_);
 
@@ -84,9 +71,10 @@ Voice::releaseKey(const ReleaseKeyState& releaseKeyState) noexcept
   if (releaseKeyState.pedalState.sustainPedalActive ||
       (releaseKeyState.pedalState.sostenutoPedalActive && sostenutoActive_)) {
     postponedRelease_ = true;
+    os_log_info(log_, "releaseKey - postponed due to pedal state");
   } else {
     keyDown_ = false;
-    volumeEnvelope_.gate(false);
-    modulatorEnvelope_.gate(false);
+    volumeEnvelope_.noteReleased();
+    modulatorEnvelope_.noteReleased();
   }
 }

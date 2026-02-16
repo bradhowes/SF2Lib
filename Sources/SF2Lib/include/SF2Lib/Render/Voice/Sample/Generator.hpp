@@ -124,7 +124,7 @@ private:
   }
 
   Bounds bounds_{};
-  Index index_;
+  Index index_{};
   InterpolatorProc interpolatorProc_;
   const IO::NormalizedSampleSource* sampleSource_{nullptr};
 };

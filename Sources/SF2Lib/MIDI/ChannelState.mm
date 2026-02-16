@@ -10,7 +10,7 @@ using namespace SF2::MIDI;
 void
 ChannelState::reset() noexcept
 {
-  continuousControllerValues_.fill(0);
+  continuousControllerValues_.zero();
 
   // Follow settings from FluidSynth
   setContinuousControllerValue(ControlChange::volumeMSB, 100); // 7
@@ -39,6 +39,7 @@ ChannelState::reset() noexcept
   notePressureValues_.fill(0);
 
   nrpnValues_.zero();
+
   channelPressure_ = 0;
   pitchWheelValue_ = (maxPitchWheelValue + 1) / 2; // This is the middle of the wheel at rest
   pitchWheelSensitivity_ = 2; // This should resolve to 200 cents
