@@ -28,7 +28,6 @@ Parser::parse(const char* path)
     while (p1 < chunkList.end()) {
       auto chunk = p1.makeChunk();
       p1 = chunk.advance();
-      auto p2 = p1;
       switch (chunk.tag().toTags()) {
 
         case Tags::inam:

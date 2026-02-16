@@ -307,7 +307,7 @@ private:
    one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
 
    NOTE: only called from unit tests via TestEngineHarness
-
+
    @param fd the file descriptor to read from
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
@@ -317,7 +317,7 @@ private:
   /**
    Finish loading from an SF2 file. Called at the conclusion of `loadBookmarkAndPreset()`.
 
-   @param path the file to load from
+   @param fd the file descriptor to read from
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
    */

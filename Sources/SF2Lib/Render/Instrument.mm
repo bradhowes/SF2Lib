@@ -5,8 +5,7 @@
 
 using namespace SF2::Render;
 
-Instrument::Instrument(IO::File &file,
-                       const Entity::Instrument &config) noexcept
+Instrument::Instrument(IO::File &file, const Entity::Instrument &config) noexcept
   : WithCollectionBase<Zone::Instrument, Entity::Instrument>(config.zoneCount(), config)
 {
   for (const Entity::Bag& bag : file.instrumentZones().slice(config.firstZoneIndex(), config.zoneCount())) {

@@ -20,8 +20,7 @@ public:
    @param mods the vector of modulators that define the zone
    @param sampleSources the samples for all of the instruments in the SF2 file
    */
-  Instrument(GeneratorCollection&& gens, ModulatorCollection&& mods,
-             const IO::SampleSourceCollection& sampleSources) noexcept;
+  Instrument(GeneratorCollection&& gens, ModulatorCollection&& mods, const IO::SampleSourceCollection& sampleSources) noexcept;
 
   /// @returns the sample buffer registered to this zone. Throws exception if zone is global
   const IO::NormalizedSampleSource& sampleSource() const;

@@ -56,8 +56,8 @@ public:
 
 private:
   std::vector<Preset> presets_{};
-  std::atomic<size_t> size_;
-  InstrumentCollection instruments_;
+  InstrumentCollection instruments_{};
+  std::atomic<size_t> size_{0};
 };
 
 } // namespace SF2::Render

@@ -12,7 +12,7 @@ namespace SF2::IO {
 
 /**
  Collection of all of the SampleHeader entities from a SoundFont paired with a span of normalized samples to use when
- rendering.
+ rendering. Does not hold the actual samples themselves.
  */
 class SampleSourceCollection
 {

@@ -17,11 +17,11 @@
 
 using namespace SF2::IO;
 
-File::File() : path_{}, loaded_{false} {}
+File::File() : path_{}, fd_{-1}, loaded_{false} {}
 
-File::File(std::string path) : path_{path}, loaded_{false} {}
+File::File(std::string path) noexcept : path_{path}, fd_{-1}, loaded_{false} {}
 
-File::File(const char* path) : File::File(std::string(path)) {}
+File::File(const char* path) noexcept : File::File(std::string(path)) {}
 
 File::LoadResponse
 File::load() noexcept
@@ -35,10 +35,10 @@ File::load() noexcept
   auto offset = path_.find(prefix) == std::string::npos ? 0 : prefix.size();
   auto c_path = path_.c_str() + offset;
 
-  auto fd = Closer(::open(c_path, O_RDONLY));
-  if (!fd.is_valid()) return LoadResponse::notFound;
+  int fd = ::open(c_path, O_RDONLY);
+  if (fd == -1) return LoadResponse::notFound;
 
-  return load(*fd);
+  return load(fd);
 }
 
 File::LoadResponse
@@ -104,17 +104,14 @@ File::load(int fd) noexcept
     return presets_[aIndex] < presets_[bIndex];
   });
 
-  // Force the conversion of the samples now instead of at first-use.
-  // TODO: consider moving to on-demand conversion to speed up load and reduce
-  // memory pressure.
-  sampleSourceCollection();
-
+  loaded_ = true;
   return LoadResponse::ok;
 }
 
 const SF2::IO::SampleSourceCollection&
 File::sampleSourceCollection()
 {
+  // WARNING: not thread-safe
   if (sampleSourceCollection_.empty()) {
     extractNormalizedSamples();
     sampleSourceCollection_.build(normalizedSamples_, sampleHeaders_);

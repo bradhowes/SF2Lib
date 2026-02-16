@@ -567,8 +567,11 @@ Engine::concludeLoad(const std::string& path, size_t index) noexcept
   auto response = file->load();
 
   if (response == IO::File::LoadResponse::ok) {
+    // Order is important. Presets can reference contents of IO::File. Take ownership of new file and release old one to free up
+    // its memory. Finally, build new preset collection.
     presets_.clear();
     file_.swap(file);
+    file.reset();
     presets_.build(*file_);
   }
 
@@ -675,8 +678,11 @@ Engine::concludeLoad(int fd, size_t index) noexcept
   auto response = file->load(fd);
 
   if (response == IO::File::LoadResponse::ok) {
+    // Order is important. Presets can reference contents of IO::File. Take ownership of new file and release old one to free up
+    // its memory. Finally, build new preset collection.
     presets_.clear();
     file_.swap(file);
+    file.reset();
     presets_.build(*file_);
   }
 

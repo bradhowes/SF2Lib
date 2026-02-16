@@ -31,18 +31,28 @@ public:
   File();
 
   /**
-   Constructor. Processes the SF2 file contents and builds up various collections based on what it finds.
+   Constructor.
+
+   NOTE: legacy API that only saves the path. Requires call to ``load()`` to do anything meaningful.
 
    @param path the file to open and load
    */
-  File(const char* path);
+  File(const char* path) noexcept;
 
   /**
-   Constructor. Processes the SF2 file contents and builds up various collections based on what it finds.
+   Constructor.
+
+   NOTE: legacy API that only saves the path. Requires call to ``load()`` to do anything meaningful.
 
    @param path the file to open and load
    */
-  File(std::string path);
+  File(std::string path) noexcept;
+
+  File(const File&) = delete;
+
+  File(File&& rhs) noexcept = default;
+
+  ~File() noexcept { if (fd_ != -1) ::close(fd_); }
 
   enum class LoadResponse {
     ok,
@@ -59,15 +69,13 @@ public:
   LoadResponse load() noexcept;
 
   /**
-   Load the file referenced by the given file descriptor. Note that most of the File API is valid only if `load` was successful
+   Load the file by the given file descriptor. Note that most of the File API is valid only if `load` was successful
    and returned `LoadResponse::ok`.
 
    @param fd the file descriptor of the file to read from
    @returns status of the load
    */
   LoadResponse load(int fd) noexcept;
-
-  void loadSamples() noexcept;
 
   /// @returns true if the file has been loaded successfully.
   inline bool loaded() const noexcept { return loaded_; }
@@ -119,7 +127,7 @@ public:
   /// @returns reference to samples definitions
   inline const ChunkItems<Entity::SampleHeader>& sampleHeaders() const noexcept { return sampleHeaders_; };
 
-  /// @returns reference to collection of SampleSource entities.
+  /// @returns reference to collection of SampleSource entities. **WARNING: not thread-safe**
   const IO::SampleSourceCollection& sampleSourceCollection();
 
   /// @returns reference to collection of preset indices that order the Preset entities by bank and program.
@@ -138,6 +146,7 @@ private:
   void extractNormalizedSamples();
 
   std::string path_;
+  int fd_;
   bool loaded_{false};
   off_t size_{0};
   Pos sampleDataBegin_{-1, 0, 0};
