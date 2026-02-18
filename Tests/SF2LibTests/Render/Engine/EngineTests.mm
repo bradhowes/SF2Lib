@@ -1241,6 +1241,27 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(std::string("SFX"), engine.activePresetName());
 }
 
+- (void)testEngineDirectLoadPath {
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(self.contexts->context2.path(), 0);
+
+  XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
+
+  const NSURL* url = self.contexts->context0.url();
+  NSLog(@"URL: %@", url);
+  const NSString* path = [url path];
+  NSLog(@"path: %@", path);
+  std::string tmp([path cStringUsingEncoding: NSUTF8StringEncoding],
+                  [path lengthOfBytesUsingEncoding: NSUTF8StringEncoding]);
+  engine.loadFileAndPreset(tmp, 234);
+
+  std::cout << engine.activePresetName() << '\n';
+
+  XCTAssertEqual(0, engine.presetChangesPending());
+  XCTAssertEqual(std::string("SFX"), engine.activePresetName());
+}
+
 - (void)testEngineMIDILoadPathEmpty {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
@@ -1296,6 +1317,30 @@ using namespace SF2::Render::Engine;
   auto exp = [self expectationWithDescription:@"empty queue"];
   harness.postWorkItem(^{ [exp fulfill]; });
   [self waitForExpectations:@[exp]];
+
+  XCTAssertEqual(0, engine.presetChangesPending());
+  XCTAssertEqual(std::string("SFX"), engine.activePresetName());
+}
+
+- (void)testEngineDirectLoadBookmark {
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(self.contexts->context2.path(), 0);
+
+  XCTAssertEqual(std::string("Nice Piano"), engine.activePresetName());
+
+  const NSURL* url = self.contexts->context0.url();
+  NSLog(@"URL: %@", url);
+
+  auto didStart = [url startAccessingSecurityScopedResource];
+  NSError* error = nil;
+  NSData* bookmark = [url bookmarkDataWithOptions:NSURLBookmarkCreationMinimalBookmark
+                   includingResourceValuesForKeys:nil
+                                    relativeToURL:nil
+                                            error:&error];
+  if (didStart) { [url stopAccessingSecurityScopedResource]; }
+
+  engine.loadBookmarkAndPreset(bookmark, 234);
 
   XCTAssertEqual(0, engine.presetChangesPending());
   XCTAssertEqual(std::string("SFX"), engine.activePresetName());

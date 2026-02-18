@@ -539,7 +539,7 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
 
   __block auto path = pathCount == 0 ? std::string("") : Utils::Base64::decode(pathStart, pathCount);
 
-  dispatch_async(workQueue_, ^{ loadFileAndPreset(path, presetIndex); });
+  dispatch_async(workQueue_, ^{ beginLoadFileAndPreset(path, presetIndex); });
 
   return true;
 }
@@ -570,13 +570,19 @@ Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
   NSData* data = [NSData dataWithBytesNoCopy:dataStart length:dataCount freeWhenDone:false];
   __block NSData* bookmark = [data initWithBase64EncodedData:data options:0];
 
-  dispatch_async(workQueue_, ^{ loadBookmarkAndPreset(bookmark, presetIndex); });
+  dispatch_async(workQueue_, ^{ beginLoadBookmarkAndPreset(bookmark, presetIndex); });
 
   return true;
 }
 
 void
 Engine::loadFileAndPreset(std::string path, size_t presetIndex) noexcept {
+  ++presetChangesPending_;
+  beginLoadFileAndPreset(path, presetIndex);
+}
+
+void
+Engine::beginLoadFileAndPreset(std::string path, size_t presetIndex) noexcept {
   // !!! NOTE: we are probably *not* running in the render thread, so care must be taken when changing state in the engine so we
   // do not cause sound glitches.
 
@@ -614,7 +620,13 @@ Engine::concludeLoad(const std::string& path, size_t index) noexcept
 }
 
 void
-Engine::loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept {
+Engine::loadBookmarkAndPreset(NSData *bookmark, size_t presetIndex) noexcept {
+  ++presetChangesPending_;
+  beginLoadBookmarkAndPreset(bookmark, presetIndex);
+}
+
+void
+Engine::beginLoadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept {
   // !!! NOTE: we are probably *not* running in the render thread, so care must be taken when changing state in the engine so we
   // do not cause sound glitches.
 

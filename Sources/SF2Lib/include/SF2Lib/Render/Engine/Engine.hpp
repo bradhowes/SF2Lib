@@ -315,6 +315,10 @@ private:
    */
   IO::File::LoadResponse load(const std::string& path, size_t index) noexcept;
 
+  void beginLoadFileAndPreset(std::string path, size_t presetIndex) noexcept;
+
+  void beginLoadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept;
+
   /**
    Finish loading from an SF2 file. Called at the conclusion of `loadFileAndPreset()`.
 
