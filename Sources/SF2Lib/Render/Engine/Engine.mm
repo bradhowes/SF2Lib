@@ -528,25 +528,57 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
   ++presetChangesPending_;
 
   const uint8_t* bytes = midiEvent.data;
-  __block auto payload = std::vector<uint8_t>(bytes, bytes + midiEvent.length);
 
-  dispatch_async(workQueue_, ^{ loadFileAndPreset(std::move(payload)); });
+  auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes);
+  __block auto presetIndex = payload->presetIndex;
+  auto overrideCount = payload->overrideCount;
+  auto pos1 = reinterpret_cast<const SF2::MIDI::GeneratorOverride*>(payload + 1);
+  auto overrides = std::vector<MIDI::GeneratorOverride>(pos1, pos1 + overrideCount);
+  auto pathStart = reinterpret_cast<const uint8_t*>(pos1 + overrideCount);
+  auto pathCount = size_t((bytes + midiEvent.length) - pathStart) - 1;
+
+  __block auto path = pathCount == 0 ? std::string("") : Utils::Base64::decode(pathStart, pathCount);
+
+  dispatch_async(workQueue_, ^{ loadFileAndPreset(path, presetIndex); });
+
+  return true;
+}
+
+bool
+Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
+  os_log_info(log_, "loadBookmarkAndPresetFromSysEx BEGIN");
+
+  if (midiEvent.length < LoadPresetSysExPayload::minPayloadSize) {
+    os_log_error(log_, "loadBookmarkAndPresetFromSysEx END - invalid midi payload %d", midiEvent.length);
+    return false;
+  }
+
+  // Do this now to stop any future rendering.
+  allOff();
+  ++presetChangesPending_;
+
+  const uint8_t* bytes = midiEvent.data;
+
+  auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes);
+  __block auto presetIndex = payload->presetIndex;
+  auto overrideCount = payload->overrideCount;
+  auto pos1 = reinterpret_cast<const SF2::MIDI::GeneratorOverride*>(payload + 1);
+  auto overrides = std::vector<MIDI::GeneratorOverride>(pos1, pos1 + overrideCount);
+  auto dataStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(pos1 + overrideCount));
+  auto dataCount = size_t((bytes + midiEvent.length) - dataStart) - 1;
+
+  NSData* data = [NSData dataWithBytesNoCopy:dataStart length:dataCount freeWhenDone:false];
+  __block NSData* bookmark = [data initWithBase64EncodedData:data options:0];
+
+  dispatch_async(workQueue_, ^{ loadBookmarkAndPreset(bookmark, presetIndex); });
 
   return true;
 }
 
 void
-Engine::loadFileAndPreset(std::vector<uint8_t>&& bytes) noexcept {
-  // !!! NOTE: we are probably *not* running in the render thread, so care must be taken when changing state in the engine.
-
-  auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes.data());
-  auto presetIndex = payload->presetIndex;
-  auto overrideCount = payload->overrideCount;
-  auto pos1 = reinterpret_cast<const SF2::MIDI::GeneratorOverride*>(payload + 1);
-  auto overrides = std::vector<MIDI::GeneratorOverride>(pos1, pos1 + overrideCount);
-  auto pathStart = reinterpret_cast<const uint8_t*>(pos1 + overrideCount);
-  auto pathCount = size_t((bytes.data() + bytes.size()) - pathStart) - 1;
-  auto path = pathCount == 0 ? std::string("") : Utils::Base64::decode(pathStart, pathCount);
+Engine::loadFileAndPreset(std::string path, size_t presetIndex) noexcept {
+  // !!! NOTE: we are probably *not* running in the render thread, so care must be taken when changing state in the engine so we
+  // do not cause sound glitches.
 
   if (!path.empty()) {
     concludeLoad(path, presetIndex);
@@ -581,43 +613,12 @@ Engine::concludeLoad(const std::string& path, size_t index) noexcept
   return response;
 }
 
-bool
-Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
-  os_log_info(log_, "loadBookmarkAndPresetFromSysEx BEGIN");
-
-  if (midiEvent.length < LoadPresetSysExPayload::minPayloadSize) {
-    os_log_error(log_, "loadBookmarkAndPresetFromSysEx END - invalid midi payload %d", midiEvent.length);
-    return false;
-  }
-
-  // Do this now to stop any future rendering.
-  allOff();
-  ++presetChangesPending_;
-
-  const uint8_t* bytes = midiEvent.data;
-  __block auto payload = std::vector<uint8_t>(bytes, bytes + midiEvent.length);
-
-  dispatch_async(workQueue_, ^{ loadBookmarkAndPreset(std::move(payload)); });
-
-  return true;
-}
-
 void
-Engine::loadBookmarkAndPreset(std::vector<uint8_t>&& bytes) noexcept {
-  // !!! NOTE: we are probably *not* running in the render thread, so care must be taken when changing state in the engine.
+Engine::loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept {
+  // !!! NOTE: we are probably *not* running in the render thread, so care must be taken when changing state in the engine so we
+  // do not cause sound glitches.
 
   os_log_info(log_, "loadBookmarkAndPreset BEGIN");
-
-  auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
-  auto presetIndex = payload->presetIndex;
-  auto overrideCount = payload->overrideCount;
-  auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>(payload + 1);
-  auto overrides = std::vector<MIDI::GeneratorOverride>(pos1, pos1 + overrideCount);
-  auto dataStart = reinterpret_cast<uint8_t*>(pos1 + overrideCount);
-  auto dataCount = size_t((bytes.data() + bytes.size()) - dataStart) - 1;
-
-  NSData* data = [NSData dataWithBytesNoCopy:dataStart length:dataCount freeWhenDone:false];
-  NSData* bookmark = [data initWithBase64EncodedData:data options:0];
 
   NSError* error = nil;
   BOOL isStale = NO;

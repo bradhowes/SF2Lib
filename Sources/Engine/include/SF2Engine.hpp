@@ -123,6 +123,17 @@ struct SWIFT_ESCAPABLE SF2Engine
   static std::vector<uint8_t> createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex) noexcept;
 
   /**
+   Load a soundfont file at the given path. If successful, make active the preset at the given index.
+
+   NOTE: this should only be invoked when there is no rendering activity. Otherwise, this change should be done using a
+   SysEx MIDI command created by ``createLoadFileUsePresetPayload`` sent to the MIDI event scheduling block.
+
+   @param path the location of the file to load
+   @param presetIndex the index of the preset to make active after loading
+   */
+  void loadFileAndPreset(std::string path, size_t presetIndex) noexcept;
+
+  /**
    Obtain MIDI payload containing a MIDI SYSEX command that can be sent to load an SF2 file and use a given
    preset. This should be sent to the engine via a MIDI control connection; this method only creates the bytes to send.
 
@@ -132,6 +143,17 @@ struct SWIFT_ESCAPABLE SF2Engine
    */
   static std::vector<uint8_t> createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetIndex) noexcept;
   // SF2::MIDI::GeneratorOverrideVector overrides) noexcept;
+
+  /**
+   Load a soundfont file using a bookmark. If successful, make active the preset at the given index.
+
+   NOTE: this should only be invoked when there is no rendering activity. Otherwise, this change should be done using a
+   SysEx MIDI command created by ``createLoadBookmarkUsePresetPayload`` sent to the MIDI event scheduling block.
+
+   @param bookmark the encoded location of the file to load
+   @param presetIndex the index of the preset to make active after loading
+   */
+  void loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept;
 
   /**
    Obtain MIDI payload containing MIDI command to reset the engine. This will stop playing any notes and reset
