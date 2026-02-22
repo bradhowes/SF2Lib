@@ -123,7 +123,7 @@ extension Package.Dependency {
       path: "/Users/howes/src/Mine/DSPHeaders"
     ) : .package(
       url: "https://github.com/bradhowes/DSPHeaders",
-      from: "1.4.8"
+      from: "1.5.1"
     )
   }
 }
