@@ -17,13 +17,9 @@ struct traits {
 
   static inline constexpr size_t maxVoiceCount{128};
 
-  // If true, collection render durations partitioned by number of active voices.
-  static inline constexpr bool renderDurationCollectionEnabled = false;
-
-  /// Number of engine parameters to be found in the AUParameterTree. This does *not* include the
-  static inline constexpr size_t engineParameterCount = ((valueOf(ParameterAddress::lastParameterAddressPlusOne) -
-                                                          valueOf(ParameterAddress::firstParameterAddress)) +
-                                                         (renderDurationCollectionEnabled ? maxVoiceCount : 0));
+  /// Number of engine parameters to be found in the AUParameterTree.
+  static inline constexpr size_t engineParameterCount = (valueOf(ParameterAddress::lastParameterAddressPlusOne) -
+                                                         valueOf(ParameterAddress::firstParameterAddress));
 
   /// Total number of engine parameters to be found in the AUParameterTree (not exact due to unused indices in the list of
   /// SF2 generators)

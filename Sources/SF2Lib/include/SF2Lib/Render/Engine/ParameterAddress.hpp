@@ -12,20 +12,19 @@ enum struct ParameterAddress : AUParameterAddress
   // Pretty sure this is large enough to never overlap with SF generator indices now and in the future
   // (SoundFont spec v2.01 defines 59)
   //
-  // NOTE: parameters can be increased if traits::renderDurationCollectionEnabled is true.
-
   firstParameterAddress = 1000,
   portamentoModeEnabled = firstParameterAddress,
-  portamentoRate,
-  oneVoicePerKeyModeEnabled, // aka mono
-  polyphonicModeEnabled,
-  activeVoiceCount,
-  retriggerModeEnabled,
-  isRendering,
-  activeProgramIndex,
-  activeBankIndex,
-  activePresetIndex,
-  lastLoadFinished,
+  portamentoRate,            // 1001
+  oneVoicePerKeyModeEnabled, // 1002 aka mono
+  polyphonicModeEnabled,     // 1003
+  activeVoiceCount,          // 1004
+  retriggerModeEnabled,      // 1005
+  isRendering,               // 1006
+  activeSoundFontIndex,      // 1007
+  activeProgramIndex,        // 1008
+  activeBankIndex,           // 1009
+  activePresetIndex,         // 1010
+  lastLoadFinished,          // 1011
   lastParameterAddressPlusOne
 };
 }

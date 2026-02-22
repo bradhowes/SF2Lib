@@ -298,6 +298,11 @@ private:
 
   void updateDurationParameters() noexcept;
 
+  uint64_t timeBudgetNanoseconds(AUAudioFrameCount frameCount) const noexcept {
+    return (renderingTimeBudgetScaling_ > 0.0) ? (frameCount * uint64_t(double(renderingTimeBudgetIntervalNanoseconds_) *
+                                                                        renderingTimeBudgetScaling_)) : 0xFFFFFFFFFFFFFFFFL;
+  }
+
   /**
    Create the audio unit parameter tree.
    */

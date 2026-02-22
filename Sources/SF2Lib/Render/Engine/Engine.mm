@@ -34,7 +34,6 @@ Engine::Engine(Float sampleRate, size_t voiceCountLimit, Interpolator interpolat
 
   for (size_t voiceIndex = 0; voiceIndex < voiceCountLimit; ++voiceIndex) {
     voices_[voiceIndex].initialize(voiceIndex, sampleRate, interpolator);
-    if constexpr (traits::renderDurationCollectionEnabled) { durationBuckets_.emplace_back(0.0); }
   }
 
   makeTree();
@@ -209,20 +208,9 @@ Engine::applyPedals() noexcept
 void
 Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
 {
-  auto voiceCount = activeVoiceCount();
-  if (voiceCount == 0) {
-    if constexpr (traits::renderDurationCollectionEnabled) { updateDurationParameters(); }
-    return;
-  }
+  if (activeVoiceCount() == 0 || presetChangesPending_.load() > 0 || !hasActivePreset()) return;
 
-  if constexpr (traits::renderDurationCollectionEnabled) {
-    os_signpost_interval_begin(log_, renderSignpost_, "renderInto", "voices: %lu", voiceCount);
-  }
-
-  uint64_t timeBudgetNanoseconds = renderingTimeBudgetScaling_ > 0.0
-  ? (frameCount * uint64_t(double(renderingTimeBudgetIntervalNanoseconds_) * renderingTimeBudgetScaling_))
-  : 0xFFFFFFFFFFFFFFFFL;
-
+  auto timeBudget = timeBudgetNanoseconds(frameCount);
   auto entryTime = Utils::Timer::now();
 
   // Iterate over the active voices -- the voices are ordered from newest to oldest. If we run out of time we will stop
@@ -232,7 +220,7 @@ Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
 
     auto& voice{voices_[voiceIndex]};
     if (voice.isActive()) {
-      if (Utils::Timer::delta(entryTime) < timeBudgetNanoseconds) {
+      if (Utils::Timer::delta(entryTime) < timeBudget) {
         voice.renderInto(mixer, frameCount);
       } else {
         voice.stop();
@@ -246,11 +234,6 @@ Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
     } else {
       ++pos;
     }
-  }
-
-  if constexpr (traits::renderDurationCollectionEnabled) {
-    durationBuckets_[voiceCount - 1] = Utils::Timer::delta(entryTime);
-    os_signpost_interval_end(log_, renderSignpost_, "renderInto", "voices: %lu", voiceCount);
   }
 }
 
@@ -298,6 +281,7 @@ Engine::doRenderingStateChanged(bool state) noexcept
 {
   if (!state) {
     allOff();
+
     // Post a sentinal item to work queue to know all pending items are done. Since the render thread is no longer operating at
     // this point, we know there will be no more added and from now on it is safe for the Engine to be destroyed.
     dispatch_sync(workQueue_, ^{ });
@@ -308,6 +292,7 @@ Engine::doRenderingStateChanged(bool state) noexcept
       presetChangesPending_.store(0);
     }
   }
+
   [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::isRendering)] setValue: SF2::fromBool(state)];
 }
 
@@ -842,22 +827,6 @@ Engine::updateActiveVoiceCount() noexcept
 }
 
 void
-Engine::updateDurationParameters() noexcept
-{
-  if constexpr (traits::renderDurationCollectionEnabled) {
-    for (size_t voiceCount = 0; voiceCount < durationBuckets_.size(); ++voiceCount) {
-      auto value = durationBuckets_[voiceCount];
-      if (value > 0.0) {
-        AUParameterAddress address = valueOf(ParameterAddress::lastParameterAddressPlusOne) + voiceCount;
-        assert(address < valueOf(ParameterAddress::firstParameterAddress) + traits::engineParameterCount);
-        [[parameterTree_ parameterWithAddress: address] setValue: value];
-        durationBuckets_[voiceCount] = 0.0;
-      }
-    }
-  }
-}
-
-void
 Engine::bumpLastLoadFinished() noexcept
 {
   os_log_info(log_, "bumpLastLoadFinished");
@@ -1109,24 +1078,6 @@ Engine::makeTree() noexcept
                                                                    flags:flags
                                                             valueStrings:nullptr
                                                      dependentParameters:nullptr]];
-
-  if constexpr (traits::renderDurationCollectionEnabled) {
-    // Generate the buckets for render durations based on number of active voices
-    for (size_t durationBucketIndex = 0; durationBucketIndex < durationBuckets_.size(); ++durationBucketIndex) {
-      auto name = [NSString stringWithFormat:@"renderDuration%ld", durationBucketIndex];
-      AUParameterAddress address = valueOf(ParameterAddress::lastParameterAddressPlusOne) + durationBucketIndex;
-      [definitions addObject: [AUParameterTree createParameterWithIdentifier:name
-                                                                        name:name
-                                                                     address:address
-                                                                         min:0.0
-                                                                         max:10000.0
-                                                                        unit:kAudioUnitParameterUnit_Milliseconds
-                                                                    unitName:nullptr
-                                                                       flags:flags
-                                                                valueStrings:nullptr
-                                                         dependentParameters:nullptr]];
-    }
-  }
 
   parameterTree_ = [AUParameterTree createTreeWithChildren:definitions];
 
