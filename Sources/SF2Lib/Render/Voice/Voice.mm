@@ -19,6 +19,7 @@ Voice::initialize(size_t voiceIndex, Float sampleRate, Sample::Interpolator inte
   voiceIndex_ = voiceIndex;
   sampleGenerator_.setInterpolator(interpolator);
   state_.setSampleRate(sampleRate);
+  filter_.setSampleRate(sampleRate);
 }
 
 void
@@ -29,6 +30,7 @@ Voice::configure(const State::Config& config, const MIDI::ChannelState& channelS
   state_.prepareForVoice(config, channelState);
   sampleGenerator_.configure(config.sampleSource(), state_);
   pitch_.configure(config.sampleSource().header());
+  filter_.reset();
 
   os_signpost_interval_end(log_, configSignpost_, "end");
 }

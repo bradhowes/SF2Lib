@@ -221,7 +221,6 @@ using namespace SF2::Render::Engine;
 }
 
 - (void)testRolandPianoChordRenderCubic4thOrder {
-  // self.playAudio = YES;
   auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);

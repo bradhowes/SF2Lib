@@ -4,13 +4,13 @@
 
 #include <algorithm>
 
-#include "DSPHeaders/LowPassFilter.hpp"
 
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Envelope/Modulation.hpp"
 #include "SF2Lib/Render/Envelope/Volume.hpp"
 #include "SF2Lib/Render/LFO.hpp"
+#include "SF2Lib/Render/LowPassFilter.hpp"
 #include "SF2Lib/Render/Voice/Sample/Generator.hpp"
 #include "SF2Lib/Render/Voice/State/Modulator.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
@@ -66,6 +66,7 @@ public:
    */
   void setSampleRate(Float sampleRate) noexcept {
     state_.setSampleRate(sampleRate);
+    filter_.setSampleRate(sampleRate);
   }
 
   /// @returns the unique index assigned to this voice instance.
@@ -184,16 +185,14 @@ public:
     auto modLFOValCB{modLFO.val * -state_.modulated(Index::modulatorLFOToVolume)};
     auto gain{initialAttenuation_ * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB)};
 
-    // FIXME: disable low-pass filter until settings are properly calculated
-//#if ENABLE_LOWPASS_FILTER == 1
-//    // Calculate the low-pass filter parameters. Only the frequency can be affected by an LFO or mod envelope, but both
-//    // can have external modulators attached to their primary state value.
+    // Calculate the low-pass filter parameters. Only the frequency can be affected by an LFO or mod envelope, but both
+    // can have external modulators attached to their primary state value.
 //    auto frequency{(state_.modulated(Index::initialFilterCutoff) +
 //                    state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO.val +
 //                    state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv.val)};
-//    auto resonance{state_.modulated(Index::initialFilterResonance)};
-//    auto filtered{filter_.transform(frequency, resonance, sample * gain)};
-//#endif
+    auto frequency{state_.modulated(Index::initialFilterCutoff)};
+    auto resonance{state_.modulated(Index::initialFilterResonance)};
+    auto filtered{filter_.transform(frequency, resonance, sample * gain)};
 
     if (!sampleGenerator_.isActive() ||
         !volumeEnvelope_.isActive() ||
@@ -201,7 +200,7 @@ public:
       stop();
     }
 
-    return sample * gain; // filtered;
+    return filtered; // sample * gain; // filtered;
   }
 
   /**
@@ -245,7 +244,7 @@ private:
   Envelope::Modulation modulatorEnvelope_{};
   ModLFO modulatorLFO_{};
   VibLFO vibratoLFO_{};
-  DSPHeaders::LowPassFilter filter_{};
+  LowPassFilter filter_{};
   Float initialAttenuation_{1_F};
 
   bool active_{false};

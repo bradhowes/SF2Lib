@@ -6,7 +6,7 @@ import PackageDescription
 let checkedVectorIndexing = false
 
 // Set to true to enable low-pass filter in sample generation (once sound quality bugs are fixed)
-let enableLowPassFilter = false
+let enableLowPassFilter = true
 
 // Set to true to play audio generated in tests.
 let playAudioDuringTests = false
