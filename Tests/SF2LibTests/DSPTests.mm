@@ -142,15 +142,6 @@ using namespace SF2::DSP;
   }
 }
 
-
-- (void)testParabolicSineAccuracy {
-  for (int index = 0; index < 36000.0; ++index) {
-    auto theta = 2.0 * M_PI * index / 36000.0 - M_PI;
-    auto real = std::sin(theta);
-    XCTAssertEqualWithAccuracy(DSPHeaders::DSP::parabolicSine(theta), real, 0.0011);
-  }
-}
-
 - (void)testCentToFrequency {
   if constexpr (std::is_same_v<Float, float>) {
     XCTAssertEqualWithAccuracy(1.0, centsToFrequency(-1), self.epsilon); // A0

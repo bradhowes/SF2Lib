@@ -143,11 +143,10 @@ public:
    API for EventProcessor. Perform rendering of audio samples using the loaded soundfont and active preset.
 
    @param outputBusNumber the index of the bus being rendered
-   @param ins input buffers (not used)
    @param outs the output buffers to write to
    @param frameCount the number of frames to render, where 1 frame is 1 sample per output buffer
    */
-  inline void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers ins, DSPHeaders::BusBuffers outs,
+  inline void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs,
                           AUAudioFrameCount frameCount) noexcept {
     // All of the work is done when working with output bus 0. If wired correctly, busses 1 and 2 will
     // hold the buffered values that were created here.
