@@ -325,7 +325,13 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
     case MIDI::CoreEvent::noteOn:
       os_log_info(log_, "doMIDIEvent noteOn");
       if (midiEvent.length == 3) {
-        noteOn(midiEvent.data[1], midiEvent.data[2]);
+        if (midiEvent.data[2] > 0) {
+          noteOn(midiEvent.data[1], midiEvent.data[2]);
+        } else {
+          noteOff(midiEvent.data[1]);
+        }
+      } else if (midiEvent.length == 2) {
+        noteOff(midiEvent.data[1]);
       }
       break;
 
