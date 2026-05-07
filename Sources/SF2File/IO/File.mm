@@ -112,6 +112,7 @@ const SF2::IO::SampleSourceCollection&
 File::sampleSourceCollection()
 {
   // WARNING: not thread-safe
+  assert(sampleHeaders_.size() > 0);
   if (sampleSourceCollection_.empty()) {
     extractNormalizedSamples();
     sampleSourceCollection_.build(normalizedSamples_, sampleHeaders_);
