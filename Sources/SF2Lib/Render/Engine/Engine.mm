@@ -323,15 +323,15 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::noteOn:
-      os_log_info(log_, "doMIDIEvent noteOn");
-      if (midiEvent.length == 3) {
-        if (midiEvent.data[2] > 0) {
-          noteOn(midiEvent.data[1], midiEvent.data[2]);
+      if (midiEvent.length > 1) {
+        auto velocity = midiEvent.length == 3 ? midiEvent.data[2] : 0;
+        if (velocity > 0) {
+          os_log_info(log_, "doMIDIEvent noteOn");
+          noteOn(midiEvent.data[1], velocity);
         } else {
+          os_log_info(log_, "doMIDIEvent noteOff (zero velocity noteOn");
           noteOff(midiEvent.data[1]);
         }
-      } else if (midiEvent.length == 2) {
-        noteOff(midiEvent.data[1]);
       }
       break;
 

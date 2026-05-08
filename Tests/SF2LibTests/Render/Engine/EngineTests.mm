@@ -486,6 +486,28 @@ using namespace SF2::Render::Engine;
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
 
+- (void)testEngineMIDINoteOnAsNoteOff
+{
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(self.contexts->context0.path(), 0);
+
+  int seconds = 1;
+  auto mixer{harness.createMixer(seconds)};
+  XCTAssertEqual(size_t(0), engine.activeVoiceCount());
+
+  harness.sendNoteOn(40);
+  harness.renderUntil(mixer, AVAudioFrameCount(harness.renders() * 0.5));
+  XCTAssertEqual(size_t(1), engine.activeVoiceCount());
+
+  harness.sendNoteOn(40, 0);
+  harness.renderToEnd(mixer);
+
+  XCTAssertEqual(size_t(0), engine.activeVoiceCount());
+
+  [self playSamples: harness.dryBuffer() count: harness.duration()];
+}
+
 - (void)testEngineMIDIPitchBendProcessing
 {
   auto harness{TestEngineHarness{48000.0}};
