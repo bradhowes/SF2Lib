@@ -20,8 +20,8 @@ using MIDIRange = Range<int>;
 
 /**
  A zone represents a collection of generator and modulator settings that apply to a range of MIDI key and velocity
- values. There are two types: instrument zones and preset zones. Generator settings for the former specify actual values
- to use, while those in preset zones define adjustments to values set by the instrument.
+ values. There are two kinds: instrument zones and preset zones. Generator settings for the former specify actual values
+ to use, while those in preset zones define adjustments to values set by the instrument (per SF2 spec).
 
  Must be derived from, but it defines no virtual functions.
  */
@@ -36,7 +36,7 @@ public:
 
   /**
    Determine if the generator collection and modulator collection combo refers to a global zone. This is the
-   case iff the generator collection is empty and the modulator collection is not, or the generator collection does
+   case ONLY IF the generator collection is empty and the modulator collection is not, OR the generator collection does
    not end with a generator of an expected type. Note that in particular if *both* collections are empty, it is *not* a
    global zone here (it should be filtered out elsewhere)
 
@@ -88,6 +88,8 @@ protected:
   /**
    Obtain the link to the resource used by this zone. For an instrument zone, this points to the sample buffer to
    use to render sounds. For a preset zone, this points to an instrument. It is undefined to call on a global zone.
+
+   The returned value refers to the original SF2 file index for the resource.
 
    @returns index of the resource that this zone uses
    */

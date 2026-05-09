@@ -12,8 +12,8 @@ namespace SF2::Entity {
 /**
  Define the audio samples to be used for playing a specific sound.
 
- Memory layout of a 'shdr' entry. The size of this is defined to be 46 bytes, but due
- to alignment/padding the struct below is 48 bytes.
+ Memory layout of a 'shdr' entry. The size of this is defined to be 46 bytes, but due to alignment/padding the struct below is 48
+ bytes.
 
  The offsets (begin, end, loopBegin, and loopEnd) are indices into a big array of 16-bit integer sample values.
 

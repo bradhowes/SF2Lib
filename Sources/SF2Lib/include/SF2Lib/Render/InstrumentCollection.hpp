@@ -20,14 +20,24 @@ public:
   InstrumentCollection() = default;
 
   /**
-   Construct a new collection using contents from the given file.
+   Construct a new collection using contents from the given file. Creates a new `Instrument` for each instrument definition in the
+   file.
 
    @param file the file to build with
    */
   void build(IO::File& file) noexcept;
 
+  /**
+   Clear the collection of `Instrument` values but retain capacity.
+   */
   void clear() noexcept;
 
+  /**
+   Obtain the `Instrument` at the given index.
+
+   @param index the index of the instrument to get
+   @returns the `Instrument` reference
+   */
   const Instrument& operator[](size_t index) const noexcept;
 
 private:

@@ -29,6 +29,8 @@ Zone::resourceLink() const
 {
   if (isGlobal_)
     throw std::runtime_error("global zones do not have a linked resource");
+  // NOTE: a non-global Preset must have an instrument index as its last generator; a non-global Instrument must have a sample
+  // header index as its last generator.
   const Entity::Generator::Generator& generator{generators_.back().get()};
   return generator.amount().unsignedAmount();
 }

@@ -10,9 +10,8 @@
 namespace SF2::IO {
 
 /**
- Contains the span of samples that pertain to a specific MIDI key and velocity mapping.
- The samples come from the normalized vector of samples derived from 16-bit samples from
- the SF2 file.
+ Contains the span of samples that pertain to a specific MIDI key and velocity mapping. The samples come from the normalized vector
+ of samples derived from 16-bit samples from the SF2 file.
  */
 class NormalizedSampleSource {
 public:
@@ -35,9 +34,8 @@ public:
   size_t size() const noexcept { return span_.size(); }
 
   /**
-   Obtain the sample at the given index. Note that due to how the span of samples is
-   defined, the indexing iz zero-based and is correct from the standpoint of a Bounds
-   instance.
+   Obtain the sample at the given index. Note that due to how the span of samples is defined, the indexing is zero-based and is
+   correct from the standpoint of a Bounds instance.
 
    @param index the index to use
    @returns sample at the index

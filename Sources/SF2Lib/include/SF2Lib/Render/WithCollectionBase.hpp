@@ -19,7 +19,7 @@ concept ZoneDerivedType = std::derived_from<T, SF2::Render::Zone::Zone>;
  - `T` is an SF2::Zone class (PresetZone or InstrumentZone) to hold in the collection
  - `E` is the SF2::Entity class that defines the zone configuration in the SF2 file.
 
- Must be derived from.
+ Cannot instantiate -- must be derived from.
  */
 template <ZoneDerivedType T, EntityDerivedType E>
 class WithCollectionBase
