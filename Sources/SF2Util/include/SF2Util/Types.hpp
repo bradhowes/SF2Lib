@@ -17,7 +17,7 @@ namespace SF2 {
 using namespace DSPHeaders;
 
 /**
- Type to use for all floating-point operations in SF2. For precision we do everything in 64-bit and convert at AUValue
+ Type to use for all floating-point operations in SF2. For precision (?) we do everything in 64-bit and convert at AUValue
  (32-bit float) only when necessary.
  */
 using Float = double;

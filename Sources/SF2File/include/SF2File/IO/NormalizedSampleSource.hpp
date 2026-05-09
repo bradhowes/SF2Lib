@@ -31,7 +31,7 @@ public:
   {}
 
   /// @returns number of samples in the canonical representation
-  size_t size() const noexcept { return span_.size(); }
+  inline size_t size() const noexcept { return span_.size(); }
 
   /**
    Obtain the sample at the given index. Note that due to how the span of samples is defined, the indexing is zero-based and is
