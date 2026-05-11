@@ -22,6 +22,15 @@ public:
 
    @param gens the vector of generators that define the zone
    @param mods the vector of modulators that define the zone
+   @param sampleSources the samples for all of the instruments in the SF2 file
+   */
+  Instrument(GeneratorCollection&& gens, ModulatorCollection&& mods, const IO::SampleSourceCollection& sampleSources) noexcept;
+
+  /**
+   Construct new instrument zone from entity in file.
+
+   @param gens the vector of generators that define the zone
+   @param mods the vector of modulators that define the zone
    @param sampleHeaders the collection of SHDR entities from the SF2 file
    */
   Instrument(GeneratorCollection&& gens, ModulatorCollection&& mods,
@@ -29,6 +38,9 @@ public:
 
   /// @returns the original SHDR entity for this instrument zone as found in the SF2 file.
   inline const Entity::SampleHeader* sampleHeader() const noexcept { return sampleHeader_; }
+
+  /// @returns the sample buffer registered to this zone. Throws exception if zone is global
+  const IO::NormalizedSampleSource& sampleSource() const;
 
   /// @returns the sample buffer registered to this zone. Throws exception if zone is global
   const NormalizedSamples& samples() const;
@@ -49,6 +61,7 @@ public:
 
 private:
   const Entity::SampleHeader* sampleHeader_;
+  const IO::NormalizedSampleSource* sampleSource_;
   std::unique_ptr<NormalizedSamples> samples_{nullptr};
 };
 

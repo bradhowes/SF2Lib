@@ -28,8 +28,8 @@ Voice::configure(const State::Config& config, const MIDI::ChannelState& channelS
   os_signpost_interval_begin(log_, configSignpost_, "start");
 
   state_.prepareForVoice(config, channelState);
-  sampleGenerator_.configure(config.samples(), state_);
-  pitch_.configure(config.samples().header());
+  sampleGenerator_.configure(config.sampleSource(), state_);
+  pitch_.configure(config.sampleSource().header());
   filter_.reset();
 
   os_signpost_interval_end(log_, configSignpost_, "end");

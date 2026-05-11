@@ -8,6 +8,10 @@ class NormalizedSamples;
 class Preset;
 }
 
+namespace SF2::IO {
+class NormalizedSampleSource;
+}
+
 namespace SF2::Render::Voice::State {
 
 class State;
@@ -32,6 +36,9 @@ public:
    */
   Config(const Zone::Preset& preset, const Zone::Preset* globalPreset, const Zone::Instrument& instrument,
          const Zone::Instrument* globalInstrument, int eventKey, int eventVelocity) noexcept;
+
+  /// @returns the buffer of audio samples to use for rendering
+  const IO::NormalizedSampleSource& sampleSource() const noexcept;
 
   /// @returns the buffer of audio samples to use for rendering
   const Zone::NormalizedSamples& samples() const noexcept;

@@ -1,5 +1,6 @@
 // Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
+#include "SF2File/IO/NormalizedSampleSource.hpp"
 #include "SF2Lib/Render/Voice/State/Config.hpp"
 #include "SF2Lib/Render/Zone/NormalizedSamples.hpp"
 #include "SF2Lib/Render/Zone/Preset.hpp"
@@ -21,6 +22,12 @@ Config::Config(const Zone::Preset &preset, const Zone::Preset *globalPreset,
       break;
     }
   }
+}
+
+const SF2::IO::NormalizedSampleSource&
+Config::sampleSource() const noexcept
+{
+  return instrument_.sampleSource();
 }
 
 const SF2::Render::Zone::NormalizedSamples&
