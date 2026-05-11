@@ -66,7 +66,6 @@ public:
 
 private:
   SampleVector normalizedSamples_{};
-
   inline static const os_log_t log_{Log::create("Preset")};
 };
 

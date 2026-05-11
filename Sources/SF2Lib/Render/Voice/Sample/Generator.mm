@@ -5,17 +5,9 @@
 using namespace SF2::Render::Voice::Sample;
 
 void
-Generator::configure(const IO::NormalizedSampleSource& sampleSource, const State& state) noexcept
+Generator::configure(std::shared_ptr<Zone::NormalizedSampleSpan>&& samples, const State& state) noexcept
 {
-  bounds_ = Bounds::make(sampleSource.header(), state);
+  samples_ = samples;
+  bounds_ = Bounds::make(samples_->header(), state);
   index_.configure(bounds_);
-  sampleSource_ = &sampleSource;
-}
-
-void
-Generator::configure(const Zone::NormalizedSamples& samples, const State& state) noexcept
-{
-  bounds_ = Bounds::make(samples.header(), state);
-  index_.configure(bounds_);
-  samples_ = &samples;
 }

@@ -62,4 +62,11 @@ using namespace SF2::Render::Voice;
   XCTAssertEqual(0, right.unmodulated(Entity::Generator::Index::endAddressCoarseOffset));
 }
 
+- (void)testRolandPianoPresetLoad {
+  auto& file{self.contexts->context2.file()};
+  XCTAssertEqual(size_t(1), file.presets().size());
+  Preset preset{self.contexts->context2.preset(0)};
+  XCTAssertTrue(preset.loadSamples(file));
+}
+
 @end

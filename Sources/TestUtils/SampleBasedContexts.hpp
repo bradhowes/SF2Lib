@@ -251,11 +251,12 @@ struct PresetTestContextBase
     ;
   }
 
-  const SF2::Render::Preset& preset(size_t presetIndex) const {
+  const SF2::Render::Preset& preset(size_t presetIndex) {
     // Lazily create the PresetCollection for the file when first asked for a preset.
     if (presets_.empty()) {
      const_cast<PresetTestContextBase*>(this)->presets_.build(getFile(urlIndex_));
     }
+    presets_[presetIndex].loadSamples(getFile(urlIndex_));
     const auto& p{presets_[presetIndex].configuration()};
     std::cout << "Using preset: " << presetIndex << " " << p.name() << " " << p.bank() << "/" << p.program()
     << " " << getUrl(urlIndex_).path.UTF8String << std::endl;
@@ -282,7 +283,7 @@ struct PresetTestContextBase
     return state;
   }
 
-  SF2::Render::Voice::State::State makeState(size_t presetIndex, int midiKey, int midiVelocity) const {
+  SF2::Render::Voice::State::State makeState(size_t presetIndex, int midiKey, int midiVelocity) {
     auto found{preset(presetIndex).find(midiKey, midiVelocity)};
     return makeState(found[0]);
   }

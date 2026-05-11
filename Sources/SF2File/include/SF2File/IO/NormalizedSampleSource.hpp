@@ -24,10 +24,12 @@ public:
    @param allSamples collection of normalized samples in the SF2 file
    @param header defines the range of samples to actually load
    */
-  NormalizedSampleSource(const SampleVector& allSamples, const Entity::SampleHeader& header) noexcept :
+  NormalizedSampleSource(const SampleVector& samples, const Entity::SampleHeader& header) noexcept :
   header_{header},
-  span_(std::ranges::next(allSamples.begin(), long(header.startIndex())),
-        std::ranges::next(allSamples.begin(), long(header.endIndex() + sizePaddingAfterEnd)))
+  span_{
+    std::ranges::next(samples.begin(), long(header.startIndex()), samples.end()),
+    std::ranges::next(samples.begin(), long(header.endIndex() + sizePaddingAfterEnd), samples.end())
+  }
   {}
 
   /// @returns number of samples in the canonical representation

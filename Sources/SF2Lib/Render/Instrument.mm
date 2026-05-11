@@ -12,7 +12,7 @@ WithCollectionBase<Zone::Instrument, Entity::Instrument>(config.zoneCount(), con
     zones_.add(Entity::Generator::Index::sampleID,
                file.instrumentZoneGenerators().slice(bag.firstGeneratorIndex(), bag.generatorCount()),
                file.instrumentZoneModulators().slice(bag.firstModulatorIndex(), bag.modulatorCount()),
-               file.sampleSourceCollection());
+               file.sampleHeaders());
   }
 }
 

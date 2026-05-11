@@ -11,10 +11,9 @@
 #include "SF2File/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Voice/Sample/Bounds.hpp"
 #include "SF2Lib/Render/Voice/Sample/Index.hpp"
-#include "SF2File/IO/NormalizedSampleSource.hpp"
 #include "SF2Lib/Render/Voice/Sample/Pitch.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
-#include "SF2Lib/Render/Zone/NormalizedSamples.hpp"
+#include "SF2Lib/Render/Zone/NormalizedSampleSpan.hpp"
 
 namespace SF2::Render::Voice::Sample {
 
@@ -48,19 +47,10 @@ public:
    Configure instance to use the given sample source. NOTE: this is invoked before start of rendering a note. This
    routine *must* ensure that the state is properly setup to do so, just as if it was created from scratch.
 
-   @param sampleSource the samples to use for rendering
-   @param state the state configuration for the voice
-   */
-  void configure(const IO::NormalizedSampleSource& sampleSource, const State& state) noexcept;
-
-  /**
-   Configure instance to use the given sample source. NOTE: this is invoked before start of rendering a note. This
-   routine *must* ensure that the state is properly setup to do so, just as if it was created from scratch.
-
    @param samples the samples to use for rendering
    @param state the state configuration for the voice
    */
-  void configure(const Zone::NormalizedSamples& samples, const State& state) noexcept;
+  void configure(std::shared_ptr<Zone::NormalizedSampleSpan>&& samples, const State& state) noexcept;
 
   /// Begin rendering samples from the generator.
   void start() noexcept { index_.start(); }
@@ -124,22 +114,19 @@ private:
 
   Float sample(size_t whole, bool canLoop) const noexcept {
     if (whole == bounds_.endLoopPos() && canLoop) { whole = bounds_.startLoopPos(); }
-    return sample(whole);
+    return (*samples_)[whole];
   }
 
   Float before(size_t whole, bool canLoop) const noexcept {
     if (whole == 0) { return 0_F; }
     if (whole == bounds_.startLoopPos() && canLoop) { whole = bounds_.endLoopPos(); }
-    return sample(whole - 1);
+    return (*samples_)[whole - 1];
   }
-
-  inline Float sample(size_t index) const noexcept { return sampleSource_ ? (*sampleSource_)[index] : (*samples_)[index]; }
 
   Bounds bounds_{};
   Index index_{};
   InterpolatorProc interpolatorProc_;
-  const IO::NormalizedSampleSource* sampleSource_{nullptr};
-  const Zone::NormalizedSamples* samples_{nullptr};
+  std::shared_ptr<Zone::NormalizedSampleSpan> samples_{};
 };
 
 } // namespace SF2::Render::Sample

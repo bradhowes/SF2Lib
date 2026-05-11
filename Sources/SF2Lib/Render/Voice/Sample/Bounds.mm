@@ -28,18 +28,18 @@ Bounds::make(const Entity::SampleHeader& header, const State::State& state) noex
   auto endLoopOffset = offset(Index::endLoopAddressOffset, Index::endLoopAddressCoarseOffset);
   auto endOffset = offset(Index::endAddressOffset, Index::endAddressCoarseOffset);
 
-  os_log_debug(log_, "make - start: %d startLoop: %d endLoop: %d end: %d",
+  os_log_debug(log_, "make - startOffset: %d startLoopOffset: %d endLoopOffset: %d endOffset: %d",
                startOffset, startLoopOffset, endLoopOffset, endOffset);
 
-  // Don't trust values above. Clamp them to valid range before using, and convert to use `header.startIndex()` as their origin.
-  auto lower = int(header.startIndex());
-  auto upper = int(header.endIndex());
-  auto clampPos = [lower, upper](int value) -> size_t {
-    return static_cast<size_t>(std::clamp(value, lower, upper) - lower);
+  // Apply offsets to header values, clamping them, and shift so `startIndex` is at zero.
+  auto startIndex = int(header.startIndex());
+  auto endIndex = int(header.endIndex());
+  auto clampPos = [startIndex, endIndex](int value) -> size_t {
+    return static_cast<size_t>(std::clamp(value, startIndex, endIndex) - startIndex);
   };
 
-  return Bounds(clampPos(lower + startOffset),
+  return Bounds(clampPos(startIndex + startOffset),
                 clampPos(int(header.startLoopIndex()) + startLoopOffset),
                 clampPos(int(header.endLoopIndex()) + endLoopOffset),
-                clampPos(upper + endOffset));
+                clampPos(endIndex + endOffset));
 }

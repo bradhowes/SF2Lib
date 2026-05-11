@@ -37,7 +37,7 @@ using namespace SF2::Render::Voice;
   auto zones = instrument.filter(64, 10);
   XCTAssertEqual(size_t(2), zones.size());
   XCTAssertFalse(zones[0].get().isGlobal());
-  XCTAssertNotEqual(nullptr, &zones[0].get().sampleSource());
+  XCTAssertNotEqual(nullptr, zones[0].get().sampleHeader());
 
   InstrumentCollection instruments;
   instruments.build(file);

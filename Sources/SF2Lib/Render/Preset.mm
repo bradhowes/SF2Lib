@@ -5,8 +5,8 @@
 
 using namespace SF2::Render;
 
-Preset::Preset(IO::File& file, InstrumentCollection& instruments, const Entity::Preset& config) noexcept
-  : WithCollectionBase<Zone::Preset, Entity::Preset>(config.zoneCount(), config)
+Preset::Preset(IO::File& file, InstrumentCollection& instruments, const Entity::Preset& config) noexcept :
+WithCollectionBase<Zone::Preset, Entity::Preset>(config.zoneCount(), config)
 {
   for (const Entity::Bag& bag : file.presetZones().slice(config.firstZoneIndex(), config.zoneCount())) {
     zones_.add(Entity::Generator::Index::instrument,
@@ -14,6 +14,7 @@ Preset::Preset(IO::File& file, InstrumentCollection& instruments, const Entity::
                file.presetZoneModulators().slice(bag.firstModulatorIndex(), bag.modulatorCount()),
                instruments);
   }
+  os_log_debug(log_, "Preset - %s", configuration().name().c_str());
 }
 
 Preset::ConfigCollection
@@ -43,14 +44,16 @@ Preset::loadSamples(const IO::File &file) noexcept {
   static constexpr size_t batchSampleCount = 32 * 1024;
   static constexpr Float normalizationScale = 1.0_F / Float(1 << 15);
 
-  os_log_debug(log_, "loadSamples");
+  os_log_debug(log_, "loadSamples - %s", configuration().name().c_str());
 
   auto pos = file.sampleDataBegin();
   assert(pos.available() >= 0);
 
   // Assume that samples for a preset will lie in the same general area of the samples chunk, so that we can simply identify the
   // min start and max end values and go. Alternate approach would be to take all of the start/end pairs, order by start, remove
-  // duplicates, and then process each pair in turn. The first approach requires less book-keeping and is faster.
+  // duplicates, and then process each pair in turn. The first approach requires less book-keeping and should be marginally faster.
+  // The risk is that there are holes in the spans and the underlying `normalizedSamples_` container is too large.
+
   size_t minStartIndex = size_t(pos.offset()) + size_t(pos.available());
   size_t maxEndIndex = 0;
 
@@ -59,52 +62,46 @@ Preset::loadSamples(const IO::File &file) noexcept {
     if (presetZone.isGlobal()) continue;
     const auto& instrument = presetZone.instrument();
 
-    // Visit each instrument zone to get the instrument sample header.
+    // Visit each instrument zone to get the instrument's sample header bounds.
     for (const auto& instrumentZone : instrument.zones()) {
       auto sampleHeader = instrumentZone.sampleHeader();
       if (sampleHeader == nullptr) continue;
-
       // Update the range of samples we will convert.
-      if (sampleHeader->startIndex() < minStartIndex) minStartIndex = sampleHeader->startIndex();
-      if (sampleHeader->endIndex() > maxEndIndex) maxEndIndex = sampleHeader->endIndex();
+      minStartIndex = std::min(sampleHeader->startIndex(), minStartIndex);
+      maxEndIndex = std::max(sampleHeader->endIndex(), maxEndIndex);
     }
   }
 
   os_log_debug(log_, "loadSamples - minStartIndex: %ld maxEndIndex %ld", minStartIndex, maxEndIndex);
 
-  size_t remainingSamples = (maxEndIndex - minStartIndex) / sizeof(int16_t) + Zone::NormalizedSamples::sizePaddingAfterEnd;
-  os_log_debug(log_, "loadSamples - remainingSamples: %ld", remainingSamples);
+  size_t remainingSampleCount = (maxEndIndex - minStartIndex) + Zone::NormalizedSampleSpan::sizePaddingAfterEnd + 1;
+  os_log_debug(log_, "loadSamples - remainingSampleCount: %ld", remainingSampleCount);
 
-  normalizedSamples_.resize(remainingSamples);
+  normalizedSamples_.resize(remainingSampleCount);
   std::array<int16_t, batchSampleCount> rawSamples;
 
+  // Point to the first 16-bit sample associated with this preset, and copy over remainingSampleCount 16-bit samples in
+  // batchSampleCount chunks.
+  pos = pos.advance(minStartIndex * sizeof(int16_t));
   auto ptr = normalizedSamples_.data();
   using elemType = std::remove_pointer_t<decltype(ptr)>;
-  while (remainingSamples > 0) {
-    auto sampleCount = std::min(remainingSamples, batchSampleCount);
-    remainingSamples -= sampleCount;
+  while (remainingSampleCount > 0) {
+    auto sampleCount = std::min(remainingSampleCount, batchSampleCount);
+    remainingSampleCount -= sampleCount;
     pos = pos.readInto(rawSamples.data(), sampleCount * sizeof(int16_t));
-
-    // Convert from int16 to 32-bit float, saving into normalizedSamples via `ptr`.
     DSPHeaders::Accelerated<elemType>::conversionProc(rawSamples.data(), 1, ptr, 1, sampleCount);
-    // Normalize 32-bit float values, converting in-place.
     DSPHeaders::Accelerated<elemType>::scaleProc(ptr, 1, &normalizationScale, ptr, 1, sampleCount);
     ptr += sampleCount;
   }
 
-  assert(size_t(ptr - normalizedSamples_.data()) == normalizedSamples_.size());
-
-  // Update all instrument zones to use the normalized samples.
-  // Visit each preset zone.
+  // Update all instrument zones to use spans of normalized samples.
   for (auto& presetZone : zones()) {
     if (presetZone.isGlobal()) continue;
     auto& instrument = presetZone.instrument();
-
-    // Visit each instrument zone to get the instrument sample header.
     for (auto& instrumentZone : instrument.zones()) {
       auto sampleHeader = instrumentZone.sampleHeader();
       if (sampleHeader == nullptr) continue;
-      instrumentZone.setNormalizedSamples(new Zone::NormalizedSamples(normalizedSamples_, minStartIndex, *sampleHeader));
+      instrumentZone.setSamples(std::make_shared<Zone::NormalizedSampleSpan>(normalizedSamples_, minStartIndex, *sampleHeader));
     }
   }
 
@@ -121,7 +118,8 @@ Preset::clearSamples() noexcept
     for (auto& instrumentZone : instrument.zones()) {
       auto sampleHeader = instrumentZone.sampleHeader();
       if (sampleHeader == nullptr) continue;
-      instrumentZone.setNormalizedSamples(nullptr);
+      instrumentZone.releaseSamples();
     }
   }
+  normalizedSamples_.clear();
 }

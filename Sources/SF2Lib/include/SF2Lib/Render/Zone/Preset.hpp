@@ -23,7 +23,10 @@ public:
   Preset(GeneratorCollection&& gens, ModulatorCollection&& mods, Render::InstrumentCollection& instruments) noexcept;
 
   /// @returns the `Instrument` configured for this zone. Throws exception if zone is global.
-  Render::Instrument& instrument() const;
+  Render::Instrument& instrument() const {
+    if (instrument_ == nullptr) throw std::runtime_error("global preset zone has no instrument");
+    return *instrument_;
+  }
 
   /**
    Apply the zone to the given voice state by adjusting the nominal value of the generators in the zone.

@@ -127,9 +127,6 @@ public:
   /// @returns reference to samples definitions
   inline const ChunkItems<Entity::SampleHeader>& sampleHeaders() const noexcept { return sampleHeaders_; };
 
-  /// @returns reference to collection of SampleSource entities. **WARNING: not thread-safe**
-  const IO::SampleSourceCollection& sampleSourceCollection();
-
   /// @returns reference to collection of preset indices that order the Preset entities by bank and program.
   inline const std::vector<size_t>& presetIndicesOrderedByBankProgram() const noexcept {
     return presetIndicesOrderedByBankProgram_;
@@ -144,8 +141,6 @@ public:
   void dump() const noexcept;
 
 private:
-
-  void extractNormalizedSamples();
 
   std::string path_;
   int fd_;
@@ -174,8 +169,6 @@ private:
   ChunkItems<Entity::Generator::Generator> instrumentZoneGenerators_{};
   ChunkItems<Entity::Modulator::Modulator> instrumentZoneModulators_{};
   ChunkItems<Entity::SampleHeader> sampleHeaders_{};
-  IO::SampleSourceCollection sampleSourceCollection_{};
-  SampleVector normalizedSamples_{};
 
   std::vector<size_t> presetIndicesOrderedByBankProgram_{};
 

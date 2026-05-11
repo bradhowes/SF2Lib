@@ -7,7 +7,6 @@
 #include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2File/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
-#include "SF2Lib/Render/Zone/NormalizedSamples.hpp"
 
 /**
  Classes used to generate new samples from SF2 sample data for a given pitch and sample rate.

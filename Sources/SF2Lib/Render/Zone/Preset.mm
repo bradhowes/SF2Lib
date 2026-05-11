@@ -9,10 +9,3 @@ Preset::Preset(GeneratorCollection &&gens, ModulatorCollection &&mods,
 Zone(std::forward<decltype(gens)>(gens), std::forward<decltype(mods)>(mods), Entity::Generator::Index::instrument),
 instrument_{isGlobal() ? nullptr : &instruments[resourceLink()]}
 {}
-
-SF2::Render::Instrument&
-Preset::instrument() const
-{
-  if (instrument_ == nullptr) throw std::runtime_error("global preset zone has no instrument");
-  return *instrument_;
-}

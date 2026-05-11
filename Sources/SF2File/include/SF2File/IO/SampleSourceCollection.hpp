@@ -31,7 +31,8 @@ public:
     }
   }
 
-  /// @return the NormalizedSampleSource value at the given index
+  /// @return the NormalizedSampleSource value at the given index, where the index comes from the instrument definition in the SF2
+  /// file.
   const NormalizedSampleSource& operator[](size_t index) const {
     return checkedVectorIndexing(collection_, index);
   }
