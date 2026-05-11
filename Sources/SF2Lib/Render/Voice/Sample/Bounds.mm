@@ -4,10 +4,14 @@
 
 using namespace SF2::Render::Voice::Sample;
 
+const os_log_t Bounds::log_{Log::create("Bounds")};
+
 Bounds::Bounds(size_t startPos, size_t startLoopPos, size_t endLoopPos, size_t endPos) noexcept
   : startPos_{startPos}, startLoopPos_{startLoopPos}, endLoopPos_{endLoopPos}, endPos_{endPos}
 {
-  ;
+  hasLoop_ = startLoopPos_ > startPos_ && startLoopPos_ < endLoopPos_ && endLoopPos_ <= endPos_;
+  os_log_debug(log_, "init - start: %ld startLoop: %ld endLoop: %ld end: %ld hasLoop: %d",
+               startPos_, startLoopPos_, endLoopPos_, endPos_, hasLoop_);
 }
 
 Bounds
@@ -24,7 +28,10 @@ Bounds::make(const Entity::SampleHeader& header, const State::State& state) noex
   auto endLoopOffset = offset(Index::endLoopAddressOffset, Index::endLoopAddressCoarseOffset);
   auto endOffset = offset(Index::endAddressOffset, Index::endAddressCoarseOffset);
 
-  // Don't trust values above. Clamp them to valid ranges before using.
+  os_log_debug(log_, "make - start: %d startLoop: %d endLoop: %d end: %d",
+               startOffset, startLoopOffset, endLoopOffset, endOffset);
+
+  // Don't trust values above. Clamp them to valid range before using, and convert to use `header.startIndex()` as their origin.
   auto lower = int(header.startIndex());
   auto upper = int(header.endIndex());
   auto clampPos = [lower, upper](int value) -> size_t {
@@ -36,4 +43,3 @@ Bounds::make(const Entity::SampleHeader& header, const State::State& state) noex
                 clampPos(int(header.endLoopIndex()) + endLoopOffset),
                 clampPos(upper + endOffset));
 }
-

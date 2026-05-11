@@ -122,7 +122,15 @@ Engine::concludeUsePresetWithIndex(size_t index)
     index = presets_.size();
   }
 
+  if (activePreset_ < presets_.size()) {
+    presets_[activePreset_].clearSamples();
+  }
+
   activePreset_ = index;
+  if (activePreset_ < presets_.size()) {
+    presets_[activePreset_].loadSamples(*file_);
+  }
+
   parameters_.reset();
   bumpLastLoadFinished();
 
@@ -828,7 +836,7 @@ Engine::updateActiveVoiceCount() noexcept
 {
   auto value = oldestVoiceIndices_.activeVoiceCount();
   os_log_info(log_, "updateActiveVoiceCount - %ld", value);
-  [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::activeVoiceCount)] setValue: value];
+  [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::activeVoiceCount)] setValue: AUValue(value)];
 }
 
 void
@@ -898,7 +906,7 @@ Engine::provideParameterValue(AUParameter* parameter) const noexcept
         value = SF2::fromBool(portamentoModeEnabled());
         break;
       case ParameterAddress::portamentoRate:
-        value = portamentoRate();
+        value = AUValue(portamentoRate());
         break;
       case ParameterAddress::oneVoicePerKeyModeEnabled:
         value = SF2::fromBool(oneVoicePerKeyModeEnabled());
@@ -907,20 +915,20 @@ Engine::provideParameterValue(AUParameter* parameter) const noexcept
         value = SF2::fromBool(polyphonicModeEnabled());
         break;
       case ParameterAddress::activeVoiceCount:
-        return oldestVoiceIndices_.activeVoiceCount();
+        return AUValue(oldestVoiceIndices_.activeVoiceCount());
       case ParameterAddress::retriggerModeEnabled:
         value = SF2::fromBool(retriggerModeEnabled());
         break;
       case ParameterAddress::isRendering:
         return isRendering();
       case ParameterAddress::activeProgramIndex:
-        value = activeProgramIndex();
+        value = AUValue(activeProgramIndex());
         break;
       case ParameterAddress::activeBankIndex:
-        value = activeBankIndex();
+        value = AUValue(activeBankIndex());
         break;
       case ParameterAddress::activePresetIndex:
-        value = activePresetIndex();
+        value = AUValue(activePresetIndex());
         break;
       case ParameterAddress::lastLoadFinished:
         value = lastLoadFinishedCounter_;
@@ -1021,7 +1029,7 @@ Engine::makeTree() noexcept
                                                         flags:flags
                                                  valueStrings:nullptr
                                           dependentParameters:nullptr];
-  param.value = portamentoRate();
+  param.value = AUValue(portamentoRate());
   [definitions addObject:param];
 
   flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_MeterReadOnly;
@@ -1032,7 +1040,7 @@ Engine::makeTree() noexcept
                                                                          name:@"activeVoiceCount"
                                                                       address:valueOf(ParameterAddress::activeVoiceCount)
                                                                           min:0
-                                                                          max:voiceCountLimit()
+                                                                          max:AUValue(voiceCountLimit())
                                                                          unit:kAudioUnitParameterUnit_Generic
                                                                      unitName:nullptr
                                                                         flags:flags

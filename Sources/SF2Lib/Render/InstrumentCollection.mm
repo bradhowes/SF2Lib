@@ -23,9 +23,3 @@ InstrumentCollection::clear() noexcept
 {
   instruments_.clear();
 }
-
-const Instrument&
-InstrumentCollection::operator[](size_t index) const noexcept
-{
-  return checkedVectorIndexing(instruments_, index);
-}

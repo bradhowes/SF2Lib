@@ -20,10 +20,10 @@ public:
    @param mods the vector of modulators that define the zone
    @param instruments collection of instrument definitions found in the file
    */
-  Preset(GeneratorCollection&& gens, ModulatorCollection&& mods, const Render::InstrumentCollection& instruments) noexcept;
+  Preset(GeneratorCollection&& gens, ModulatorCollection&& mods, Render::InstrumentCollection& instruments) noexcept;
 
-  /// @returns the Instrument configured for this zone. Throws exception if zone is global.
-  const Render::Instrument& instrument() const;
+  /// @returns the `Instrument` configured for this zone. Throws exception if zone is global.
+  Render::Instrument& instrument() const;
 
   /**
    Apply the zone to the given voice state by adjusting the nominal value of the generators in the zone.
@@ -33,7 +33,7 @@ public:
   void refine(Voice::State::State& state) const noexcept;
 
 private:
-  const Render::Instrument* instrument_;
+  Render::Instrument* instrument_;
 };
 
 } // namespace SF2::Render

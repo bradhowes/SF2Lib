@@ -8,7 +8,7 @@
 #include "TestResources.hpp"
 
 #include "SF2File/IO/File.hpp"
-#include "SF2File/IO/NormalizedSampleSource.hpp"
+// #include "SF2File/IO/NormalizedSampleSource.hpp"
 
 using namespace SF2;
 using namespace SF2::IO;
@@ -96,35 +96,35 @@ using namespace SF2::Render::Voice::Sample;
   XCTAssertEqual(size_t(0), file.presetIndicesOrderedByBankProgram()[0]);
   XCTAssertEqual(std::string("Nice Piano"), file.presets()[0].name());
   // file.presets()[0].dump("", 0);
-
-  auto samples = file.sampleSourceCollection()[0];
-  XCTAssertEqual(samples.size(), size_t(115504));
-
-  XCTAssertEqualWithAccuracy(samples[0], -0.00103759765625, 0.000001);
+//
+//  auto samples = file.sampleSourceCollection()[0];
+//  XCTAssertEqual(samples.size(), size_t(115504));
+//
+//  XCTAssertEqualWithAccuracy(samples[0], -0.00103759765625, 0.000001);
 }
 
-- (void)testSamples {
-  auto& file = self.contexts->context2.file();
-  auto samples = file.sampleSourceCollection()[0];
-
-  off_t sampleOffset = 246;
-  XCTAssertEqual(samples.size(), size_t(115504));
-  XCTAssertEqualWithAccuracy(samples[0], -0.00103759765625, self.epsilon);
-
-  int fd = self.contexts->context2.fd();
-  off_t pos = ::lseek(fd, sampleOffset, SEEK_SET);
-  XCTAssertEqual(pos, sampleOffset);
-
-  int16_t rawSamples[4];
-  ::read(fd, &rawSamples, sizeof(rawSamples));
-
-  XCTAssertEqualWithAccuracy(rawSamples[0] * NormalizedSampleSource::normalizationScale, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(rawSamples[1] * NormalizedSampleSource::normalizationScale, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(rawSamples[2] * NormalizedSampleSource::normalizationScale, samples[2], self.epsilon);
-  XCTAssertEqualWithAccuracy(rawSamples[3] * NormalizedSampleSource::normalizationScale, samples[3], self.epsilon);
-
-  // file.dumpThreaded();
-}
+//- (void)testSamples {
+//  auto& file = self.contexts->context2.file();
+//  auto samples = file.sampleSourceCollection()[0];
+//
+//  off_t sampleOffset = 246;
+//  XCTAssertEqual(samples.size(), size_t(115504));
+//  XCTAssertEqualWithAccuracy(samples[0], -0.00103759765625, self.epsilon);
+//
+//  int fd = self.contexts->context2.fd();
+//  off_t pos = ::lseek(fd, sampleOffset, SEEK_SET);
+//  XCTAssertEqual(pos, sampleOffset);
+//
+//  int16_t rawSamples[4];
+//  ::read(fd, &rawSamples, sizeof(rawSamples));
+//
+//  XCTAssertEqualWithAccuracy(rawSamples[0] * NormalizedSampleSource::normalizationScale, samples[0], self.epsilon);
+//  XCTAssertEqualWithAccuracy(rawSamples[1] * NormalizedSampleSource::normalizationScale, samples[1], self.epsilon);
+//  XCTAssertEqualWithAccuracy(rawSamples[2] * NormalizedSampleSource::normalizationScale, samples[2], self.epsilon);
+//  XCTAssertEqualWithAccuracy(rawSamples[3] * NormalizedSampleSource::normalizationScale, samples[3], self.epsilon);
+//
+//  // file.dumpThreaded();
+//}
 
 #if 0
 

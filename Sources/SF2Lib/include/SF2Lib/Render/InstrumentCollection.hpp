@@ -33,12 +33,20 @@ public:
   void clear() noexcept;
 
   /**
+   Obtain the (read-only) `Instrument` at the given index.
+
+   @param index the index of the instrument to get
+   @returns the `Instrument` reference
+   */
+  const Instrument& operator[](size_t index) const noexcept { return checkedVectorIndexing(instruments_, index); }
+
+  /**
    Obtain the `Instrument` at the given index.
 
    @param index the index of the instrument to get
    @returns the `Instrument` reference
    */
-  const Instrument& operator[](size_t index) const noexcept;
+  Instrument& operator[](size_t index) noexcept { return checkedVectorIndexing(instruments_, index); }
 
 private:
   std::vector<Instrument> instruments_{};
