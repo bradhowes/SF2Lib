@@ -19,7 +19,7 @@ concept ZoneDerivedType = std::derived_from<T, SF2::Render::Zone::Zone>;
 
 /**
  Templated collection of zones, made up of either Preset zones or Instrument zones. A non-global zone defines a range
- of MIDI keys and/or velocities over which it operates. The first zone can be a `global` zone. The global zone defines
+ of MIDI keys and/or velocities over which it operates. The first zone can be a `global` zone (optional). The global zone defines
  the configuration settings that apply to all other zones. The collection can be filtered by MIDI key and velocity to
  obtain the zones that are to be used for rendering audio samples.
  */
@@ -58,6 +58,12 @@ public:
     return matches;
   }
 
+  inline std::vector<T>::iterator begin() noexcept { return zones_.begin(); }
+  inline std::vector<T>::iterator end() noexcept { return zones_.end(); }
+
+  inline std::vector<T>::const_iterator begin() const noexcept { return zones_.cbegin(); }
+  inline std::vector<T>::const_iterator end() const noexcept { return zones_.cend(); }
+
   /// @returns true if first zone in collection is a global zone
   inline bool hasGlobal() const noexcept { return !zones_.empty() && zones_.front().isGlobal(); }
 
@@ -69,14 +75,14 @@ public:
    global zones that are not the first zone.
 
    @param notGlobalIfPresent generator index that if present at end of gen collection means the zone is not global. For
-   a PresetZone, this is an Instrument. For an InstrumentZone, it is a SampleSource.
+   a `PresetZone`, this is an index to an `Instrument`. For an `InstrumentZone`, it is an index to a `SampleSource`.
    @param gens collection of generators that defines the zone
    @param mods collection of modulators that defines the zone
    @param values additional arguments for the Zone construction
    */
   template<class... Args>
   void add(Entity::Generator::Index notGlobalIfPresent, GeneratorCollection&& gens, ModulatorCollection&& mods,
-           const Args&... values) noexcept {
+           Args&... values) noexcept {
 
     // Per spec, disregard zones that have no gens AND mods
     if (gens.empty() && mods.empty()) return;

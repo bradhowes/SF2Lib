@@ -29,14 +29,17 @@ public:
   using EntityType = E;
   using CollectionType = Zone::Collection<ZoneType>;
 
-  /// @returns true if the instrument has a global zone
+  /// @returns true if the preset/instrument has a global zone
   inline bool hasGlobalZone() const noexcept { return zones_.hasGlobal(); }
 
   /// @returns the collection's global zone if there is one
   inline const ZoneType* globalZone() const noexcept { return zones_.global(); }
 
-  /// @returns the collection of zones associated with the child class
+  /// @returns the collection of associated zones
   inline const CollectionType& zones() const noexcept { return zones_; }
+
+  /// @returns the collection of associated zones
+  inline CollectionType& zones() noexcept { return zones_; }
 
   /// @returns the preset/instrument's entity from the SF2 file
   inline const EntityType& configuration() const noexcept { return configuration_; }

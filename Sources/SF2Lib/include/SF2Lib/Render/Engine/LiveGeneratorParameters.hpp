@@ -53,7 +53,7 @@ public:
    @param index the index of the generator
    @returns the current value
    */
-  inline AUValue getLiveValue(Index index) const noexcept { return liveValues_[index]; }
+  inline AUValue getLiveValue(Index index) const noexcept { return AUValue(liveValues_[index]); }
 
   /**
    Apply one changed value to the given voice state.

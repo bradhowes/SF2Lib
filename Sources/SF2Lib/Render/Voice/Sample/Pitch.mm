@@ -41,7 +41,7 @@ Pitch::configure(const Entity::SampleHeader& header) noexcept
   }
 
   auto sampleRateDeltaCents{0};
-  if (state_.sampleRate() != header.sampleRate()) {
+  if (state_.sampleRate() != Float(header.sampleRate())) {
     // Calculate ratio of sample rates as a difference in their cent frequency values, which can then be added to
     // the sum of the phase increments. Saves us from a multiply later on.
     auto sampleRateCents{int(std::round(1200 * std::log2(state_.sampleRate() / 440_F)))};

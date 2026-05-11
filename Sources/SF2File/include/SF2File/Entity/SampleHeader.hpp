@@ -19,12 +19,14 @@ namespace SF2::Entity {
 
  From the SF2 spec:
 
- > The values of dwStart, dwEnd, dwStartloop, and dwEndloop must all be within the range of the sample data field included in the
- > SoundFont compatible bank or referenced in the sound ROM. Also, to allow a variety of hardware platforms to be able to reproduce
- > the data, the samples have a minimum length of 48 data points, a minimum loop size of 32 data points and a minimum of 8 valid
- > points prior to dwStartloop and after dwEndloop. Thus dwStart must be less than dwStartloop-7, dwStartloop must be less than
- > dwEndloop-31, and dwEndloop must be less than dwEnd-7. If these constraints are not met, the sound may optionally not be played
- > if the hardware cannot support artifact-free playback for the parameters given.
+ > The values of `dwStart`, `dwEnd`, `dwStartloop`, and `dwEndloop` must all be within the range of the sample data field included
+ > in the SoundFont compatible bank or referenced in the sound ROM. Also, to allow a variety of hardware platforms to be able to
+ > reproduce the data, the samples have a minimum length of 48 data points, a minimum loop size of 32 data points and a minimum of
+ > 8 valid points prior to `dwStartloop` and after `dwEndloop`. Thus `dwStart` must be less than `dwStartloop-7`, `dwStartloop`
+ > must be less than `dwEndloop-31`, and `dwEndloop` must be less than `dwEnd-7`. If these constraints are not met, the sound may
+ > optionally not be played if the hardware cannot support artifact-free playback for the parameters given.
+
+ Note that the SF2 spec allows for ROM samples, which this code does not support since it is meaningless in our context.
  */
 class SampleHeader {
 public:
@@ -87,7 +89,7 @@ public:
    The DWORD dwEnd contains the index, in sample data points, from the beginning of the sample data field to the first
    of the set of 46 zero valued data points following this sample.
 
-   @returns index + 1 of the last sample to use.
+   @returns the index *after* the last sample to use (the first zero value).
    */
   size_t endIndex() const noexcept { return dwEnd; }
 
@@ -101,7 +103,7 @@ public:
 
   /**
    The DWORD dwEndloop contains the index, in sample data points, from the beginning of the sample data field to the
-   first data point following the loop of this sample. Note that this is the data point “equivalent to” the first loop
+   first data point following the loop of this sample. Note that this is the data point *equivalent to* the first loop
    data point, and that to produce portable artifact free loops, the eight proximal data points surrounding both the
    Startloop and Endloop points should be identical.
 
@@ -123,6 +125,7 @@ public:
   /// @returns number of samples between the start and end indices.
   size_t sampleSize() const noexcept { return endIndex() - startIndex(); }
 
+  /// @returns index of another instance that is related (eg left/right pairs). Only valid if `isRight()` or `isLeft()` is `true`.
   size_t sampleLinkIndex() const noexcept { return sampleLink; }
 
   void dump(const std::string& indent, size_t index) const noexcept;

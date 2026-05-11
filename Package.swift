@@ -194,7 +194,6 @@ extension Array where Element == CXXSetting {
       "-Wimplicit-fallthrough",
       "-Wimplicit-retain-self",
       "-Wincompatible-function-pointer-types",
-      "-Wlifetime",
       "-Wlogical-op-parentheses",
       "-Wmethod-signatures",
       "-Wmismatched-tags",

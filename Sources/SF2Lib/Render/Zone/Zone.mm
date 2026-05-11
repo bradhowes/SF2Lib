@@ -1,6 +1,4 @@
-// Copyright © 2022, 2025 Brad Howes. All rights reserved.
-
-#include <limits>
+// Copyright © 2026 Brad Howes. All rights reserved.
 
 #include "SF2Lib/Render/Zone/Zone.hpp"
 

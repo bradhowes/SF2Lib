@@ -11,9 +11,9 @@
 namespace SF2::Render::Voice::Sample {
 
 /**
- Interpolatable index into a NormalizedSampleSource. Maintains two counters, an integral one (`size_t`) and a partial
- one (`Float`) that indicates how close the index is to a sample index. These two values are then used by other
- routines to fetch the appropriate samples and interpolate over them.
+ Interpolatable index into a `NormalizedSamples` collection. Maintains two counters, an integral one (`size_t`) and a
+ partial one (`Float`) that indicates how close the index is to a sample index. These two values are then used by other
+ routines to fetch the appropriate samples and interpolate over them. (FluidSynth uses two 32-bit integers to do the same.)
 
  Updates to the index honor loops in the sample stream if allowed. The index can also signal when it has reached the
  end of the sample stream via its `finished` method.
@@ -66,8 +66,8 @@ public:
     partial_ += partialIncrement;
 
     if (partial_ >= 1_F) {
-      auto carry{size_t(partial_)};
-      whole_ += carry;
+      auto carry{trunc(partial_)};
+      whole_ += size_t(carry);
       partial_ -= carry;
     }
 

@@ -135,6 +135,8 @@ public:
     return presetIndicesOrderedByBankProgram_;
   }
 
+  Pos sampleDataBegin() const noexcept { return sampleDataBegin_; }
+
   void patchReleaseTimes(float maxDuration) noexcept;
 
   void dumpThreaded() const noexcept;

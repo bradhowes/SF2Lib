@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #include <cmath>
 
@@ -34,13 +34,6 @@ PresetCollection::clear() noexcept
   size_.store(0);
   presets_.clear();
   instruments_.clear();
-}
-
-const Preset&
-PresetCollection::operator[](size_t index) const noexcept
-{
-  assert(size_.load() > index);
-  return checkedVectorIndexing(presets_, index);
 }
 
 size_t

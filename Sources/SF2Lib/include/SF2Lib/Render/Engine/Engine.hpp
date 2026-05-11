@@ -74,7 +74,7 @@ public:
 
   inline size_t minimumNoteDurationSamples() const noexcept
   {
-    return static_cast<size_t>(ceil(minimumNoteDurationMilliseconds_ / 1000_F * sampleRate_));
+    return static_cast<size_t>(ceil(Float(minimumNoteDurationMilliseconds_) / 1000_F * sampleRate_));
   }
 
   /// @returns maximum number of voices available for simultaneous rendering in engine.

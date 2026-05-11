@@ -37,7 +37,7 @@ public:
      @param value the value to clamp
      @returns clamped value
      */
-    template <Numeric T> T clamp(T value) const noexcept { return std::clamp<T>(value, min, max); }
+    template <Numeric T> T clamp(T value) const noexcept { return std::clamp<T>(value, T(min), T(max)); }
 
     const int min;
     const int max;

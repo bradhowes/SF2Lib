@@ -47,7 +47,7 @@ private:
   static constexpr size_t TableSize = size_t(MaximumAttenuationCentiBels + 1);
   static constexpr Float generator(size_t index) {
     // Equivalent to pow(10.0, Float(index) / -200.0)
-    return DSPHeaders::ConstMath::exp(index / -200_F * DSPHeaders::ConstMath::Constants<Float>::ln10);
+    return DSPHeaders::ConstMath::exp(Float(index) / -200_F * DSPHeaders::ConstMath::Constants<Float>::ln10);
   }
 
   inline static const auto lookup_ = DSPHeaders::ConstMath::make_array<Float, TableSize>(generator);
@@ -102,7 +102,7 @@ private:
   static constexpr size_t TableSize = size_t(CentsPerOctave);
   static constexpr Float generator(size_t index) {
     // 6.875 x 2^(index / 1200) ==> 6.875 x e^(index / 1200 * ln(2))
-    return 6.875_F * DSPHeaders::ConstMath::exp(index / Float(CentsPerOctave) *
+    return 6.875_F * DSPHeaders::ConstMath::exp(Float(index) / Float(CentsPerOctave) *
                                                 DSPHeaders::ConstMath::Constants<Float>::ln2);
   }
 
@@ -159,7 +159,7 @@ struct PanLookup {
 private:
   static constexpr size_t TableSize = 500 + 500 + 1;
   static constexpr Float Scaling = DSPHeaders::ConstMath::Constants<Float>::HalfPI / (TableSize - 1);
-  static constexpr Float generator(size_t index) { return DSPHeaders::ConstMath::sin(index * Scaling); }
+  static constexpr Float generator(size_t index) { return DSPHeaders::ConstMath::sin(Float(index) * Scaling); }
 
   inline static const auto lookup_ = DSPHeaders::ConstMath::make_array<Float, TableSize>(generator);
 };
