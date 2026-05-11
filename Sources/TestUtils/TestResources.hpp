@@ -6,6 +6,7 @@
 
 + (NSArray<NSURL*>*)getInitSoundFontUrls;
 + (NSURL*)getResourceUrl:(NSUInteger)index;
++ (std::string)getResourcePath:(NSUInteger)index;
 + (NSURL*)getBadResourceUrl:(NSUInteger)index;
 + (SF2::IO::File&)getFile:(NSUInteger)index;
 

@@ -289,7 +289,11 @@ struct PresetTestContextBase
   }
 
   const NSURL* url() const { return getUrl(urlIndex_); }
-  const std::string path() const { return url().path.UTF8String; }
+  const std::string path() const {
+    auto nsPath = url().path;
+    const char* utf8Str = nsPath.UTF8String;
+    return utf8Str ? std::string(utf8Str) : std::string();
+  }
   SF2::IO::File& file() const { return getFile(urlIndex_); }
   int fd() const { return ::open(path().c_str(), O_RDONLY); }
   SF2::MIDI::ChannelState& channelState() { return channelState_; }

@@ -70,6 +70,13 @@ void initSoundFontUrls() {
   return url;
 }
 
++ (std::string) getResourcePath:(NSUInteger)urlIndex
+{
+  auto url = [TestResources getResourceUrl:urlIndex];
+  const char* path = url.path.UTF8String;
+  return path != nullptr ? std::string(path) : std::string();
+}
+
 + (NSURL*)getBadResourceUrl:(NSUInteger)urlIndex
 {
   auto urls = [TestResources getSoundFontUrls];

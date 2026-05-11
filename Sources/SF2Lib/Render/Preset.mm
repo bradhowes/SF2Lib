@@ -82,7 +82,7 @@ Preset::loadSamples(const IO::File &file) noexcept {
 
   // Point to the first 16-bit sample associated with this preset, and copy over remainingSampleCount 16-bit samples in
   // batchSampleCount chunks.
-  pos = pos.advance(minStartIndex * sizeof(int16_t));
+  pos = pos.advance(off_t(minStartIndex * sizeof(int16_t)));
   auto ptr = normalizedSamples_.data();
   using elemType = std::remove_pointer_t<decltype(ptr)>;
   while (remainingSampleCount > 0) {

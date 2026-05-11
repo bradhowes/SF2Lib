@@ -215,7 +215,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqualWithAccuracy(0.0657718032598, samples[22], epsilon);
   XCTAssertEqualWithAccuracy(0.0629670470953, samples[23], epsilon);
   XCTAssertEqualWithAccuracy(0.0279869697988, samples[24], epsilon);
-  XCTAssertEqualWithAccuracy(0, samples[25], epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[25], epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
@@ -296,7 +296,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqualWithAccuracy(0.0657671317458, samples[22], epsilon);
   XCTAssertEqualWithAccuracy(0.062967300415, samples[23], epsilon);
   XCTAssertEqualWithAccuracy(0.0278175324202, samples[24], epsilon);
-  XCTAssertEqualWithAccuracy(0, samples[25], epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[25], epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
@@ -1058,9 +1058,9 @@ using namespace SF2::Render::Engine;
   XCTAssertEqualWithAccuracy(-0.00152004370466, samples[146], self.epsilon);
   XCTAssertEqualWithAccuracy(-1.91024373635e-05, samples[147], self.epsilon);
   XCTAssertEqualWithAccuracy(-0.00130360154435, samples[148], self.epsilon);
-  XCTAssertEqualWithAccuracy(0, samples[149], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[149], self.epsilon);
   XCTAssertEqualWithAccuracy(0.00521253235638, samples[150], self.epsilon);
-  XCTAssertEqualWithAccuracy(0, samples[151], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[151], self.epsilon);
   XCTAssertEqualWithAccuracy(0.00381309306249, samples[152], self.epsilon);
   XCTAssertEqualWithAccuracy(0.00381309306249, samples[153], self.epsilon);
   XCTAssertEqualWithAccuracy(0.000672512280289, samples[154], self.epsilon);
@@ -1542,21 +1542,21 @@ using namespace SF2::Render::Engine;
   harness.sendNoteOn(72);
   harness.renderUntil(mixer, AVAudioFrameCount(harness.renders() * 0.1));
   XCTAssertEqual(size_t(2), engine.activeVoiceCount());
-  XCTAssertEqual(2, param.value);
+  XCTAssertEqual(2.0, param.value);
 
   harness.sendNoteOff(60);
   harness.renderUntil(mixer, AVAudioFrameCount(harness.renders() * 0.5));
   XCTAssertEqual(size_t(1), engine.activeVoiceCount());
-  XCTAssertEqual(1, param.value);
+  XCTAssertEqual(1.0, param.value);
 
   harness.sendNoteOff(72);
   harness.renderToEnd(mixer);
   XCTAssertEqual(size_t(0), engine.activeVoiceCount());
-  XCTAssertEqual(0, param.value);
+  XCTAssertEqual(0.0, param.value);
 
   // Should be harmless
   param.value = 99;
-  XCTAssertEqual(0, param.value);
+  XCTAssertEqual(0.0, param.value);
 }
 
 - (void)testEngineParameterTreeHasGenerators
@@ -1782,7 +1782,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqualWithAccuracy(-0.00130352284759283066, samples[148], self.epsilon);
   XCTAssertEqualWithAccuracy(-1.43335573739022948e-05, samples[149], self.epsilon);
   XCTAssertEqualWithAccuracy(0.00521253235638141632, samples[150], self.epsilon);
-  XCTAssertEqualWithAccuracy(0, samples[151], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[151], self.epsilon);
   XCTAssertEqualWithAccuracy(0.0037709362804889679, samples[152], self.epsilon);
   XCTAssertEqualWithAccuracy(0.00385478883981704712, samples[153], self.epsilon);
   XCTAssertEqualWithAccuracy(0.000667075335513800383, samples[154], self.epsilon);
@@ -1931,7 +1931,7 @@ using namespace SF2::Render::Engine;
   XCTAssertEqualWithAccuracy(-0.00519049586728215218, samples[297], self.epsilon);
   XCTAssertEqualWithAccuracy(1.07499417936196551e-05, samples[298], self.epsilon);
   XCTAssertEqualWithAccuracy(0.000977621413767337799, samples[299], self.epsilon);
-  XCTAssertEqualWithAccuracy(0, samples[300], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[300], self.epsilon);
   XCTAssertEqualWithAccuracy(0.00784593448042869568, samples[301], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.duration()];

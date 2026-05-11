@@ -13,14 +13,14 @@
 - (void)testLoading {
   auto fi1 = SF2FileInfo("a.b");
   XCTAssertFalse(fi1.load());
-  auto url = [TestResources getResourceUrl:0];
-  auto fi2 = SF2FileInfo(url.path.UTF8String);
+  auto path = [TestResources getResourcePath:0];
+  auto fi2 = SF2FileInfo(path);
   XCTAssertTrue(fi2.load());
 }
 
 - (void)testEmbeddedContent0 {
-  auto url = [TestResources getResourceUrl: 0];
-  auto fi1 = SF2FileInfo(url.path.UTF8String);
+  auto path = [TestResources getResourcePath: 0];
+  auto fi1 = SF2FileInfo(path);
   fi1.load();
   XCTAssertTrue(std::string("Free Font GM Ver. 3.2") == fi1.embeddedName());
   XCTAssertTrue(std::string("") == fi1.embeddedAuthor());
@@ -29,8 +29,8 @@
 }
 
 - (void)testEmbeddedContent1 {
-  auto url = [TestResources getResourceUrl: 1];
-  auto fi1 = SF2FileInfo(url.path.UTF8String);
+  auto path = [TestResources getResourcePath: 1];
+  auto fi1 = SF2FileInfo(path);
   fi1.load();
   XCTAssertTrue(std::string("GeneralUser GS MuseScore version 1.442") == fi1.embeddedName());
   XCTAssertTrue(std::string("S. Christian Collins") == fi1.embeddedAuthor());
@@ -39,8 +39,8 @@
 }
 
 - (void)testEmbeddedContent2 {
-  auto url = [TestResources getResourceUrl: 2];
-  auto fi1 = SF2FileInfo(url.path.UTF8String);
+  auto path = [TestResources getResourcePath: 2];
+  auto fi1 = SF2FileInfo(path);
   fi1.load();
   XCTAssertTrue(std::string("User Bank") == fi1.embeddedName());
   XCTAssertTrue(std::string("Vienna Master") == fi1.embeddedAuthor());
@@ -49,8 +49,8 @@
 }
 
 - (void)testPresetInfo {
-  auto url = [TestResources getResourceUrl: 0];
-  auto fi1 = SF2FileInfo(url.path.UTF8String);
+  auto path = [TestResources getResourcePath: 0];
+  auto fi1 = SF2FileInfo(path);
   fi1.load();
   XCTAssertEqual(size_t(235), fi1.size());
   auto presetInfo = fi1[0];

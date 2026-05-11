@@ -30,10 +30,10 @@
 }
 
 - (void)testCreateLoadFileUseIndexNoOverrides {
-  auto url = [TestResources getResourceUrl:0];
+  auto path = [TestResources getResourcePath:0];
   // auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
-  auto data = self.engine->createLoadFileUsePresetPayload(url.path.UTF8String, 123);
-  XCTAssertTrue(data.size() > url.path.length);
+  auto data = self.engine->createLoadFileUsePresetPayload(path, 123);
+  XCTAssertTrue(data.size() > path.size());
 }
 
 //- (void)testCreateLoadFileUseIndexWithOverrides {

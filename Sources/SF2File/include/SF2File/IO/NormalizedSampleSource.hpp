@@ -21,7 +21,7 @@ public:
   /**
    Construct a span of normalized samples defined by a SampleHeader entity.
 
-   @param allSamples collection of normalized samples in the SF2 file
+   @param samples collection of normalized samples for a preset
    @param header defines the range of samples to actually load
    */
   NormalizedSampleSource(const SampleVector& samples, const Entity::SampleHeader& header) noexcept :

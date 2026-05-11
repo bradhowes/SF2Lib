@@ -18,10 +18,10 @@ struct LFOTestInjector {
   static ModLFO makeMod(Float sampleRate, Float frequency, Float delay) { return ModLFO(sampleRate, frequency, delay); }
   static VibLFO makeVib(Float sampleRate, Float frequency, Float delay) { return VibLFO(sampleRate, frequency, delay); }
 
-  ModLFO::Value delaySampleCount(ModLFO& lfo) const noexcept { return ModLFO::Value(lfo.delaySampleCount_); }
+  ModLFO::Value delaySampleCount(ModLFO& lfo) const noexcept { return ModLFO::Value(Float(lfo.delaySampleCount_)); }
   ModLFO::Value increment(ModLFO& lfo) const noexcept { return ModLFO::Value(lfo.increment_); }
 
-  VibLFO::Value delaySampleCount(VibLFO& lfo) const noexcept { return VibLFO::Value(lfo.delaySampleCount_); }
+  VibLFO::Value delaySampleCount(VibLFO& lfo) const noexcept { return VibLFO::Value(Float(lfo.delaySampleCount_)); }
   VibLFO::Value increment(VibLFO& lfo) const noexcept { return VibLFO::Value(lfo.increment_); }
 };
 }
