@@ -21,10 +21,10 @@ Base64::decode(const unsigned char* ptr, size_t size) noexcept
 std::string
 Base64::decode(const std::string& input) noexcept
 {
-  const char* in = input.data();
+  auto in = input.data();
   auto inputSize = input.size();
-  size_t padded = inputSize > 0 && (inputSize % 4 || in[inputSize - 1] == '=');
-  const size_t commonSize = ((inputSize + 3) / 4 - padded) * 4;
+  auto padded = inputSize > 0 && (inputSize % 4 || in[inputSize - 1] == '=');
+  auto commonSize = ((inputSize + 3) / 4 - padded) * 4;
 
   std::string output(commonSize / 4 * 3 + padded, '\0');
   auto out = output.data();
@@ -55,7 +55,7 @@ std::string
 Base64::encode(const std::string& input) noexcept
 {
   auto inputSize = input.size();
-  size_t outputSize = 4 * ((inputSize + 2) / 3);
+  auto outputSize = 4 * ((inputSize + 2) / 3);
   if (outputSize < inputSize) return std::string();
 
   std::string output;
