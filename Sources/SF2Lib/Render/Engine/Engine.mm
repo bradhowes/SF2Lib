@@ -26,7 +26,7 @@ Engine::Engine(Float sampleRate, size_t voiceCountLimit, Interpolator interpolat
     startVoiceSignpost_{os_signpost_id_generate(log_)},
     stopVoiceSignpost_{os_signpost_id_generate(log_)},
     renderingTimeBudgetScaling_{renderingTimeBudgetScaling},
-    workQueue_{dispatch_queue_create("SF2Lib::Engine", NULL)}
+    workQueue_{dispatch_queue_create("SF2Lib::Engine", DISPATCH_QUEUE_SERIAL)}
 {
   assert(voiceCountLimit <= traits::maxVoiceCount);
 
@@ -89,30 +89,30 @@ Engine::load(const std::string& path, size_t index) noexcept
   // Only called from unit tests -- balance the change made in usePresetWithIndex()
   assert(presetChangesPending_.load() == 0);
   ++presetChangesPending_;
-  return concludeLoad(path, index);
+  return concludeLoad_RT(path, index);
 }
 
 SF2::IO::File::LoadResponse
 Engine::load(int fd, size_t index) noexcept
 {
-  // Only called from unit tests -- balance the change made in concludeUsePresetWithIndex()
+  // Only called from unit tests -- balance the change made in concludeUsePresetWithIndex_RT()
   assert(presetChangesPending_.load() == 0);
   ++presetChangesPending_;
-  return concludeLoad(fd, index);
+  return concludeLoad_RT(fd, index);
 }
 
 void
 Engine::usePresetWithIndex(size_t index)
 {
-  // Only called from unit tests -- balance the change made in concludeUsePresetWithIndex()
+  // Only called from unit tests -- balance the change made in concludeUsePresetWithIndex_RT()
   os_log_info(log_, "usePresetWithIndex BEGIN - %lu", index);
   assert(presetChangesPending_.load() == 0);
   ++presetChangesPending_;
-  concludeUsePresetWithIndex(index);
+  concludeUsePresetWithIndex_RT(index);
 }
 
 void
-Engine::concludeUsePresetWithIndex(size_t index)
+Engine::concludeUsePresetWithIndex_RT(size_t index)
 {
   assert(presetChangesPending_.load() > 0);
 
@@ -132,27 +132,27 @@ Engine::concludeUsePresetWithIndex(size_t index)
   }
 
   parameters_.reset();
-  bumpLastLoadFinished();
+  bumpLastLoadFinished_RT();
 
   NSString* name = [NSString stringWithCString:activePresetName().c_str() encoding:NSUTF8StringEncoding];
-  os_log_info(log_, "concludeUsePresetWithIndex END - %{public}@", name);
+  os_log_info(log_, "concludeUsePresetWithIndex_RT END - %{public}@", name);
 }
 
 void
-Engine::allOff() noexcept
+Engine::allOff_RT() noexcept
 {
   // !!! NOTE: must only be done on the render thread.
   for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
-    pos = stopVoice(*pos);
+    pos = stopVoice_RT(*pos);
   }
 }
 
 void
-Engine::noteOn(int key, int velocity) noexcept
+Engine::noteOn_RT(int key, int velocity) noexcept
 {
   if (presetChangesPending_.load() > 0 || !hasActivePreset()) return;
 
-  os_signpost_interval_begin(log_, noteOnSignpost_, "noteOn");
+  os_signpost_interval_begin(log_, noteOnSignpost_, "noteOn_RT");
 
   if (channelState_.pedalState().softPedalActive) {
     velocity /= 2;
@@ -164,51 +164,51 @@ Engine::noteOn(int key, int velocity) noexcept
   for (const Config& config : configs) {
     auto exclusiveClass{config.exclusiveClass()};
     if (exclusiveClass > 0) {
-      stopAllExclusiveVoices(exclusiveClass);
+      stopAllExclusiveVoices_RT(exclusiveClass);
     }
     if (oneVoicePerKeyModeEnabled_) {
-      stopSameKeyVoices(config.eventKey());
+      stopSameKeyVoices_RT(config.eventKey());
     }
   }
 
   for (const Config& config : configs) {
-    startVoice(config);
+    startVoice_RT(config);
   }
-  os_signpost_interval_end(log_, noteOnSignpost_, "noteOn");
+  os_signpost_interval_end(log_, noteOnSignpost_, "noteOn_RT");
 }
 
 void
-Engine::noteOff(int key) noexcept
+Engine::noteOff_RT(int key) noexcept
 {
-  os_signpost_interval_begin(log_, noteOffSignpost_, "noteOff");
-  visitActiveVoice([=](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
+  os_signpost_interval_begin(log_, noteOffSignpost_, "noteOff_RT");
+  visitActiveVoice_RT([=](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
     if (voice.initiatingKey() == key) {
       voice.releaseKey(releaseKeyState);
     }
   });
-  os_signpost_interval_end(log_, noteOffSignpost_, "noteOff");
+  os_signpost_interval_end(log_, noteOffSignpost_, "noteOff_RT");
 }
 
 void
-Engine::applySostenutoPedal() noexcept
+Engine::applySostenutoPedal_RT() noexcept
 {
-  visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState&) {
+  visitActiveVoice_RT([](Voice& voice, const Voice::ReleaseKeyState&) {
     if (voice.isKeyDown()) voice.useSostenuto();
   });
 }
 
 void
-Engine::releaseKeys() noexcept
+Engine::releaseKeys_RT() noexcept
 {
-  visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
+  visitActiveVoice_RT([](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
     voice.releaseKey(releaseKeyState);
   }, Voice::ReleaseKeyState{0u, MIDI::ChannelState::PedalState()});
 }
 
 void
-Engine::applyPedals() noexcept
+Engine::applyPedals_RT() noexcept
 {
-  visitActiveVoice([](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
+  visitActiveVoice_RT([](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
     voice.releaseKey(releaseKeyState);
   });
 }
@@ -238,7 +238,7 @@ Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
     }
 
     if (voice.isDone()) {
-      pos = stopVoice(voiceIndex);
+      pos = stopVoice_RT(voiceIndex);
     } else {
       ++pos;
     }
@@ -254,7 +254,7 @@ Engine::doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount durati
   if (rawIndex < valueOf(Entity::Generator::Index::numValues)) {
     auto index = Entity::Generator::Index(rawIndex);
     parameters_.setLiveValue(index, value);
-    notifyParameterChanged(index);
+    notifyParameterChanged_RT(index);
     return duration;
   } else if (rawIndex >= valueOf(ParameterAddress::firstParameterAddress) &&
              rawIndex < valueOf(ParameterAddress::lastParameterAddressPlusOne)) {
@@ -288,9 +288,9 @@ void
 Engine::doRenderingStateChanged(bool state) noexcept
 {
   if (!state) {
-    allOff();
+    allOff_RT();
 
-    // Post a sentinal item to work queue to know all pending items are done. Since the render thread is no longer operating at
+    // Post a sentinal item to work queue so we know all pending items are done. Since the render thread is no longer operating at
     // this point, we know there will be no more added and from now on it is safe for the Engine to be destroyed.
     dispatch_sync(workQueue_, ^{ });
 
@@ -326,7 +326,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
     case MIDI::CoreEvent::noteOff:
       os_log_info(log_, "doMIDIEvent noteOff");
       if (midiEvent.length > 1) {
-        noteOff(midiEvent.data[1]);
+        noteOff_RT(midiEvent.data[1]);
       }
       break;
 
@@ -335,10 +335,10 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
         auto velocity = midiEvent.length == 3 ? midiEvent.data[2] : 0;
         if (velocity > 0) {
           os_log_info(log_, "doMIDIEvent noteOn");
-          noteOn(midiEvent.data[1], velocity);
+          noteOn_RT(midiEvent.data[1], velocity);
         } else {
           os_log_info(log_, "doMIDIEvent noteOff (zero velocity noteOn");
-          noteOff(midiEvent.data[1]);
+          noteOff_RT(midiEvent.data[1]);
         }
       }
       break;
@@ -347,7 +347,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       os_log_info(log_, "doMIDIEvent keyPressure");
       if (midiEvent.length == 3) {
         channelState_.setNotePressure(midiEvent.data[1], midiEvent.data[2]);
-        notifyActiveVoicesChannelStateChanged();
+        notifyActiveVoicesChannelStateChanged_RT();
       }
       break;
 
@@ -357,9 +357,9 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
         auto what = MIDI::ControlChange(midiEvent.data[1]);
         auto data = midiEvent.data[2];
         if (midiEvent.data[1] < 120) {
-          processControlChange(what, data);
+          processControlChange_RT(what, data);
         } else {
-          processChannelMessage(what, data);
+          processChannelMessage_RT(what, data);
         }
       }
       break;
@@ -367,7 +367,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
     case MIDI::CoreEvent::programChange:
       os_log_info(log_, "doMIDIEvent programChange");
       if (midiEvent.length >= 2) {
-        changeProgram(midiEvent.data[1]);
+        changeProgram_RT(midiEvent.data[1]);
       }
       break;
 
@@ -375,7 +375,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       os_log_info(log_, "doMIDIEvent channelPressure");
       if (midiEvent.length >= 2) {
         channelState_.setChannelPressure(midiEvent.data[1]);
-        notifyActiveVoicesChannelStateChanged();
+        notifyActiveVoicesChannelStateChanged_RT();
       }
       break;
 
@@ -384,7 +384,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       if (midiEvent.length == 3) {
         int bend = (midiEvent.data[2] << 7) | midiEvent.data[1];
         channelState_.setPitchWheelValue(bend);
-        notifyActiveVoicesChannelStateChanged();
+        notifyActiveVoicesChannelStateChanged_RT();
       }
       break;
 
@@ -394,13 +394,13 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
           midiEvent.data[midiEvent.length - 1] == SF2::valueOf(MIDI::CoreEvent::EOX)) {
         switch (midiEvent.data[2]) {
           case LoadPresetSysExPayload::modelPathPayload:
-            if (!loadFileAndPresetFromSysEx(midiEvent)) {
+            if (!loadFileAndPresetFromSysEx_RT(midiEvent)) {
               os_log_info(log_, "doMIDIEvent - systemExclusive ignored due to length < 6");
             }
             break;
 
           case LoadPresetSysExPayload::modelBookmarkPayload:
-            if (!loadBookmarkAndPresetFromSysEx(midiEvent)) {
+            if (!loadBookmarkAndPresetFromSysEx_RT(midiEvent)) {
               os_log_info(log_, "doMIDIEvent - systemExclusive ignored due to length < 6");
             }
             break;
@@ -414,7 +414,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 
     case MIDI::CoreEvent::reset:
       os_log_info(log_, "doMIDIEvent reset");
-      reset();
+      reset_RT();
       break;
 
     default:
@@ -426,40 +426,40 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 }
 
 void
-Engine::processChannelMessage(MIDI::ControlChange channelMessage, uint8_t value) noexcept
+Engine::processChannelMessage_RT(MIDI::ControlChange channelMessage, uint8_t value) noexcept
 {
-  os_log_info(log_, "processChannelMessage - %d value: %d", channelMessage, value);
+  os_log_info(log_, "processChannelMessage_RT - %d value: %d", channelMessage, value);
   switch (channelMessage) {
     case MIDI::ControlChange::allSoundOff:
-      allOff();
+      allOff_RT();
       break;
 
     case MIDI::ControlChange::resetAllControllers:
-      reset();
+      reset_RT();
       break;
 
 //    case MIDI::ControlChange::localControl:
 //      break;
 
     case MIDI::ControlChange::allNotesOff:
-      releaseKeys();
+      releaseKeys_RT();
       break;
 
     case MIDI::ControlChange::omniOff:
-      allOff();
+      allOff_RT();
       break;
 
     case MIDI::ControlChange::omniOn:
-      allOff();
+      allOff_RT();
       break;
 
     case MIDI::ControlChange::monoOn:
-      allOff();
+      allOff_RT();
       setPhonicMode(PhonicMode::mono);
       break;
 
     case MIDI::ControlChange::polyOn:
-      allOff();
+      allOff_RT();
       setPhonicMode(PhonicMode::poly);
       break;
 
@@ -468,14 +468,14 @@ Engine::processChannelMessage(MIDI::ControlChange channelMessage, uint8_t value)
 }
 
 void
-Engine::processControlChange(MIDI::ControlChange cc, uint8_t value) noexcept
+Engine::processControlChange_RT(MIDI::ControlChange cc, uint8_t value) noexcept
 {
   auto previousPedalState = channelState_.pedalState();
 
   // Delegate the processing of the CC values. If a value was actually changed, then notify the active voices so that
   // they can update their generators that rely on CC values.
   if (channelState_.setContinuousControllerValue(cc, value)) {
-    notifyActiveVoicesChannelStateChanged();
+    notifyActiveVoicesChannelStateChanged_RT();
   }
 
   // Now check if there is a pedal change that can affect note off responses in a voice.
@@ -484,7 +484,7 @@ Engine::processControlChange(MIDI::ControlChange cc, uint8_t value) noexcept
 
   if (!previousPedalState.sostenutoPedalActive) {
     if (currentPedalState.sostenutoPedalActive) {
-      applySostenutoPedal();
+      applySostenutoPedal_RT();
     }
   } else {
     doRelease = !currentPedalState.sostenutoPedalActive;
@@ -495,35 +495,35 @@ Engine::processControlChange(MIDI::ControlChange cc, uint8_t value) noexcept
   }
 
   if (doRelease) {
-    applyPedals();
+    applyPedals_RT();
   }
 }
 
 void
-Engine::notifyParameterChanged(Entity::Generator::Index index) noexcept
+Engine::notifyParameterChanged_RT(Entity::Generator::Index index) noexcept
 {
-  visitActiveVoice([&](Voice& voice, const Voice::ReleaseKeyState&) {
+  visitActiveVoice_RT([&](Voice& voice, const Voice::ReleaseKeyState&) {
     parameters_.applyOneGenerator(voice.state(), index);
   });
 }
 
 void
-Engine::notifyActiveVoicesChannelStateChanged() noexcept
+Engine::notifyActiveVoicesChannelStateChanged_RT() noexcept
 {
-  visitActiveVoice([&](Voice& voice, const Voice::ReleaseKeyState&) { voice.channelStateChanged(channelState_); });
+  visitActiveVoice_RT([&](Voice& voice, const Voice::ReleaseKeyState&) { voice.channelStateChanged(channelState_); });
 }
 
 bool
-Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
-  os_log_info(log_, "loadFileAndPresetFromSysEx BEGIN");
+Engine::loadFileAndPresetFromSysEx_RT(const AUMIDIEvent& midiEvent) noexcept {
+  os_log_info(log_, "loadFileAndPresetFromSysEx_RT BEGIN");
 
   if (midiEvent.length < LoadPresetSysExPayload::minPayloadSize) {
-    os_log_error(log_, "loadFileAndPresetFromSysEx END - invalid midi payload %d", midiEvent.length);
+    os_log_error(log_, "loadFileAndPresetFromSysEx_RT END - invalid midi payload %d", midiEvent.length);
     return false;
   }
 
   // Do this now to stop any future rendering.
-  allOff();
+  allOff_RT();
   ++presetChangesPending_;
 
   const uint8_t* bytes = midiEvent.data;
@@ -538,22 +538,23 @@ Engine::loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
 
   __block auto path = pathCount == 0 ? std::string("") : Utils::Base64::decode(pathStart, pathCount);
 
-  dispatch_async(workQueue_, ^{ beginLoadFileAndPreset(path, presetIndex); });
+  dispatch_async(workQueue_, ^{ beginLoadFileAndPreset_RT(path, presetIndex); });
 
+  os_log_info(log_, "loadFileAndPresetFromSysEx_RT END - true");
   return true;
 }
 
 bool
-Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
-  os_log_info(log_, "loadBookmarkAndPresetFromSysEx BEGIN");
+Engine::loadBookmarkAndPresetFromSysEx_RT(const AUMIDIEvent& midiEvent) noexcept {
+  os_log_info(log_, "loadBookmarkAndPresetFromSysEx_RT BEGIN");
 
   if (midiEvent.length < LoadPresetSysExPayload::minPayloadSize) {
-    os_log_error(log_, "loadBookmarkAndPresetFromSysEx END - invalid midi payload %d", midiEvent.length);
+    os_log_error(log_, "loadBookmarkAndPresetFromSysEx_RT END - invalid midi payload %d", midiEvent.length);
     return false;
   }
 
   // Do this now to stop any future rendering.
-  allOff();
+  allOff_RT();
   ++presetChangesPending_;
 
   const uint8_t* bytes = midiEvent.data;
@@ -569,35 +570,34 @@ Engine::loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept {
   NSData* data = [NSData dataWithBytesNoCopy:dataStart length:dataCount freeWhenDone:false];
   __block NSData* bookmark = [data initWithBase64EncodedData:data options:0];
 
-  dispatch_async(workQueue_, ^{ beginLoadBookmarkAndPreset(bookmark, presetIndex); });
+  dispatch_async(workQueue_, ^{ beginLoadBookmarkAndPreset_RT(bookmark, presetIndex); });
 
+  os_log_info(log_, "loadBookmarkAndPresetFromSysEx_RT END - true");
   return true;
 }
 
 void
 Engine::loadFileAndPreset(std::string path, size_t presetIndex) noexcept {
   ++presetChangesPending_;
-  beginLoadFileAndPreset(path, presetIndex);
+  beginLoadFileAndPreset_RT(path, presetIndex);
 }
 
 void
-Engine::beginLoadFileAndPreset(std::string path, size_t presetIndex) noexcept {
-  // !!! NOTE: we are probably *not* running in the render thread, so care must be taken when changing state in the engine so we
-  // do not cause sound glitches.
-
+Engine::beginLoadFileAndPreset_RT(std::string path, size_t presetIndex) noexcept {
+  // !!! NOTE: we are *not* running in the render thread.
+  os_log_info(log_, "beginLoadFileAndPreset_RT BEGIN");
   if (!path.empty()) {
-    concludeLoad(path, presetIndex);
+    concludeLoad_RT(path, presetIndex);
   } else {
-    concludeUsePresetWithIndex(presetIndex);
+    concludeUsePresetWithIndex_RT(presetIndex);
   }
-
-  os_log_info(log_, "loadFileAndPreset END");
+  os_log_info(log_, "beginLoadFileAndPreset_RT END");
 }
 
 SF2::IO::File::LoadResponse
-Engine::concludeLoad(const std::string& path, size_t index) noexcept
+Engine::concludeLoad_RT(const std::string& path, size_t index) noexcept
 {
-  os_log_info(log_, "concludeLoad - path: '%{public}s' index: %lu", path.c_str(), index);
+  os_log_info(log_, "concludeLoad_RT - path: '%{public}s' index: %lu", path.c_str(), index);
   assert(presetChangesPending_.load() > 0);
 
   auto file = std::make_unique<IO::File>(path);
@@ -611,20 +611,20 @@ Engine::concludeLoad(const std::string& path, size_t index) noexcept
     presets_.build(*file_);
   }
 
-  concludeUsePresetWithIndex(index);
+  concludeUsePresetWithIndex_RT(index);
 
-  os_log_info(log_, "concludeLoad END - %d", response);
+  os_log_info(log_, "concludeLoad_RT END - %d", response);
   return response;
 }
 
 void
 Engine::loadBookmarkAndPreset(NSData *bookmark, size_t presetIndex) noexcept {
   ++presetChangesPending_;
-  beginLoadBookmarkAndPreset(bookmark, presetIndex);
+  beginLoadBookmarkAndPreset_RT(bookmark, presetIndex);
 }
 
 void
-Engine::beginLoadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept {
+Engine::beginLoadBookmarkAndPreset_RT(NSData* bookmark, size_t presetIndex) noexcept {
   // !!! NOTE: we are probably *not* running in the render thread, so care must be taken when changing state in the engine so we
   // do not cause sound glitches.
 
@@ -669,7 +669,7 @@ Engine::beginLoadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcep
 
     os_log_info(log_, "loading from resolved url - file descriptor: %d", fileHandle.fileDescriptor);
 
-    concludeLoad(fileHandle.fileDescriptor, presetIndex);
+    concludeLoad_RT(fileHandle.fileDescriptor, presetIndex);
   }];
 
   if (didStart) {
@@ -680,7 +680,7 @@ Engine::beginLoadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcep
 }
 
 SF2::IO::File::LoadResponse
-Engine::concludeLoad(int fd, size_t index) noexcept
+Engine::concludeLoad_RT(int fd, size_t index) noexcept
 {
   os_log_info(log_, "concludeLoad - fd: %d index: %lu", fd, index);
   assert(presetChangesPending_.load() > 0);
@@ -697,7 +697,7 @@ Engine::concludeLoad(int fd, size_t index) noexcept
     presets_.build(*file_);
   }
 
-  concludeUsePresetWithIndex(index);
+  concludeUsePresetWithIndex_RT(index);
 
   os_log_info(log_, "concludeLoad END - %d", response);
   return response;
@@ -755,9 +755,9 @@ Engine::createUseBankProgramPayload(uint16_t bank, uint8_t program) noexcept
 }
 
 void
-Engine::changeProgram(uint8_t program) noexcept
+Engine::changeProgram_RT(uint8_t program) noexcept
 {
-  allOff();
+  allOff_RT();
   ++presetChangesPending_;
 
   uint16_t msbBank = channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectMSB);
@@ -765,7 +765,7 @@ Engine::changeProgram(uint8_t program) noexcept
   uint16_t bank = msbBank * 128u + lsbBank;
 
   auto index = presets_.locatePresetIndex(bank, program);
-  concludeUsePresetWithIndex(index);
+  concludeUsePresetWithIndex_RT(index);
 }
 
 void
@@ -773,7 +773,7 @@ Engine::initialize(Float sampleRate) noexcept
 {
   sampleRate_ = sampleRate;
   renderingTimeBudgetIntervalNanoseconds_ = uint64_t(1.0 / sampleRate * 1.0e9);
-  allOff();
+  allOff_RT();
   for (auto& voice : voices_) {
     voice.setSampleRate(sampleRate);
   }
@@ -781,12 +781,12 @@ Engine::initialize(Float sampleRate) noexcept
 }
 
 void
-Engine::stopAllExclusiveVoices(int exclusiveClass) noexcept
+Engine::stopAllExclusiveVoices_RT(int exclusiveClass) noexcept
 {
   for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
     auto voiceIndex = *pos;
     if (voices_[voiceIndex].exclusiveClass() == exclusiveClass) {
-      pos = stopVoice(voiceIndex);
+      pos = stopVoice_RT(voiceIndex);
     } else {
       ++pos;
     }
@@ -794,12 +794,12 @@ Engine::stopAllExclusiveVoices(int exclusiveClass) noexcept
 }
 
 void
-Engine::stopSameKeyVoices(int eventKey) noexcept
+Engine::stopSameKeyVoices_RT(int eventKey) noexcept
 {
   for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
     auto voiceIndex = *pos;
     if (voices_[voiceIndex].initiatingKey() == eventKey) {
-      pos = stopVoice(voiceIndex);
+      pos = stopVoice_RT(voiceIndex);
     } else {
       ++pos;
     }
@@ -807,51 +807,51 @@ Engine::stopSameKeyVoices(int eventKey) noexcept
 }
 
 void
-Engine::startVoice(const Config& config) noexcept
+Engine::startVoice_RT(const Config& config) noexcept
 {
-  os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice");
+  os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice_RT");
   auto voiceIndex = oldestVoiceIndices_.voiceAcquire();
-  os_log_info(log_, "startVoice - %lu", voiceIndex);
+  os_log_info(log_, "startVoice_RT - %lu", voiceIndex);
   voices_[voiceIndex].configure(config, channelState_);
   parameters_.applyChanged(voices_[voiceIndex].state());
   voices_[voiceIndex].start();
-  updateActiveVoiceCount();
-  os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice");
+  updateActiveVoiceCount_RT();
+  os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice_RT");
 }
 
 OldestVoiceCollection::iterator
-Engine::stopVoice(size_t voiceIndex) noexcept
+Engine::stopVoice_RT(size_t voiceIndex) noexcept
 {
-  os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice");
-  os_log_info(log_, "stopVoice - %lu", voiceIndex);
+  os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice_RT");
+  os_log_info(log_, "stopVoice_RT - %lu", voiceIndex);
   voices_[voiceIndex].stop();
   auto pos = oldestVoiceIndices_.voiceRelease(voiceIndex);
-  os_signpost_interval_end(log_, stopVoiceSignpost_, "stopVoice");
-  updateActiveVoiceCount();
+  os_signpost_interval_end(log_, stopVoiceSignpost_, "stopVoice_RT");
+  updateActiveVoiceCount_RT();
   return pos;
 }
 
 void
-Engine::updateActiveVoiceCount() noexcept
+Engine::updateActiveVoiceCount_RT() noexcept
 {
   auto value = oldestVoiceIndices_.activeVoiceCount();
-  os_log_info(log_, "updateActiveVoiceCount - %ld", value);
+  os_log_info(log_, "updateActiveVoiceCount_RT - %ld", value);
   [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::activeVoiceCount)] setValue: AUValue(value)];
 }
 
 void
-Engine::bumpLastLoadFinished() noexcept
+Engine::bumpLastLoadFinished_RT() noexcept
 {
-  os_log_info(log_, "bumpLastLoadFinished");
+  os_log_info(log_, "bumpLastLoadFinished_RT");
   auto param = [parameterTree_ parameterWithAddress: valueOf(ParameterAddress::lastLoadFinished)];
   lastLoadFinishedCounter_ += traits::lastLoadFinishedChange;
   [param setValue: AUValue(lastLoadFinishedCounter_)];
 }
 
 void
-Engine::reset() noexcept
+Engine::reset_RT() noexcept
 {
-  allOff();
+  allOff_RT();
   channelState_.reset();
 }
 

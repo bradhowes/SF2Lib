@@ -132,7 +132,7 @@ public:
    samples, and `frameCount` will never be more than the `maxFramesToRender` value given to the `setRenderingFormat`.
 
    NOTE: everything from this point on should be inlined as much as possible for speed. This is executed in a real-time
-   rendering thread.
+   rendering thread when called via `doRendering`.
 
    @param mixer collection of buffers to render into
    @param frameCount number of samples to render.
@@ -142,6 +142,8 @@ public:
   /**
    API for EventProcessor. Perform rendering of audio samples using the loaded soundfont and active preset.
 
+   **NOTE**: this runs on the real-time audio rendering thread.
+
    @param outputBusNumber the index of the bus being rendered
    @param outs the output buffers to write to
    @param frameCount the number of frames to render, where 1 frame is 1 sample per output buffer
@@ -150,14 +152,16 @@ public:
                           AUAudioFrameCount frameCount) noexcept {
     // All of the work is done when working with output bus 0. If wired correctly, busses 1 and 2 will
     // hold the buffered values that were created here.
-    if (isRendering() && presetChangesPending_.load() == 0 && outputBusNumber == 0) {
+    if (outputBusNumber == 0) {
 
       // The voices will add their samples to the mixer so clear them here.
       outs.clear(frameCount);
       busBuffers(1).clear(frameCount);
       busBuffers(2).clear(frameCount);
 
-      renderInto(Mixer(outs, busBuffers(1), busBuffers(2)), frameCount);
+      if (presetChangesPending() == 0) {
+        renderInto(Mixer(outs, busBuffers(1), busBuffers(2)), frameCount);
+      }
     }
   }
 
@@ -175,7 +179,7 @@ public:
 
    @param index the generate to update
    */
-  void notifyParameterChanged(Entity::Generator::Index index) noexcept;
+  void notifyParameterChanged_RT(Entity::Generator::Index index) noexcept;
 
   /// @returns the AUParameterTree for the engine.
   inline AUParameterTree* parameterTree() const noexcept {
@@ -300,7 +304,7 @@ private:
 
   AUValue provideParameterValue(AUParameter* parameter) const noexcept;
 
-  void updateActiveVoiceCount() noexcept;
+  void updateActiveVoiceCount_RT() noexcept;
 
   void updateDurationParameters() noexcept;
 
@@ -326,9 +330,9 @@ private:
    */
   IO::File::LoadResponse load(const std::string& path, size_t index) noexcept;
 
-  void beginLoadFileAndPreset(std::string path, size_t presetIndex) noexcept;
+  void beginLoadFileAndPreset_RT(std::string path, size_t presetIndex) noexcept;
 
-  void beginLoadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept;
+  void beginLoadBookmarkAndPreset_RT(NSData* bookmark, size_t presetIndex) noexcept;
 
   /**
    Finish loading from an SF2 file. Called at the conclusion of `loadFileAndPreset()`.
@@ -337,7 +341,7 @@ private:
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
    */
-  IO::File::LoadResponse concludeLoad(const std::string& path, size_t index) noexcept;
+  IO::File::LoadResponse concludeLoad_RT(const std::string& path, size_t index) noexcept;
 
   /**
    Load the presets from an file descriptor and activate one. NOTE: this is not thread-safe. When running in a render thread,
@@ -358,7 +362,7 @@ private:
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
    */
-  IO::File::LoadResponse concludeLoad(int fd, size_t index) noexcept;
+  IO::File::LoadResponse concludeLoad_RT(int fd, size_t index) noexcept;
 
   /**
    Activate the preset at the given index. NOTE: this is not thread-safe and is only called from unit tests via TestEngineHarness.
@@ -367,11 +371,11 @@ private:
    */
   void usePresetWithIndex(size_t index);
 
-  void concludeUsePresetWithIndex(size_t index);
+  void concludeUsePresetWithIndex_RT(size_t index);
 
   /// Reset the engine to a known state. All keys are released, all voices are off, and the MIDI channel state is reset
   /// to initial state.
-  void reset() noexcept;
+  void reset_RT() noexcept;
 
   /**
    Turn off all voices, making them all available for rendering.
@@ -379,13 +383,13 @@ private:
    NOTE: this is not thread-safe. When running in a render thread, it is expected that this is only executed due to
    an incoming MIDI command.
    */
-  void allOff() noexcept;
+  void allOff_RT() noexcept;
 
   /**
    Release all keys -- all MIDI note ON events that have not seen a note OFF event. Unlike, `allOff` this does not
    stop audio.
    */
-  void releaseKeys() noexcept;
+  void releaseKeys_RT() noexcept;
 
   /**
    Tell any voices playing the current MIDI key that the key has been released. The voice will continue to render until
@@ -396,7 +400,7 @@ private:
 
    @param key the MIDI key that was released
    */
-  void noteOff(int key) noexcept;
+  void noteOff_RT(int key) noexcept;
 
   /**
    Activate one or more voices to play a MIDI key with the given velocity.
@@ -407,7 +411,7 @@ private:
    @param key the MIDI key to play
    @param velocity the MIDI velocity to play at
    */
-  void noteOn(int key, int velocity) noexcept;
+  void noteOn_RT(int key, int velocity) noexcept;
 
   /**
    Set the portamento (glissando/glide) mode. Note that this is only applicable in monophonic mode.
@@ -469,10 +473,10 @@ private:
    @param visitor the method to invoke
    */
   template <typename Visitor>
-  void visitActiveVoice(Visitor visitor) noexcept
+  void visitActiveVoice_RT(Visitor visitor) noexcept
   {
     auto releaseKeyState = Voice::ReleaseKeyState{minimumNoteDurationSamples(), channelState_.pedalState()};
-    visitActiveVoice(visitor, releaseKeyState);
+    visitActiveVoice_RT(visitor, releaseKeyState);
   }
 
   /**
@@ -483,7 +487,7 @@ private:
    @param releaseKeyState the state of the pedal controllers
    */
   template <typename Visitor>
-  void visitActiveVoice(Visitor visitor, const Voice::ReleaseKeyState releaseKeyState) noexcept
+  void visitActiveVoice_RT(Visitor visitor, const Voice::ReleaseKeyState releaseKeyState) noexcept
   {
     for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
       auto voiceIndex = *pos;
@@ -497,35 +501,33 @@ private:
     }
   }
 
-  void forgetCurrentPresets() noexcept;
-
-  void bumpLastLoadFinished() noexcept;
+  void bumpLastLoadFinished_RT() noexcept;
 
   void initialize(Float sampleRate) noexcept;
 
-  void stopAllExclusiveVoices(int exclusiveClass) noexcept;
+  void stopAllExclusiveVoices_RT(int exclusiveClass) noexcept;
 
-  void stopSameKeyVoices(int eventKey) noexcept;
+  void stopSameKeyVoices_RT(int eventKey) noexcept;
 
-  void startVoice(const Config& config) noexcept;
+  void startVoice_RT(const Config& config) noexcept;
 
-  OldestVoiceCollection::iterator stopVoice(size_t voiceIndex) noexcept;
+  OldestVoiceCollection::iterator stopVoice_RT(size_t voiceIndex) noexcept;
 
-  void notifyActiveVoicesChannelStateChanged() noexcept;
+  void notifyActiveVoicesChannelStateChanged_RT() noexcept;
 
-  void processChannelMessage(MIDI::ControlChange cc, uint8_t value) noexcept;
+  void processChannelMessage_RT(MIDI::ControlChange cc, uint8_t value) noexcept;
 
-  void processControlChange(MIDI::ControlChange cc, uint8_t value) noexcept;
+  void processControlChange_RT(MIDI::ControlChange cc, uint8_t value) noexcept;
 
-  void changeProgram(uint8_t program) noexcept;
+  void changeProgram_RT(uint8_t program) noexcept;
 
-  bool loadFileAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept;
+  bool loadFileAndPresetFromSysEx_RT(const AUMIDIEvent& midiEvent) noexcept;
 
-  bool loadBookmarkAndPresetFromSysEx(const AUMIDIEvent& midiEvent) noexcept;
+  bool loadBookmarkAndPresetFromSysEx_RT(const AUMIDIEvent& midiEvent) noexcept;
 
-  void applySostenutoPedal() noexcept;
+  void applySostenutoPedal_RT() noexcept;
 
-  void applyPedals() noexcept;
+  void applyPedals_RT() noexcept;
 
   Float sampleRate_;
   size_t minimumNoteDurationMilliseconds_{0};
