@@ -54,25 +54,29 @@ Engine::setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFra
 bool
 Engine::hasActivePreset() const noexcept
 {
-  return activePreset_ < presets_.size();
+  auto ptr = presetsState();
+  return ptr ? ptr->hasActivePreset() : false;
 }
 
 std::string
 Engine::activePresetName() const noexcept
 {
-  return hasActivePreset() ? presets_[activePreset_].configuration().name() : "";
+  auto ptr = presetsState();
+  return ptr && ptr->hasActivePreset() ? ptr->activePreset().configuration().name() : "";
 }
 
 int
 Engine::activeProgramIndex() const noexcept
 {
-  return hasActivePreset() ? presets_[activePreset_].configuration().program() : -1;
+  auto ptr = presetsState();
+  return ptr && ptr->hasActivePreset() ? ptr->activePreset().configuration().program() : -1;
 }
 
 int
 Engine::activeBankIndex() const noexcept
 {
-  return hasActivePreset() ? presets_[activePreset_].configuration().bank() : -1;
+  auto ptr = presetsState();
+  return ptr && ptr->hasActivePreset() ? ptr->activePreset().configuration().bank() : -1;
 }
 
 int
@@ -80,35 +84,8 @@ Engine::activePresetIndex() const noexcept
 {
   // NOTE: this value is only used/reported in the AUParameterTree -- not to be used in place of `activePreset_` value which is the
   // only real preset index value to be used in the engine.
-  return hasActivePreset() ? int(activePreset_) : -1;
-}
-
-SF2::IO::File::LoadResponse
-Engine::load(const std::string& path, size_t index) noexcept
-{
-  // Only called from unit tests -- balance the change made in usePresetWithIndex()
-  assert(presetChangesPending_.load() == 0);
-  ++presetChangesPending_;
-  return concludeLoad_RT(path, index);
-}
-
-SF2::IO::File::LoadResponse
-Engine::load(int fd, size_t index) noexcept
-{
-  // Only called from unit tests -- balance the change made in concludeUsePresetWithIndex_RT()
-  assert(presetChangesPending_.load() == 0);
-  ++presetChangesPending_;
-  return concludeLoad_RT(fd, index);
-}
-
-void
-Engine::usePresetWithIndex(size_t index)
-{
-  // Only called from unit tests -- balance the change made in concludeUsePresetWithIndex_RT()
-  os_log_info(log_, "usePresetWithIndex BEGIN - %lu", index);
-  assert(presetChangesPending_.load() == 0);
-  ++presetChangesPending_;
-  concludeUsePresetWithIndex_RT(index);
+  auto ptr = presetsState();
+  return ptr ? int(ptr->activePresetIndex()) : -1;
 }
 
 void
@@ -116,25 +93,17 @@ Engine::concludeUsePresetWithIndex_RT(size_t index)
 {
   assert(presetChangesPending_.load() > 0);
 
-  --presetChangesPending_;
-  if (index >= presets_.size()) {
-    // Special case to flag no preset being used.
-    index = presets_.size();
-  }
-
-  if (activePreset_ < presets_.size()) {
-    presets_[activePreset_].clearSamples();
-  }
-
-  activePreset_ = index;
-  if (activePreset_ < presets_.size()) {
-    presets_[activePreset_].loadSamples(*file_);
+  auto ptr = presetsState();
+  if (ptr) {
+    ptr->changeActivePreset(index);
   }
 
   parameters_.reset();
   bumpLastLoadFinished_RT();
+  --presetChangesPending_;
 
-  NSString* name = [NSString stringWithCString:activePresetName().c_str() encoding:NSUTF8StringEncoding];
+  auto presetName = ptr->hasActivePreset() ? ptr->activePreset().configuration().name() : "???";
+  NSString* name = [NSString stringWithCString:presetName.c_str() encoding:NSUTF8StringEncoding];
   os_log_info(log_, "concludeUsePresetWithIndex_RT END - %{public}@", name);
 }
 
@@ -150,30 +119,37 @@ Engine::allOff_RT() noexcept
 void
 Engine::noteOn_RT(int key, int velocity) noexcept
 {
-  if (presetChangesPending_.load() > 0 || !hasActivePreset()) return;
-
   os_signpost_interval_begin(log_, noteOnSignpost_, "noteOn_RT");
 
-  if (channelState_.pedalState().softPedalActive) {
-    velocity /= 2;
-  }
+  if (presetChangesPending_.load() == 0) {
+    auto ptr = presetsState();
+    if (ptr && ptr->hasActivePreset()) {
 
-  auto configs = presets_[activePreset_].find(key, velocity);
+      ptr->deletePast();
 
-  // Stop any existing voice with the same exclusiveClass value.
-  for (const Config& config : configs) {
-    auto exclusiveClass{config.exclusiveClass()};
-    if (exclusiveClass > 0) {
-      stopAllExclusiveVoices_RT(exclusiveClass);
+      if (channelState_.pedalState().softPedalActive) {
+        velocity /= 2;
+      }
+
+      auto configs = ptr->activePreset().find(key, velocity);
+
+      // Stop any existing voice with the same exclusiveClass value.
+      for (const Config& config : configs) {
+        auto exclusiveClass{config.exclusiveClass()};
+        if (exclusiveClass > 0) {
+          stopAllExclusiveVoices_RT(exclusiveClass);
+        }
+        if (oneVoicePerKeyModeEnabled_) {
+          stopSameKeyVoices_RT(config.eventKey());
+        }
+      }
+
+      for (const Config& config : configs) {
+        startVoice_RT(config);
+      }
     }
-    if (oneVoicePerKeyModeEnabled_) {
-      stopSameKeyVoices_RT(config.eventKey());
-    }
   }
 
-  for (const Config& config : configs) {
-    startVoice_RT(config);
-  }
   os_signpost_interval_end(log_, noteOnSignpost_, "noteOn_RT");
 }
 
@@ -216,7 +192,7 @@ Engine::applyPedals_RT() noexcept
 void
 Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
 {
-  if (activeVoiceCount() == 0 || presetChangesPending_.load() > 0 || !hasActivePreset()) return;
+  if (activeVoiceCount() == 0) return;
 
   auto timeBudget = timeBudgetNanoseconds(frameCount);
   auto entryTime = Utils::Timer::now();
@@ -522,22 +498,22 @@ Engine::loadFileAndPresetFromSysEx_RT(const AUMIDIEvent& midiEvent) noexcept {
     return false;
   }
 
-  // Do this now to stop any future rendering.
+  // Stop all existing voices and block future ones from starting.
   allOff_RT();
+  // Increment number of items in workQueue
   ++presetChangesPending_;
 
   const uint8_t* bytes = midiEvent.data;
-
   auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes);
-  __block auto presetIndex = payload->presetIndex;
   auto overrideCount = payload->overrideCount;
   auto pos1 = reinterpret_cast<const SF2::MIDI::GeneratorOverride*>(payload + 1);
   auto overrides = std::vector<MIDI::GeneratorOverride>(pos1, pos1 + overrideCount);
   auto pathStart = reinterpret_cast<const uint8_t*>(pos1 + overrideCount);
   auto pathCount = size_t((bytes + midiEvent.length) - pathStart) - 1;
 
+  // Let another thread deal with the the loading -- we are on the render thread and need to move on.
   __block auto path = pathCount == 0 ? std::string("") : Utils::Base64::decode(pathStart, pathCount);
-
+  __block auto presetIndex = payload->presetIndex;
   dispatch_async(workQueue_, ^{ beginLoadFileAndPreset_RT(path, presetIndex); });
 
   os_log_info(log_, "loadFileAndPresetFromSysEx_RT END - true");
@@ -553,45 +529,53 @@ Engine::loadBookmarkAndPresetFromSysEx_RT(const AUMIDIEvent& midiEvent) noexcept
     return false;
   }
 
-  // Do this now to stop any future rendering.
+  // Stop all existing voices and block future ones from starting.
   allOff_RT();
+  // Increment number of items in workQueue
   ++presetChangesPending_;
 
   const uint8_t* bytes = midiEvent.data;
-
   auto payload = reinterpret_cast<const LoadPresetSysExPayload*>(bytes);
-  __block auto presetIndex = payload->presetIndex;
   auto overrideCount = payload->overrideCount;
   auto pos1 = reinterpret_cast<const SF2::MIDI::GeneratorOverride*>(payload + 1);
   auto overrides = std::vector<MIDI::GeneratorOverride>(pos1, pos1 + overrideCount);
   auto dataStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(pos1 + overrideCount));
   auto dataCount = size_t((bytes + midiEvent.length) - dataStart) - 1;
 
+  // Let another thread deal with the the loading -- we are on the render thread and need to move on.
+  // NOTE: not sure why this cannot be done in the workQueue routine.
   NSData* data = [NSData dataWithBytesNoCopy:dataStart length:dataCount freeWhenDone:false];
   __block NSData* bookmark = [data initWithBase64EncodedData:data options:0];
-
+  __block auto presetIndex = payload->presetIndex;
   dispatch_async(workQueue_, ^{ beginLoadBookmarkAndPreset_RT(bookmark, presetIndex); });
 
   os_log_info(log_, "loadBookmarkAndPresetFromSysEx_RT END - true");
   return true;
 }
 
-void
+SF2::IO::File::LoadResponse
 Engine::loadFileAndPreset(std::string path, size_t presetIndex) noexcept {
   ++presetChangesPending_;
-  beginLoadFileAndPreset_RT(path, presetIndex);
+  return beginLoadFileAndPreset_RT(path, presetIndex);
 }
 
-void
+SF2::IO::File::LoadResponse
+Engine::loadFileAndPreset(int fd, size_t presetIndex) noexcept {
+  ++presetChangesPending_;
+  return concludeLoad_RT(fd, presetIndex);
+}
+
+SF2::IO::File::LoadResponse
 Engine::beginLoadFileAndPreset_RT(std::string path, size_t presetIndex) noexcept {
-  // !!! NOTE: we are *not* running in the render thread.
   os_log_info(log_, "beginLoadFileAndPreset_RT BEGIN");
   if (!path.empty()) {
     concludeLoad_RT(path, presetIndex);
   } else {
     concludeUsePresetWithIndex_RT(presetIndex);
   }
-  os_log_info(log_, "beginLoadFileAndPreset_RT END");
+  auto response = presetsState_.load()->loadResponse();
+  os_log_info(log_, "beginLoadFileAndPreset_RT END - %d", response);
+  return response;
 }
 
 SF2::IO::File::LoadResponse
@@ -600,34 +584,23 @@ Engine::concludeLoad_RT(const std::string& path, size_t index) noexcept
   os_log_info(log_, "concludeLoad_RT - path: '%{public}s' index: %lu", path.c_str(), index);
   assert(presetChangesPending_.load() > 0);
 
-  auto file = std::make_unique<IO::File>(path);
-  auto response = file->load();
-
-  if (response == IO::File::LoadResponse::ok) {
-    // Order is important: presets can reference contents of IO::File, so remove existing presets before discarding file reference.
-    // Take ownership of new file and release old one to free up memory. Finally, build new preset collection.
-    presets_.clear();
-    std::swap(file, file_);
-    presets_.build(*file_);
-  }
-
+  // Set new presets state for render thread to use. It will be responsible for deleting the old state when it is safe to do so.
+  presetsState_.store(new PresetsState(path, index, presetsState_.load()));
   concludeUsePresetWithIndex_RT(index);
 
+  auto response = presetsState_.load()->loadResponse();
   os_log_info(log_, "concludeLoad_RT END - %d", response);
   return response;
 }
 
-void
+SF2::IO::File::LoadResponse
 Engine::loadBookmarkAndPreset(NSData *bookmark, size_t presetIndex) noexcept {
   ++presetChangesPending_;
-  beginLoadBookmarkAndPreset_RT(bookmark, presetIndex);
+  return beginLoadBookmarkAndPreset_RT(bookmark, presetIndex);
 }
 
-void
+SF2::IO::File::LoadResponse
 Engine::beginLoadBookmarkAndPreset_RT(NSData* bookmark, size_t presetIndex) noexcept {
-  // !!! NOTE: we are probably *not* running in the render thread, so care must be taken when changing state in the engine so we
-  // do not cause sound glitches.
-
   os_log_info(log_, "loadBookmarkAndPreset BEGIN");
 
   NSError* error = nil;
@@ -676,7 +649,9 @@ Engine::beginLoadBookmarkAndPreset_RT(NSData* bookmark, size_t presetIndex) noex
     [resolved stopAccessingSecurityScopedResource];
   }
 
-  os_log_info(log_, "loadBookmarkAndPreset END");
+  auto response = presetsState_.load()->loadResponse();
+  os_log_info(log_, "loadBookmarkAndPreset END - %d", response);
+  return response;
 }
 
 SF2::IO::File::LoadResponse
@@ -685,20 +660,11 @@ Engine::concludeLoad_RT(int fd, size_t index) noexcept
   os_log_info(log_, "concludeLoad - fd: %d index: %lu", fd, index);
   assert(presetChangesPending_.load() > 0);
 
-  auto file = std::make_unique<IO::File>();
-  auto response = file->load(fd);
-
-  if (response == IO::File::LoadResponse::ok) {
-    // Order is important. Presets can reference contents of IO::File. Take ownership of new file and release old one to free up
-    // its memory. Finally, build new preset collection.
-    presets_.clear();
-    file_.swap(file);
-    file.reset();
-    presets_.build(*file_);
-  }
-
+  // Set new presets state for render thread to use. It will be responsible for deleting the old state when it is safe to do so.
+  presetsState_.store(new PresetsState(fd, index, presetsState_.load()));
   concludeUsePresetWithIndex_RT(index);
 
+  auto response = presetsState_.load()->loadResponse();
   os_log_info(log_, "concludeLoad END - %d", response);
   return response;
 }
@@ -764,8 +730,11 @@ Engine::changeProgram_RT(uint8_t program) noexcept
   uint16_t lsbBank = channelState_.continuousControllerValue(MIDI::ControlChange::bankSelectLSB);
   uint16_t bank = msbBank * 128u + lsbBank;
 
-  auto index = presets_.locatePresetIndex(bank, program);
-  concludeUsePresetWithIndex_RT(index);
+  auto ptr = presetsState();
+  if (ptr) {
+    auto index = ptr->locatePresetIndex(bank, program);
+    concludeUsePresetWithIndex_RT(index);
+  }
 }
 
 void

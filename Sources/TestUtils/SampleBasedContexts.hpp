@@ -80,14 +80,14 @@ struct TestEngineHarness {
   Engine& engine() noexcept { return engine_; }
 
   SF2::IO::File::LoadResponse load(const std::string& path, size_t index) noexcept {
-    return engine_.load(path, index);
+    return engine_.loadFileAndPreset(path, index);
   }
 
   typedef void (^ WorkItemBlock)();
 
   void postWorkItem(WorkItemBlock block) { dispatch_async(engine_.workQueue_, block); }
 
-  void usePresetWithIndex(size_t index) { engine_.usePresetWithIndex(index); }
+  void usePresetWithIndex(size_t index) { engine_.loadFileAndPreset("", index); }
 
   AVAudioFrameCount maxFramesToRender() const noexcept { return maxFramesToRender_; }
 

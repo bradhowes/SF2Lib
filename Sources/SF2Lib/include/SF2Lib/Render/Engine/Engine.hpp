@@ -18,6 +18,7 @@
 #include "SF2Lib/Render/Engine/LiveGeneratorParameters.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
 #include "SF2Lib/Render/Engine/OldestVoiceCollection.hpp"
+#include "SF2Lib/Render/Engine/PresetsState.hpp"
 #include "SF2Lib/Render/Engine/Traits.hpp"
 #include "SF2Lib/Render/PresetCollection.hpp"
 #include "SF2Lib/Render/Voice/Voice.hpp"
@@ -36,6 +37,10 @@ namespace SF2::Render::Engine {
  parameter changes should be done with care. For the AUv3 use-case, this is handled by the `EventProcessor` base class
  and the AUv3 API. MIDI events and parameter changes are scheduled using dedicated APIs and the render thread sees them
  during a render request.
+
+ Preset and SF2 file changes can happen in two ways: via specially-crafted SysEx MIDI messages or via the Engine API. They both
+ should work without any issue -- the code assumes that the render thread is always active so it uses atomic operations to
+ switch to a new preset collection and/or a new preset index. There are no locks in the code so as to not block the render thread.
 
  The engine supports a maximum of `traits::maxVoiceCount` simultaneous voices -- these are allocated all at once in one continuous
  block of memory. However, the engine can be configured to use fewer voices at construction time via the `voiceCountLimit`. Further,
@@ -72,8 +77,7 @@ public:
 
   ~Engine() noexcept;
 
-  inline size_t minimumNoteDurationSamples() const noexcept
-  {
+  inline size_t minimumNoteDurationSamples() const noexcept {
     return static_cast<size_t>(ceil(Float(minimumNoteDurationMilliseconds_) / 1000_F * sampleRate_));
   }
 
@@ -112,17 +116,14 @@ public:
   /// @returns the bank index value of for the active preset, or -1 if none is active
   int activeBankIndex() const noexcept;
 
-  /**
-   NOTE: this value is only used/reported in the AUParameterTree -- not to be used in place of `activePreset_` value which is the
-   only real preset index value to be used in the engine.
-
-   @returns the current active preset index value if there is one, or else `-1`.
-   */
+  /// @returns the current active preset index value, or -1 if none is active. NOTE: only used/reported in the AUParameterTree.
   int activePresetIndex() const noexcept;
 
-  /// @returns number of presets currently available. During an SF2 load, this becomes 0 which blocks any new voices from
-  /// being activated.
-  inline size_t presetCount() const noexcept { return presets_.size(); }
+  /// @returns the number of presets available, or 0 if none have been loaded.
+  inline size_t presetCount() const noexcept {
+    auto ptr = presetsState();
+    return ptr ? ptr->size() : 0;
+  }
 
   /// @return the number of active voices
   inline size_t activeVoiceCount() const noexcept { return oldestVoiceIndices_.activeVoiceCount(); }
@@ -213,7 +214,7 @@ public:
    @param filePath the location of the SF2 file to load
    @param presetIndex the index of the preset to activate
    @param overrides collection of SF2 generator values to apply
-   @returns array of MIDI bytes
+   @returns vector of MIDI bytes
    */
   static std::vector<uint8_t> createLoadFileUsePresetPayload(const std::string& filePath, size_t presetIndex,
                                                              const std::vector<SF2::MIDI::GeneratorOverride>& overrides) noexcept;
@@ -225,7 +226,7 @@ public:
    @param bookmark the file's bookmarkd data for the SF2 file to load
    @param presetIndex the index of the preset to activate
    @param overrides collection of SF2 generator values to apply
-   @returns array of MIDI bytes
+   @returns vector of MIDI bytes
    */
   static std::vector<uint8_t> createLoadBookmarkUsePresetPayload(const NSData* bookmark, size_t presetIndex,
                                                                  const std::vector<SF2::MIDI::GeneratorOverride>& overrides) noexcept;
@@ -234,7 +235,7 @@ public:
    Utility class method that creates a MIDI channel command to reset the engine. This stops all voices and resets the
    MIDI channel state.
 
-   @returns array of MIDI bytes
+   @returns array of 1 MIDI byte
    */
   static std::array<uint8_t, 1> createResetCommandPayload() noexcept;
 
@@ -244,7 +245,7 @@ public:
 
    @param bank the bank to activate (0-16383)
    @param program the program in the bank to activate (0-127)
-   @returns array of an array of MIDI bytes
+   @returns array of 9 MIDI bytes
    */
   static std::array<uint8_t, 9> createUseBankProgramPayload(uint16_t bank, uint8_t program) noexcept;
 
@@ -253,48 +254,59 @@ public:
 
    @param channelMessage the MIDI channel message to send
    @param value the value to provide in the channel message
-   @returns array of MIDI bytes
+   @returns array of 3 MIDI bytes
    */
   static std::array<uint8_t, 3> createChannelMessagePayload(MIDI::ControlChange channelMessage, uint8_t value = 0) noexcept;
 
+  /// @returns array of 3 MIDI bytes with MIDI command to stop playing all notes.
   inline static std::array<uint8_t, 3> createAllNotesOffPayload() noexcept
   {
     return createChannelMessagePayload(MIDI::ControlChange::allNotesOff);
   }
 
+  /// @returns array of 3 MIDI bytes with MIDI command to stop all sound output.
   inline static std::array<uint8_t, 3> createAllSoundOffPayload() noexcept
   {
     return createChannelMessagePayload(MIDI::ControlChange::allSoundOff);
   }
 
+  /// @returns the counter value that tracks the number of SF2 file load requests.
   inline Float lastLoadFinishedCounter() const noexcept { return lastLoadFinishedCounter_; }
 
   /// @returns current number of preset changes pending in the work queue.
   inline int presetChangesPending() const noexcept { return presetChangesPending_.load(); }
 
   /**
-   Load a soundfont file at the given path. If successful, make active the preset at the given index.
+   Load a soundfont file at the given path. If successful, make active the preset at the given index. This should be safe to call
+   even when the audio render thread is running.
 
-   NOTE: this should only be invoked when there is no rendering activity. Otherwise, this change should be done using a
-   SysEx MIDI command created by ``createLoadFileUsePresetPayload`` sent to the MIDI event scheduling block.
-
-   @param path the location of the file to load
+   @param path the location of the file to load. If empty, use existing preset collection.
    @param presetIndex the index of the preset to make active after loading
+   @returns status indicating the success of the loading.
    */
-  void loadFileAndPreset(std::string path, size_t presetIndex) noexcept;
+  IO::File::LoadResponse loadFileAndPreset(std::string path, size_t presetIndex) noexcept;
 
   /**
-   Load a soundfont file using a bookmark. If successful, make active the preset at the given index.
+   Load the presets from a file descriptor and activate a specific preset.
+   
+   @param fd the file descriptor to read from. If -1, use the existing preset collection.
+   @param presetIndex the preset to make active
+   @returns status indicating the success of the loading.
+   */
+  IO::File::LoadResponse loadFileAndPreset(int fd, size_t presetIndex) noexcept;
 
-   NOTE: this should only be invoked when there is no rendering activity. Otherwise, this change should be done using a
-   SysEx MIDI command created by ``createLoadBookmarkUsePresetPayload`` sent to the MIDI event scheduling block.
+  /**
+   Load a soundfont file using a secure bookmark reference. If successful, make active the preset at the given index. This should
+   be safe to call even when the audio render thread is running.
 
    @param bookmark the encoded location of the file to load
    @param presetIndex the index of the preset to make active after loading
    */
-  void loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept;
+  IO::File::LoadResponse loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept;
 
 private:
+
+  inline PresetsState* presetsState() const noexcept { return presetsState_.load(); }
 
   static AUParameter* makeGeneratorParameter(Entity::Generator::Index index) noexcept;
 
@@ -319,23 +331,25 @@ private:
   void makeTree() noexcept;
 
   /**
-   Load the presets from an SF2 file and activate one. NOTE: this is not thread-safe. When running in a render thread,
-   one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
-
-   NOTE: only called from unit tests via TestEngineHarness
+   Routine run outside of the render thread to load an SF2 file and make active a preset in it.
 
    @param path the file to load from
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
    */
-  IO::File::LoadResponse load(const std::string& path, size_t index) noexcept;
-
-  void beginLoadFileAndPreset_RT(std::string path, size_t presetIndex) noexcept;
-
-  void beginLoadBookmarkAndPreset_RT(NSData* bookmark, size_t presetIndex) noexcept;
+  IO::File::LoadResponse beginLoadFileAndPreset_RT(std::string path, size_t presetIndex) noexcept;
 
   /**
-   Finish loading from an SF2 file. Called at the conclusion of `loadFileAndPreset()`.
+   Routine run outside of the render thread to load a secure bookmark to an SF2 file and make active a preset in it.
+
+   @param bookmark the bookmark to load from
+   @param index the preset to make active
+   @returns IO::File::LoadResponse::OK if the loading was successful
+   */
+  IO::File::LoadResponse beginLoadBookmarkAndPreset_RT(NSData* bookmark, size_t presetIndex) noexcept;
+
+  /**
+   Finish loading from an SF2 file. Called at the conclusion of `beginLoadFileAndPreset_RT`.
 
    @param path the file to load from
    @param index the preset to make active
@@ -344,19 +358,7 @@ private:
   IO::File::LoadResponse concludeLoad_RT(const std::string& path, size_t index) noexcept;
 
   /**
-   Load the presets from an file descriptor and activate one. NOTE: this is not thread-safe. When running in a render thread,
-   one should use the special MIDI system-exclusive command to perform a load. See comment in `doMIDIEvent`.
-
-   NOTE: only called from unit tests via TestEngineHarness
-
-   @param fd the file descriptor to read from
-   @param index the preset to make active
-   @returns IO::File::LoadResponse::OK if the loading was successful
-   */
-  IO::File::LoadResponse load(int fd, size_t index) noexcept;
-
-  /**
-   Finish loading from an SF2 file. Called at the conclusion of `loadBookmarkAndPreset()`.
+   Finish loading from an SF2 file. Called at the conclusion of `beginLoadBookmarkAndPreset_RT()`.
 
    @param fd the file descriptor to read from
    @param index the preset to make active
@@ -365,13 +367,11 @@ private:
   IO::File::LoadResponse concludeLoad_RT(int fd, size_t index) noexcept;
 
   /**
-   Activate the preset at the given index. NOTE: this is not thread-safe and is only called from unit tests via TestEngineHarness.
+   Active a new preset in the current preset state.
 
-   @param index the preset to use
+   @param presetIndex the index of the preset to activate
    */
-  void usePresetWithIndex(size_t index);
-
-  void concludeUsePresetWithIndex_RT(size_t index);
+  void concludeUsePresetWithIndex_RT(size_t presetIndex);
 
   /// Reset the engine to a known state. All keys are released, all voices are off, and the MIDI channel state is reset
   /// to initial state.
@@ -540,9 +540,11 @@ private:
   OldestVoiceCollection oldestVoiceIndices_;
   std::size_t voiceCountLimit_;
 
-  std::unique_ptr<IO::File> file_{};
-  PresetCollection presets_{};
-  size_t activePreset_{0};
+  std::atomic<PresetsState*> presetsState_;
+
+  // std::unique_ptr<IO::File> file_{};
+  // PresetCollection presets_{};
+
   std::atomic<int> presetChangesPending_{0};
 
   size_t portamentoRateMillisecondsPerSemitone_{100};

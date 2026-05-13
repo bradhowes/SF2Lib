@@ -57,7 +57,8 @@ public:
   enum class LoadResponse {
     ok,
     notFound,
-    invalidFormat
+    invalidFormat,
+    none
   };
 
   /**
