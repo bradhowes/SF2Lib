@@ -54,7 +54,7 @@ struct PresetsState {
     }
   }
 
-  inline size_t activePresetIndex() const noexcept { activePresetIndex_.load(); }
+  inline size_t activePresetIndex() const noexcept { return activePresetIndex_.load(); }
 
   inline IO::File::LoadResponse loadResponse() const noexcept { return loadResponse_; }
 
