@@ -611,10 +611,10 @@ Engine::beginLoadBookmarkAndPreset_RT(NSData* bookmark, size_t presetIndex) noex
 
   if (error != nil) {
     os_log_error(log_, "loadBookmarkAndPreset END - error from resolving bookmark data - %{public}@", error);
-    return;
+    return SF2::IO::File::LoadResponse::notFound;
   } else if (resolved == nil) {
     os_log_error(log_, "loadBookmarkAndPreset END - failed to resolve bookmark data (no error)");
-    return;
+    return SF2::IO::File::LoadResponse::notFound;
   } else {
     os_log_error(log_, "loadBookmarkAndPreset - resolved bookmark: %{public}@", resolved);
   }
