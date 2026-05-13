@@ -102,6 +102,9 @@ public:
   /// @returns true if the generator can be used in a preset zone
   inline bool isAvailableInPreset() const noexcept { return availableInPreset_; }
 
+  Definition(const char* name, ValueKind valueKind, ValueRange minMax, bool availableInPreset,
+             NRPNMultiplier nrpnMultiplier) noexcept;
+
   /**
    Obtain the NRPN multiplier for a generator index. Per SF 2.01 spec section 9.6.3:
 
@@ -151,9 +154,6 @@ public:
 
 private:
   static GeneratorValueArray<Definition> const definitions_;
-
-  Definition(const char* name, ValueKind valueKind, ValueRange minMax, bool availableInPreset,
-             NRPNMultiplier nrpnMultiplier) noexcept;
 
   /**
    Obtain the value from a generator Amount instance (from an SF2 file) after converting it to its natural or desired

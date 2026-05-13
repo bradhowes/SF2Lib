@@ -69,14 +69,12 @@ File::load(int fd) noexcept
         switch (chunk.tag().toTags()) {
           case Tags::ifil: soundFontVersion_.load(chunk.begin()); break;
           case Tags::isng: soundEngine_ = chunk.extract(); break;
-          case Tags::iver: fileVersion_.load(chunk.begin()); break;
           case Tags::inam: embeddedName_ = chunk.extract(); break;
           case Tags::icrd: embeddedCreationDate_ = chunk.extract(); break;
           case Tags::ieng: embeddedAuthor_ = chunk.extract(); break;
           case Tags::iprd: embeddedProduct_ = chunk.extract(); break;
           case Tags::icop: embeddedCopyright_ = chunk.extract(); break;
           case Tags::icmt: embeddedComment_ = chunk.extract(); break;
-          case Tags::istf: embeddedTools_ = chunk.extract(); break;
           case Tags::phdr: presets_.load(chunk); break;
           case Tags::pbag: presetZones_.load(chunk); break;
           case Tags::pgen: presetZoneGenerators_.load(chunk); break;
@@ -111,7 +109,6 @@ File::load(int fd) noexcept
 void
 File::dump() const noexcept {
   std::cout << "|-ifil"; soundFontVersion_.dump("|-ifil");
-  std::cout << "|-iver"; fileVersion_.dump("|-iver");
   std::cout << "|-phdr"; presets_.dump("|-phdr: ");
   std::cout << "|-pbag"; presetZones_.dump("|-pbag: ");
   std::cout << "|-pgen"; presetZoneGenerators_.dump("|-pgen: ");

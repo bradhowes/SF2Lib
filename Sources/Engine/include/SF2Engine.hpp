@@ -10,6 +10,7 @@
 #include <Foundation/Foundation.h>
 #include <CoreAudioKit/CoreAudioKit.h>
 #include <SF2File/Entity/Generator/Index.hpp>
+#include <SF2File/IO/File.hpp>
 #include <SF2Lib/MIDI/GeneratorOverride.hpp>
 #include <SF2Lib/Render/Engine/ParameterAddress.hpp>
 
@@ -125,13 +126,18 @@ struct SWIFT_ESCAPABLE SF2Engine
   /**
    Load a soundfont file at the given path. If successful, make active the preset at the given index.
 
-   NOTE: this should only be invoked when there is no rendering activity. Otherwise, this change should be done using a
-   SysEx MIDI command created by ``createLoadFileUsePresetPayload`` sent to the MIDI event scheduling block.
-
    @param path the location of the file to load
    @param presetIndex the index of the preset to make active after loading
    */
-  void loadFileAndPreset(std::string path, size_t presetIndex) noexcept;
+  SF2::IO::File::LoadResponse loadFileAndPreset(std::string path, size_t presetIndex) noexcept;
+
+  /**
+   Load a soundfont from the given file descriptor. If successful, make active the preset at the given index.
+
+   @param fd the file descriptor to read from
+   @param presetIndex the index of the preset to make active after loading
+   */
+  SF2::IO::File::LoadResponse loadFileAndPreset(int fd, size_t presetIndex) noexcept;
 
   /**
    Obtain MIDI payload containing a MIDI SYSEX command that can be sent to load an SF2 file and use a given
@@ -153,7 +159,7 @@ struct SWIFT_ESCAPABLE SF2Engine
    @param bookmark the encoded location of the file to load
    @param presetIndex the index of the preset to make active after loading
    */
-  void loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept;
+  SF2::IO::File::LoadResponse loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept;
 
   /**
    Obtain MIDI payload containing MIDI command to reset the engine. This will stop playing any notes and reset

@@ -52,7 +52,7 @@ Definition::dump(const Amount& amount) const noexcept
     case ValueKind::signedTimeCents: std::cout << value << " seconds"; break;
     case ValueKind::signedSemitones: std::cout << value << " notes"; break;
     case ValueKind::range: std::cout << '[' << amount.low() << '-' << amount.high() << ']'; break;
-    default: break;
+    case ValueKind::UNUSED: std::cout << "*UNUSED*"; break;
   }
 
   return std::cout << " (" << (isUnsignedValue() ? amount.unsignedAmount() : amount.signedAmount()) << ')';

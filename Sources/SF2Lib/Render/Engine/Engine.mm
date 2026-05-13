@@ -248,8 +248,6 @@ Engine::doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount durati
       case ParameterAddress::polyphonicModeEnabled:
         setPhonicMode(SF2::toBool(value) ? Engine::PhonicMode::poly : Engine::PhonicMode::mono);
         break;
-      case ParameterAddress::activeVoiceCount:
-        break;
       case ParameterAddress::retriggerModeEnabled:
         setRetriggerModeEnabled(SF2::toBool(value));
         break;

@@ -80,9 +80,14 @@ SF2Engine::createLoadFileUsePresetPayload(std::string filePath, size_t presetInd
   return SF2::Render::Engine::Engine::createLoadFileUsePresetPayload(filePath, presetIndex, overrides);
 }
 
-void
+SF2::IO::File::LoadResponse
 SF2Engine::loadFileAndPreset(std::string path, size_t presetIndex) noexcept {
-  impl_->loadFileAndPreset(path, presetIndex);
+  return impl_->loadFileAndPreset(path, presetIndex);
+}
+
+SF2::IO::File::LoadResponse
+SF2Engine::loadFileAndPreset(int fd, size_t presetIndex) noexcept {
+  return impl_->loadFileAndPreset(fd, presetIndex);
 }
 
 std::vector<uint8_t>
@@ -93,9 +98,9 @@ SF2Engine::createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetInd
   return SF2::Render::Engine::Engine::createLoadBookmarkUsePresetPayload(bookmark, presetIndex, overrides);
 }
 
-void
+SF2::IO::File::LoadResponse
 SF2Engine::loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept {
-  impl_->loadBookmarkAndPreset(bookmark, presetIndex);
+  return impl_->loadBookmarkAndPreset(bookmark, presetIndex);
 }
 
 std::array<uint8_t, 1>

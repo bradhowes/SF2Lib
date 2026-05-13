@@ -54,11 +54,11 @@ public:
 
   ~File() noexcept { if (fd_ != -1) ::close(fd_); }
 
-  enum class LoadResponse {
-    ok,
-    notFound,
-    invalidFormat,
-    none
+  enum class LoadResponse: int {
+    ok = 0,
+    notFound = 1,
+    invalidFormat = 2,
+    none = -1
   };
 
   /**
@@ -150,7 +150,6 @@ private:
   Pos sampleDataBegin_{-1, 0, 0};
 
   Entity::Version soundFontVersion_{};
-  Entity::Version fileVersion_{};
 
   std::string soundEngine_{};
   std::string embeddedName_{};
@@ -159,7 +158,6 @@ private:
   std::string embeddedProduct_{};
   std::string embeddedCopyright_{};
   std::string embeddedComment_{};
-  std::string embeddedTools_{};
 
   ChunkItems<Entity::Preset> presets_{};
   ChunkItems<Entity::Bag> presetZones_{};

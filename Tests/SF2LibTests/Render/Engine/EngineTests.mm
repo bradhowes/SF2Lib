@@ -35,6 +35,9 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(size_t(100), engine.portamentoRate());
   XCTAssertTrue(engine.retriggerModeEnabled());
   XCTAssertEqual(traits::minLastLoadFinished, engine.lastLoadFinishedCounter());
+  XCTAssertEqual(engine.activeBankIndex(), -1);
+  XCTAssertEqual(engine.activeProgramIndex(), -1);
+  XCTAssertEqual(engine.activePresetIndex(), -1);
 }
 
 - (void)testPortamento {
@@ -109,14 +112,27 @@ using namespace SF2::Render::Engine;
   XCTAssertEqual(harness.load(self.contexts->context0.path(), 0), SF2::IO::File::LoadResponse::ok);
   XCTAssertEqual(engine.presetCount(), size_t(235));
   XCTAssertEqualWithAccuracy(engine.lastLoadFinishedCounter(), 0.0002, 0.0005);
+  XCTAssertEqual(engine.activeBankIndex(), 0);
+  XCTAssertEqual(engine.activeProgramIndex(), 0);
+  XCTAssertEqual(engine.activePresetIndex(), 0);
+
+  XCTAssertEqual(harness.load(self.contexts->context0.path(), 123), SF2::IO::File::LoadResponse::ok);
+  XCTAssertEqual(engine.activeBankIndex(), 0);
+  XCTAssertEqual(engine.activeProgramIndex(), 123);
+  XCTAssertEqual(engine.activePresetIndex(), 123);
 
   XCTAssertTrue(engine.hasActivePreset());
   XCTAssertEqual(harness.load(self.contexts->context1.path(), 10000), SF2::IO::File::LoadResponse::ok);
   XCTAssertEqualWithAccuracy(engine.lastLoadFinishedCounter(), 0.0003, 0.0005);
+  XCTAssertEqual(engine.activeBankIndex(), -1);
+  XCTAssertEqual(engine.activeProgramIndex(), -1);
 
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqual(harness.load(self.contexts->context2.path(), 0), SF2::IO::File::LoadResponse::ok);
   XCTAssertEqualWithAccuracy(engine.lastLoadFinishedCounter(), 0.0004, 0.0005);
+  XCTAssertEqual(engine.activeBankIndex(), 0);
+  XCTAssertEqual(engine.activeProgramIndex(), 1);
+  XCTAssertEqual(engine.activePresetIndex(), 0);
 }
 
 - (void)testUsePresetByIndex {

@@ -126,8 +126,6 @@ using namespace SF2::Render::Voice::Sample;
 //  // file.dumpThreaded();
 //}
 
-#if 0
-
 - (void)testDump0 {
   const auto& file = self.contexts->context0.file();
   XCTAssertNoThrow(file.dump());
@@ -136,11 +134,13 @@ using namespace SF2::Render::Voice::Sample;
 
 - (void)testDump1 {
   const auto& file = self.contexts->context1.file();
-  XCTAssertNoThrow(file.dump());
   XCTAssertNoThrow(file.dumpThreaded());
 }
 
-#endif
+- (void)testDump2 {
+  const auto& file = self.contexts->context2.file();
+  XCTAssertNoThrow(file.dumpThreaded());
+}
 
 - (void)testLoadPath {
   XCTAssertEqual(SF2::IO::File("/dev/null").load(), SF2::IO::File::LoadResponse::invalidFormat);
