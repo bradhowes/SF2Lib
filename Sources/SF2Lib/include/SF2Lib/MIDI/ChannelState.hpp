@@ -26,7 +26,7 @@ public:
    */
   ChannelState() noexcept { reset(); }
 
-  ChannelState(ChannelState&&) = default;
+  ChannelState(ChannelState&&) noexcept = default;
 
   /// Put channel state in original state.
   void reset() noexcept;

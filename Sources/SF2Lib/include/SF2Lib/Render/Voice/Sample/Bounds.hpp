@@ -32,7 +32,7 @@ public:
    */
   static Bounds make(const Entity::SampleHeader& header, const State::State& state) noexcept;
 
-  Bounds() = default;
+  Bounds() noexcept = default;
 
   /// @returns the index of the first sample to use for rendering
   inline size_t startPos() const noexcept { return startPos_; }
@@ -54,7 +54,7 @@ private:
   size_t startLoopPos_{0};
   size_t endLoopPos_{0};
   size_t endPos_{0};
-  bool hasLoop_;
+  bool hasLoop_{false};
 
   static const os_log_t log_;
 };

@@ -23,7 +23,7 @@ public:
   /**
    Construct from file.
 
-   @param pos location in file to read
+   @param pos location in file to read. Note the given value is updated to point to the the location after the read.
    */
   explicit Generator(IO::Pos& pos) noexcept;
 

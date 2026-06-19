@@ -28,7 +28,7 @@ namespace SF2::IO {
 class File {
 public:
 
-  File();
+  File() noexcept = default;
 
   /**
    Constructor.
@@ -144,7 +144,7 @@ public:
 private:
 
   std::string path_;
-  int fd_;
+  int fd_{-1};
   bool loaded_{false};
   off_t size_{0};
   Pos sampleDataBegin_{-1, 0, 0};

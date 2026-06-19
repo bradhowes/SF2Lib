@@ -11,7 +11,7 @@ namespace SF2::Render::Engine {
 
 struct PresetsState {
 
-  PresetsState() = default;
+  PresetsState() noexcept = default;
 
   PresetsState(int fd, size_t index, PresetsState* past) noexcept
   : file_{std::make_unique<IO::File>()}, past_{past} {
@@ -64,6 +64,9 @@ struct PresetsState {
 
 private:
 
+  PresetsState(const PresetsState&) = delete;
+  PresetsState(PresetsState&&) = delete;
+
   void initialize(IO::File::LoadResponse loadResponse, size_t index) {
     loadResponse_ = loadResponse;
     if (loadResponse == IO::File::LoadResponse::ok) {
@@ -74,7 +77,7 @@ private:
     activePresetIndex_.store(std::min(index, size()));
   }
 
-  std::unique_ptr<IO::File> file_;
+  std::unique_ptr<IO::File> file_{};
   PresetCollection collection_{};
   std::atomic<size_t> activePresetIndex_{0};
   PresetsState* past_{nullptr};

@@ -6,10 +6,10 @@ using namespace SF2::Render::Voice::Sample;
 
 const os_log_t Bounds::log_{Log::create("Bounds")};
 
-Bounds::Bounds(size_t startPos, size_t startLoopPos, size_t endLoopPos, size_t endPos) noexcept
-  : startPos_{startPos}, startLoopPos_{startLoopPos}, endLoopPos_{endLoopPos}, endPos_{endPos}
+Bounds::Bounds(size_t startPos, size_t startLoopPos, size_t endLoopPos, size_t endPos) noexcept :
+startPos_{startPos}, startLoopPos_{startLoopPos}, endLoopPos_{endLoopPos}, endPos_{endPos},
+hasLoop_{startLoopPos > startPos && startLoopPos < endLoopPos && endLoopPos <= endPos}
 {
-  hasLoop_ = startLoopPos_ > startPos_ && startLoopPos_ < endLoopPos_ && endLoopPos_ <= endPos_;
   os_log_debug(log_, "init - start: %ld startLoop: %ld endLoop: %ld end: %ld hasLoop: %d",
                startPos_, startLoopPos_, endLoopPos_, endPos_, hasLoop_);
 }

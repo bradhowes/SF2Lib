@@ -22,12 +22,6 @@ class Index {
 public:
 
   /**
-   Construct new instance. NOTE: the instance is not usable for audio rendering at this point. One must call
-   `configure` in order to be useable for rendering purposes.
-   */
-  Index() = default;
-
-  /**
    Configure the index to work with the given bounds.
 
    @param bounds the sample bounds to work with

@@ -441,7 +441,7 @@ public:
   /**
    Constructor of a new iterator that points to the first enum value.
    */
-  IndexIterator() = default;
+  IndexIterator() noexcept = default;
 
   /**
    Constructor of a new iterator that starts at the given Index enum value.

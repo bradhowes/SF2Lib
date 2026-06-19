@@ -21,8 +21,6 @@ class Stage
 {
 public:
 
-  Stage() noexcept = default;
-
   /**
    Generate a configuration that will emit a constant value for a fixed or indefinite time.
 

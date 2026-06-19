@@ -20,10 +20,10 @@ public:
 
    @param value the MIDI value to represent
    */
-  explicit Note(int value) noexcept : value_{value}, note_{size_t(value % 12)} {}
+  explicit Note(unsigned short value) noexcept : value_{value}, note_{static_cast<unsigned short>(value % 12)} {}
 
   /// @returns the octave that the note resides in
-  inline int octave() const noexcept { return value_ / 12 - 1; }
+  inline short octave() const noexcept { return value_ / 12 - 1; }
 
   /// @returns true if the note is accented (sharp / flat)
   inline bool accented() const noexcept { return (note_ < 5 && (note_ & 1) == 1) || (note_ > 5 && (note_ & 1) == 0); }
@@ -34,7 +34,7 @@ public:
   }
 
   /// @returns the MIDI value for the note
-  inline int value() const noexcept { return value_; }
+  inline unsigned short value() const noexcept { return value_; }
 
   friend std::strong_ordering operator <=>(const Note& lhs, const Note& rhs) { return lhs.value_ <=> rhs.value_; }
 
@@ -46,8 +46,8 @@ private:
     "C", "C", "D", "D", "E", "F", "F", "G", "G", "A", "A", "B"
   };
 
-  int value_;
-  size_t note_;
+  unsigned short value_;
+  unsigned short note_;
 };
 
 } // namespace SF2::MIDI

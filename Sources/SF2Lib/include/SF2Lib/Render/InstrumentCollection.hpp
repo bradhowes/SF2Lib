@@ -17,8 +17,6 @@ class InstrumentCollection
 {
 public:
 
-  InstrumentCollection() = default;
-
   /**
    Construct a new collection using contents from the given file. Creates a new `Instrument` for each instrument definition in the
    file.

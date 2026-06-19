@@ -62,9 +62,7 @@ public:
   /// The bit that flags the polarity of the controller mapping
   inline static const uint16_t polarityBit = (1 << 9);
 
-  Source() = default;
-
-  explicit Source(uint16_t bits) noexcept : bits_{bits} {}
+  explicit Source(uint16_t bits = 0) noexcept : bits_{bits} {}
 
   /**
    Generate a Source based on a MIDI general controller.

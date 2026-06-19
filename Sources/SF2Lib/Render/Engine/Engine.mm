@@ -39,11 +39,6 @@ Engine::Engine(Float sampleRate, size_t voiceCountLimit, Interpolator interpolat
   makeTree();
 }
 
-Engine::~Engine() noexcept
-{
-  os_log_info(log_, "~Engine");
-}
-
 void
 Engine::setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept
 {

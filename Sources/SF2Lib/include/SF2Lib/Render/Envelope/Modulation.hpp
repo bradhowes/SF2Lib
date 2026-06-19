@@ -27,7 +27,7 @@ public:
   /**
    Create a modulation envelope for a voice
    */
-  inline explicit Modulation() : Generator("ModGen") {}
+  inline Modulation() noexcept : Generator("ModGen") {}
 
   /**
    Create new envelope for volume changes over time.
@@ -47,8 +47,7 @@ public:
   inline Value getNextValue() noexcept { return {Generator::getNextValue()}; }
 
 private:
-  Modulation(Float sampleRate, Float delay, Float attack, Float hold, Float decay,
-             int sustain, Float release) noexcept :
+  Modulation(Float sampleRate, Float delay, Float attack, Float hold, Float decay, int sustain, Float release) noexcept :
   Generator(sampleRate, "ModGen", delay, attack, hold, decay, sustain, release) {}
 
   friend struct EnvelopeTestInjector;

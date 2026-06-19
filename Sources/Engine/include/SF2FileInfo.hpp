@@ -24,11 +24,6 @@ struct SWIFT_ESCAPABLE SF2FileInfo
   SF2FileInfo(std::string path);
 
   /**
-   Destructor. Currently does nothing.
-   */
-  ~SF2FileInfo();
-
-  /**
    Attempt to load the file pointed to in the constructor.
 
    @returns `true` if loading succeeded, `false` otherwise
@@ -59,6 +54,6 @@ struct SWIFT_ESCAPABLE SF2FileInfo
   SF2PresetInfo operator[](size_t index) const noexcept;
 
 private:
-  std::shared_ptr<SF2::IO::File> impl_;
+  std::unique_ptr<SF2::IO::File> impl_;
   std::string path_;
 };

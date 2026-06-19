@@ -22,8 +22,6 @@ class PresetCollection
 {
 public:
 
-  PresetCollection() = default;
-
   /**
    Build a collection using the contents of the given file
 

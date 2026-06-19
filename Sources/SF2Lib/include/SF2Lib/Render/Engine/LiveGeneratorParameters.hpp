@@ -24,8 +24,6 @@ public:
   using Index = Entity::Generator::Index;
   using State = Voice::State::State;
 
-  LiveGeneratorParameters() = default;
-
   /**
    Clear the state such that there are no differences from the active preset generators.
    */

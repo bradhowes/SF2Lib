@@ -103,7 +103,15 @@ public:
   inline bool isAvailableInPreset() const noexcept { return availableInPreset_; }
 
   Definition(const char* name, ValueKind valueKind, ValueRange minMax, bool availableInPreset,
-             NRPNMultiplier nrpnMultiplier) noexcept;
+             NRPNMultiplier nrpnMultiplier) noexcept :
+  name_{name},
+  valueRange_{minMax},
+  valueKind_{valueKind},
+  nrpnMultiplier_{nrpnMultiplier},
+  availableInPreset_{availableInPreset}
+  {
+    ;
+  }
 
   /**
    Obtain the NRPN multiplier for a generator index. Per SF 2.01 spec section 9.6.3:

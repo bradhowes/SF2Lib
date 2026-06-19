@@ -8,19 +8,6 @@
 
 namespace Eng = SF2::Render::Engine;
 
-SF2Engine::SF2Engine() noexcept
-: impl_{nullptr}
-{
-  std::cout << "SF2Engine::SF2Engine" << std::endl;
-}
-
-SF2Engine::~SF2Engine() noexcept
-{
-  auto allocated = impl_.get() != nullptr;
-  auto useCount = impl_.use_count();
-  std::cout << "SF2Engine::~SF2Engine - allocated: " << allocated << " useCount: " << useCount << std::endl;
-}
-
 void SF2Engine::create(double sampleRate, NSUInteger voiceCount)
 {
   std::cout << "SF2Engine::create" << std::endl;

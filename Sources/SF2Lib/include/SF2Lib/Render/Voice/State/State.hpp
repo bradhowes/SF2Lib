@@ -65,13 +65,14 @@ public:
    @param key the MIDI key to use
    @param velocity the MIDI velocity to use
    */
-  State(Float sampleRate, int key, int velocity = 64) noexcept : sampleRate_{sampleRate}, eventKey_{key}, eventVelocity_{velocity}
+  State(Float sampleRate, int key, int velocity = 64) noexcept
+  : sampleRate_{sampleRate}, eventKey_{key}, eventVelocity_{velocity}
   {
     clear();
   }
 
   /// Allow move operations during construction to support std::vector
-  State(State&&) = default;
+  State(State&&) noexcept = default;
 
   /**
    Set the sample rate to use for rendering

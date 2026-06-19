@@ -9,17 +9,6 @@
 using namespace SF2;
 using namespace SF2::Entity::Generator;
 
-Definition::Definition(const char* name, ValueKind valueKind, ValueRange minMax, bool availableInPreset,
-                       NRPNMultiplier nrpnMultiplier) noexcept :
-name_{name},
-valueRange_{minMax},
-valueKind_{valueKind},
-nrpnMultiplier_{nrpnMultiplier},
-availableInPreset_{availableInPreset}
-{
-  ;
-}
-
 Float
 Definition::convertedValueOf(const Amount& amount) const noexcept
 {

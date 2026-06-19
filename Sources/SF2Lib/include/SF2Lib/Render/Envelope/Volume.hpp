@@ -27,7 +27,7 @@ public:
   /**
    Create a volume envelope for a voice
    */
-  inline explicit Volume() : Generator("VolGen") {}
+  inline Volume() noexcept : Generator("VolGen") {}
 
   /**
    Create new envelope for volume changes over time.

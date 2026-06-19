@@ -4,15 +4,9 @@
 #include "SF2File/Entity/Preset.hpp"
 #include "SF2File/IO/File.hpp"
 
-//SF2FileInfo::SF2FileInfo(const char* path)
-//: impl_{new SF2::IO::File(path)}
-//{}
-
 SF2FileInfo::SF2FileInfo(std::string path)
 : impl_{new SF2::IO::File()}, path_{path}
 {}
-
-SF2FileInfo::~SF2FileInfo() {}
 
 bool
 SF2FileInfo::load()

@@ -36,26 +36,6 @@ namespace Render { namespace Engine { class Engine; } }
 struct SWIFT_ESCAPABLE SF2Engine
 {
   /**
-   Default constructor. Does not allocate anything.
-   */
-  SF2Engine() noexcept;
-
-  /**
-   Destructor. Only for logging of reference count of any allocated Engine.
-   */
-  ~SF2Engine() noexcept;
-
-  /**
-   Default copy constructor.
-   */
-  SF2Engine(const SF2Engine&) = default;
-
-  /**
-   Default move constructor.
-   */
-  SF2Engine(SF2Engine&&) = default;
-
-  /**
    Constructs a new Engine.
 
    @param sampleRate the sample rate to use when rendering. Note that this is not fixed and may change in the
@@ -211,6 +191,7 @@ struct SWIFT_ESCAPABLE SF2Engine
   bool retriggerModeEnabled() const noexcept;
 
 private:
+  // Use of shared_ptr is on purpose in order to hide the internal API.
   std::shared_ptr<SF2::Render::Engine::Engine> impl_;
 
 } SWIFT_SELF_CONTAINED;

@@ -12,7 +12,7 @@ namespace SF2::IO {
  ASCII characters. The 4-byte value uniquely identifies the type of data held in the chunk.
  The next entry in the chunk layout is an unsigned 4-byte value indicating the number of
  bytes in the chunk. The chunk records the position of its data in the file.
- It does not hold any internal data apart from the chunk tag and size.
+ It does not hold any internal data apart from the chunk tag, size, and position in the file.
  */
 class Chunk {
 public:

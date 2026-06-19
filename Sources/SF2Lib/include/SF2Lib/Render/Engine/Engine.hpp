@@ -75,8 +75,6 @@ public:
          size_t minimumNoteDurationMilliseconds = 10
          ) noexcept;
 
-  ~Engine() noexcept;
-
   inline size_t minimumNoteDurationSamples() const noexcept {
     return static_cast<size_t>(ceil(Float(minimumNoteDurationMilliseconds_) / 1000_F * sampleRate_));
   }
@@ -305,6 +303,9 @@ public:
   IO::File::LoadResponse loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept;
 
 private:
+
+  Engine(const Engine&) = delete;
+  Engine(Engine&&) = delete;
 
   inline PresetsState* presetsState() const noexcept { return presetsState_.load(); }
 

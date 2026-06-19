@@ -12,14 +12,11 @@
 #include "SF2File/Entity/Instrument.hpp"
 #include "SF2File/Entity/Preset.hpp"
 #include "SF2File/IO/ChunkList.hpp"
-#include "SF2File/IO/Closer.hpp"
 #include "SF2File/IO/File.hpp"
 
 using namespace SF2::IO;
 
-File::File() : path_{}, fd_{-1}, loaded_{false} {}
-
-File::File(std::string path) noexcept : path_{path}, fd_{-1}, loaded_{false} {}
+File::File(std::string path) noexcept : path_{path} {}
 
 File::File(const char* path) noexcept : File::File(std::string(path)) {}
 

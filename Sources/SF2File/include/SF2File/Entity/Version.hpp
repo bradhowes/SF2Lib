@@ -13,8 +13,6 @@ class Version {
 public:
   inline static const size_t entity_size = 4;
 
-  Version() = default;
-
   /**
    Constructor that reads from file.
 
