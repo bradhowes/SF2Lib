@@ -882,7 +882,8 @@ Engine::provideParameterValue(AUParameter* parameter) const noexcept
         value = SF2::fromBool(retriggerModeEnabled());
         break;
       case ParameterAddress::isRendering:
-        return isRendering();
+        value = SF2::fromBool(isRendering());
+        break;
       case ParameterAddress::activeProgramIndex:
         value = AUValue(activeProgramIndex());
         break;
