@@ -17,14 +17,17 @@ enum struct ParameterAddress : AUParameterAddress
   portamentoRate,            // 1001
   oneVoicePerKeyModeEnabled, // 1002 aka mono
   polyphonicModeEnabled,     // 1003
-  activeVoiceCount,          // 1004
+  /// Number of voices currently rendering audio samples
+  activeVoiceCount,          // 1004 (read-only)
   retriggerModeEnabled,      // 1005
-  isRendering,               // 1006
-  activeSoundFontIndex,      // 1007
-  activeProgramIndex,        // 1008
-  activeBankIndex,           // 1009
-  activePresetIndex,         // 1010
-  lastLoadFinished,          // 1011
+  /// True (1.0) if the component is rendering audio samples
+  isRendering,               // 1006 (read-only)
+  activeSoundFontIndex,      // 1007 (read-only) (not used)
+  activeProgramIndex,        // 1008 (read-only)
+  activeBankIndex,           // 1009 (read-only)
+  activePresetIndex,         // 1010 (read-only)
+  /// Counter that increases each time a new preset is loaded -- signals when the change has taken place.
+  lastLoadFinished,          // 1011 (read-only)
   lastParameterAddressPlusOne
 };
 }
