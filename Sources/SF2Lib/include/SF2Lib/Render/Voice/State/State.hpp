@@ -36,7 +36,7 @@ class Config;
  state values can change due to AUParameterTree changes, with values changed by a UI control or by MIDI event mapping.
 
  Remember that this is a per-voice setting, and each voice only operates with one SF2 instrument. This makes it somewhat
- tedious right now to manipulate an generator like the VCA attack across all instruments assigned to a key.
+ tedious right now to manipulate a generator like the VCA attack across all instruments assigned to a key.
  */
 class State
 {

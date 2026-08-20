@@ -31,16 +31,16 @@ struct SWIFT_ESCAPABLE SF2FileInfo
   bool load();
 
   /// @returns the embedded name in the file
-  std::string embeddedName() const noexcept;
+  std::string embeddedName() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
 
   /// @returns the embedded author name in the file
-  std::string embeddedAuthor() const noexcept;
+  std::string embeddedAuthor() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
 
   /// @returns any embedded comment in the file
-  std::string embeddedComment() const noexcept;
+  std::string embeddedComment() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
 
   /// @returns any embedded copyright notice in the file
-  std::string embeddedCopyright() const noexcept;
+  std::string embeddedCopyright() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
 
   /// @returns the number of presets found in the file
   size_t size() const noexcept;
@@ -51,9 +51,9 @@ struct SWIFT_ESCAPABLE SF2FileInfo
    @param index the preset to reference. Must be between 0 and size() - 1.
    @returns SF2PresetInfo for the indicated preset
    */
-  SF2PresetInfo operator[](size_t index) const noexcept;
+  SF2PresetInfo operator[](size_t index) const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
 
 private:
   std::unique_ptr<SF2::IO::File> impl_;
   std::string path_;
-};
+} SWIFT_SELF_CONTAINED;

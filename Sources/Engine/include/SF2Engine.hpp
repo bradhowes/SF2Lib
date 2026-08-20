@@ -60,7 +60,7 @@ struct SWIFT_ESCAPABLE SF2Engine
   /**
    Obtain a render block to be used to invoke the `processAndRender` method below.
    */
-  AUInternalRenderBlock getRenderBlock() const noexcept;
+  AUInternalRenderBlock getRenderBlock() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
 
   /**
    Request to render samples. May be called on a real-time thread by the CoreAudio framework. Note that
@@ -86,7 +86,7 @@ struct SWIFT_ESCAPABLE SF2Engine
 
    @returns preset name or ""
    */
-  std::string activePresetName() const noexcept;
+  std::string activePresetName() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
 
   /// @returns current number of active voices
   size_t activeVoiceCount() const noexcept;
