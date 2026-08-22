@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -70,7 +70,6 @@ public:
   }
 
 private:
-
   char achPresetName[20];
   uint16_t wPreset;
   uint16_t wBank;
