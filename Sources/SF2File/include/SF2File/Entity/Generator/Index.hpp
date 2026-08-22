@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -437,7 +437,6 @@ enum struct Index : size_t {
  */
 class IndexIterator {
 public:
-
   /**
    Constructor of a new iterator that points to the first enum value.
    */
@@ -485,7 +484,6 @@ private:
  */
 class RawIndex {
 public:
-
   /// @returns boxed value
   inline uint16_t value() const noexcept { return value_; }
 

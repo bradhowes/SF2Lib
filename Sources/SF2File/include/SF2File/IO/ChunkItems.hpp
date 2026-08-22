@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -104,7 +104,6 @@ public:
   }
 
 private:
-
   /**
    Read in items found in a chunk
 

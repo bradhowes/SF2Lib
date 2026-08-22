@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -75,7 +75,6 @@ public:
   }
 
 protected:
-
   /**
    Constructor.
 
@@ -96,7 +95,6 @@ protected:
   uint16_t resourceLink() const;
 
 private:
-
   /**
    Obtain a key range from a generator collection. Per spec, if it exists it must be the first generator.
 

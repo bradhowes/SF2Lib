@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -61,7 +61,6 @@ enum struct Tags : uint32_t {
  */
 class Tag {
 public:
-
   /**
    Construct new Tag from an unsigned integer.
 

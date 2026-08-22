@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -12,7 +12,6 @@ namespace SF2::Render::Zone {
  */
 class Preset : public Zone {
 public:
-
   /**
    Construct new preset zone from entity in file.
 

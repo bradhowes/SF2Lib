@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -52,7 +52,6 @@ class Engine : public DSPHeaders::EventProcessor<Engine> {
   friend super;
 
 public:
-
   using Config = Voice::State::Config;
   using Voice = Voice::Voice;
   using Interpolator = Render::Voice::Sample::Interpolator;
@@ -152,7 +151,6 @@ public:
     // All of the work is done when working with output bus 0. If wired correctly, busses 1 and 2 will
     // hold the buffered values that were created here.
     if (outputBusNumber == 0) {
-
       // The voices will add their samples to the mixer so clear them here.
       outs.clear(frameCount);
       busBuffers(1).clear(frameCount);
@@ -303,7 +301,6 @@ public:
   IO::File::LoadResponse loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept;
 
 private:
-
   Engine(const Engine&) = delete;
   Engine(Engine&&) = delete;
 

@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -83,7 +83,6 @@ public:
   template<class... Args>
   void add(Entity::Generator::Index notGlobalIfPresent, GeneratorCollection&& gens, ModulatorCollection&& mods,
            Args&... values) noexcept {
-
     // Per spec, disregard zones that have no gens AND mods
     if (gens.empty() && mods.empty()) return;
 

@@ -1,9 +1,8 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
 #include "SF2Lib/Render/Voice/State/Modulator.hpp"
-#include "SF2Lib/Render/Voice/State/State.hpp"
 
 namespace SF2::Render::Voice::State {
 
@@ -17,7 +16,6 @@ class State;
  - mods -- added by a linked modulator
  */
 struct GenValue {
-
   /**
    Set the generator value using a value from an Instrument.
 

@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -36,7 +36,6 @@ public:
   inline int high() const noexcept { return int(raw_.ranges[1]); }
 
 private:
-
   union {
     uint16_t wAmount;
     int16_t shAmount;

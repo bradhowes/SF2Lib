@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -162,7 +162,6 @@ public:
   void dump() noexcept;
 
 private:
-
   /**
    Set a generator value. Should only be called with a value from an InstrumentZone. It can be set twice, once by a
    global instrument generator setting, and again by a non-global instrument generator setting, the latter one

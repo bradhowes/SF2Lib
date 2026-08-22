@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -18,7 +18,6 @@ class ChunkList;
  instances with new position values.
  */
 struct Pos {
-
   /**
    Constructor
 

@@ -10,7 +10,6 @@
 namespace SF2::Render::Engine {
 
 struct PresetsState {
-
   PresetsState() noexcept = default;
 
   PresetsState(int fd, size_t index, PresetsState* past) noexcept
@@ -63,7 +62,6 @@ struct PresetsState {
   }
 
 private:
-
   PresetsState(const PresetsState&) = delete;
   PresetsState(PresetsState&&) = delete;
 

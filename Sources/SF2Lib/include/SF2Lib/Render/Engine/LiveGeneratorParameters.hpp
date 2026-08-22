@@ -1,4 +1,4 @@
-// Copyright © 2023 Brad Howes. All rights reserved.
+// Copyright © 2023, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -64,7 +64,6 @@ public:
   }
 
 private:
-
   // Current "live" generator settings
   Entity::Generator::GeneratorValueArray<int> liveValues_{};
   // Indicator that value was changed by external source since last check.

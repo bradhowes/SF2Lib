@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -16,7 +16,6 @@ namespace SF2::Render::Envelope {
 class Modulation : public Generator
 {
 public:
-
   /**
    Type-specific wrapper for envelope value to help ensure proper use of the right value in signal flows.
    */

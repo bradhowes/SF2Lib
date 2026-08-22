@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -9,7 +9,6 @@ namespace SF2::Render::Engine {
 class Mixer
 {
 public:
-
   /**
    Construct new mixer that consists of three output busses. The arguments take a value type so that they may be
    constructed at the call site or used directly from a function return. Alternative would be to define move operations

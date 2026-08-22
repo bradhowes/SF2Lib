@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -34,7 +34,6 @@ public:
   void setSampleRate(Float sampleRate) noexcept;
 
 private:
-
   void updateSettings(Float frequency, Float resonance) noexcept;
 
   DSPHeaders::Biquad::Direct<Float> filter_;

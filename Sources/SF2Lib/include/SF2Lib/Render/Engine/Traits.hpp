@@ -10,7 +10,6 @@ namespace SF2::Render::Engine {
 // TODO: integrate this into Engine as a template parameter
 
 struct traits {
-
   static inline constexpr AUValue minLastLoadFinished{AUValue(-1.0e-4)};
   static inline constexpr AUValue maxLastLoadFinished{AUValue(1.0e+6)};
   static inline constexpr AUValue lastLoadFinishedChange{AUValue(0.0001)};

@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -22,7 +22,6 @@ namespace SF2::Entity::Modulator {
  */
 class Source {
 public:
-
   /// Valid sources for a general controller
   enum struct GeneralIndex : uint16_t {
     none = 0,
@@ -146,7 +145,6 @@ public:
   friend std::ostream& operator<<(std::ostream& os, const Source& mod) noexcept;
 
 private:
-
   inline Source continuity(ContinuityType continuity) const noexcept {
     return Source(static_cast<uint16_t>((bits_ & 0x3FF) | (uint16_t(continuity) << 10)));
   }

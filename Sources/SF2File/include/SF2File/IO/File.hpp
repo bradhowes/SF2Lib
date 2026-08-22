@@ -1,4 +1,4 @@
-// Copyright © 2022, 2025 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -27,7 +27,6 @@ namespace SF2::IO {
  */
 class File {
 public:
-
   File() noexcept = default;
 
   /**
@@ -142,7 +141,6 @@ public:
   void dump() const noexcept;
 
 private:
-
   std::string path_;
   int fd_{-1};
   bool loaded_{false};

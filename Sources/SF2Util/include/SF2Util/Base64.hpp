@@ -8,7 +8,6 @@ namespace SF2::Utils {
  Base64 routines. Follows RFC 4648 section 4 with mandatory padding ('=').
  */
 struct Base64 {
-
   /**
    Convert given string from Base-64 to ASCII/UTF-8.
 

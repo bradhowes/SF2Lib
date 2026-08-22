@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -67,7 +67,6 @@ public:
   }
 
 private:
-
   /**
    Locate the right table to use based on the transformation, direction, and polarity.
 

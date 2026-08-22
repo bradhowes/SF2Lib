@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -30,7 +30,6 @@ class Definition {
 public:
   /// Range for generator values.
   struct ValueRange {
-
     /**
      Clamp the given value to be within the defined range.
 
@@ -51,7 +50,6 @@ public:
 
   /// The kind of value held by the generator.
   enum struct ValueKind {
-
     // These have isUnsignedValue() == true
     unsignedShort = 1,
     offset,

@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 #include <os/log.h>
@@ -76,7 +76,6 @@ public:
    @param voiceIndex the index to add
    */
   iterator voiceRelease(size_t voiceIndex) noexcept {
-
     if (activeVoiceCounter_ == 0) {
       os_log_error(log_, "voiceRelease - logic error: voiceRelease(%lu) called while active voice count is zero", voiceIndex);
       return firstInactiveVoice_;

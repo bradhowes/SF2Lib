@@ -8,7 +8,6 @@ namespace Entity { class Preset; }
 }
 
 struct SWIFT_ESCAPABLE SF2PresetInfo {
-
   SF2PresetInfo(std::string name, int bank, int program) : name_{name}, bank_{bank}, program_{program} {}
 
   SF2PresetInfo(const SF2::Entity::Preset& preset);

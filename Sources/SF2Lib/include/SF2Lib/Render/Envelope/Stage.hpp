@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -20,7 +20,6 @@ namespace SF2::Render::Envelope {
 class Stage
 {
 public:
-
   /**
    Generate a configuration that will emit a constant value for a fixed or indefinite time.
 

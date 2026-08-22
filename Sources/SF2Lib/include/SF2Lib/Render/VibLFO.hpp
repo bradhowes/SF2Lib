@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -12,7 +12,6 @@ namespace SF2::Render {
 class VibLFO : public LFO
 {
 public:
-
   // Typed boxed value to help ensure correctness in signal processing calls.
   struct Value {
     const Float val;

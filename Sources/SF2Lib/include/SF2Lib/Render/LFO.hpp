@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -24,7 +24,6 @@ namespace SF2::Render {
  */
 class LFO {
 public:
-
   /**
    Restart from a known zero state.
    */
@@ -34,7 +33,6 @@ public:
   }
 
 protected:
-
   /**
    Construct new LFO. It will have no frequency so it will never return a non-zero value.
 

@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 //
 // Loosely based on iffdigest v0.3 by Andrew C. Bulhak. This code has been modified to *only* work on IFF_FMT_RIFF, and
 // it safely parses bogus files by throwing an IFF_FMT_ERROR exception anytime there is an access outside of valid
@@ -17,7 +17,6 @@ namespace SF2::IO {
  */
 class Parser {
 public:
-
   /// Extracted preset information from the SF2 file.
   struct PresetInfo {
     PresetInfo(std::string n, uint16_t b, uint16_t p) noexcept : name{n}, bank{b}, preset{p} {}
@@ -29,7 +28,6 @@ public:
 
   /// Extract SF2 info
   struct Info {
-
     /// The name embedded in the SF2 file
     std::string embeddedName;
     std::string embeddedAuthor;

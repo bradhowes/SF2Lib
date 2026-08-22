@@ -1,6 +1,8 @@
-// Copyright © 2022, 2025 Brad Howes. All rights reserved.
+// Copyright © 2022, 2025, 2026 Brad Howes. All rights reserved.
 
 #pragma once
+
+#include <memory>
 
 namespace SF2::Render::Zone {
 class Instrument;
@@ -19,7 +21,6 @@ class State;
  */
 class Config {
 public:
-
   /**
    Construct a preset/instrument pair
 
@@ -54,7 +55,6 @@ public:
   void applyTo(State& state) const noexcept;
 
 private:
-
   const Zone::Preset& preset_;
   const Zone::Preset* globalPreset_;
   const Zone::Instrument& instrument_;

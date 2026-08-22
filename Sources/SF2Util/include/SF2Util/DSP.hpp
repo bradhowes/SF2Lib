@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -92,7 +92,6 @@ inline static constexpr Float centibelsToAttenuationInterpolated(Float value) no
  Lookup table definition for cents to frequency values in range [0 - 1200).
  */
 struct CentsPartialLookup {
-
   /// @return the value frequency for the given cents.
   inline static constexpr Float query(int cents) noexcept {
     return lookup_[static_cast<size_t>(std::clamp<int>(cents, 0, int(TableSize - 1)))];
@@ -122,7 +121,6 @@ inline static Float centsPartialLookup(int value) noexcept { return CentsPartial
  well-designed SF2 files.
  */
 struct Power2Lookup {
-
   /// @return the value 2 ^ cents
   inline static constexpr Float query(int cents) noexcept {
     return lookup_[static_cast<size_t>(std::clamp<int>(cents + Offset, 0, int(TableSize - 1)))];

@@ -1,4 +1,4 @@
-// Copyright © 2023, 2025 Brad Howes. All rights reserved.
+// Copyright © 2023, 2025, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -193,5 +193,4 @@ struct SWIFT_ESCAPABLE SF2Engine
 private:
   // Use of shared_ptr is on purpose in order to hide the internal API.
   std::shared_ptr<SF2::Render::Engine::Engine> impl_;
-
 } SWIFT_SELF_CONTAINED;

@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -16,7 +16,6 @@ namespace SF2::Render {
 class InstrumentCollection
 {
 public:
-
   /**
    Construct a new collection using contents from the given file. Creates a new `Instrument` for each instrument definition in the
    file.

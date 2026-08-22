@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -130,7 +130,6 @@ public:
   inline const Stage& stage(StageIndex index) const noexcept { return stages_[index]; }
 
 protected:
-
   /**
    Construct a NULL generator, one that will never emit any non-zero values. To be useful, a generator must be
    configured with a State that holds the stage definitions to use.
@@ -168,7 +167,6 @@ protected:
   void configureModulationEnvelope(const State& state) noexcept;
 
 private:
-
   /**
    Enter a new stage.
 

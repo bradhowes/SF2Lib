@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -16,7 +16,6 @@ namespace SF2::Entity::Modulator {
  */
 class Transformer {
 public:
-
   enum struct Kind : uint16_t {
     linear = 0
   };

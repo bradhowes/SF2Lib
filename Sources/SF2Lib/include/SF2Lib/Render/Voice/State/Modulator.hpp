@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -9,7 +9,7 @@
 #include "SF2Lib/MIDI/MIDI.hpp"
 #include "SF2Lib/MIDI/ValueTransformer.hpp"
 
-namespace SF2::MIDI { class Channel; }
+namespace SF2::MIDI { class ChannelState; }
 
 namespace SF2::Render::Voice::State {
 
@@ -30,7 +30,6 @@ class State;
  */
 class Modulator {
 public:
-
   /**
    Construct new modulator
 
@@ -78,7 +77,9 @@ private:
     const MIDI::ControlChange cc_{0};
 
     bool isActive() const noexcept { return proc_ != nullptr; }
-    int operator()(const State& state, const MIDI::ChannelState& channelState) const noexcept { return (this->*proc_)(state, channelState); }
+    int operator()(const State &state, const MIDI::ChannelState &channelState) const noexcept {
+      return (this->*proc_)(state, channelState);
+    }
 
     int ccValue(const State&, const MIDI::ChannelState&) const noexcept;
     int noteOnKey(const State&, const MIDI::ChannelState&) const noexcept;

@@ -1,4 +1,4 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
@@ -20,7 +20,6 @@ namespace SF2::Render::Voice::Sample {
  */
 class Index {
 public:
-
   /**
    Configure the index to work with the given bounds.
 
