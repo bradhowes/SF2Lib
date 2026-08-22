@@ -2,6 +2,7 @@
 [![COV][cov]][ci]
 [![][spiv]][spi]
 [![][spip]][spi]
+[![][cf1]][cf2]
 [![][mit]][license]
 
 # SF2Lib - a SoundFont (SF2) synthesizer in C++
@@ -49,7 +50,7 @@ definitions found in the SF2 v2 specification.
 
 There are quite a large number of unit tests that cover a good chunk of the code base. There are even some rendering
 tests that will play audio at the end if configured to do so. This option is found in the
-[Package.swift](Package.swift#L12) file, in the line `let playAudioDuringTests = false`. Change the `false` to `true` to 
+[Package.swift](Package.swift#L12) file, in the line `let playAudioDuringTests = false`. Change the `false` to `true` to
 enable the audio output for *all* tests. This will increase the test run time, but it can be helpful when making code changes.
 
 Alternatively, the unit tests with rendering capability have a `playAudio` attribute which can be set to `true` to play
@@ -109,3 +110,5 @@ misrepresentations of SF2 functionality are of my own doing.
 [spec]: SoundFont%20Spec%202.01.pdf
 [engine]: Sources/SF2Lib/include/SF2Lib/Render/Engine/Engine.hpp
 [mixer]: Sources/SF2Lib/include/SF2Lib/Render/Engine/Mixer.hpp
+[cf1]: https://www.codefactor.io/repository/github/bradhowes/sf2lib/badge
+[cf2]: https://www.codefactor.io/repository/github/bradhowes/sf2lib
