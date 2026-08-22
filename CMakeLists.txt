@@ -17,7 +17,7 @@ set(SDK "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/De
 file(GLOB_RECURSE Sources "${CMAKE_SOURCE_DIR}/Sources/*.mm")
 
 # No idea what is really necessary here, but this seems to give clangd enough info to parse the Objective C++ files..
-add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-g;-DDEBUG;-D__OBJC2__;-D__USE_PUBLIC_HEADERS__;-ObjC++;-std=c++23;>")
+add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-g;-DDEBUG;-D__OBJC2__;-D__USE_PUBLIC_HEADERS__;-ObjC++;-std=c++2a;>")
 add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-framework;Foundation;-isysroot;${SDK};>")
 
 add_executable(SF2Lib ${Sources})

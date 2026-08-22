@@ -1,4 +1,4 @@
 CompileFlags:
-  Add: [-xobjective-c++, -std=c++23, -fobjc-arc]
+  Add: [-xobjective-c++, -std=c++2a, -fobjc-arc]
   Compiler: clang++
   CompilationDatabase: cmake
