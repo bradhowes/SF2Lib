@@ -88,6 +88,18 @@ interator for the presets it defines.
 Note that the most of the rendering and SF2 containers are not exposed by the Swift bridge, as they are not pertinent
 when using the library for rendering in an AUv3 context.
 
+# Pre-Commit Hooks
+
+This repository now depends on [pre-commit][pc] framework to perform various pre-commit checks before allow a git
+commit. It currently runs two custom checks for this repository:
+
+- [local_dsp_headers_check](pre-commit-hooks/local_dspheaders_check) -- checks whether the
+  [Package.swift](Package.swift) file has `useLocalDSPHeaders` set to `true`.
+- [unsafe_flags_check](pre-commit-hooks/unsafe_flags_check) -- checks whether the [Package.swift](Package.swift) file
+  has `useUnsafeFlags` set to `true`.
+
+Install `brew install pre-commit` to install the Python package and make it available for use by the checks above.
+
 # Credits
 
 All of the code has been written by myself over the course of several years, but I have benefitted from the existence of
@@ -112,3 +124,4 @@ misrepresentations of SF2 functionality are of my own doing.
 [mixer]: Sources/SF2Lib/include/SF2Lib/Render/Engine/Mixer.hpp
 [cf1]: https://www.codefactor.io/repository/github/bradhowes/sf2lib/badge
 [cf2]: https://www.codefactor.io/repository/github/bradhowes/sf2lib
+[pc]: https://pre-commit.com
