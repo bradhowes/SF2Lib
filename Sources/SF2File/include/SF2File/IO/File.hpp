@@ -14,6 +14,7 @@
 
 #include "SF2File/IO/ChunkItems.hpp"
 #include "SF2File/IO/SampleSourceCollection.hpp"
+#include "SF2File/IO/UniqueFd.hpp"
 
 /**
  Collection of classes and types involved in parsing an SF2 file or data stream.
@@ -51,7 +52,8 @@ public:
 
   File(File&& rhs) noexcept = default;
 
-  ~File() noexcept { if (fd_ != -1) ::close(fd_); }
+  /// Closes the file if it was loaded successfully.
+  ~File() noexcept = default;
 
   enum class LoadResponse: int {
     ok = 0,
@@ -71,6 +73,9 @@ public:
   /**
    Load the file by the given file descriptor. Note that most of the File API is valid only if `load` was successful
    and returned `LoadResponse::ok`.
+
+   The descriptor is duplicated: the caller keeps ownership of `fd` and may close it as soon as this returns. The
+   duplicate stays open for as long as this instance exists, since samples are read from it lazily.
 
    @param fd the file descriptor of the file to read from
    @returns status of the load
@@ -148,8 +153,17 @@ private:
    */
   void validate() const;
 
+  /**
+   Load the file using the given descriptor. On success the descriptor is kept open until this instance is destroyed;
+   on failure it is closed.
+
+   @param fd the descriptor to read from
+   @returns status of the load
+   */
+  LoadResponse load(UniqueFd&& fd) noexcept;
+
   std::string path_;
-  int fd_{-1};
+  UniqueFd fd_{};
   bool loaded_{false};
   off_t size_{0};
   Pos sampleDataBegin_{-1, 0, 0};

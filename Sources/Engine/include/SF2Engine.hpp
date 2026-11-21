@@ -114,7 +114,8 @@ struct SWIFT_ESCAPABLE SF2Engine
   /**
    Load a soundfont from the given file descriptor. If successful, make active the preset at the given index.
 
-   @param fd the file descriptor to read from
+   @param fd the file descriptor to read from. It is duplicated, so the caller keeps ownership and may close it as soon
+   as this returns.
    @param presetIndex the index of the preset to make active after loading
    */
   SF2::IO::File::LoadResponse loadFileAndPreset(int fd, size_t presetIndex) noexcept;

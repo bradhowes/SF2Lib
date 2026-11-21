@@ -32,10 +32,11 @@ File::load() noexcept
   auto offset = path_.find(prefix) == std::string::npos ? 0 : prefix.size();
   auto c_path = path_.c_str() + offset;
 
-  int fd = ::open(c_path, O_RDONLY);
-  if (fd == -1) return LoadResponse::notFound;
+  if (loaded_) return LoadResponse::ok;
+  auto fd = UniqueFd::openForReading(c_path);
+  if (!fd.isValid()) return LoadResponse::notFound;
 
-  return load(fd);
+  return load(std::move(fd));
 }
 
 File::LoadResponse
@@ -43,6 +44,18 @@ File::load(int fd) noexcept
 {
   if (loaded_) return LoadResponse::ok;
 
+  // Work with our own descriptor so that the caller can close theirs (e.g. when an NSFileHandle goes away) without
+  // breaking the lazy sample loading done later by `Preset::loadSamples`.
+  return load(UniqueFd::duplicate(fd));
+}
+
+File::LoadResponse
+File::load(UniqueFd&& owned) noexcept
+{
+  if (loaded_) return LoadResponse::ok;
+  if (!owned.isValid()) return LoadResponse::invalidFormat;
+
+  auto fd = owned.get();
   off_t fileSize = ::lseek(fd, 0, SEEK_END);
   if (fileSize < 16) return LoadResponse::invalidFormat;
 
@@ -95,11 +108,17 @@ File::load(int fd) noexcept
     }
     validate();
   } catch (File::LoadResponse) {
+    sampleDataBegin_ = Pos(-1, 0, 0);
     return LoadResponse::invalidFormat;
   } catch (const std::exception&) {
     // For instance, std::bad_alloc from a chunk that claims to hold more entities than we can allocate.
+    sampleDataBegin_ = Pos(-1, 0, 0);
     return LoadResponse::invalidFormat;
   }
+
+  // Keep the descriptor open for as long as this instance exists: `sampleDataBegin_` (and therefore
+  // `Preset::loadSamples`) reads from it.
+  fd_ = std::move(owned);
 
   // Create an indirection index that provides the presets ordered by bank/program ordering.
   presetIndicesOrderedByBankProgram_.resize(presets_.size());

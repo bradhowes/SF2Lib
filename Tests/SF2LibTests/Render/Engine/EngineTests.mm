@@ -2415,6 +2415,49 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertEqual(harness.engine().activeVoiceCount(), size_t(0));
 }
 
+- (void)testProgramChangeAfterBookmarkLoadReadsSamples
+{
+  // On the bookmark path the NSFileHandle (and its descriptor) is released as soon as the file has been parsed. A
+  // later MIDI program change loads that preset's samples from the file, which used to fail on the closed descriptor
+  // (or, worse, read whichever file had reused its number). The note after the program change must sound exactly as it
+  // does when the same file is loaded by path.
+  auto render = [](TestEngineHarness& harness) {
+    auto mixer{harness.createMixer(0.25)};
+    harness.sendRaw(std::array<uint8_t, 3>{0xC0, 23, 0}); // program change to 23 (padded to 3 bytes)
+    harness.sendNoteOn(64, 127);
+    harness.renderToEnd(mixer);
+    const AUValue* data = harness.dryBuffer().floatChannelData[0];
+    return std::vector<AUValue>(data, data + harness.duration());
+  };
+
+  auto byPath{TestEngineHarness{48000.0}};
+  XCTAssertEqual(byPath.load(self.contexts->context0.path(), 0), IO::File::LoadResponse::ok);
+  auto reference = render(byPath);
+  auto referenceName = byPath.engine().activePresetName();
+
+  const NSURL* url = self.contexts->context0.url();
+  NSError* error = nil;
+  NSData* bookmark = [url bookmarkDataWithOptions:NSURLBookmarkCreationMinimalBookmark
+                   includingResourceValuesForKeys:nil relativeToURL:nil error:&error];
+  XCTAssertNil(error);
+
+  auto byBookmark{TestEngineHarness{48000.0}};
+  // The NSFileHandle is autoreleased. Drain a pool here so that it is really gone (and its descriptor closed) before
+  // the program change, as it is in a host once the work-queue block returns.
+  @autoreleasepool {
+    XCTAssertEqual(byBookmark.engine().loadBookmarkAndPreset(bookmark, 0), IO::File::LoadResponse::ok);
+  }
+  // Open another file so that, without the fix, the released descriptor number gets reused.
+  int other = ::open("/dev/zero", O_RDONLY);
+  auto viaBookmark = render(byBookmark);
+  ::close(other);
+
+  XCTAssertNotEqual(referenceName, std::string("Piano 1"));
+  XCTAssertEqual(byBookmark.engine().activePresetName(), referenceName);
+  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
+  XCTAssertTrue(reference == viaBookmark);
+}
+
 - (void)testSostenutoPedalTapDoesNotReleaseHeldKey
 {
   const auto path = self.contexts->context1.path();

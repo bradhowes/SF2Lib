@@ -285,7 +285,8 @@ public:
   /**
    Load the presets from a file descriptor and activate a specific preset.
    
-   @param fd the file descriptor to read from. If -1, use the existing preset collection.
+   @param fd the file descriptor to read from. It is duplicated, so the caller keeps ownership and may close it as soon
+   as this returns.
    @param presetIndex the preset to make active
    @returns status indicating the success of the loading.
    */

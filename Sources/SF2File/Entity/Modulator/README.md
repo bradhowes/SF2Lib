@@ -19,6 +19,6 @@ The following are the modulators somewhat defined in the SF2 spec. See [Modulato
 * MIDI pitch wheel to "initial pitch" (8.4.10). Follow FluidSynth here: as there is no "initial pitch" generator in
   the spec, link the modulator to `fineTune` instead. That way it can be overridden by a preset and/or instrument.
 
-Additional modulators can be defined by an SF2 file, and the SF2Lib Engine will attempt to honor them. However, the 
+Additional modulators can be defined by an SF2 file, and the SF2Lib Engine will attempt to honor them. However, the
 spec does not require this -- it only requires being able to override or disable a modulation from the SF2 file
 definition.

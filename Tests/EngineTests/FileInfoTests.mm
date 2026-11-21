@@ -18,6 +18,24 @@
   XCTAssertTrue(fi2.load());
 }
 
+- (void)testLoadingDoesNotLeakDescriptors {
+  // `SF2FileInfo::load` used to open the file and never close it. Now only the `File` it owns keeps a descriptor, and
+  // that is closed when the SF2FileInfo is destroyed.
+  auto countOpen = [] {
+    int count = 0;
+    for (int fd = 0; fd < ::getdtablesize(); ++fd) if (::fcntl(fd, F_GETFD) != -1) ++count;
+    return count;
+  };
+  auto path = [TestResources getResourcePath:0];
+  auto before = countOpen();
+  for (int count = 0; count < 10; ++count) {
+    auto info = SF2FileInfo(path);
+    XCTAssertTrue(info.load());
+    XCTAssertEqual(countOpen(), before + 1);
+  }
+  XCTAssertEqual(countOpen(), before);
+}
+
 - (void)testEmbeddedContent0 {
   auto path = [TestResources getResourcePath: 0];
   auto fi1 = SF2FileInfo(path);

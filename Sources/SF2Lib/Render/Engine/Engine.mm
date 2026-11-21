@@ -635,6 +635,9 @@ Engine::beginLoadBookmarkAndPreset_RT(NSData* bookmark, size_t presetIndex) noex
 
     os_log_info(log_, "loading from resolved url - file descriptor: %d", fileHandle.fileDescriptor);
 
+    // `File::load(int)` duplicates the descriptor, so the file stays readable after `fileHandle` is released (closing
+    // its descriptor) at the end of this block and after security-scoped access stops below. Later program changes
+    // load their samples through the duplicate.
     concludeLoad_RT(fileHandle.fileDescriptor, presetIndex);
   }];
 

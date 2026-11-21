@@ -11,9 +11,9 @@ SF2FileInfo::SF2FileInfo(std::string path)
 bool
 SF2FileInfo::load()
 {
-  int fd = ::open(path_.c_str(), O_RDONLY);
-  if (impl_->load(fd) != SF2::IO::File::LoadResponse::ok) return false;
-  return true;
+  // `File::load(int)` keeps its own duplicate of the descriptor, so ours is closed when `fd` goes out of scope.
+  auto fd = SF2::IO::UniqueFd::openForReading(path_.c_str());
+  return impl_->load(fd.get()) == SF2::IO::File::LoadResponse::ok;
 }
 
 std::string SF2FileInfo::embeddedName() const noexcept { return impl_->embeddedName(); }

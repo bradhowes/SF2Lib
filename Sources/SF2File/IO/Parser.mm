@@ -7,14 +7,16 @@
 #include "SF2File/IO/ChunkList.hpp"
 #include "SF2File/IO/File.hpp"
 #include "SF2File/IO/Parser.hpp"
+#include "SF2File/IO/UniqueFd.hpp"
 
 using namespace SF2::IO;
 
 Parser::Info
 Parser::parse(const char* path)
 {
-  int fd = ::open(path, O_RDONLY);
-  if (fd == -1) throw File::LoadResponse::notFound;
+  auto owned = UniqueFd::openForReading(path);
+  if (!owned.isValid()) throw File::LoadResponse::notFound;
+  int fd = owned.get();
 
   Parser::Info info;
   off_t fileSize = ::lseek(fd, 0, SEEK_END);
