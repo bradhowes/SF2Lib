@@ -200,14 +200,16 @@ public:
     auto modLFOValCB{modLFO.val * -state_.modulated(Index::modulatorLFOToVolume)};
     auto gain{initialAttenuation_ * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB)};
 
-    // Calculate the low-pass filter parameters. Only the frequency can be affected by an LFO or mod envelope, but both
-    // can have external modulators attached to their primary state value.
-//    auto frequency{(state_.modulated(Index::initialFilterCutoff) +
-//                    state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO.val +
-//                    state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv.val)};
-    auto frequency{state_.modulated(Index::initialFilterCutoff)};
-    auto resonance{state_.modulated(Index::initialFilterResonance)};
-    auto filtered{filter_.transform(frequency, resonance, sample * gain)};
+    // Update the low-pass filter parameters every `LowPassFilter::updateInterval` samples. Only the frequency can be
+    // affected by the mod LFO and mod envelope, and both are in cents so they add to the absolute-cents cutoff
+    // (SF2.01 8.1.2 #8, #10, #11). Both can also have external modulators attached to their primary state value.
+    if (filter_.needsUpdate()) {
+      auto frequency{state_.modulated(Index::initialFilterCutoff) +
+                     state_.modulated(Index::modulatorLFOToFilterCutoff) * modLFO.val +
+                     state_.modulated(Index::modulatorEnvelopeToFilterCutoff) * modEnv.val};
+      filter_.update(frequency, state_.modulated(Index::initialFilterResonance));
+    }
+    auto filtered{filter_.transform(sample * gain)};
 
     if (!sampleGenerator_.isActive() ||
         !volumeEnvelope_.isActive() ||
@@ -215,7 +217,7 @@ public:
       stop();
     }
 
-    return filtered; // sample * gain; // filtered;
+    return filtered;
   }
 
   /**
