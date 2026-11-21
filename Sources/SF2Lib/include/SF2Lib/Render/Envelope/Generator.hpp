@@ -36,6 +36,31 @@ enum struct StageIndex : size_t {
 };
 
 /**
+ The volume envelope value is a normalized representation of attenuation that is linear in decibels: 1.0 is the peak
+ (0 cB of attenuation) and 0.0 is the noise floor (`DSP::NoiseFloorCentiBels` of attenuation). Stage increments are
+ therefore constant dB changes per sample, which is what the spec asks for in the decay and release phases (8.1.2
+ decayVolEnv / releaseVolEnv). These two functions are the *only* place where that mapping is defined; both the
+ envelope configuration (sustain level) and the voice gain calculation must use them.
+
+ @param value normalized volume envelope value in [0.0, 1.0]
+ @returns attenuation in centibels in [0, NoiseFloorCentiBels]
+ */
+inline constexpr Float volumeEnvelopeToCentibels(Float value) noexcept {
+  return SF2::DSP::NoiseFloorCentiBels * (1_F - std::clamp(value, 0_F, 1_F));
+}
+
+/**
+ Inverse of `volumeEnvelopeToCentibels`. Values at or beyond the noise floor map to 0.0; negative values map to 1.0
+ (spec 8.1.2 sustainVolEnv: "Values less than zero are to be interpreted as zero").
+
+ @param centibels attenuation in centibels
+ @returns normalized volume envelope value in [0.0, 1.0]
+ */
+inline constexpr Float centibelsToVolumeEnvelope(Float centibels) noexcept {
+  return 1_F - std::clamp(centibels, 0_F, SF2::DSP::NoiseFloorCentiBels) / SF2::DSP::NoiseFloorCentiBels;
+}
+
+/**
  Generator of values for the SF2 volume/modulation envelopes. An SF2 envelope contains 6 stages:
 
  - Delay -- number of samples to delay the beginning of the attack stage

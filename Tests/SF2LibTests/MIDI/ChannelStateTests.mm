@@ -28,7 +28,7 @@ using namespace SF2::MIDI;
   ChannelState channel;
   for (int key = 0; key < 128; ++key) XCTAssertEqual(0, channel.notePressure(Note(key)));
   XCTAssertEqual(0, channel.channelPressure());
-  XCTAssertEqual(4096, channel.pitchWheelValue());
+  XCTAssertEqual(8192, channel.pitchWheelValue());
   XCTAssertEqual(2, channel.pitchWheelSensitivity());
 
   XCTAssertFalse(channel.pedalState().softPedalActive);
@@ -94,10 +94,18 @@ using namespace SF2::MIDI;
 
 - (void)testPitchWheelValue {
   ChannelState channel;
-  XCTAssertEqual(4096, channel.pitchWheelValue());
+  XCTAssertEqual(8192, channel.pitchWheelValue());
 
   channel.setPitchWheelValue(123);
   XCTAssertEqual(123, channel.pitchWheelValue());
+
+  // Full 14-bit MIDI range is accepted; values outside it are clamped.
+  channel.setPitchWheelValue(16383);
+  XCTAssertEqual(16383, channel.pitchWheelValue());
+  channel.setPitchWheelValue(20000);
+  XCTAssertEqual(16383, channel.pitchWheelValue());
+  channel.setPitchWheelValue(-1);
+  XCTAssertEqual(0, channel.pitchWheelValue());
 }
 
 - (void)testPitchWheelSensitivity {

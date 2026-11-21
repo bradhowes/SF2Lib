@@ -82,7 +82,7 @@ std::vector<ValueTransformer::TransformArray> buildAll() {
   size_t transformsSize_ = 32;
   std::vector<ValueTransformer::TransformArray> transforms{transformsSize_};
   for (int M = 0; M < 2; ++M) {
-    auto maxValue = size_t(M * (8191 - 127) + 127);
+    auto maxValue = size_t(M * (ChannelState::maxPitchWheelValue - 127) + 127);
     for (int P = 0; P < 2; ++P ) {
       auto pol{ValueTransformer::Polarity(P)};
       for (int D = 0; D < 2; ++D) {

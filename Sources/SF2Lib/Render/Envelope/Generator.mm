@@ -119,10 +119,13 @@ Generator::configureVolumeEnvelope(const State& state) noexcept
    interpreted as zero; conventionally 1000 indicates full attenuation. For example, a sustain level which
    corresponds to an absolute value 12dB below of peak would be 120.
 
-   Our stages always work in normalized values, so convert centibels to an attenuation value.
+   Our stages work in normalized values that are linear in dB (see `volumeEnvelopeToCentibels`), so the sustain level
+   must be expressed in that same domain. NOTE: do *not* convert to an amplitude ratio here -- the voice converts the
+   envelope value to centibels, so an amplitude-ratio sustain level would be applied twice (120 cB would become
+   ~720 cB).
    */
-  auto sustainCents = state.modulated(Index::sustainVolumeEnvelope);
-  sustainLevel_ = DSP::centibelsToAttenuationInterpolated(sustainCents);
+  auto sustainCentibels = state.modulated(Index::sustainVolumeEnvelope);
+  sustainLevel_ = centibelsToVolumeEnvelope(sustainCentibels);
 
   auto delayTimecents = state.modulated(Index::delayVolumeEnvelope);
   stages_[StageIndex::delay].setDelay(durationInSamples(delayTimecentsToSeconds(delayTimecents)));

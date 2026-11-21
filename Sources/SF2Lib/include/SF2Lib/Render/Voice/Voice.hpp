@@ -178,10 +178,10 @@ public:
     // attack stage of the volume envelope as special and just a linear ramp from 0.0 - 1.0. The other stages are
     // treated as a normalized representation of a dB attenuation.
     //
-    // We instead do what I think is more intuitive and straightforward -- we always convert from normalized gain
-    // of 0.0 - 1.0 to an attenuation in cB which is *then* converted along with the modLFO value into an attenuation
-    // that is applied to the sample.
-    auto volEnvCB{DSP::NoiseFloorCentiBels * (1_F - volEnv.val)};
+    // We instead always treat the envelope value as a normalized dB attenuation (see
+    // `Envelope::volumeEnvelopeToCentibels`), convert it to cB, and then combine it with the modLFO value into an
+    // attenuation that is applied to the sample.
+    auto volEnvCB{Envelope::volumeEnvelopeToCentibels(volEnv.val)};
     auto modLFOValCB{modLFO.val * -state_.modulated(Index::modulatorLFOToVolume)};
     auto gain{initialAttenuation_ * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB)};
 

@@ -19,7 +19,8 @@ namespace SF2::MIDI {
  */
 class ChannelState {
 public:
-  inline static const int maxPitchWheelValue = 8191;
+  /// Largest value of the 14-bit MIDI v1 pitch wheel. The wheel at rest reports `(maxPitchWheelValue + 1) / 2` (8192).
+  inline static const int maxPitchWheelValue = 16'383;
 
   /**
    Construct new channel.
@@ -61,8 +62,8 @@ public:
   inline uint8_t channelPressure() const noexcept { return channelPressure_; }
 
   /**
-   Set the pitch wheel value. For MIDI v1 this is a 14-bit value [0-8191] and at rest, it should report out a value
-   of 4096 which when mapped to bipolar range [-1 - 1) will give 0 as an output value.
+   Set the pitch wheel value. For MIDI v1 this is a 14-bit value [0-16383] and at rest, it should report out a value
+   of 8192 (0x2000) which when mapped to bipolar range [-1 - 1) will give 0 as an output value.
 
    @param value the pitch wheel value
    */

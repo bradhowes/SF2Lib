@@ -43,7 +43,7 @@ public:
 
   enum struct ControllerRange: uint16_t {
     _128 = 128,
-    _8192 = 8192
+    _16384 = 16384 // MIDI v1 14-bit pitch wheel
   };
 
   /// Continuous Controller (CC) designation
@@ -124,7 +124,7 @@ public:
 
   /// @returns largest value the controller will return.
   inline ControllerRange controllerRange() const noexcept {
-    if (!isContinuousController() && generalIndex() == GeneralIndex::pitchWheel) return ControllerRange::_8192;
+    if (!isContinuousController() && generalIndex() == GeneralIndex::pitchWheel) return ControllerRange::_16384;
     return ControllerRange::_128;
   }
 

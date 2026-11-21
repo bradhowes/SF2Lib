@@ -70,7 +70,7 @@ private:
   /**
    Locate the right table to use based on the transformation, direction, and polarity.
 
-   @param maxValue the largest value that the controller will provide (127 or 8191 for MIDI v1)
+   @param maxValue the largest value that the controller will provide (127 or 16383 for MIDI v1)
    @param kind the transformation function to apply
    @param direction the min/max ordering to use
    @param polarity the lower bound of the transformed result

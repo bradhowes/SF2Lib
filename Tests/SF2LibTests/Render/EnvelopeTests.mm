@@ -223,25 +223,42 @@ gen.noteReleased();
   gen.configure(state);
 
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
-  XCTAssertEqualWithAccuracy(0.251188643151, EnvelopeTestInjector::sustain(gen), self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0 - 120.0 / 960.0, EnvelopeTestInjector::sustain(gen), self.epsilon);
 
   self.sst.setValue(state, State::State::Index::sustainVolumeEnvelope, 500);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
-  XCTAssertEqualWithAccuracy(0.00316227766017, EnvelopeTestInjector::sustain(gen), self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0 - 500.0 / 960.0, EnvelopeTestInjector::sustain(gen), self.epsilon);
 
   self.sst.setValue(state, State::State::Index::sustainVolumeEnvelope, 900);
   gen.configure(state);
   std::cout << std::setprecision(15) << EnvelopeTestInjector::sustain(gen) <<'\n';
-  XCTAssertEqualWithAccuracy(3.16227766017e-05, EnvelopeTestInjector::sustain(gen), self.epsilon);
+  XCTAssertEqualWithAccuracy(1.0 - 900.0 / 960.0, EnvelopeTestInjector::sustain(gen), self.epsilon);
 
   self.sst.setValue(state, State::State::Index::sustainVolumeEnvelope, 960);
   gen.configure(state);
-  XCTAssertEqualWithAccuracy(1.58489319246e-05, EnvelopeTestInjector::sustain(gen), self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, EnvelopeTestInjector::sustain(gen), self.epsilon);
 
   self.sst.setValue(state, State::State::Index::sustainVolumeEnvelope, 1440);
   gen.configure(state);
   XCTAssertEqualWithAccuracy(0.0, EnvelopeTestInjector::sustain(gen), self.epsilon);
+}
+
+- (void)testVolumeEnvelopeSustainRoundTripsThroughVoiceGainMapping {
+  // The sustain level stored in the envelope must convert back to the generator's centibel value via the same mapping
+  // the voice uses to compute gain.
+  State::State state{self.contexts->context2.makeState(0, 64, 32)};
+  auto gen = Volume();
+  for (int centibels : {0, 60, 120, 480, 900}) {
+    self.sst.setValue(state, State::State::Index::sustainVolumeEnvelope, centibels);
+    gen.configure(state);
+    XCTAssertEqualWithAccuracy(Float(centibels), volumeEnvelopeToCentibels(EnvelopeTestInjector::sustain(gen)),
+                               self.epsilon);
+  }
+  XCTAssertEqualWithAccuracy(1.0, centibelsToVolumeEnvelope(-10.0), self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, centibelsToVolumeEnvelope(1'440.0), self.epsilon);
+  XCTAssertEqualWithAccuracy(0.251188643151, SF2::DSP::centibelsToAttenuation(volumeEnvelopeToCentibels(1.0 - 120.0 / 960.0)),
+                             self.epsilon);
 }
 
 - (void)testModulationEnvelopeSustainLevel {
