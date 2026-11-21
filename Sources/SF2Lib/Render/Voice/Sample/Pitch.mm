@@ -1,5 +1,8 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
+#include <algorithm>
+#include <cmath>
+
 #include "SF2File/Entity/SampleHeader.hpp"
 #include "SF2Lib/Render/Voice/Sample/Pitch.hpp"
 
@@ -40,12 +43,16 @@ Pitch::configure(const Entity::SampleHeader& header) noexcept
     constantPitch = false; // Unclear in spec if this should be the case.
   }
 
+  // SF2.01 7.10: "A value of zero is illegal. If an illegal or impractical value is encountered, the nearest practical
+  // value should be used." The spec gives 400 Hz as the lowest practical rate.
+  auto headerSampleRate{std::max(Float(header.sampleRate()), 400_F)};
+
   auto sampleRateDeltaCents{0};
-  if (state_.sampleRate() != Float(header.sampleRate())) {
+  if (state_.sampleRate() != headerSampleRate) {
     // Calculate ratio of sample rates as a difference in their cent frequency values, which can then be added to
     // the sum of the phase increments. Saves us from a multiply later on.
     auto sampleRateCents{int(std::round(1200 * std::log2(state_.sampleRate() / 440_F)))};
-    auto originalSampleRateCents{int(std::round(1200 * std::log2(header.sampleRate() / 440_F)))};
+    auto originalSampleRateCents{int(std::round(1200 * std::log2(headerSampleRate / 440_F)))};
     sampleRateDeltaCents = originalSampleRateCents - sampleRateCents;
   }
 

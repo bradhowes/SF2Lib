@@ -9,7 +9,7 @@
 
 using namespace SF2::Entity::Generator;
 
-Generator::Generator(IO::Pos& pos) noexcept
+Generator::Generator(IO::Pos& pos)
 {
   pos = pos.readInto(*this);
 }
@@ -42,5 +42,6 @@ Generator::name() const noexcept
 std::ostream&
 Generator::dump(const std::string& indent, size_t index) const noexcept
 {
+  if (!isValid()) return std::cout << indent << '[' << index << "] unknown " << index_.value() << std::endl;
   return std::cout << indent << '[' << index << "] " << name() << ' ' << Dumper(definition(), amount_) << std::endl;
 }

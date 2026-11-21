@@ -8,7 +8,7 @@
 
 using namespace SF2::Entity;
 
-Bag::Bag(IO::Pos& pos) noexcept
+Bag::Bag(IO::Pos& pos)
 {
   pos = pos.readInto(*this);
 }

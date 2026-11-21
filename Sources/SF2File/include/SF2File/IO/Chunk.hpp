@@ -46,7 +46,7 @@ public:
 
    @return chunk contents as std::string value
    */
-  std::string extract() const noexcept;
+  std::string extract() const;
 
 private:
   inline uint32_t paddedSize() const noexcept { return size_ + (size_ & 1); }

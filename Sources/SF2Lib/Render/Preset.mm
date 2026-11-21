@@ -74,24 +74,38 @@ Preset::loadSamples(const IO::File &file) noexcept {
 
   os_log_debug(log_, "loadSamples - minStartIndex: %ld maxEndIndex %ld", minStartIndex, maxEndIndex);
 
+  // A preset whose zones reference no samples has nothing to load.
+  if (maxEndIndex < minStartIndex) {
+    normalizedSamples_.clear();
+    return true;
+  }
+
   size_t remainingSampleCount = (maxEndIndex - minStartIndex) + Zone::NormalizedSampleSpan::sizePaddingAfterEnd + 1;
   os_log_debug(log_, "loadSamples - remainingSampleCount: %ld", remainingSampleCount);
 
-  normalizedSamples_.resize(remainingSampleCount);
+  normalizedSamples_.assign(remainingSampleCount, 0_F);
   std::array<int16_t, batchSampleCount> rawSamples;
 
   // Point to the first 16-bit sample associated with this preset, and copy over remainingSampleCount 16-bit samples in
-  // batchSampleCount chunks.
+  // batchSampleCount chunks. `File::validate` guarantees that every sample header lies inside the `smpl` chunk, but the
+  // padding after the last one may not, so stop at the end of the chunk and leave the rest as zeros.
   pos = pos.advance(off_t(minStartIndex * sizeof(int16_t)));
+  remainingSampleCount = std::min(remainingSampleCount, size_t(pos.available()) / sizeof(int16_t));
   auto ptr = normalizedSamples_.data();
   using elemType = std::remove_pointer_t<decltype(ptr)>;
-  while (remainingSampleCount > 0) {
-    auto sampleCount = std::min(remainingSampleCount, batchSampleCount);
-    remainingSampleCount -= sampleCount;
-    pos = pos.readInto(rawSamples.data(), sampleCount * sizeof(int16_t));
-    DSPHeaders::Accelerated<elemType>::conversionProc(rawSamples.data(), 1, ptr, 1, sampleCount);
-    DSPHeaders::Accelerated<elemType>::scaleProc(ptr, 1, &normalizationScale, ptr, 1, sampleCount);
-    ptr += sampleCount;
+  try {
+    while (remainingSampleCount > 0) {
+      auto sampleCount = std::min(remainingSampleCount, batchSampleCount);
+      remainingSampleCount -= sampleCount;
+      pos = pos.readInto(rawSamples.data(), sampleCount * sizeof(int16_t));
+      DSPHeaders::Accelerated<elemType>::conversionProc(rawSamples.data(), 1, ptr, 1, sampleCount);
+      DSPHeaders::Accelerated<elemType>::scaleProc(ptr, 1, &normalizationScale, ptr, 1, sampleCount);
+      ptr += sampleCount;
+    }
+  } catch (IO::File::LoadResponse) {
+    os_log_error(log_, "loadSamples - failed to read samples for %{public}s", configuration().name().c_str());
+    normalizedSamples_.clear();
+    return false;
   }
 
   // Update all instrument zones to use spans of normalized samples.

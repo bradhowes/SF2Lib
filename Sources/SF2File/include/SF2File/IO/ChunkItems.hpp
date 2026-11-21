@@ -13,6 +13,9 @@ namespace SF2::IO {
 
 struct ChunkItemsSupport {
   static void beginDump(size_t size);
+
+  /// Throw `File::LoadResponse::invalidFormat` (defined out of line to avoid including File.hpp here)
+  [[noreturn]] static void throwInvalidFormat();
 };
 
 /**
@@ -44,22 +47,26 @@ public:
    Constructor that loads items from the file.
 
    @param source defines where to load and how many items to load
+   @throws File::LoadResponse::invalidFormat if the chunk is malformed or cannot be read
    */
-  explicit ChunkItems(const ChunkList& source) noexcept { load(source); }
+  explicit ChunkItems(const ChunkList& source) { load(source); }
 
   /**
-   Get the number of items in this collection
+   Get the number of items in this collection, not counting the terminal record that ends every SF2 entity list.
 
-   @returns collection count
+   @returns collection count (0 if the chunk was missing or empty)
    */
-  inline size_t size() const noexcept { return items_.size() - 1; }
+  inline size_t size() const noexcept { return items_.empty() ? 0 : items_.size() - 1; }
+
+  /// @returns true if the chunk held a terminal record (SF2.01 7.2-7.10 require one for every pdta sub-chunk)
+  inline bool hasTerminal() const noexcept { return !items_.empty(); }
 
   /**
    Determine if collection is empty
 
    @returns true if so
    */
-  inline bool empty() const noexcept { return items_.size() < 2; }
+  inline bool empty() const noexcept { return size() == 0; }
 
   /**
    Obtain a (read-only) reference to an entity in the collection.
@@ -90,7 +97,7 @@ public:
   inline const_iterator begin() const noexcept { return items_.begin(); }
 
   /// @returns iterator at the end of the collection
-  inline const_iterator end() const noexcept { return items_.end() - 1; }
+  inline const_iterator end() const noexcept { return items_.empty() ? items_.end() : items_.end() - 1; }
 
   /**
    Utility to dump out the contents of the collection
@@ -105,13 +112,17 @@ public:
 
 private:
   /**
-   Read in items found in a chunk
+   Read in items found in a chunk, replacing any previous contents.
 
    @param source the location in the file to read
+   @throws File::LoadResponse::invalidFormat if the chunk size is not a multiple of the entity size (SF2.01 7.2-7.10:
+   "the file should be rejected") or the chunk cannot be read
    */
-  void load(const Chunk& source) noexcept
+  void load(const Chunk& source)
   {
+    if (source.size() % itemSize != 0) throwInvalidFormat();
     size_t count = source.size() / itemSize;
+    items_.clear();
     items_.reserve(count);
     Pos pos = source.begin();
     Pos end = pos.advance(off_t(count * itemSize));

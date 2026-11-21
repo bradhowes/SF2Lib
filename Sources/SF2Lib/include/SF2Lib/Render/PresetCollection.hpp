@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <vector>
 
 #include "SF2Lib/Render/Preset.hpp"

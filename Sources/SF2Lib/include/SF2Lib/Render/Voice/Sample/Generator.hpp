@@ -72,6 +72,9 @@ public:
   inline Float generate(Float increment, bool canLoop) noexcept
   {
     if (index_.finished()) { return 0_F; }
+    // Only loop if the sample bounds define a usable loop. Otherwise `before()` could wrap to `endLoopPos - 1` when the
+    // loop end is 0, reading before the start of the samples.
+    canLoop = canLoop && bounds_.hasLoop();
     auto whole{index_.whole()};
     auto partial{index_.partial()};
     index_.increment(increment, canLoop);

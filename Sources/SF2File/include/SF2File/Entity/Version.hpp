@@ -18,7 +18,7 @@ public:
 
    @param pos location to read from
    */
-  void load(const IO::Pos& pos) noexcept { pos.readInto(*this); }
+  void load(const IO::Pos& pos) { pos.readInto(*this); }
 
   /**
    Utility for displaying bag contents on output stream.

@@ -78,6 +78,14 @@ struct Pos {
    */
   Pos advance(off_t offset) const noexcept;
 
+  /**
+   Obtain a new Pos value at the same offset whose end is no more than `count` bytes away.
+
+   @param count the maximum number of bytes that may be read from the new Pos
+   @returns new Pos instance
+   */
+  Pos limit(off_t count) const noexcept { return Pos(fd_, pos_, std::min(end_, pos_ + std::max(off_t(0), count))); }
+
   /// @returns true if Pos is invalid
   inline explicit operator bool() const noexcept { return fd_ < 0 || pos_ >= end_; }
 

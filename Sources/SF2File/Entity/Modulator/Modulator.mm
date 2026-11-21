@@ -37,7 +37,7 @@ const std::array<Modulator, Modulator::DefaultsSize> Modulator::defaults {
             Source(Source::GeneralIndex::pitchWheelSensitivity))
 };
 
-Modulator::Modulator(IO::Pos& pos) noexcept
+Modulator::Modulator(IO::Pos& pos)
 {
   pos = pos.readInto(*this);
 }

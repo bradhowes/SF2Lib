@@ -141,6 +141,13 @@ public:
   void dump() const noexcept;
 
 private:
+  /**
+   Check the cross-references between the loaded entity lists.
+
+   @throws LoadResponse::invalidFormat if any index is out of range
+   */
+  void validate() const;
+
   std::string path_;
   int fd_{-1};
   bool loaded_{false};

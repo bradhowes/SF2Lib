@@ -8,7 +8,7 @@
 
 using namespace SF2::Entity;
 
-Instrument::Instrument(IO::Pos& pos) noexcept
+Instrument::Instrument(IO::Pos& pos)
 {
   pos = pos.readInto(*this);
   SF2::Utils::trim_property(achInstName);

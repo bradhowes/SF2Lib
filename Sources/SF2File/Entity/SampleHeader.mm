@@ -8,7 +8,7 @@
 
 using namespace SF2::Entity;
 
-SampleHeader::SampleHeader(IO::Pos& pos) noexcept
+SampleHeader::SampleHeader(IO::Pos& pos)
 {
   // Account for the extra padding by reading twice.
   pos = pos.readInto(&achSampleName, 40);

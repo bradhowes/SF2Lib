@@ -77,6 +77,7 @@ Modulator::makeValueProvider(const EntityMod::Source& source) noexcept
     case GI::channelPressure: return ValueProvider{&ValueProvider::channelPressure};
     case GI::pitchWheel: return ValueProvider{&ValueProvider::pitchWheelValue};
     case GI::pitchWheelSensitivity: return ValueProvider{&ValueProvider::pitchWheelSensitivity};
+    default: return ValueProvider{}; // Unsupported (e.g. 2.04 link, 127) or reserved: no modulation
   }
 }
 

@@ -47,7 +47,7 @@ public:
 
    @param pos location to read from
    */
-  explicit Modulator(IO::Pos& pos) noexcept;
+  explicit Modulator(IO::Pos& pos);
 
   /**
    Construct instance from values. Used to define default mods and support unit tests.

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cstring>
 #include <string>
 
 #include "SF2Util/Types.hpp"
@@ -25,7 +27,8 @@ template <CharArray T> static inline void trim_property(T& property) noexcept {
   std::string s(property, size);
   trim_property(s);
   memset(property, 0, size);
-  memcpy(property, s.data(), s.size());
+  // Always leave room for a terminating NUL: SF2 names fill the whole array when they are 20 characters long.
+  memcpy(property, s.data(), std::min(s.size(), size - 1));
 }
 
 } // end namespace SF2::IO

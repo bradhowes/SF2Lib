@@ -30,7 +30,7 @@ public:
 
    @param pos location to read from
    */
-  explicit Bag(IO::Pos& pos) noexcept;
+  explicit Bag(IO::Pos& pos);
 
   /// @returns first generator index in this collection
   size_t firstGeneratorIndex() const noexcept { return wGenNdx; }

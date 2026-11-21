@@ -83,6 +83,9 @@ public:
   template<class... Args>
   void add(Entity::Generator::Index notGlobalIfPresent, GeneratorCollection&& gens, ModulatorCollection&& mods,
            Args&... values) noexcept {
+    // SF2.01 8.1: generators with an unknown index are ignored, as if they were not in the file.
+    std::erase_if(gens, [](const Entity::Generator::Generator& gen) { return !gen.isValid(); });
+
     // Per spec, disregard zones that have no gens AND mods
     if (gens.empty() && mods.empty()) return;
 

@@ -19,7 +19,7 @@ public:
 
    @param pos location to read from
    */
-  explicit Preset(IO::Pos& pos) noexcept;
+  explicit Preset(IO::Pos& pos);
 
   /**
    Construct a pseudo-Preset that is only used to locate a Preset in a file.

@@ -25,10 +25,13 @@ public:
 
    @param pos location in file to read. Note the given value is updated to point to the the location after the read.
    */
-  explicit Generator(IO::Pos& pos) noexcept;
+  explicit Generator(IO::Pos& pos);
 
-  /// @returns index of the generator as an enumerated type
+  /// @returns index of the generator as an enumerated type. Only meaningful if `isValid()` is true.
   inline Index index() const noexcept { return index_.index(); }
+
+  /// @returns true if the generator index is one defined by the spec. SF2.01 8.1: others must be ignored.
+  inline bool isValid() const noexcept { return index_.value() < SF2::valueOf(Index::numValues); }
 
   /// @returns value configured for the generator
   inline Amount amount() const noexcept { return amount_; }

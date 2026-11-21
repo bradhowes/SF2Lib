@@ -45,7 +45,7 @@ public:
 
    @param pos location in file to read
    */
-  explicit SampleHeader(IO::Pos& pos) noexcept;
+  explicit SampleHeader(IO::Pos& pos);
 
   /**
    Constructor for unit tests.

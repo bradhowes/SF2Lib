@@ -54,7 +54,7 @@ State::configureWith(const Zone::Instrument& instrument) noexcept {
   // Generator state settings
   std::for_each(instrument.generators().cbegin(), instrument.generators().cend(),
                 [this](const Entity::Generator::Generator& generator) {
-    setValue(generator.index(), generator.value());
+    if (generator.isValid()) setValue(generator.index(), generator.value());
   });
 
   // Modulator definitions
@@ -68,7 +68,7 @@ void
 State::configureWith(const Zone::Preset& preset) noexcept {
   std::for_each(preset.generators().cbegin(), preset.generators().cend(),
                 [this](const Entity::Generator::Generator& generator) {
-    if (generator.definition().isAvailableInPreset()) {
+    if (generator.isValid() && generator.definition().isAvailableInPreset()) {
       setAdjustment(generator.index(), generator.value());
     }
   });
@@ -76,7 +76,10 @@ State::configureWith(const Zone::Preset& preset) noexcept {
 
 void
 State::addModulator(const Entity::Modulator::Modulator& modulator) noexcept {
-  if (!modulator.source().isValid()) return;
+  // SF2.01 8.2: modulators with an invalid source, amount source or destination are ignored. A destination with bit 15
+  // set is a 2.04 modulator link, which is not supported, and would otherwise index past the end of `gens_`.
+  if (!modulator.source().isValid() || !modulator.amountSource().isValid()) return;
+  if (SF2::valueOf(modulator.generatorDestination()) >= SF2::valueOf(Index::numValues)) return;
 
   // Per spec, there must only be one modulator with specific <sfModSrcOper, sfModDestOper, and sfModSrcAmtOper>
   // values. If we find a duplicate, then we just update it's amount with the amount taken from the newer modulator and

@@ -20,7 +20,7 @@ pos_{pos}
 }
 
 std::string
-Chunk::extract() const noexcept
+Chunk::extract() const
 {
   std::string buffer(size() + 1, char(0));
   begin().readInto(buffer.data(), size());

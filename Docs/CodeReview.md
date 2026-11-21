@@ -276,3 +276,36 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - Checked that the new tests catch the bug: with `whole_ = 0` put back temporarily, both engine tests and three `IndexTests` fail.
 - Tests updated: three `BoundsTests` assertions (`testStartLoopOffset`, `testStartLoopOffsetCoarse`, `testEndLoopOffsetCoarse`) expected `hasLoop() == false` for a loop starting at sample 0. They now expect `true` because of the rule change above. No hard-coded rendering values changed, since none of the test presets use start offsets.
 - Left over: §3.3 "Loop wrap at high pitch" and "Interpolation at loop end" in `Index::increment` / `Generator::sample` are still open. A start offset inside the loop makes the second more likely to matter, because `before()` can now be asked for `startLoopPos` on the first pass.
+
+**Step 4 — done (2026-11-21). Committed as `73e4fff` "Harden SF2 parsing against malformed files and add a fuzz target."; `make test-macOS`: 308 tests, 0 failures. `make fuzz`: clean for 2 + 5 minutes (~3.2 M inputs) after the fixes below.**
+- **noexcept:** removed from every function on the parse path that throws or calls code that throws: the `Entity::{Preset, Bag, Instrument, SampleHeader, Generator, Modulator}(Pos&)` constructors, `Version::load`, `Chunk::extract`, and the `ChunkItems` constructor and `load`. Malformed files now reach the `try/catch` in `File::load(int)` and return `invalidFormat` instead of terminating. `File::load(int)` also catches `std::exception` (e.g. `bad_alloc`). `Preset::loadSamples` stays `noexcept`: it now catches read errors itself and returns `false`, and `PresetsState` already treats that as "no active preset".
+- **Empty chunks:** `ChunkItems::size()` / `end()` no longer underflow for an empty or missing chunk. A new `hasTerminal()` reports whether the terminal record was there. `load` replaces rather than appends, and rejects a chunk whose size is not a multiple of the entity size (spec 7.2–7.10). `Pos::makeChunkList` rejects a LIST size below 4. `ifil` must be 4 bytes.
+- **File validation:** the new `File::validate()` runs after the RIFF walk. It requires at least one preset, plus terminal records in PHDR, PBAG, INST, IBAG and SHDR. PGEN/PMOD/IGEN/IMOD may be absent as long as no bag refers to them. It checks that PHDR→PBAG and INST→IBAG zone indices and PBAG/IBAG→gen/mod indices never decrease and that terminal records stay in range. Instrument links (7.5) and sampleID links (7.9) must be in range, and each linked sample header must have start ≤ end ≤ the number of samples in `smpl`. `sampleDataBegin_` is now limited to the `smpl` chunk (new `Pos::limit`), so headers can no longer read `pdta` bytes as audio.
+- **Unknown generators (8.1):** `Generator::isValid()`, then `Zone::Collection::add` drops unknown generators before the zone is classified. `State::configureWith` also skips them as a second line of defence. `Generator::dump` handles them.
+- **Invalid modulators (8.2):** `State::addModulator` ignores a modulator with an invalid amount source or a destination ≥ 59 (including the 2.04 link bit 15). `Modulator::makeValueProvider` has a `default:` case (inactive provider), which removes the UB for source 127.
+- **Names:** `trim_property(char[N])` always leaves a terminating NUL, so a 20-character name is truncated to 19. `std::isspace` / `std::isprint` now get `unsigned char`.
+- **Presets without samples:** `Preset::loadSamples` returns early for a preset whose zones have no samples (`maxEnd − minStart` underflowed). The padding after the last sample is now zero-filled instead of read from past the end of `smpl`.
+- **Found by the fuzzer and fixed (render path, triggered by untrusted sample headers):** (1) A sample rate of 0 made `Pitch::configure` convert `log2(0) = −inf` to `int`, followed by integer overflows. It is now clamped to 400 Hz, per 7.10 ("the nearest practical value should be used"). (2) A heap-buffer-overflow read in `Generator::before()`: with `sampleModes` set but no usable loop (loop end 0 < loop start), cubic interpolation wrapped to `endLoopPos − 1` = −1. `Generator::generate` now only loops when `Bounds::hasLoop()`.
+- **New test utility:** `Sources/TestUtils/SF2Builder.hpp`, a header-only plain C++ builder for small SF2 files. `minimal()` gives one preset → one instrument → one looped 441 Hz sine.
+- **Tests added** in the new `MalformedFileTests` (19 tests), through both `File::load(fd)` and `Engine::loadFileAndPreset` + note-on:
+  - the minimal file loads and plays; every truncation is rejected;
+  - missing required chunks and a file with only the terminal preset are rejected, while missing modulator lists are accepted;
+  - wrong chunk-size multiples, a bad `ifil` size and a LIST size below 4 are rejected;
+  - out-of-range instrument and sample links, samples outside `smpl`, and five kinds of bad zone index are rejected;
+  - unknown generators (59, 60, 1000, 0xFFFF) and invalid modulators (bad destination, link destination, bad amount source, source 127) are ignored: the rendering is identical to the clean file, and a non-vacuity check confirms that a valid CC→attenuation modulator does change it;
+  - 20-character names are terminated and Latin-1 names are sanitised;
+  - a preset with no samples is silent;
+  - the two fuzz findings (sample rate 0 is identical to 400 Hz; an invalid loop is identical to no loop);
+  - a deterministic 300-iteration random-corruption test that loads and plays each mutated file.
+- **Checked that the tests catch the bugs:** with the step's source changes stashed, 7 of the new tests fail, and the process aborts on a libc++ bounds assertion in `testUnknownGeneratorsAreIgnored`. Each fuzz regression test also aborts with its fix removed.
+- **Fuzz target:** `Fuzz/SF2FileFuzzer.mm` (libFuzzer + ASan + UBSan, `CHECKED_VECTOR_INDEXING=1`). It loads the input and, if that succeeds, builds presets, loads samples and renders voices. `Fuzz/MakeSeeds.cpp` writes three seeds. `make fuzz [FUZZ_TIME=s]` / `make fuzz-build` need Homebrew LLVM, because Apple clang ships without the libFuzzer runtime. Output goes to `.fuzz/` (added to `.gitignore`). `Fuzz/README.md` describes the target.
+- **Also changed:** added the missing `#include <atomic>` to `PresetCollection.hpp`, which Homebrew's libc++ needs.
+- No hard-coded rendering values changed.
+- **Left over:**
+  - `Source::isValid` still accepts general source 127. The `default:` case makes it harmless, but rejecting it belongs to step 7.
+  - Sample headers marked as ROM samples are checked against `smpl` like any other, so a ROM-based file with out-of-range offsets is rejected.
+  - The `ifil` major version is not checked.
+  - `std::sort` of presets is still unstable (§3.3).
+  - The `File::load()` / `Parser::parse` fd leaks belong to step 5.
+  - `Zone::Zone` and `Zone::resourceLink` still `throw std::runtime_error`. Neither throw is reachable with validated input, but they are still exceptions in code reached from the render thread.
+  - The fuzzer does not cover MIDI/SysEx input to `Engine::doMIDIEvent`. That would be a second target, after the SysEx fixes in §3.2.

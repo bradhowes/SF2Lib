@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "SF2File/IO/ChunkItems.hpp"
+#include "SF2File/IO/File.hpp"
 
 using namespace SF2::IO;
 
@@ -11,4 +12,10 @@ void
 ChunkItemsSupport::beginDump(size_t size)
 {
   std::cout << " count: " << size << std::endl;
+}
+
+void
+ChunkItemsSupport::throwInvalidFormat()
+{
+  throw File::LoadResponse::invalidFormat;
 }

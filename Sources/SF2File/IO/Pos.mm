@@ -51,6 +51,8 @@ Pos::makeChunkList() const
   if (static_cast<size_t>(available()) < sizeof(buffer)) throw File::LoadResponse::invalidFormat;
   if (Pos::seek(fd_, off_t(pos_), SEEK_SET) != off_t(pos_)) throw File::LoadResponse::invalidFormat;
   if (Pos::read(fd_, buffer, sizeof(buffer)) != sizeof(buffer)) throw File::LoadResponse::invalidFormat;
+  // The LIST size includes the 4-byte kind tag that we have just read.
+  if (buffer[1] < 4) throw File::LoadResponse::invalidFormat;
   auto size = buffer[1] - 4;
   return ChunkList(Tag(buffer[0]), size, Tag(buffer[2]), advance(sizeof(buffer)));
 }

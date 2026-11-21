@@ -8,7 +8,7 @@
 
 using namespace SF2::Entity;
 
-Preset::Preset(IO::Pos& pos) noexcept
+Preset::Preset(IO::Pos& pos)
 {
   // Account for the extra padding by reading twice.
   pos = pos.readInto(&achPresetName, 20 + sizeof(uint16_t) * 3);

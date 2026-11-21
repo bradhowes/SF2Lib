@@ -64,7 +64,10 @@ File::load(int fd) noexcept
         auto chunk = p1.makeChunk();
         p1 = chunk.advance();
         switch (chunk.tag().toTags()) {
-          case Tags::ifil: soundFontVersion_.load(chunk.begin()); break;
+          case Tags::ifil:
+            if (chunk.size() != 4) throw File::LoadResponse::invalidFormat;
+            soundFontVersion_.load(chunk.begin());
+            break;
           case Tags::isng: soundEngine_ = chunk.extract(); break;
           case Tags::inam: embeddedName_ = chunk.extract(); break;
           case Tags::icrd: embeddedCreationDate_ = chunk.extract(); break;
@@ -81,13 +84,20 @@ File::load(int fd) noexcept
           case Tags::igen: instrumentZoneGenerators_.load(chunk); break;
           case Tags::imod: instrumentZoneModulators_.load(chunk); break;
           case Tags::shdr: sampleHeaders_.load(chunk); break;
-          case Tags::smpl: sampleDataBegin_ = chunk.begin(); break;
+          case Tags::smpl:
+            // Limit reads to the `smpl` chunk so that sample headers cannot reach into `pdta` (or past the file end).
+            sampleDataBegin_ = chunk.begin().limit(off_t(chunk.size()));
+            break;
           default:
             break;
         }
       }
     }
+    validate();
   } catch (File::LoadResponse) {
+    return LoadResponse::invalidFormat;
+  } catch (const std::exception&) {
+    // For instance, std::bad_alloc from a chunk that claims to hold more entities than we can allocate.
     return LoadResponse::invalidFormat;
   }
 
@@ -101,6 +111,63 @@ File::load(int fd) noexcept
 
   loaded_ = true;
   return LoadResponse::ok;
+}
+
+namespace {
+
+[[noreturn]] void reject() { throw File::LoadResponse::invalidFormat; }
+
+/**
+ Validate the zone indices of a PHDR/INST collection and its PBAG/IBAG collection. Each owner's zones are the bags in
+ [firstZoneIndex, next owner's firstZoneIndex), and each bag's generators and modulators run up to the next bag's
+ indices, so the indices must not decrease and the terminal records must not point past the end of the next list.
+ */
+template <typename Owners>
+void validateZones(const Owners& owners, const ChunkItems<SF2::Entity::Bag>& bags, size_t generatorCount,
+                   size_t modulatorCount) {
+  for (size_t index = 0; index < owners.size(); ++index) {
+    if (owners[index + 1].firstZoneIndex() < owners[index].firstZoneIndex()) reject();
+  }
+  if (owners[owners.size()].firstZoneIndex() > bags.size()) reject();
+
+  for (size_t index = 0; index < bags.size(); ++index) {
+    if (bags[index + 1].firstGeneratorIndex() < bags[index].firstGeneratorIndex()) reject();
+    if (bags[index + 1].firstModulatorIndex() < bags[index].firstModulatorIndex()) reject();
+  }
+  if (bags[bags.size()].firstGeneratorIndex() > generatorCount) reject();
+  if (bags[bags.size()].firstModulatorIndex() > modulatorCount) reject();
+}
+
+} // namespace
+
+void
+File::validate() const
+{
+  using Entity::Generator::Index;
+
+  // SF2.01 7.2, 7.6, 7.10: there must be at least one preset, and the PHDR, PBAG, INST, IBAG and SHDR lists must each
+  // end with a terminal record. The generator and modulator lists may be empty as long as no bag refers to them.
+  if (presets_.empty() || !presetZones_.hasTerminal() || !instruments_.hasTerminal() ||
+      !instrumentZones_.hasTerminal() || !sampleHeaders_.hasTerminal()) reject();
+
+  validateZones(presets_, presetZones_, presetZoneGenerators_.size(), presetZoneModulators_.size());
+  validateZones(instruments_, instrumentZones_, instrumentZoneGenerators_.size(), instrumentZoneModulators_.size());
+
+  // SF2.01 7.5: an instrument generator whose value is not a valid instrument index means the file should be rejected.
+  for (const auto& generator : presetZoneGenerators_) {
+    if (generator.index() == Index::instrument && generator.amount().unsignedAmount() >= instruments_.size()) reject();
+  }
+
+  // SF2.01 7.9: likewise for sampleID generators and sample headers. The referenced sample must also lie within the
+  // `smpl` chunk, since its samples are read from there.
+  auto sampleCount = size_t(sampleDataBegin_.available()) / sizeof(int16_t);
+  for (const auto& generator : instrumentZoneGenerators_) {
+    if (generator.index() != Index::sampleID) continue;
+    auto sampleIndex = generator.amount().unsignedAmount();
+    if (sampleIndex >= sampleHeaders_.size()) reject();
+    const auto& header = sampleHeaders_[sampleIndex];
+    if (header.startIndex() > header.endIndex() || header.endIndex() > sampleCount) reject();
+  }
 }
 
 void

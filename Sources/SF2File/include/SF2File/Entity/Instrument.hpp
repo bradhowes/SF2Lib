@@ -21,7 +21,7 @@ public:
 
    @param pos location in file to read
    */
-  explicit Instrument(IO::Pos& pos) noexcept;
+  explicit Instrument(IO::Pos& pos);
 
   /// @returns the name of the instrument
   std::string name() const noexcept;
