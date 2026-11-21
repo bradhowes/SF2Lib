@@ -246,7 +246,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - Tests added: `EngineTests::testMIDIPitchBendDecodesFull14BitRange`, `testMIDIPitchBendCentreIsNeutral` (renders with/without `E0 00 40` and requires identical output), `testVolumeEnvelopeSustainLevelIsAppliedInDecibels` (sustain 120 cB → RMS ratio 0.2512 ± 2 %), and `EnvelopeTests::testVolumeEnvelopeSustainRoundTripsThroughVoiceGainMapping`.
 - Expect golden-sample assertions in rendering tests (`EngineTests`, `VoiceTests`, etc.) to change wherever a preset has a non-zero `sustainVolEnv`. Those values encoded the old, wrong gain and need to be regenerated from the `dumpSamples` output.
 
-**Step 2 — done (2026-11-21). Not yet committed. `make test-macOS`: 267 tests, 0 failures.**
+**Step 2 — done (2026-11-21). Committed as `6ee5433` "Fix sustain/sostenuto pedal release logic."; `make test-macOS`: 267 tests, 0 failures.**
 - `Voice` now tracks two separate things: `keyDown_` (the physical key, cleared by every note-off) and the new `released_` (the envelopes have entered release). `releaseKey` always clears `keyDown_`, and either sets `postponedRelease_` (when held by sustain, or by sostenuto with `sostenutoActive_`) or releases the envelopes. A repeated note-off on a voice that is already released no longer restarts its release stage.
 - New `Voice::pedalReleased(PedalState)`: clears `sostenutoActive_` once sostenuto is up, then releases the voice only if `postponedRelease_` is set and no remaining pedal holds it. `Engine::applyPedals_RT` calls this instead of `releaseKey`, so lifting a pedal no longer cuts off held keys.
 - `Voice::start()` resets `released_`, `postponedRelease_` and `sostenutoActive_`, so a recycled voice no longer inherits pedal state.
