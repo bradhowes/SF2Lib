@@ -48,12 +48,16 @@ public:
    routine *must* ensure that the state is properly setup to do so, just as if it was created from scratch.
 
    @param samples the samples to use for rendering
+   */
+  void configure(std::shared_ptr<Zone::NormalizedSampleSpan>&& samples) noexcept { samples_ = samples; }
+
+  /**
+   Begin rendering samples from the generator. The sample bounds are calculated here rather than in `configure` so that
+   they reflect every generator value applied to the voice before it starts, including live parameter overrides.
+
    @param state the state configuration for the voice
    */
-  void configure(std::shared_ptr<Zone::NormalizedSampleSpan>&& samples, const State& state) noexcept;
-
-  /// Begin rendering samples from the generator.
-  void start() noexcept { index_.start(); }
+  void start(const State& state) noexcept;
 
   /// Tell the generator that there will be no more samples generated.
   void stop() noexcept { index_.stop(); }

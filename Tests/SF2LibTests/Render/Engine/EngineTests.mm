@@ -2382,6 +2382,39 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertLessThan(sweptRMS, 1.05 * openRMS);
 }
 
+- (void)testStartAddressOffsetChangesRenderedNote
+{
+  // startAddrsOffset (gen 0) set as an AU parameter must change where playback begins. Previously the index always
+  // started at 0, and the bounds were computed before live parameters were applied, so this had no effect.
+  const auto path = self.contexts->context0.path();
+  auto reference = renderNoteWithGenerators(path, {});
+  auto offset = renderNoteWithGenerators(path, {{Index::startAddressOffset, 2'000}});
+  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
+  XCTAssertFalse(reference == offset);
+
+  // Setting it back to zero restores the original rendering exactly.
+  auto restored = renderNoteWithGenerators(path, {{Index::startAddressOffset, 0}});
+  XCTAssertTrue(reference == restored);
+}
+
+- (void)testStartAddressCoarseOffsetPastEndOfSampleIsSilent
+{
+  // startAddrsCoarseOffset (gen 4) of 1000 x 32768 samples is far beyond any sample in the file. The start clamps to
+  // the end of the sample, so the note produces no audio and its voice finishes straight away.
+  const auto path = self.contexts->context0.path();
+  auto harness{TestEngineHarness{48000.0}};
+  harness.load(path, 0);
+  harness.setParameter(Index::startAddressCoarseOffset, 1'000);
+  auto mixer{harness.createMixer(0.25)};
+  harness.sendNoteOn(60, 127);
+  XCTAssertGreaterThan(harness.engine().activeVoiceCount(), size_t(0));
+  harness.renderToEnd(mixer);
+  const AUValue* data = harness.dryBuffer().floatChannelData[0];
+  std::vector<AUValue> samples(data, data + harness.duration());
+  XCTAssertEqual(rms(samples, 0, samples.size()), 0.0);
+  XCTAssertEqual(harness.engine().activeVoiceCount(), size_t(0));
+}
+
 - (void)testSostenutoPedalTapDoesNotReleaseHeldKey
 {
   const auto path = self.contexts->context1.path();

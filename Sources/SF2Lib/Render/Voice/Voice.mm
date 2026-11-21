@@ -28,7 +28,7 @@ Voice::configure(const State::Config& config, const MIDI::ChannelState& channelS
   os_signpost_interval_begin(log_, configSignpost_, "start");
 
   state_.prepareForVoice(config, channelState);
-  sampleGenerator_.configure(config.samples(), state_);
+  sampleGenerator_.configure(config.samples());
   pitch_.configure(config.samples()->header());
   filter_.reset();
 
@@ -67,7 +67,7 @@ Voice::start() noexcept
   modulatorLFO_.configure(state_);
   vibratoLFO_.configure(state_);
 
-  sampleGenerator_.start();
+  sampleGenerator_.start(state_);
 
   os_signpost_interval_end(log_, startSignpost_, "start");
 }

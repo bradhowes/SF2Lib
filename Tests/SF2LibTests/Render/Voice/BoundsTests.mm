@@ -169,7 +169,8 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
     XCTAssertEqual(bounds.startLoopPos(), size_t(0));
     XCTAssertEqual(bounds.endLoopPos(), size_t(90));
     XCTAssertEqual(bounds.endPos(), size_t(128));
-    XCTAssertEqual(bounds.hasLoop(), false);
+    // A loop may begin at the first sample played; only an empty or out-of-range loop is invalid.
+    XCTAssertEqual(bounds.hasLoop(), true);
   }
   self.sst.setValue(state, SF2::Entity::Generator::Index::startLoopAddressOffset, 80);
   {
@@ -217,7 +218,8 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
     XCTAssertEqual(bounds.startLoopPos(), size_t(0));
-    XCTAssertEqual(bounds.hasLoop(), false);
+    // A loop may begin at the first sample played; only an empty or out-of-range loop is invalid.
+    XCTAssertEqual(bounds.hasLoop(), true);
   }
 }
 
@@ -292,7 +294,8 @@ static SampleHeader sampleHeaderLooped{11, 139, 54, 101, 48'000, 0, 0};
   {
     auto bounds = Bounds::make(sampleHeaderLooped, state);
     XCTAssertEqual(bounds.startLoopPos(), size_t(0));
-    XCTAssertEqual(bounds.hasLoop(), false);
+    // A loop may begin at the first sample played; only an empty or out-of-range loop is invalid.
+    XCTAssertEqual(bounds.hasLoop(), true);
   }
 }
 

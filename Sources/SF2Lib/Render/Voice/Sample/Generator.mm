@@ -5,9 +5,9 @@
 using namespace SF2::Render::Voice::Sample;
 
 void
-Generator::configure(std::shared_ptr<Zone::NormalizedSampleSpan>&& samples, const State& state) noexcept
+Generator::start(const State& state) noexcept
 {
-  samples_ = samples;
   bounds_ = Bounds::make(samples_->header(), state);
   index_.configure(bounds_);
+  index_.start();
 }

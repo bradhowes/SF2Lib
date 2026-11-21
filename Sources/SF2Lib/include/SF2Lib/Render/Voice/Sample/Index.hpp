@@ -27,9 +27,10 @@ public:
    */
   void configure(const Bounds& bounds) noexcept { bounds_ = bounds; }
 
-  /// Start rendering.
+  /// Start rendering at the first sample given by the bounds, which includes the startAddrsOffset and
+  /// startAddrsCoarseOffset generators (SF2.01 8.1.2 #0, #4).
   void start() noexcept {
-    whole_ = 0;
+    whole_ = bounds_.startPos();
     partial_ = 0_F;
     looped_ = false;
   }
