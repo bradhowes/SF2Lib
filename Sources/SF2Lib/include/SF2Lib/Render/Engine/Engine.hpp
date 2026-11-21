@@ -525,6 +525,7 @@ private:
 
   void applySostenutoPedal_RT() noexcept;
 
+  /// Release the voices whose key-up was postponed by a pedal that has just been lifted. Held keys keep sounding.
   void applyPedals_RT() noexcept;
 
   Float sampleRate_;

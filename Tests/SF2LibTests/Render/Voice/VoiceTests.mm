@@ -763,15 +763,37 @@ using namespace SF2::Render::Voice::State;
   voice.useSostenuto();
   XCTAssertTrue(voice.isKeyDown());
   voice.renderSample();
-  voice.releaseKey({1, {true, true, true}});
-  voice.renderSample();
-  XCTAssertTrue(voice.isKeyDown());
-  voice.releaseKey({0, {false, true, false}});
-  voice.renderSample();
-  XCTAssertTrue(voice.isKeyDown());
-  voice.releaseKey({0, {false, false, false}});
+
+  // Key up while sostenuto holds the voice: release is postponed.
+  voice.releaseKey({1, {false, true, false}});
   voice.renderSample();
   XCTAssertFalse(voice.isKeyDown());
+  XCTAssertTrue(voice.isReleasePostponed());
+  XCTAssertFalse(voice.isReleased());
+
+  // Sustain going up while sostenuto is still down does not release the voice.
+  voice.pedalReleased({false, true, false});
+  voice.renderSample();
+  XCTAssertTrue(voice.isReleasePostponed());
+  XCTAssertFalse(voice.isReleased());
+
+  // Sostenuto going up releases it.
+  voice.pedalReleased({false, false, false});
+  voice.renderSample();
+  XCTAssertFalse(voice.isReleasePostponed());
+  XCTAssertTrue(voice.isReleased());
+}
+
+- (void)testSostenutoDoesNotHoldVoiceThatWasNotCaptured {
+  auto state = self.contexts->context0.makeVoiceCollection(0, 60);
+  auto& voice = state[0];
+  voice.start();
+  while (voice.renderSample() == 0.0) ;
+
+  // Sostenuto is down but this voice was not held when it went down, so key up releases it straight away.
+  voice.releaseKey({1, {false, true, false}});
+  XCTAssertFalse(voice.isReleasePostponed());
+  XCTAssertTrue(voice.isReleased());
 }
 
 - (void)testSustain {
@@ -780,15 +802,80 @@ using namespace SF2::Render::Voice::State;
   voice.start();
   XCTAssertTrue(voice.isKeyDown());
   while (voice.renderSample() == 0.0) ;
+
   voice.releaseKey({1, {true, false, false}});
   voice.renderSample();
-  XCTAssertTrue(voice.isKeyDown());
-  voice.releaseKey({0, {true, true, true}});
-  voice.renderSample();
-  XCTAssertTrue(voice.isKeyDown());
-  voice.releaseKey({0, {false, true, true}});
-  voice.renderSample();
   XCTAssertFalse(voice.isKeyDown());
+  XCTAssertTrue(voice.isReleasePostponed());
+  XCTAssertFalse(voice.isReleased());
+
+  // Sostenuto going up while sustain is still down does not release the voice.
+  voice.pedalReleased({true, false, false});
+  voice.renderSample();
+  XCTAssertTrue(voice.isReleasePostponed());
+  XCTAssertFalse(voice.isReleased());
+
+  voice.pedalReleased({false, false, false});
+  voice.renderSample();
+  XCTAssertFalse(voice.isReleasePostponed());
+  XCTAssertTrue(voice.isReleased());
+}
+
+- (void)testPedalReleaseDoesNotReleaseHeldKey {
+  auto state = self.contexts->context0.makeVoiceCollection(0, 60);
+  auto& voice = state[0];
+  voice.start();
+  while (voice.renderSample() == 0.0) ;
+
+  // Sustain (and sostenuto) went down and came back up while the key stayed down.
+  voice.useSostenuto();
+  voice.pedalReleased({false, false, false});
+  voice.renderSample();
+  XCTAssertTrue(voice.isKeyDown());
+  XCTAssertFalse(voice.isReleasePostponed());
+  XCTAssertFalse(voice.isReleased());
+
+  // The real note-off still releases it.
+  voice.releaseKey({1, {false, false, false}});
+  XCTAssertFalse(voice.isKeyDown());
+  XCTAssertTrue(voice.isReleased());
+}
+
+- (void)testSostenutoIsForgottenWhenPedalLifts {
+  auto state = self.contexts->context0.makeVoiceCollection(0, 60);
+  auto& voice = state[0];
+  voice.start();
+  while (voice.renderSample() == 0.0) ;
+
+  // Captured by sostenuto, which then lifts while the key is still down.
+  voice.useSostenuto();
+  voice.pedalReleased({false, false, false});
+
+  // A later sostenuto press that did not capture this voice must not hold it.
+  voice.releaseKey({1, {false, true, false}});
+  XCTAssertFalse(voice.isReleasePostponed());
+  XCTAssertTrue(voice.isReleased());
+}
+
+- (void)testStartClearsPedalState {
+  auto state = self.contexts->context0.makeVoiceCollection(0, 60);
+  auto& voice = state[0];
+  voice.start();
+  while (voice.renderSample() == 0.0) ;
+  voice.useSostenuto();
+  voice.releaseKey({1, {true, true, false}});
+  XCTAssertTrue(voice.isReleasePostponed());
+
+  // Recycle the voice for a new note. It must not inherit sostenuto or the postponed release from the last one.
+  voice.start();
+  XCTAssertTrue(voice.isKeyDown());
+  XCTAssertFalse(voice.isReleasePostponed());
+  XCTAssertFalse(voice.isReleased());
+  while (voice.renderSample() == 0.0) ;
+
+  voice.releaseKey({1, {false, true, false}});
+  XCTAssertFalse(voice.isReleasePostponed());
+  XCTAssertTrue(voice.isReleased());
 }
 
 @end

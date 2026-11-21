@@ -98,8 +98,14 @@ public:
   /// @returns true if this voice is still rendering interesting samples
   bool isActive() const noexcept { return active_; }
 
-  /// @returns true if this voice has its key down
+  /// @returns true if the MIDI key that started this voice is still physically held down
   bool isKeyDown() const noexcept { return keyDown_; }
+
+  /// @returns true if the voice's key-up has been deferred because a sustain or sostenuto pedal is holding it
+  bool isReleasePostponed() const noexcept { return postponedRelease_; }
+
+  /// @returns true if the envelopes have been told that the note was released
+  bool isReleased() const noexcept { return released_; }
 
   /// @returns true if this voice is done processing and will no longer render meaningful samples.
   bool isDone() const noexcept { return !isActive(); }
@@ -116,12 +122,21 @@ public:
   };
 
   /**
-   Signal the envelopes that the key is no longer pressed, transitioning to release phase. This is always the result of
-   a MIDI event -- usually a note-off event, but pedal activity can also trigger it.
+   Record that the key is no longer pressed. If a pedal is holding the voice (sustain, or sostenuto when this voice was
+   held at the time the sostenuto pedal went down) the release is postponed until `pedalReleased` says otherwise.
+   Otherwise the envelopes transition to their release phase.
 
    @param releaseKeyState -- engine state that may affect if/when the key release actually takes place.
    */
   void releaseKey(const ReleaseKeyState& releaseKeyState) noexcept;
+
+  /**
+   Notification that a sustain or sostenuto pedal was released. Voices whose release was postponed and that are no
+   longer held by any pedal transition to their release phase. Voices whose key is still down are not affected.
+
+   @param pedalState -- the pedal state after the change
+   */
+  void pedalReleased(const MIDI::ChannelState::PedalState& pedalState) noexcept;
 
   /// @returns looping mode of the sample being rendered
   LoopingMode loopingMode() const noexcept;
@@ -129,7 +144,7 @@ public:
   /// @returns true if the voice can enter a loop if it is available
   inline bool canLoop() const noexcept {
     return ((loopingMode_ == LoopingMode::activeEnvelope && volumeEnvelope_.isActive()) ||
-            (loopingMode_ == LoopingMode::duringKeyPress && keyDown_));
+            (loopingMode_ == LoopingMode::duringKeyPress && !released_));
   }
 
   /**
@@ -236,6 +251,15 @@ public:
   void useSostenuto() noexcept { sostenutoActive_ = true; }
 
 private:
+
+  /// @returns true if the given pedal state holds this voice after its key is released
+  bool isHeldByPedal(const MIDI::ChannelState::PedalState& pedalState) const noexcept {
+    return pedalState.sustainPedalActive || (pedalState.sostenutoPedalActive && sostenutoActive_);
+  }
+
+  /// Move the envelopes into their release phase.
+  void releaseEnvelopes() noexcept;
+
   State::State state_{};
   LoopingMode loopingMode_{LoopingMode::none};
   Sample::Pitch pitch_{state_};
@@ -249,6 +273,7 @@ private:
 
   bool active_{false};
   bool keyDown_{false};
+  bool released_{false};
   bool postponedRelease_{false};
   bool sostenutoActive_{false};
 

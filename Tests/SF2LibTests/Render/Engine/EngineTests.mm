@@ -51,6 +51,30 @@ static std::vector<AUValue> renderNoteWithVolumeSustain(const std::string& path,
   return std::vector<AUValue>(data, data + harness.duration());
 }
 
+/// A 3-byte MIDI message to send just before the render block with the given index.
+using TimedMIDIEvents = std::vector<std::pair<AVAudioFrameCount, std::array<uint8_t, 3>>>;
+
+/// Render 1 second of preset 0 of the given file, sending each MIDI message at its render-block index. Events must be in
+/// render-block order. Returns the left channel of the dry bus.
+static std::vector<AUValue> renderMIDISequence(const std::string& path, const TimedMIDIEvents& events)
+{
+  auto harness{TestEngineHarness{48000.0}};
+  harness.load(path, 0);
+  auto mixer{harness.createMixer(1.0)};
+  for (const auto& [renderIndex, bytes] : events) {
+    harness.renderUntil(mixer, renderIndex);
+    harness.sendRaw(bytes);
+  }
+  harness.renderToEnd(mixer);
+  const AUValue* data = harness.dryBuffer().floatChannelData[0];
+  return std::vector<AUValue>(data, data + harness.duration());
+}
+
+static std::array<uint8_t, 3> noteOnBytes(uint8_t key) { return {0x90, key, 100}; }
+static std::array<uint8_t, 3> noteOffBytes(uint8_t key) { return {0x80, key, 0}; }
+static std::array<uint8_t, 3> sustainBytes(bool down) { return {0xB0, 64, uint8_t(down ? 127 : 0)}; }
+static std::array<uint8_t, 3> sostenutoBytes(bool down) { return {0xB0, 66, uint8_t(down ? 127 : 0)}; }
+
 /// RMS of samples in [begin, end)
 static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 {
@@ -2216,6 +2240,72 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   auto expected = std::pow(10.0, -120.0 / 200.0);
   // Allow ~2% for integer-centibel rounding when modLFO-to-volume is also active in the preset.
   XCTAssertEqualWithAccuracy(reducedRMS / fullRMS, expected, expected * 0.02);
+}
+
+- (void)testSustainPedalTapDoesNotReleaseHeldKey
+{
+  // Hold a key, tap the sustain pedal down and up, then release the key. The tap must have no audible effect: the
+  // rendering must match one with no pedal at all. Previously, lifting the pedal released every voice, including
+  // ones whose key was still down.
+  const auto path = self.contexts->context1.path();
+  auto reference = renderMIDISequence(path, {{0, noteOnBytes(60)}, {60, noteOffBytes(60)}});
+  auto tapped = renderMIDISequence(path, {{0, noteOnBytes(60)}, {10, sustainBytes(true)}, {20, sustainBytes(false)},
+    {60, noteOffBytes(60)}});
+  auto releasedAtTap = renderMIDISequence(path, {{0, noteOnBytes(60)}, {20, noteOffBytes(60)}});
+
+  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
+  XCTAssertTrue(reference == tapped);
+
+  // Guard against a vacuous test: releasing the note when the pedal lifts (the old behaviour) sounds different.
+  XCTAssertFalse(reference == releasedAtTap);
+}
+
+- (void)testSustainPedalReleasesPostponedNoteWhenLifted
+{
+  // A note released while the sustain pedal is down keeps sounding until the pedal lifts. It then sounds exactly like a
+  // note released at the time the pedal lifted.
+  const auto path = self.contexts->context1.path();
+  auto reference = renderMIDISequence(path, {{0, noteOnBytes(60)}, {40, noteOffBytes(60)}});
+  auto sustained = renderMIDISequence(path, {{0, noteOnBytes(60)}, {5, sustainBytes(true)}, {20, noteOffBytes(60)},
+    {40, sustainBytes(false)}});
+  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
+  XCTAssertTrue(reference == sustained);
+}
+
+- (void)testSustainPedalLiftOnlyReleasesNotesWhoseKeysAreUp
+{
+  // Two notes under the sustain pedal: 60 is released while the pedal is down, 64 stays held. Lifting the pedal releases
+  // 60 only. 64 sounds until its own note-off.
+  const auto path = self.contexts->context1.path();
+  auto reference = renderMIDISequence(path, {{0, noteOnBytes(60)}, {0, noteOnBytes(64)}, {30, noteOffBytes(60)},
+    {60, noteOffBytes(64)}});
+  auto sustained = renderMIDISequence(path, {{0, noteOnBytes(60)}, {0, noteOnBytes(64)}, {5, sustainBytes(true)},
+    {15, noteOffBytes(60)}, {30, sustainBytes(false)}, {60, noteOffBytes(64)}});
+  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
+  XCTAssertTrue(reference == sustained);
+}
+
+- (void)testSostenutoPedalHoldsOnlyCapturedNotes
+{
+  // 60 is down when sostenuto goes down, so it is captured. 64 starts afterwards and must release normally. 60 is
+  // released while the pedal is down, so it sounds until the pedal lifts.
+  const auto path = self.contexts->context1.path();
+  auto reference = renderMIDISequence(path, {{0, noteOnBytes(60)}, {10, noteOnBytes(64)}, {20, noteOffBytes(64)},
+    {40, noteOffBytes(60)}});
+  auto held = renderMIDISequence(path, {{0, noteOnBytes(60)}, {5, sostenutoBytes(true)}, {10, noteOnBytes(64)},
+    {20, noteOffBytes(64)}, {25, noteOffBytes(60)}, {40, sostenutoBytes(false)}});
+  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
+  XCTAssertTrue(reference == held);
+}
+
+- (void)testSostenutoPedalTapDoesNotReleaseHeldKey
+{
+  const auto path = self.contexts->context1.path();
+  auto reference = renderMIDISequence(path, {{0, noteOnBytes(60)}, {60, noteOffBytes(60)}});
+  auto tapped = renderMIDISequence(path, {{0, noteOnBytes(60)}, {10, sostenutoBytes(true)},
+    {20, sostenutoBytes(false)}, {60, noteOffBytes(60)}});
+  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
+  XCTAssertTrue(reference == tapped);
 }
 
 @end

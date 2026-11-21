@@ -180,7 +180,7 @@ void
 Engine::applyPedals_RT() noexcept
 {
   visitActiveVoice_RT([](Voice& voice, const Voice::ReleaseKeyState& releaseKeyState) {
-    voice.releaseKey(releaseKeyState);
+    voice.pedalReleased(releaseKeyState.pedalState);
   });
 }
 

@@ -52,6 +52,11 @@ Voice::start() noexcept
 
   active_ = true;
   keyDown_ = true;
+  released_ = false;
+
+  // Voices are recycled, so clear any pedal state left over from the previous note.
+  postponedRelease_ = false;
+  sostenutoActive_ = false;
 
   loopingMode_ = loopingMode();
   initialAttenuation_ = DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));
@@ -70,13 +75,36 @@ Voice::start() noexcept
 void
 Voice::releaseKey(const ReleaseKeyState& releaseKeyState) noexcept
 {
-  if (releaseKeyState.pedalState.sustainPedalActive ||
-      (releaseKeyState.pedalState.sostenutoPedalActive && sostenutoActive_)) {
+  keyDown_ = false;
+  if (released_) return;
+  if (isHeldByPedal(releaseKeyState.pedalState)) {
     postponedRelease_ = true;
     os_log_info(log_, "releaseKey - postponed due to pedal state");
   } else {
-    keyDown_ = false;
-    volumeEnvelope_.noteReleased();
-    modulatorEnvelope_.noteReleased();
+    releaseEnvelopes();
   }
+}
+
+void
+Voice::pedalReleased(const MIDI::ChannelState::PedalState& pedalState) noexcept
+{
+  // Sostenuto only holds the notes that were down when the pedal went down. Once it comes up, forget them so that a
+  // later sostenuto press does not hold this voice again.
+  if (!pedalState.sostenutoPedalActive) sostenutoActive_ = false;
+
+  // Only voices whose key-up was postponed by a pedal are released. A voice whose key is still physically down never
+  // has `postponedRelease_` set, so it keeps sounding until its own note-off.
+  if (postponedRelease_ && !isHeldByPedal(pedalState)) {
+    os_log_info(log_, "pedalReleased - applying postponed release");
+    releaseEnvelopes();
+  }
+}
+
+void
+Voice::releaseEnvelopes() noexcept
+{
+  postponedRelease_ = false;
+  released_ = true;
+  volumeEnvelope_.noteReleased();
+  modulatorEnvelope_.noteReleased();
 }
