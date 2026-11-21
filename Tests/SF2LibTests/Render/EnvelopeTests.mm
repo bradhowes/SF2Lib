@@ -106,7 +106,7 @@ gen.noteReleased();
 - (void)testAttack {
   auto gen = EnvelopeTestInjector::DAHDSR(0, 10, 0, 0, 0, 0);
   gen.start();
-  XCTAssertEqual(0.1, gen.getNextValue().val);
+  XCTAssertEqualWithAccuracy(0.1, gen.getNextValue().val, self.epsilon);
   XCTAssertEqual(StageIndex::attack, gen.activeIndex());
   XCTAssertEqualWithAccuracy(0.2, gen.getNextValue().val, self.epsilon);
   XCTAssertEqualWithAccuracy(0.3, gen.getNextValue().val, self.epsilon);

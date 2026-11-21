@@ -45,7 +45,7 @@ Pitch::configure(const Entity::SampleHeader& header) noexcept
 
   // SF2.01 7.10: "A value of zero is illegal. If an illegal or impractical value is encountered, the nearest practical
   // value should be used." The spec gives 400 Hz as the lowest practical rate.
-  auto headerSampleRate{std::max(Float(header.sampleRate()), 400_F)};
+  auto headerSampleRate{std::max<Float>(Float(header.sampleRate()), 400_F)};
 
   auto sampleRateDeltaCents{0};
   if (state_.sampleRate() != headerSampleRate) {

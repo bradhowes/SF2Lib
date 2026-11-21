@@ -131,7 +131,7 @@ private:
   static constexpr int Offset = Range / 2;
   static constexpr size_t TableSize = Range;
   static constexpr Float generator(size_t index) {
-    return DSPHeaders::ConstMath::pow(2_F, Float(int(index) - Offset) / Float(CentsPerOctave));
+    return DSPHeaders::ConstMath::pow<Float>(2_F, Float(int(index) - Offset) / Float(CentsPerOctave));
   }
 
   inline static const auto lookup_ = DSPHeaders::ConstMath::make_array<Float, TableSize>(generator);

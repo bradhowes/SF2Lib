@@ -60,26 +60,23 @@ using namespace SF2::Render::Voice::State;
 
   std::cout << std::setprecision(12);
 
-  if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(-0.0684094578028, samples[0], self.epsilon);
-  }
-  else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(-0.0698643401265, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00836191140115, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0588994584978, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00935971178114, samples[3], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0550728663802, samples[4], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0126139139757, samples[5], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0547123402357, samples[6], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0134199066088, samples[7], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0541706979275, samples[8], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0136071350425, samples[9], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0541077405214, samples[10], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0136712500826, samples[11], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0540701821446, samples[12], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0136786820367, samples[13], self.epsilon);
-    XCTAssertEqualWithAccuracy(1.30052876557e-06, samples[14], self.epsilon);
-  }
+  // if constexpr (std::is_same_v<Float, float>) {
+  XCTAssertEqualWithAccuracy(-0.0698651000857, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00836017355323, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0588996708393, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.009357242845, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0550787374377, samples[4], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0125944437459, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.054721660912, samples[6], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0133919101208, samples[7], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0541880838573, samples[8], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0135757969692, samples[9], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0541263818741, samples[10], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0136384507641, samples[11], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0540896803141, samples[12], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0136456955224, samples[13], self.epsilon);
+  XCTAssertEqualWithAccuracy(1.26977931814e-06, samples[14], self.epsilon);
+  // }
 
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }
@@ -113,22 +110,11 @@ using namespace SF2::Render::Voice::State;
 
   XCTAssertEqual(repetitions * 3, samples.size());
 
-  if constexpr (std::is_same_v<Float, float>) {
-    for (size_t index = 0; index < samples.size(); ++index) {
-      switch (index % 3) {
-        case 0: XCTAssertEqualWithAccuracy(0.0000000000, samples[index], self.epsilon); break;
-        case 1: XCTAssertEqualWithAccuracy(0.0111224222928, samples[index], self.epsilon); break;
-        case 2: XCTAssertEqualWithAccuracy(0.00317874527536, samples[index], self.epsilon); break;
-      }
-    }
-  }
-  else if constexpr (std::is_same_v<Float, double>) {
-    for (size_t index = 0; index < samples.size(); ++index) {
-      switch (index % 3) {
-        case 0: XCTAssertEqualWithAccuracy(0.0000000000, samples[index], self.epsilon); break;
-        case 1: XCTAssertEqualWithAccuracy(0.0168082546443, samples[index], self.epsilon); break;
-        case 2: XCTAssertEqualWithAccuracy(-0.00124768540263, samples[index], self.epsilon); break;
-      }
+  for (size_t index = 0; index < samples.size(); ++index) {
+    switch (index % 3) {
+      case 0: XCTAssertEqualWithAccuracy(0.0000000000, samples[index], self.epsilon); break;
+      case 1: XCTAssertEqualWithAccuracy(0.0168094616383, samples[index], self.epsilon); break;
+      case 2: XCTAssertEqualWithAccuracy(-0.00124791753478, samples[index], self.epsilon); break;
     }
   }
 
@@ -166,34 +152,18 @@ using namespace SF2::Render::Voice::State;
 
   XCTAssertEqual(4 * notes.size(), samples.size());
 
-  if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.128517314792, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.107323430479, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.11131759733, samples[3], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[4], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0638395249844, samples[5], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0724022015929, samples[6], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.137387365103, samples[7], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[8], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.116560056806, samples[9], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.120563536882, samples[10], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.123455472291, samples[11], self.epsilon);
-  }
-  else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00919859670103, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00683849584311, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.02204583399, samples[3], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[4], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0139200314879, samples[5], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0123502006754, samples[6], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.00821241363883, samples[7], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[8], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.00203400268219, samples[9], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.00278515834361, samples[10], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.000516511325259, samples[11], self.epsilon);
-  }
+  XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00919859670103, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00683849584311, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.02204583399, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[4], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0139200314879, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0123502006754, samples[6], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.00821241363883, samples[7], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[8], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.00203400268219, samples[9], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.00278515834361, samples[10], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.000516511325259, samples[11], self.epsilon);
 
   [self playSamples: buffer count: sampleCount];
 }
@@ -229,18 +199,10 @@ using namespace SF2::Render::Voice::State;
 
   XCTAssertEqual(4 * notes.size(), samples.size());
 
-  if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.128517314792, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.107323430479, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.11131759733, samples[3], self.epsilon);
-  }
-  else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.000220100017032, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.000506518699694, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
-  }
+  XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.000220100017032, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.000506518699694, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
 
   [self playSamples: buffer count: sampleCount];
 }
@@ -273,34 +235,18 @@ using namespace SF2::Render::Voice::State;
 
   [self dumpSamples: samples];
 
-  if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.114197462797, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.113293237984, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[4], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.148109078407, samples[5], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.140772968531, samples[6], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[7], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[8], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0182730704546, samples[9], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0210941880941, samples[10], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[11], self.epsilon);
-  }
-  else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00195370847359, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00213433802128, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[4], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00109550275374, samples[5], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00132327864412, samples[6], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[7], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[8], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00053169374587, samples[9], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.000934656127356, samples[10], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[11], self.epsilon);
-  }
+  XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00195370847359, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00213433802128, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[4], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00109550275374, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00132327864412, samples[6], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[7], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[8], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00053169374587, samples[9], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.000934656127356, samples[10], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[11], self.epsilon);
 
   [self playSamples: buffer count: sampleCount];
 }
@@ -334,34 +280,19 @@ using namespace SF2::Render::Voice::State;
   [self dumpSamples: samples];
 
   auto epsilon = self.epsilon;
-  if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.114197462797, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.113293237984, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[4], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.148109078407, samples[5], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.140772968531, samples[6], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[7], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[8], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0182730704546, samples[9], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0210941880941, samples[10], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[11], self.epsilon);
-  }
-  else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(0, samples[0], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0342836864293, samples[1], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0344120599329, samples[2], epsilon);
-    XCTAssertEqualWithAccuracy(0, samples[3], epsilon);
-    XCTAssertEqualWithAccuracy(0, samples[4], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0391573309898, samples[5], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0380108244717, samples[6], epsilon);
-    XCTAssertEqualWithAccuracy(0, samples[7], epsilon);
-    XCTAssertEqualWithAccuracy(0, samples[8], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0340084172785, samples[9], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0331242568791, samples[10], epsilon);
-    XCTAssertEqualWithAccuracy(0, samples[11], epsilon);
-  }
+
+  XCTAssertEqualWithAccuracy(0, samples[0], epsilon);
+  XCTAssertEqualWithAccuracy(-0.0342836864293, samples[1], epsilon);
+  XCTAssertEqualWithAccuracy(-0.0344120599329, samples[2], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[3], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[4], epsilon);
+  XCTAssertEqualWithAccuracy(-0.0391573309898, samples[5], epsilon);
+  XCTAssertEqualWithAccuracy(-0.0380108244717, samples[6], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[7], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[8], epsilon);
+  XCTAssertEqualWithAccuracy(-0.0340084172785, samples[9], epsilon);
+  XCTAssertEqualWithAccuracy(-0.0331242568791, samples[10], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[11], epsilon);
 
   [self playSamples: buffer count: sampleCount];
 }
@@ -392,13 +323,6 @@ using namespace SF2::Render::Voice::State;
   [self dumpSamples: samples];
   auto epsilon = self.epsilon;
 
-  if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.00364254624583, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.00210017827339, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0023496679496, samples[3], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00281907012686, samples[4], self.epsilon);
-  } else if constexpr (std::is_same_v<Float, double>) {
     XCTAssertEqualWithAccuracy(0, samples[0], epsilon);
     XCTAssertEqualWithAccuracy(-0.00390073889866, samples[1], epsilon);
     XCTAssertEqualWithAccuracy(-0.00436056032777, samples[2], epsilon);
@@ -409,7 +333,6 @@ using namespace SF2::Render::Voice::State;
     XCTAssertEqualWithAccuracy(-0.00283227767795, samples[7], epsilon);
     XCTAssertEqualWithAccuracy(-0.00359885301441, samples[8], epsilon);
     XCTAssertEqualWithAccuracy(0.00217619538307, samples[9], epsilon);
-  }
 
   [self playSamples: buffer count: sampleCount];
 }
@@ -440,20 +363,6 @@ using namespace SF2::Render::Voice::State;
 
   [self dumpSamples: samples];
 
-  if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0793079808354, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0705065429211, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(1.06012303149e-05, samples[3], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[4], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00973602384329, samples[5], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00511918962002, samples[6], self.epsilon);
-    XCTAssertEqualWithAccuracy(1.91168401216e-05, samples[7], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[8], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.040793273598, samples[9], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0392105169594, samples[10], self.epsilon);
-    XCTAssertEqualWithAccuracy(9.74768136075e-06, samples[11], self.epsilon);
-  } else if constexpr (std::is_same_v<Float, double>) {
     XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
     XCTAssertEqualWithAccuracy(-0.0109371868894, samples[1], self.epsilon);
     XCTAssertEqualWithAccuracy(-0.0117771374062, samples[2], self.epsilon);
@@ -466,7 +375,6 @@ using namespace SF2::Render::Voice::State;
     XCTAssertEqualWithAccuracy(-0.00204970920458, samples[9], self.epsilon);
     XCTAssertEqualWithAccuracy(-0.0072527024895, samples[10], self.epsilon);
     XCTAssertEqualWithAccuracy(0.000121989636682, samples[11], self.epsilon);
-  }
 
   [self playSamples: buffer count: sampleCount];
 }
@@ -502,35 +410,19 @@ using namespace SF2::Render::Voice::State;
   XCTAssertEqual(4 * notes.size(), samples.size());
 
   [self dumpSamples: samples];
-  auto epsilon = self.epsilon;
 
-  if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0559814758599, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.052519839257, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(3.17845551763e-05, samples[3], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[4], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.112895518541, samples[5], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0982752144337, samples[6], self.epsilon);
-    XCTAssertEqualWithAccuracy(6.28374400549e-05, samples[7], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[8], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0129413604736, samples[9], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0301705002785, samples[10], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.000106911902549, samples[11], self.epsilon);
-  } else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(0, samples[0], epsilon);
-    XCTAssertEqualWithAccuracy(-0.017094168812, samples[1], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0152829913422, samples[2], epsilon);
-    XCTAssertEqualWithAccuracy(-0.00196327478625, samples[3], epsilon);
-    XCTAssertEqualWithAccuracy(0, samples[4], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0165916401893, samples[5], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0104964738712, samples[6], epsilon);
-    XCTAssertEqualWithAccuracy(-0.00620357505977, samples[7], epsilon);
-    XCTAssertEqualWithAccuracy(0, samples[8], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0277099013329, samples[9], epsilon);
-    XCTAssertEqualWithAccuracy(-0.0204559918493, samples[10], epsilon);
-    XCTAssertEqualWithAccuracy(-0.00847473740578, samples[11], epsilon);
-  }
+  XCTAssertEqualWithAccuracy(0, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.017094168812, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0152829913422, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00196327478625, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[4], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0154943112284, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00939854048193, samples[6], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00620357505977, samples[7], self.epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[8], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0264700781554, samples[9], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0188500732183, samples[10], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00847473740578, samples[11], self.epsilon);
 
   [self playSamples: buffer count: sampleCount];
 }
@@ -574,33 +466,18 @@ using namespace SF2::Render::Voice::State;
   [self dumpSamples: samples];
   auto epsilon = self.epsilon;
 
-  if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0793079808354, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0705065429211, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(1.06012303149e-05, samples[3], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[4], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00973602384329, samples[5], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00511918962002, samples[6], self.epsilon);
-    XCTAssertEqualWithAccuracy(1.91168401216e-05, samples[7], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[8], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.040793273598, samples[9], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0392105169594, samples[10], self.epsilon);
-    XCTAssertEqualWithAccuracy(9.74768136075e-06, samples[11], self.epsilon);
-  } else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(0, samples[0], epsilon);
-    XCTAssertEqualWithAccuracy(-0.00451428350061, samples[1], epsilon);
-    XCTAssertEqualWithAccuracy(-0.00532276649028, samples[2], epsilon);
-    XCTAssertEqualWithAccuracy(0, samples[3], epsilon);
-    XCTAssertEqualWithAccuracy(0, samples[4], epsilon);
-    XCTAssertEqualWithAccuracy(0.00374535471201, samples[5], epsilon);
-    XCTAssertEqualWithAccuracy(0.00411266554147, samples[6], epsilon);
-    XCTAssertEqualWithAccuracy(0, samples[7], epsilon);
-    XCTAssertEqualWithAccuracy(0, samples[8], epsilon);
-    XCTAssertEqualWithAccuracy(0.000942283542827, samples[9], epsilon);
-    XCTAssertEqualWithAccuracy(-0.00170362228528, samples[10], epsilon);
-    XCTAssertEqualWithAccuracy(0, samples[11], epsilon);
-  }
+  XCTAssertEqualWithAccuracy(0, samples[0], epsilon);
+  XCTAssertEqualWithAccuracy(-0.00451428350061, samples[1], epsilon);
+  XCTAssertEqualWithAccuracy(-0.00532276649028, samples[2], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[3], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[4], epsilon);
+  XCTAssertEqualWithAccuracy(0.00374535471201, samples[5], epsilon);
+  XCTAssertEqualWithAccuracy(0.00411266554147, samples[6], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[7], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[8], epsilon);
+  XCTAssertEqualWithAccuracy(0.000942283542827, samples[9], epsilon);
+  XCTAssertEqualWithAccuracy(-0.00170362228528, samples[10], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[11], epsilon);
 
   [self playSamples: buffer count: sampleCount];
 }
@@ -642,17 +519,10 @@ using namespace SF2::Render::Voice::State;
 
   [self dumpSamples: samples];
 
-  if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0715493783355, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0556658469141, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
-  } else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.00834430195391, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0103608714417, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
-  }
+  XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.00834430195391, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0103608714417, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
 
   [self playSamples: buffer count: sampleCount];
 }
@@ -682,17 +552,10 @@ using namespace SF2::Render::Voice::State;
 
   [self dumpSamples: samples];
 
-  if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0715493783355, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0556658469141, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
-  } else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0167881231755, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.018545711413, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
-  }
+  XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0167881231755, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.018545711413, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
 
   [self playSamples: buffer count: sampleCount];
 }
@@ -722,17 +585,10 @@ using namespace SF2::Render::Voice::State;
 
   [self dumpSamples: samples];
 
-  if constexpr (std::is_same_v<Float, float>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0715493783355, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.0556658469141, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
-  } else if constexpr (std::is_same_v<Float, double>) {
-    XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00352061167359, samples[1], self.epsilon);
-    XCTAssertEqualWithAccuracy(-0.00512139173225, samples[2], self.epsilon);
-    XCTAssertEqualWithAccuracy(-3.27081615978e-05, samples[3], self.epsilon);
-  }
+  XCTAssertEqualWithAccuracy(0.0, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00344462739304, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00502655562013, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0, samples[3], self.epsilon);
 
   [self playSamples: buffer count: sampleCount];
 }

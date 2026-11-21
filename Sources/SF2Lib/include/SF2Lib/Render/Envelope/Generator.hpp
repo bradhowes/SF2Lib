@@ -46,7 +46,7 @@ enum struct StageIndex : size_t {
  @returns attenuation in centibels in [0, NoiseFloorCentiBels]
  */
 inline constexpr Float volumeEnvelopeToCentibels(Float value) noexcept {
-  return SF2::DSP::NoiseFloorCentiBels * (1_F - std::clamp(value, 0_F, 1_F));
+  return SF2::DSP::NoiseFloorCentiBels * (1_F - std::clamp<Float>(value, 0_F, 1_F));
 }
 
 /**
@@ -57,7 +57,7 @@ inline constexpr Float volumeEnvelopeToCentibels(Float value) noexcept {
  @returns normalized volume envelope value in [0.0, 1.0]
  */
 inline constexpr Float centibelsToVolumeEnvelope(Float centibels) noexcept {
-  return 1_F - std::clamp(centibels, 0_F, SF2::DSP::NoiseFloorCentiBels) / SF2::DSP::NoiseFloorCentiBels;
+  return 1_F - std::clamp<Float>(centibels, 0_F, SF2::DSP::NoiseFloorCentiBels) / SF2::DSP::NoiseFloorCentiBels;
 }
 
 /**

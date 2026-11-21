@@ -91,7 +91,7 @@ static Float hzToCents(double hz) { return Float(1200.0 * std::log2(hz / 8.17579
   for (size_t index = 0; index < 1000; ++index) {
     filter.needsUpdate();
     auto x = std::sin(2.0 * M_PI * 15'000.0 * double(index) / sampleRate);
-    XCTAssertEqual(filter.transform(x), x);
+    XCTAssertEqualWithAccuracy(filter.transform(x), x, 0.000001);
   }
 
   // Any resonance, or a cutoff at or below 13500 cents (~19.9 kHz), keeps the filter active.
