@@ -87,6 +87,22 @@ struct TestEngineHarness {
 
   void postWorkItem(WorkItemBlock block) { dispatch_async(engine_.workQueue_, block); }
 
+  /// Block until every work item queued so far has run. MIDI program changes load on the work queue, so call this
+  /// after one before checking the active preset or sending notes (they are ignored while a change is pending).
+  void drainWorkQueue() { dispatch_sync(engine_.workQueue_, ^{ }); }
+
+  /// Hold back work-queue items, so a test can look at the engine while a program change or SysEx load is pending.
+  void suspendWorkQueue() { dispatch_suspend(engine_.workQueue_); }
+
+  /// Let held-back work-queue items run again.
+  void resumeWorkQueue() { dispatch_resume(engine_.workQueue_); }
+
+  /// @returns number of replaced presets states that have not been freed yet
+  size_t retiredPresetsStateCount() {
+    std::lock_guard<std::mutex> lock(engine_.retiredMutex_);
+    return engine_.retired_.size();
+  }
+
   void usePresetWithIndex(size_t index) { engine_.loadFileAndPreset("", index); }
 
   AVAudioFrameCount maxFramesToRender() const noexcept { return maxFramesToRender_; }

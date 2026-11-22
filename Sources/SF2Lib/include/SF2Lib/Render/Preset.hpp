@@ -5,6 +5,8 @@
 #include <os/log.h>
 #include <vector>
 
+#include "SF2Util/FixedCapacityVector.hpp"
+
 #include "SF2Lib/Render/Voice/State/Config.hpp"
 #include "SF2Lib/Render/WithCollectionBase.hpp"
 #include "SF2Lib/Render/Zone/Preset.hpp"
@@ -29,7 +31,11 @@ namespace SF2::Render {
  */
 class Preset : public WithCollectionBase<Zone::Preset, Entity::Preset> {
 public:
-  using ConfigCollection = std::vector<Voice::State::Config>;
+  /// Maximum number of zone pairs that one note can start. Any more are dropped (and logged).
+  static constexpr size_t maxConfigsPerNote = 64;
+
+  /// Result of `find`. Fixed capacity, so `find` does not allocate on the render thread.
+  using ConfigCollection = Utils::FixedCapacityVector<Voice::State::Config, maxConfigsPerNote>;
 
   /**
    Construct new Preset from SF2 entities

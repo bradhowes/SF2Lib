@@ -47,7 +47,7 @@ constexpr Float decayTimecentsToSeconds(Float value) noexcept {
 }
 
 constexpr Float releaseTimecentsToSeconds(Float value) noexcept {
-  return ::DSP::centsToSeconds(::DSP::clamp(value, lowerBoundTimecents, 5'000.0));
+  return ::DSP::centsToSeconds(::DSP::clamp(value, lowerBoundTimecents, 8'000.0));
 }
 
 constexpr Float midiKeyVolumeEnvelopeHoldAdjustment(const Generator::State& state) noexcept {

@@ -6,6 +6,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <queue>
 #include <set>
 #include <vector>
@@ -72,7 +73,10 @@ public:
          Interpolator interpolator,
          double renderingTimeBudgetScaling, // = 0.85,
          size_t minimumNoteDurationMilliseconds = 10
-         ) noexcept;
+         );
+
+  /// Waits for queued loads to finish, then frees every preset state.
+  ~Engine() noexcept;
 
   inline size_t minimumNoteDurationSamples() const noexcept {
     return static_cast<size_t>(ceil(Float(minimumNoteDurationMilliseconds_) / 1000_F * sampleRate_));
@@ -305,7 +309,40 @@ private:
   Engine(const Engine&) = delete;
   Engine(Engine&&) = delete;
 
-  inline PresetsState* presetsState() const noexcept { return presetsState_.load(); }
+  /// @returns the most recently published presets state. Not for the render thread: use `syncPresetsState_RT`.
+  inline PresetsState* presetsState() const noexcept { return presetsState_.load(std::memory_order_acquire); }
+
+  /**
+   Render-thread entry point to the presets state. If a new state has been published since the last call, stop all
+   voices (they may reference the old state's samples) and record the new state's generation, which allows the old
+   state to be freed off the render thread.
+
+   @returns the current presets state, or nullptr if nothing has been loaded
+   */
+  PresetsState* syncPresetsState_RT() noexcept;
+
+  /**
+   Publish a fully prepared presets state and retire the previous one. Frees retired states the render thread no
+   longer uses.
+
+   @param state the new state to publish
+   */
+  void installPresetsState_WQ(PresetsState* state) noexcept;
+
+  /**
+   Free retired presets states. Caller must hold `retiredMutex_`.
+
+   @param all if true, free all of them (only safe when the render thread is not running). Otherwise free only those
+   older than the generation that the render thread has acknowledged.
+   */
+  void reclaimRetiredPresetsStates_WQ(bool all) noexcept;
+
+  /// Work-queue function for a program change requested by the render thread (see `changeProgram_RT`).
+  static void usePresetRequest_WQ(void* context) noexcept;
+
+  /// Common end of every preset or file change: reset live parameters, bump `lastLoadFinished`, and finally allow the
+  /// render thread to render and start voices again by decrementing `presetChangesPending_`.
+  void finishPresetChange_WQ() noexcept;
 
   static AUParameter* makeGeneratorParameter(Entity::Generator::Index index) noexcept;
 
@@ -314,8 +351,6 @@ private:
   void parameterValueChanged(AUParameter* parameter, AUValue value) noexcept;
 
   AUValue provideParameterValue(AUParameter* parameter) const noexcept;
-
-  void updateActiveVoiceCount_RT() noexcept;
 
   void updateDurationParameters() noexcept;
 
@@ -336,7 +371,7 @@ private:
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
    */
-  IO::File::LoadResponse beginLoadFileAndPreset_RT(std::string path, size_t presetIndex) noexcept;
+  IO::File::LoadResponse beginLoadFileAndPreset_WQ(std::string path, size_t presetIndex) noexcept;
 
   /**
    Routine run outside of the render thread to load a secure bookmark to an SF2 file and make active a preset in it.
@@ -345,32 +380,32 @@ private:
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
    */
-  IO::File::LoadResponse beginLoadBookmarkAndPreset_RT(NSData* bookmark, size_t presetIndex) noexcept;
+  IO::File::LoadResponse beginLoadBookmarkAndPreset_WQ(NSData* bookmark, size_t presetIndex) noexcept;
 
   /**
-   Finish loading from an SF2 file. Called at the conclusion of `beginLoadFileAndPreset_RT`.
+   Finish loading from an SF2 file. Called at the conclusion of `beginLoadFileAndPreset_WQ`.
 
    @param path the file to load from
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
    */
-  IO::File::LoadResponse concludeLoad_RT(const std::string& path, size_t index) noexcept;
+  IO::File::LoadResponse concludeLoad_WQ(const std::string& path, size_t index) noexcept;
 
   /**
-   Finish loading from an SF2 file. Called at the conclusion of `beginLoadBookmarkAndPreset_RT()`.
+   Finish loading from an SF2 file. Called at the conclusion of `beginLoadBookmarkAndPreset_WQ()`.
 
    @param fd the file descriptor to read from
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
    */
-  IO::File::LoadResponse concludeLoad_RT(int fd, size_t index) noexcept;
+  IO::File::LoadResponse concludeLoad_WQ(int fd, size_t index) noexcept;
 
   /**
    Active a new preset in the current preset state.
 
    @param presetIndex the index of the preset to activate
    */
-  void concludeUsePresetWithIndex_RT(size_t presetIndex);
+  void usePresetWithIndex_WQ(size_t presetIndex);
 
   /// Reset the engine to a known state. All keys are released, all voices are off, and the MIDI channel state is reset
   /// to initial state.
@@ -500,7 +535,7 @@ private:
     }
   }
 
-  void bumpLastLoadFinished_RT() noexcept;
+  void bumpLastLoadFinished_WQ() noexcept;
 
   void initialize(Float sampleRate) noexcept;
 
@@ -520,9 +555,22 @@ private:
 
   void changeProgram_RT(uint8_t program) noexcept;
 
-  bool loadFileAndPresetFromSysEx_RT(const AUMIDIEvent& midiEvent) noexcept;
+  /**
+   Hand a "load file/bookmark and preset" SysEx message to the work queue. Runs on the render thread, so it only
+   copies the raw bytes into a free preallocated `SysExRequest` slot; all parsing and decoding happens in
+   `processSysExRequest_WQ`.
 
-  bool loadBookmarkAndPresetFromSysEx_RT(const AUMIDIEvent& midiEvent) noexcept;
+   @param midiEvent the SysEx event (already known to be addressed to us and to end with EOX)
+   @returns true if the request was queued
+   */
+  bool queueSysExRequest_RT(const AUMIDIEvent& midiEvent) noexcept;
+
+  /// Work-queue function that parses and runs a queued SysEx request. `context` is the `SysExRequest`.
+  static void processSysExRequest_WQ(void* context) noexcept;
+
+  /// Parse a queued SysEx request and start the load it describes.
+  void processSysExRequest_WQ(const uint8_t* bytes, size_t length) noexcept;
+
 
   void applySostenutoPedal_RT() noexcept;
 
@@ -540,7 +588,32 @@ private:
   OldestVoiceCollection oldestVoiceIndices_;
   std::size_t voiceCountLimit_;
 
-  std::atomic<PresetsState*> presetsState_;
+  std::atomic<PresetsState*> presetsState_{nullptr};
+
+  /// Generation for the next presets state (loads can come from the work queue or from API callers)
+  std::atomic<uint64_t> nextGeneration_{1};
+
+  /// Generation of the presets state the render thread is using. Written only by the render thread.
+  std::atomic<uint64_t> renderGeneration_{0};
+
+  /// Preset index for the latest program change, read by `usePresetRequest_WQ`
+  std::atomic<size_t> requestedPresetIndex_{0};
+
+  /// A SysEx message copied off the render thread. Bookmarks and paths are Base64-encoded, so 8 KB is ample.
+  struct SysExRequest {
+    static constexpr size_t capacity = 8 * 1024;
+    Engine* engine{nullptr};
+    std::atomic<bool> busy{false};
+    size_t length{0};
+    std::array<uint8_t, capacity> bytes{};
+  };
+
+  /// Preallocated SysEx slots. A request that finds them all busy is dropped.
+  std::array<SysExRequest, 4> sysExRequests_{};
+
+  /// Presets states that have been replaced and are waiting until the render thread no longer uses them
+  std::mutex retiredMutex_;
+  std::vector<PresetsState*> retired_;
 
   // std::unique_ptr<IO::File> file_{};
   // PresetCollection presets_{};

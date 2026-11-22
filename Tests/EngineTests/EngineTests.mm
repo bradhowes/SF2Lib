@@ -26,6 +26,11 @@
   self.engine = nullptr;
 }
 
+- (void)testWithTooManyVoices {
+  self.engine = new SF2Engine();
+  XCTAssertThrowsSpecific(self.engine->create(48000.0, 99999), std::runtime_error);
+}
+
 - (void)testSetRenderingFormat {
   auto audioFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:48000.0 channels:2];
   XCTAssertTrue(self.engine->setRenderingFormat(3, audioFormat, 512));

@@ -32,13 +32,9 @@ public:
   /// global zone. Otherwise, returns `nullptr`
   inline const Entity::SampleHeader* sampleHeader() const noexcept { return sampleHeader_; }
 
-  /// @returns the sample buffer registered to this zone. Note that this must only be called if `sampleHeader()` returns non-null
-  /// otherwise it throws an exception.
-  std::shared_ptr<NormalizedSampleSpan> samples() const {
-    if (sampleHeader_ == nullptr) throw std::runtime_error("global instrument zone has no sample source");
-    if (!samples_) throw std::runtime_error("unexpected nil sample source");
-    return samples_;
-  }
+  /// @returns the sample buffer registered to this zone, or nullptr if there is none (a global zone, or samples not
+  /// loaded). Does not throw: it is reached from the render thread through `Config::samples()`.
+  std::shared_ptr<NormalizedSampleSpan> samples() const noexcept { return samples_; }
 
   /**
    Apply the instrument zone to the given voice state. Sets the nominal value of the generators in the zone.

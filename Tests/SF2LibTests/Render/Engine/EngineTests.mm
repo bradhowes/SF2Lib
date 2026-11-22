@@ -435,6 +435,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   midiEvent.length = 2;
 
   engine.doMIDIEvent(midiEvent);
+  harness.drainWorkQueue(); // the program change loads on the work queue
   name = [NSString stringWithCString:engine.activePresetName().c_str() encoding:NSUTF8StringEncoding];
   NSLog(@"name: |%@|", name);
   XCTAssertTrue([name isEqualToString:@"Bandoneon"]);
@@ -2083,12 +2084,15 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   harness.load(self.contexts->context0.path(), 0);
   XCTAssertEqual("Piano 1", engine.activePresetName());
   harness.sendRaw(engine.createUseBankProgramPayload(0, 1));
+  harness.drainWorkQueue();
   std::clog << engine.activePresetName() << '\n';
   XCTAssertEqual("Piano 2", engine.activePresetName());
   harness.sendRaw(engine.createUseBankProgramPayload(1, 38));
+  harness.drainWorkQueue();
   std::clog << engine.activePresetName() << '\n';
   XCTAssertEqual("SynthBass101", engine.activePresetName());
   harness.sendRaw(engine.createUseBankProgramPayload(128, 56));
+  harness.drainWorkQueue();
   std::clog << engine.activePresetName() << '\n';
  }
 
@@ -2424,6 +2428,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   auto render = [](TestEngineHarness& harness) {
     auto mixer{harness.createMixer(0.25)};
     harness.sendRaw(std::array<uint8_t, 3>{0xC0, 23, 0}); // program change to 23 (padded to 3 bytes)
+    harness.drainWorkQueue(); // the program change loads on the work queue
     harness.sendNoteOn(64, 127);
     harness.renderToEnd(mixer);
     const AUValue* data = harness.dryBuffer().floatChannelData[0];

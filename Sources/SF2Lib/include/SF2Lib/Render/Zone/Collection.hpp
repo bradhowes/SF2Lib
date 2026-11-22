@@ -51,11 +51,26 @@ public:
   Matches filter(int key, int velocity) const noexcept
   {
     Matches matches;
+    visit(key, velocity, [&matches](const T& zone) { matches.push_back(zone); });
+    return matches;
+  }
+
+  /**
+   Invoke a visitor on each (non-global) zone that matches the given key/velocity pair. Unlike `filter` this does not
+   allocate, so it is safe on the render thread.
+
+   @param key the MIDI key to filter on
+   @param velocity the MIDI velocity to filter on
+   @param visitor the callable to invoke with each matching zone
+   */
+  template <typename Visitor>
+  void visit(int key, int velocity, Visitor&& visitor) const noexcept
+  {
     auto pos = zones_.cbegin();
     if (hasGlobal()) ++pos;
-    std::copy_if(pos, zones_.cend(), std::back_inserter(matches),
-                 [key, velocity](const Zone& zone) { return zone.appliesTo(key, velocity); });
-    return matches;
+    for (; pos != zones_.cend(); ++pos) {
+      if (pos->appliesTo(key, velocity)) visitor(*pos);
+    }
   }
 
   inline std::vector<T>::iterator begin() noexcept { return zones_.begin(); }

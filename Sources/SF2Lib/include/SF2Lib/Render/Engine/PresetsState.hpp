@@ -9,18 +9,39 @@
 
 namespace SF2::Render::Engine {
 
+/**
+ The presets of one loaded SF2 file. A new instance is created for every file load. The Engine publishes it to the
+ render thread and frees it off the render thread once the render thread has moved on to a newer one (see
+ `Engine::installPresetsState_WQ` and `Engine::syncPresetsState_RT`). Instances are never shared between loads, so a
+ voice can never outlive the samples it is playing.
+ */
 struct PresetsState {
-  PresetsState() noexcept = default;
+  /**
+   Load presets from a file descriptor.
 
-  PresetsState(int fd, size_t index, PresetsState* past) noexcept
-  : file_{std::make_unique<IO::File>()}, past_{past} {
+   @param fd the descriptor to read from (duplicated by `IO::File`)
+   @param index the preset to make active
+   @param generation the sequence number of this load. Generations increase with every load.
+   */
+  PresetsState(int fd, size_t index, uint64_t generation) noexcept
+  : file_{std::make_unique<IO::File>()}, generation_{generation} {
     initialize(file_->load(fd), index);
   }
 
-  PresetsState(const std::string& path, size_t index, PresetsState* past) noexcept
-  : file_{std::make_unique<IO::File>(path)}, past_{past} {
+  /**
+   Load presets from a file path.
+
+   @param path the path of the file to load
+   @param index the preset to make active
+   @param generation the sequence number of this load. Generations increase with every load.
+   */
+  PresetsState(const std::string& path, size_t index, uint64_t generation) noexcept
+  : file_{std::make_unique<IO::File>(path)}, generation_{generation} {
     initialize(file_->load(), index);
   }
+
+  /// @returns the sequence number of the load that created this instance
+  inline uint64_t generation() const noexcept { return generation_; }
 
   void changeActivePreset(size_t index) noexcept {
     auto activePresetIndex = activePresetIndex_.load();
@@ -40,17 +61,16 @@ struct PresetsState {
 
   inline size_t size() const noexcept { return collection_.size(); }
 
+  /// @returns the active preset, or nullptr if there is none. Does not throw, so it is safe on the render thread.
+  inline Preset* activePresetOrNull() noexcept {
+    auto activePresetIndex = activePresetIndex_.load();
+    return activePresetIndex < size() ? &collection_[activePresetIndex] : nullptr;
+  }
+
   inline Preset& activePreset() {
     auto activePresetIndex = activePresetIndex_.load();
     if (activePresetIndex >= size()) throw std::runtime_error("unexpected nil active preset");
     return collection_[activePresetIndex];
-  }
-
-  void deletePast() noexcept {
-    if (past_) {
-      delete past_;
-      past_ = nullptr;
-    }
   }
 
   inline size_t activePresetIndex() const noexcept { return activePresetIndex_.load(); }
@@ -78,7 +98,7 @@ private:
   std::unique_ptr<IO::File> file_{};
   PresetCollection collection_{};
   std::atomic<size_t> activePresetIndex_{0};
-  PresetsState* past_{nullptr};
+  uint64_t generation_{0};
   IO::File::LoadResponse loadResponse_{IO::File::LoadResponse::none};
 };
 

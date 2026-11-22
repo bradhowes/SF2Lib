@@ -48,6 +48,9 @@ public:
   struct Tester;
   friend struct Tester;
 
+  /// Number of modulators each voice has room for before installing one would allocate
+  static constexpr size_t modulatorReserve = 64;
+
   /**
    Create new state vector with a given sample rate.
 
@@ -55,6 +58,9 @@ public:
    */
   State(Float sampleRate = 0_F) noexcept : sampleRate_{sampleRate}, eventKey_{}, eventVelocity_{}
   {
+    // Reserve room for the default modulators plus the usual instrument and preset ones, so that configuring a voice
+    // on the render thread does not normally allocate.
+    modulators_.reserve(modulatorReserve);
     clear();
   }
 
@@ -68,6 +74,7 @@ public:
   State(Float sampleRate, int key, int velocity = 64) noexcept
   : sampleRate_{sampleRate}, eventKey_{key}, eventVelocity_{velocity}
   {
+    modulators_.reserve(modulatorReserve);
     clear();
   }
 
