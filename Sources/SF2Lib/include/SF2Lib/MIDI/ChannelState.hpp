@@ -86,8 +86,8 @@ public:
   /**
    Respond to MIDI Reset All Controllers (CC 121) as described by MIDI RP-015: modulation, expression, the pedals
    (64-67), pitch bend, channel and key pressure, and the RPN/NRPN numbers are reset. Bank select, volume, pan, the
-   sound and effects controllers, and RPN/NRPN values (e.g. pitch wheel sensitivity) are kept. Unlike `reset` this
-   is not a power-on reset.
+   sound and effects controllers, and RPN/NRPN values (e.g. pitch wheel sensitivity) are kept. Controllers RP-015
+   lists in neither group (e.g. 2-5, 8-9, 68-69, 80-90) are also kept. Unlike `reset` this is not a power-on reset.
    */
   void resetControllers() noexcept;
 

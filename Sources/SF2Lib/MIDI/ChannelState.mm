@@ -175,6 +175,11 @@ ChannelState::resetControllers() noexcept
 
   // Do NOT reset: bank select, volume, pan, sound controllers (70-79), effects depths (91-95), or RPN/NRPN *values*
   // (pitch wheel sensitivity and the SF2 NRPN generator offsets in `nrpnValues_`).
+  //
+  // Controllers that RP-015 lists in neither group are left unchanged as well: 2-5, 8-9, 12-31, the LSBs 33-63 other
+  // than those reset above, Legato (68), Hold 2 (69), 80-90, data increment/decrement (96-97) and 102-119. RP-015
+  // permits a receiver to document such behaviour. Resetting them to 0 could be harmful (for instance, balance CC 8
+  // defaults to 64), and none of them drives a default SF2 modulator.
 }
 
 bool

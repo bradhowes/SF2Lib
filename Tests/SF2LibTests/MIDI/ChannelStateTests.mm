@@ -276,6 +276,10 @@ using namespace SF2::MIDI;
   channel.setContinuousControllerValue(ControlChange::sostenutoSwitch, 127);
   channel.setContinuousControllerValue(ControlChange::softPedalSwitch, 127);
   channel.setContinuousControllerValue(ControlChange::effectsDepth1, 70);
+  // Controllers RP-015 lists in neither group are documented as kept.
+  channel.setContinuousControllerValue(ControlChange(2), 50);    // breath
+  channel.setContinuousControllerValue(ControlChange(8), 30);    // balance
+  channel.setContinuousControllerValue(ControlChange(68), 127);  // legato
   channel.setPitchWheelValue(0);
   channel.setChannelPressure(99);
   channel.setNotePressure(60, 77);
@@ -310,6 +314,9 @@ using namespace SF2::MIDI;
   XCTAssertEqual(40, channel.continuousControllerValue(ControlChange::volumeMSB));
   XCTAssertEqual(20, channel.continuousControllerValue(ControlChange::panMSB));
   XCTAssertEqual(70, channel.continuousControllerValue(ControlChange::effectsDepth1));
+  XCTAssertEqual(50, channel.continuousControllerValue(ControlChange(2)));
+  XCTAssertEqual(30, channel.continuousControllerValue(ControlChange(8)));
+  XCTAssertEqual(127, channel.continuousControllerValue(ControlChange(68)));
   XCTAssertEqual(12, channel.pitchWheelSensitivity());
   XCTAssertEqual(nrpnValue, channel.nrpnValue(SF2::Entity::Generator::Index::initialFilterCutoff));
 
