@@ -69,14 +69,15 @@ using namespace SF2::Entity::Modulator;
 }
 
 - (void)testGeneralIndices {
-  for (auto bits : {0, 2, 3, 10, 13, 14, 16, 127}) {
+  for (auto bits : {0, 2, 3, 10, 13, 14, 16}) {
     Source s{Source(Source::GeneralIndex(bits))};
     XCTAssertTrue(s.isValid());
     XCTAssertFalse(s.isContinuousController());
     XCTAssertEqual(Source::GeneralIndex(bits), s.generalIndex());
   }
 
-  for (auto bits : {1, 4, 5, 11, 126}) {
+  // SF2.01 8.2.1: everything else is reserved, including 127 (used by 2.04 for modulator links).
+  for (auto bits : {1, 4, 5, 11, 126, 127}) {
     Source s{Source(Source::GeneralIndex(bits))};
     XCTAssertFalse(s.isValid());
     XCTAssertFalse(s.isContinuousController());
@@ -91,7 +92,7 @@ using namespace SF2::Entity::Modulator;
     XCTAssertEqual(bits, s.ccIndex().value);
   }
 
-  for (auto bits : {0, 6, 32, 63, 98, 101, 120, 127}) {
+  for (auto bits : {0, 6, 32, 38, 63, 98, 99, 100, 101, 120, 127}) {
     Source s{Source(Source::CC(uint16_t(bits)))};
     XCTAssertFalse(s.isValid());
     XCTAssertTrue(s.isContinuousController());

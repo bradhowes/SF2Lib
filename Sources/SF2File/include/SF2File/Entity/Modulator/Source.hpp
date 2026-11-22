@@ -99,10 +99,13 @@ public:
     }
     auto idx = rawIndex();
     if (isContinuousController()) {
-      return !(idx == 0 || idx == 6 || (idx >=32 && idx <= 63) || idx == 98 || idx == 101 ||
+      // SF2.01 8.2.1: CC 0, 6, 32, 38, 98-101 and 120-127 are illegal, and 33-63 are reserved for LSB values.
+      return !(idx == 0 || idx == 6 || (idx >= 32 && idx <= 63) || (idx >= 98 && idx <= 101) ||
                (idx >= 120 && idx <= 127));
     } else {
-      return idx == 0 || idx == 2 || idx == 3 || idx == 10 || idx == 13 || idx == 14 || idx == 16 || idx == 127;
+      // SF2.01 8.2.1: "All values not listed are reserved ... the entire modulator structure should be ignored." That
+      // includes 127, which SF2 2.04 uses for modulator links (not supported).
+      return idx == 0 || idx == 2 || idx == 3 || idx == 10 || idx == 13 || idx == 14 || idx == 16;
     }
   }
 

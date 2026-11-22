@@ -49,6 +49,17 @@ public:
   }
 
   /**
+   Add the amount from the given configuration to this one. This is how an identical preset-level modulator adds to an
+   instrument-level one (SF2.01 9.5.1).
+
+   @param configuration the SF2 entity whose amount to add
+   */
+  void addAmountFrom(const Entity::Modulator::Modulator& configuration) noexcept
+  {
+    amount_ += configuration.amount();
+  }
+
+  /**
    Calculate the modulator's value.
 
    @param state the voice state that is used as a source of values for the modulator

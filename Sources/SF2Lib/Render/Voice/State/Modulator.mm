@@ -77,7 +77,7 @@ Modulator::makeValueProvider(const EntityMod::Source& source) noexcept
     case GI::channelPressure: return ValueProvider{&ValueProvider::channelPressure};
     case GI::pitchWheel: return ValueProvider{&ValueProvider::pitchWheelValue};
     case GI::pitchWheelSensitivity: return ValueProvider{&ValueProvider::pitchWheelSensitivity};
-    default: return ValueProvider{}; // Unsupported (e.g. 2.04 link, 127) or reserved: no modulation
+    default: return ValueProvider{}; // Not reached: `State::isUsable` rejects reserved sources
   }
 }
 
@@ -92,12 +92,9 @@ Modulator::description() const noexcept
 Float
 Modulator::value(const State& state, const MIDI::ChannelState& channelState) const noexcept
 {
-  // If there is no source for the modulator, it always returns 0.0 (no modulation).
-  if (!primaryValue_.isActive()) return 0_F;
-
-  // Obtain transformed primary value.
-  auto primary{primaryValue_(state, channelState)};
-  Float transformedPrimary{primaryTransform_(primary)};
+  // SF2.01 8.2.1: with "No Controller" as the source, "the output of this controller module should be treated as if its
+  // value were set to '1'. It should not be a means to turn off a modulator." The same holds for the amount source.
+  Float transformedPrimary = primaryValue_.isActive() ? primaryTransform_(primaryValue_(state, channelState)) : 1_F;
   if (transformedPrimary == 0_F) return 0_F;
 
   // Obtain transformed secondary value.

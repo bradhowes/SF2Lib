@@ -21,9 +21,8 @@ namespace SF2::Entity::Modulator {
  Memory layout of a 'pmod'/'imod' entry. The size of this is defined to be 10.
 
  Defines a mapping of a modulator to a generator so that a modulator can affect the value given by a generator. Per the
- spec a modulator can have two sources. If the first one is 'none', then the modulator will always return 0.0. The
- second one is optional -- if it exists then it will scale the result of the previous source value. Otherwise, it just
- acts as if the source returned 1.0.
+ spec a modulator can have two sources. A source of 'none' ("No Controller") acts as if it returned 1.0, for both the
+ primary source and the optional amount source that scales it (SF2.01 8.2.1).
 
  Per the spec, modulators are unique if they do not share the same sfModSrcOper, sfModDestOper, sfModAmtSrcOper values.
  If there are duplicates, the second occurrence wins. This is also how modulators can override those that were defined

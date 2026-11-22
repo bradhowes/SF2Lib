@@ -105,6 +105,17 @@ public:
   void configureWith(const Zone::Preset& preset) noexcept;
 
   /**
+   Apply the modulators of the preset zones (SF2.01 7.4, 9.5.1). Must be called after the instrument zones have been
+   applied. A modulator in the local preset zone supersedes an identical one in the global preset zone. Each remaining
+   preset modulator then *adds* its amount to an identical instrument-level (or default) modulator, or is added as a
+   new modulator if there is none.
+
+   @param globalPreset the global preset zone, if there is one
+   @param preset the local preset zone
+   */
+  void addPresetModulators(const Zone::Preset* globalPreset, const Zone::Preset& preset) noexcept;
+
+  /**
    Set a generator value with a value from a MIDI NPRN controller or AUParameterTree node.
 
    @param gen the generator to set
@@ -188,6 +199,16 @@ private:
    @param modulator the modulator to install
    */
   void addModulator(const Entity::Modulator::Modulator& modulator) noexcept;
+
+  /**
+   Add a preset-level modulator: add its amount to an identical existing modulator, or install it if there is none.
+
+   @param modulator the modulator to add
+   */
+  void addPresetModulator(const Entity::Modulator::Modulator& modulator) noexcept;
+
+  /// @returns true if the modulator can be used: valid sources, and a destination that is a known generator (8.2).
+  static bool isUsable(const Entity::Modulator::Modulator& modulator) noexcept;
 
   void clear() noexcept;
 

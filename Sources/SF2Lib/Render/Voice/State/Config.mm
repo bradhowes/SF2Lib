@@ -41,4 +41,7 @@ Config::applyTo(State& state) const noexcept
   // Presets apply refinements to absolute values set from instruments zones above.
   if (globalPreset_ != nullptr) state.configureWith(*globalPreset_);
   state.configureWith(preset_);
+
+  // Preset modulators add to the instrument (and default) modulators installed above.
+  state.addPresetModulators(globalPreset_, preset_);
 }

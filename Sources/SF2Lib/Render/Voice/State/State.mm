@@ -1,5 +1,6 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
+#include <algorithm>
 #include <iostream>
 
 #include "SF2Lib/Render/Voice/State/Config.hpp"
@@ -74,12 +75,67 @@ State::configureWith(const Zone::Preset& preset) noexcept {
   });
 }
 
-void
-State::addModulator(const Entity::Modulator::Modulator& modulator) noexcept {
+bool
+State::isUsable(const Entity::Modulator::Modulator& modulator) noexcept {
   // SF2.01 8.2: modulators with an invalid source, amount source or destination are ignored. A destination with bit 15
   // set is a 2.04 modulator link, which is not supported, and would otherwise index past the end of `gens_`.
-  if (!modulator.source().isValid() || !modulator.amountSource().isValid()) return;
-  if (SF2::valueOf(modulator.generatorDestination()) >= SF2::valueOf(Index::numValues)) return;
+  if (!modulator.source().isValid() || !modulator.amountSource().isValid()) return false;
+  return SF2::valueOf(modulator.generatorDestination()) < SF2::valueOf(Index::numValues);
+}
+
+namespace {
+
+using ModulatorCollection = SF2::Render::Zone::Zone::ModulatorCollection;
+
+/// @returns true if `mods[index]` is followed in the same zone by an identical modulator. SF2.01 7.4: "If a second
+/// modulator is encountered with the same three enumerators as a previous modulator with the same zone, the first
+/// modulator will be ignored."
+bool isShadowed(const ModulatorCollection& mods, size_t index) noexcept {
+  const auto& mod = mods[index].get();
+  return std::any_of(mods.begin() + long(index) + 1, mods.end(), [&mod](const auto& other) { return other.get() == mod; });
+}
+
+} // namespace
+
+void
+State::addPresetModulators(const Zone::Preset* globalPreset, const Zone::Preset& preset) noexcept {
+  const auto& localMods = preset.modulators();
+  if (globalPreset != nullptr) {
+    const auto& globalMods = globalPreset->modulators();
+    for (size_t index = 0; index < globalMods.size(); ++index) {
+      if (isShadowed(globalMods, index)) continue;
+      // 9.5.1: "A modulator, contained within a local preset zone, that is identical to a modulator in a global preset
+      // zone supersedes or replaces that modulator in the global preset zone."
+      const auto& mod = globalMods[index].get();
+      if (std::any_of(localMods.begin(), localMods.end(), [&mod](const auto& other) { return other.get() == mod; })) {
+        continue;
+      }
+      addPresetModulator(mod);
+    }
+  }
+  for (size_t index = 0; index < localMods.size(); ++index) {
+    if (!isShadowed(localMods, index)) addPresetModulator(localMods[index].get());
+  }
+}
+
+void
+State::addPresetModulator(const Entity::Modulator::Modulator& modulator) noexcept {
+  if (!isUsable(modulator)) return;
+  // 9.5.1: "A modulator at the preset level adds to a modulator at the instrument level if both modulators are
+  // identical. Otherwise, the effects of a modulator at the preset level are added to the effects of a modulator at
+  // the instrument level." Default modulators count as instrument level here.
+  for (auto& mod : modulators_) {
+    if (mod.configuration() == modulator) {
+      mod.addAmountFrom(modulator);
+      return;
+    }
+  }
+  modulators_.emplace_back(modulator);
+}
+
+void
+State::addModulator(const Entity::Modulator::Modulator& modulator) noexcept {
+  if (!isUsable(modulator)) return;
 
   // Per spec, there must only be one modulator with specific <sfModSrcOper, sfModDestOper, and sfModSrcAmtOper>
   // values. If we find a duplicate, then we just update it's amount with the amount taken from the newer modulator and
