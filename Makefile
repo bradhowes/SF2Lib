@@ -2,7 +2,10 @@ PLATFORM_IOS = iOS Simulator,name=iPad mini (A17 Pro)
 PLATFORM_MACOS = macOS
 XCCOV = xcrun xccov view --report --only-targets
 SCHEME = 'SF2Lib-Package (Release)'
-BUILD_FLAGS = -skipMacroValidation -skipPackagePluginValidation -enableCodeCoverage YES -scheme $(SCHEME)
+# -collect-test-diagnostics never: on a test failure xcodebuild otherwise runs `simctl diagnose`, which can stall and
+# leave xcodebuild (and make) hanging after the tests have finished.
+BUILD_FLAGS = -skipMacroValidation -skipPackagePluginValidation -enableCodeCoverage YES -collect-test-diagnostics never \
+	-scheme $(SCHEME)
 
 ifeq ($(GITHUB_ENV),)
 XCB = | xcbeautify --renderer github-actions
