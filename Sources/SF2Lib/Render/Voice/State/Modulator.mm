@@ -101,7 +101,7 @@ Modulator::value(const State& state, const MIDI::ChannelState& channelState) con
   if (transformedPrimary == 0_F) return 0_F;
 
   // Obtain transformed secondary value.
-  Float transformedSecondary{static_cast<Float>(secondaryValue_.isActive() ? secondaryTransform_(secondaryValue_(state, channelState)) : 1_F)};
+  Float transformedSecondary = secondaryValue_.isActive() ? secondaryTransform_(secondaryValue_(state, channelState)) : 1_F;
   Float result{transformedPrimary * transformedSecondary * amount_};
   // std::cout << "P: " << primary << " tP: " << transformedPrimary << " tS: " << transformedSecondary
   // << " amount: " << amount_ << " result: " << result << "\n";
