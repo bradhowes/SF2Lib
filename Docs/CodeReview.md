@@ -309,3 +309,48 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - The `File::load()` / `Parser::parse` fd leaks belong to step 5.
   - `Zone::Zone` and `Zone::resourceLink` still `throw std::runtime_error`. Neither throw is reachable with validated input, but they are still exceptions in code reached from the render thread.
   - The fuzzer does not cover MIDI/SysEx input to `Engine::doMIDIEvent`. That would be a second target, after the SysEx fixes in §3.2.
+
+**Step 5 — done (2026-11-21). Committed by the user as `a604806` "Do not leak file descriptors". `make test-macOS`: 318 tests, 0 failures.**
+- New `IO::UniqueFd` (`SF2File/IO/UniqueFd.hpp`): a move-only owner of a POSIX descriptor that closes it on destruction. It has `openForReading(path)` (`O_CLOEXEC`), `duplicate(fd)` (`F_DUPFD_CLOEXEC`), `get()`, `isValid()` and `reset()`.
+- `File` now owns its descriptor through a `UniqueFd fd_` member, replacing the unused `int fd_` and the hand-written destructor. `File(File&&) = default` now moves ownership instead of copying an int that would have been closed twice.
+- `File::load()` (path) opens into a `UniqueFd` instead of leaking a descriptor on every load. `File::load(int fd)` now duplicates the caller's descriptor, so the caller keeps ownership and may close it right away. Both go through a private `load(UniqueFd&&)`, which keeps the descriptor only on success; on failure it is closed and `sampleDataBegin_` is reset.
+- **Bookmark lifetime (§3.2):** this fixes it without any Engine logic change. In `beginLoadBookmarkAndPreset_RT`, the `NSFileHandle`'s descriptor can now be closed when the accessor block ends, and security-scoped access can stop. `File` keeps reading samples through its duplicate on later program changes, and can no longer read a reused descriptor that points at a different file. There is a comment at the call site.
+- `Parser::parse` and `SF2FileInfo::load` no longer leak their descriptors (`UniqueFd`; `SF2FileInfo` relies on `File::load(int)` duplicating).
+- Doc comments for `Engine::loadFileAndPreset(int, …)` and `SF2Engine::loadFileAndPreset(int, …)` now state the ownership rule. The stale "If -1, use the existing preset collection" claim is gone: the code never did that.
+- Tests added in the new `FileDescriptorTests`:
+  - `UniqueFd`: close on destruction, move construction and assignment, an independent duplicate, invalid inputs;
+  - `File::load(path)` ×25 leaves exactly one descriptor per live `File` and none after;
+  - failed loads leak nothing;
+  - `testLoadFromDescriptorSurvivesCallerClosingIt`: after the caller closes its descriptor, with and without the number being reused by `/dev/zero`, the loaded samples are identical to a by-path load;
+  - a moved `File` keeps a single descriptor;
+  - `Parser::parse` leaks nothing, whether it succeeds or throws.
+- In `FileInfoTests`, `testLoadingDoesNotLeakDescriptors` was added.
+- End to end in `EngineTests`, `testProgramChangeAfterBookmarkLoadReadsSamples` loads by bookmark inside an `@autoreleasepool` (so the `NSFileHandle` really is released), lets the descriptor number be reused, then sends MIDI program change 23 and a note. The rendering must match the same sequence after a by-path load, sample for sample.
+- Checked that the tests catch the bugs: on the pre-step-5 sources, all five leak tests fail. The descriptor-survival and bookmark tests fail too: `loadSamples` returns false, and the bookmark engine ends up with no active preset and renders silence. The first versions of those last two tests passed on the old code, because of descriptor reuse and autorelease timing. They were strengthened before committing.
+- No hard-coded rendering values changed.
+- Left over:
+  - `Config::samples()` (and `PresetsState::activePreset()`, `Zone::resourceLink()`) still `throw std::runtime_error`. They are unreachable when sample loading succeeds or the preset is made inactive, but they are still exceptions on render-thread paths (§4).
+  - The use-after-free and leak of old `PresetsState`s on file switch (§3.2) belong to step 8.
+- Since this step, the user switched `SF2::Float` to `float` (`b762bf3`, `f2f90bd`, DSPHeaders 1.6.1). That is step 9's sample-storage idea applied to all processing. Because DSPHeaders' `_F` literal still yields `double`, mixed-type `std::max` / `std::clamp` / `ConstMath::pow` calls need an explicit `<Float>`.
+
+**Step 7 — done (2026-11-22). Committed as `2781752` "Support preset modulators; "No Controller" = 1; reject reserved sources."; `make test-macOS`: 326 tests, 0 failures.**
+- **PMOD support (7.4, 9.5.1):** the new `State::addPresetModulators(globalPreset, preset)` is called from `Config::applyTo` after the instrument and preset generators. A global preset zone modulator is skipped if the local preset zone has an identical one. Within a zone, the last of several identical modulators wins (7.4). Each remaining preset modulator goes through `addPresetModulator`, which adds its amount to an identical modulator already installed (instrument level or default), using the new `Modulator::addAmountFrom`, or appends it as a new modulator. Instrument-level replacement (`addModulator`) is unchanged.
+- The validity checks from step 4 are now `State::isUsable` and apply to preset modulators too.
+- **"No Controller" = 1 (8.2.1):** `Modulator::value` now treats an inactive primary source as 1 instead of returning 0, so a source-less modulator applies `amount × amount-source` as a constant. The amount source already behaved this way. The `Entity::Modulator` doc comment that said 'none' returns 0.0 is corrected.
+- **Reserved sources (8.2.1):** `Source::isValid` now rejects general index 127 (a 2.04 link). It also rejects CC 99 and 100: the spec makes 98–101 illegal, but only 98 and 101 were rejected. The `default:` case in `makeValueProvider` can no longer be reached for usable modulators.
+- **Tests added**, in a new `PresetModulatorTests` (8 tests). Each builds two files with `SF2Builder` that the spec says must be equivalent, renders a note through the Engine (with CC 16 / CC 17 set), and requires identical output. Each also checks that the modulator under test really changes the sound:
+  - preset 100 + instrument 200 ≡ instrument 300;
+  - a preset modulator with no match ≡ the same instrument modulator;
+  - a preset amount of −960 on the default velocity→attenuation modulator ≡ an instrument modulator replacing it with 0;
+  - local preset supersedes global (≡ local only, ≠ summed);
+  - an un-superseded global preset modulator is added;
+  - duplicate preset modulators: last wins;
+  - a "No Controller" modulator of 200 cB ≡ the initialAttenuation generator at 200, at both instrument and preset level;
+  - reserved general and CC sources, including as the amount source, are ignored.
+- **Tests updated:** `ModulatorSourceTests` now expects 127 to be invalid, and adds 38 and 99/100 to the illegal CCs.
+- **Checked that the tests catch the bugs:** on the pre-step sources, 7 of the 8 new tests and both updated source tests fail. The eighth (duplicates) passed vacuously until it was given its own non-vacuity check.
+- No hard-coded rendering values changed: none of the test presets use PMOD or "No Controller" sources.
+- **Left over:**
+  - Modulator identity (`Entity::Modulator::operator==`) still ignores the transform. 9.5.1 includes it, while 7.4 lists only the three enumerators. It only matters once a second transform (2.04 "absolute value") is supported.
+  - Unknown `sfModTransOper` values are not checked.
+  - `State::modulators_` still grows with `emplace_back` at voice start, an allocation on the render thread (§4, step 8).
