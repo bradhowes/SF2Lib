@@ -10,6 +10,7 @@
 #include <XCTest/XCTest.h>
 
 #include "SampleBasedContexts.hpp"
+#include "SF2Builder.hpp"
 
 #include "SF2Lib/Configuration.hpp"
 #include "SF2Util/Base64.hpp"
@@ -2332,6 +2333,39 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   auto wide = render({selectRPN0Msb, selectRPN0Lsb, dataEntry(12), fullUp}, {});
   XCTAssertFalse(wide == defaultBend);
   XCTAssertFalse(wide == unbent);
+}
+
+- (void)testVolumeEnvelopeAttackIsLinearInAmplitude
+{
+  // SF2.01 8.1.2 #34: the volume envelope attack is "convex" so that the result is linear in amplitude. Play the
+  // minimal looped sine with a 1 second attack and compare the level at 25%, 50% and 75% of the attack with the level
+  // once the attack has finished. Previously the attack was linear in dB, so half way through it was at -48 dB.
+  auto builder = SF2Builder::minimal();
+  builder.igen.insert(builder.igen.begin(), {SF2Builder::Gen{34, 0}}); // attackVolEnv = 0 timecents = 1 second
+  builder.ibag[1].generatorIndex += 1;
+  auto path = std::string(NSTemporaryDirectory().UTF8String) + "SF2LibAttack.sf2";
+  builder.writeTo(path);
+
+  auto harness{TestEngineHarness{48000.0}};
+  XCTAssertEqual(harness.load(path, 0), IO::File::LoadResponse::ok);
+  auto mixer{harness.createMixer(1.5)};
+  harness.sendNoteOn(69, 127);
+  harness.renderToEnd(mixer);
+  const AUValue* data = harness.dryBuffer().floatChannelData[0];
+  std::vector<AUValue> samples(data, data + harness.duration());
+
+  // RMS over 10 ms windows (just under 4.5 cycles of the 441 Hz sine), centred on each point. The default delay is
+  // -12000 timecents (about 1 ms), which shifts the attack by less than 0.1%.
+  auto windowRMS = [&samples](double seconds) {
+    auto centre = size_t(seconds * 48'000);
+    return rms(samples, centre - 240, centre + 240);
+  };
+  auto full = windowRMS(1.25);
+  XCTAssertGreaterThan(full, 0.01);
+  for (double fraction : {0.25, 0.5, 0.75}) {
+    // Allow for the 1 cB resolution of `DSP::centibelsToAttenuation` (about 1.2% in amplitude) and the window.
+    XCTAssertEqualWithAccuracy(windowRMS(fraction) / full, fraction, fraction * 0.03, @"at %.0f%%", fraction * 100);
+  }
 }
 
 - (void)testVolumeEnvelopeSustainLevelIsAppliedInDecibels

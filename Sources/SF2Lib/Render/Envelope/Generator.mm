@@ -91,6 +91,7 @@ Generator::noteReleased() noexcept
 void
 Generator::start() noexcept {
   value_ = 0_F;
+  attackProgress_ = 0_F;
   enterStage(StageIndex::delay);
 }
 

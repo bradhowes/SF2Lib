@@ -26,7 +26,7 @@ public:
   /**
    Create a volume envelope for a voice
    */
-  inline Volume() noexcept : Generator("VolGen") {}
+  inline Volume() noexcept : Generator("VolGen") { enableConvexAttack(); }
 
   /**
    Create new envelope for volume changes over time.
@@ -47,7 +47,7 @@ public:
 
 private:
   Volume(Float sampleRate, Float delay, Float attack, Float hold, Float decay, int sustain, Float release) noexcept :
-  Generator(sampleRate, "VolGen", delay, attack, hold, decay, sustain, release) {}
+  Generator(sampleRate, "VolGen", delay, attack, hold, decay, sustain, release) { enableConvexAttack(); }
 
   friend struct EnvelopeTestInjector;
 };

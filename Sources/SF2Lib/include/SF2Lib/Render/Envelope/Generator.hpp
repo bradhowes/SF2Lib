@@ -61,6 +61,21 @@ inline constexpr Float centibelsToVolumeEnvelope(Float centibels) noexcept {
 }
 
 /**
+ Shape of the volume envelope attack (SF2.01 8.1.2 #34 attackVolEnv): "the attack is 'convex'; the curve is nominally
+ such that when applied to the decibel volume parameter, the result is linear in amplitude." Given the linear progress
+ through the attack (0 to 1), return the normalised-dB envelope value whose gain (see `volumeEnvelopeToCentibels`) is
+ that same fraction of full scale.
+
+ @param progress how far through the attack, from 0 (start) to 1 (peak)
+ @returns envelope value in the normalised-dB domain
+ */
+inline Float volumeEnvelopeAttackCurve(Float progress) noexcept {
+  if (progress <= 0_F) return 0_F;
+  if (progress >= 1_F) return 1_F;
+  return centibelsToVolumeEnvelope(Float(-200.0 * std::log10(double(progress))));
+}
+
+/**
  Generator of values for the SF2 volume/modulation envelopes. An SF2 envelope contains 6 stages:
 
  - Delay -- number of samples to delay the beginning of the attack stage
@@ -179,7 +194,14 @@ protected:
    */
   inline Float getNextValue() noexcept {
     if (!checkForNextStage()) return 0_F;
-    value_ = stages_[stageIndex_].next(value_);
+    if (convexAttack_ && stageIndex_ == StageIndex::attack) {
+      // The stage ramps the attack *progress* linearly; the envelope value follows the convex curve. Because `value_`
+      // holds the shaped value, a release during the attack starts from the level actually being heard.
+      attackProgress_ = std::min<Float>(stages_[StageIndex::attack].next(attackProgress_), 1_F);
+      value_ = volumeEnvelopeAttackCurve(attackProgress_);
+    } else {
+      value_ = stages_[stageIndex_].next(value_);
+    }
     if (value_ < 0_F) return stop();
     if (value_ > 1_F) value_ = 1_F;
     --counter_;
@@ -188,6 +210,10 @@ protected:
   }
 
   void configureVolumeEnvelope(const State& state) noexcept;
+
+  /// Shape the attack with `volumeEnvelopeAttackCurve` (volume envelope only). The modulation envelope keeps a linear
+  /// attack: "linear in Hz" for gen 26 depends on the destination and depth, and FluidSynth also uses a linear ramp.
+  void enableConvexAttack() noexcept { convexAttack_ = true; }
 
   void configureModulationEnvelope(const State& state) noexcept;
 
@@ -228,7 +254,9 @@ private:
   StageIndex stageIndex_{StageIndex::idle};
   int counter_{0};
   Float value_{0_F};
+  Float attackProgress_{0_F};
   Float sustainLevel_{0_F};
+  bool convexAttack_{false};
   const os_log_t log_;
 
   static const StateNameArray stageNames_;

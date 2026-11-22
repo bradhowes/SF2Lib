@@ -24,6 +24,10 @@ struct EnvelopeTestInjector {
     return Volume(1.0, delay, attack, hold, decay, sustain, release);
   }
 
+  static Modulation modDAHDSR(Float delay, Float attack, Float hold, Float decay, int sustain, Float release) {
+    return Modulation(1.0, delay, attack, hold, decay, sustain, release);
+  }
+
   template <EnvelopeGenerator T>
   static Float sustain(const T& gen) { return gen.sustainLevel(); }
 };
@@ -104,36 +108,58 @@ gen.noteReleased();
 }
 
 - (void)testAttack {
+  // SF2.01 8.1.2 #34: the volume envelope attack is "convex" so that the resulting gain is linear in amplitude. Each
+  // value is the normalised-dB envelope value whose gain equals the progress through the attack.
   auto gen = EnvelopeTestInjector::DAHDSR(0, 10, 0, 0, 0, 0);
   gen.start();
-  XCTAssertEqualWithAccuracy(0.1, gen.getNextValue().val, self.epsilon);
-  XCTAssertEqual(StageIndex::attack, gen.activeIndex());
-  XCTAssertEqualWithAccuracy(0.2, gen.getNextValue().val, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.3, gen.getNextValue().val, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.4, gen.getNextValue().val, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.5, gen.getNextValue().val, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.6, gen.getNextValue().val, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.7, gen.getNextValue().val, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.8, gen.getNextValue().val, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.9, gen.getNextValue().val, self.epsilon);
-  XCTAssertEqualWithAccuracy(1.0, gen.getNextValue().val, self.epsilon);
+  for (int step = 1; step <= 10; ++step) {
+    auto value = gen.getNextValue().val;
+    auto progress = step / 10.0;
+    XCTAssertEqualWithAccuracy(value, volumeEnvelopeAttackCurve(Float(progress)), self.epsilon, @"step %d", step);
+    // The gain the voice derives from this value (exact, without the 1 cB lookup table) is linear in the progress.
+    auto gain = std::pow(10.0, -volumeEnvelopeToCentibels(value) / 200.0);
+    XCTAssertEqualWithAccuracy(gain, progress, progress * 1.0e-5, @"step %d", step);
+    if (step < 10) XCTAssertEqual(StageIndex::attack, gen.activeIndex());
+  }
   XCTAssertEqual(StageIndex::decay, gen.activeIndex());
   XCTAssertEqualWithAccuracy(1.0, gen.getNextValue().val, self.epsilon);
   XCTAssertEqual(StageIndex::sustain, gen.activeIndex());
   XCTAssertEqualWithAccuracy(1.0, gen.getNextValue().val, self.epsilon);
 }
 
+- (void)testAttackCurveShape {
+  // Half way through the attack the gain is half of full scale (-6 dB), not -48 dB as with a linear-in-dB ramp.
+  XCTAssertEqualWithAccuracy(volumeEnvelopeToCentibels(volumeEnvelopeAttackCurve(0.5_F)), 60.206, 0.001);
+  XCTAssertEqual(volumeEnvelopeAttackCurve(0_F), 0_F);
+  XCTAssertEqual(volumeEnvelopeAttackCurve(-1_F), 0_F);
+  XCTAssertEqual(volumeEnvelopeAttackCurve(1_F), 1_F);
+  // Below the 96 dB noise floor the curve is 0.
+  XCTAssertEqual(volumeEnvelopeAttackCurve(1.0e-6_F), 0_F);
+}
+
+- (void)testModulationEnvelopeAttackStaysLinear {
+  // The modulation envelope (gen 26) keeps a linear attack (see `Generator::enableConvexAttack`).
+  auto gen = EnvelopeTestInjector::modDAHDSR(0, 10, 0, 0, 0, 0);
+  gen.start();
+  for (int step = 1; step <= 10; ++step) {
+    XCTAssertEqualWithAccuracy(step / 10.0, gen.getNextValue().val, self.epsilon, @"step %d", step);
+  }
+}
+
 - (void)testAttackAborted {
   auto gen = EnvelopeTestInjector::DAHDSR(0, 10, 0, 0, 200, 3);
   gen.start();
-  XCTAssertEqualWithAccuracy(0.1, gen.getNextValue().val, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.2, gen.getNextValue().val, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.3, gen.getNextValue().val, self.epsilon);
-  XCTAssertEqualWithAccuracy(0.4, gen.getNextValue().val, self.epsilon);
+  XCTAssertEqualWithAccuracy(volumeEnvelopeAttackCurve(0.1_F), gen.getNextValue().val, self.epsilon);
+  XCTAssertEqualWithAccuracy(volumeEnvelopeAttackCurve(0.2_F), gen.getNextValue().val, self.epsilon);
+  XCTAssertEqualWithAccuracy(volumeEnvelopeAttackCurve(0.3_F), gen.getNextValue().val, self.epsilon);
+  auto atRelease = gen.getNextValue().val;
+  XCTAssertEqualWithAccuracy(volumeEnvelopeAttackCurve(0.4_F), atRelease, self.epsilon);
   gen.noteReleased();
   XCTAssertFalse(gen.isAttack());
   XCTAssertEqual(StageIndex::release, gen.activeIndex());
-  XCTAssertEqualWithAccuracy(0.06666666666666666, gen.getNextValue().val, self.epsilon);
+  // The release starts from the shaped value actually being heard (gain 0.4), not from the raw attack progress, so
+  // there is no jump in level.
+  XCTAssertEqualWithAccuracy(atRelease - 1.0 / 3.0, gen.getNextValue().val, self.epsilon);
 }
 
 - (void)testHold {
