@@ -141,34 +141,52 @@ Naming: `_RT` is used for functions that actually run on the work queue (`beginL
 
 ## 5. SoundFont 2.01 conformance checklist
 
+Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each row was checked against the current code. The step that changed a row is given in brackets.
+
 | Spec item | Status |
 |---|---|
 | 7.x RIFF structure, chunk tags, entity sizes (38/4/10/4/22/46) | ✅ |
-| 7.x "reject if size not multiple of N / index ≥ terminal" | ❌ not validated |
-| 7.2 duplicate bank/program → first wins | ⚠️ unstable sort |
-| 7.3/7.7 global zone rules (first zone only; empty zone ignored; non-global without terminal gen ignored) | ✅ |
-| 7.4/7.5 duplicate gen/mod in zone → last wins | ✅ (replace semantics) |
+| 7.x "reject if size not multiple of N / index ≥ terminal" | ✅ [step 4] `ChunkItems::load` rejects bad sizes. `File::validate` checks terminal records, zone/gen/mod index order and range, and instrument/sample links. Linked samples must lie inside `smpl` |
+| 5.1 ifil "missing, or its size is not four bytes → reject" | ✅ a wrong size is rejected [step 4], as is a *missing* `ifil` |
+| 7.2 duplicate bank/program → first wins | ✅ duplicates appear in order seen in file
+| 7.3/7.7 global zone rules (first zone only; empty zone ignored; non-global without terminal gen ignored) | ✅ (unknown generators are now dropped before a zone is classified [step 4]) |
+| 7.4/7.5 duplicate gen/mod in zone → last wins | ✅ instrument level replaces; preset level skips all but the last of identical modulators in a zone [step 7] |
 | 7.10 originalPitch 128–254/255 → 60 | ✅ (255 also forces constant pitch — beyond spec, worth documenting) |
-| 8.1 unknown generators ignored | ❌ OOB (see §3.1) |
+| 7.10 sample rate 0 → "nearest practical value" | ✅ [step 4, found by fuzzing] clamped to 400 Hz in `Pitch::configure` |
+| 5.4/5.5/7.10 ROM samples (no `irom`/`iver` → "accesses … should be terminated and not sound") | ✅ `File::validate` rejects the file if an instrument zone uses a ROM sample header (ROM headers no instrument uses are allowed). The spec only asks for such zones to be silent; with no ROM support at all, rejecting is stricter but simpler |
+| 8.1 unknown generators ignored | ✅ [step 4] `Generator::isValid`; dropped in `Zone::Collection::add`, skipped in `State` |
 | 8.1.2 ranges / defaults table | ✅ `Definition.mm` matches the spec table |
-| Gen 0/4 start offsets | ❌ ignored |
-| Gen 1/2/3/12/45/50 end/loop offsets | ✅ via `Bounds` |
-| Gen 8/9/10/11 filter | ❌ filter disabled; 10/11 not wired |
-| Gen 38 releaseVolEnv/30 releaseModEnv max 8000 | ⚠️ capped at 5000 |
-| Gen 34 attackVolEnv "convex, linear in amplitude" | ⚠️ implemented linear in dB (acknowledged in comments) |
-| Gen 37 sustainVolEnv | ❌ domain mismatch |
+| Gen 0/4 start offsets | ✅ [step 3] `Index::start()` uses `Bounds::startPos()`; bounds are computed after live parameters are applied |
+| Gen 1/2/3/12/45/50 end/loop offsets | ✅ via `Bounds` (now also settable through the AU parameter tree [step 3]) |
+| Gen 54 sampleModes looping | ⚠️ loop only used when `Bounds::hasLoop()` [steps 3, 4], but §3.3 is still open: `Index::increment` subtracts `loopSize()` once (a short loop at high pitch can overrun), and interpolation around the loop end/start is not wrapped correctly |
+| Gen 8/9/10/11 filter | ✅ [step 6] enabled; Fc = initialFilterFc + modLfo·gen10 + modEnv·gen11 (cents); 8.1.2 #8 bypass (≥ 20 kHz with Q = 0) and #9 DC gain −Q/2 implemented. Deviation: the gain at the cutoff is Q − 3.01 dB rather than Q (FluidSynth convention, so 0 cB is a non-resonant Butterworth) |
+| Gen 38 releaseVolEnv/30 releaseModEnv max 8000 | ✅ `releaseTimecentsToSeconds` now clamps at 8000, matching `Definition.mm` |
+| Gen 34 attackVolEnv "convex, linear in amplitude" | ⚠️ unchanged: the attack ramps the normalised-dB envelope linearly, so it is linear in dB (acknowledged in comments) |
+| Gen 37 sustainVolEnv | ✅ [step 1] sustain level and voice gain share one normalised-dB mapping |
 | Gen 46/47 keynum/velocity overrides | ✅ |
-| Gen 57 exclusiveClass | ⚠️ global zone ignored; hard cut |
-| 8.2.1 "No Controller" source = value 1, not a way to turn a modulator off | ❌ returns 0 (`Modulator.mm:95`) |
-| 8.2.1 reserved source indices → ignore modulator | ⚠️ 127 accepted; amount source unchecked |
+| Gen 57 exclusiveClass | ⚠️ unchanged: `Config` reads it from the local instrument zone only (global zone ignored, unlike `Voice::exclusiveClass()`), and other voices of the class are cut off rather than given a fast release |
+| 8.2.1 "No Controller" source = value 1, not a way to turn a modulator off | ✅ [step 7] |
+| 8.2.1 reserved source indices → ignore modulator | ✅ [steps 4, 7] general 127 and other reserved indices rejected; CC 0, 6, 32–63, 98–101, 120–127 rejected; the amount source and the destination are validated too |
+| 8.2.1 source 16 "pitch wheel sensitivity … sent from the MIDI RPN 0 command" | ❌ RPN 0 is not decoded (§3.3 NRPN item), so `ChannelState::pitchWheelSensitivity` stays at its reset value of 2 and the source never changes over MIDI |
+| 8.2.4 / 7.4 unknown `sfModTransOper` values | ⚠️ not checked: every transform is treated as linear (the only 2.01 value), so a 2.04 "absolute value" transform is silently ignored rather than the modulator being ignored |
 | 8.4 default modulators | ✅, with two deviations worth documenting: CC10→pan amount 500 (spec says 1000; FluidSynth makes the same choice), and velocity→Fc has no 0x502 amount source (matches 2.04, not 2.01) |
 | 8.5 preset-level-forbidden generators ignored | ✅ (`isAvailableInPreset`) |
 | 9.4 generator precedence (default → global inst → local inst; preset adds) | ✅ |
-| 9.5.1 modulator identity includes transform | ⚠️ `operator==` ignores transform (comment cites 7.4 only) |
-| 9.5.1 PMOD additive | ❌ ignored |
+| 9.5.1 modulator identity includes transform | ⚠️ unchanged: `operator==` ignores the transform (7.4 lists only the three enumerators). This only matters once a second transform is supported |
+| 9.5.1 PMOD additive | ✅ [step 7] preset modulators add their amount to an identical instrument/default modulator, or are added as new; local preset supersedes global preset |
 | 9.5.1 inst modulators supersede defaults | ✅ |
 | 7.10 stereo links "played synchronously, pitch from right sample" | ❌ not implemented (acknowledged in `Voice.hpp`) |
-| Modulated value clamping to gen range after summation | ⚠️ ad hoc per consumer (envelopes, filter, pan are clamped; tuning, Q, send levels partially) |
+| Modulated value clamping to gen range after summation | ⚠️ ad hoc per consumer (envelope times, filter Fc/Q, pan and the sample rate are clamped; tuning and send levels only partially) |
+
+**Summary:** of the 8 ❌ rows in the original review, 7 are now ✅ (size/index validation, unknown generators, start offsets, filter, sustain, "No Controller", PMOD); release-time capping (⚠️) and reserved sources (⚠️) are also ✅. Still ❌: stereo links, plus the newly listed RPN 0 / pitch-wheel sensitivity. Open ⚠️ items, roughly in order of audible impact:
+- loop wrap/interpolation (§3.3);
+- attack curve;
+- exclusiveClass;
+- duplicate presets;
+- ROM samples;
+- missing `ifil`;
+- the transform field;
+- clamping after summation.
 
 ---
 
