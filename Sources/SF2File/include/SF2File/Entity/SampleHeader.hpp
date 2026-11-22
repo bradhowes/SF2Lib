@@ -52,7 +52,7 @@ public:
    */
   SampleHeader(uint32_t start, uint32_t end, uint32_t loopBegin, uint32_t loopEnd,
                uint32_t sampleRate, uint8_t key, int8_t adjustment = 0, uint16_t link = 0,
-               Type type = Type::monoSample) noexcept;
+               Type type = Type::monoSample);
 
   bool sampleIsA(Type type) const noexcept {
     return (sampleType & SF2::valueOf(type)) == SF2::valueOf(type);

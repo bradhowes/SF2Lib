@@ -49,6 +49,33 @@ File::load(int fd) noexcept
   return load(UniqueFd::duplicate(fd));
 }
 
+namespace {
+[[noreturn]] void reject() { throw File::LoadResponse::invalidFormat; }
+
+/**
+ Validate the zone indices of a PHDR/INST collection and its PBAG/IBAG collection. Each owner's zones are the bags in
+ [firstZoneIndex, next owner's firstZoneIndex), and each bag's generators and modulators run up to the next bag's
+ indices, so the indices must not decrease and the terminal records must not point past the end of the next list.
+ */
+template <typename Owners>
+void validateZones(const Owners& owners, const ChunkItems<SF2::Entity::Bag>& bags, size_t generatorCount,
+                   size_t modulatorCount) {
+  for (size_t index = 0; index < owners.size(); ++index) {
+    if (owners[index + 1].firstZoneIndex() < owners[index].firstZoneIndex()) reject();
+  }
+  if (owners[owners.size()].firstZoneIndex() > bags.size()) reject();
+
+  for (size_t index = 0; index < bags.size(); ++index) {
+    if (bags[index + 1].firstGeneratorIndex() < bags[index].firstGeneratorIndex()) reject();
+    if (bags[index + 1].firstModulatorIndex() < bags[index].firstModulatorIndex()) reject();
+  }
+  if (bags[bags.size()].firstGeneratorIndex() > generatorCount) reject();
+  if (bags[bags.size()].firstModulatorIndex() > modulatorCount) reject();
+}
+
+} // namespace
+
+
 File::LoadResponse
 File::load(UniqueFd&& owned) noexcept
 {
@@ -60,6 +87,7 @@ File::load(UniqueFd&& owned) noexcept
   if (fileSize < 16) return LoadResponse::invalidFormat;
 
   size_ = fileSize;
+  auto hasIFIL = false;
 
   try {
     auto riff = Pos(fd, 0, size_).makeChunkList();
@@ -80,6 +108,7 @@ File::load(UniqueFd&& owned) noexcept
           case Tags::ifil:
             if (chunk.size() != 4) throw File::LoadResponse::invalidFormat;
             soundFontVersion_.load(chunk.begin());
+            hasIFIL = true;
             break;
           case Tags::isng: soundEngine_ = chunk.extract(); break;
           case Tags::inam: embeddedName_ = chunk.extract(); break;
@@ -106,6 +135,7 @@ File::load(UniqueFd&& owned) noexcept
         }
       }
     }
+    if (!hasIFIL) reject();
     validate();
   } catch (File::LoadResponse) {
     sampleDataBegin_ = Pos(-1, 0, 0);
@@ -123,41 +153,14 @@ File::load(UniqueFd&& owned) noexcept
   // Create an indirection index that provides the presets ordered by bank/program ordering.
   presetIndicesOrderedByBankProgram_.resize(presets_.size());
   std::iota(presetIndicesOrderedByBankProgram_.begin(), presetIndicesOrderedByBankProgram_.end(), 0);
-  std::sort(presetIndicesOrderedByBankProgram_.begin(), presetIndicesOrderedByBankProgram_.end(),
-            [&](size_t aIndex, size_t bIndex) {
+  std::stable_sort(presetIndicesOrderedByBankProgram_.begin(), presetIndicesOrderedByBankProgram_.end(),
+                   [&](size_t aIndex, size_t bIndex) {
     return presets_[aIndex] < presets_[bIndex];
   });
 
   loaded_ = true;
   return LoadResponse::ok;
 }
-
-namespace {
-
-[[noreturn]] void reject() { throw File::LoadResponse::invalidFormat; }
-
-/**
- Validate the zone indices of a PHDR/INST collection and its PBAG/IBAG collection. Each owner's zones are the bags in
- [firstZoneIndex, next owner's firstZoneIndex), and each bag's generators and modulators run up to the next bag's
- indices, so the indices must not decrease and the terminal records must not point past the end of the next list.
- */
-template <typename Owners>
-void validateZones(const Owners& owners, const ChunkItems<SF2::Entity::Bag>& bags, size_t generatorCount,
-                   size_t modulatorCount) {
-  for (size_t index = 0; index < owners.size(); ++index) {
-    if (owners[index + 1].firstZoneIndex() < owners[index].firstZoneIndex()) reject();
-  }
-  if (owners[owners.size()].firstZoneIndex() > bags.size()) reject();
-
-  for (size_t index = 0; index < bags.size(); ++index) {
-    if (bags[index + 1].firstGeneratorIndex() < bags[index].firstGeneratorIndex()) reject();
-    if (bags[index + 1].firstModulatorIndex() < bags[index].firstModulatorIndex()) reject();
-  }
-  if (bags[bags.size()].firstGeneratorIndex() > generatorCount) reject();
-  if (bags[bags.size()].firstModulatorIndex() > modulatorCount) reject();
-}
-
-} // namespace
 
 void
 File::validate() const
@@ -185,6 +188,9 @@ File::validate() const
     auto sampleIndex = generator.amount().unsignedAmount();
     if (sampleIndex >= sampleHeaders_.size()) reject();
     const auto& header = sampleHeaders_[sampleIndex];
+    // SF2.01 5.4, 5.5, 7.10: ROM samples refer to sample memory we do not have. The spec asks for such zones to be
+    // silent; with no ROM support at all we reject the file instead. Only headers that an instrument uses are checked.
+    if (header.isROM()) reject();
     if (header.startIndex() > header.endIndex() || header.endIndex() > sampleCount) reject();
   }
 }

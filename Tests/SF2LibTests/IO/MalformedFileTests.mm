@@ -128,6 +128,68 @@ static double peak(const std::vector<AUValue>& samples)
   }
 }
 
+- (void)testMissingIfilIsRejected {
+  // SF2.01 5.1: "If the ifil sub-chunk is missing, or its size is not four bytes, the file should be rejected".
+  auto builder = SF2Builder::minimal();
+  builder.omittedChunks.insert("ifil");
+  XCTAssertEqual(load(builder), LoadResponse::invalidFormat);
+}
+
+- (void)testROMSampleIsRejected {
+  // SF2.01 5.4, 5.5, 7.10: there is no ROM sample memory, so an instrument that uses a ROM sample makes the file be
+  // rejected. Previously it was played from `smpl` as if it were a RAM sample.
+  auto builder = SF2Builder::minimal();
+  builder.shdr[0].type = 0x8001; // romMonoSample
+  XCTAssertEqual(load(builder), LoadResponse::invalidFormat);
+
+  // A ROM header that no instrument uses does not matter.
+  builder = SF2Builder::minimal();
+  builder.shdr.insert(builder.shdr.end() - 1, {"ROM", 0, 100, 10, 90, 44'100, 60, 0, 0, 0x8001});
+  XCTAssertEqual(load(builder), LoadResponse::ok);
+}
+
+- (void)testDuplicateBankProgramFirstWins {
+  // SF2.01 7.2: if two presets have the same bank and program, the first one in PHDR is used. 40 presets alternating
+  // between programs 0 and 1 is a pattern that libc++'s (unstable) `std::sort` reorders, so this catches a regression
+  // from `std::stable_sort`.
+  const size_t duplicates = 40;
+  auto builder = SF2Builder::minimal();
+  builder.phdr.clear();
+  builder.pbag.clear();
+  builder.pgen.clear();
+  for (size_t index = 0; index < duplicates; ++index) {
+    // Bank 0, program 0 or 1, each with its own zone that uses the same instrument.
+    builder.phdr.push_back({"P" + std::to_string(index), uint16_t(index % 2), 0, uint16_t(index)});
+    builder.pbag.push_back({uint16_t(index), 0});
+    builder.pgen.push_back({SF2Builder::genInstrument, 0});
+  }
+  builder.phdr.push_back({"EOP", 0, 0, uint16_t(duplicates)});
+  builder.pbag.push_back({uint16_t(duplicates), 0});
+  builder.pgen.push_back({0, 0});
+
+  IO::File file;
+  XCTAssertEqual(load(builder, &file), LoadResponse::ok);
+  // Program 0 presets first (P0, P2, ...), then program 1 (P1, P3, ...), each group in file order.
+  const auto& order = file.presetIndicesOrderedByBankProgram();
+  XCTAssertEqual(order.size(), duplicates);
+  for (size_t index = 0; index < order.size(); ++index) {
+    auto expected = index < duplicates / 2 ? index * 2 : (index - duplicates / 2) * 2 + 1;
+    XCTAssertEqual(order[index], expected, @"position %zu", index);
+  }
+
+  // And through the Engine: selecting bank 0 / program 0 or 1 picks the first such preset in the file.
+  auto path = tempPath("duplicates");
+  builder.writeTo(path);
+  auto harness{TestEngineHarness{48000.0}};
+  XCTAssertEqual(harness.load(path, 5), LoadResponse::ok);
+  harness.sendRaw(harness.engine().createUseBankProgramPayload(0, 0));
+  harness.drainWorkQueue();
+  XCTAssertEqual(std::string("P0"), harness.engine().activePresetName());
+  harness.sendRaw(harness.engine().createUseBankProgramPayload(0, 1));
+  harness.drainWorkQueue();
+  XCTAssertEqual(std::string("P1"), harness.engine().activePresetName());
+}
+
 - (void)testBadIfilSizeIsRejected {
   auto builder = SF2Builder::minimal();
   builder.ifilSize = 2;

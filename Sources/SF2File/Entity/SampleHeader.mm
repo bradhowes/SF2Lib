@@ -18,7 +18,7 @@ SampleHeader::SampleHeader(IO::Pos& pos)
 
 SampleHeader::SampleHeader(uint32_t start, uint32_t end, uint32_t loopBegin, uint32_t loopEnd,
                            uint32_t sampleRate, uint8_t key, int8_t adjustment, uint16_t link,
-                           Type type) noexcept :
+                           Type type) :
 achSampleName{"blah"},
 dwStart{start},
 dwEnd{end},
@@ -29,7 +29,9 @@ originalKey{key},
 correction{adjustment},
 sampleLink{link},
 sampleType{SF2::valueOf(type)}
-{}
+{
+  if (isROM()) throw std::runtime_error("ROM samples are not supported.");
+}
 
 std::string
 SampleHeader::sampleTypeDescription() const noexcept
