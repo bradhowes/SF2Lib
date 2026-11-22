@@ -2335,6 +2335,32 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertFalse(wide == unbent);
 }
 
+- (void)testShortLoopAtHighPitchKeepsLooping
+{
+  // §3.3: a loop shorter than the per-sample increment used to be wrapped by a single subtraction, so the play position
+  // drifted past the loop and on past the end of the samples. Use a 4-sample loop and play 3 octaves above the root
+  // key (an increment of about 7.35 samples). The note must keep looping, with bounded output, for the whole render.
+  auto builder = SF2Builder::minimal();
+  builder.shdr[0].startLoop = 100;
+  builder.shdr[0].endLoop = 104;
+  auto path = std::string(NSTemporaryDirectory().UTF8String) + "SF2LibShortLoop.sf2";
+  builder.writeTo(path);
+
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  XCTAssertEqual(harness.load(path, 0), IO::File::LoadResponse::ok);
+  auto mixer{harness.createMixer(0.5)};
+  harness.sendNoteOn(69 + 36, 127);
+  harness.renderToEnd(mixer);
+  XCTAssertEqual(engine.activeVoiceCount(), size_t(1));
+
+  const AUValue* data = harness.dryBuffer().floatChannelData[0];
+  std::vector<AUValue> samples(data, data + harness.duration());
+  XCTAssertTrue(std::all_of(samples.begin(), samples.end(), [](AUValue v) { return std::isfinite(v) && std::abs(v) < 1; }));
+  // Still sounding in the last 100 ms (the sample itself is only 2000 frames long).
+  XCTAssertGreaterThan(rms(samples, samples.size() - 4'800, samples.size()), 0.001);
+}
+
 - (void)testVolumeEnvelopeAttackIsLinearInAmplitude
 {
   // SF2.01 8.1.2 #34: the volume envelope attack is "convex" so that the result is linear in amplitude. Play the

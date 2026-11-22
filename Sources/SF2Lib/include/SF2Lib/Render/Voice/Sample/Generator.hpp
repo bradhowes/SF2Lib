@@ -77,8 +77,11 @@ public:
     canLoop = canLoop && bounds_.hasLoop();
     auto whole{index_.whole()};
     auto partial{index_.partial()};
+    // Whether playback has already wrapped around the loop, taken before this increment can change it. Only then is the
+    // sample before the loop start the one at the loop end.
+    auto hasLooped = canLoop && index_.looped();
     index_.increment(increment, canLoop);
-    return (this->*interpolatorProc_)(whole, partial, canLoop);
+    return (this->*interpolatorProc_)(whole, partial, canLoop, hasLooped);
   }
 
   /// @returns true if sill generating samples
@@ -88,7 +91,7 @@ public:
   bool looped() const noexcept { return index_.looped(); }
 
 private:
-  using InterpolatorProc = Float (Generator::*)(size_t, Float, bool) const;
+  using InterpolatorProc = Float (Generator::*)(size_t, Float, bool, bool) const;
 
   inline static InterpolatorProc interpolator(Interpolator kind) noexcept {
     return kind == Interpolator::linear ? &Generator::linearInterpolate : &Generator::cubic4thOrderInterpolate;
@@ -100,9 +103,10 @@ private:
    @param whole the index of the first sample to use
    @param partial the non-integral part of the index
    @param canLoop true if wrapping around in loop is allowed
+   @param hasLooped true if playback has already wrapped around the loop (unused: linear does not look backwards)
    @returns interpolated sample result
    */
-  inline Float linearInterpolate(size_t whole, Float partial, bool canLoop) const noexcept {
+  inline Float linearInterpolate(size_t whole, Float partial, bool canLoop, bool) const noexcept {
     return Float(DSPHeaders::DSP::Interpolation::linear(partial, sample(whole, canLoop), sample(whole + 1, canLoop)));
   }
 
@@ -112,21 +116,35 @@ private:
    @param whole the index of the first sample to use
    @param partial the non-integral part of the index
    @param canLoop true if wrapping around in loop is allowed
+   @param hasLooped true if playback has already wrapped around the loop
    @returns interpolated sample result
    */
-  inline Float cubic4thOrderInterpolate(size_t whole, Float partial, bool canLoop) const noexcept {
-    return Float(DSPHeaders::DSP::Interpolation::cubic4thOrder(partial, before(whole, canLoop), sample(whole, canLoop),
-                                                               sample(whole + 1, canLoop), sample(whole + 2, canLoop)));
+  inline Float cubic4thOrderInterpolate(size_t whole, Float partial, bool canLoop, bool hasLooped) const noexcept {
+    return Float(DSPHeaders::DSP::Interpolation::cubic4thOrder(partial, before(whole, canLoop, hasLooped),
+                                                               sample(whole, canLoop), sample(whole + 1, canLoop),
+                                                               sample(whole + 2, canLoop)));
   }
 
+  /**
+   Fetch a sample for interpolation. When looping, any index at or past the loop end maps back into the loop: cubic
+   interpolation reads up to two samples ahead, so `endLoopPos + 1` must become `startLoopPos + 1` (only `endLoopPos`
+   itself used to be wrapped).
+   */
   Float sample(size_t whole, bool canLoop) const noexcept {
-    if (whole == bounds_.endLoopPos() && canLoop) { whole = bounds_.startLoopPos(); }
+    if (canLoop && whole >= bounds_.endLoopPos()) {
+      whole = bounds_.startLoopPos() + (whole - bounds_.endLoopPos()) % bounds_.loopSize();
+    }
     return (*samples_)[whole];
   }
 
-  Float before(size_t whole, bool canLoop) const noexcept {
+  /**
+   Fetch the sample before `whole` for cubic interpolation. At the loop start, the sample before it is the one at the
+   loop end, but only once playback has actually wrapped around: on the first pass it is the real preceding sample.
+   (This used to wrap on the first pass too.)
+   */
+  Float before(size_t whole, bool canLoop, bool hasLooped) const noexcept {
+    if (canLoop && hasLooped && whole == bounds_.startLoopPos()) { return (*samples_)[bounds_.endLoopPos() - 1]; }
     if (whole == 0) { return 0_F; }
-    if (whole == bounds_.startLoopPos() && canLoop) { whole = bounds_.endLoopPos(); }
     return (*samples_)[whole - 1];
   }
 

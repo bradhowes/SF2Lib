@@ -158,7 +158,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 | 8.1.2 ranges / defaults table | ✅ `Definition.mm` matches the spec table |
 | Gen 0/4 start offsets | ✅ [step 3] `Index::start()` uses `Bounds::startPos()`; bounds are computed after live parameters are applied |
 | Gen 1/2/3/12/45/50 end/loop offsets | ✅ via `Bounds` (now also settable through the AU parameter tree [step 3]) |
-| Gen 54 sampleModes looping | ⚠️ loop only used when `Bounds::hasLoop()` [steps 3, 4], but §3.3 is still open: `Index::increment` subtracts `loopSize()` once (a short loop at high pitch can overrun), and interpolation around the loop end/start is not wrapped correctly |
+| Gen 54 sampleModes looping | ✅ loops only when `Bounds::hasLoop()` [steps 3, 4]. `Index::increment` wraps by modulo, so any increment stays inside the loop (§3.3 "loop wrap at high pitch"). Interpolation reads at or past the loop end map back into the loop, and the sample before the loop start is the loop end only once playback has wrapped (§3.3 "interpolation at loop end") |
 | Gen 8/9/10/11 filter | ✅ [step 6] enabled; Fc = initialFilterFc + modLfo·gen10 + modEnv·gen11 (cents); 8.1.2 #8 bypass (≥ 20 kHz with Q = 0) and #9 DC gain −Q/2 implemented. Deviation: the gain at the cutoff is Q − 3.01 dB rather than Q (FluidSynth convention, so 0 cB is a non-resonant Butterworth) |
 | Gen 38 releaseVolEnv/30 releaseModEnv max 8000 | ✅ `releaseTimecentsToSeconds` now clamps at 8000, matching `Definition.mm` |
 | Gen 34 attackVolEnv "convex, linear in amplitude" | ✅ the volume envelope ramps its attack *progress* linearly and outputs `volumeEnvelopeAttackCurve(progress)`, the normalised-dB value whose gain equals the progress, so the attack is linear in amplitude (half way = −6 dB). A release during the attack starts from the shaped level. Deviation: the modulation envelope attack (gen 26, "linear in Hz") stays linear, as in FluidSynth, because the right curve depends on the destination and depth |
@@ -179,7 +179,6 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 | Modulated value clamping to gen range after summation | ⚠️ ad hoc per consumer (envelope times, filter Fc/Q, pan and the sample rate are clamped; tuning and send levels only partially) |
 
 **Summary:** of the 8 ❌ rows in the original review, 7 are now ✅ (size/index validation, unknown generators, start offsets, filter, sustain, "No Controller", PMOD); release-time capping (⚠️) and reserved sources (⚠️) are also ✅. Still ❌: stereo links. (RPN 0 / pitch-wheel sensitivity, listed in this re-evaluation, has since been fixed.) Open ⚠️ items, roughly in order of audible impact:
-- loop wrap/interpolation (§3.3);
 - exclusiveClass;
 - duplicate presets;
 - ROM samples;
@@ -478,3 +477,17 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - With the convex attack disabled, all three changed tests fail.
 - No hard-coded rendering values changed: the bundled test presets' attacks are too short to affect the values sampled.
 - **Behaviour change:** notes with a non-zero volume attack time now rise linearly in amplitude, so they are louder early in the attack and reach full level smoothly.
+
+**Follow-up (2026-11-22): gen 54 sampleModes looping (§3.3 loop wrap and interpolation). Not yet committed. `make test-macOS`: 356 tests, 0 failures.**
+- **Loop wrap:** `Sample::Index::increment` used to subtract `loopSize()` once at the loop end. With an increment larger than the loop (a short loop played at a high pitch), the position stayed past the loop end and drifted forward. The end-of-sample check is only on the non-looping branch, so it read past the end of the sample buffer. The position now wraps by modulo: `startLoop + (whole − endLoop) % loopSize`.
+- **Interpolation at the loop end:** `Sample::Generator::sample()` used to wrap only `whole == endLoopPos`, but cubic interpolation also reads `whole + 2`. Every read at or past the loop end now wraps the same way.
+- **Interpolation at the loop start:** `Sample::Generator::before()` used to substitute the loop-end sample at the loop start on the very first pass, before any looping had happened. It now does so only once playback has wrapped. That is captured as `hasLooped` *before* the index is incremented, and the interpolator functions take it as an extra parameter.
+- **Tests added:**
+  - `IndexTests::testLargeIncrementStaysInsideShortLoop`: an increment of 100 on a 47-sample loop, for 200 steps.
+  - `IndexTests::testCubicInterpolationAcrossLoopBoundaries` (increment 1.5) and `testCubicInterpolationWithIncrementLargerThanLoop` (increment 40.25 on a 16-sample loop). These run the real `Sample::Generator` over a synthetic sample whose values encode their index, and compare every output with a reference model of the correct wrap rules.
+  - `EngineTests::testShortLoopAtHighPitchKeepsLooping`: a 4-sample loop played 3 octaves up stays active, with finite, bounded output that is still sounding at the end of 0.5 s.
+- **Checked that the tests catch each bug,** by putting back each old behaviour on its own:
+  - the single subtraction fails the index test, the large-increment reference test and the engine test;
+  - the exact-end-only wrap fails both reference tests;
+  - the first-pass loop-start wrap fails the 1.5 reference test.
+- No hard-coded rendering values changed: none of the sampled values fall on a loop boundary.

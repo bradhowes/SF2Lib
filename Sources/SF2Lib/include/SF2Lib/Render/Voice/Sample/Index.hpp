@@ -66,7 +66,10 @@ public:
     }
 
     if (canLoop && bounds_.hasLoop() && whole_ >= bounds_.endLoopPos()) {
-      whole_ -= bounds_.loopSize();
+      // Wrap back into the loop. A single subtraction of the loop size is not enough when the increment is larger than
+      // the loop (a short loop played at a high pitch): the index would stay past the loop end, keep drifting forward,
+      // and read past the end of the samples. `hasLoop()` guarantees `loopSize() > 0`.
+      whole_ = bounds_.startLoopPos() + (whole_ - bounds_.endLoopPos()) % bounds_.loopSize();
       looped_ = true;
     }
     else if (whole_ >= bounds_.endPos()) {
