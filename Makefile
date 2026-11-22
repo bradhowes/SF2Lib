@@ -1,4 +1,4 @@
-PLATFORM_IOS = iOS Simulator,name=iPad mini (A17 Pro)
+PLATFORM_IOS = iOS Simulator,name=iPad mini (A20 Pro)
 PLATFORM_MACOS = macOS
 XCCOV = xcrun xccov view --report --only-targets
 SCHEME = 'SF2Lib-Package (Release)'
