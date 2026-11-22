@@ -167,7 +167,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 | Gen 57 exclusiveClass | ⚠️ unchanged: `Config` reads it from the local instrument zone only (global zone ignored, unlike `Voice::exclusiveClass()`), and other voices of the class are cut off rather than given a fast release |
 | 8.2.1 "No Controller" source = value 1, not a way to turn a modulator off | ✅ [step 7] |
 | 8.2.1 reserved source indices → ignore modulator | ✅ [steps 4, 7] general 127 and other reserved indices rejected; CC 0, 6, 32–63, 98–101, 120–127 rejected; the amount source and the destination are validated too |
-| 8.2.1 source 16 "pitch wheel sensitivity … sent from the MIDI RPN 0 command" | ❌ RPN 0 is not decoded (§3.3 NRPN item), so `ChannelState::pitchWheelSensitivity` stays at its reset value of 2 and the source never changes over MIDI |
+| 8.2.1 source 16 "pitch wheel sensitivity … sent from the MIDI RPN 0 command" | ✅ `ChannelState` decodes RPN 0 (CC 101/100 = 0/0, then Data Entry MSB = semitones) into `pitchWheelSensitivity`. An RPN stays selected across unrelated CCs until another RPN/NRPN or the RPN null (127/127). Data Entry LSB (cents), Data Entry increment/decrement and other RPNs are ignored |
 | 8.2.4 / 7.4 unknown `sfModTransOper` values | ⚠️ not checked: every transform is treated as linear (the only 2.01 value), so a 2.04 "absolute value" transform is silently ignored rather than the modulator being ignored |
 | 8.4 default modulators | ✅, with two deviations worth documenting: CC10→pan amount 500 (spec says 1000; FluidSynth makes the same choice), and velocity→Fc has no 0x502 amount source (matches 2.04, not 2.01) |
 | 8.5 preset-level-forbidden generators ignored | ✅ (`isAvailableInPreset`) |
@@ -178,7 +178,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 | 7.10 stereo links "played synchronously, pitch from right sample" | ❌ not implemented (acknowledged in `Voice.hpp`) |
 | Modulated value clamping to gen range after summation | ⚠️ ad hoc per consumer (envelope times, filter Fc/Q, pan and the sample rate are clamped; tuning and send levels only partially) |
 
-**Summary:** of the 8 ❌ rows in the original review, 7 are now ✅ (size/index validation, unknown generators, start offsets, filter, sustain, "No Controller", PMOD); release-time capping (⚠️) and reserved sources (⚠️) are also ✅. Still ❌: stereo links, plus the newly listed RPN 0 / pitch-wheel sensitivity. Open ⚠️ items, roughly in order of audible impact:
+**Summary:** of the 8 ❌ rows in the original review, 7 are now ✅ (size/index validation, unknown generators, start offsets, filter, sustain, "No Controller", PMOD); release-time capping (⚠️) and reserved sources (⚠️) are also ✅. Still ❌: stereo links. (RPN 0 / pitch-wheel sensitivity, listed in this re-evaluation, has since been fixed.) Open ⚠️ items, roughly in order of audible impact:
 - loop wrap/interpolation (§3.3);
 - attack curve;
 - exclusiveClass;
@@ -432,3 +432,36 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - §6.1's further option, keeping samples as `int16` and scaling during interpolation (a quarter of the original `double` footprint), was not done. Neither was §6.7's per-sample-header loading, which avoids loading the whole `[minStart, maxEnd]` range for scattered drum kits.
   - An SF2-specific `_F` literal returning `Float` would remove the explicit `<Float>` template arguments.
   - §2's diagram still says `SampleVector<double>`.
+
+**Follow-up (2026-11-22): SF2.01 8.2.1 source 16, RPN 0 pitch-wheel sensitivity. Not yet committed. `make test-macOS`: 344 tests, 0 failures.**
+- `ChannelState::setContinuousControllerValue` now tracks RPN selection: CC 101/100 select it (the RPN null 127/127 deselects), and selecting an NRPN deselects it. A Data Entry MSB (CC 6) with RPN 0 selected sets `pitchWheelSensitivity_` in semitones. That is the value of modulator source 16, which the default pitch-wheel modulator (8.4.10) uses as its amount source.
+- RPN selection is kept separate from the NRPN decoder. An unrelated CC does not deselect an RPN, as MIDI requires; the NRPN decoder still cancels on unrelated CCs (§3.3, still open).
+- Not handled: the Data Entry LSB (extra cents, which the semitone-resolution source cannot represent), Data Entry increment/decrement (CC 96/97), and other RPNs.
+- The header's default for `pitchWheelSensitivity_` is corrected to 2. It said 200, although `reset()` always set 2. The `setPitchWheelSensitivity` doc comment now gives the unit as semitones.
+- Tests added:
+  - `ChannelStateTests::testRPN0SetsPitchWheelSensitivity`: RPN 0 sets the value, the Data Entry LSB does not change it, and an intervening CC 1 does not deselect.
+  - `ChannelStateTests::testRPNDataEntryOnlyAppliesToRPN0`: Data Entry is ignored with nothing selected, with RPN 1, after the RPN null, and after an NRPN is selected; `reset()` restores 2.
+  - `EngineTests::testRPN0PitchWheelSensitivityControlsBendRange` (end to end through `doMIDIEvent`): with RPN 0 = 0, a full bend renders identically to no bend, whether RPN 0 is sent before the note or while it sounds; with RPN 0 = 2, it matches the default; 12 differs from both.
+- With the RPN data-entry handling disabled, all three tests fail.
+- **Behaviour change:** hosts that send RPN 0 now get the bend range they ask for, instead of a fixed 2 semitones.
+- **Left over:** MIDI RP-015 says Reset All Controllers (CC 121) should not reset RPN values, but `reset_RT` → `ChannelState::reset()` puts the sensitivity back to 2.
+
+
+**Follow-up (2026-11-22): NRPN cancellation (§3.3) and CC 121 Reset All Controllers. Not yet committed. `make test-macOS`: 349 tests, 0 failures.**
+- **NRPN:** `ChannelState::decodeNRPN` no longer ends SF2 NRPN decoding when any other controller arrives. Per SF2.01 9.6.2, only CC 99 (NRPN) and CC 101 (RPN) change the Data Entry mode, so a mod wheel, pedal or volume message between the NRPN select and its Data Entry no longer drops the value. Data Entry is still applied when the MSB arrives, combined with the most recent LSB: 9.6.3 specifies exactly that, so the "LSB after MSB is ignored" part of the §3.3 note is spec behaviour, not a bug.
+- **CC 121:** this used to call `reset_RT()` (stop every voice and power-on reset of the channel state, including bank select and pitch-wheel sensitivity). It now calls the new `Engine::resetAllControllers_RT()`, which uses the new `ChannelState::resetControllers()` and follows MIDI RP-015.
+  - Reset: modulation (CC 1/33) to 0, expression (CC 11/43) to 127, the pedals (CC 64–67) to off, the RPN/NRPN numbers to null, pitch bend to centre, and channel and key pressure to 0.
+  - Kept: bank select, volume, pan, the sound and effects controllers, and the RPN/NRPN values (pitch-wheel sensitivity and the SF2 NRPN generator offsets).
+  - Voices keep sounding with the reset values. Notes held only by sustain or sostenuto are released through the normal pedal-release path.
+  - The MIDI System Reset message (0xFF) still calls `reset_RT()`.
+- **Tests added:**
+  - `ChannelStateTests::testUnrelatedControllersDoNotCancelNRPN`: CC 1, CC 64 and CC 7 between the select and the Data Entry; the value still lands, and the other controllers still apply.
+  - `ChannelStateTests::testResetControllersFollowsRP015`: every reset and kept item, plus Data Entry having no effect after the reset.
+  - End to end through `doMIDIEvent` in `EngineTests`:
+    - `testResetAllControllersReleasesPedalHeldNotes`: CC 121 sounds identical to lifting the sustain pedal at the same time.
+    - `testResetAllControllersKeepsHeldNotesSounding`: identical to sending no CC 121.
+    - `testResetAllControllersRecentresBendButKeepsBendRange`: identical to sending a centre bend; an RPN 0 range of 12 survives CC 121.
+- **Tests updated:** `testEngineResetAllControllers` expected bank select to be reset and the voice stopped. Both contradict RP-015; it now expects the opposite.
+- **Checked that the tests catch the bugs:** with the NRPN cancel and the old `reset_RT()` call put back, all 6 new or updated tests fail (9 assertions).
+- **Behaviour change:** CC 121 no longer silences notes, and no longer resets bank select or the pitch-bend range.
+- **Left over:** RP-015 also lists Legato (CC 68) and Hold 2 (CC 69) in some revisions, and General MIDI 2 adds others. Only CC 64–67 are reset here.
