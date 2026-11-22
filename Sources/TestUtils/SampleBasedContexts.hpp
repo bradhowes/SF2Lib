@@ -34,18 +34,20 @@ struct TestEngineHarness {
 
   Mixer createMixer(double seconds) noexcept
   {
-    duration_ = AVAudioFrameCount(seconds * engine_.sampleRate());
-    dryBuffer_ = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format_ frameCapacity:duration_];
+    bufferDuration_ = seconds;
+    bufferFrameCount_ = AVAudioFrameCount(ceil(seconds * engine_.sampleRate()));
+    bufferFrameIndex_ = 0;
+    dryBuffer_ = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format_ frameCapacity:bufferFrameCount_];
     dryFacet_.setChannelCount(2);
     dryFacet_.assignBufferList(dryBuffer_.mutableAudioBufferList);
     DSPHeaders::BusBuffers dry{dryFacet_.busBuffers()};
 
-    chorusBuffer_ = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format_ frameCapacity:duration_];
+    chorusBuffer_ = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format_ frameCapacity:bufferFrameCount_];
     chorusFacet_.setChannelCount(2);
     chorusFacet_.assignBufferList(chorusBuffer_.mutableAudioBufferList);
     DSPHeaders::BusBuffers chorus{chorusFacet_.busBuffers()};
 
-    reverbBuffer_ = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format_ frameCapacity:duration_];
+    reverbBuffer_ = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format_ frameCapacity:bufferFrameCount_];
     reverbFacet_.setChannelCount(2);
     reverbFacet_.assignBufferList(reverbBuffer_.mutableAudioBufferList);
     DSPHeaders::BusBuffers reverb{reverbFacet_.busBuffers()};
@@ -53,28 +55,30 @@ struct TestEngineHarness {
     return Mixer(dry, chorus, reverb);
   }
 
-  AVAudioFrameCount renderOnce(Mixer& mixer) noexcept {
-    engine_.renderInto(mixer, maxFramesToRender_);
-    mixer.shiftOver(maxFramesToRender_);
-    return ++renderIndex_;
+  void renderMaxFramesCount(Mixer& mixer, AVAudioFrameCount count = 1) noexcept {
+    renderForCount(mixer, count * maxFramesToRender_);
   }
 
-  void renderUntil(Mixer& mixer, AVAudioFrameCount limit) noexcept {
-    while (renderIndex_ < limit) {
-      engine_.renderInto(mixer, maxFramesToRender_);
-      mixer.shiftOver(maxFramesToRender_);
-      ++renderIndex_;
+  void renderForCount(Mixer& mixer, AVAudioFrameCount count) noexcept {
+    if (bufferFrameIndex_ < bufferFrameCount_) {
+      auto amount = std::min(bufferFrameCount_ - bufferFrameIndex_, count);
+      if (amount > 0) {
+        engine_.renderInto(mixer, amount);
+        mixer.shiftOver(amount);
+        bufferFrameIndex_ += amount;
+      }
     }
+  }
+
+  void renderForDuration(Mixer& mixer, double duration) noexcept {
+    auto amount = AVAudioFrameCount(duration * engine_.sampleRate());
+    renderForCount(mixer, amount);
   }
 
   void renderToEnd(Mixer& mixer) noexcept {
-    auto limit = renders();
-    while (renderIndex_++ < limit) {
-      engine_.renderInto(mixer, maxFramesToRender_);
-      mixer.shiftOver(maxFramesToRender_);
+    if (bufferFrameIndex_ < bufferFrameCount_) {
+      renderForCount(mixer, bufferFrameCount_ - bufferFrameIndex_);
     }
-    limit = remaining();
-    if (limit) engine_.renderInto(mixer, limit);
   }
 
   Engine& engine() noexcept { return engine_; }
@@ -106,14 +110,14 @@ struct TestEngineHarness {
   void usePresetWithIndex(size_t index) { engine_.loadFileAndPreset("", index); }
 
   AVAudioFrameCount maxFramesToRender() const noexcept { return maxFramesToRender_; }
+  AVAudioFrameCount bufferFrameCount() const noexcept { return bufferFrameCount_; }
+  AVAudioFrameCount bufferFrameIndex() const noexcept { return bufferFrameIndex_; }
 
   AVAudioPCMBuffer* dryBuffer() const noexcept { return dryBuffer_; }
   AVAudioPCMBuffer* chorusBuffer() const noexcept { return chorusBuffer_; }
   AVAudioPCMBuffer* reverbBuffer() const noexcept { return reverbBuffer_; }
 
-  AVAudioFrameCount duration() const noexcept { return duration_; }
-  AVAudioFrameCount renders() const noexcept { return duration_ / maxFramesToRender_; }
-  AVAudioFrameCount remaining() const noexcept { return duration_ - renders() * maxFramesToRender_; }
+  double duration() const noexcept { return bufferDuration_; }
 
   AUValue lastDrySample() noexcept { return dryFacet_.busBuffers()[0][-1]; }
   AUValue lastChorusSample() noexcept { return chorusFacet_.busBuffers()[0][-1]; }
@@ -186,16 +190,20 @@ struct TestEngineHarness {
 
 private:
   Engine engine_;
+  double bufferDuration_;
+
   AUAudioFrameCount maxFramesToRender_{512};
+  AVAudioFrameCount bufferFrameCount_{0};
+  AVAudioFrameCount bufferFrameIndex_{0};
+
   AVAudioFormat* format_{nullptr};
   AVAudioPCMBuffer* dryBuffer_{nullptr};
   AVAudioPCMBuffer* chorusBuffer_{nullptr};
   AVAudioPCMBuffer* reverbBuffer_{nullptr};
-  AVAudioFrameCount duration_{0};
+
   DSPHeaders::BusBufferFacet dryFacet_;
   DSPHeaders::BusBufferFacet chorusFacet_;
   DSPHeaders::BusBufferFacet reverbFacet_;
-  AVAudioFrameCount renderIndex_{0};
 };
 
 

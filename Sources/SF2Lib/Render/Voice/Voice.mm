@@ -73,6 +73,18 @@ Voice::start() noexcept
 }
 
 void
+Voice::releaseKeyViaExclusiveClass() noexcept
+{
+  keyDown_ = false;
+  if (! released_) {
+    postponedRelease_ = false;
+    released_ = true;
+    volumeEnvelope_.noteAborted();
+    modulatorEnvelope_.stop();
+  }
+}
+
+void
 Voice::releaseKey(const ReleaseKeyState& releaseKeyState) noexcept
 {
   keyDown_ = false;

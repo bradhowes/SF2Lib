@@ -54,16 +54,16 @@ static int allocationsDuring(void (^block)())
   // Warm up: the first voice on each slot is the same work as any other, so no warm-up is needed for correctness, but
   // doing one note first keeps one-time library initialisation (e.g. os_log) out of the count.
   harness.sendNoteOn(60, 100);
-  harness.renderOnce(mixer);
+  harness.renderMaxFramesCount(mixer);
   harness.sendNoteOff(60);
 
   auto __block harnessPtr = &harness;
   auto __block mixerPtr = &mixer;
   int count = allocationsDuring(^{
     for (uint8_t key : {60, 64, 67, 72}) harnessPtr->sendNoteOn(key, 100);
-    for (int render = 0; render < 10; ++render) harnessPtr->renderOnce(*mixerPtr);
+    for (int render = 0; render < 10; ++render) harnessPtr->renderMaxFramesCount(*mixerPtr);
     for (uint8_t key : {60, 64, 67, 72}) harnessPtr->sendNoteOff(key);
-    harnessPtr->renderOnce(*mixerPtr);
+    harnessPtr->renderMaxFramesCount(*mixerPtr);
   });
   XCTAssertGreaterThan(harness.engine().activeVoiceCount(), size_t(0));
   XCTAssertEqual(count, 0);
@@ -131,7 +131,7 @@ static int allocationsDuring(void (^block)())
   auto mixer{harness.createMixer(2.0)};
   XCTAssertEqual(harness.load(self.contexts->context0.path(), 0), LoadResponse::ok);
   harness.sendNoteOn(60, 100);
-  harness.renderOnce(mixer);
+  harness.renderMaxFramesCount(mixer);
   XCTAssertEqual(engine.activeVoiceCount(), size_t(1));
 
   // Load another file while the voice sounds. The old state is retired, not freed: the render thread still uses it.
@@ -140,14 +140,14 @@ static int allocationsDuring(void (^block)())
   XCTAssertEqual(engine.activeVoiceCount(), size_t(1));
 
   // The next render switches to the new state and stops the old voice.
-  harness.renderOnce(mixer);
+  harness.renderMaxFramesCount(mixer);
   XCTAssertEqual(engine.activeVoiceCount(), size_t(0));
 
   // Repeated loads, each followed by a render, never leave more than the most recently replaced state waiting.
   for (int count = 0; count < 10; ++count) {
     XCTAssertEqual(harness.load(self.contexts->context0.path(), 0), LoadResponse::ok);
     harness.sendNoteOn(60, 100);
-    harness.renderOnce(mixer);
+    harness.renderMaxFramesCount(mixer);
     XCTAssertEqual(engine.activeVoiceCount(), size_t(1));
     XCTAssertLessThanOrEqual(harness.retiredPresetsStateCount(), size_t(1));
   }

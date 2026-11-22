@@ -131,6 +131,10 @@ public:
   void releaseKey(const ReleaseKeyState& releaseKeyState) noexcept;
 
   /**
+   Record that the key is no longer pressed due to another with the same exclusiveClass setting.
+   */
+  void releaseKeyViaExclusiveClass() noexcept;
+  /**
    Notification that a sustain or sostenuto pedal was released. Voices whose release was postponed and that are no
    longer held by any pedal transition to their release phase. Voices whose key is still down are not affected.
 

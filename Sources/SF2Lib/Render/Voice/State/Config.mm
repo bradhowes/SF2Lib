@@ -15,11 +15,23 @@ Config::Config(const Zone::Preset &preset, const Zone::Preset *globalPreset,
   : preset_{preset}, globalPreset_{globalPreset}, instrument_{instrument}, globalInstrument_{globalInstrument},
     eventKey_{eventKey}, eventVelocity_{eventVelocity}, exclusiveClass_{0}
 {
+  // Look for an exclusiveClass definition in the global instrument if there is one. Let a later definition override
+  // an earlier one.
+  if (globalInstrument) {
+    for (const auto& box : globalInstrument->generators()) {
+      const auto& gen{box.get()};
+      if (gen.index() == Entity::Generator::Index::exclusiveClass) {
+        exclusiveClass_ = gen.amount().unsignedAmount();
+      }
+    }
+  }
+
+  // Look for an exclusiveClass definition in the instrument. Let a later definition override
+  // an earlier one as well as any found in a global instrument.
   for (const auto& box : instrument_.generators()) {
     const auto& gen{box.get()};
     if (gen.index() == Entity::Generator::Index::exclusiveClass) {
       exclusiveClass_ = gen.amount().unsignedAmount();
-      break;
     }
   }
 }

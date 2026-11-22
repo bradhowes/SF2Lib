@@ -127,10 +127,17 @@ public:
   using Index = Entity::Generator::Index;
   using State = Render::Voice::State::State;
 
+  static constexpr Float noteAbortReleaseDuration = 0.005; // 5ms
+
   /**
    Note has been released, so jump to the release stage.
    */
   void noteReleased() noexcept;
+
+  /**
+   Note was aborted and enter s release stage with a short decay.
+   */
+  void noteAborted() noexcept;
 
   /**
    Start the envelope generator. NOTE: this is already called by the configure...Envelope() routines below. Harmless to call again
@@ -256,6 +263,7 @@ private:
   Float value_{0_F};
   Float attackProgress_{0_F};
   Float sustainLevel_{0_F};
+  int noteAbortReleaseDurationInSamples_;
   bool convexAttack_{false};
   const os_log_t log_;
 

@@ -56,7 +56,7 @@ static std::vector<AUValue> render(const SF2Builder& builder, uint8_t velocity =
   harness.sendNoteOn(69, velocity);
   harness.renderToEnd(mixer);
   const AUValue* data = harness.dryBuffer().floatChannelData[0];
-  return std::vector<AUValue>(data, data + harness.duration());
+  return std::vector<AUValue>(data, data + harness.bufferFrameCount());
 }
 
 @interface PresetModulatorTests : XCTestCase

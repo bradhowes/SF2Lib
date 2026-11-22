@@ -9,7 +9,7 @@ let checkedVectorIndexing = false
 let enableLowPassFilter = true
 
 // Set to true to play audio generated in tests.
-let playAudioDuringTests = false
+let playAudioDuringTests = true
 
 // Set to true to enable Accelerate framework
 let useAccelerate = true

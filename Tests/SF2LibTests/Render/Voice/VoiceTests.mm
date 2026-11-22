@@ -31,23 +31,18 @@ using namespace SF2::Render::Voice::State;
   auto harness{TestEngineHarness{48000.0, 96, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder}};
   harness.load(self.contexts->context2.path(), 0);
 
-  int seconds = 4;
+  double seconds = 4.0;
   int repetitions = 14;
   auto mixer{harness.createMixer(seconds)};
 
-  auto renderCount = harness.renders();
-  auto playing = renderCount / 2;
-
-  auto noteOnRenders = playing / AVAudioFrameCount(repetitions);
-  auto runningRenders = AVAudioFrameCount{0};
+  auto playing = seconds / 2;
+  auto noteDuration = playing / repetitions;
 
   std::vector<AUValue> samples;
-
   uint8_t note = 64;
   for (auto iteration = 1; iteration <= repetitions; ++iteration) {
     harness.sendNoteOn(note);
-    runningRenders += noteOnRenders;
-    harness.renderUntil(mixer, runningRenders);
+    harness.renderForDuration(mixer, noteDuration);
     samples.push_back(harness.lastDrySample());
     harness.sendNoteOff(note);
     note = note == 64 ? 65 : 64;
@@ -60,23 +55,21 @@ using namespace SF2::Render::Voice::State;
 
   std::cout << std::setprecision(12);
 
-  // if constexpr (std::is_same_v<Float, float>) {
-  XCTAssertEqualWithAccuracy(-0.0698651000857, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00836017355323, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0588996708393, samples[2], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.009357242845, samples[3], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0550787374377, samples[4], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0125944437459, samples[5], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.054721660912, samples[6], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0133919101208, samples[7], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0541880838573, samples[8], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0135757969692, samples[9], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0541263818741, samples[10], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0136384507641, samples[11], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0540896803141, samples[12], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0136456955224, samples[13], self.epsilon);
-  XCTAssertEqualWithAccuracy(1.26977931814e-06, samples[14], self.epsilon);
-  // }
+  XCTAssertEqualWithAccuracy(0.0536821633577, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0147259831429, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0305624380708, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0242499131709, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0266245156527, samples[4], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0241541340947, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0269547197968, samples[6], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0243006944656, samples[7], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0267410967499, samples[8], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0243631061167, samples[9], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0267161950469, samples[10], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0243697613478, samples[11], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.0267082154751, samples[12], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0243727508932, samples[13], self.epsilon);
+  XCTAssertEqualWithAccuracy(9.68133463175e-07, samples[14], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.duration()];
 }

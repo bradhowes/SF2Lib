@@ -53,7 +53,7 @@ static std::vector<AUValue> renderNote(const SF2Builder& builder, LoadResponse& 
   if (voices) *voices = harness.engine().activeVoiceCount();
   harness.renderToEnd(mixer);
   const AUValue* data = harness.dryBuffer().floatChannelData[0];
-  return std::vector<AUValue>(data, data + harness.duration());
+  return std::vector<AUValue>(data, data + harness.bufferFrameCount());
 }
 
 static double peak(const std::vector<AUValue>& samples)
@@ -308,7 +308,7 @@ static double peak(const std::vector<AUValue>& samples)
     harness.sendRaw(std::array<uint8_t, 3>{0xB0, 16, 64});
     harness.renderToEnd(mixer);
     const AUValue* data = harness.dryBuffer().floatChannelData[0];
-    return std::make_pair(response, std::vector<AUValue>(data, data + harness.duration()));
+    return std::make_pair(response, std::vector<AUValue>(data, data + harness.bufferFrameCount()));
   };
 
   auto builder = SF2Builder::minimal();

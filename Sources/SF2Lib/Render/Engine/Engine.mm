@@ -838,12 +838,10 @@ Engine::initialize(Float sampleRate) noexcept
 void
 Engine::stopAllExclusiveVoices_RT(int exclusiveClass) noexcept
 {
-  for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
+  for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ++pos) {
     auto voiceIndex = *pos;
     if (voices_[voiceIndex].exclusiveClass() == exclusiveClass) {
-      pos = stopVoice_RT(voiceIndex);
-    } else {
-      ++pos;
+      voices_[voiceIndex].releaseKeyViaExclusiveClass();
     }
   }
 }

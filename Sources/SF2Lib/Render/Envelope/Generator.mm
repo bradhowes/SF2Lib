@@ -66,18 +66,28 @@ constexpr Float midiKeyModulatorEnvelopeDecayAdjustment(const Generator::State& 
   return midiKeyEnvelopeScaling(state, Generator::Index::midiKeyToModulatorEnvelopeDecay);
 }
 
-Generator::Generator(const char* logTag) noexcept : log_{Log::create(logTag)} {}
+Generator::Generator(const char* logTag) noexcept : log_{Log::create(logTag)}, noteAbortReleaseDurationInSamples_{0} {}
 
 Generator::Generator(Float sampleRate, const char* logTag, Float delay, Float attack, Float hold, Float decay, int sustain,
                      Float release) noexcept : log_{Log::create(logTag)}
 {
   sustainLevel_ = 1_F - sustain / 1'000_F;
+  noteAbortReleaseDurationInSamples_ = int(round(sampleRate * noteAbortReleaseDuration));
   stages_[StageIndex::delay].setDelay(int(round(sampleRate * delay)));
   stages_[StageIndex::attack].setAttack(int(round(sampleRate * attack)));
   stages_[StageIndex::hold].setHold(int(round(sampleRate * hold)));
   stages_[StageIndex::decay].setDecay(sustainLevel_, int(round(sampleRate * decay)));
   stages_[StageIndex::sustain].setSustain();
   stages_[StageIndex::release].setRelease(int(round(sampleRate * release)));
+}
+
+void
+Generator::noteAborted() noexcept
+{
+  if (stageIndex_ != StageIndex::idle) {
+    stages_[StageIndex::release].setRelease(noteAbortReleaseDurationInSamples_);
+    enterStage(StageIndex::release);
+  }
 }
 
 void
