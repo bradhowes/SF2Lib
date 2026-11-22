@@ -44,8 +44,23 @@ ChannelState::reset() noexcept
   pitchWheelValue_ = (maxPitchWheelValue + 1) / 2; // This is the middle of the wheel at rest
   pitchWheelSensitivity_ = 2; // This should resolve to 200 cents
   nrpnIndex_ = 0;
+  rpnSelected_ = false;
 
   pedalState_ = {false, false, false};
+}
+
+void
+ChannelState::applyRPNDataEntry(uint8_t value) noexcept
+{
+  auto msb = continuousControllerValues_[ControlChange::rpnMSB];
+  auto lsb = continuousControllerValues_[ControlChange::rpnLSB];
+
+  // RPN 0 (MSB 0, LSB 0) is pitch bend sensitivity. The Data Entry MSB is the range in semitones, which is the value of
+  // the SF2.01 "pitch wheel sensitivity" modulator source (8.2.1, index 16). The Data Entry LSB holds additional cents;
+  // the modulator source only has semitone resolution, so it is ignored.
+  if (msb == 0 && lsb == 0) {
+    pitchWheelSensitivity_ = value & 0x7F;
+  }
 }
 
 bool
@@ -122,12 +137,44 @@ ChannelState::decodeNRPN(MIDI::ControlChange cc, uint8_t value) noexcept
       break;
 
     default:
-      activeDecoding_ = false;
-      nrpnIndex_ = 0;
+      // SF2.01 9.6.2: CC 99 (NRPN MSB) puts the synthesizer in NRPN Data Entry mode and CC 101 (RPN MSB) in RPN mode.
+      // Other controllers do not change the mode, so a CC (e.g. the mod wheel or a pedal) sent between the NRPN select
+      // and its Data Entry must not cancel it. (This used to clear `activeDecoding_`.)
       break;
   }
 
   return false;
+}
+
+void
+ChannelState::resetControllers() noexcept
+{
+  // MIDI RP-015 "Response to Reset All Controllers". Reset these:
+  continuousControllerValues_[ControlChange::modulationWheelMSB] = 0;
+  continuousControllerValues_[ControlChange::modulationWheelLSB] = 0;
+  continuousControllerValues_[ControlChange::expressionMSB] = 127;
+  continuousControllerValues_[ControlChange::expressionLSB] = 127;
+  for (auto cc : {ControlChange::sustainSwitch, ControlChange::portamentoSwitch, ControlChange::sostenutoSwitch,
+                  ControlChange::softPedalSwitch}) {
+    continuousControllerValues_[cc] = 0;
+  }
+  pedalState_ = {false, false, false};
+
+  // RPN and NRPN numbers go to "null", so a following Data Entry does nothing.
+  continuousControllerValues_[ControlChange::nrpnLSB] = 127;
+  continuousControllerValues_[ControlChange::nrpnMSB] = 127;
+  continuousControllerValues_[ControlChange::rpnLSB] = 127;
+  continuousControllerValues_[ControlChange::rpnMSB] = 127;
+  activeDecoding_ = false;
+  rpnSelected_ = false;
+  nrpnIndex_ = 0;
+
+  pitchWheelValue_ = (maxPitchWheelValue + 1) / 2;
+  channelPressure_ = 0;
+  notePressureValues_.fill(0);
+
+  // Do NOT reset: bank select, volume, pan, sound controllers (70-79), effects depths (91-95), or RPN/NRPN *values*
+  // (pitch wheel sensitivity and the SF2 NRPN generator offsets in `nrpnValues_`).
 }
 
 bool
@@ -138,6 +185,22 @@ ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, uint8_t value
   continuousControllerValues_[cc] = value;
 
   switch (cc) {
+    case ControlChange::rpnMSB:
+    case ControlChange::rpnLSB:
+      // Selecting an RPN deselects any NRPN. 127/127 is the "RPN null" value, which deselects everything.
+      rpnSelected_ = !(continuousControllerValues_[ControlChange::rpnMSB] == 127 &&
+                       continuousControllerValues_[ControlChange::rpnLSB] == 127);
+      break;
+
+    case ControlChange::nrpnMSB:
+    case ControlChange::nrpnLSB:
+      rpnSelected_ = false;
+      break;
+
+    case ControlChange::dataEntryMSB:
+      if (rpnSelected_) applyRPNDataEntry(value);
+      break;
+
     case ControlChange::sustainSwitch:
       pedalState_.sustainPedalActive = value >= 64;
       break;

@@ -468,7 +468,7 @@ Engine::processChannelMessage_RT(MIDI::ControlChange channelMessage, uint8_t val
       break;
 
     case MIDI::ControlChange::resetAllControllers:
-      reset_RT();
+      resetAllControllers_RT();
       break;
 
 //    case MIDI::ControlChange::localControl:
@@ -897,6 +897,21 @@ Engine::bumpLastLoadFinished_WQ() noexcept
   auto param = [parameterTree_ parameterWithAddress: valueOf(ParameterAddress::lastLoadFinished)];
   lastLoadFinishedCounter_ += traits::lastLoadFinishedChange;
   [param setValue: AUValue(lastLoadFinishedCounter_)];
+}
+
+void
+Engine::resetAllControllers_RT() noexcept
+{
+  // CC 121 resets controllers, not notes (MIDI RP-015): sounding voices keep playing with the reset values. The pedals
+  // are among the controllers reset, so notes held only by sustain or sostenuto are released as if the pedal had been
+  // lifted. (This used to call `reset_RT`, which also stopped every voice and reset RPN values such as pitch wheel
+  // sensitivity.)
+  auto previousPedalState = channelState_.pedalState();
+  channelState_.resetControllers();
+  notifyActiveVoicesChannelStateChanged_RT();
+  if (previousPedalState.sustainPedalActive || previousPedalState.sostenutoPedalActive) {
+    applyPedals_RT();
+  }
 }
 
 void

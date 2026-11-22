@@ -408,8 +408,11 @@ private:
   void usePresetWithIndex_WQ(size_t presetIndex);
 
   /// Reset the engine to a known state. All keys are released, all voices are off, and the MIDI channel state is reset
-  /// to initial state.
+  /// to initial state. Used for the MIDI System Reset message (0xFF).
   void reset_RT() noexcept;
+
+  /// Respond to MIDI Reset All Controllers (CC 121) per MIDI RP-015. See `ChannelState::resetControllers`.
+  void resetAllControllers_RT() noexcept;
 
   /**
    Turn off all voices, making them all available for rendering.

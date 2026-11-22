@@ -75,12 +75,21 @@ public:
   inline int pitchWheelValue() const noexcept { return pitchWheelValue_; }
 
   /**
-   Set the pitch wheel sensitivity value. Default is 200 cents which results in 2 note jump in either direction of the
-   pitch wheel.
+   Set the pitch wheel sensitivity in semitones. The default is 2, a 2-semitone bend in either direction. This is the
+   value of the "pitch wheel sensitivity" modulator source (SF2.01 8.2.1, index 16). Over MIDI it is set with RPN 0
+   (see `setContinuousControllerValue`).
 
-   @param value the sensitivity value to record
+   @param value the sensitivity in semitones (0-127)
    */
   inline void setPitchWheelSensitivity(int value) noexcept { pitchWheelSensitivity_ = value; }
+
+  /**
+   Respond to MIDI Reset All Controllers (CC 121) as described by MIDI RP-015: modulation, expression, the pedals
+   (64-67), pitch bend, channel and key pressure, and the RPN/NRPN numbers are reset. Bank select, volume, pan, the
+   sound and effects controllers, and RPN/NRPN values (e.g. pitch wheel sensitivity) are kept. Unlike `reset` this
+   is not a power-on reset.
+   */
+  void resetControllers() noexcept;
 
   /// @returns the current pitch wheel sensitivity value
   inline int pitchWheelSensitivity() const noexcept { return pitchWheelSensitivity_; }
@@ -137,16 +146,23 @@ private:
 
   bool decodeNRPN(MIDI::ControlChange cc, uint8_t value) noexcept;
 
+  /// Apply a Data Entry MSB value to the currently selected RPN, if it is one we support.
+  void applyRPNDataEntry(uint8_t value) noexcept;
+
   ContinuousControllerValues continuousControllerValues_{};
   NotePressureValues notePressureValues_{};
   Entity::Generator::GeneratorValueArray<int> nrpnValues_{};
 
   uint8_t channelPressure_{0};
   int pitchWheelValue_{0};
-  int pitchWheelSensitivity_{200};
+  int pitchWheelSensitivity_{2};
   size_t nrpnIndex_{0};
   PedalState pedalState_{false, false, false};
   bool activeDecoding_{false};
+
+  /// True if an RPN was selected more recently than an NRPN, and is not the "RPN null" (127/127). Unlike NRPN decoding,
+  /// unrelated controllers do not clear this: an RPN stays selected until another RPN or NRPN is selected.
+  bool rpnSelected_{false};
 };
 
 } // namespace SF2::MIDI

@@ -2133,8 +2133,57 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   harness.sendNoteOn(60);
   XCTAssertEqual(size_t(1), engine.activeVoiceCount());
   harness.sendRaw(engine.createChannelMessagePayload(MIDI::ControlChange::resetAllControllers, 0));
-  XCTAssertEqual(0, engine.channelState().continuousControllerValue(MIDI::ControlChange::bankSelectLSB));
-  XCTAssertEqual(size_t(0), engine.activeVoiceCount());
+  // MIDI RP-015: Reset All Controllers keeps bank select, and does not stop notes. (It used to do both.)
+  XCTAssertEqual(123u, engine.channelState().continuousControllerValue(MIDI::ControlChange::bankSelectLSB));
+  XCTAssertEqual(size_t(1), engine.activeVoiceCount());
+}
+
+- (void)testResetAllControllersReleasesPedalHeldNotes
+{
+  // CC 121 resets the sustain pedal, so a note held only by the pedal is released exactly as if the pedal were lifted.
+  const auto path = self.contexts->context1.path();
+  const std::array<uint8_t, 3> resetAll{0xB0, 121, 0};
+  auto reference = renderMIDISequence(path, {{0, noteOnBytes(60)}, {5, sustainBytes(true)}, {20, noteOffBytes(60)},
+    {40, sustainBytes(false)}});
+  auto reset = renderMIDISequence(path, {{0, noteOnBytes(60)}, {5, sustainBytes(true)}, {20, noteOffBytes(60)},
+    {40, resetAll}});
+  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
+  XCTAssertTrue(reference == reset);
+}
+
+- (void)testResetAllControllersKeepsHeldNotesSounding
+{
+  // A held note is unaffected by CC 121 when the controllers are already at their reset values.
+  const auto path = self.contexts->context1.path();
+  const std::array<uint8_t, 3> resetAll{0xB0, 121, 0};
+  auto reference = renderMIDISequence(path, {{0, noteOnBytes(60)}, {60, noteOffBytes(60)}});
+  auto reset = renderMIDISequence(path, {{0, noteOnBytes(60)}, {20, resetAll}, {60, noteOffBytes(60)}});
+  XCTAssertTrue(reference == reset);
+}
+
+- (void)testResetAllControllersRecentresBendButKeepsBendRange
+{
+  const auto path = self.contexts->context0.path();
+  const std::array<uint8_t, 3> resetAll{0xB0, 121, 0};
+  const std::array<uint8_t, 3> fullUp{0xE0, 0x7F, 0x7F};
+  const std::array<uint8_t, 3> centre{0xE0, 0x00, 0x40};
+  const std::array<uint8_t, 3> rpn0Msb{0xB0, 101, 0};
+  const std::array<uint8_t, 3> rpn0Lsb{0xB0, 100, 0};
+  const std::array<uint8_t, 3> twelveSemitones{0xB0, 6, 12};
+
+  // Pitch bend goes back to centre.
+  auto centred = renderMIDISequence(path, {{0, noteOnBytes(60)}, {5, fullUp}, {30, centre}});
+  auto reset = renderMIDISequence(path, {{0, noteOnBytes(60)}, {5, fullUp}, {30, resetAll}});
+  XCTAssertTrue(centred == reset);
+
+  // The bend range set with RPN 0 survives CC 121 (RP-015 keeps RPN values; it used to go back to 2 semitones).
+  auto wide = renderMIDISequence(path, {{0, rpn0Msb}, {0, rpn0Lsb}, {0, twelveSemitones}, {0, noteOnBytes(60)},
+    {20, fullUp}});
+  auto wideAfterReset = renderMIDISequence(path, {{0, rpn0Msb}, {0, rpn0Lsb}, {0, twelveSemitones},
+    {0, noteOnBytes(60)}, {10, resetAll}, {20, fullUp}});
+  auto defaultRange = renderMIDISequence(path, {{0, noteOnBytes(60)}, {20, fullUp}});
+  XCTAssertTrue(wide == wideAfterReset);
+  XCTAssertFalse(wide == defaultRange);
 }
 
 - (void)testEngineMonoOn
@@ -2243,6 +2292,47 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertFalse(up == down);
 }
 
+
+- (void)testRPN0PitchWheelSensitivityControlsBendRange
+{
+  // SF2.01 8.2.1 source 16 / 8.4.10: the default pitch wheel modulator scales its amount by the pitch wheel
+  // sensitivity, which MIDI sets with RPN 0. Previously RPN 0 was not decoded, so the range was always 2 semitones.
+  using Bytes = std::array<uint8_t, 3>;
+  const Bytes selectRPN0Msb{0xB0, 101, 0};
+  const Bytes selectRPN0Lsb{0xB0, 100, 0};
+  const Bytes fullUp{0xE0, 0x7F, 0x7F};
+  auto dataEntry = [](uint8_t semitones) { return Bytes{0xB0, 6, semitones}; };
+
+  // Render a note, sending `before` ahead of the note-on and `after` once it sounds.
+  const auto path = self.contexts->context0.path();
+  auto render = [&path](std::vector<Bytes> before, std::vector<Bytes> after) {
+    auto harness{TestEngineHarness{48000.0}};
+    harness.load(path, 0);
+    auto mixer{harness.createMixer(0.25)};
+    for (const auto& bytes : before) harness.sendRaw(bytes);
+    harness.sendNoteOn(60, 100);
+    for (const auto& bytes : after) harness.sendRaw(bytes);
+    harness.renderToEnd(mixer);
+    const AUValue* data = harness.dryBuffer().floatChannelData[0];
+    return std::vector<AUValue>(data, data + harness.duration());
+  };
+
+  auto unbent = render({}, {});
+  auto defaultBend = render({fullUp}, {});
+  XCTAssertFalse(unbent == defaultBend);
+
+  // A range of 0 semitones: the bend has no effect, whether RPN 0 arrives before the note or while it sounds.
+  XCTAssertTrue(render({selectRPN0Msb, selectRPN0Lsb, dataEntry(0), fullUp}, {}) == unbent);
+  XCTAssertTrue(render({fullUp}, {selectRPN0Msb, selectRPN0Lsb, dataEntry(0)}) == unbent);
+
+  // A range of 2 semitones is the default.
+  XCTAssertTrue(render({selectRPN0Msb, selectRPN0Lsb, dataEntry(2), fullUp}, {}) == defaultBend);
+
+  // A wider range bends further than the default.
+  auto wide = render({selectRPN0Msb, selectRPN0Lsb, dataEntry(12), fullUp}, {});
+  XCTAssertFalse(wide == defaultBend);
+  XCTAssertFalse(wide == unbent);
+}
 
 - (void)testVolumeEnvelopeSustainLevelIsAppliedInDecibels
 {
