@@ -333,7 +333,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - The use-after-free and leak of old `PresetsState`s on file switch (§3.2) belong to step 8.
 - Since this step, the user switched `SF2::Float` to `float` (`b762bf3`, `f2f90bd`, DSPHeaders 1.6.1). That is step 9's sample-storage idea applied to all processing. Because DSPHeaders' `_F` literal still yields `double`, mixed-type `std::max` / `std::clamp` / `ConstMath::pow` calls need an explicit `<Float>`.
 
-**Step 7 — done (2026-11-22). Committed as `2781752` "Support preset modulators; "No Controller" = 1; reject reserved sources."; `make test-macOS`: 326 tests, 0 failures.**
+**Step 7 — done (2026-11-22). Committed as `537b322` "Support preset modulators; "No Controller" = 1; reject reserved sources."; `make test-macOS`: 326 tests, 0 failures.**
 - **PMOD support (7.4, 9.5.1):** the new `State::addPresetModulators(globalPreset, preset)` is called from `Config::applyTo` after the instrument and preset generators. A global preset zone modulator is skipped if the local preset zone has an identical one. Within a zone, the last of several identical modulators wins (7.4). Each remaining preset modulator goes through `addPresetModulator`, which adds its amount to an identical modulator already installed (instrument level or default), using the new `Modulator::addAmountFrom`, or appends it as a new modulator. Instrument-level replacement (`addModulator`) is unchanged.
 - The validity checks from step 4 are now `State::isUsable` and apply to preset modulators too.
 - **"No Controller" = 1 (8.2.1):** `Modulator::value` now treats an inactive primary source as 1 instead of returning 0, so a source-less modulator applies `amount × amount-source` as a constant. The amount source already behaved this way. The `Entity::Modulator` doc comment that said 'none' returns 0.0 is corrected.
@@ -354,3 +354,51 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - Modulator identity (`Entity::Modulator::operator==`) still ignores the transform. 9.5.1 includes it, while 7.4 lists only the three enumerators. It only matters once a second transform (2.04 "absolute value") is supported.
   - Unknown `sfModTransOper` values are not checked.
   - `State::modulators_` still grows with `emplace_back` at voice start, an allocation on the render thread (§4, step 8).
+
+**Step 8 — done (2026-11-22). Committed as `984e8fc` "Real-time safety: PresetsState lifetime, async program change, SysEx."; `make test-macOS`: 338 tests, 0 failures. (`make test-iOS` was not re-run: it locked up Xcode during this step. The user's `-collect-test-diagnostics never` Makefile change addresses the `simctl diagnose` stall.)**
+- **PresetsState lifetime (§3.2 use-after-free and leaks):**
+  - Each `PresetsState` now has a generation number. The `past_` pointer and `deletePast()` (which ran `delete` on the render thread at note-on, freed only one level, and could free samples that releasing voices still played) are gone.
+  - Loaders build the new state and load its active preset's samples before publishing it with `installPresetsState_WQ`. That moves the old state onto `retired_` (under `retiredMutex_`, never touched by the render thread).
+  - At each render-thread entry point (`renderInto`, `noteOn_RT`, `changeProgram_RT`), `syncPresetsState_RT` compares generations. If a new state has appeared, it stops all voices and stores the generation in `renderGeneration_`.
+  - A retired state is freed (on the loader's thread) only once its generation is below that acknowledged generation. `doRenderingStateChanged(false)` frees all retired states. The new `Engine::~Engine` drains the work queue and frees everything.
+  - `activePresetOrNull()` gives a non-throwing accessor for the render thread.
+- **Program change off the render thread (§4, §3.2 hang):**
+  - `changeProgram_RT` now returns early when nothing is loaded. It used to bump `presetChangesPending_` first and never undo it, which blocked note-on forever.
+  - Otherwise it stops the voices, stores the located preset index in `requestedPresetIndex_`, bumps the pending count, and queues `usePresetRequest_WQ` with `dispatch_async_f`: a plain function pointer, so no block copy or Objective-C runtime on the render thread. The disk reads and the allocation now happen on the work queue.
+  - Repeated requests for the already-active preset are skipped.
+  - `usePresetWithIndex_WQ` no longer dereferences a possibly-null `ptr`, or builds an `NSString` for logging.
+- **Bookmark load hang:** `beginLoadBookmarkAndPreset_WQ` now undoes `presetChangesPending_` on every path that does not load (bookmark resolve error, nil URL, coordination failure, unreadable file). It also no longer dereferences `presetsState_` without a null check.
+- **Naming (§4):** functions that run on the work queue or a caller's thread were renamed from `_RT` to `_WQ`: `beginLoadFileAndPreset_WQ`, `beginLoadBookmarkAndPreset_WQ`, `concludeLoad_WQ`, `usePresetWithIndex_WQ`, `bumpLastLoadFinished_WQ`.
+- **Voice start/stop:** `updateActiveVoiceCount_RT` (an `AUParameterTree` lookup and `setValue:` on every voice start and stop) is removed. `provideParameterValue` already reports the live count, and `testEngineActiveVoiceCount` (which reads `param.value`) still passes.
+- **No allocation at note-on:**
+  - `Preset::find` now fills a `Utils::FixedCapacityVector<Config, 64>` (new `SF2Util/FixedCapacityVector.hpp`: inline storage and placement-new, so `Config`'s reference members are fine) using the new non-allocating `Zone::Collection::visit`. Any zones beyond 64 are dropped and logged.
+  - `State` reserves 64 modulator slots at construction.
+  - `Zone::Instrument::samples()` no longer throws (it is reached through `noexcept Config::samples()`), and `startVoice_RT` skips a zone without samples.
+- **SysEx (§4, part of §3.2):**
+  - `doMIDIEvent` checks the length before reading `data[1]`/`data[2]`.
+  - `queueSysExRequest_RT` only copies the message into one of four preallocated 8 KB `SysExRequest` slots (or drops it if all are busy), stops voices, bumps the pending count, and queues `processSysExRequest_WQ` with `dispatch_async_f`.
+  - The work queue bounds `overrideCount` by the bytes actually present (previously an out-of-bounds read and copy), Base64-decodes, and creates the bookmark with `[[NSData alloc] initWithBase64EncodedData:…]`. That fixes the `init`-on-an-initialised-object UB.
+  - Every rejection undoes the pending count.
+- **Tests added** in the new `RealTimeSafetyTests` (11) and `FixedCapacityVectorTests` (1):
+  - **No allocation on note-on:** the test replaces global `operator new` in the test bundle with a per-thread counter, then plays a 4-note chord and renders 11 blocks. That must make zero C++ allocations.
+  - **Program changes:** with the work queue suspended, a program change stops voices, holds the pending count at 1, keeps the old preset, and ignores note-ons; after resuming, the new preset plays. A program change with nothing loaded no longer blocks notes.
+  - **Bookmark failure:** a bookmark that does not resolve does not block notes.
+  - **State lifetime:** after a load, the old state stays retired while its voice sounds and is stopped at the next render. Over 10 load/note/render cycles, at most one state waits, and none after rendering stops.
+  - **SysEx:** messages shorter than the header are ignored; a 10⁹ override count and invalid Base64 are rejected; SysEx loads still work; a fifth request while the queue is held is dropped.
+  - **Capacity:** an instrument with 70 overlapping zones starts exactly 64 voices.
+  - **`FixedCapacityVector`:** capacity, `at`, copy, move and destruction with a non-default-constructible, non-assignable type.
+- **Tests updated:** `testEngineChangePresetByBankProgram` now calls `drainWorkQueue()` after each program change. The user had already added the same to `testEngineMIDIProgramChange` and `testProgramChangeAfterBookmarkLoadReadsSamples`; those had been passing only by winning the race. New harness helpers: `suspendWorkQueue()`, `resumeWorkQueue()` and `retiredPresetsStateCount()`.
+- **Checked that the tests catch the bugs:**
+  - With the vector-building `Preset::find` restored, the chord makes 8 allocations.
+  - With `++presetChangesPending_` moved back in front of the null check, the nothing-loaded test fails on both assertions.
+  - A full revert of the step does not compile against the new harness helpers.
+- No hard-coded rendering values changed.
+- **Behaviour change:** a MIDI program change now completes asynchronously. Until the preset's samples are loaded, nothing renders and note-ons are ignored. This is the same gating SysEx loads already used.
+- **Left over:**
+  - `dispatch_async_f` on the render thread can still allocate a libdispatch continuation on a cache miss. A preallocated lock-free queue plus a waiting worker thread would remove even that.
+  - The direct API `loadFileAndPreset("", index)` (`usePresetWithIndex_WQ`) changes the samples of the published state without the render thread stopping voices first. It is only safe while not rendering, or when called after a render-thread program change. Make it go through the render thread (or a new state) if hosts use it while playing.
+  - Non-render-thread accessors (`activePresetName()` etc.) read the published state without a reference, so a concurrent load and render-thread acknowledgement could free it underneath them. The window is tiny but real.
+  - `parameters_.reset()` runs on the work queue while the render thread reads `parameters_` (a pre-existing data race).
+  - The `os_log_info` calls on per-event paths are unchanged.
+  - The SysEx payload still carries raw 8-bit `size_t` fields and uses manufacturer 0x7E (§3.2 protocol issues), and the generator overrides are still parsed but not applied.
+  - `Engine::Engine` still only `assert`s `voiceCountLimit <= maxVoiceCount` (§3.2).
