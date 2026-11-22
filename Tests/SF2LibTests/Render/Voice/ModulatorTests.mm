@@ -16,6 +16,10 @@ using namespace SF2::Render;
 using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
 
+/// Tolerance for modulator values (in cents or centibels, up to ~12700). An absolute 1e-6 is finer than a float can
+/// resolve at those magnitudes, so use a relative tolerance of 1e-6, a few float ULPs.
+static double relativeAccuracy(double expected) { return std::abs(expected) * 1.0e-6; }
+
 @interface ModulatorTests : SamplePlayingTestCase
 @property (nonatomic) MIDI::ChannelState* channelState;
 @property (nonatomic) State::State* state;
@@ -43,10 +47,12 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 0.0, self.epsilon);
 
   self.sst.setValue(*self.state, Index::forcedMIDIVelocity, 64);
-  XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 119.049498788827904, self.epsilon);
+  XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 119.049498788827904,
+                             relativeAccuracy(119.049498788827904));
 
   self.sst.setValue(*self.state, Index::forcedMIDIVelocity, 1);
-  XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 841.521488382382699, self.epsilon);
+  XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 841.521488382382699,
+                             relativeAccuracy(841.521488382382699));
 
   // std::cout << modulator.description() << '\n';
   XCTAssertEqual("Sv: velocity(uni/+-/concave) Av: none(uni/-+/linear) dest: initialAttenuation amount: 960 trans: linear",
@@ -106,7 +112,8 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 960.0, self.epsilon);
 
   self.channelState->setContinuousControllerValue(MIDI::ControlChange::volumeMSB, 64);
-  XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 119.049498788827904, self.epsilon);
+  XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 119.049498788827904,
+                             relativeAccuracy(119.049498788827904));
 
   self.channelState->setContinuousControllerValue(MIDI::ControlChange::volumeMSB, 127);
   XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 0.0, self.epsilon);
@@ -138,7 +145,8 @@ using namespace SF2::Entity::Generator;
   XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 960.0, self.epsilon);
 
   self.channelState->setContinuousControllerValue(MIDI::ControlChange::expressionMSB, 64);
-  XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 119.049498788827904, self.epsilon);
+  XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 119.049498788827904,
+                             relativeAccuracy(119.049498788827904));
 
   self.channelState->setContinuousControllerValue(MIDI::ControlChange::expressionMSB, 127);
   XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 0.0, self.epsilon);
@@ -195,7 +203,8 @@ using namespace SF2::Entity::Generator;
   self.channelState->setPitchWheelValue(8192);
   XCTAssertEqualWithAccuracy( modulator.value(*self.state, *self.channelState), 0.0, self.epsilon);
   self.channelState->setPitchWheelValue(SF2::MIDI::ChannelState::maxPitchWheelValue);
-  XCTAssertEqualWithAccuracy( modulator.value(*self.state, *self.channelState), 12599.2430686950684, self.epsilon);
+  XCTAssertEqualWithAccuracy(modulator.value(*self.state, *self.channelState), 12599.2430686950684,
+                             relativeAccuracy(12599.2430686950684));
 }
 
 - (void)testKeyValueProvider {

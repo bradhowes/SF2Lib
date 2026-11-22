@@ -251,7 +251,7 @@ struct PresetTestContextBase
 {
   inline static SF2::Float epsilonValue() {
     if constexpr (std::is_same_v<SF2::Float, float>) {
-      return 1.0e-3;
+      return 1.0e-6;
     } else {
       return 1.0e-12;
     }
