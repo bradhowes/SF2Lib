@@ -161,7 +161,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 | Gen 54 sampleModes looping | ⚠️ loop only used when `Bounds::hasLoop()` [steps 3, 4], but §3.3 is still open: `Index::increment` subtracts `loopSize()` once (a short loop at high pitch can overrun), and interpolation around the loop end/start is not wrapped correctly |
 | Gen 8/9/10/11 filter | ✅ [step 6] enabled; Fc = initialFilterFc + modLfo·gen10 + modEnv·gen11 (cents); 8.1.2 #8 bypass (≥ 20 kHz with Q = 0) and #9 DC gain −Q/2 implemented. Deviation: the gain at the cutoff is Q − 3.01 dB rather than Q (FluidSynth convention, so 0 cB is a non-resonant Butterworth) |
 | Gen 38 releaseVolEnv/30 releaseModEnv max 8000 | ✅ `releaseTimecentsToSeconds` now clamps at 8000, matching `Definition.mm` |
-| Gen 34 attackVolEnv "convex, linear in amplitude" | ⚠️ unchanged: the attack ramps the normalised-dB envelope linearly, so it is linear in dB (acknowledged in comments) |
+| Gen 34 attackVolEnv "convex, linear in amplitude" | ✅ the volume envelope ramps its attack *progress* linearly and outputs `volumeEnvelopeAttackCurve(progress)`, the normalised-dB value whose gain equals the progress, so the attack is linear in amplitude (half way = −6 dB). A release during the attack starts from the shaped level. Deviation: the modulation envelope attack (gen 26, "linear in Hz") stays linear, as in FluidSynth, because the right curve depends on the destination and depth |
 | Gen 37 sustainVolEnv | ✅ [step 1] sustain level and voice gain share one normalised-dB mapping |
 | Gen 46/47 keynum/velocity overrides | ✅ |
 | Gen 57 exclusiveClass | ⚠️ unchanged: `Config` reads it from the local instrument zone only (global zone ignored, unlike `Voice::exclusiveClass()`), and other voices of the class are cut off rather than given a fast release |
@@ -180,7 +180,6 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 
 **Summary:** of the 8 ❌ rows in the original review, 7 are now ✅ (size/index validation, unknown generators, start offsets, filter, sustain, "No Controller", PMOD); release-time capping (⚠️) and reserved sources (⚠️) are also ✅. Still ❌: stereo links. (RPN 0 / pitch-wheel sensitivity, listed in this re-evaluation, has since been fixed.) Open ⚠️ items, roughly in order of audible impact:
 - loop wrap/interpolation (§3.3);
-- attack curve;
 - exclusiveClass;
 - duplicate presets;
 - ROM samples;
@@ -465,3 +464,17 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - **Checked that the tests catch the bugs:** with the NRPN cancel and the old `reset_RT()` call put back, all 6 new or updated tests fail (9 assertions).
 - **Behaviour change:** CC 121 no longer silences notes, and no longer resets bank select or the pitch-bend range.
 - **Correction (2026-11-22):** an earlier version of this entry said "RP-015 also lists Legato (CC 68) and Hold 2 (CC 69) in some revisions, and General MIDI 2 adds others". That was stated from memory and is not supported: the RP-015 table as reproduced in secondary sources (approved May 1999), and the Yamaha XG equivalent, list exactly the controllers reset above. One search summary also attributed to RP-015 the rule "all other controllers should be set to 0, otherwise the behavior should be documented", but this could not be confirmed in any fetched text. The primary RP-015 document (midi.org) was not available. Controllers that RP-015 lists in neither group are therefore left unchanged, and `ChannelState::resetControllers` and its header comment now say so explicitly. No behaviour change.
+
+**Follow-up (2026-11-22): SF2.01 8.1.2 #34, convex volume envelope attack. Not yet committed. `make test-macOS`: 352 tests, 0 failures.**
+- The attack used to ramp the normalised-dB envelope value linearly from 0 to 1. The voice maps that value to `960 × (1 − v)` cB, so the attack was linear in dB: −48 dB half way through, rising sharply at the end. The spec asks for the result to be "linear in amplitude".
+- New `Envelope::volumeEnvelopeAttackCurve(progress) = centibelsToVolumeEnvelope(−200 · log10(progress))`, the normalised-dB value whose gain equals `progress` (0 below the 96 dB floor).
+- `Envelope::Generator` gained `enableConvexAttack()` and an `attackProgress_`. When it is enabled, the attack stage ramps `attackProgress_` linearly and sets `value_` to the curve. Because `value_` holds the shaped value, a note-off during the attack releases from the level being heard, with no extra conversion. `Envelope::Volume` enables it; `Envelope::Modulation` does not.
+- The cost is one `log10` per voice per sample, during the attack only. The voice's gain path is unchanged.
+- Tests:
+  - `EnvelopeTests::testAttack` now expects the curve values, and checks that the exact gain of each value equals the progress (to 1e-5 relative).
+  - `testAttackAborted` now expects the release to continue from the shaped value.
+  - Added `testAttackCurveShape` (half way = 60.206 cB; clamping) and `testModulationEnvelopeAttackStaysLinear`.
+  - End to end: `EngineTests::testVolumeEnvelopeAttackIsLinearInAmplitude` plays the `SF2Builder` sine with a 1 s attack. The RMS level at 25%, 50% and 75% of the attack, relative to the level after it, must be 0.25 / 0.5 / 0.75 within 3%. That allows for the 1 cB resolution of `centibelsToAttenuation` and the measurement window.
+- With the convex attack disabled, all three changed tests fail.
+- No hard-coded rendering values changed: the bundled test presets' attacks are too short to affect the values sampled.
+- **Behaviour change:** notes with a non-zero volume attack time now rise linearly in amplitude, so they are louder early in the attack and reach full level smoothly.

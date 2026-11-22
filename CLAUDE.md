@@ -32,7 +32,10 @@ Dependency: [DSPHeaders](https://github.com/bradhowes/DSPHeaders) (Swift package
 
 - In Xcode, use the `SF2Lib-Package` scheme with the `SF2Lib-Package.xctestplan` test plan.
 - From the command line, `make test-macOS` (or `make` for both platforms plus coverage).
-- Rendering tests compare against hard-coded sample values. If a deliberate audio change breaks them, regenerate the values from the test's `dumpSamples` output and say so in the commit message. Never loosen tolerances to make a test pass.
+- Rendering tests compare against hard-coded sample values. If a deliberate audio change breaks them, regenerate the
+  values from the test's `dumpSamples` output and say so in the commit message. Never loosen tolerances to make a test
+  pass. Note that the output from `dumpSamples` contains the actual `XCTestAssertEqualWithAccuracy` statement to
+  use with enough significant digits.
 
 ## Conventions
 
