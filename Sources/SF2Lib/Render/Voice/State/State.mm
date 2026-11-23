@@ -50,6 +50,22 @@ State::prepareForVoice(const Config& config, const MIDI::ChannelState& channelSt
   updateStateMods(channelState);
 }
 
+namespace {
+
+using ModulatorCollection = SF2::Render::Zone::Zone::ModulatorCollection;
+
+/// @returns true if `mods[index]` is followed in the same zone by a modulator with the same three enumerators. SF2.01
+/// 7.4: "If a second modulator is encountered with the same three enumerators as a previous modulator with the same
+/// zone, the first modulator will be ignored." The transform is not one of the three.
+bool isShadowed(const ModulatorCollection& mods, size_t index) noexcept {
+  const auto& mod = mods[index].get();
+  return std::any_of(mods.begin() + long(index) + 1, mods.end(), [&mod](const auto& other) {
+    return other.get().hasSameEnumerators(mod);
+  });
+}
+
+} // namespace
+
 void
 State::configureWith(const Zone::Instrument& instrument) noexcept {
   // Generator state settings
@@ -58,11 +74,12 @@ State::configureWith(const Zone::Instrument& instrument) noexcept {
     if (generator.isValid()) setValue(generator.index(), generator.value());
   });
 
-  // Modulator definitions
-  std::for_each(instrument.modulators().cbegin(), instrument.modulators().cend(),
-                [this](const Entity::Modulator::Modulator& modulator) {
-    addModulator(modulator);
-  });
+  // Modulator definitions. A modulator that is followed in the same zone by one with the same three enumerators is
+  // ignored (7.4). `addModulator` then replaces an identical (9.5.1) default or global zone modulator.
+  const auto& mods = instrument.modulators();
+  for (size_t index = 0; index < mods.size(); ++index) {
+    if (!isShadowed(mods, index)) addModulator(mods[index].get());
+  }
 }
 
 void
@@ -78,24 +95,14 @@ State::configureWith(const Zone::Preset& preset) noexcept {
 bool
 State::isUsable(const Entity::Modulator::Modulator& modulator) noexcept {
   // SF2.01 8.2: modulators with an invalid source, amount source or destination are ignored. A destination with bit 15
-  // set is a 2.04 modulator link, which is not supported, and would otherwise index past the end of `gens_`.
+  // set is a 2.04 modulator link, which is not supported, and would otherwise index past the end of `gens_`. Likewise
+  // for an unknown transform (7.4, 10.3: "unknown enumerators should simply cause the associated Generator or Modulator
+  // to be ignored").
   if (!modulator.source().isValid() || !modulator.amountSource().isValid()) return false;
+  if (!modulator.transformer().isValid()) return false;
   return SF2::valueOf(modulator.generatorDestination()) < SF2::valueOf(Index::numValues);
 }
 
-namespace {
-
-using ModulatorCollection = SF2::Render::Zone::Zone::ModulatorCollection;
-
-/// @returns true if `mods[index]` is followed in the same zone by an identical modulator. SF2.01 7.4: "If a second
-/// modulator is encountered with the same three enumerators as a previous modulator with the same zone, the first
-/// modulator will be ignored."
-bool isShadowed(const ModulatorCollection& mods, size_t index) noexcept {
-  const auto& mod = mods[index].get();
-  return std::any_of(mods.begin() + long(index) + 1, mods.end(), [&mod](const auto& other) { return other.get() == mod; });
-}
-
-} // namespace
 
 void
 State::addPresetModulators(const Zone::Preset* globalPreset, const Zone::Preset& preset) noexcept {
@@ -137,9 +144,9 @@ void
 State::addModulator(const Entity::Modulator::Modulator& modulator) noexcept {
   if (!isUsable(modulator)) return;
 
-  // Per spec, there must only be one modulator with specific <sfModSrcOper, sfModDestOper, and sfModSrcAmtOper>
-  // values. If we find a duplicate, then we just update it's amount with the amount taken from the newer modulator and
-  // exit.
+  // SF2.01 9.5.1: an identical modulator (same source, destination, amount source and transform) in a later level
+  // supersedes an earlier one (default -> global instrument zone -> local instrument zone), so take its amount.
+  // Duplicates within one zone have already been dropped by `isShadowed`.
   for (auto& mod : modulators_) {
     if (mod.configuration() == modulator) {
       mod.takeAmountFrom(modulator);

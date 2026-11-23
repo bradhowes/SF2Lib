@@ -188,4 +188,71 @@ static std::vector<AUValue> render(const SF2Builder& builder, uint8_t velocity =
   XCTAssertFalse(render(valid) == expected);
 }
 
+- (void)testUnknownTransformsAreIgnored {
+  // 7.4, 10.3: an unknown sfModTransOper causes the modulator to be ignored. Previously every transform was treated as
+  // linear, so these modulators attenuated the note.
+  auto unknown = SF2Builder::minimal();
+  setInstrumentMods(unknown, {{cc16, attenuation, 960, 0, 1}, {cc17, attenuation, 960, 0, 3}});
+  setPresetMods(unknown, {{cc16, attenuation, 960, 0, 0xFFFF}});
+
+  auto expected = render(SF2Builder::minimal());
+  XCTAssertTrue(render(unknown) == expected);
+
+  // Guard against a vacuous test: the same modulator with the linear transform does attenuate.
+  auto linear = SF2Builder::minimal();
+  setInstrumentMods(linear, {{cc16, attenuation, 960, 0, 0}});
+  XCTAssertFalse(render(linear) == expected);
+}
+
+- (void)testAbsoluteValueTransform {
+  // SF2.04 8.3 transform 2, applied to the multiplier output (9.5.1: "Transform(Amount * Map(primary) * Map(secondary))").
+  // With a negative amount, |-300 * cc16| must sound like +300 * cc16.
+  auto absolute = SF2Builder::minimal();
+  setInstrumentMods(absolute, {{cc16, attenuation, -300, 0, 2}});
+  auto positive = SF2Builder::minimal();
+  setInstrumentMods(positive, {{cc16, attenuation, 300, 0, 0}});
+  auto negative = SF2Builder::minimal();
+  setInstrumentMods(negative, {{cc16, attenuation, -300, 0, 0}});
+
+  auto expected = render(positive);
+  XCTAssertTrue(render(absolute) == expected);
+  XCTAssertFalse(render(negative) == expected);
+
+  // The same at the preset level.
+  auto preset = SF2Builder::minimal();
+  setPresetMods(preset, {{cc16, attenuation, -300, 0, 2}});
+  XCTAssertTrue(render(preset) == expected);
+}
+
+- (void)testPresetModulatorWithDifferentTransformIsNotSummed {
+  // 9.5.1: modulators are identical only if their transforms match too, and amounts are only summed for identical
+  // ones. A linear +600 preset modulator next to an absolute -300 instrument modulator gives 300 + 600 = 900. Summing
+  // the amounts would instead give |-300 + 600| = 300.
+  auto mixed = SF2Builder::minimal();
+  setInstrumentMods(mixed, {{cc16, attenuation, -300, 0, 2}});
+  setPresetMods(mixed, {{cc16, attenuation, 600, 0, 0}});
+  auto expected = SF2Builder::minimal();
+  setInstrumentMods(expected, {{cc16, attenuation, 900, 0, 0}});
+  auto summed = SF2Builder::minimal();
+  setInstrumentMods(summed, {{cc16, attenuation, 300, 0, 0}});
+
+  XCTAssertTrue(render(mixed) == render(expected));
+  XCTAssertFalse(render(mixed) == render(summed));
+}
+
+- (void)testDuplicateInZoneIgnoresTransform {
+  // 7.4: within a zone, a later modulator with the same source, destination and amount source replaces the earlier one,
+  // whatever their transforms. Here only |-100 * cc16| remains.
+  auto duplicated = SF2Builder::minimal();
+  setInstrumentMods(duplicated, {{cc16, attenuation, 500, 0, 0}, {cc16, attenuation, -100, 0, 2}});
+  auto single = SF2Builder::minimal();
+  setInstrumentMods(single, {{cc16, attenuation, 100, 0, 0}});
+  XCTAssertTrue(render(duplicated) == render(single));
+
+  // The same rule applies in a preset zone.
+  auto presetDuplicated = SF2Builder::minimal();
+  setPresetMods(presetDuplicated, {{cc16, attenuation, 500, 0, 0}, {cc16, attenuation, -100, 0, 2}});
+  XCTAssertTrue(render(presetDuplicated) == render(single));
+}
+
 @end

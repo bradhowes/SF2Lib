@@ -81,12 +81,26 @@ public:
   std::string description() const noexcept;
 
   /**
-   Compare two instances for equality. Per the SF2 spec, the `modAmount` and `sfModTransOper` are not involved in this.
+   Compare two instances for equality. SF2.01 9.5.1: "A Modulator is defined as identical to another modulator if its
+   source, destination, amount source, and transform are the same in both modulators." The `modAmount` is not involved.
+   This decides when a modulator supersedes, or adds to, another one.
 
    @param rhs the modulator to compare with
-   @returns true if this modulator is equivalent to `rhs`
+   @returns true if this modulator is identical to `rhs`
    */
   inline bool operator ==(const Modulator& rhs) const noexcept {
+    return hasSameEnumerators(rhs) && sfModTransOper == rhs.sfModTransOper;
+  }
+
+  /**
+   SF2.01 7.4 / 7.8: "All modulators within a zone must have a unique set of these three enumerators" (source,
+   destination and amount source). Unlike `operator==`, this ignores the transform. It is only used to find duplicates
+   within a single zone.
+
+   @param rhs the modulator to compare with
+   @returns true if both modulators have the same source, destination and amount source
+   */
+  inline bool hasSameEnumerators(const Modulator& rhs) const noexcept {
     return (sfModSrcOper == rhs.sfModSrcOper &&
             sfModDestOper == rhs.sfModDestOper &&
             sfModAmtSrcOper == rhs.sfModAmtSrcOper);

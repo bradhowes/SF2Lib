@@ -168,11 +168,11 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 | 8.2.1 "No Controller" source = value 1, not a way to turn a modulator off | ✅ [step 7] |
 | 8.2.1 reserved source indices → ignore modulator | ✅ [steps 4, 7] general 127 and other reserved indices rejected; CC 0, 6, 32–63, 98–101, 120–127 rejected; the amount source and the destination are validated too |
 | 8.2.1 source 16 "pitch wheel sensitivity … sent from the MIDI RPN 0 command" | ✅ `ChannelState` decodes RPN 0 (CC 101/100 = 0/0, then Data Entry MSB = semitones) into `pitchWheelSensitivity`. An RPN stays selected across unrelated CCs until another RPN/NRPN or the RPN null (127/127). Data Entry LSB (cents), Data Entry increment/decrement and other RPNs are ignored |
-| 8.2.4 / 7.4 unknown `sfModTransOper` values | ⚠️ not checked: every transform is treated as linear (the only 2.01 value), so a 2.04 "absolute value" transform is silently ignored rather than the modulator being ignored |
+| 8.2.4 / 7.4 unknown `sfModTransOper` values | ✅ a modulator with an unknown transform is ignored (7.4, 10.3). The 2.04 "absolute value" transform (2) is supported and applied to the multiplier output (9.5.1) |
 | 8.4 default modulators | ✅, with two deviations worth documenting: CC10→pan amount 500 (spec says 1000; FluidSynth makes the same choice), and velocity→Fc has no 0x502 amount source (matches 2.04, not 2.01) |
 | 8.5 preset-level-forbidden generators ignored | ✅ (`isAvailableInPreset`) |
 | 9.4 generator precedence (default → global inst → local inst; preset adds) | ✅ |
-| 9.5.1 modulator identity includes transform | ⚠️ unchanged: `operator==` ignores the transform (7.4 lists only the three enumerators). This only matters once a second transform is supported |
+| 9.5.1 modulator identity includes transform | ✅ `operator==` compares source, destination, amount source and transform (9.5.1) for superseding and summing. Duplicates within a zone use the three enumerators only (7.4, `hasSameEnumerators`) |
 | 9.5.1 PMOD additive | ✅ [step 7] preset modulators add their amount to an identical instrument/default modulator, or are added as new; local preset supersedes global preset |
 | 9.5.1 inst modulators supersede defaults | ✅ |
 | 7.10 stereo links "played synchronously, pitch from right sample" | ❌ not implemented (acknowledged in `Voice.hpp`) |
@@ -182,7 +182,6 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 - duplicate presets;
 - ROM samples;
 - missing `ifil`;
-- the transform field;
 - clamping after summation.
 
 ---
@@ -513,3 +512,17 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - **Left over:** no test catches `Voice::releaseKeyViaExclusiveClass` stopping the modulation envelope instead of aborting it. That would need a preset with a mod envelope routed to pitch or the filter, and a way to separate the old voice's output from the new one's.
 - No hard-coded rendering values changed with the review fixes: none of the sampled tests trigger an exclusive class.
 - **Behaviour change:** notes cut off by an exclusive class now fade out over 5 ms or less instead of stopping with a click, and this also applies to notes in their release phase.
+
+**Follow-up (2026-11-23): SF2.01 7.4 / 8.3 / 9.5.1 / 10.3 modulator transforms. Not yet committed. `make test-macOS`: 367 tests, 0 failures.**
+- **Unknown transforms:** `Transformer` used to keep the raw value but always report and apply "linear", so a modulator with an unknown `sfModTransOper` still had its effect. 7.4 ("Unknown or undefined values are ignored") and 10.3 ("unknown enumerators should simply cause the associated Generator or Modulator to be ignored") ask for the whole modulator to be dropped. `Transformer::isValid()` is new, and `State::isUsable` now rejects such modulators, the same way it rejects reserved sources. Throwing from the parser was considered and rejected: it would refuse files that the spec says must load (5.1: unknown transform enumerators are "defined as being ignored if unknown").
+- **Absolute value (SF2.04, transform 2):** `Transformer::Kind::absolute` is new. `Render::Voice::State::Modulator::value` applies the transform to the product `Amount × Map(primary) × Map(secondary)`, as in 9.5.1's `Transform(...)` equation and 8.3 ("the output value of the multiplier"). FluidSynth does the same.
+- **Identity:** 9.5.1 defines identical modulators by "source, destination, amount source, and transform"; 7.4's in-zone duplicate rule uses only the first three. `Entity::Modulator::operator==` now includes the transform, and is used where one level supersedes or adds to another (defaults → global instrument → local instrument; preset adds to instrument; local preset supersedes global preset). The new `hasSameEnumerators` is used by `isShadowed` for duplicates within one zone. Instrument zones now go through `isShadowed` as well. Before, they relied on `addModulator` replacing an equal modulator, which with a transform-aware `==` would have kept both duplicates.
+- **Tests added:**
+  - `EntityModulatorTransformTests` (new file): linear, absolute, unknown kinds (invalid, printed as `unknown(n)`), and identity with and without the transform.
+  - `PresetModulatorTests::testUnknownTransformsAreIgnored`: transforms 1, 3 and 0xFFFF at instrument and preset level render the same as no modulator; the linear version does not.
+  - `testAbsoluteValueTransform`: |−300 × CC16| renders like +300 × CC16 at both levels, and unlike −300.
+  - `testPresetModulatorWithDifferentTransformIsNotSummed`: an absolute −300 instrument modulator plus a linear +600 preset modulator renders like +900, not like the summed |300|.
+  - `testDuplicateInZoneIgnoresTransform`: in instrument and preset zones, a later modulator with the same three enumerators but a different transform replaces the earlier one.
+- **Checked that the tests catch each bug,** by putting back each old behaviour on its own: no validity check; transform not applied; identity without the transform; in-zone shadowing by identity; instrument zones without `isShadowed`. Each makes at least one new test fail.
+- No hard-coded rendering values changed: the bundled test files use only linear transforms.
+- **Behaviour change:** modulators with unknown transforms no longer have any effect; SF2.04 files using the absolute-value transform now sound as intended.

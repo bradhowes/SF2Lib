@@ -99,7 +99,8 @@ Modulator::value(const State& state, const MIDI::ChannelState& channelState) con
 
   // Obtain transformed secondary value.
   Float transformedSecondary = secondaryValue_.isActive() ? secondaryTransform_(secondaryValue_(state, channelState)) : 1_F;
-  Float result{transformedPrimary * transformedSecondary * amount_};
+  // SF2.01 9.5.1: "destination value += Transform(Amount * Map(primary source input) * Map(secondary source input))"
+  Float result{configuration_.transformer().transform(transformedPrimary * transformedSecondary * amount_)};
   // std::cout << "P: " << primary << " tP: " << transformedPrimary << " tS: " << transformedSecondary
   // << " amount: " << amount_ << " result: " << result << "\n";
   return result;
