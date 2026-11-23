@@ -176,13 +176,12 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 | 9.5.1 PMOD additive | ✅ [step 7] preset modulators add their amount to an identical instrument/default modulator, or are added as new; local preset supersedes global preset |
 | 9.5.1 inst modulators supersede defaults | ✅ |
 | 7.10 stereo links "played synchronously, pitch from right sample" | ❌ not implemented (acknowledged in `Voice.hpp`) |
-| Modulated value clamping to gen range after summation | ⚠️ ad hoc per consumer (envelope times, filter Fc/Q, pan and the sample rate are clamped; tuning and send levels only partially) |
+| Modulated value clamping to gen range after summation | ✅ `State::unmodulated` and `State::modulated` clamp the completed instrument, preset, live, and modulator sums through each generator's `Definition` range. Envelope key-scaling applies a final destination-range clamp after its extra term is added; the dynamic filter Fc composition retains its separate, wider DSP bounds so it can reach the specified ≥20 kHz bypass. |
 
 **Summary:** of the 8 ❌ rows in the original review, 7 are now ✅ (size/index validation, unknown generators, start offsets, filter, sustain, "No Controller", PMOD); release-time capping (⚠️) and reserved sources (⚠️) are also ✅. Still ❌: stereo links. (RPN 0 / pitch-wheel sensitivity, listed in this re-evaluation, has since been fixed.) Open ⚠️ items, roughly in order of audible impact:
 - duplicate presets;
 - ROM samples;
-- missing `ifil`;
-- clamping after summation.
+- missing `ifil`.
 
 ---
 

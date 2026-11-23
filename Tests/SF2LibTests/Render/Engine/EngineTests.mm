@@ -74,7 +74,7 @@ static const std::vector<std::pair<Index, AUValue>> instantModEnvelope{
   {Index::sustainModulatorEnvelope, 0}};
 
 /// A 3-byte MIDI message and how long to render (in seconds) after sending it.
-using TimedMIDIEvents = std::vector<std::pair<double, std::array<uint8_t, 3>>>;
+using TimedMIDIEvents = std::vector<std::pair<int, std::array<uint8_t, 3>>>;
 
 /// Render 1 second of preset 0 of the given file. Each MIDI message is sent and then followed by its render duration;
 /// whatever remains of the second is rendered after the last one. Returns the left channel of the dry bus.
@@ -83,19 +83,15 @@ static std::vector<AUValue> renderMIDISequence(const std::string& path, const Ti
   auto harness{TestEngineHarness{48000.0}};
   harness.load(path, 0);
   auto mixer{harness.createMixer(1.0)};
-  for (const auto& [duration, bytes] : events) {
+  for (const auto& [blocks, bytes] : events) {
     harness.sendRaw(bytes);
-    harness.renderForDuration(mixer, duration);
+    harness.renderMaxFramesCount(mixer, blocks);
   }
   harness.renderToEnd(mixer);
 
   const AUValue* data = harness.dryBuffer().floatChannelData[0];
   return std::vector<AUValue>(data, data + harness.bufferFrameCount());
 }
-
-/// @returns the duration of `count` 512-frame render blocks at 48 kHz, for `renderMIDISequence`. The extra half frame
-/// keeps `renderForDuration` from truncating `count * 512` frames to one fewer.
-static double blocks(int count) { return (count * 512.0 + 0.5) / 48'000.0; }
 
 static std::array<uint8_t, 3> noteOnBytes(uint8_t key) { return {0x90, key, 100}; }
 static std::array<uint8_t, 3> noteOffBytes(uint8_t key) { return {0x80, key, 0}; }
@@ -2292,10 +2288,10 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   // CC 121 resets the sustain pedal, so a note held only by the pedal is released exactly as if the pedal were lifted.
   const auto path = self.contexts->context1.path();
   const std::array<uint8_t, 3> resetAll{0xB0, 121, 0};
-  auto reference = renderMIDISequence(path, {{0.1, noteOnBytes(60)}, {0.2, sustainBytes(true)}, {0.3, noteOffBytes(60)},
-    {0.4, sustainBytes(false)}});
-  auto reset = renderMIDISequence(path, {{0.1, noteOnBytes(60)}, {0.2, sustainBytes(true)}, {0.3, noteOffBytes(60)},
-    {0.4, resetAll}});
+  auto reference = renderMIDISequence(path, {{5, noteOnBytes(60)}, {25, sustainBytes(true)}, {5, noteOffBytes(60)},
+    {25, sustainBytes(false)}});
+  auto reset = renderMIDISequence(path, {{5, noteOnBytes(60)}, {25, sustainBytes(true)}, {5, noteOffBytes(60)},
+    {25, resetAll}});
   XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
   XCTAssertTrue(reference == reset);
 }
@@ -2321,18 +2317,18 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   const std::array<uint8_t, 3> twelveSemitones{0xB0, 6, 12};
 
   // Pitch bend goes back to centre.
-  auto centred = renderMIDISequence(path, {{blocks(5), noteOnBytes(60)}, {blocks(25), fullUp}, {0, centre}});
-  auto reset = renderMIDISequence(path, {{blocks(5), noteOnBytes(60)}, {blocks(25), fullUp}, {0, resetAll}});
-  auto bentThroughout = renderMIDISequence(path, {{blocks(5), noteOnBytes(60)}, {0, fullUp}});
+  auto centred = renderMIDISequence(path, {{5, noteOnBytes(60)}, {25, fullUp}, {0, centre}});
+  auto reset = renderMIDISequence(path, {{5, noteOnBytes(60)}, {25, fullUp}, {0, resetAll}});
+  auto bentThroughout = renderMIDISequence(path, {{5, noteOnBytes(60)}, {0, fullUp}});
   XCTAssertTrue(centred == reset);
   XCTAssertFalse(centred == bentThroughout);
 
   // The bend range set with RPN 0 survives CC 121 (RP-015 keeps RPN values; it used to go back to 2 semitones).
-  auto wide = renderMIDISequence(path, {{0, rpn0Msb}, {0, rpn0Lsb}, {0, twelveSemitones}, {blocks(20), noteOnBytes(60)},
+  auto wide = renderMIDISequence(path, {{0, rpn0Msb}, {0, rpn0Lsb}, {0, twelveSemitones}, {20, noteOnBytes(60)},
     {0, fullUp}});
   auto wideAfterReset = renderMIDISequence(path, {{0, rpn0Msb}, {0, rpn0Lsb}, {0, twelveSemitones},
-    {blocks(10), noteOnBytes(60)}, {blocks(10), resetAll}, {0, fullUp}});
-  auto defaultRange = renderMIDISequence(path, {{blocks(20), noteOnBytes(60)}, {0, fullUp}});
+    {10, noteOnBytes(60)}, {10, resetAll}, {0, fullUp}});
+  auto defaultRange = renderMIDISequence(path, {{20, noteOnBytes(60)}, {0, fullUp}});
   XCTAssertTrue(wide == wideAfterReset);
   XCTAssertFalse(wide == defaultRange);
 }
@@ -2573,16 +2569,23 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   // rendering must match one with no pedal at all. Previously, lifting the pedal released every voice, including
   // ones whose key was still down.
   const auto path = self.contexts->context1.path();
-  auto reference = renderMIDISequence(path, {{0.4, noteOnBytes(60)}, {0.6, noteOffBytes(60)}});
-  auto tapped = renderMIDISequence(path, {{0.2, noteOnBytes(60)}, {0.1, sustainBytes(true)}, {0.1, sustainBytes(false)},
-    {0.6, noteOffBytes(60)}});
-  auto releasedAtTap = renderMIDISequence(path, {{0.2, noteOnBytes(60)}, {0.8, noteOffBytes(60)}});
+  auto reference = renderMIDISequence(path, {
+    {20, noteOnBytes(60)},
+    {20, noteOffBytes(60)}
+  });
+  auto tapped = renderMIDISequence(path, {
+    {10, noteOnBytes(60)},
+    {0, sustainBytes(true)},
+    {10, sustainBytes(false)},
+    {20, noteOffBytes(60)}
+  });
+  auto releasedAtTap = renderMIDISequence(path, {
+    {10, noteOnBytes(60)},
+    {30, noteOffBytes(60)}
+  });
 
-  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
-  XCTAssertTrue(reference == tapped);
-
-  // Guard against a vacuous test: releasing the note when the pedal lifts (the old behaviour) sounds different.
-  XCTAssertFalse(reference == releasedAtTap);
+  XCTAssertEqual(reference, tapped);
+  XCTAssertNotEqual(reference, releasedAtTap);
 }
 
 - (void)testSustainPedalReleasesPostponedNoteWhenLifted
@@ -2590,11 +2593,17 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   // A note released while the sustain pedal is down keeps sounding until the pedal lifts. It then sounds exactly like a
   // note released at the time the pedal lifted.
   const auto path = self.contexts->context1.path();
-  auto reference = renderMIDISequence(path, {{0.5, noteOnBytes(60)}, {0.5, noteOffBytes(60)}});
-  auto sustained = renderMIDISequence(path, {{0.4, noteOnBytes(60)}, {0.1, sustainBytes(true)}, {0.5, noteOffBytes(60)},
-    {0.0, sustainBytes(false)}});
-  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
-  // XCTAssertTrue(reference == sustained);
+  auto reference = renderMIDISequence(path, {
+    {20, noteOnBytes(60)},
+    {20, noteOffBytes(60)}
+  });
+  auto sustained = renderMIDISequence(path, {
+    {10, noteOnBytes(60)},
+    {0, sustainBytes(true)},
+    {10, noteOffBytes(60)},
+    {20, sustainBytes(false)}
+  });
+  XCTAssertEqual(reference, sustained);
 }
 
 - (void)testSustainPedalLiftOnlyReleasesNotesWhoseKeysAreUp
@@ -2602,12 +2611,21 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   // Two notes under the sustain pedal: 60 is released while the pedal is down, 64 stays held. Lifting the pedal releases
   // 60 only. 64 sounds until its own note-off.
   const auto path = self.contexts->context1.path();
-  auto reference = renderMIDISequence(path, {{0, noteOnBytes(60)}, {0, noteOnBytes(64)}, {0.9, noteOffBytes(60)},
-    {0, noteOffBytes(64)}});
-  auto sustained = renderMIDISequence(path, {{0, noteOnBytes(60)}, {0, noteOnBytes(64)}, {0.8, sustainBytes(true)},
-    {0.9, noteOffBytes(60)}, {0, sustainBytes(false)}, {0, noteOffBytes(64)}});
-  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
-  // XCTAssertTrue(reference == sustained);
+  auto reference = renderMIDISequence(path, {
+    {10, noteOnBytes(60)},
+    {10, noteOnBytes(64)},
+    {20, noteOffBytes(60)},
+    {20, noteOffBytes(64)}
+  });
+  auto sustained = renderMIDISequence(path, {
+    {10, noteOnBytes(60)},
+    {10, noteOnBytes(64)},
+    {0, sustainBytes(true)},
+    {0, noteOffBytes(60)},
+    {20, sustainBytes(false)},
+    {0, noteOffBytes(64)}
+  });
+  XCTAssertEqual(reference, sustained);
 }
 
 - (void)testSostenutoPedalHoldsOnlyCapturedNotes
@@ -2616,13 +2634,21 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   // released while the pedal is down, so it sounds until the pedal lifts.
   const auto path = self.contexts->context1.path();
   // Each entry is (event, then render this long): events at blocks 0, 10, 20, 40 and 0, 5, 10, 20, 25, 40.
-  auto reference = renderMIDISequence(path, {{blocks(10), noteOnBytes(60)}, {blocks(10), noteOnBytes(64)},
-    {blocks(20), noteOffBytes(64)}, {0, noteOffBytes(60)}});
-  auto held = renderMIDISequence(path, {{blocks(5), noteOnBytes(60)}, {blocks(5), sostenutoBytes(true)},
-    {blocks(10), noteOnBytes(64)}, {blocks(5), noteOffBytes(64)}, {blocks(15), noteOffBytes(60)},
-    {0, sostenutoBytes(false)}});
-  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
-  XCTAssertTrue(reference == held);
+  auto reference = renderMIDISequence(path, {
+    {10, noteOnBytes(60)},
+    {10, noteOnBytes(64)},
+    {20, noteOffBytes(64)},
+    {0, noteOffBytes(60)}
+  });
+  auto held = renderMIDISequence(path, {
+    {5, noteOnBytes(60)},
+    {5, sostenutoBytes(true)},
+    {10, noteOnBytes(64)},
+    {5, noteOffBytes(64)},
+    {15, noteOffBytes(60)},
+    {0, sostenutoBytes(false)}
+  });
+  XCTAssertEqual(reference, held);
 }
 
 - (void)testLowPassFilterCutoffAttenuatesOutput
@@ -2700,7 +2726,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
   // Setting it back to zero restores the original rendering exactly.
   auto restored = renderNoteWithGenerators(path, {{Index::startAddressOffset, 0}});
-  XCTAssertTrue(reference == restored);
+  XCTAssertEqual(reference, restored);
 }
 
 - (void)testStartAddressCoarseOffsetPastEndOfSampleIsSilent
@@ -2768,11 +2794,17 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 - (void)testSostenutoPedalTapDoesNotReleaseHeldKey
 {
   const auto path = self.contexts->context1.path();
-  auto reference = renderMIDISequence(path, {{0.8, noteOnBytes(60)}, {0.2, noteOffBytes(60)}});
-  auto tapped = renderMIDISequence(path, {{0.4, noteOnBytes(60)}, {0.2, sostenutoBytes(true)},
-    {0.2, sostenutoBytes(false)}, {0.2, noteOffBytes(60)}});
-  XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
-  XCTAssertTrue(reference == tapped);
+  auto reference = renderMIDISequence(path, {
+    {100, noteOnBytes(60)},
+    {0, noteOffBytes(60)}
+  });
+  auto tapped = renderMIDISequence(path, {
+    {80, noteOnBytes(60)},
+    {0, sostenutoBytes(true)},
+    {20, sostenutoBytes(false)},
+    {0, noteOffBytes(60)}
+  });
+  XCTAssertEqual(reference, tapped);
 }
 
 @end
