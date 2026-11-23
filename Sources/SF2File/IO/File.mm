@@ -58,8 +58,7 @@ namespace {
  indices, so the indices must not decrease and the terminal records must not point past the end of the next list.
  */
 template <typename Owners>
-void validateZones(const Owners& owners, const ChunkItems<SF2::Entity::Bag>& bags, size_t generatorCount,
-                   size_t modulatorCount) {
+void validateZones(const Owners& owners, const ChunkItems<SF2::Entity::Bag>& bags, size_t generatorCount, size_t modulatorCount) {
   for (size_t index = 0; index < owners.size(); ++index) {
     if (owners[index + 1].firstZoneIndex() < owners[index].firstZoneIndex()) reject();
   }
