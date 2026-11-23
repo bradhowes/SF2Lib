@@ -526,7 +526,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - No hard-coded rendering values changed: the bundled test files use only linear transforms.
 - **Behaviour change:** modulators with unknown transforms no longer have any effect; SF2.04 files using the absolute-value transform now sound as intended.
 
-**Follow-up (2026-11-23): SF2.01 10.5, out-of-range values after summation. Not yet committed. `make test-macOS`: 373 tests, 0 failures.**
+**Follow-up (2026-11-23): SF2.01 10.5, out-of-range values after summation. Commit `b7363c4`. `make test-macOS`: 373 tests, 0 failures.**
 - **Correction:** `f57b707` marked this row ✅ with a description of central clamping in `State::unmodulated` / `State::modulated`. That code was never committed: `GenValue::modulated()` returned the raw sum. The row now describes what is actually implemented, below.
 - **Approach:** 10.5 says out-of-range values, including ones that result from summation, "should be handled by substituting the nearest perceptually relevant or realizable value". Each consumer clamps instead of `State::modulated` doing it centrally. Central clamping would also clamp fineTune to ±99 cents and break pitch bend, since the default pitch-wheel modulator targets fineTune (as in FluidSynth).
 - **New `State::modulatedInRange(gen)`:** clamps the modulated value to `Definition::valueRange()`. Used for:
