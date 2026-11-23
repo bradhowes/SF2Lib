@@ -208,6 +208,17 @@ using namespace SF2::DSP;
   XCTAssertEqualWithAccuracy(1.0, SF2::DSP::tenthPercentageToNormalized(1001), 0.0001);
 }
 
+- (void)testLFODelayTimecentsToSeconds {
+  // -32768 means no delay; otherwise clamp to [-12000, 5000] timecents (SF2.01 8.1.2 #21, #23; 10.5).
+  XCTAssertEqual(0.0, SF2::DSP::lfoDelayTimecentsToSeconds(-32768));
+  XCTAssertEqual(0.0, SF2::DSP::lfoDelayTimecentsToSeconds(-40000));
+  XCTAssertEqualWithAccuracy(0.000977, SF2::DSP::lfoDelayTimecentsToSeconds(-20000), 0.000001);
+  XCTAssertEqualWithAccuracy(0.000977, SF2::DSP::lfoDelayTimecentsToSeconds(-12000), 0.000001);
+  XCTAssertEqualWithAccuracy(1.0, SF2::DSP::lfoDelayTimecentsToSeconds(0), 0.0001);
+  XCTAssertEqualWithAccuracy(17.9594, SF2::DSP::lfoDelayTimecentsToSeconds(5000), 0.001);
+  XCTAssertEqualWithAccuracy(17.9594, SF2::DSP::lfoDelayTimecentsToSeconds(8000), 0.001);
+}
+
 - (void)testLFOCentsToFrequency {
   XCTAssertEqualWithAccuracy(0.000792, SF2::DSP::lfoCentsToFrequency(-32768), 0.000001);
   XCTAssertEqualWithAccuracy(0.000792, SF2::DSP::lfoCentsToFrequency(-16000), 0.000001);

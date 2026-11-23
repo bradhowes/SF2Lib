@@ -43,8 +43,45 @@ static void setPresetMods(SF2Builder& builder, std::vector<Mod> local, std::vect
   builder.pmod = mods;
 }
 
+/// Add generators to the minimal file's instrument zone
+static void addInstrumentGens(SF2Builder& builder, std::vector<std::pair<uint16_t, int16_t>> gens)
+{
+  for (auto [oper, amount] : gens) {
+    builder.igen.insert(builder.igen.begin(), {oper, uint16_t(amount)});
+    builder.ibag[1].generatorIndex += 1;
+  }
+}
+
+static std::vector<AUValue> render(const SF2Builder& builder, uint8_t velocity = 127);
+
+/**
+ SF2.01 10.5: a value pushed out of range by summation is replaced by the nearest in-range value. Check that a generator
+ at the top of its range plus a constant ("No Controller") modulator that pushes it further sounds the same as the
+ generator alone, and that the generator itself does change the sound.
+
+ @param gen the generator to test
+ @param value the generator value, at the edge of its range
+ @param extra the modulator amount that pushes the sum out of range
+ @param other additional generators needed to make `gen` audible
+ */
+static void checkSumIsClamped(XCTestCase* self, uint16_t gen, int16_t value, int16_t extra,
+                              std::vector<std::pair<uint16_t, int16_t>> other = {})
+{
+  auto base = SF2Builder::minimal();
+  addInstrumentGens(base, other);
+  auto atLimit = base;
+  addInstrumentGens(atLimit, {{gen, value}});
+  auto pushed = atLimit;
+  setInstrumentMods(pushed, {{noController, gen, extra, 0, 0}});
+
+  auto expected = render(atLimit);
+  XCTAssertFalse(expected.empty());
+  XCTAssertTrue(render(pushed) == expected, @"gen %d", gen);
+  XCTAssertFalse(render(base) == expected, @"gen %d", gen);
+}
+
 /// Render 0.1 s of key 69 after setting CC 16 and CC 17 to 100. Returns the left channel of the dry bus.
-static std::vector<AUValue> render(const SF2Builder& builder, uint8_t velocity = 127)
+static std::vector<AUValue> render(const SF2Builder& builder, uint8_t velocity)
 {
   auto path = std::string(NSTemporaryDirectory().UTF8String) + "SF2LibPresetMods.sf2";
   builder.writeTo(path);
@@ -186,6 +223,29 @@ static std::vector<AUValue> render(const SF2Builder& builder, uint8_t velocity =
   auto valid = SF2Builder::minimal();
   setInstrumentMods(valid, {{uint16_t(0x0080 | 18 | negative), attenuation, 960, 0, 0}});
   XCTAssertFalse(render(valid) == expected);
+}
+
+- (void)testCoarseTuneSumIsClamped {
+  checkSumIsClamped(self, 51, 120, 100);  // coarseTune, +/-120 semitones
+}
+
+- (void)testPitchModulationDepthSumIsClamped {
+  checkSumIsClamped(self, 6, 12'000, 6'000);  // vibLfoToPitch, +/-12000 cents
+  checkSumIsClamped(self, 5, -12'000, -6'000);  // modLfoToPitch
+}
+
+- (void)testModLFOToVolumeSumIsClamped {
+  checkSumIsClamped(self, 13, 960, 960);  // modLfoToVolume, +/-960 cB
+}
+
+- (void)testModLFOToFilterCutoffSumIsClamped {
+  checkSumIsClamped(self, 10, 12'000, 12'000);  // modLfoToFilterFc, +/-12000 cents
+}
+
+- (void)testKeyToVolumeEnvelopeDecaySumIsClamped {
+  // keynumToVolEnvDecay (40), +/-1200 timecents per key. Key 69 scales it by -9, so the clamped sum gives a decay of
+  // 5000 - 10800 timecents (about 35 ms); unclamped it would be at the 1 ms floor. A 96 dB sustain makes decay audible.
+  checkSumIsClamped(self, 40, 1'200, 1'200, {{36, 5'000}, {37, 960}});
 }
 
 - (void)testUnknownTransformsAreIgnored {

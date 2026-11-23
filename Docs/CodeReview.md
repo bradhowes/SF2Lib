@@ -176,7 +176,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 | 9.5.1 PMOD additive | ✅ [step 7] preset modulators add their amount to an identical instrument/default modulator, or are added as new; local preset supersedes global preset |
 | 9.5.1 inst modulators supersede defaults | ✅ |
 | 7.10 stereo links "played synchronously, pitch from right sample" | ❌ not implemented (acknowledged in `Voice.hpp`) |
-| Modulated value clamping to gen range after summation | ✅ `State::unmodulated` and `State::modulated` clamp the completed instrument, preset, live, and modulator sums through each generator's `Definition` range. Envelope key-scaling applies a final destination-range clamp after its extra term is added; the dynamic filter Fc composition retains its separate, wider DSP bounds so it can reach the specified ≥20 kHz bypass. |
+| Modulated value clamping to gen range after summation | ✅ clamped where each value is used (10.5). `State::modulated` still returns the raw sum; consumers that did not already bound it use `State::modulatedInRange`, which clamps to the generator's `Definition` range: coarseTune, the three pitch depths, modLfoToVolume, the two filter Fc depths and the key-number envelope scaling. LFO delays use `DSP::lfoDelayTimecentsToSeconds` (−32768 = no delay). Envelope times, sustain levels, LFO frequencies, filter Fc/Q, attenuation, pan and the sends were already bounded by their conversions. fineTune is deliberately not clamped: it carries the pitch-wheel modulator |
 
 **Summary:** of the 8 ❌ rows in the original review, 7 are now ✅ (size/index validation, unknown generators, start offsets, filter, sustain, "No Controller", PMOD); release-time capping (⚠️) and reserved sources (⚠️) are also ✅. Still ❌: stereo links. (RPN 0 / pitch-wheel sensitivity, listed in this re-evaluation, has since been fixed.) Open ⚠️ items, roughly in order of audible impact:
 - duplicate presets;
@@ -525,3 +525,20 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - **Checked that the tests catch each bug,** by putting back each old behaviour on its own: no validity check; transform not applied; identity without the transform; in-zone shadowing by identity; instrument zones without `isShadowed`. Each makes at least one new test fail.
 - No hard-coded rendering values changed: the bundled test files use only linear transforms.
 - **Behaviour change:** modulators with unknown transforms no longer have any effect; SF2.04 files using the absolute-value transform now sound as intended.
+
+**Follow-up (2026-11-23): SF2.01 10.5, out-of-range values after summation. Not yet committed. `make test-macOS`: 373 tests, 0 failures.**
+- **Correction:** `f57b707` marked this row ✅ with a description of central clamping in `State::unmodulated` / `State::modulated`. That code was never committed: `GenValue::modulated()` returned the raw sum. The row now describes what is actually implemented, below.
+- **Approach:** 10.5 says out-of-range values, including ones that result from summation, "should be handled by substituting the nearest perceptually relevant or realizable value". Each consumer clamps instead of `State::modulated` doing it centrally. Central clamping would also clamp fineTune to ±99 cents and break pitch bend, since the default pitch-wheel modulator targets fineTune (as in FluidSynth).
+- **New `State::modulatedInRange(gen)`:** clamps the modulated value to `Definition::valueRange()`. Used for:
+  - `Pitch::samplePhaseIncrement`: coarseTune (±120) and mod LFO, vibrato LFO and mod envelope to pitch (±12000). fineTune is not clamped.
+  - `Voice::renderSample`: modLfoToVolume (±960) and the mod LFO / mod envelope to filter Fc depths (±12000). The final cutoff keeps its own realisable bound in `LowPassFilter::update`.
+  - `midiKeyEnvelopeScaling`: the four keynumTo* generators (±1200), before they are scaled by the key. The resulting times were already clamped.
+- **New `DSP::lfoDelayTimecentsToSeconds`:** LFO delays clamp to [−12000, 5000], but −32768 or lower means no delay, as for the envelope delays (`LFOTests::testConfigFromState` relies on that). It is used by `ModLFO` and `VibLFO`.
+- **Already bounded and left alone:** envelope times and sustain levels, LFO frequencies (`lfoCentsToFrequency`), filter Fc and Q, initial attenuation, pan, and the chorus and reverb sends.
+- **Tests:**
+  - `PresetModulatorTests`: `testCoarseTuneSumIsClamped`, `testPitchModulationDepthSumIsClamped` (vibrato and mod LFO), `testModLFOToVolumeSumIsClamped`, `testModLFOToFilterCutoffSumIsClamped` and `testKeyToVolumeEnvelopeDecaySumIsClamped`. Each renders a generator at the edge of its range plus a constant "No Controller" modulator that pushes it further. That must sound the same as the generator alone, and different from not having the generator.
+  - `DSPTests::testLFODelayTimecentsToSeconds`.
+- **Checked that the tests catch the bug:** with no clamp in `modulatedInRange`, all 5 render tests fail. With the clamp removed from just `Pitch.hpp`, `Voice.hpp` or `Generator.mm`, the tests for that file fail.
+- **Left over:** no render test covers the LFO delay clamp. Any delay above 5000 timecents is about 18 s, far longer than a test render. The DSP unit test covers it.
+- No hard-coded rendering values changed.
+- **Behaviour change:** sums that go out of range now saturate at the generator limit, instead of producing more extreme pitch, LFO volume or filter swings and longer or shorter key-scaled envelopes.

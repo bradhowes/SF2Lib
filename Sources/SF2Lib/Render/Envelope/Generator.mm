@@ -25,7 +25,7 @@ const Generator::StateNameArray Generator::stageNames_ = {
  @returns result of generator value x (60 - key)
  */
 constexpr Float midiKeyEnvelopeScaling(const Generator::State& state, Generator::Index gen) noexcept {
-  auto value = state.modulated(gen);
+  auto value = state.modulatedInRange(gen);  // +/-1200 (SF2.01 8.1.2 #31, 32, 39, 40; 10.5)
   auto scaling = 60 - state.key();
   return value * scaling;
 }

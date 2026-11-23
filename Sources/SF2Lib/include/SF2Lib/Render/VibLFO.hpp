@@ -27,7 +27,7 @@ public:
   inline void configure(Voice::State::State& state) noexcept {
     LFO::configure(state.sampleRate(),
                    DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyVibratoLFO)),
-                   DSP::centsToSeconds(state.modulated(Entity::Generator::Index::delayVibratoLFO)));
+                   DSP::lfoDelayTimecentsToSeconds(state.modulated(Entity::Generator::Index::delayVibratoLFO)));
   }
 
   /**

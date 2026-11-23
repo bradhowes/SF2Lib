@@ -74,12 +74,14 @@ public:
    */
   inline Float samplePhaseIncrement(ModLFO::Value modLFO, VibLFO::Value vibLFO, Modulation::Value modEnv) const noexcept
   {
-    auto coarseTune{state_.modulated(Index::coarseTune)};
+    // Clamp summed values to their generator ranges (SF2.01 10.5). fineTune is the exception: it also carries the
+    // pitch-wheel modulator (see `Modulator::defaults`), whose output legitimately exceeds the +/-99 cent range.
+    auto coarseTune{state_.modulatedInRange(Index::coarseTune)};
     auto fineTune{state_.modulated(Index::fineTune)};
     auto phaseOffset{coarseTune * 100_F + fineTune};
-    auto modLFOValue{modLFO.val * state_.modulated(Index::modulatorLFOToPitch)};
-    auto vibLFOValue{vibLFO.val * state_.modulated(Index::vibratoLFOToPitch)};
-    auto modEnvValue{modEnv.val * state_.modulated(Index::modulatorEnvelopeToPitch)};
+    auto modLFOValue{modLFO.val * state_.modulatedInRange(Index::modulatorLFOToPitch)};
+    auto vibLFOValue{vibLFO.val * state_.modulatedInRange(Index::vibratoLFOToPitch)};
+    auto modEnvValue{modEnv.val * state_.modulatedInRange(Index::modulatorEnvelopeToPitch)};
     auto phase{phaseBase_ + phaseOffset + modLFOValue + vibLFOValue + modEnvValue};
     return DSP::power2Lookup(int(std::round(phase)));
   }

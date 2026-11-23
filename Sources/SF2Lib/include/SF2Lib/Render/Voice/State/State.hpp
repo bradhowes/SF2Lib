@@ -151,6 +151,19 @@ public:
    */
   inline Float modulated(Index gen) const noexcept { return gens_[gen].modulated(); }
 
+  /**
+   Obtain a generator value that includes the changes added by attached modulators, clamped to the generator's range.
+   SF2.01 10.5: out-of-range values, including ones that result from "the summation of instrument and preset values",
+   "should be handled by substituting the nearest perceptually relevant or realizable value". Use this where the
+   consumer does not already limit the value itself.
+
+   @param gen the index of the generator
+   @returns current value of the generator, limited to the range given in SF2.01 8.1.3
+   */
+  inline Float modulatedInRange(Index gen) const noexcept {
+    return Entity::Generator::Definition::definition(gen).valueRange().clamp(modulated(gen));
+  }
+
   /// @returns MIDI key that started a voice to begin emitting samples. For DSP this is *not* what is desired. See
   /// `key` method below.
   inline int eventKey() const noexcept { return eventKey_; }

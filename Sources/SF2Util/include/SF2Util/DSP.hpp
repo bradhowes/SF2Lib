@@ -210,6 +210,17 @@ inline static constexpr Float lfoCentsToFrequency(Float value) noexcept {
 }
 
 /**
+ Convert an LFO delay in timecents to seconds. Values are clamped to the generator range [-12000, 5000] (SF2.01 8.1.2
+ #21, #23; 10.5), except that -32768 or lower means no delay at all, as for the envelope delays.
+
+ @param value the delay in timecents
+ @returns delay in seconds
+ */
+inline static constexpr Float lfoDelayTimecentsToSeconds(Float value) noexcept {
+  return value <= -32'768_F ? 0_F : centsToSeconds(clamp(value, -12'000_F, 5'000_F));
+}
+
+/**
  Convert centiBels to resonance (Q) value for use in low-pass filter calculations. The input is clamped to the range
  given in SF2.01 spec #8.1.3. The factor being subtracted comes from FluidSynth code to conform to spec.
 
