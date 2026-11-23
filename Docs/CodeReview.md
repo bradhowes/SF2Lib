@@ -510,7 +510,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - No hard-coded rendering values changed.
 - **Behaviour change:** sums that go out of range now saturate at the generator limit, instead of producing more extreme pitch, LFO volume or filter swings and longer or shorter key-scaled envelopes.
 
-**Follow-up (2026-11-24): §7 redundant `inline` and unnecessary `noexcept`. Not yet committed. `make test-macOS`: 373 tests, 0 failures.**
+**Follow-up (2026-11-24): §7 redundant `inline` and unnecessary `noexcept`. Commit `1dfe7fd`. `make test-macOS`: 373 tests, 0 failures.**
 - **`inline` (277 removed, in `Sources/`):** removed only where the language already implies it:
   - member functions (including friends and operators) defined inside the class;
   - `constexpr` functions and variables, at class or namespace scope;
