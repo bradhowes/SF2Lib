@@ -491,7 +491,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - the first-pass loop-start wrap fails the 1.5 reference test.
 - No hard-coded rendering values changed: none of the sampled values fall on a loop boundary.
 
-**Follow-up (2026-11-23): SF2.01 8.1.2 #57 exclusiveClass. The first part was committed by the user as `9deb75b`; the review fixes are not yet committed. `make test-macOS`: 359 tests, 0 failures.**
+**Follow-up (2026-11-23): SF2.01 8.1.2 #57 exclusiveClass. The first part was committed by the user as `9deb75b`; the review fixes are `9a7c323`. `make test-macOS`: 359 tests, 0 failures.**
 - **`9deb75b` (user):**
   - `Config` reads `exclusiveClass` from the global instrument zone, and the local zone overrides it.
   - `Engine::stopAllExclusiveVoices_RT` calls the new `Voice::releaseKeyViaExclusiveClass()` instead of stopping the voice.
