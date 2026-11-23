@@ -36,6 +36,54 @@ struct EnvelopeTestInjector {
 @interface EnvelopeTests : SamplePlayingTestCase
 @end
 
+/**
+ Configure `gen` from a voice state (the production path), with a 2 s release, and check `noteAborted` (exclusiveClass,
+ SF2.01 8.1.2 #57). It must fade from the current value rather than jump to 0, and finish within about 5 ms, both when
+ sustaining and when already in a (slow) release.
+ */
+template <EnvelopeGenerator T>
+static void checkNoteAborted(EnvelopeTests* self, T& gen, State::State& state, State::State::Index release) {
+  self.sst.setValue(state, release, 1200);
+  gen.configure(state);
+  const int abortSamples = int(std::round(state.sampleRate() * Generator::noteAbortReleaseDuration));
+  XCTAssertGreaterThan(abortSamples, 100);
+
+  auto samplesUntilIdle = [&]() {
+    int count = 0;
+    while (gen.isActive() && count < state.sampleRate()) {
+      gen.getNextValue();
+      ++count;
+    }
+    return count;
+  };
+
+  // Aborted while sustaining at full scale.
+  gen.start();
+  for (int index = 0; index < 1000; ++index) gen.getNextValue();
+  XCTAssertEqual(StageIndex::sustain, gen.activeIndex());
+  XCTAssertEqualWithAccuracy(1.0, gen.value().val, self.epsilon);
+  gen.noteAborted();
+  XCTAssertEqual(StageIndex::release, gen.activeIndex());
+  XCTAssertGreaterThan(gen.getNextValue().val, 0.99);
+  auto count = samplesUntilIdle();
+  XCTAssertGreaterThan(count, abortSamples / 2);
+  XCTAssertLessThanOrEqual(count, abortSamples + 2);
+
+  // Aborted part way through a release that would otherwise take 2 seconds. `noteAborted` replaced the release stage, so
+  // configure again, as `Voice::start` does for every note.
+  gen.configure(state);
+  gen.start();
+  for (int index = 0; index < 1000; ++index) gen.getNextValue();
+  gen.noteReleased();
+  for (int index = 0; index < 100; ++index) gen.getNextValue();
+  auto before = gen.value().val;
+  XCTAssertGreaterThan(before, 0.9);
+  gen.noteAborted();
+  XCTAssertEqual(StageIndex::release, gen.activeIndex());
+  XCTAssertGreaterThan(gen.getNextValue().val, before - 0.01);
+  XCTAssertLessThanOrEqual(samplesUntilIdle(), abortSamples + 2);
+}
+
 @implementation EnvelopeTests
 
 - (void)setUp {
@@ -234,6 +282,18 @@ gen.noteReleased();
   XCTAssertEqual(StageIndex::idle, gen.activeIndex());
   XCTAssertEqualWithAccuracy(0.0, gen.getNextValue().val, self.epsilon);
   XCTAssertEqual(StageIndex::idle, gen.activeIndex());
+}
+
+- (void)testVolumeEnvelopeNoteAborted {
+  State::State state{self.contexts->context2.makeState(0, 64, 32)};
+  auto gen = Volume();
+  checkNoteAborted(self, gen, state, State::State::Index::releaseVolumeEnvelope);
+}
+
+- (void)testModulationEnvelopeNoteAborted {
+  State::State state{self.contexts->context2.makeState(0, 64, 32)};
+  auto gen = Modulation();
+  checkNoteAborted(self, gen, state, State::State::Index::releaseModulatorEnvelope);
 }
 
 - (void)testVolumeEnvelopeSustainLevel {

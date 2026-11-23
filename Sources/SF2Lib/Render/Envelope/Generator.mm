@@ -84,6 +84,9 @@ Generator::Generator(Float sampleRate, const char* logTag, Float delay, Float at
 void
 Generator::noteAborted() noexcept
 {
+  // SF2.01 8.1.2 #57 exclusiveClass: other notes of the class are "rapidly terminated". Use a short release (from the
+  // current value, so there is no jump) instead of stopping outright, which clicks. This also applies to a note that
+  // is already in its release phase.
   if (stageIndex_ != StageIndex::idle) {
     stages_[StageIndex::release].setRelease(noteAbortReleaseDurationInSamples_);
     enterStage(StageIndex::release);
@@ -154,6 +157,7 @@ Generator::configureVolumeEnvelope(const State& state) noexcept
 
   auto releaseTimecents = state.modulated(Index::releaseVolumeEnvelope);
   stages_[StageIndex::release].setRelease(durationInSamples(releaseTimecentsToSeconds(releaseTimecents)));
+  noteAbortReleaseDurationInSamples_ = durationInSamples(noteAbortReleaseDuration);
 
   start();
 }
@@ -196,6 +200,7 @@ Generator::configureModulationEnvelope(const State& state) noexcept
 
   auto releaseTimecents = state.modulated(Index::releaseModulatorEnvelope);
   stages_[StageIndex::release].setRelease(durationInSamples(releaseTimecentsToSeconds(releaseTimecents)));
+  noteAbortReleaseDurationInSamples_ = durationInSamples(noteAbortReleaseDuration);
 
   start();
 }

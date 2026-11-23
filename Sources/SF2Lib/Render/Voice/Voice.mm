@@ -75,13 +75,15 @@ Voice::start() noexcept
 void
 Voice::releaseKeyViaExclusiveClass() noexcept
 {
+  // SF2.01 8.1.2 #57: "any other sounding note with the same exclusive class value should be rapidly terminated". That
+  // includes notes already in their release phase (e.g. an open hi-hat ringing out when the closed hi-hat is struck),
+  // so this does not return early when `released_` is set. The modulation envelope gets the same short release rather
+  // than an instant stop, which would make pitch or filter cutoff jump during the fade.
   keyDown_ = false;
-  if (! released_) {
-    postponedRelease_ = false;
-    released_ = true;
-    volumeEnvelope_.noteAborted();
-    modulatorEnvelope_.stop();
-  }
+  postponedRelease_ = false;
+  released_ = true;
+  volumeEnvelope_.noteAborted();
+  modulatorEnvelope_.noteAborted();
 }
 
 void

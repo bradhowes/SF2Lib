@@ -135,7 +135,8 @@ public:
   void noteReleased() noexcept;
 
   /**
-   Note was aborted and enter s release stage with a short decay.
+   Note was cut off by another note with the same exclusiveClass (SF2.01 8.1.2 #57). Enter a short release of
+   `noteAbortReleaseDuration` from the current value, even if the envelope is already releasing.
    */
   void noteAborted() noexcept;
 
@@ -263,7 +264,7 @@ private:
   Float value_{0_F};
   Float attackProgress_{0_F};
   Float sustainLevel_{0_F};
-  int noteAbortReleaseDurationInSamples_;
+  int noteAbortReleaseDurationInSamples_{0};
   bool convexAttack_{false};
   const os_log_t log_;
 

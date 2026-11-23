@@ -103,7 +103,7 @@ Fix: validate generator opers once at load and drop invalid entries. Validate th
 - **Interpolation at loop end:** `sample()` only wraps `whole == endLoopPos`. Cubic interpolation also reads `whole+2`, which can be `endLoopPos+1`. `before()` wraps on the *first* pass through `startLoopPos`, before any looping has happened.
 - **Pitch quantised to 1 cent:** `power2Lookup(int(round(phase)))`. Each sample-rate term is also rounded separately (`sampleRateDeltaCents`). Detuned layers beat at the wrong rate and vibrato stair-steps. Interpolate the table, or use `exp2` once per block.
 - **Release time capped at 5000 timecents (≈18 s)** in `releaseTimecentsToSeconds`. The spec and `Definition` both allow 8000 (≈100 s).
-- **exclusiveClass:** `Config` reads it only from the local instrument zone (the global zone is ignored, which disagrees with `Voice::exclusiveClass()`). Voices are also hard-stopped; a ~5 ms fast release would avoid clicks.
+- ~~**exclusiveClass:** `Config` reads it only from the local instrument zone (the global zone is ignored, which disagrees with `Voice::exclusiveClass()`). Voices are also hard-stopped; a ~5 ms fast release would avoid clicks.~~ Fixed (see §11, gen 57 follow-up).
 - **Duplicate bank/program:** spec 7.2 says the *first* preset in PHDR wins. `std::sort` is not stable; use `std::stable_sort`.
 - **Empty or missing chunks:** `ChunkItems::size()` is `items_.size() - 1`, which underflows for an empty or missing chunk. A file without `phdr` then makes `presetIndicesOrderedByBankProgram_.resize(SIZE_MAX)` (terminate). `end()` is `items_.end() - 1` on an empty vector, which is UB. `makeChunkList` computes `buffer[1] - 4` without checking ≥ 4.
 - **Non-terminated names:** `trim_property(char[N])` can leave all 20 bytes non-zero. `Preset::name()` then reads past the array. Copy at most `N-1` bytes.
@@ -164,7 +164,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 | Gen 34 attackVolEnv "convex, linear in amplitude" | ✅ the volume envelope ramps its attack *progress* linearly and outputs `volumeEnvelopeAttackCurve(progress)`, the normalised-dB value whose gain equals the progress, so the attack is linear in amplitude (half way = −6 dB). A release during the attack starts from the shaped level. Deviation: the modulation envelope attack (gen 26, "linear in Hz") stays linear, as in FluidSynth, because the right curve depends on the destination and depth |
 | Gen 37 sustainVolEnv | ✅ [step 1] sustain level and voice gain share one normalised-dB mapping |
 | Gen 46/47 keynum/velocity overrides | ✅ |
-| Gen 57 exclusiveClass | ⚠️ unchanged: `Config` reads it from the local instrument zone only (global zone ignored, unlike `Voice::exclusiveClass()`), and other voices of the class are cut off rather than given a fast release |
+| Gen 57 exclusiveClass | ✅ read from the global instrument zone, overridden by the local zone. Other sounding voices of the class, including ones already releasing, get a 5 ms release on both envelopes instead of a hard stop |
 | 8.2.1 "No Controller" source = value 1, not a way to turn a modulator off | ✅ [step 7] |
 | 8.2.1 reserved source indices → ignore modulator | ✅ [steps 4, 7] general 127 and other reserved indices rejected; CC 0, 6, 32–63, 98–101, 120–127 rejected; the amount source and the destination are validated too |
 | 8.2.1 source 16 "pitch wheel sensitivity … sent from the MIDI RPN 0 command" | ✅ `ChannelState` decodes RPN 0 (CC 101/100 = 0/0, then Data Entry MSB = semitones) into `pitchWheelSensitivity`. An RPN stays selected across unrelated CCs until another RPN/NRPN or the RPN null (127/127). Data Entry LSB (cents), Data Entry increment/decrement and other RPNs are ignored |
@@ -179,7 +179,6 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 | Modulated value clamping to gen range after summation | ⚠️ ad hoc per consumer (envelope times, filter Fc/Q, pan and the sample rate are clamped; tuning and send levels only partially) |
 
 **Summary:** of the 8 ❌ rows in the original review, 7 are now ✅ (size/index validation, unknown generators, start offsets, filter, sustain, "No Controller", PMOD); release-time capping (⚠️) and reserved sources (⚠️) are also ✅. Still ❌: stereo links. (RPN 0 / pitch-wheel sensitivity, listed in this re-evaluation, has since been fixed.) Open ⚠️ items, roughly in order of audible impact:
-- exclusiveClass;
 - duplicate presets;
 - ROM samples;
 - missing `ifil`;
@@ -491,3 +490,26 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - the exact-end-only wrap fails both reference tests;
   - the first-pass loop-start wrap fails the 1.5 reference test.
 - No hard-coded rendering values changed: none of the sampled values fall on a loop boundary.
+
+**Follow-up (2026-11-23): SF2.01 8.1.2 #57 exclusiveClass. The first part was committed by the user as `9deb75b`; the review fixes are not yet committed. `make test-macOS`: 359 tests, 0 failures.**
+- **`9deb75b` (user):**
+  - `Config` reads `exclusiveClass` from the global instrument zone, and the local zone overrides it.
+  - `Engine::stopAllExclusiveVoices_RT` calls the new `Voice::releaseKeyViaExclusiveClass()` instead of stopping the voice.
+  - That calls the new `Envelope::Generator::noteAborted()`, which enters a release of `noteAbortReleaseDuration` (5 ms) from the current value.
+  - `TestEngineHarness` was refactored to render by time (`renderForDuration`, `renderForCount`, `renderMaxFramesCount`), and the hard-coded rendering values in `EngineTests` and `VoiceTests` were regenerated for it.
+- **Review fixes:**
+  - **5 ms fade never happened:** the abort length was only set by the test-only constructor. Voices are built with the default constructor, so the "fade" lasted one sample. `configureVolumeEnvelope` and `configureModulationEnvelope` now set it from the sample rate.
+  - **Released notes were not cut off:** `releaseKeyViaExclusiveClass` returned early for a voice already in its release phase, so an open hi-hat ringing out was not choked. The spec says "any other sounding note", so it no longer returns early. `noteAborted` also shortens a release that is already running.
+  - **Mod envelope stopped outright:** the modulation envelope was stopped, which made its pitch and filter effect jump during the fade. It now gets the same 5 ms release.
+  - `playAudioDuringTests` went back to `false`.
+- **Tests:**
+  - `EngineTests::testEngineExcludeClassNoteTermination` used to assert that the old voice was gone after 4 ms, which only passed because of the one-sample fade. It now requires the old voice to be active 1 ms after the new note and gone 5 ms later. (It stops after about 2 ms: the voice's gain includes the velocity attenuation, so it reaches the −80 dB cut-off early.)
+  - Added `EngineTests::testExclusiveClassChokesReleasingNote`: a note released 10 ms earlier is choked by a new note in its class.
+  - Added `EnvelopeTests::testVolumeEnvelopeNoteAborted` and `testModulationEnvelopeNoteAborted`. These configure from a voice state (the production path), with a 2 s release. Aborting while sustaining must start just below 1.0 and finish in about 240 samples. Aborting part way through the release must continue from the current value and finish just as quickly.
+  - `testResetAllControllersRecentresBendButKeepsBendRange` and `testSostenutoPedalHoldsOnlyCapturedNotes` had their key assertions commented out. After the harness refactor their event times were render-block indices being read as seconds, so the sequences no longer meant what they said. They now use `blocks(n)` durations matching the original timing, both assertions are back, and both pass. The bend test also gained a check that the bend is actually heard (`centred != bentThroughout`).
+- **Checked that the tests catch the bugs:**
+  - with the abort length left at 0, both engine tests and both envelope tests fail;
+  - with the early return on `released_` put back, `testExclusiveClassChokesReleasingNote` fails.
+- **Left over:** no test catches `Voice::releaseKeyViaExclusiveClass` stopping the modulation envelope instead of aborting it. That would need a preset with a mod envelope routed to pitch or the filter, and a way to separate the old voice's output from the new one's.
+- No hard-coded rendering values changed with the review fixes: none of the sampled tests trigger an exclusive class.
+- **Behaviour change:** notes cut off by an exclusive class now fade out over 5 ms or less instead of stopping with a click, and this also applies to notes in their release phase.

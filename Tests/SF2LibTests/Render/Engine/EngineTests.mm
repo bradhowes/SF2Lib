@@ -73,11 +73,11 @@ static const std::vector<std::pair<Index, AUValue>> instantModEnvelope{
   {Index::holdModulatorEnvelope, -12'000}, {Index::decayModulatorEnvelope, -12'000},
   {Index::sustainModulatorEnvelope, 0}};
 
-/// A 3-byte MIDI message to send just before the render block with the given index.
+/// A 3-byte MIDI message and how long to render (in seconds) after sending it.
 using TimedMIDIEvents = std::vector<std::pair<double, std::array<uint8_t, 3>>>;
 
-/// Render 1 second of preset 0 of the given file, sending each MIDI message at its render-block index. Events must be in
-/// render-block order. Returns the left channel of the dry bus.
+/// Render 1 second of preset 0 of the given file. Each MIDI message is sent and then followed by its render duration;
+/// whatever remains of the second is rendered after the last one. Returns the left channel of the dry bus.
 static std::vector<AUValue> renderMIDISequence(const std::string& path, const TimedMIDIEvents& events)
 {
   auto harness{TestEngineHarness{48000.0}};
@@ -92,6 +92,10 @@ static std::vector<AUValue> renderMIDISequence(const std::string& path, const Ti
   const AUValue* data = harness.dryBuffer().floatChannelData[0];
   return std::vector<AUValue>(data, data + harness.bufferFrameCount());
 }
+
+/// @returns the duration of `count` 512-frame render blocks at 48 kHz, for `renderMIDISequence`. The extra half frame
+/// keeps `renderForDuration` from truncating `count * 512` frames to one fewer.
+static double blocks(int count) { return (count * 512.0 + 0.5) / 48'000.0; }
 
 static std::array<uint8_t, 3> noteOnBytes(uint8_t key) { return {0x90, key, 100}; }
 static std::array<uint8_t, 3> noteOffBytes(uint8_t key) { return {0x80, key, 0}; }
@@ -671,25 +675,51 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineExcludeClassNoteTermination
 {
+  // SF2.01 8.1.2 #57: a new note with the same exclusiveClass "rapidly terminates" a sounding one. Use a ~5 ms release
+  // rather than a hard cut: the old voice must still be fading after 1 ms and gone after 6 ms. It actually stops after
+  // about 2 ms, because its gain (which includes the velocity attenuation) drops below the -80 dB cut-off early.
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context1.path(), 260);
-
-  auto seconds = 1.5;
-  auto mixer{harness.createMixer(seconds)};
+  auto mixer{harness.createMixer(1.5)};
   XCTAssertEqual(size_t(0), engine.activeVoiceCount());
 
   auto note = 46;
   harness.sendNoteOn(note);
-  // This should cause the previous note to be released but it will render audio for ~5ms.
+  harness.renderForDuration(mixer, 0.1);  // let the first note sound before it is cut off
   harness.sendNoteOn(note);
   XCTAssertEqual(size_t(2), engine.activeVoiceCount());
-  harness.renderForDuration(mixer, 0.004);
+  harness.renderForDuration(mixer, 0.001);
+  XCTAssertEqual(size_t(2), engine.activeVoiceCount());  // still fading (used to be a hard cut)
+  harness.renderForDuration(mixer, 0.005);
   XCTAssertEqual(size_t(1), engine.activeVoiceCount());
   harness.renderToEnd(mixer);
   XCTAssertEqual(size_t(1), engine.activeVoiceCount());
 
   [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
+}
+
+- (void)testExclusiveClassChokesReleasingNote
+{
+  // A note that has been released and is still ringing out is also "sounding" (8.1.2 #57), so a new note in the same
+  // class cuts it off. Previously a voice already in its release phase was skipped.
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  harness.load(self.contexts->context1.path(), 260);
+  auto mixer{harness.createMixer(1.0)};
+
+  auto note = 46;
+  harness.sendNoteOn(note);
+  harness.renderForDuration(mixer, 0.1);
+  harness.sendNoteOff(note);
+  harness.renderForDuration(mixer, 0.01);
+  XCTAssertEqual(size_t(1), engine.activeVoiceCount());  // ringing out in its release phase
+  harness.sendNoteOn(note);
+  XCTAssertEqual(size_t(2), engine.activeVoiceCount());
+  harness.renderForDuration(mixer, 0.001);
+  XCTAssertEqual(size_t(2), engine.activeVoiceCount());
+  harness.renderForDuration(mixer, 0.005);
+  XCTAssertEqual(size_t(1), engine.activeVoiceCount());
 }
 
 - (void)testEngineMIDIChannelPressure
@@ -2295,17 +2325,19 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   const std::array<uint8_t, 3> twelveSemitones{0xB0, 6, 12};
 
   // Pitch bend goes back to centre.
-  auto centred = renderMIDISequence(path, {{0, noteOnBytes(60)}, {5, fullUp}, {30, centre}});
-  auto reset = renderMIDISequence(path, {{0, noteOnBytes(60)}, {5, fullUp}, {30, resetAll}});
+  auto centred = renderMIDISequence(path, {{blocks(5), noteOnBytes(60)}, {blocks(25), fullUp}, {0, centre}});
+  auto reset = renderMIDISequence(path, {{blocks(5), noteOnBytes(60)}, {blocks(25), fullUp}, {0, resetAll}});
+  auto bentThroughout = renderMIDISequence(path, {{blocks(5), noteOnBytes(60)}, {0, fullUp}});
   XCTAssertTrue(centred == reset);
+  XCTAssertFalse(centred == bentThroughout);
 
   // The bend range set with RPN 0 survives CC 121 (RP-015 keeps RPN values; it used to go back to 2 semitones).
-  auto wide = renderMIDISequence(path, {{0, rpn0Msb}, {0, rpn0Lsb}, {0, twelveSemitones}, {0, noteOnBytes(60)},
-    {0.9, fullUp}});
+  auto wide = renderMIDISequence(path, {{0, rpn0Msb}, {0, rpn0Lsb}, {0, twelveSemitones}, {blocks(20), noteOnBytes(60)},
+    {0, fullUp}});
   auto wideAfterReset = renderMIDISequence(path, {{0, rpn0Msb}, {0, rpn0Lsb}, {0, twelveSemitones},
-    {0.8, noteOnBytes(60)}, {0.1, resetAll}, {0.1, fullUp}});
-  auto defaultRange = renderMIDISequence(path, {{0, noteOnBytes(60)}, {0.9, fullUp}});
-  // XCTAssertTrue(wide == wideAfterReset);
+    {blocks(10), noteOnBytes(60)}, {blocks(10), resetAll}, {0, fullUp}});
+  auto defaultRange = renderMIDISequence(path, {{blocks(20), noteOnBytes(60)}, {0, fullUp}});
+  XCTAssertTrue(wide == wideAfterReset);
   XCTAssertFalse(wide == defaultRange);
 }
 
@@ -2587,12 +2619,14 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   // 60 is down when sostenuto goes down, so it is captured. 64 starts afterwards and must release normally. 60 is
   // released while the pedal is down, so it sounds until the pedal lifts.
   const auto path = self.contexts->context1.path();
-  auto reference = renderMIDISequence(path, {{0, noteOnBytes(60)}, {10, noteOnBytes(64)}, {20, noteOffBytes(64)},
-    {40, noteOffBytes(60)}});
-  auto held = renderMIDISequence(path, {{0, noteOnBytes(60)}, {5, sostenutoBytes(true)}, {10, noteOnBytes(64)},
-    {20, noteOffBytes(64)}, {25, noteOffBytes(60)}, {40, sostenutoBytes(false)}});
+  // Each entry is (event, then render this long): events at blocks 0, 10, 20, 40 and 0, 5, 10, 20, 25, 40.
+  auto reference = renderMIDISequence(path, {{blocks(10), noteOnBytes(60)}, {blocks(10), noteOnBytes(64)},
+    {blocks(20), noteOffBytes(64)}, {0, noteOffBytes(60)}});
+  auto held = renderMIDISequence(path, {{blocks(5), noteOnBytes(60)}, {blocks(5), sostenutoBytes(true)},
+    {blocks(10), noteOnBytes(64)}, {blocks(5), noteOffBytes(64)}, {blocks(15), noteOffBytes(60)},
+    {0, sostenutoBytes(false)}});
   XCTAssertGreaterThan(rms(reference, 0, reference.size()), 0.001);
-  // XCTAssertTrue(reference == held);
+  XCTAssertTrue(reference == held);
 }
 
 - (void)testLowPassFilterCutoffAttenuatesOutput
