@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2Util/Base64.hpp"
 
 namespace SF2::Render::Engine {
@@ -34,7 +35,7 @@ namespace SF2::Render::Engine {
                           + encodedFilePath.size()) + 1;
       auto bytes = std::vector<uint8_t>(payloadSize, 0);
       auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
-      payload->sysExBegin = SF2::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
+      payload->sysExBegin = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
       payload->manufacturer = manufacturerValue;
       payload->model = modelPathPayload;
       payload->presetIndex = presetIndex;
@@ -43,7 +44,7 @@ namespace SF2::Render::Engine {
       auto pos2 = std::copy(overrides.begin(), overrides.end(), pos1);
       auto pos3 = reinterpret_cast<uint8_t*>(std::copy(encodedFilePath.begin(), encodedFilePath.end(),
                                                        reinterpret_cast<char*>(pos2)));
-      *pos3++ = SF2::valueOf(SF2::MIDI::CoreEvent::EOX);
+      *pos3++ = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::EOX);
 
       assert(pos3 - bytes.data() == long(bytes.size()));
       assert(bytes.size() >= minPayloadSize);
@@ -59,7 +60,7 @@ namespace SF2::Render::Engine {
                           + encodedBookmark.length) + 1;
       auto bytes = std::vector<uint8_t>(payloadSize, 0);
       auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
-      payload->sysExBegin = SF2::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
+      payload->sysExBegin = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
       payload->manufacturer = manufacturerValue;
       payload->model = modelBookmarkPayload;
       payload->presetIndex = presetIndex;
@@ -68,7 +69,7 @@ namespace SF2::Render::Engine {
       auto pos2 = reinterpret_cast<uint8_t*>(std::copy(overrides.begin(), overrides.end(), pos1));
       [encodedBookmark getBytes: pos2 length: encodedBookmark.length];
       auto pos3 = pos2 + encodedBookmark.length;
-      *pos3++ = SF2::valueOf(SF2::MIDI::CoreEvent::EOX);
+      *pos3++ = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::EOX);
 
       assert(pos3 - bytes.data() == long(bytes.size()));
       assert(bytes.size() >= minPayloadSize);

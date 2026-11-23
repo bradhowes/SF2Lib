@@ -51,9 +51,9 @@ public:
 private:
   inline uint32_t paddedSize() const noexcept { return size_ + (size_ & 1); }
 
-  Tag const tag_;
-  uint32_t const size_;
-  Pos const pos_;
+  Tag tag_;
+  uint32_t size_;
+  Pos pos_;
 };
 
 } // end namespace SF2::IO

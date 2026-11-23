@@ -7,6 +7,8 @@
 #include <iosfwd>
 #include <string>
 
+#include "DSPHeaders/DSP.hpp"
+#include "DSPHeaders/Types.hpp"
 #include "SF2Util/Types.hpp"
 
 namespace SF2::Entity::Modulator {
@@ -68,7 +70,7 @@ public:
 
    @param index the controller to use
    */
-  explicit Source(GeneralIndex index) noexcept : bits_{static_cast<uint16_t>(SF2::valueOf(index) & indexMask)} {}
+  explicit Source(GeneralIndex index) noexcept : bits_{static_cast<uint16_t>(DSPHeaders::valueOf(index) & indexMask)} {}
 
   /**
    Generate a Source based on a MIDI continuous controller (CC)
@@ -94,7 +96,7 @@ public:
 
   /// @returns true if the source is valid
   bool isValid() const noexcept {
-    if (rawType() > SF2::valueOf(ContinuityType::switched)) {
+    if (rawType() > DSPHeaders::valueOf(ContinuityType::switched)) {
       return false;
     }
     auto idx = rawIndex();

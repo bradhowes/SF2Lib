@@ -4,6 +4,7 @@
 
 #include <concepts>
 
+#include "DSPHeaders/Concepts.hpp"
 #include "SF2Lib/Render/Zone/Collection.hpp"
 
 namespace SF2::IO { class File; }
@@ -21,7 +22,7 @@ concept ZoneDerivedType = std::derived_from<T, SF2::Render::Zone::Zone>;
 
  Cannot instantiate -- must be derived from.
  */
-template <ZoneDerivedType T, EntityDerivedType E>
+template <ZoneDerivedType T, DSPHeaders::EntityDerivedType E>
 class WithCollectionBase
 {
 public:

@@ -28,6 +28,4 @@ SF2::Utils::trim_property(std::string& property) noexcept
                  property.begin(), [](std::string::value_type c) {
     return std::isprint(static_cast<unsigned char>(c)) ? c : '_';
   });
-
-  // std::cout << "trim_property - |" << property << "|\n";
 }

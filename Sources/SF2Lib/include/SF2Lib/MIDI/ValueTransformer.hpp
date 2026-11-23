@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2Util/Types.hpp"
 #include "SF2File/Entity/Modulator/Source.hpp"
 
@@ -63,7 +64,7 @@ public:
    @returns transformed value
    */
   inline Float operator()(int controllerValue) const noexcept {
-    return checkedVectorIndexing(active_, std::clamp(controllerValue, 0, int(active_.size() - 1)));
+    return DSPHeaders::checkedVectorIndexing(active_, std::clamp(controllerValue, 0, int(active_.size() - 1)));
   }
 
 private:

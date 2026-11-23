@@ -21,7 +21,7 @@ public:
    @param kind the Tag type for the elements in the chunk list
    @param pos the file position where the first item in the list is to be found
    */
-  ChunkList(Tag tag, uint32_t size, Tag kind, Pos pos);
+  ChunkList(Tag tag, uint32_t size, Tag kind, Pos pos) : Chunk(tag, size, pos), kind_{kind} {}
 
   /// @returns the Tag type for the elements held in the container
   inline Tag kind() const noexcept { return kind_; }

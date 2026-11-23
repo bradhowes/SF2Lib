@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2Lib/Render/Instrument.hpp"
 
 namespace SF2::IO { class File; }
@@ -35,7 +36,7 @@ public:
    @param index the index of the instrument to get
    @returns the `Instrument` reference
    */
-  const Instrument& operator[](size_t index) const noexcept { return checkedVectorIndexing(instruments_, index); }
+  const Instrument& operator[](size_t index) const noexcept { return DSPHeaders::checkedVectorIndexing(instruments_, index); }
 
   /**
    Obtain the `Instrument` at the given index.
@@ -43,7 +44,7 @@ public:
    @param index the index of the instrument to get
    @returns the `Instrument` reference
    */
-  Instrument& operator[](size_t index) noexcept { return checkedVectorIndexing(instruments_, index); }
+  Instrument& operator[](size_t index) noexcept { return DSPHeaders::checkedVectorIndexing(instruments_, index); }
 
 private:
   std::vector<Instrument> instruments_{};

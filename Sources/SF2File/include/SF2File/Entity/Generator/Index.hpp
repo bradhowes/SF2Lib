@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdint>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2Util/Types.hpp"
 
 namespace SF2::Entity::Generator {
@@ -447,7 +448,7 @@ public:
 
    @param value the starting value
    */
-  inline IndexIterator(Index value) noexcept : value_{SF2::valueOf(value)} {}
+  inline IndexIterator(Index value) noexcept : value_{DSPHeaders::valueOf(value)} {}
 
   /**
    Increment the iterator.
@@ -498,6 +499,6 @@ private:
  Fixed-size array with template value type that uses Index enums for indices.
  */
 template <typename ValueType>
-using GeneratorValueArray = EnumIndexableValueArray<ValueType, Index, size_t(Index::numValues)>;
+using GeneratorValueArray = DSPHeaders::EnumIndexableValueArray<ValueType, Index, size_t(Index::numValues)>;
 
 } // end namespace SF2::Entity::Generator

@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2Util/Types.hpp"
 #include "SF2File/IO/Pos.hpp"
 
@@ -55,7 +56,7 @@ public:
                Type type = Type::monoSample);
 
   bool sampleIsA(Type type) const noexcept {
-    return (sampleType & SF2::valueOf(type)) == SF2::valueOf(type);
+    return (sampleType & DSPHeaders::valueOf(type)) == DSPHeaders::valueOf(type);
   }
 
   /// @returns true if this sample only has one channel

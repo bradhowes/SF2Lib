@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2File/Entity/Generator/Definition.hpp"
 #include "SF2Lib/MIDI/ChannelState.hpp"
 
@@ -232,6 +233,6 @@ ChannelState::dump() const noexcept
     std::cout << "CC " << index << " = " << continuousControllerValues_[index] << '\n';
   }
   for (auto pos = Entity::Generator::IndexIterator::begin(); pos != Entity::Generator::IndexIterator::end(); ++pos) {
-    std::cout << "NRPN " << valueOf(*pos) << " = " << nrpnValues_[*pos] << '\n';
+    std::cout << "NRPN " << DSPHeaders::valueOf(*pos) << " = " << nrpnValues_[*pos] << '\n';
   }
 }

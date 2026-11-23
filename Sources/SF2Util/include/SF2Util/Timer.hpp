@@ -1,8 +1,7 @@
 #pragma once
 
-#import <time.h>
-
-#import <AudioToolbox/AUParameters.h>
+#include <time.h>
+#include <AudioToolbox/AUParameters.h>
 
 namespace SF2::Utils {
 

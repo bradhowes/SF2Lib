@@ -4,6 +4,7 @@
 #include <cstring>
 #include <vector>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2Util/Base64.hpp"
 #include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
@@ -131,7 +132,7 @@ Engine::finishPresetChange_WQ() noexcept
 
   auto ptr = presetsState();
   auto preset = ptr ? ptr->activePresetOrNull() : nullptr;
-  os_log_info(log_, "finishPresetChange_WQ - %{public}s", preset ? preset->configuration().name().c_str() : "???");
+  os_log_debug(log_, "finishPresetChange_WQ - %{public}s", preset ? preset->configuration().name().c_str() : "???");
 
   // Last, so that the render thread does not start voices before the change is complete.
   --presetChangesPending_;
@@ -292,29 +293,29 @@ Engine::doParameterEvent(const AUParameterEvent& event, AUAudioFrameCount durati
   auto rawIndex = event.parameterAddress;
   auto value = event.value;
   if (rawIndex < 0) return 0;
-  if (rawIndex < valueOf(Entity::Generator::Index::numValues)) {
+  if (rawIndex < DSPHeaders::valueOf(Entity::Generator::Index::numValues)) {
     auto index = Entity::Generator::Index(rawIndex);
     parameters_.setLiveValue(index, value);
     notifyParameterChanged_RT(index);
     return duration;
-  } else if (rawIndex >= valueOf(ParameterAddress::firstParameterAddress) &&
-             rawIndex < valueOf(ParameterAddress::lastParameterAddressPlusOne)) {
+  } else if (rawIndex >= DSPHeaders::valueOf(ParameterAddress::firstParameterAddress) &&
+             rawIndex < DSPHeaders::valueOf(ParameterAddress::lastParameterAddressPlusOne)) {
     auto address = ParameterAddress(rawIndex);
     switch (address) {
       case ParameterAddress::portamentoModeEnabled:
-        setPortamentoModeEnabled(SF2::toBool(value));
+        setPortamentoModeEnabled(DSPHeaders::toBool(value));
         break;
       case ParameterAddress::portamentoRate:
         setPortamentoRate(size_t(value));
         break;
       case ParameterAddress::oneVoicePerKeyModeEnabled:
-        setOneVoicePerKeyModeEnabled(SF2::toBool(value));
+        setOneVoicePerKeyModeEnabled(DSPHeaders::toBool(value));
         break;
       case ParameterAddress::polyphonicModeEnabled:
-        setPhonicMode(SF2::toBool(value) ? Engine::PhonicMode::poly : Engine::PhonicMode::mono);
+        setPhonicMode(DSPHeaders::toBool(value) ? Engine::PhonicMode::poly : Engine::PhonicMode::mono);
         break;
       case ParameterAddress::retriggerModeEnabled:
-        setRetriggerModeEnabled(SF2::toBool(value));
+        setRetriggerModeEnabled(DSPHeaders::toBool(value));
         break;
       default:
         break;
@@ -344,30 +345,30 @@ Engine::doRenderingStateChanged(bool state) noexcept
     reclaimRetiredPresetsStates_WQ(true);
   }
 
-  [[parameterTree_ parameterWithAddress: valueOf(ParameterAddress::isRendering)] setValue: SF2::fromBool(state)];
+  [[parameterTree_ parameterWithAddress: DSPHeaders::valueOf(ParameterAddress::isRendering)] setValue: DSPHeaders::fromBool(state)];
 }
 
 void
 Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 {
-  os_log_info(log_, "doMIDIEvent BEGIN - %d", midiEvent.length);
+  os_log_debug(log_, "doMIDIEvent BEGIN - %d", midiEvent.length);
 
   if (midiEvent.length < 1) {
-    os_log_info(log_, "doMIDIEvent BEGIN - no bytes");
+    os_log_debug(log_, "doMIDIEvent BEGIN - no bytes");
     return;
   }
 
   if (midiEvent.data[0] < 0x80) {
-    os_log_info(log_, "doMIDIEvent END - invalid first byte %d", midiEvent.data[0]);
+    os_log_debug(log_, "doMIDIEvent END - invalid first byte %d", midiEvent.data[0]);
     return;
   }
 
-  auto event = MIDI::CoreEvent(midiEvent.data[0] < SF2::valueOf(MIDI::CoreEvent::systemExclusive)
-                               ? (midiEvent.data[0] & SF2::valueOf(MIDI::CoreEvent::systemExclusive))
+  auto event = MIDI::CoreEvent(midiEvent.data[0] < DSPHeaders::valueOf(MIDI::CoreEvent::systemExclusive)
+                               ? (midiEvent.data[0] & DSPHeaders::valueOf(MIDI::CoreEvent::systemExclusive))
                                : midiEvent.data[0]);
   switch (event) {
     case MIDI::CoreEvent::noteOff:
-      os_log_info(log_, "doMIDIEvent noteOff");
+      os_log_debug(log_, "doMIDIEvent noteOff");
       if (midiEvent.length > 1) {
         noteOff_RT(midiEvent.data[1]);
       }
@@ -377,17 +378,17 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       if (midiEvent.length > 1) {
         auto velocity = midiEvent.length == 3 ? midiEvent.data[2] : 0;
         if (velocity > 0) {
-          os_log_info(log_, "doMIDIEvent noteOn");
+          os_log_debug(log_, "doMIDIEvent noteOn");
           noteOn_RT(midiEvent.data[1], velocity);
         } else {
-          os_log_info(log_, "doMIDIEvent noteOff (zero velocity noteOn");
+          os_log_debug(log_, "doMIDIEvent noteOff (zero velocity noteOn");
           noteOff_RT(midiEvent.data[1]);
         }
       }
       break;
 
     case MIDI::CoreEvent::keyPressure:
-      os_log_info(log_, "doMIDIEvent keyPressure");
+      os_log_debug(log_, "doMIDIEvent keyPressure");
       if (midiEvent.length == 3) {
         channelState_.setNotePressure(midiEvent.data[1], midiEvent.data[2]);
         notifyActiveVoicesChannelStateChanged_RT();
@@ -395,7 +396,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::controlChange:
-      os_log_info(log_, "doMIDIEvent controlChange");
+      os_log_debug(log_, "doMIDIEvent controlChange");
       if (midiEvent.length == 3) {
         auto what = MIDI::ControlChange(midiEvent.data[1]);
         auto data = midiEvent.data[2];
@@ -408,14 +409,14 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::programChange:
-      os_log_info(log_, "doMIDIEvent programChange");
+      os_log_debug(log_, "doMIDIEvent programChange");
       if (midiEvent.length >= 2) {
         changeProgram_RT(midiEvent.data[1]);
       }
       break;
 
     case MIDI::CoreEvent::channelPressure:
-      os_log_info(log_, "doMIDIEvent channelPressure");
+      os_log_debug(log_, "doMIDIEvent channelPressure");
       if (midiEvent.length >= 2) {
         channelState_.setChannelPressure(midiEvent.data[1]);
         notifyActiveVoicesChannelStateChanged_RT();
@@ -423,7 +424,7 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::pitchBend:
-      os_log_info(log_, "doMIDIEvent pitchBend");
+      os_log_debug(log_, "doMIDIEvent pitchBend");
       if (midiEvent.length == 3) {
         int bend = (midiEvent.data[2] << 7) | midiEvent.data[1];
         channelState_.setPitchWheelValue(bend);
@@ -432,36 +433,36 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
       break;
 
     case MIDI::CoreEvent::systemExclusive:
-      os_log_info(log_, "doMIDIEvent systemExclusive");
+      os_log_debug(log_, "doMIDIEvent systemExclusive");
       // Check the length before reading `data[1]` and `data[2]` (this used to read them unconditionally).
       if (midiEvent.length >= 3 &&
           midiEvent.data[1] == LoadPresetSysExPayload::manufacturerValue &&
-          midiEvent.data[midiEvent.length - 1] == SF2::valueOf(MIDI::CoreEvent::EOX) &&
+          midiEvent.data[midiEvent.length - 1] == DSPHeaders::valueOf(MIDI::CoreEvent::EOX) &&
           (midiEvent.data[2] == LoadPresetSysExPayload::modelPathPayload ||
            midiEvent.data[2] == LoadPresetSysExPayload::modelBookmarkPayload)) {
         queueSysExRequest_RT(midiEvent);
       } else {
-        os_log_info(log_, "doMIDIEvent - systemExclusive ignored");
+        os_log_debug(log_, "doMIDIEvent - systemExclusive ignored");
       }
       break;
 
     case MIDI::CoreEvent::reset:
-      os_log_info(log_, "doMIDIEvent reset");
+      os_log_debug(log_, "doMIDIEvent reset");
       reset_RT();
       break;
 
     default:
-      os_log_info(log_, "doMIDIEvent - ignored %hhX", midiEvent.data[0]);
+      os_log_debug(log_, "doMIDIEvent - ignored %hhX", midiEvent.data[0]);
       break;
   }
 
-  os_log_info(log_, "doMIDIEvent END");
+  os_log_debug(log_, "doMIDIEvent END");
 }
 
 void
 Engine::processChannelMessage_RT(MIDI::ControlChange channelMessage, uint8_t value) noexcept
 {
-  os_log_info(log_, "processChannelMessage_RT - %d value: %d", channelMessage, value);
+  os_log_debug(log_, "processChannelMessage_RT - %d value: %d", channelMessage, value);
   switch (channelMessage) {
     case MIDI::ControlChange::allSoundOff:
       allOff_RT();
@@ -637,21 +638,21 @@ Engine::loadFileAndPreset(int fd, size_t presetIndex) noexcept {
 
 SF2::IO::File::LoadResponse
 Engine::beginLoadFileAndPreset_WQ(std::string path, size_t presetIndex) noexcept {
-  os_log_info(log_, "beginLoadFileAndPreset_WQ BEGIN");
+  os_log_debug(log_, "beginLoadFileAndPreset_WQ BEGIN");
   if (!path.empty()) {
     return concludeLoad_WQ(path, presetIndex);
   }
   usePresetWithIndex_WQ(presetIndex);
   auto ptr = presetsState();
   auto response = ptr != nullptr ? ptr->loadResponse() : SF2::IO::File::LoadResponse::none;
-  os_log_info(log_, "beginLoadFileAndPreset_WQ END - %d", response);
+  os_log_debug(log_, "beginLoadFileAndPreset_WQ END - %d", response);
   return response;
 }
 
 SF2::IO::File::LoadResponse
 Engine::concludeLoad_WQ(const std::string& path, size_t index) noexcept
 {
-  os_log_info(log_, "concludeLoad_WQ - path: '%{public}s' index: %lu", path.c_str(), index);
+  os_log_debug(log_, "concludeLoad_WQ - path: '%{public}s' index: %lu", path.c_str(), index);
   assert(presetChangesPending_.load() > 0);
 
   // Build the new state and load its active preset's samples before the render thread can see it. The old state is
@@ -661,7 +662,7 @@ Engine::concludeLoad_WQ(const std::string& path, size_t index) noexcept
   auto response = state->loadResponse();
   installPresetsState_WQ(state);
   finishPresetChange_WQ();
-  os_log_info(log_, "concludeLoad_WQ END - %d", response);
+  os_log_debug(log_, "concludeLoad_WQ END - %d", response);
   return response;
 }
 
@@ -673,7 +674,7 @@ Engine::loadBookmarkAndPreset(NSData *bookmark, size_t presetIndex) noexcept {
 
 SF2::IO::File::LoadResponse
 Engine::beginLoadBookmarkAndPreset_WQ(NSData* bookmark, size_t presetIndex) noexcept {
-  os_log_info(log_, "loadBookmarkAndPreset BEGIN");
+  os_log_debug(log_, "loadBookmarkAndPreset BEGIN");
 
   NSError* error = nil;
   BOOL isStale = NO;
@@ -716,7 +717,7 @@ Engine::beginLoadBookmarkAndPreset_WQ(NSData* bookmark, size_t presetIndex) noex
       return;
     }
 
-    os_log_info(log_, "loading from resolved url - file descriptor: %d", fileHandle.fileDescriptor);
+    os_log_debug(log_, "loading from resolved url - file descriptor: %d", fileHandle.fileDescriptor);
 
     // `File::load(int)` duplicates the descriptor, so the file stays readable after `fileHandle` is released (closing
     // its descriptor) at the end of this block and after security-scoped access stops below. Later program changes
@@ -730,14 +731,14 @@ Engine::beginLoadBookmarkAndPreset_WQ(NSData* bookmark, size_t presetIndex) noex
 
   // The accessor block does not run if coordination fails, and returns early if the file cannot be opened.
   if (response == SF2::IO::File::LoadResponse::notFound) --presetChangesPending_;
-  os_log_info(log_, "loadBookmarkAndPreset END - %d", response);
+  os_log_debug(log_, "loadBookmarkAndPreset END - %d", response);
   return response;
 }
 
 SF2::IO::File::LoadResponse
 Engine::concludeLoad_WQ(int fd, size_t index) noexcept
 {
-  os_log_info(log_, "concludeLoad - fd: %d index: %lu", fd, index);
+  os_log_debug(log_, "concludeLoad - fd: %d index: %lu", fd, index);
   assert(presetChangesPending_.load() > 0);
 
   // See `concludeLoad_WQ(path, index)`.
@@ -746,7 +747,7 @@ Engine::concludeLoad_WQ(int fd, size_t index) noexcept
   auto response = state->loadResponse();
   installPresetsState_WQ(state);
   finishPresetChange_WQ();
-  os_log_info(log_, "concludeLoad END - %d", response);
+  os_log_debug(log_, "concludeLoad END - %d", response);
   return response;
 }
 
@@ -768,7 +769,7 @@ std::array<uint8_t, 1>
 Engine::createResetCommandPayload() noexcept
 {
   return std::array<uint8_t, 1>{
-    SF2::valueOf(MIDI::CoreEvent::reset)
+    DSPHeaders::valueOf(MIDI::CoreEvent::reset)
   };
 }
 
@@ -776,8 +777,8 @@ std::array<uint8_t, 3>
 Engine::createChannelMessagePayload(MIDI::ControlChange channelMessage, uint8_t value) noexcept
 {
   return std::array<uint8_t, 3>{
-    SF2::valueOf(MIDI::CoreEvent::controlChange),
-    SF2::valueOf(channelMessage),
+    DSPHeaders::valueOf(MIDI::CoreEvent::controlChange),
+    DSPHeaders::valueOf(channelMessage),
     value
   };
 }
@@ -789,13 +790,13 @@ Engine::createUseBankProgramPayload(uint16_t bank, uint8_t program) noexcept
   auto bankMSB = uint8_t(bank / 128u);
   auto bankLSB = uint8_t(bank - bankMSB * 128u);
   return std::array<uint8_t, 9>{
-    SF2::valueOf(MIDI::CoreEvent::controlChange),
-    SF2::valueOf(MIDI::ControlChange::bankSelectMSB),
+    DSPHeaders::valueOf(MIDI::CoreEvent::controlChange),
+    DSPHeaders::valueOf(MIDI::ControlChange::bankSelectMSB),
     bankMSB,
-    SF2::valueOf(MIDI::CoreEvent::controlChange),
-    SF2::valueOf(MIDI::ControlChange::bankSelectLSB),
+    DSPHeaders::valueOf(MIDI::CoreEvent::controlChange),
+    DSPHeaders::valueOf(MIDI::ControlChange::bankSelectLSB),
     bankLSB,
-    SF2::valueOf(MIDI::CoreEvent::programChange),
+    DSPHeaders::valueOf(MIDI::CoreEvent::programChange),
     program,
     0
   };
@@ -870,7 +871,7 @@ Engine::startVoice_RT(const Config& config) noexcept
     return;
   }
   auto voiceIndex = oldestVoiceIndices_.voiceAcquire();
-  os_log_info(log_, "startVoice_RT - %lu", voiceIndex);
+  os_log_debug(log_, "startVoice_RT - %lu", voiceIndex);
   voices_[voiceIndex].configure(config, channelState_);
   parameters_.applyChanged(voices_[voiceIndex].state());
   voices_[voiceIndex].start();
@@ -881,7 +882,7 @@ OldestVoiceCollection::iterator
 Engine::stopVoice_RT(size_t voiceIndex) noexcept
 {
   os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice_RT");
-  os_log_info(log_, "stopVoice_RT - %lu", voiceIndex);
+  os_log_debug(log_, "stopVoice_RT - %lu", voiceIndex);
   voices_[voiceIndex].stop();
   auto pos = oldestVoiceIndices_.voiceRelease(voiceIndex);
   os_signpost_interval_end(log_, stopVoiceSignpost_, "stopVoice_RT");
@@ -891,8 +892,8 @@ Engine::stopVoice_RT(size_t voiceIndex) noexcept
 void
 Engine::bumpLastLoadFinished_WQ() noexcept
 {
-  os_log_info(log_, "bumpLastLoadFinished_WQ");
-  auto param = [parameterTree_ parameterWithAddress: valueOf(ParameterAddress::lastLoadFinished)];
+  os_log_debug(log_, "bumpLastLoadFinished_WQ");
+  auto param = [parameterTree_ parameterWithAddress: DSPHeaders::valueOf(ParameterAddress::lastLoadFinished)];
   lastLoadFinishedCounter_ += traits::lastLoadFinishedChange;
   [param setValue: AUValue(lastLoadFinishedCounter_)];
 }
@@ -922,31 +923,31 @@ Engine::reset_RT() noexcept
 void
 Engine::parameterValueChanged(AUParameter* parameter, AUValue value) noexcept
 {
-  os_log_info(log_, "parameterValueChanged - %llu %{public}s %f", parameter.address, parameter.identifier.UTF8String, value);
+  os_log_debug(log_, "parameterValueChanged - %llu %{public}s %f", parameter.address, parameter.identifier.UTF8String, value);
   auto rawIndex = parameter.address;
   if (rawIndex < 0) return;
-  if (rawIndex < valueOf(Entity::Generator::Index::numValues)) {
+  if (rawIndex < DSPHeaders::valueOf(Entity::Generator::Index::numValues)) {
     parameters_.setLiveValue(Entity::Generator::Index(rawIndex), value);
-  } else if (rawIndex >= valueOf(ParameterAddress::firstParameterAddress) &&
-             rawIndex < valueOf(ParameterAddress::lastParameterAddressPlusOne)) {
+  } else if (rawIndex >= DSPHeaders::valueOf(ParameterAddress::firstParameterAddress) &&
+             rawIndex < DSPHeaders::valueOf(ParameterAddress::lastParameterAddressPlusOne)) {
     auto address = ParameterAddress(rawIndex);
     switch (address) {
       case ParameterAddress::portamentoModeEnabled:
-        setPortamentoModeEnabled(SF2::toBool(value));
+        setPortamentoModeEnabled(DSPHeaders::toBool(value));
         break;
       case ParameterAddress::portamentoRate:
         setPortamentoRate(value >= 0 ? size_t(value) : 0);
         break;
       case ParameterAddress::oneVoicePerKeyModeEnabled:
-        setOneVoicePerKeyModeEnabled(SF2::toBool(value));
+        setOneVoicePerKeyModeEnabled(DSPHeaders::toBool(value));
         break;
       case ParameterAddress::polyphonicModeEnabled:
-        setPhonicMode(SF2::toBool(value) ?
+        setPhonicMode(DSPHeaders::toBool(value) ?
                       SF2::Render::Engine::Engine::PhonicMode::poly :
                       SF2::Render::Engine::Engine::PhonicMode::mono);
         break;
       case ParameterAddress::retriggerModeEnabled:
-        setRetriggerModeEnabled(SF2::toBool(value));
+        setRetriggerModeEnabled(DSPHeaders::toBool(value));
         break;
       default: break;
     }
@@ -958,33 +959,33 @@ Engine::provideParameterValue(AUParameter* parameter) const noexcept
 {
   auto rawIndex = parameter.address;
   AUValue value = 0.0;
-  if (rawIndex >= 0 && rawIndex < valueOf(Entity::Generator::Index::numValues)) {
+  if (rawIndex >= 0 && rawIndex < DSPHeaders::valueOf(Entity::Generator::Index::numValues)) {
     auto index = Entity::Generator::Index(rawIndex);
     const auto& def = Entity::Generator::Definition::definition(index);
     value = def.clamp(parameters_.getLiveValue(index));
-  } else if (rawIndex >= valueOf(ParameterAddress::firstParameterAddress) &&
-             rawIndex < valueOf(ParameterAddress::lastParameterAddressPlusOne)) {
+  } else if (rawIndex >= DSPHeaders::valueOf(ParameterAddress::firstParameterAddress) &&
+             rawIndex < DSPHeaders::valueOf(ParameterAddress::lastParameterAddressPlusOne)) {
     auto address = ParameterAddress(rawIndex);
     switch (address) {
       case ParameterAddress::portamentoModeEnabled:
-        value = SF2::fromBool(portamentoModeEnabled());
+        value = DSPHeaders::fromBool(portamentoModeEnabled());
         break;
       case ParameterAddress::portamentoRate:
         value = AUValue(portamentoRate());
         break;
       case ParameterAddress::oneVoicePerKeyModeEnabled:
-        value = SF2::fromBool(oneVoicePerKeyModeEnabled());
+        value = DSPHeaders::fromBool(oneVoicePerKeyModeEnabled());
         break;
       case ParameterAddress::polyphonicModeEnabled:
-        value = SF2::fromBool(polyphonicModeEnabled());
+        value = DSPHeaders::fromBool(polyphonicModeEnabled());
         break;
       case ParameterAddress::activeVoiceCount:
         return AUValue(oldestVoiceIndices_.activeVoiceCount());
       case ParameterAddress::retriggerModeEnabled:
-        value = SF2::fromBool(retriggerModeEnabled());
+        value = DSPHeaders::fromBool(retriggerModeEnabled());
         break;
       case ParameterAddress::isRendering:
-        value = SF2::fromBool(isRendering());
+        value = DSPHeaders::fromBool(isRendering());
         break;
       case ParameterAddress::activeProgramIndex:
         value = AUValue(activeProgramIndex());
@@ -1002,7 +1003,7 @@ Engine::provideParameterValue(AUParameter* parameter) const noexcept
     }
   }
 
-  os_log_info(log_, "provideValue - %llu %{public}s %f", parameter.address, parameter.identifier.UTF8String, value);
+  os_log_debug(log_, "provideValue - %llu %{public}s %f", parameter.address, parameter.identifier.UTF8String, value);
   return value;
 }
 
@@ -1014,7 +1015,7 @@ Engine::makeGeneratorParameter(Entity::Generator::Index index) noexcept
   auto flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable;
   return [AUParameterTree createParameterWithIdentifier:name
                                                    name:name
-                                                address:AUParameterAddress(valueOf(index))
+                                                address:AUParameterAddress(DSPHeaders::valueOf(index))
                                                     min:AUValue(definition.valueRange().min)
                                                     max:AUValue(definition.valueRange().max)
                                                    unit:AudioUnitParameterUnit::kAudioUnitParameterUnit_Generic
@@ -1030,7 +1031,7 @@ Engine::makeBooleanParameter(NSString* name, ParameterAddress address, bool valu
   auto flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable;
   auto param = [AUParameterTree createParameterWithIdentifier:name
                                                          name:name
-                                                      address:valueOf(address)
+                                                      address:DSPHeaders::valueOf(address)
                                                           min:0
                                                           max:1
                                                          unit:kAudioUnitParameterUnit_Boolean
@@ -1038,14 +1039,14 @@ Engine::makeBooleanParameter(NSString* name, ParameterAddress address, bool valu
                                                         flags:flags
                                                  valueStrings:nullptr
                                           dependentParameters:nullptr];
-  param.value = fromBool(value);
+  param.value = DSPHeaders::fromBool(value);
   return param;
 }
 
 void
 Engine::makeTree() noexcept
 {
-  os_log_info(log_, "makeTree BEGIN");
+  os_log_debug(log_, "makeTree BEGIN");
 
   // This is a bit too large due to various unused generators found in the spec.
   auto capacity = NSUInteger(traits::parameterTreeSize);
@@ -1086,7 +1087,7 @@ Engine::makeTree() noexcept
   auto flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable;
   auto param = [AUParameterTree createParameterWithIdentifier:@"portamentoRate"
                                                          name:@"portamentoRate"
-                                                      address:valueOf(ParameterAddress::portamentoRate)
+                                                      address:DSPHeaders::valueOf(ParameterAddress::portamentoRate)
                                                           min:0
                                                           max:60000
                                                          unit:kAudioUnitParameterUnit_Milliseconds
@@ -1103,7 +1104,7 @@ Engine::makeTree() noexcept
 
   [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"activeVoiceCount"
                                                                          name:@"activeVoiceCount"
-                                                                      address:valueOf(ParameterAddress::activeVoiceCount)
+                                                                      address:DSPHeaders::valueOf(ParameterAddress::activeVoiceCount)
                                                                           min:0
                                                                           max:AUValue(voiceCountLimit())
                                                                          unit:kAudioUnitParameterUnit_Generic
@@ -1114,7 +1115,7 @@ Engine::makeTree() noexcept
 
   [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"activeProgramIndex"
                                                                    name:@"activeProgramIndex"
-                                                                address:valueOf(ParameterAddress::activeProgramIndex)
+                                                                address:DSPHeaders::valueOf(ParameterAddress::activeProgramIndex)
                                                                     min:0
                                                                     max:127
                                                                    unit:kAudioUnitParameterUnit_Generic
@@ -1125,7 +1126,7 @@ Engine::makeTree() noexcept
 
   [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"activeBankIndex"
                                                                    name:@"activeBankIndex"
-                                                                address:valueOf(ParameterAddress::activeBankIndex)
+                                                                address:DSPHeaders::valueOf(ParameterAddress::activeBankIndex)
                                                                     min:0
                                                                     max:127
                                                                    unit:kAudioUnitParameterUnit_Generic
@@ -1136,7 +1137,7 @@ Engine::makeTree() noexcept
 
   [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"activePresetIndex"
                                                                    name:@"activePresetIndex"
-                                                                address:valueOf(ParameterAddress::activePresetIndex)
+                                                                address:DSPHeaders::valueOf(ParameterAddress::activePresetIndex)
                                                                     min:0
                                                                     max:65535
                                                                    unit:kAudioUnitParameterUnit_Generic
@@ -1148,7 +1149,7 @@ Engine::makeTree() noexcept
   // We do not care about actual value, only that a change took place in the engine. Should we use a binary flip/flop?
   [definitions addObject: [AUParameterTree createParameterWithIdentifier:@"lastLoadFinished"
                                                                     name:@"lastLoadFinished"
-                                                                 address:valueOf(ParameterAddress::lastLoadFinished)
+                                                                 address:DSPHeaders::valueOf(ParameterAddress::lastLoadFinished)
                                                                      min:traits::minLastLoadFinished
                                                                      max:traits::maxLastLoadFinished
                                                                     unit:kAudioUnitParameterUnit_Generic
@@ -1167,5 +1168,5 @@ Engine::makeTree() noexcept
     return provideParameterValue(parameter);
   };
 
-  os_log_info(log_, "makeTree END");
+  os_log_debug(log_, "makeTree END");
 }

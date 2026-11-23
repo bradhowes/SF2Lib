@@ -9,6 +9,7 @@
 #include <limits>
 #include <utility>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2Util/DSP.hpp"
 #include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Envelope/Stage.hpp"
@@ -107,9 +108,9 @@ inline Float volumeEnvelopeAttackCurve(Float progress) noexcept {
  */
 class Generator {
   /// Collection of Stage entities that define the duration of part of the envelope.
-  using StageArray = std::array<Stage, SF2::valueOf(StageIndex::numStages)>;
+  using StageArray = std::array<Stage, DSPHeaders::valueOf(StageIndex::numStages)>;
   /// Stage names for logging.  NOTE: extra name is due to 'idle' state that does not have a Stage entity.
-  using StateNameArray = EnumIndexableValueArray<const char*, StageIndex, valueOf(StageIndex::numStages) + 1>;
+  using StateNameArray = DSPHeaders::EnumIndexableValueArray<const char*, StageIndex, DSPHeaders::valueOf(StageIndex::numStages) + 1>;
 
   /**
    Collection of states for all of the stages in an SF2 envelope. Provides for indexing by StageIndex values.
@@ -119,8 +120,8 @@ class Generator {
 
     Stages() : StageArray({Stage(), Stage(), Stage(), Stage(), Stage(), Stage()}) {}
 
-    Stage& operator[](const StageIndex& index) { return super::operator[](SF2::valueOf(index)); }
-    const Stage& operator[](const StageIndex& index) const { return super::operator[](SF2::valueOf(index)); }
+    Stage& operator[](const StageIndex& index) { return super::operator[](DSPHeaders::valueOf(index)); }
+    const Stage& operator[](const StageIndex& index) const { return super::operator[](DSPHeaders::valueOf(index)); }
   };
 
 public:

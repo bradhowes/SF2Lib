@@ -49,7 +49,7 @@ public:
 
 private:
   const Entity::SampleHeader& header_;
-  const std::span<const Float> span_;
+  std::span<const Float> span_;
 };
 
 } // namespace SF2::IO

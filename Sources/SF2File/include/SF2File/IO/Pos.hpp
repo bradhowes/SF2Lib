@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <unistd.h>
 
+#include "DSPHeaders/Concepts.hpp"
 #include "SF2File/IO/Tag.hpp"
 #include "SF2Util/Types.hpp"
 
@@ -40,7 +41,7 @@ struct Pos {
 
    @returns new Pos instance for the next bytes in the file
    */
-  template <EntityDerivedType T>
+  template <DSPHeaders::EntityDerivedType T>
   Pos readInto(T& buffer) const { return readInto(&buffer, sizeof(buffer)); }
 
   /**
@@ -51,7 +52,7 @@ struct Pos {
 
    @returns new Pos instance for the next bytes in the file
    */
-  template <EntityDerivedType T>
+  template <DSPHeaders::EntityDerivedType T>
   Pos readInto(T& buffer, size_t maxCount) const { return readInto(&buffer, std::min(sizeof(buffer), maxCount)); }
 
   /**

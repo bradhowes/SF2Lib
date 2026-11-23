@@ -4,7 +4,7 @@
 #include <AVFoundation/AVFoundation.h>
 #include <iomanip>
 
-#import "SF2Lib/Configuration.hpp"
+#include "SF2Lib/Configuration.hpp"
 
 #include "SampleBasedContexts.hpp"
 #include "TestResources.hpp"

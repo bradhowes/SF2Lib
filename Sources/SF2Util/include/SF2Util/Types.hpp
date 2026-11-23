@@ -10,11 +10,11 @@
 #include <type_traits>
 #include <vector>
 
-#import "DSPHeaders/Types.hpp"
+#include "DSPHeaders/Types.hpp"
 
 namespace SF2 {
 
-using namespace DSPHeaders;
+using DSPHeaders::operator""_F;
 
 using Float = float;
 using SampleVector = std::vector<Float>;

@@ -93,7 +93,7 @@ Voice::releaseKey(const ReleaseKeyState& releaseKeyState) noexcept
   if (released_) return;
   if (isHeldByPedal(releaseKeyState.pedalState)) {
     postponedRelease_ = true;
-    os_log_info(log_, "releaseKey - postponed due to pedal state");
+    os_log_debug(log_, "releaseKey - postponed due to pedal state");
   } else {
     releaseEnvelopes();
   }
@@ -109,7 +109,7 @@ Voice::pedalReleased(const MIDI::ChannelState::PedalState& pedalState) noexcept
   // Only voices whose key-up was postponed by a pedal are released. A voice whose key is still physically down never
   // has `postponedRelease_` set, so it keeps sounding until its own note-off.
   if (postponedRelease_ && !isHeldByPedal(pedalState)) {
-    os_log_info(log_, "pedalReleased - applying postponed release");
+    os_log_debug(log_, "pedalReleased - applying postponed release");
     releaseEnvelopes();
   }
 }

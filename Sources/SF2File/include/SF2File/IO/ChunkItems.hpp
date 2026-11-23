@@ -6,6 +6,7 @@
 #include <functional>
 #include <vector>
 
+#include "DSPHeaders/Concepts.hpp"
 #include "SF2File/IO/Chunk.hpp"
 #include "SF2Util/Types.hpp"
 
@@ -27,7 +28,7 @@ struct ChunkItemsSupport {
 
  @arg T is the entity type found in this container
  */
-template <EntityDerivedType T>
+template <DSPHeaders::EntityDerivedType T>
 class ChunkItems : private ChunkItemsSupport
 {
 public:
@@ -74,7 +75,7 @@ public:
    @param index the entity to fetch
    @returns entity reference
    */
-  inline const ItemType& operator[](size_t index) const noexcept { return checkedVectorIndexing(items_, index); }
+  inline const ItemType& operator[](size_t index) const noexcept { return DSPHeaders::checkedVectorIndexing(items_, index); }
 
   /**
    Obtain a read-only slice of the original collection. This is used to parcel out a run of values from a collection

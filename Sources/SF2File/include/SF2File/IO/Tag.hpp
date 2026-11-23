@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2Util/Types.hpp"
 
 namespace SF2::IO {
@@ -73,7 +74,7 @@ public:
 
    @param tag the value to use
    */
-  Tag(Tags tag) noexcept : tag_{SF2::valueOf(tag)} {}
+  Tag(Tags tag) noexcept : tag_{DSPHeaders::valueOf(tag)} {}
 
   /// @returns the underlying raw value of the tag
   inline uint32_t rawValue() const noexcept { return tag_; }

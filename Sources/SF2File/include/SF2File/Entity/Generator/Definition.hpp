@@ -6,6 +6,7 @@
 #include <concepts>
 #include <string>
 
+#include "DSPHeaders/Concepts.hpp"
 #include "SF2Util/Types.hpp"
 #include "SF2File/Entity/Generator/Amount.hpp"
 #include "SF2File/Entity/Generator/Index.hpp"
@@ -36,7 +37,7 @@ public:
      @param value the value to clamp
      @returns clamped value
      */
-    template <Numeric T> T clamp(T value) const noexcept { return std::clamp<T>(value, T(min), T(max)); }
+    template <DSPHeaders::Numeric T> T clamp(T value) const noexcept { return std::clamp<T>(value, T(min), T(max)); }
 
     const int min;
     const int max;
@@ -81,7 +82,7 @@ public:
   };
 
   /// Number of definitions. This is the same as the number of generators defined in the SF2 spec.
-  static inline const size_t NumDefs = SF2::valueOf(Index::numValues);
+  static inline const size_t NumDefs = DSPHeaders::valueOf(Index::numValues);
 
   /**
    Obtain the Definition entry for a given Index value
@@ -128,7 +129,7 @@ public:
 
    @returns multiplier for NRPN values.
   */
-  inline int nrpnMultiplier() const noexcept { return SF2::valueOf(nrpnMultiplier_); }
+  inline int nrpnMultiplier() const noexcept { return DSPHeaders::valueOf(nrpnMultiplier_); }
 
   /// @returns true if the generator amount value is unsigned or signed
   inline bool isUnsignedValue() const noexcept { return valueKind_ < ValueKind::signedShort; }
@@ -152,7 +153,7 @@ public:
    @param value the value to clamp
    @returns clamped value
    */
-  template <Numeric T> T clamp(T value) const noexcept { return valueRange_.clamp(value); }
+  template <DSPHeaders::Numeric T> T clamp(T value) const noexcept { return valueRange_.clamp(value); }
 
   inline ValueRange valueRange() const noexcept { return valueRange_; }
 

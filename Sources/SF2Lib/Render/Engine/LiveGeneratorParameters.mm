@@ -11,7 +11,7 @@ using namespace SF2::Render::Voice::State;
 void
 LiveGeneratorParameters::reset() noexcept
 {
-  os_log_info(log_, "reset");
+  os_log_debug(log_, "reset");
   isChanged_.fill(false);
   anyChanged_ = false;
 }
@@ -19,7 +19,7 @@ LiveGeneratorParameters::reset() noexcept
 void
 LiveGeneratorParameters::applyChanged(State& state) noexcept
 {
-  os_log_info(log_, "applyChanged - %d", anyChanged_);
+  os_log_debug(log_, "applyChanged - %d", anyChanged_);
   if (!anyChanged_) {
     return;
   }
@@ -36,7 +36,7 @@ LiveGeneratorParameters::setLiveValue(Index index, AUValue value) noexcept
 {
   const auto& def = Entity::Generator::Definition::definition(index);
   auto clamped = def.clamp(std::round(value));
-  os_log_info(log_, "setLiveValue - index: %lu value: %f clamped: %f", index, value, clamped);
+  os_log_debug(log_, "setLiveValue - index: %lu value: %f clamped: %f", index, value, clamped);
   liveValues_[index] = int(clamped);
   isChanged_[index] = true;
   anyChanged_ = true;

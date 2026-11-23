@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2Lib/Render/Voice/State/Config.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 #include "SF2Lib/Render/Zone/Instrument.hpp"
@@ -100,7 +101,7 @@ State::isUsable(const Entity::Modulator::Modulator& modulator) noexcept {
   // to be ignored").
   if (!modulator.source().isValid() || !modulator.amountSource().isValid()) return false;
   if (!modulator.transformer().isValid()) return false;
-  return SF2::valueOf(modulator.generatorDestination()) < SF2::valueOf(Index::numValues);
+  return DSPHeaders::valueOf(modulator.generatorDestination()) < DSPHeaders::valueOf(Index::numValues);
 }
 
 
@@ -163,7 +164,6 @@ State::updateStateMods(const MIDI::ChannelState& channelState) noexcept
   std::for_each(Entity::Generator::IndexIterator::begin(), Entity::Generator::IndexIterator::end(), [&](auto index) {
     auto value{channelState.nrpnValue(index)};
     if (value != 0 || value != gens_[index].mods()) {
-      // std::cout << "setMod " << Definition::definition(index).name() << " = " << value << '\n';
       gens_[index].setMods(value);
     }
   });
@@ -172,7 +172,6 @@ State::updateStateMods(const MIDI::ChannelState& channelState) noexcept
   for (auto& mod : modulators_) {
     auto value{mod.value(*this, channelState)};
     if (value != 0) {
-      // std::cout << "addMod " << Definition::definition(mod.destination()).name() << " += " << value << '\n';
       gens_[mod.destination()].addMod(value);
     }
   }
@@ -185,7 +184,7 @@ State::dump() noexcept
 {
   for (auto pos = Entity::Generator::IndexIterator::begin(); pos != Entity::Generator::IndexIterator::end(); ++pos) {
     auto& gen{gens_[*pos]};
-    std::cout << valueOf(*pos) << " value: " << gen.instrumentValue() << " adj: " << gen.presetValue()
+    std::cout << DSPHeaders::valueOf(*pos) << " value: " << gen.instrumentValue() << " adj: " << gen.presetValue()
     << " mods: " << gen.mods() << '\n';
   }
   for (auto& mod : modulators_) {

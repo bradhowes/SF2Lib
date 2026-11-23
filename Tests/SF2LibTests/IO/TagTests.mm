@@ -4,6 +4,7 @@
 
 #include <XCTest/XCTest.h>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2File/IO/Tag.hpp"
 
 using namespace SF2::IO;
@@ -19,29 +20,7 @@ using namespace SF2::IO;
 }
 
 - (void)testRiff {
-  XCTAssertEqual(uint32_t(1179011410), SF2::valueOf(Tags::riff));
+  XCTAssertEqual(uint32_t(1179011410), DSPHeaders::valueOf(Tags::riff));
 }
-
-/**
- Generate partial soundfont file contents and try to process them to make sure that there are no BAD_ACCESS
- exceptions.
- */
-//func testRobustnessWithPartialPayload() {
-//  let tmp = newTempFileURL
-//  defer { try? FileManager.default.removeItem(at: tmp) }
-//
-//  guard let original = try? Data(contentsOf: urls[0]) else { fatalError() }
-//  for _ in 0..<20 {
-//    let truncatedCount = Int.random(in: 1..<(original.count / 2))
-//    let data = original.subdata(in: 0..<truncatedCount)
-//    do {
-//      try data.write(to: tmp, options: .atomic)
-//    } catch _ as NSError {
-//      fatalError()
-//    }
-//    let result = SoundFontInfo.load(viaParser: tmp)
-//    XCTAssertNil(result)
-//  }
-//}
 
 @end

@@ -25,8 +25,6 @@ File::load() noexcept
 {
   static const std::string prefix = "file://";
 
-  std::cout << "loading: " << path_ << std::endl;
-
   // NOTE: not sure about this being the best approach when on iOS. Probably better to use Foundation FileManager to
   // open the file and hopefully obtain a low-level file descriptor that we can then use to process the contents.
   auto offset = path_.find(prefix) == std::string::npos ? 0 : prefix.size();

@@ -8,6 +8,7 @@
 #include <XCTest/XCTest.h>
 
 #include "DSPHeaders/BusBufferFacet.hpp"
+#include "DSPHeaders/Types.hpp"
 
 #include "SF2File/IO/File.hpp"
 #include "SF2Lib/Render/Engine/Engine.hpp"
@@ -152,7 +153,7 @@ struct TestEngineHarness {
 
   void sendNoteOn(uint8_t note, uint8_t velocity = 64) noexcept {
     AUMIDIEvent midiEvent;
-    midiEvent.data[0] = SF2::valueOf(SF2::MIDI::CoreEvent::noteOn);
+    midiEvent.data[0] = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::noteOn);
     midiEvent.data[1] = note;
     midiEvent.data[2] = velocity;
     midiEvent.length = 3;
@@ -161,7 +162,7 @@ struct TestEngineHarness {
 
   void sendNoteOff(uint8_t note) noexcept {
     AUMIDIEvent midiEvent;
-    midiEvent.data[0] = SF2::valueOf(SF2::MIDI::CoreEvent::noteOff);
+    midiEvent.data[0] = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::noteOff);
     midiEvent.data[1] = note;
     midiEvent.length = 2;
     engine_.doMIDIEvent(midiEvent);
@@ -169,21 +170,21 @@ struct TestEngineHarness {
 
   void sendAllOff() noexcept {
     AUMIDIEvent midiEvent;
-    midiEvent.data[0] = SF2::valueOf(SF2::MIDI::CoreEvent::reset);
+    midiEvent.data[0] = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::reset);
     midiEvent.length = 1;
     engine_.doMIDIEvent(midiEvent);
   }
 
   void setParameter(SF2::Render::Engine::ParameterAddress address, AUValue value) noexcept {
     auto event = AUParameterEvent();
-    event.parameterAddress = SF2::valueOf(address);
+    event.parameterAddress = DSPHeaders::valueOf(address);
     event.value = value;
     engine_.doParameterEvent(event, 0);
   }
 
   void setParameter(SF2::Entity::Generator::Index index, AUValue value) noexcept {
     auto event = AUParameterEvent();
-    event.parameterAddress = SF2::valueOf(index);
+    event.parameterAddress = DSPHeaders::valueOf(index);
     event.value = value;
     engine_.doParameterEvent(event, 0);
   }
@@ -281,9 +282,6 @@ struct PresetTestContextBase
      const_cast<PresetTestContextBase*>(this)->presets_.build(getFile(urlIndex_));
     }
     presets_[presetIndex].loadSamples(getFile(urlIndex_));
-    const auto& p{presets_[presetIndex].configuration()};
-    std::cout << "Using preset: " << presetIndex << " " << p.name() << " " << p.bank() << "/" << p.program()
-    << " " << getUrl(urlIndex_).path.UTF8String << std::endl;
     return presets_[presetIndex];
   }
 

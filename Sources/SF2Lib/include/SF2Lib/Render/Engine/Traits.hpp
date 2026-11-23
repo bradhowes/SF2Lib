@@ -1,5 +1,6 @@
 // Copyright © 2026 Brad Howes. All rights reserved.
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Engine/ParameterAddress.hpp"
 
@@ -17,12 +18,12 @@ struct traits {
   static inline constexpr size_t maxVoiceCount{128};
 
   /// Number of engine parameters to be found in the AUParameterTree.
-  static inline constexpr size_t engineParameterCount = (valueOf(ParameterAddress::lastParameterAddressPlusOne) -
-                                                         valueOf(ParameterAddress::firstParameterAddress));
+  static inline constexpr size_t engineParameterCount = (DSPHeaders::valueOf(ParameterAddress::lastParameterAddressPlusOne) -
+                                                         DSPHeaders::valueOf(ParameterAddress::firstParameterAddress));
 
   /// Total number of engine parameters to be found in the AUParameterTree (not exact due to unused indices in the list of
   /// SF2 generators)
-  static inline constexpr size_t parameterTreeSize = valueOf(Entity::Generator::Index::numValues) + engineParameterCount;
+  static inline constexpr size_t parameterTreeSize = DSPHeaders::valueOf(Entity::Generator::Index::numValues) + engineParameterCount;
 };
 
 }

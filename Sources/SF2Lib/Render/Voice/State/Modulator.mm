@@ -13,45 +13,31 @@ using namespace SF2::Render::Voice::State;
 namespace EntityMod = Entity::Modulator;
 
 int Modulator::ValueProvider::ccValue(const State&, const MIDI::ChannelState& channelState) const noexcept {
-  auto value = channelState.continuousControllerValue(cc_);
-  // std::cout << "ValueProvider CC " << valueOf(cc_) << " value: " << value << "\n";
-  return value;
+  return channelState.continuousControllerValue(cc_);
 }
 
 int Modulator::ValueProvider::noteOnKey(const State& state, const MIDI::ChannelState&) const noexcept {
-  auto value = state.key();
-  // std::cout << "ValueProvider key " << value << "\n";
-  return value;
+  return state.key();
 }
 
 int Modulator::ValueProvider::noteOnVelocity(const State& state, const MIDI::ChannelState&) const noexcept {
-  auto value = state.velocity();
-  // std::cout << "ValueProvider vel " << value << "\n";
-  return value;
+  return state.velocity();
 }
 
 int Modulator::ValueProvider::keyPressure(const State& state, const MIDI::ChannelState& channelState) const noexcept {
-  auto value = channelState.notePressure(state.key());
-  // std::cout << "ValueProvider keyPressure " << state.key() << " " << value << "\n";
-  return value;
+  return channelState.notePressure(state.key());
 }
 
 int Modulator::ValueProvider::channelPressure(const State&, const MIDI::ChannelState& channelState) const noexcept {
-  auto value = channelState.channelPressure();
-  // std::cout << "ValueProvider channelPressure " << value << "\n";
-  return value;
+  return channelState.channelPressure();
 }
 
 int Modulator::ValueProvider::pitchWheelValue(const State&, const MIDI::ChannelState& channelState) const noexcept {
-  auto value = channelState.pitchWheelValue();
-  // std::cout << "ValueProvider pitchWheelValue " << value << "\n";
-  return value;
+  return channelState.pitchWheelValue();
 }
 
 int Modulator::ValueProvider::pitchWheelSensitivity(const State&, const MIDI::ChannelState& channelState) const noexcept {
-  auto value = channelState.pitchWheelSensitivity();
-  // std::cout << "ValueProvider pitchWheelSensitivity " << value << "\n";
-  return value;
+  return channelState.pitchWheelSensitivity();
 }
 
 Modulator::Modulator(const EntityMod::Modulator &configuration) noexcept
@@ -100,8 +86,5 @@ Modulator::value(const State& state, const MIDI::ChannelState& channelState) con
   // Obtain transformed secondary value.
   Float transformedSecondary = secondaryValue_.isActive() ? secondaryTransform_(secondaryValue_(state, channelState)) : 1_F;
   // SF2.01 9.5.1: "destination value += Transform(Amount * Map(primary source input) * Map(secondary source input))"
-  Float result{configuration_.transformer().transform(transformedPrimary * transformedSecondary * amount_)};
-  // std::cout << "P: " << primary << " tP: " << transformedPrimary << " tS: " << transformedSecondary
-  // << " amount: " << amount_ << " result: " << result << "\n";
-  return result;
+  return configuration_.transformer().transform(transformedPrimary * transformedSecondary * amount_);
 }

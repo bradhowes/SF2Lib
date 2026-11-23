@@ -178,11 +178,6 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 | 7.10 stereo links "played synchronously, pitch from right sample" | ❌ not implemented (acknowledged in `Voice.hpp`) |
 | Modulated value clamping to gen range after summation | ✅ clamped where each value is used (10.5). `State::modulated` still returns the raw sum; consumers that did not already bound it use `State::modulatedInRange`, which clamps to the generator's `Definition` range: coarseTune, the three pitch depths, modLfoToVolume, the two filter Fc depths and the key-number envelope scaling. LFO delays use `DSP::lfoDelayTimecentsToSeconds` (−32768 = no delay). Envelope times, sustain levels, LFO frequencies, filter Fc/Q, attenuation, pan and the sends were already bounded by their conversions. fineTune is deliberately not clamped: it carries the pitch-wheel modulator |
 
-**Summary:** of the 8 ❌ rows in the original review, 7 are now ✅ (size/index validation, unknown generators, start offsets, filter, sustain, "No Controller", PMOD); release-time capping (⚠️) and reserved sources (⚠️) are also ✅. Still ❌: stereo links. (RPN 0 / pitch-wheel sensitivity, listed in this re-evaluation, has since been fixed.) Open ⚠️ items, roughly in order of audible impact:
-- duplicate presets;
-- ROM samples;
-- missing `ifil`.
-
 ---
 
 ## 6. Optimisation opportunities
@@ -204,12 +199,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 - `noexcept` is applied mechanically, including on functions that throw or call throwing code. Reserve it for code that really can't fail (move ops, RT render path).
 - Exceptions used as control flow (`throw File::LoadResponse::invalidFormat`, an enum value). Prefer `std::expected<T, LoadResponse>` (C++23 is already enabled).
 - `(this + 1)->firstZoneIndex()` in `Preset`/`Bag`/`Instrument` relies on the entity living inside a vector with a sentinel. That is fragile, and UB for a stand-alone copy. Compute counts in `ChunkItems` instead.
-- `using namespace DSPHeaders;` inside `namespace SF2` in a widely-included header (`Types.hpp`) leaks every DSPHeaders name into all SF2 code. `#import` is used inside a C++ header.
-- `const` data members (`NormalizedSampleSpan::span_`, `Chunk::tag_`…) disable assignment for no real benefit; prefer private non-const members.
 - Redundant `inline` on in-class definitions throughout; `inline static size_t entity_size` is non-const in `Modulator` (const elsewhere).
-- Duplicate size checks in `Chunk` and `ChunkList` constructors; `NormalizedSampleSource` (SF2File) and `NormalizedSampleSpan` (SF2Lib) are near-duplicates. `SampleSourceCollection.mm` is empty and `build()` doesn't clear.
-- `std::cout` in library code (`File::load` prints "loading: …", `SF2Engine::create`).
-- Stale comments: `Parser.hpp` (FormatError, "size" parameter), `Version.hpp` says 'iver' but it parses `ifil`, `ChannelState::setPitchWheelSensitivity` says the default is 200 when it is 2, `Modulator.hpp` says a 'none' source returns 0.0 (contradicts 8.2.1).
 - Advertised but unimplemented: mono mode, portamento, retrigger, minimum note duration, generator overrides, `durationBuckets_`, plus the `ENABLE_LOWPASS_FILTER` / `USE_ACCELERATE` flags. Either implement these or remove them from the AU parameter tree and `Package.swift`.
 - MIDI channel nibble ignored (omni). Fine for an AUv3 instrument, but worth documenting.
 
@@ -228,29 +218,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 
 ---
 
-## 9. Repo hygiene
-
-- `cmake/compile_commands.json` is tracked (with machine-specific absolute paths) even though `cmake/` is git-ignored.
-- Emacs backup directories (`.~/`, `*.~`) are scattered under `Sources/`, `Tests/` and `.github/`; add them to `.gitignore`.
-- `Tests/…/Voice/.~/VoiceTests.mm~` and the other backups contain stale code that shows up in greps (e.g. old `ENABLE_LOWPASS_FILTER` uses).
-
----
-
-## 10. Suggested order of work
-
-1. Pitch-bend domain and sustain-level domain: two small, contained fixes, each with an integration test.
-2. Pedal logic (`postponedRelease_`, reset flags on voice start).
-3. `Index::start()` → `bounds_.startPos()`.
-4. Parse-path hardening: drop `noexcept`, validate gen/mod IDs and indices, fix `ChunkItems` empty handling. Add the fuzz target.
-5. File-descriptor ownership (bookmark dup, RAII fd).
-6. Re-enable and wire the filter (frequency = Fc + modLfo·Fc + modEnv·Fc), computed per block.
-7. PMOD support; "No Controller" = 1; reject reserved sources.
-8. RT-safety refactor (§4) and the PresetsState lifetime/graveyard.
-9. Memory: switch sample storage to `float`.
-
----
-
-## 11. Progress log
+## 10. Progress log
 
 **Step 1 — done (2026-11-21). Committed as `4739ab2` "Fixed pitch bend and sustain levels."; tests fixed and passing per user.**
 - Pitch bend: `ChannelState::maxPitchWheelValue` is now 16383 (rest = 8192). `Source::ControllerRange::_8192` → `_16384`. `ValueTransformer` builds its pitch-wheel tables from `maxPitchWheelValue`.
@@ -412,7 +380,6 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - The direct API `loadFileAndPreset("", index)` (`usePresetWithIndex_WQ`) changes the samples of the published state without the render thread stopping voices first. It is only safe while not rendering, or when called after a render-thread program change. Make it go through the render thread (or a new state) if hosts use it while playing.
   - Non-render-thread accessors (`activePresetName()` etc.) read the published state without a reference, so a concurrent load and render-thread acknowledgement could free it underneath them. The window is tiny but real.
   - `parameters_.reset()` runs on the work queue while the render thread reads `parameters_` (a pre-existing data race).
-  - The `os_log_info` calls on per-event paths are unchanged.
   - The SysEx payload still carries raw 8-bit `size_t` fields and uses manufacturer 0x7E (§3.2 protocol issues), and the generator overrides are still parsed but not applied.
   - `Engine::Engine` still only `assert`s `voiceCountLimit <= maxVoiceCount` (§3.2).
 

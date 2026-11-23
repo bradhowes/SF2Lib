@@ -9,6 +9,8 @@
 
 #include <XCTest/XCTest.h>
 
+#include "DSPHeaders/Types.hpp"
+
 #include "SampleBasedContexts.hpp"
 #include "SF2Builder.hpp"
 
@@ -408,7 +410,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   std::vector<AUValue> samples;
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::noteOn);
+  midiEvent.data[0] = DSPHeaders::valueOf(MIDI::CoreEvent::noteOn);
   midiEvent.data[1] = 0x40;
   midiEvent.data[2] = 0x7F;
   midiEvent.length = 3;
@@ -419,7 +421,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   samples.push_back(harness.lastDrySample());
   XCTAssertEqual(size_t(1), engine.activeVoiceCount());
 
-  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::programChange);
+  midiEvent.data[0] = DSPHeaders::valueOf(MIDI::CoreEvent::programChange);
   midiEvent.data[1] = 23;
   midiEvent.length = 2;
 
@@ -430,7 +432,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertTrue([name isEqualToString:@"Bandoneon"]);
   XCTAssertEqual(size_t(0), engine.activeVoiceCount());
 
-  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::noteOn);
+  midiEvent.data[0] = DSPHeaders::valueOf(MIDI::CoreEvent::noteOn);
   midiEvent.data[1] = 0x40;
   midiEvent.data[2] = 0x7F;
   midiEvent.length = 3;
@@ -501,7 +503,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertEqual(size_t(0), engine.activeVoiceCount());
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::noteOn);
+  midiEvent.data[0] = DSPHeaders::valueOf(MIDI::CoreEvent::noteOn);
   midiEvent.data[1] = 0x40;
   midiEvent.data[2] = 0x7F;
   midiEvent.length = 3;
@@ -609,7 +611,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   std::vector<AUValue> samples;
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::noteOn);
+  midiEvent.data[0] = DSPHeaders::valueOf(MIDI::CoreEvent::noteOn);
   midiEvent.data[1] = 0x40;
   midiEvent.data[2] = 0x64;
   midiEvent.length = 3;
@@ -632,7 +634,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   samples.push_back(harness.lastDrySample());
 
   // Pitch wheel all the way up
-  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::pitchBend);
+  midiEvent.data[0] = DSPHeaders::valueOf(MIDI::CoreEvent::pitchBend);
   midiEvent.data[1] = 127;
   midiEvent.data[2] = 127;
   engine.doMIDIEvent(midiEvent);
@@ -735,7 +737,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   samples.push_back(harness.lastDrySample());
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::channelPressure);
+  midiEvent.data[0] = DSPHeaders::valueOf(MIDI::CoreEvent::channelPressure);
   midiEvent.length = 2;
 
   midiEvent.data[1] = 127;
@@ -774,7 +776,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   samples.push_back(harness.lastDrySample());
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::keyPressure);
+  midiEvent.data[0] = DSPHeaders::valueOf(MIDI::CoreEvent::keyPressure);
   midiEvent.data[1] = 60;
   midiEvent.length = 3;
 
@@ -829,8 +831,8 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertFalse(engine.channelState().pedalState().sustainPedalActive);
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
-  midiEvent.data[1] = SF2::valueOf(MIDI::ControlChange::sustainSwitch);
+  midiEvent.data[0] = DSPHeaders::valueOf(MIDI::CoreEvent::controlChange);
+  midiEvent.data[1] = DSPHeaders::valueOf(MIDI::ControlChange::sustainSwitch);
   midiEvent.data[2] = 64;
   midiEvent.length = 3;
 
@@ -902,8 +904,8 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertFalse(engine.channelState().pedalState().sostenutoPedalActive);
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
-  midiEvent.data[1] = SF2::valueOf(MIDI::ControlChange::sostenutoSwitch);
+  midiEvent.data[0] = DSPHeaders::valueOf(MIDI::CoreEvent::controlChange);
+  midiEvent.data[1] = DSPHeaders::valueOf(MIDI::ControlChange::sostenutoSwitch);
   midiEvent.data[2] = 64;
   midiEvent.length = 3;
 
@@ -975,7 +977,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   samples.push_back(harness.lastDrySample(1));
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::controlChange);
+  midiEvent.data[0] = DSPHeaders::valueOf(MIDI::CoreEvent::controlChange);
   midiEvent.data[1] = 10;
   midiEvent.length = 3;
 
@@ -1405,7 +1407,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertEqual(size_t(3), engine.activeVoiceCount());
 
   AUMIDIEvent midiEvent;
-  midiEvent.data[0] = SF2::valueOf(MIDI::CoreEvent::reset);
+  midiEvent.data[0] = DSPHeaders::valueOf(MIDI::CoreEvent::reset);
   midiEvent.length = 1;
   engine.doMIDIEvent(midiEvent);
 
@@ -1707,7 +1709,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 {
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
-  auto address = valueOf(ParameterAddress::activeVoiceCount);
+  auto address = DSPHeaders::valueOf(ParameterAddress::activeVoiceCount);
   AUParameter* param = [engine.parameterTree() parameterWithAddress: address];
   harness.load(self.contexts->context0.path(), 0);
 
@@ -1750,7 +1752,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
       continue;
     }
 
-    auto address = AUParameterAddress(valueOf(index));
+    auto address = AUParameterAddress(DSPHeaders::valueOf(index));
     AUParameter* param = [engine.parameterTree() parameterWithAddress: address];
     XCTAssertNotNil(param);
     XCTAssertEqual(flags, [param flags]);

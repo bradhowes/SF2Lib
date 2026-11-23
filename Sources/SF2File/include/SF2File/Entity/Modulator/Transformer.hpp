@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iosfwd>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2Util/Types.hpp"
 
 namespace SF2::Entity::Modulator {
@@ -30,11 +31,11 @@ public:
 
    @param kind the kind of transform to apply
    */
-  Transformer(Kind kind = Kind::linear) noexcept : bits_{SF2::valueOf(kind)} {}
+  Transformer(Kind kind = Kind::linear) noexcept : bits_{DSPHeaders::valueOf(kind)} {}
 
   /// @returns true if the raw value is a known transform kind
   bool isValid() const noexcept {
-    return bits_ == SF2::valueOf(Kind::linear) || bits_ == SF2::valueOf(Kind::absolute);
+    return bits_ == DSPHeaders::valueOf(Kind::linear) || bits_ == DSPHeaders::valueOf(Kind::absolute);
   }
 
   /// @returns the kind of transform to apply. Only meaningful if `isValid()` is true.

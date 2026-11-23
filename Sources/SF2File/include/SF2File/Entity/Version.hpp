@@ -7,7 +7,7 @@
 namespace SF2::Entity {
 
 /**
- Memory layout of a 'iver' entry in a sound font resource. Holds the version info of a file.
+ Memory layout of a 'ifil' entry in a sound font resource. Holds the version info of a file.
  */
 class Version {
 public:

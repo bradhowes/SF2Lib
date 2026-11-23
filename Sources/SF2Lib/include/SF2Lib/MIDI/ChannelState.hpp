@@ -6,6 +6,7 @@
 #include <array>
 #include <cmath>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/MIDI/MIDI.hpp"
 #include "SF2Lib/MIDI/Note.hpp"
@@ -40,7 +41,7 @@ public:
    @param value the pressure value to record
    */
   inline void setNotePressure(int key, uint8_t value) noexcept {
-    checkedVectorIndexing(notePressureValues_, key) = value;
+    DSPHeaders::checkedVectorIndexing(notePressureValues_, key) = value;
   }
 
   /**
@@ -49,7 +50,7 @@ public:
    @param key the key to get
    @returns the current pressure value for a key
    */
-  inline uint8_t notePressure(int key) const noexcept { return checkedVectorIndexing(notePressureValues_, key); }
+  inline uint8_t notePressure(int key) const noexcept { return DSPHeaders::checkedVectorIndexing(notePressureValues_, key); }
 
   /**
    Set the channel pressure.
@@ -141,7 +142,7 @@ public:
   void dump() const noexcept;
 
 private:
-  using ContinuousControllerValues = EnumIndexableValueArray<uint8_t, ControlChange, 128>;
+  using ContinuousControllerValues = DSPHeaders::EnumIndexableValueArray<uint8_t, ControlChange, 128>;
   using NotePressureValues = std::array<uint8_t, Note::Max + 1>;
 
   bool decodeNRPN(MIDI::ControlChange cc, uint8_t value) noexcept;

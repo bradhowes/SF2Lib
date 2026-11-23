@@ -6,6 +6,7 @@
 #include <cstring>
 #include <string>
 
+#include "DSPHeaders/Concepts.hpp"
 #include "SF2Util/Types.hpp"
 
 namespace SF2::Utils {
@@ -22,7 +23,8 @@ void trim_property(std::string& property) noexcept;
 
  @param property reference to C++ array to work with
  */
-template <CharArray T> static inline void trim_property(T& property) noexcept {
+template <DSPHeaders::CharArray T>
+static inline void trim_property(T& property) noexcept {
   auto size = sizeof(T);
   std::string s(property, size);
   trim_property(s);

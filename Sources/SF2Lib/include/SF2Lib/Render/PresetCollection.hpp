@@ -5,6 +5,7 @@
 #include <atomic>
 #include <vector>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2Lib/Render/Preset.hpp"
 
 namespace SF2::IO { class File; }
@@ -43,10 +44,10 @@ public:
   inline size_t size() const noexcept { return size_.load(); }
 
   /// @returns the preset at a given index.
-  Preset& operator[](size_t index) noexcept { return checkedVectorIndexing(presets_, index); }
+  Preset& operator[](size_t index) noexcept { return DSPHeaders::checkedVectorIndexing(presets_, index); }
 
   /// @returns the preset at a given index.
-  const Preset& operator[](size_t index) const noexcept { return checkedVectorIndexing(presets_, index); }
+  const Preset& operator[](size_t index) const noexcept { return DSPHeaders::checkedVectorIndexing(presets_, index); }
 
   /**
    Locate the index of the preset based on bank/program pair.

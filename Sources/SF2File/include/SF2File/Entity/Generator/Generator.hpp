@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2File/IO/Pos.hpp"
 #include "SF2File/Entity/Generator/Definition.hpp"
 #include "SF2File/Entity/Generator/Index.hpp"
@@ -31,7 +32,7 @@ public:
   inline Index index() const noexcept { return index_.index(); }
 
   /// @returns true if the generator index is one defined by the spec. SF2.01 8.1: others must be ignored.
-  inline bool isValid() const noexcept { return index_.value() < SF2::valueOf(Index::numValues); }
+  inline bool isValid() const noexcept { return index_.value() < DSPHeaders::valueOf(Index::numValues); }
 
   /// @returns value configured for the generator
   inline Amount amount() const noexcept { return amount_; }

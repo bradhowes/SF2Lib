@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2File/IO/ChunkItems.hpp"
 #include "SF2File/Entity/SampleHeader.hpp"
 #include "SF2File/IO/NormalizedSampleSource.hpp"
@@ -34,7 +35,7 @@ public:
   /// @return the NormalizedSampleSource value at the given index, where the index comes from the instrument definition in the SF2
   /// file.
   const NormalizedSampleSource& operator[](size_t index) const {
-    return checkedVectorIndexing(collection_, index);
+    return DSPHeaders::checkedVectorIndexing(collection_, index);
   }
 
   /// @return true if the collection is empty. This is true after File loading due to lazy-loading of the rendering

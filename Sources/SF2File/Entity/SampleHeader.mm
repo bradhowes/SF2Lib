@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "DSPHeaders/Types.hpp"
 #include "SF2File/IO/Pos.hpp"
 #include "SF2File/Entity/SampleHeader.hpp"
 #include "SF2Util/StringUtils.hpp"
@@ -28,7 +29,7 @@ dwSampleRate{sampleRate},
 originalKey{key},
 correction{adjustment},
 sampleLink{link},
-sampleType{SF2::valueOf(type)}
+sampleType{DSPHeaders::valueOf(type)}
 {
   if (isROM()) throw std::runtime_error("ROM samples are not supported.");
 }
