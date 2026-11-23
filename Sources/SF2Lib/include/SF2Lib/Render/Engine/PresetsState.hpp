@@ -23,7 +23,7 @@ struct PresetsState {
    @param index the preset to make active
    @param generation the sequence number of this load. Generations increase with every load.
    */
-  PresetsState(int fd, size_t index, uint64_t generation) noexcept
+  PresetsState(int fd, size_t index, uint64_t generation)
   : file_{std::make_unique<IO::File>()}, generation_{generation} {
     initialize(file_->load(fd), index);
   }
@@ -35,13 +35,13 @@ struct PresetsState {
    @param index the preset to make active
    @param generation the sequence number of this load. Generations increase with every load.
    */
-  PresetsState(const std::string& path, size_t index, uint64_t generation) noexcept
+  PresetsState(const std::string& path, size_t index, uint64_t generation)
   : file_{std::make_unique<IO::File>(path)}, generation_{generation} {
     initialize(file_->load(), index);
   }
 
   /// @returns the sequence number of the load that created this instance
-  inline uint64_t generation() const noexcept { return generation_; }
+  uint64_t generation() const noexcept { return generation_; }
 
   void changeActivePreset(size_t index) noexcept {
     auto activePresetIndex = activePresetIndex_.load();
@@ -57,27 +57,27 @@ struct PresetsState {
     activePresetIndex_.store(activePresetIndex);
   }
 
-  inline bool hasActivePreset() const noexcept { return activePresetIndex_.load() < size(); }
+  bool hasActivePreset() const noexcept { return activePresetIndex_.load() < size(); }
 
-  inline size_t size() const noexcept { return collection_.size(); }
+  size_t size() const noexcept { return collection_.size(); }
 
   /// @returns the active preset, or nullptr if there is none. Does not throw, so it is safe on the render thread.
-  inline Preset* activePresetOrNull() noexcept {
+  Preset* activePresetOrNull() noexcept {
     auto activePresetIndex = activePresetIndex_.load();
     return activePresetIndex < size() ? &collection_[activePresetIndex] : nullptr;
   }
 
-  inline Preset& activePreset() {
+  Preset& activePreset() {
     auto activePresetIndex = activePresetIndex_.load();
     if (activePresetIndex >= size()) throw std::runtime_error("unexpected nil active preset");
     return collection_[activePresetIndex];
   }
 
-  inline size_t activePresetIndex() const noexcept { return activePresetIndex_.load(); }
+  size_t activePresetIndex() const noexcept { return activePresetIndex_.load(); }
 
-  inline IO::File::LoadResponse loadResponse() const noexcept { return loadResponse_; }
+  IO::File::LoadResponse loadResponse() const noexcept { return loadResponse_; }
 
-  inline size_t locatePresetIndex(uint16_t bank, uint8_t program) const noexcept {
+  size_t locatePresetIndex(uint16_t bank, uint8_t program) const noexcept {
     return collection_.locatePresetIndex(bank, program);
   }
 

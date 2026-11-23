@@ -68,7 +68,7 @@ Modulator::makeValueProvider(const EntityMod::Source& source) noexcept
 }
 
 std::string
-Modulator::description() const noexcept
+Modulator::description() const
 {
   std::ostringstream os;
   os << configuration().description();

@@ -24,7 +24,7 @@ public:
 
    @param state the state parameters to use
    */
-  inline void configure(Voice::State::State& state) noexcept {
+  void configure(Voice::State::State& state) noexcept {
     LFO::configure(state.sampleRate(),
                    DSP::lfoCentsToFrequency(state.modulated(Entity::Generator::Index::frequencyVibratoLFO)),
                    DSP::lfoDelayTimecentsToSeconds(state.modulated(Entity::Generator::Index::delayVibratoLFO)));
@@ -35,14 +35,14 @@ public:
 
    @returns next waveform value to use
    */
-  inline Value getNextValue() noexcept { return {LFO::getNextValue()}; }
+  Value getNextValue() noexcept { return {LFO::getNextValue()}; }
 
   /**
    Obtain the current value of the oscillator.
 
    @returns current waveform value
    */
-  inline Value value() const noexcept { return {LFO::value()}; }
+  Value value() const noexcept { return {LFO::value()}; }
 
 private:
   VibLFO(Float sampleRate, Float frequency, Float delay) : LFO(sampleRate, "VibLFO", frequency, delay) {}

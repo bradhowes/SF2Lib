@@ -14,7 +14,7 @@ Bag::Bag(IO::Pos& pos)
 }
 
 void
-Bag::dump(const std::string& indent, size_t index) const noexcept
+Bag::dump(const std::string& indent, size_t index) const
 {
   std::cout << indent << '[' << index << "] genIndex: " << firstGeneratorIndex() << " count: " << generatorCount()
   << " modIndex: " << firstModulatorIndex() << " count: " << modulatorCount() << std::endl;

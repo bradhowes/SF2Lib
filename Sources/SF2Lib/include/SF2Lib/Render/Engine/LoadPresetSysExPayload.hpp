@@ -28,7 +28,7 @@ namespace SF2::Render::Engine {
     static constexpr size_t minPayloadSize = 25;
 
     static std::vector<uint8_t> make(const SF2::MIDI::GeneratorOverrideVector& overrides,
-                                     const std::string& filePath, size_t presetIndex) noexcept {
+                                     const std::string& filePath, size_t presetIndex) {
       auto encodedFilePath = filePath.empty() ? std::string("") : SF2::Utils::Base64::encode(filePath);
       auto payloadSize = (sizeof(LoadPresetSysExPayload)
                           + overrides.size() * sizeof(SF2::MIDI::GeneratorOverride)
@@ -53,7 +53,7 @@ namespace SF2::Render::Engine {
     }
 
     static std::vector<uint8_t> make(const SF2::MIDI::GeneratorOverrideVector& overrides,
-                                     const NSData* bookmark, size_t presetIndex) noexcept {
+                                     const NSData* bookmark, size_t presetIndex) {
       NSData* encodedBookmark = [bookmark base64EncodedDataWithOptions: 0];
       auto payloadSize = (sizeof(LoadPresetSysExPayload)
                           + overrides.size() * sizeof(SF2::MIDI::GeneratorOverride)

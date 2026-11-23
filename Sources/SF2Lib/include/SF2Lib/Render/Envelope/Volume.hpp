@@ -26,24 +26,24 @@ public:
   /**
    Create a volume envelope for a voice
    */
-  inline Volume() noexcept : Generator("VolGen") { enableConvexAttack(); }
+  Volume() noexcept : Generator("VolGen") { enableConvexAttack(); }
 
   /**
    Create new envelope for volume changes over time.
 
    @param state the state holding the generator values for the envelope definition
    */
-  inline void configure(const State& state) noexcept { configureVolumeEnvelope(state); }
+  void configure(const State& state) noexcept { configureVolumeEnvelope(state); }
 
   /// @returns the current envelope value.
-  inline Value value() const noexcept { return {Generator::value()}; }
+  Value value() const noexcept { return {Generator::value()}; }
 
   /**
    Calculate the next envelope value. This must be called on every sample for proper timing of the stages.
 
    @returns the new envelope value.
    */
-  inline Value getNextValue() noexcept { return {Generator::getNextValue()}; }
+  Value getNextValue() noexcept { return {Generator::getNextValue()}; }
 
 private:
   Volume(Float sampleRate, Float delay, Float attack, Float hold, Float decay, int sustain, Float release) noexcept :

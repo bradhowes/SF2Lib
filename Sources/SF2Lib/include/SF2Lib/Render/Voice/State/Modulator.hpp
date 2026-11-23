@@ -76,7 +76,7 @@ public:
   Entity::Generator::Index destination() const noexcept { return configuration_.generatorDestination(); }
 
   /// @returns a textual description of the modulator.
-  std::string description() const noexcept;
+  std::string description() const;
 
 private:
   // Holds a pointer to member function that determines how to generate a value for a modulator.

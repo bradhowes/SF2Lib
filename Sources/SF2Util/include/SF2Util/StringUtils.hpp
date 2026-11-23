@@ -24,7 +24,7 @@ void trim_property(std::string& property) noexcept;
  @param property reference to C++ array to work with
  */
 template <DSPHeaders::CharArray T>
-static inline void trim_property(T& property) noexcept {
+static void trim_property(T& property) {
   auto size = sizeof(T);
   std::string s(property, size);
   trim_property(s);

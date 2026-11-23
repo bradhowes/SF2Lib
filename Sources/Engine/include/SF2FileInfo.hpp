@@ -31,16 +31,16 @@ struct SWIFT_ESCAPABLE SF2FileInfo
   bool load();
 
   /// @returns the embedded name in the file
-  std::string embeddedName() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
+  std::string embeddedName() const SWIFT_RETURNS_INDEPENDENT_VALUE;
 
   /// @returns the embedded author name in the file
-  std::string embeddedAuthor() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
+  std::string embeddedAuthor() const SWIFT_RETURNS_INDEPENDENT_VALUE;
 
   /// @returns any embedded comment in the file
-  std::string embeddedComment() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
+  std::string embeddedComment() const SWIFT_RETURNS_INDEPENDENT_VALUE;
 
   /// @returns any embedded copyright notice in the file
-  std::string embeddedCopyright() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
+  std::string embeddedCopyright() const SWIFT_RETURNS_INDEPENDENT_VALUE;
 
   /// @returns the number of presets found in the file
   size_t size() const noexcept;

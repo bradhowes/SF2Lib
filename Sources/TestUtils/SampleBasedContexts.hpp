@@ -84,7 +84,7 @@ struct TestEngineHarness {
 
   Engine& engine() noexcept { return engine_; }
 
-  SF2::IO::File::LoadResponse load(const std::string& path, size_t index) noexcept {
+  SF2::IO::File::LoadResponse load(const std::string& path, size_t index) {
     return engine_.loadFileAndPreset(path, index);
   }
 
@@ -258,7 +258,7 @@ private:
 
 struct PresetTestContextBase
 {
-  inline static SF2::Float epsilonValue() {
+  static SF2::Float epsilonValue() {
     if constexpr (std::is_same_v<SF2::Float, float>) {
       return 1.0e-6;
     } else {

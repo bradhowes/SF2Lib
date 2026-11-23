@@ -129,10 +129,10 @@ public:
   /// @returns index of another instance that is related (eg left/right pairs). Only valid if `isRight()` or `isLeft()` is `true`.
   size_t sampleLinkIndex() const noexcept { return sampleLink; }
 
-  void dump(const std::string& indent, size_t index) const noexcept;
+  void dump(const std::string& indent, size_t index) const;
 
 private:
-  std::string sampleTypeDescription() const noexcept;
+  std::string sampleTypeDescription() const;
 
   char achSampleName[20];
   uint32_t dwStart;

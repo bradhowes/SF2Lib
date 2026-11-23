@@ -93,13 +93,13 @@ public:
   static const Definition& definition(Index index) { return definitions_[index]; }
 
   /// @returns name of the definition
-  inline const std::string& name() const noexcept { return name_; }
+  const std::string& name() const noexcept { return name_; }
 
   /// @returns value type of the generator
-  inline ValueKind valueKind() const noexcept { return valueKind_; }
+  ValueKind valueKind() const noexcept { return valueKind_; }
 
   /// @returns true if the generator can be used in a preset zone
-  inline bool isAvailableInPreset() const noexcept { return availableInPreset_; }
+  bool isAvailableInPreset() const noexcept { return availableInPreset_; }
 
   Definition(const char* name, ValueKind valueKind, ValueRange minMax, bool availableInPreset,
              NRPNMultiplier nrpnMultiplier) noexcept :
@@ -129,10 +129,10 @@ public:
 
    @returns multiplier for NRPN values.
   */
-  inline int nrpnMultiplier() const noexcept { return DSPHeaders::valueOf(nrpnMultiplier_); }
+  int nrpnMultiplier() const noexcept { return DSPHeaders::valueOf(nrpnMultiplier_); }
 
   /// @returns true if the generator amount value is unsigned or signed
-  inline bool isUnsignedValue() const noexcept { return valueKind_ < ValueKind::signedShort; }
+  bool isUnsignedValue() const noexcept { return valueKind_ < ValueKind::signedShort; }
 
   /**
    Obtain the value from a generator's Amount instance. The SF2 spec defines `unsigned` and `signed` values, but in
@@ -142,7 +142,7 @@ public:
    @param amount the container holding the value to extract
    @returns extracted value
    */
-  inline int valueOf(const Amount& amount) const noexcept {
+  int valueOf(const Amount& amount) const noexcept {
     static_assert(sizeof(decltype(amount.unsignedAmount())) < sizeof(int), "Undefined behavior - sizeof(int) == sizeof(uint16)");
     return isUnsignedValue() ? amount.unsignedAmount() : amount.signedAmount();
   }
@@ -155,9 +155,9 @@ public:
    */
   template <DSPHeaders::Numeric T> T clamp(T value) const noexcept { return valueRange_.clamp(value); }
 
-  inline ValueRange valueRange() const noexcept { return valueRange_; }
+  ValueRange valueRange() const noexcept { return valueRange_; }
 
-  std::ostream& dump(const Amount& amount) const noexcept;
+  std::ostream& dump(const Amount& amount) const;
 
 private:
   static GeneratorValueArray<Definition> const definitions_;

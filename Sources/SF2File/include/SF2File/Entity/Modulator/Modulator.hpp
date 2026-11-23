@@ -61,24 +61,24 @@ public:
             Transformer transform = Transformer()) noexcept;
 
   /// @returns the source of data for the modulator
-  inline const Source& source() const noexcept { return sfModSrcOper; }
+  const Source& source() const noexcept { return sfModSrcOper; }
 
   /// @returns the destination (generator) for the modulator
-  inline Generator::Index generatorDestination() const noexcept {
+  Generator::Index generatorDestination() const noexcept {
     return Generator::Index(sfModDestOper);
   }
 
   /// @returns the maximum deviation that a modulator can apply to a generator
-  inline int16_t amount() const noexcept { return modAmount; }
+  int16_t amount() const noexcept { return modAmount; }
 
   /// @returns the second source of data for the modulator
-  inline const Source& amountSource() const noexcept { return sfModAmtSrcOper; }
+  const Source& amountSource() const noexcept { return sfModAmtSrcOper; }
 
   /// @returns the transform to apply to values created by the modulator
-  inline const Transformer& transformer() const noexcept { return sfModTransOper; }
+  const Transformer& transformer() const noexcept { return sfModTransOper; }
 
   /// @returns textual description of the modulator
-  std::string description() const noexcept;
+  std::string description() const;
 
   /**
    Compare two instances for equality. SF2.01 9.5.1: "A Modulator is defined as identical to another modulator if its
@@ -88,7 +88,7 @@ public:
    @param rhs the modulator to compare with
    @returns true if this modulator is identical to `rhs`
    */
-  inline bool operator ==(const Modulator& rhs) const noexcept {
+  bool operator ==(const Modulator& rhs) const noexcept {
     return hasSameEnumerators(rhs) && sfModTransOper == rhs.sfModTransOper;
   }
 
@@ -100,7 +100,7 @@ public:
    @param rhs the modulator to compare with
    @returns true if both modulators have the same source, destination and amount source
    */
-  inline bool hasSameEnumerators(const Modulator& rhs) const noexcept {
+  bool hasSameEnumerators(const Modulator& rhs) const noexcept {
     return (sfModSrcOper == rhs.sfModSrcOper &&
             sfModDestOper == rhs.sfModDestOper &&
             sfModAmtSrcOper == rhs.sfModAmtSrcOper);
@@ -112,9 +112,9 @@ public:
    @param rhs the modulator to compare with
    @return true if this modulator is not equivalent to `rhs`
    */
-  inline bool operator !=(const Modulator& rhs) const noexcept { return !operator==(rhs); }
+  bool operator !=(const Modulator& rhs) const noexcept { return !operator==(rhs); }
 
-  void dump(const std::string& indent, size_t index) const noexcept;
+  void dump(const std::string& indent, size_t index) const;
 
 private:
   Source sfModSrcOper;

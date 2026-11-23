@@ -180,7 +180,7 @@ State::updateStateMods(const MIDI::ChannelState& channelState) noexcept
 }
 
 void
-State::dump() noexcept
+State::dump()
 {
   for (auto pos = Entity::Generator::IndexIterator::begin(); pos != Entity::Generator::IndexIterator::end(); ++pos) {
     auto& gen{gens_[*pos]};

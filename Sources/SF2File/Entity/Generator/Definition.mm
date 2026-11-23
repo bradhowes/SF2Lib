@@ -25,7 +25,7 @@ Definition::convertedValueOf(const Amount& amount) const noexcept
 }
 
 std::ostream&
-Definition::dump(const Amount& amount) const noexcept
+Definition::dump(const Amount& amount) const
 {
   Float value = convertedValueOf(amount);
   switch (valueKind_) {

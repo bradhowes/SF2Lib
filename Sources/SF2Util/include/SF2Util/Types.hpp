@@ -30,7 +30,7 @@ using AUAudioFrameCount = ::AUAudioFrameCount;
 struct Log {
   inline static const char* subsystem = "com.braysoftware.SF2Lib";
 
-  inline static os_log_t create(const char* category) { return os_log_create(subsystem, category); }
+  static os_log_t create(const char* category) { return os_log_create(subsystem, category); }
 };
 
 } // end namespace SF2

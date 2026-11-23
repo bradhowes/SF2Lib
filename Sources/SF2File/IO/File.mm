@@ -16,9 +16,9 @@
 
 using namespace SF2::IO;
 
-File::File(std::string path) noexcept : path_{path} {}
+File::File(std::string path) : path_{path} {}
 
-File::File(const char* path) noexcept : File::File(std::string(path)) {}
+File::File(const char* path) : File::File(std::string(path)) {}
 
 File::LoadResponse
 File::load() noexcept
@@ -193,7 +193,7 @@ File::validate() const
 }
 
 void
-File::dump() const noexcept {
+File::dump() const {
   std::cout << "|-ifil"; soundFontVersion_.dump("|-ifil");
   std::cout << "|-phdr"; presets_.dump("|-phdr: ");
   std::cout << "|-pbag"; presetZones_.dump("|-pbag: ");

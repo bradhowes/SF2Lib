@@ -35,7 +35,7 @@ sampleType{DSPHeaders::valueOf(type)}
 }
 
 std::string
-SampleHeader::sampleTypeDescription() const noexcept
+SampleHeader::sampleTypeDescription() const
 {
   std::string tag("");
   if (sampleIsA(Type::monoSample)) tag += "M";
@@ -46,7 +46,7 @@ SampleHeader::sampleTypeDescription() const noexcept
 }
 
 void
-SampleHeader::dump(const std::string& indent, size_t index) const noexcept
+SampleHeader::dump(const std::string& indent, size_t index) const
 {
   std::cout << indent << '[' << index << "] '" << achSampleName
   << "' sampleRate: " << dwSampleRate

@@ -25,7 +25,7 @@ public:
 
    @param indent the prefix to write out before each line
    */
-  void dump(const std::string& indent) const noexcept;
+  void dump(const std::string& indent) const;
 
 private:
   uint16_t wMajor{};

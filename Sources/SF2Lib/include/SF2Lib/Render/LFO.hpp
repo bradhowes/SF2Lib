@@ -55,7 +55,7 @@ protected:
   /**
    Advance the current value of the LFO to the next value. NOTE: this is automatically done by `getNextValue` method.
    */
-  inline void increment() noexcept {
+  void increment() noexcept {
     if (delaySampleCount_ > 0) {
       --delaySampleCount_;
       return;
@@ -77,7 +77,7 @@ protected:
 
    @returns next waveform value to use
    */
-  inline Float getNextValue() noexcept {
+  Float getNextValue() noexcept {
     auto counter = counter_;
     increment();
     return counter;
@@ -88,7 +88,7 @@ protected:
 
    @returns current waveform value
    */
-  inline Float value() const noexcept { return counter_; }
+  Float value() const noexcept { return counter_; }
 
   void configure(Float sampleRate, Float frequency, Float delay);
 

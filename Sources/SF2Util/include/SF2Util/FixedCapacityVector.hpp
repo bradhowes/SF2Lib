@@ -25,7 +25,7 @@ public:
   using iterator = T*;
   using const_iterator = const T*;
 
-  FixedCapacityVector() noexcept = default;
+  FixedCapacityVector() = default;
 
   FixedCapacityVector(const FixedCapacityVector& rhs) noexcept(std::is_nothrow_copy_constructible_v<T>) {
     for (const auto& value : rhs) emplace_back(value);
@@ -39,7 +39,7 @@ public:
   FixedCapacityVector& operator=(const FixedCapacityVector&) = delete;
   FixedCapacityVector& operator=(FixedCapacityVector&&) = delete;
 
-  ~FixedCapacityVector() noexcept { clear(); }
+  ~FixedCapacityVector() { clear(); }
 
   /**
    Construct a new element at the end of the container.

@@ -16,7 +16,7 @@ struct Base64 {
 
    @returns converted character sequence
    */
-  static std::string decode(const unsigned char* ptr, size_t size) noexcept;
+  static std::string decode(const unsigned char* ptr, size_t size);
 
   /**
    Convert the given string from Base-64 to ASCII/UTF-8.
@@ -25,7 +25,7 @@ struct Base64 {
 
    @returns converted character sequence
    */
-  static std::string decode(const std::string& input) noexcept;
+  static std::string decode(const std::string& input);
 
   /**
    Convert the given string to Base-64.
@@ -34,7 +34,7 @@ struct Base64 {
 
    @returns Base-64 character sequence
    */
-  static std::string encode(const std::string& input) noexcept;
+  static std::string encode(const std::string& input);
 };
 
 } // end namespace SF2::Utils

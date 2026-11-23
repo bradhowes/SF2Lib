@@ -72,7 +72,7 @@ public:
    @param vibLFO the current vibrato LFO value
    @param modEnv the current modulation envelope value
    */
-  inline Float samplePhaseIncrement(ModLFO::Value modLFO, VibLFO::Value vibLFO, Modulation::Value modEnv) const noexcept
+  Float samplePhaseIncrement(ModLFO::Value modLFO, VibLFO::Value vibLFO, Modulation::Value modEnv) const noexcept
   {
     // Clamp summed values to their generator ranges (SF2.01 10.5). fineTune is the exception: it also carries the
     // pitch-wheel modulator (see `Modulator::defaults`), whose output legitimately exceeds the +/-99 cent range.

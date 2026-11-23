@@ -76,17 +76,17 @@ public:
          );
 
   /// Waits for queued loads to finish, then frees every preset state.
-  ~Engine() noexcept;
+  ~Engine();
 
-  inline size_t minimumNoteDurationSamples() const noexcept {
+  size_t minimumNoteDurationSamples() const noexcept {
     return static_cast<size_t>(ceil(Float(minimumNoteDurationMilliseconds_) / 1000_F * sampleRate_));
   }
 
   /// @returns maximum number of voices available for simultaneous rendering in engine.
-  inline size_t maxVoiceCount() const noexcept { return traits::maxVoiceCount; }
+  size_t maxVoiceCount() const noexcept { return traits::maxVoiceCount; }
 
   /// @returns configured maximum number of voices available for rendering [legacy].
-  inline size_t voiceCountLimit() const noexcept { return voiceCountLimit_; }
+  size_t voiceCountLimit() const noexcept { return voiceCountLimit_; }
 
   /**
    Update kernel and buffers to support the given format and channel count
@@ -97,19 +97,19 @@ public:
   void setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) noexcept;
 
   /// @returns the current sample rate
-  inline Float sampleRate() const noexcept { return sampleRate_; }
+  Float sampleRate() const noexcept { return sampleRate_; }
 
   /// @returns the MIDI channel state assigned to the engine
-  inline MIDI::ChannelState& channelState() noexcept { return channelState_; }
+  MIDI::ChannelState& channelState() noexcept { return channelState_; }
 
   /// @returns the MIDI channel state assigned to the engine
-  inline const MIDI::ChannelState& channelState() const noexcept { return channelState_; }
+  const MIDI::ChannelState& channelState() const noexcept { return channelState_; }
 
   /// @returns true if there is an active preset
   bool hasActivePreset() const noexcept;
 
   /// @returns name of the active preset or empty string if none is active
-  std::string activePresetName() const noexcept;
+  std::string activePresetName() const;
 
   /// @returns the program index value for the active preset, or -1 if none is active
   int activeProgramIndex() const noexcept;
@@ -121,13 +121,13 @@ public:
   int activePresetIndex() const noexcept;
 
   /// @returns the number of presets available, or 0 if none have been loaded.
-  inline size_t presetCount() const noexcept {
+  size_t presetCount() const noexcept {
     auto ptr = presetsState();
     return ptr ? ptr->size() : 0;
   }
 
   /// @return the number of active voices
-  inline size_t activeVoiceCount() const noexcept { return oldestVoiceIndices_.activeVoiceCount(); }
+  size_t activeVoiceCount() const noexcept { return oldestVoiceIndices_.activeVoiceCount(); }
 
   /**
    Render samples to the given stereo output buffers. The buffers are guaranteed to be able to hold `frameCount`
@@ -150,7 +150,7 @@ public:
    @param outs the output buffers to write to
    @param frameCount the number of frames to render, where 1 frame is 1 sample per output buffer
    */
-  inline void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs,
+  void doRendering(NSInteger outputBusNumber, DSPHeaders::BusBuffers, DSPHeaders::BusBuffers outs,
                           AUAudioFrameCount frameCount) noexcept {
     // All of the work is done when working with output bus 0. If wired correctly, busses 1 and 2 will
     // hold the buffered values that were created here.
@@ -183,28 +183,28 @@ public:
   void notifyParameterChanged_RT(Entity::Generator::Index index) noexcept;
 
   /// @returns the AUParameterTree for the engine.
-  inline AUParameterTree* parameterTree() const noexcept {
+  AUParameterTree* parameterTree() const noexcept {
     assert(parameterTree_ !=  nullptr);
     return parameterTree_;
   }
 
   /// @returns true if portamento mode is enabled
-  inline bool portamentoModeEnabled() const noexcept { return portamentoModeEnabled_; }
+  bool portamentoModeEnabled() const noexcept { return portamentoModeEnabled_; }
 
   /// @returns the rate of change from one note to another expressed as milliseconds per semitone change
-  inline size_t portamentoRate() const noexcept { return portamentoRateMillisecondsPerSemitone_; }
+  size_t portamentoRate() const noexcept { return portamentoRateMillisecondsPerSemitone_; }
 
   /// @returns true if only one voice will play at the same time for the same MIDI key
-  inline bool oneVoicePerKeyModeEnabled() const noexcept { return oneVoicePerKeyModeEnabled_; }
+  bool oneVoicePerKeyModeEnabled() const noexcept { return oneVoicePerKeyModeEnabled_; }
 
   /// @returns true if a new note ON for the same key will use a new envelopes or will simply inherit the active one.
-  inline bool retriggerModeEnabled() const noexcept { return retriggerModeEnabled_; }
+  bool retriggerModeEnabled() const noexcept { return retriggerModeEnabled_; }
 
   /// @returns true if Engine is in monophonic mode
-  inline bool monophonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::mono; }
+  bool monophonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::mono; }
 
   /// @returns true if Engine is in polyphonic mode (default)
-  inline bool polyphonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::poly; }
+  bool polyphonicModeEnabled() const noexcept { return phonicMode_ == PhonicMode::poly; }
 
   /**
    Utility class method that creates a MIDI SysEx command to load an SF2 file at the given path and to activate
@@ -217,7 +217,7 @@ public:
    @returns vector of MIDI bytes
    */
   static std::vector<uint8_t> createLoadFileUsePresetPayload(const std::string& filePath, size_t presetIndex,
-                                                             const std::vector<SF2::MIDI::GeneratorOverride>& overrides) noexcept;
+                                                             const std::vector<SF2::MIDI::GeneratorOverride>& overrides);
 
   /**
    Utility class method that creates a MIDI SysEx command to load a SF2 file that requires a security scope to access, and to
@@ -229,7 +229,7 @@ public:
    @returns vector of MIDI bytes
    */
   static std::vector<uint8_t> createLoadBookmarkUsePresetPayload(const NSData* bookmark, size_t presetIndex,
-                                                                 const std::vector<SF2::MIDI::GeneratorOverride>& overrides) noexcept;
+                                                                 const std::vector<SF2::MIDI::GeneratorOverride>& overrides);
 
   /**
    Utility class method that creates a MIDI channel command to reset the engine. This stops all voices and resets the
@@ -259,22 +259,22 @@ public:
   static std::array<uint8_t, 3> createChannelMessagePayload(MIDI::ControlChange channelMessage, uint8_t value = 0) noexcept;
 
   /// @returns array of 3 MIDI bytes with MIDI command to stop playing all notes.
-  inline static std::array<uint8_t, 3> createAllNotesOffPayload() noexcept
+  static std::array<uint8_t, 3> createAllNotesOffPayload() noexcept
   {
     return createChannelMessagePayload(MIDI::ControlChange::allNotesOff);
   }
 
   /// @returns array of 3 MIDI bytes with MIDI command to stop all sound output.
-  inline static std::array<uint8_t, 3> createAllSoundOffPayload() noexcept
+  static std::array<uint8_t, 3> createAllSoundOffPayload() noexcept
   {
     return createChannelMessagePayload(MIDI::ControlChange::allSoundOff);
   }
 
   /// @returns the counter value that tracks the number of SF2 file load requests.
-  inline Float lastLoadFinishedCounter() const noexcept { return lastLoadFinishedCounter_; }
+  Float lastLoadFinishedCounter() const noexcept { return lastLoadFinishedCounter_; }
 
   /// @returns current number of preset changes pending in the work queue.
-  inline int presetChangesPending() const noexcept { return presetChangesPending_.load(); }
+  int presetChangesPending() const noexcept { return presetChangesPending_.load(); }
 
   /**
    Load a soundfont file at the given path. If successful, make active the preset at the given index. This should be safe to call
@@ -284,7 +284,7 @@ public:
    @param presetIndex the index of the preset to make active after loading
    @returns status indicating the success of the loading.
    */
-  IO::File::LoadResponse loadFileAndPreset(std::string path, size_t presetIndex) noexcept;
+  IO::File::LoadResponse loadFileAndPreset(std::string path, size_t presetIndex);
 
   /**
    Load the presets from a file descriptor and activate a specific preset.
@@ -294,7 +294,7 @@ public:
    @param presetIndex the preset to make active
    @returns status indicating the success of the loading.
    */
-  IO::File::LoadResponse loadFileAndPreset(int fd, size_t presetIndex) noexcept;
+  IO::File::LoadResponse loadFileAndPreset(int fd, size_t presetIndex);
 
   /**
    Load a soundfont file using a secure bookmark reference. If successful, make active the preset at the given index. This should
@@ -303,14 +303,14 @@ public:
    @param bookmark the encoded location of the file to load
    @param presetIndex the index of the preset to make active after loading
    */
-  IO::File::LoadResponse loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept;
+  IO::File::LoadResponse loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex);
 
 private:
   Engine(const Engine&) = delete;
   Engine(Engine&&) = delete;
 
   /// @returns the most recently published presets state. Not for the render thread: use `syncPresetsState_RT`.
-  inline PresetsState* presetsState() const noexcept { return presetsState_.load(std::memory_order_acquire); }
+  PresetsState* presetsState() const noexcept { return presetsState_.load(std::memory_order_acquire); }
 
   /**
    Render-thread entry point to the presets state. If a new state has been published since the last call, stop all
@@ -327,7 +327,7 @@ private:
 
    @param state the new state to publish
    */
-  void installPresetsState_WQ(PresetsState* state) noexcept;
+  void installPresetsState_WQ(PresetsState* state);
 
   /**
    Free retired presets states. Caller must hold `retiredMutex_`.
@@ -371,7 +371,7 @@ private:
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
    */
-  IO::File::LoadResponse beginLoadFileAndPreset_WQ(std::string path, size_t presetIndex) noexcept;
+  IO::File::LoadResponse beginLoadFileAndPreset_WQ(std::string path, size_t presetIndex);
 
   /**
    Routine run outside of the render thread to load a secure bookmark to an SF2 file and make active a preset in it.
@@ -380,7 +380,7 @@ private:
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
    */
-  IO::File::LoadResponse beginLoadBookmarkAndPreset_WQ(NSData* bookmark, size_t presetIndex) noexcept;
+  IO::File::LoadResponse beginLoadBookmarkAndPreset_WQ(NSData* bookmark, size_t presetIndex);
 
   /**
    Finish loading from an SF2 file. Called at the conclusion of `beginLoadFileAndPreset_WQ`.
@@ -389,7 +389,7 @@ private:
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
    */
-  IO::File::LoadResponse concludeLoad_WQ(const std::string& path, size_t index) noexcept;
+  IO::File::LoadResponse concludeLoad_WQ(const std::string& path, size_t index);
 
   /**
    Finish loading from an SF2 file. Called at the conclusion of `beginLoadBookmarkAndPreset_WQ()`.
@@ -398,7 +398,7 @@ private:
    @param index the preset to make active
    @returns IO::File::LoadResponse::OK if the loading was successful
    */
-  IO::File::LoadResponse concludeLoad_WQ(int fd, size_t index) noexcept;
+  IO::File::LoadResponse concludeLoad_WQ(int fd, size_t index);
 
   /**
    Active a new preset in the current preset state.
@@ -457,7 +457,7 @@ private:
 
    @param value enable portamento mode if true
    */
-  inline void setPortamentoModeEnabled(bool value) noexcept { portamentoModeEnabled_ = value; }
+  void setPortamentoModeEnabled(bool value) noexcept { portamentoModeEnabled_ = value; }
 
   /**
    Set the rate at which the note transitions from the old pitch to the new pitch. This is expressed as milliseconds
@@ -467,7 +467,7 @@ private:
 
    @param value the rate in milliseconds
    */
-  inline void setPortamentoRate(size_t value) noexcept { portamentoRateMillisecondsPerSemitone_ = value; }
+  void setPortamentoRate(size_t value) noexcept { portamentoRateMillisecondsPerSemitone_ = value; }
 
   /**
    Set the "one voice per key" mode. When enabled, playing the same MIDI note will stop any active previous note. When
@@ -477,7 +477,7 @@ private:
 
    @param value enable if true
    */
-  inline void setOneVoicePerKeyModeEnabled(bool value) noexcept { oneVoicePerKeyModeEnabled_ = value; }
+  void setOneVoicePerKeyModeEnabled(bool value) noexcept { oneVoicePerKeyModeEnabled_ = value; }
 
   /**
    Controls the retriggering of the volume and modulation envelopes when pressing the same key.
@@ -486,7 +486,7 @@ private:
 
    @param value enable if true
    */
-  inline void setRetriggerModeEnabled(bool value) noexcept { retriggerModeEnabled_ = value; }
+  void setRetriggerModeEnabled(bool value) noexcept { retriggerModeEnabled_ = value; }
 
   /// The note playing mode of the engine.
   enum class PhonicMode
@@ -502,7 +502,7 @@ private:
 
    @param mode the mode to enter
    */
-  inline void setPhonicMode(PhonicMode mode) noexcept { phonicMode_ = mode; }
+  void setPhonicMode(PhonicMode mode) noexcept { phonicMode_ = mode; }
 
   /**
    Visit each active voice with a method that accepts two parameters: a `Voice` reference.
@@ -572,7 +572,7 @@ private:
   static void processSysExRequest_WQ(void* context) noexcept;
 
   /// Parse a queued SysEx request and start the load it describes.
-  void processSysExRequest_WQ(const uint8_t* bytes, size_t length) noexcept;
+  void processSysExRequest_WQ(const uint8_t* bytes, size_t length);
 
 
   void applySostenutoPedal_RT() noexcept;

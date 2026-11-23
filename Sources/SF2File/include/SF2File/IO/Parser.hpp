@@ -19,7 +19,7 @@ class Parser {
 public:
   /// Extracted preset information from the SF2 file.
   struct PresetInfo {
-    PresetInfo(std::string n, uint16_t b, uint16_t p) noexcept : name{n}, bank{b}, preset{p} {}
+    PresetInfo(std::string n, uint16_t b, uint16_t p) : name{n}, bank{b}, preset{p} {}
 
     std::string name;
     uint16_t bank;

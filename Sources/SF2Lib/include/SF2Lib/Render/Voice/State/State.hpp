@@ -139,7 +139,7 @@ public:
    @param gen the index of the generator
    @returns configured value of the generator
    */
-  inline int unmodulated(Index gen) const noexcept { return gens_[gen].unmodulated(); }
+  int unmodulated(Index gen) const noexcept { return gens_[gen].unmodulated(); }
 
   /**
    Obtain a generator value that includes the changes added by attached modulators.
@@ -149,7 +149,7 @@ public:
    @param gen the index of the generator
    @returns current value of the generator
    */
-  inline Float modulated(Index gen) const noexcept { return gens_[gen].modulated(); }
+  Float modulated(Index gen) const noexcept { return gens_[gen].modulated(); }
 
   /**
    Obtain a generator value that includes the changes added by attached modulators, clamped to the generator's range.
@@ -160,22 +160,22 @@ public:
    @param gen the index of the generator
    @returns current value of the generator, limited to the range given in SF2.01 8.1.3
    */
-  inline Float modulatedInRange(Index gen) const noexcept {
+  Float modulatedInRange(Index gen) const noexcept {
     return Entity::Generator::Definition::definition(gen).valueRange().clamp(modulated(gen));
   }
 
   /// @returns MIDI key that started a voice to begin emitting samples. For DSP this is *not* what is desired. See
   /// `key` method below.
-  inline int eventKey() const noexcept { return eventKey_; }
+  int eventKey() const noexcept { return eventKey_; }
 
   /// @returns key value to use for DSP. A generator can force it to be fixed to a set value.
-  inline int key() const noexcept {
+  int key() const noexcept {
     int key{unmodulated(Index::forcedMIDIKey)};
     return key >= 0 ? key : eventKey_;
   }
 
   /// @returns velocity to use for DSP. A generator can force it to be fixed to a set value.
-  inline int velocity() const noexcept {
+  int velocity() const noexcept {
     int velocity{unmodulated(Index::forcedMIDIVelocity)};
     return velocity >= 0 ? velocity : eventVelocity_;
   }
@@ -190,7 +190,7 @@ public:
   size_t modulatorCount() const noexcept { return modulators_.size(); }
 
   /// Show content of state.
-  void dump() noexcept;
+  void dump();
 
 private:
   /**

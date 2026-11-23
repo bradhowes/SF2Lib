@@ -29,13 +29,13 @@ public:
   explicit Generator(IO::Pos& pos);
 
   /// @returns index of the generator as an enumerated type. Only meaningful if `isValid()` is true.
-  inline Index index() const noexcept { return index_.index(); }
+  Index index() const noexcept { return index_.index(); }
 
   /// @returns true if the generator index is one defined by the spec. SF2.01 8.1: others must be ignored.
-  inline bool isValid() const noexcept { return index_.value() < DSPHeaders::valueOf(Index::numValues); }
+  bool isValid() const noexcept { return index_.value() < DSPHeaders::valueOf(Index::numValues); }
 
   /// @returns value configured for the generator
-  inline Amount amount() const noexcept { return amount_; }
+  Amount amount() const noexcept { return amount_; }
 
   /// @returns meta-data for the generator
   const Definition& definition() const noexcept;
@@ -44,9 +44,9 @@ public:
   const std::string& name() const noexcept;
 
   /// @returns the configured value of a generator
-  inline int value() const noexcept { return definition().valueOf(amount_); }
+  int value() const noexcept { return definition().valueOf(amount_); }
 
-  std::ostream& dump(const std::string& indent, size_t index) const noexcept;
+  std::ostream& dump(const std::string& indent, size_t index) const;
 
 private:
   RawIndex index_;

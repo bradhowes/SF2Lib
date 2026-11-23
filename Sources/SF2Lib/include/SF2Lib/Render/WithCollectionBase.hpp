@@ -31,19 +31,19 @@ public:
   using CollectionType = Zone::Collection<ZoneType>;
 
   /// @returns true if the preset/instrument has a global zone
-  inline bool hasGlobalZone() const noexcept { return zones_.hasGlobal(); }
+  bool hasGlobalZone() const noexcept { return zones_.hasGlobal(); }
 
   /// @returns the collection's global zone if there is one
-  inline const ZoneType* globalZone() const noexcept { return zones_.global(); }
+  const ZoneType* globalZone() const noexcept { return zones_.global(); }
 
   /// @returns the collection of associated zones
-  inline const CollectionType& zones() const noexcept { return zones_; }
+  const CollectionType& zones() const noexcept { return zones_; }
 
   /// @returns the collection of associated zones
-  inline CollectionType& zones() noexcept { return zones_; }
+  CollectionType& zones() noexcept { return zones_; }
 
   /// @returns the preset/instrument's entity from the SF2 file
-  inline const EntityType& configuration() const noexcept { return configuration_; }
+  const EntityType& configuration() const noexcept { return configuration_; }
 
 protected:
   WithCollectionBase(size_t zoneCount, const EntityType& configuration) noexcept :

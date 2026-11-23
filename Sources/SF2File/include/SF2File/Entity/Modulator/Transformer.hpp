@@ -56,7 +56,7 @@ public:
   /// @returns true if both have the same raw value
   bool operator ==(const Transformer& rhs) const noexcept { return bits_ == rhs.bits_; }
 
-  friend std::ostream& operator<<(std::ostream& os, const Transformer& value) noexcept;
+  friend std::ostream& operator<<(std::ostream& os, const Transformer& value);
 
 private:
   uint16_t bits_;

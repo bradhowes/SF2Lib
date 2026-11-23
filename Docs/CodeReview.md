@@ -196,10 +196,10 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 
 ## 7. Style and idioms
 
-- `noexcept` is applied mechanically, including on functions that throw or call throwing code. Reserve it for code that really can't fail (move ops, RT render path).
+- ~~`noexcept` is applied mechanically, including on functions that throw or call throwing code. Reserve it for code that really can't fail (move ops, RT render path).~~ Partly addressed (2026-11-24, see §11): removed where it was redundant or wrong. It remains on getters, math helpers, the RT path and moves.
 - Exceptions used as control flow (`throw File::LoadResponse::invalidFormat`, an enum value). Prefer `std::expected<T, LoadResponse>` (C++23 is already enabled).
 - `(this + 1)->firstZoneIndex()` in `Preset`/`Bag`/`Instrument` relies on the entity living inside a vector with a sentinel. That is fragile, and UB for a stand-alone copy. Compute counts in `ChunkItems` instead.
-- Redundant `inline` on in-class definitions throughout; `inline static size_t entity_size` is non-const in `Modulator` (const elsewhere).
+- ~~Redundant `inline` on in-class definitions throughout~~ (removed 2026-11-24, see §11); `inline static size_t entity_size` is non-const in `Modulator` (const elsewhere).
 - Advertised but unimplemented: mono mode, portamento, retrigger, minimum note duration, generator overrides, `durationBuckets_`, plus the `ENABLE_LOWPASS_FILTER` / `USE_ACCELERATE` flags. Either implement these or remove them from the AU parameter tree and `Package.swift`.
 - MIDI channel nibble ignored (omni). Fine for an AUv3 instrument, but worth documenting.
 
@@ -509,3 +509,29 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - **Left over:** no render test covers the LFO delay clamp. Any delay above 5000 timecents is about 18 s, far longer than a test render. The DSP unit test covers it.
 - No hard-coded rendering values changed.
 - **Behaviour change:** sums that go out of range now saturate at the generator limit, instead of producing more extreme pitch, LFO volume or filter swings and longer or shorter key-scaled envelopes.
+
+**Follow-up (2026-11-24): §7 redundant `inline` and unnecessary `noexcept`. Not yet committed. `make test-macOS`: 373 tests, 0 failures.**
+- **`inline` (277 removed, in `Sources/`):** removed only where the language already implies it:
+  - member functions (including friends and operators) defined inside the class;
+  - `constexpr` functions and variables, at class or namespace scope;
+  - non-specialised function templates.
+- **`inline` kept:**
+  - in-class non-`constexpr` static data members (`inline static const …`, `log_`, lookup tables), where it is required for an in-class definition;
+  - plain non-template, non-`constexpr` functions defined in headers, where it is required by the ODR (e.g. `power2Lookup`, `volumeEnvelopeAttackCurve`).
+- **`noexcept` (116 removed):**
+  - **Special members:** defaulted default constructors, destructors (implicitly `noexcept`), and the defaulted `IndexIterator::operator<=>`. Move constructors keep it.
+  - **Functions that build strings or streams, and so can throw `bad_alloc`:**
+    - every `dump`, `description` and `operator<<`, and the by-value `name()` functions;
+    - `sampleTypeDescription`, `continuityTypeName`, `Tag::toString`, `Note::label`, Base64 `encode`/`decode`, and the array `trim_property` template;
+    - `File(std::string)`, `File(const char*)` and the `PresetInfo` constructor;
+    - `activePresetName`, and the `SF2FileInfo` / `SF2PresetInfo` string getters.
+  - **Allocating load and work-queue code:**
+    - `Engine::loadFileAndPreset` (both), `loadBookmarkAndPreset`, `beginLoad*_WQ`, `concludeLoad_WQ` (both), `installPresetsState_WQ` (vector growth and mutex), and `processSysExRequest_WQ(bytes, length)`;
+    - the `PresetsState` constructors;
+    - the `std::vector` payload builders (`createLoad*UsePresetPayload`, `LoadPresetSysExPayload::make`);
+    - the matching `SF2Engine` wrappers and `TestEngineHarness::load`.
+- **`noexcept` kept:**
+  - the `dispatch_async_f` callbacks `usePresetRequest_WQ(void*)` and `processSysExRequest_WQ(void*)`, so an exception cannot unwind into libdispatch;
+  - `File::load*` and `Preset::loadSamples`, which catch internally;
+  - the `std::array` payload builders, getters, math helpers, everything on the render thread, and moves.
+- No behaviour or audio changes; no test changes.

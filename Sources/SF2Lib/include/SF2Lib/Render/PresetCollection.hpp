@@ -38,10 +38,10 @@ public:
   void clear() noexcept;
 
   /// @returns true if the collection is empty. Thread-safe.
-  inline bool empty() const noexcept { return size_.load() == 0; }
+  bool empty() const noexcept { return size_.load() == 0; }
 
   /// @returns the number of presets in the collection. Thread-safe.
-  inline size_t size() const noexcept { return size_.load(); }
+  size_t size() const noexcept { return size_.load(); }
 
   /// @returns the preset at a given index.
   Preset& operator[](size_t index) noexcept { return DSPHeaders::checkedVectorIndexing(presets_, index); }

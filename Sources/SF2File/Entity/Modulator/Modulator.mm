@@ -54,13 +54,13 @@ sfModTransOper{transform}
 }
 
 void
-Modulator::dump(const std::string& indent, size_t index) const noexcept
+Modulator::dump(const std::string& indent, size_t index) const
 {
   std::cout << indent << '[' << index << "] " << description() << std::endl;
 }
 
 std::string
-Modulator::description() const noexcept
+Modulator::description() const
 {
   std::ostringstream os;
   os << "Sv: " << sfModSrcOper << " Av: " << sfModAmtSrcOper << " dest: ";

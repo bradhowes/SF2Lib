@@ -38,13 +38,13 @@ public:
   std::shared_ptr<Zone::NormalizedSampleSpan> samples() const noexcept;
 
   /// @returns original MIDI key that triggered the voice
-  inline int eventKey() const noexcept { return eventKey_; }
+  int eventKey() const noexcept { return eventKey_; }
 
   /// @returns original MIDI velocity that triggered the voice
-  inline int eventVelocity() const noexcept { return eventVelocity_; }
+  int eventVelocity() const noexcept { return eventVelocity_; }
 
   /// @returns value of `exclusiveClass` generator for an instrument if it is set, or 0 if not found.
-  inline int exclusiveClass() const noexcept { return exclusiveClass_; }
+  int exclusiveClass() const noexcept { return exclusiveClass_; }
 
   /**
    Update a state with the various zone configurations. This is done once during the initialization of a Voice with a

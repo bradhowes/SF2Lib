@@ -86,7 +86,7 @@ struct SWIFT_ESCAPABLE SF2Engine
 
    @returns preset name or ""
    */
-  std::string activePresetName() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
+  std::string activePresetName() const SWIFT_RETURNS_INDEPENDENT_VALUE;
 
   /// @returns current number of active voices
   size_t activeVoiceCount() const noexcept;
@@ -101,7 +101,7 @@ struct SWIFT_ESCAPABLE SF2Engine
    @param presetIndex the index of the preset in the file to use
    @returns MIDI SYSEX command as a byte sequence
    */
-  static std::vector<uint8_t> createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex) noexcept;
+  static std::vector<uint8_t> createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex);
 
   /**
    Load a soundfont file at the given path. If successful, make active the preset at the given index.
@@ -109,7 +109,7 @@ struct SWIFT_ESCAPABLE SF2Engine
    @param path the location of the file to load
    @param presetIndex the index of the preset to make active after loading
    */
-  SF2::IO::File::LoadResponse loadFileAndPreset(std::string path, size_t presetIndex) noexcept;
+  SF2::IO::File::LoadResponse loadFileAndPreset(std::string path, size_t presetIndex);
 
   /**
    Load a soundfont from the given file descriptor. If successful, make active the preset at the given index.
@@ -118,7 +118,7 @@ struct SWIFT_ESCAPABLE SF2Engine
    as this returns.
    @param presetIndex the index of the preset to make active after loading
    */
-  SF2::IO::File::LoadResponse loadFileAndPreset(int fd, size_t presetIndex) noexcept;
+  SF2::IO::File::LoadResponse loadFileAndPreset(int fd, size_t presetIndex);
 
   /**
    Obtain MIDI payload containing a MIDI SYSEX command that can be sent to load an SF2 file and use a given
@@ -128,7 +128,7 @@ struct SWIFT_ESCAPABLE SF2Engine
    @param presetIndex the index of the preset in the file to use
    @returns MIDI SYSEX command as a byte sequence
    */
-  static std::vector<uint8_t> createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetIndex) noexcept;
+  static std::vector<uint8_t> createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetIndex);
   // SF2::MIDI::GeneratorOverrideVector overrides) noexcept;
 
   /**
@@ -140,7 +140,7 @@ struct SWIFT_ESCAPABLE SF2Engine
    @param bookmark the encoded location of the file to load
    @param presetIndex the index of the preset to make active after loading
    */
-  SF2::IO::File::LoadResponse loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept;
+  SF2::IO::File::LoadResponse loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex);
 
   /**
    Obtain MIDI payload containing MIDI command to reset the engine. This will stop playing any notes and reset

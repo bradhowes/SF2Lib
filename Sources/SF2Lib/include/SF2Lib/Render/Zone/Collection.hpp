@@ -39,7 +39,7 @@ public:
   explicit Collection(size_t zoneCount) noexcept { zones_.reserve(zoneCount); }
 
   /// @returns number of zones in the collection (including the optional global one)
-  inline size_t size() const noexcept { return zones_.size(); }
+  size_t size() const noexcept { return zones_.size(); }
 
   /**
    Locate the zone(s) that match the given key/velocity pair.
@@ -73,17 +73,17 @@ public:
     }
   }
 
-  inline std::vector<T>::iterator begin() noexcept { return zones_.begin(); }
-  inline std::vector<T>::iterator end() noexcept { return zones_.end(); }
+  std::vector<T>::iterator begin() noexcept { return zones_.begin(); }
+  std::vector<T>::iterator end() noexcept { return zones_.end(); }
 
-  inline std::vector<T>::const_iterator begin() const noexcept { return zones_.cbegin(); }
-  inline std::vector<T>::const_iterator end() const noexcept { return zones_.cend(); }
+  std::vector<T>::const_iterator begin() const noexcept { return zones_.cbegin(); }
+  std::vector<T>::const_iterator end() const noexcept { return zones_.cend(); }
 
   /// @returns true if first zone in collection is a global zone
-  inline bool hasGlobal() const noexcept { return !zones_.empty() && zones_.front().isGlobal(); }
+  bool hasGlobal() const noexcept { return !zones_.empty() && zones_.front().isGlobal(); }
 
   /// @returns pointer to global zone or nullptr if there is not one
-  inline const T* global() const noexcept { return hasGlobal() ? &zones_.front() : nullptr; }
+  const T* global() const noexcept { return hasGlobal() ? &zones_.front() : nullptr; }
 
   /**
    Add a zone with the given args. Note that empty zones (no generators and no modulators) are dropped, as are any

@@ -441,21 +441,21 @@ public:
   /**
    Constructor of a new iterator that points to the first enum value.
    */
-  IndexIterator() noexcept = default;
+  IndexIterator() = default;
 
   /**
    Constructor of a new iterator that starts at the given Index enum value.
 
    @param value the starting value
    */
-  inline IndexIterator(Index value) noexcept : value_{DSPHeaders::valueOf(value)} {}
+  IndexIterator(Index value) noexcept : value_{DSPHeaders::valueOf(value)} {}
 
   /**
    Increment the iterator.
 
    @returns this iterator
    */
-  inline IndexIterator operator++() noexcept {
+  IndexIterator operator++() noexcept {
     ++value_;
     return *this;
   }
@@ -465,15 +465,15 @@ public:
 
    @returns Index enum value
    */
-  inline Index operator*() const noexcept { return static_cast<Index>(value_); }
+  Index operator*() const noexcept { return static_cast<Index>(value_); }
 
   /// @return iterator that points to first Index enum value.
-  static inline IndexIterator begin() noexcept { return {}; }
+  static IndexIterator begin() noexcept { return {}; }
 
   /// @return iterator that points to last Index enum value + 1.
-  static inline IndexIterator end() noexcept { return {Index::numValues}; }
+  static IndexIterator end() noexcept { return {Index::numValues}; }
 
-  friend std::strong_ordering operator<=>(const IndexIterator& lhs, const IndexIterator& rhs) noexcept = default;
+  friend std::strong_ordering operator<=>(const IndexIterator& lhs, const IndexIterator& rhs) = default;
 
 private:
   typename std::underlying_type<Index>::type value_;
@@ -486,10 +486,10 @@ private:
 class RawIndex {
 public:
   /// @returns boxed value
-  inline uint16_t value() const noexcept { return value_; }
+  uint16_t value() const noexcept { return value_; }
 
   /// @returns Index value
-  inline Index index() const noexcept { return Index(value_); }
+  Index index() const noexcept { return Index(value_); }
 
 private:
   uint16_t const value_{0};

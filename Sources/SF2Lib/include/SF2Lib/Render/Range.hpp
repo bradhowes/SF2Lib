@@ -39,13 +39,13 @@ public:
    @param value the value to test
    @returns true if so
    */
-  inline bool contains(ValueType value) const noexcept { return value >= low_ && value <= high_; }
+  bool contains(ValueType value) const noexcept { return value >= low_ && value <= high_; }
 
   /// @returns lowest value in range
-  inline ValueType low() const noexcept { return low_; }
+  ValueType low() const noexcept { return low_; }
 
   /// @returns highest value in range
-  inline ValueType high() const noexcept { return high_; }
+  ValueType high() const noexcept { return high_; }
 
 private:
   ValueType low_;

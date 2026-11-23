@@ -24,7 +24,7 @@ public:
   explicit Instrument(IO::Pos& pos);
 
   /// @returns the name of the instrument
-  std::string name() const noexcept;
+  std::string name() const;
 
   /// @returns the index of the first Zone of the instrument
   size_t firstZoneIndex() const noexcept { return wInstBagNdx; }
@@ -34,7 +34,7 @@ public:
     return (this + 1)->firstZoneIndex() - firstZoneIndex();
   }
 
-  void dump(const std::string& indent, size_t index) const noexcept;
+  void dump(const std::string& indent, size_t index) const;
 
 private:
   char achInstName[20];

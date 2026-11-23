@@ -15,13 +15,13 @@ Instrument::Instrument(IO::Pos& pos)
 }
 
 std::string
-Instrument::name() const noexcept
+Instrument::name() const
 {
   return std::string(achInstName);
 }
 
 void
-Instrument::dump(const std::string& indent, size_t index) const noexcept
+Instrument::dump(const std::string& indent, size_t index) const
 {
   std::cout << indent << '[' << index << "] '" << name() << "' zoneIndex: " << firstZoneIndex()
   << " count: " << zoneCount() << std::endl;

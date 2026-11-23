@@ -18,7 +18,7 @@ namespace SF2::IO {
 class SampleSourceCollection
 {
 public:
-  SampleSourceCollection() noexcept = default;
+  SampleSourceCollection() = default;
 
   /**
    Construct the collection of NormalizedSampleSource values from the given ones.

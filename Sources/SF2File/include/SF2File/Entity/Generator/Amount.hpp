@@ -24,16 +24,16 @@ public:
   explicit Amount(uint16_t raw = 0) noexcept : raw_{raw} {}
 
   /// @returns unsigned integer value
-  inline uint16_t unsignedAmount() const noexcept { return raw_.wAmount; }
+  uint16_t unsignedAmount() const noexcept { return raw_.wAmount; }
 
   /// @returns signed integer value
-  inline int16_t signedAmount() const noexcept { return raw_.shAmount; }
+  int16_t signedAmount() const noexcept { return raw_.shAmount; }
 
   /// @returns low value of a range (0-255)
-  inline int low() const noexcept { return int(raw_.ranges[0]); }
+  int low() const noexcept { return int(raw_.ranges[0]); }
 
   /// @returns high value of a range (0-255)
-  inline int high() const noexcept { return int(raw_.ranges[1]); }
+  int high() const noexcept { return int(raw_.ranges[1]); }
 
 private:
   union {

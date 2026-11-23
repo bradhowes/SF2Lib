@@ -23,22 +23,22 @@ public:
   explicit Note(unsigned short value) noexcept : value_{value}, note_{static_cast<unsigned short>(value % 12)} {}
 
   /// @returns the octave that the note resides in
-  inline short octave() const noexcept { return value_ / 12 - 1; }
+  short octave() const noexcept { return value_ / 12 - 1; }
 
   /// @returns true if the note is accented (sharp / flat)
-  inline bool accented() const noexcept { return (note_ < 5 && (note_ & 1) == 1) || (note_ > 5 && (note_ & 1) == 0); }
+  bool accented() const noexcept { return (note_ < 5 && (note_ & 1) == 1) || (note_ > 5 && (note_ & 1) == 0); }
 
   /// @returns textual representation of the note (shows a sharp for accented notes)
-  inline std::string label() const noexcept {
+  std::string label() const {
     return labels_[note_] + std::to_string(octave()) + (accented() ? sharpTag_ : "");
   }
 
   /// @returns the MIDI value for the note
-  inline unsigned short value() const noexcept { return value_; }
+  unsigned short value() const noexcept { return value_; }
 
   friend std::strong_ordering operator <=>(const Note& lhs, const Note& rhs) { return lhs.value_ <=> rhs.value_; }
 
-  inline operator int() const noexcept { return value(); }
+  operator int() const noexcept { return value(); }
 
 private:
   inline static std::string const sharpTag_ = "♯";

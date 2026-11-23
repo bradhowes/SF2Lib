@@ -42,7 +42,7 @@ public:
   inline static const size_t itemSize = T::entity_size;
 
   /// Constructor for an empty collection.
-  ChunkItems() noexcept = default;
+  ChunkItems() = default;
 
   /**
    Constructor that loads items from the file.
@@ -57,17 +57,17 @@ public:
 
    @returns collection count (0 if the chunk was missing or empty)
    */
-  inline size_t size() const noexcept { return items_.empty() ? 0 : items_.size() - 1; }
+  size_t size() const noexcept { return items_.empty() ? 0 : items_.size() - 1; }
 
   /// @returns true if the chunk held a terminal record (SF2.01 7.2-7.10 require one for every pdta sub-chunk)
-  inline bool hasTerminal() const noexcept { return !items_.empty(); }
+  bool hasTerminal() const noexcept { return !items_.empty(); }
 
   /**
    Determine if collection is empty
 
    @returns true if so
    */
-  inline bool empty() const noexcept { return size() == 0; }
+  bool empty() const noexcept { return size() == 0; }
 
   /**
    Obtain a (read-only) reference to an entity in the collection.
@@ -75,7 +75,7 @@ public:
    @param index the entity to fetch
    @returns entity reference
    */
-  inline const ItemType& operator[](size_t index) const noexcept { return DSPHeaders::checkedVectorIndexing(items_, index); }
+  const ItemType& operator[](size_t index) const noexcept { return DSPHeaders::checkedVectorIndexing(items_, index); }
 
   /**
    Obtain a read-only slice of the original collection. This is used to parcel out a run of values from a collection
@@ -95,17 +95,17 @@ public:
   }
 
   /// @returns iterator to the start of the collection
-  inline const_iterator begin() const noexcept { return items_.begin(); }
+  const_iterator begin() const noexcept { return items_.begin(); }
 
   /// @returns iterator at the end of the collection
-  inline const_iterator end() const noexcept { return items_.empty() ? items_.end() : items_.end() - 1; }
+  const_iterator end() const noexcept { return items_.empty() ? items_.end() : items_.end() - 1; }
 
   /**
    Utility to dump out the contents of the collection
 
    @param indent the prefix to use for all output
    */
-  void dump(const std::string& indent) const noexcept {
+  void dump(const std::string& indent) const {
     beginDump(size());
     size_t index = 0;
     std::for_each(begin(), end(), [&](const ItemType& item) { item.dump(indent, index++); });

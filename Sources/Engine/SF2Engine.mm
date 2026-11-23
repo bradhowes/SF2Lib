@@ -53,13 +53,13 @@ SF2Engine::getParameterTree() const noexcept
 }
 
 std::string
-SF2Engine::activePresetName() const noexcept
+SF2Engine::activePresetName() const
 {
   return impl_->activePresetName();
 }
 
 std::vector<uint8_t>
-SF2Engine::createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex) noexcept
+SF2Engine::createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex)
 //                                          SF2::MIDI::GeneratorOverrideVector overrides) noexcept
 {
   SF2::MIDI::GeneratorOverrideVector overrides;
@@ -67,17 +67,17 @@ SF2Engine::createLoadFileUsePresetPayload(std::string filePath, size_t presetInd
 }
 
 SF2::IO::File::LoadResponse
-SF2Engine::loadFileAndPreset(std::string path, size_t presetIndex) noexcept {
+SF2Engine::loadFileAndPreset(std::string path, size_t presetIndex) {
   return impl_->loadFileAndPreset(path, presetIndex);
 }
 
 SF2::IO::File::LoadResponse
-SF2Engine::loadFileAndPreset(int fd, size_t presetIndex) noexcept {
+SF2Engine::loadFileAndPreset(int fd, size_t presetIndex) {
   return impl_->loadFileAndPreset(fd, presetIndex);
 }
 
 std::vector<uint8_t>
-SF2Engine::createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetIndex) noexcept
+SF2Engine::createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetIndex)
 //                                          SF2::MIDI::GeneratorOverrideVector overrides) noexcept
 {
   SF2::MIDI::GeneratorOverrideVector overrides;
@@ -85,7 +85,7 @@ SF2Engine::createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetInd
 }
 
 SF2::IO::File::LoadResponse
-SF2Engine::loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) noexcept {
+SF2Engine::loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) {
   return impl_->loadBookmarkAndPreset(bookmark, presetIndex);
 }
 

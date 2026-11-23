@@ -7,7 +7,7 @@
 using namespace SF2::Entity;
 
 void
-Version::dump(const std::string& indent) const noexcept
+Version::dump(const std::string& indent) const
 {
   std::cout << indent << "major: " << wMajor << " minor: " << wMinor << std::endl;
 }

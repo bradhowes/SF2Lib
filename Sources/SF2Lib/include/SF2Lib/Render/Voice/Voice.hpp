@@ -45,7 +45,7 @@ public:
   /**
    Construct a new voice renderer.
    */
-  Voice() noexcept = default;
+  Voice() = default;
 
   /**
    Initialize a voice renderer.
@@ -91,7 +91,7 @@ public:
   /**
    Stop the voice. After this, it will just produce 0.0 if asked to render a sample.
    */
-  inline void stop() noexcept {
+  void stop() noexcept {
     active_ = false;
   }
 
@@ -146,7 +146,7 @@ public:
   LoopingMode loopingMode() const noexcept;
 
   /// @returns true if the voice can enter a loop if it is available
-  inline bool canLoop() const noexcept {
+  bool canLoop() const noexcept {
     return ((loopingMode_ == LoopingMode::activeEnvelope && volumeEnvelope_.isActive()) ||
             (loopingMode_ == LoopingMode::duringKeyPress && !released_));
   }
@@ -173,7 +173,7 @@ public:
 
    @returns next sample
    */
-  inline Float renderSample() noexcept {
+  Float renderSample() noexcept {
     if (! active_) { return 0_F; }
 
     // Capture the current state of the modulators and envelopes and advance them to the next sample.

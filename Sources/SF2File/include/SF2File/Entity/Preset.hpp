@@ -33,7 +33,7 @@ public:
   char const* cname() const noexcept { return achPresetName; }
 
   /// @returns name of the preset
-  std::string name() const noexcept { return achPresetName; }
+  std::string name() const { return achPresetName; }
 
   /// @returns program number for the preset
   uint16_t program() const noexcept { return wPreset; }
@@ -57,7 +57,7 @@ public:
   size_t zoneCount() const noexcept { return (this + 1)->firstZoneIndex() - firstZoneIndex(); }
 
   /// Write out description of the preset to std::cout
-  void dump(const std::string& indent, size_t index) const noexcept;
+  void dump(const std::string& indent, size_t index) const;
 
   /// @returns true if first argument is ordered lower than the second
   friend bool operator<(const Preset& lhs, const Preset& rhs) noexcept {

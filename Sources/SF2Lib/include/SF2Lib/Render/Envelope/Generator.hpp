@@ -46,7 +46,7 @@ enum struct StageIndex : size_t {
  @param value normalized volume envelope value in [0.0, 1.0]
  @returns attenuation in centibels in [0, NoiseFloorCentiBels]
  */
-inline constexpr Float volumeEnvelopeToCentibels(Float value) noexcept {
+constexpr Float volumeEnvelopeToCentibels(Float value) noexcept {
   return SF2::DSP::NoiseFloorCentiBels * (1_F - std::clamp<Float>(value, 0_F, 1_F));
 }
 
@@ -57,7 +57,7 @@ inline constexpr Float volumeEnvelopeToCentibels(Float value) noexcept {
  @param centibels attenuation in centibels
  @returns normalized volume envelope value in [0.0, 1.0]
  */
-inline constexpr Float centibelsToVolumeEnvelope(Float centibels) noexcept {
+constexpr Float centibelsToVolumeEnvelope(Float centibels) noexcept {
   return 1_F - std::clamp<Float>(centibels, 0_F, SF2::DSP::NoiseFloorCentiBels) / SF2::DSP::NoiseFloorCentiBels;
 }
 
@@ -158,25 +158,25 @@ public:
   StageIndex activeIndex() const { return stageIndex_; }
 
   /// @returns true if the generator still has values to emit
-  inline bool isActive() const noexcept { return stageIndex_ != StageIndex::idle; }
+  bool isActive() const noexcept { return stageIndex_ != StageIndex::idle; }
 
   /// @returns true if the generator is active and has not yet reached the release state
-  inline bool isGated() const noexcept { return isActive() && stageIndex_ != StageIndex::release; }
+  bool isGated() const noexcept { return isActive() && stageIndex_ != StageIndex::release; }
 
   /// @returns true if in the delayed stage
-  inline bool isDelayed() const noexcept { return stageIndex_ == StageIndex::delay; }
+  bool isDelayed() const noexcept { return stageIndex_ == StageIndex::delay; }
 
   /// @returns true if in the attack stage
-  inline bool isAttack() const noexcept { return stageIndex_ == StageIndex::attack; }
+  bool isAttack() const noexcept { return stageIndex_ == StageIndex::attack; }
 
   /// @returns true if in the release stage
-  inline bool isRelease() const noexcept { return stageIndex_ == StageIndex::release; }
+  bool isRelease() const noexcept { return stageIndex_ == StageIndex::release; }
 
   /// @returns number of samples remaining in the current state
-  inline int counter() const noexcept { return counter_; }
+  int counter() const noexcept { return counter_; }
 
   /// @returns stage at given index
-  inline const Stage& stage(StageIndex index) const noexcept { return stages_[index]; }
+  const Stage& stage(StageIndex index) const noexcept { return stages_[index]; }
 
 protected:
   /**
@@ -193,7 +193,7 @@ protected:
   Float sustainLevel() const noexcept { return sustainLevel_; }
 
   /// @returns the current envelope value.
-  inline Float value() const noexcept { return value_; }
+  Float value() const noexcept { return value_; }
 
   /**
    Calculate the next envelope value. This must be called on every sample for proper timing of the stages.
@@ -201,7 +201,7 @@ protected:
 
    @returns the new envelope value.
    */
-  inline Float getNextValue() noexcept {
+  Float getNextValue() noexcept {
     if (!checkForNextStage()) return 0_F;
     if (convexAttack_ && stageIndex_ == StageIndex::attack) {
       // The stage ramps the attack *progress* linearly; the envelope value follows the convex curve. Because `value_`
@@ -232,7 +232,7 @@ private:
 
    @param next the stage to enter
    */
-  inline void enterStage(StageIndex next) noexcept {
+  void enterStage(StageIndex next) noexcept {
     stageIndex_ = next;
     if (next != StageIndex::idle) {
       counter_ = stages_[stageIndex_].durationInSamples();
@@ -244,7 +244,7 @@ private:
 
    @returns true if the envelope is still active
    */
-  inline bool checkForNextStage() noexcept {
+  bool checkForNextStage() noexcept {
     while (counter_ == 0) {
       switch (stageIndex_) {
         case StageIndex::delay:     enterStage(StageIndex::attack); continue;

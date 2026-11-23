@@ -69,7 +69,7 @@ public:
    @param canLoop true if the generator is permitted to loop for more samples
    @returns new sample value
    */
-  inline Float generate(Float increment, bool canLoop) noexcept
+  Float generate(Float increment, bool canLoop) noexcept
   {
     if (index_.finished()) { return 0_F; }
     // Only loop if the sample bounds define a usable loop. Otherwise `before()` could wrap to `endLoopPos - 1` when the
@@ -93,7 +93,7 @@ public:
 private:
   using InterpolatorProc = Float (Generator::*)(size_t, Float, bool, bool) const;
 
-  inline static InterpolatorProc interpolator(Interpolator kind) noexcept {
+  static InterpolatorProc interpolator(Interpolator kind) noexcept {
     return kind == Interpolator::linear ? &Generator::linearInterpolate : &Generator::cubic4thOrderInterpolate;
   }
 
@@ -106,7 +106,7 @@ private:
    @param hasLooped true if playback has already wrapped around the loop (unused: linear does not look backwards)
    @returns interpolated sample result
    */
-  inline Float linearInterpolate(size_t whole, Float partial, bool canLoop, bool) const noexcept {
+  Float linearInterpolate(size_t whole, Float partial, bool canLoop, bool) const noexcept {
     return Float(DSPHeaders::DSP::Interpolation::linear(partial, sample(whole, canLoop), sample(whole + 1, canLoop)));
   }
 
@@ -119,7 +119,7 @@ private:
    @param hasLooped true if playback has already wrapped around the loop
    @returns interpolated sample result
    */
-  inline Float cubic4thOrderInterpolate(size_t whole, Float partial, bool canLoop, bool hasLooped) const noexcept {
+  Float cubic4thOrderInterpolate(size_t whole, Float partial, bool canLoop, bool hasLooped) const noexcept {
     return Float(DSPHeaders::DSP::Interpolation::cubic4thOrder(partial, before(whole, canLoop, hasLooped),
                                                                sample(whole, canLoop), sample(whole + 1, canLoop),
                                                                sample(whole + 2, canLoop)));

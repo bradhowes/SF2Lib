@@ -48,19 +48,19 @@ public:
                        const ModulatorCollection& mods) noexcept;
 
   /// @returns range of MID key values that this Zone handles
-  inline const MIDIRange& keyRange() const noexcept { return keyRange_; }
+  const MIDIRange& keyRange() const noexcept { return keyRange_; }
 
   /// @returns range of MIDI velocity values that this Zone handles
-  inline const MIDIRange& velocityRange() const noexcept { return velocityRange_; }
+  const MIDIRange& velocityRange() const noexcept { return velocityRange_; }
 
   /// @returns collection of generators defined for this zone
-  inline const GeneratorCollection& generators() const noexcept { return generators_; }
+  const GeneratorCollection& generators() const noexcept { return generators_; }
 
   /// @returns collection of modulators defined for this zone
-  inline const ModulatorCollection& modulators() const noexcept { return modulators_; }
+  const ModulatorCollection& modulators() const noexcept { return modulators_; }
 
   /// @returns true if this is a global zone
-  inline bool isGlobal() const noexcept { return isGlobal_; }
+  bool isGlobal() const noexcept { return isGlobal_; }
 
   /**
    Determines if this zone applies to a given MIDI key/velocity pair. NOTE: this should not be called for a global
@@ -70,7 +70,7 @@ public:
    @param velocity MIDI velocity value
    @returns true if so
    */
-  inline bool appliesTo(int key, int velocity) const noexcept {
+  bool appliesTo(int key, int velocity) const noexcept {
     return keyRange_.contains(key) && velocityRange_.contains(velocity);
   }
 

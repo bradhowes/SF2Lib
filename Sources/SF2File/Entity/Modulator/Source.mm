@@ -9,7 +9,7 @@
 using namespace SF2::Entity::Modulator;
 
 std::string
-Source::description() const noexcept {
+Source::description() const {
   std::ostringstream os;
   if (isGeneralController()) {
     switch (generalIndex()) {
@@ -35,7 +35,7 @@ Source::description() const noexcept {
 namespace SF2::Entity::Modulator {
 
 std::ostream&
-operator<<(std::ostream& os, const Source& mod) noexcept
+operator<<(std::ostream& os, const Source& mod)
 {
   return os << mod.description();
 }

@@ -16,10 +16,10 @@ SF2FileInfo::load()
   return impl_->load(fd.get()) == SF2::IO::File::LoadResponse::ok;
 }
 
-std::string SF2FileInfo::embeddedName() const noexcept { return impl_->embeddedName(); }
-std::string SF2FileInfo::embeddedAuthor() const noexcept { return impl_->embeddedAuthor(); }
-std::string SF2FileInfo::embeddedComment() const noexcept { return impl_->embeddedComment(); }
-std::string SF2FileInfo::embeddedCopyright() const noexcept { return impl_->embeddedCopyright(); }
+std::string SF2FileInfo::embeddedName() const { return impl_->embeddedName(); }
+std::string SF2FileInfo::embeddedAuthor() const { return impl_->embeddedAuthor(); }
+std::string SF2FileInfo::embeddedComment() const { return impl_->embeddedComment(); }
+std::string SF2FileInfo::embeddedCopyright() const { return impl_->embeddedCopyright(); }
 
 size_t
 SF2FileInfo::size() const noexcept {

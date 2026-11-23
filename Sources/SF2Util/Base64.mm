@@ -12,14 +12,14 @@ constexpr int decoder[256] = {
 };
 
 std::string
-Base64::decode(const unsigned char* ptr, size_t size) noexcept
+Base64::decode(const unsigned char* ptr, size_t size)
 {
   std::string source{reinterpret_cast<const char*>(ptr), size};
   return decode(source);
 }
 
 std::string
-Base64::decode(const std::string& input) noexcept
+Base64::decode(const std::string& input)
 {
   auto in = input.data();
   auto inputSize = input.size();
@@ -52,7 +52,7 @@ Base64::decode(const std::string& input) noexcept
 constexpr char encoder[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 std::string
-Base64::encode(const std::string& input) noexcept
+Base64::encode(const std::string& input)
 {
   auto inputSize = input.size();
   auto outputSize = 4 * ((inputSize + 2) / 3);

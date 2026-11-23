@@ -63,7 +63,7 @@ public:
    @param controllerValue value to convert between 0 and 127
    @returns transformed value
    */
-  inline Float operator()(int controllerValue) const noexcept {
+  Float operator()(int controllerValue) const noexcept {
     return DSPHeaders::checkedVectorIndexing(active_, std::clamp(controllerValue, 0, int(active_.size() - 1)));
   }
 

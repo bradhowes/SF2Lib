@@ -58,7 +58,7 @@ Engine::hasActivePreset() const noexcept
 }
 
 std::string
-Engine::activePresetName() const noexcept
+Engine::activePresetName() const
 {
   auto ptr = presetsState();
   return ptr && ptr->hasActivePreset() ? ptr->activePreset().configuration().name() : "";
@@ -87,7 +87,7 @@ Engine::activePresetIndex() const noexcept
   return ptr ? int(ptr->activePresetIndex()) : -1;
 }
 
-Engine::~Engine() noexcept
+Engine::~Engine()
 {
   // Let queued loads finish: they use this instance.
   dispatch_sync(workQueue_, ^{ });
@@ -139,7 +139,7 @@ Engine::finishPresetChange_WQ() noexcept
 }
 
 void
-Engine::installPresetsState_WQ(PresetsState* state) noexcept
+Engine::installPresetsState_WQ(PresetsState* state)
 {
   auto old = presetsState_.exchange(state, std::memory_order_acq_rel);
   std::lock_guard<std::mutex> lock(retiredMutex_);
@@ -582,7 +582,7 @@ Engine::processSysExRequest_WQ(void* context) noexcept {
 }
 
 void
-Engine::processSysExRequest_WQ(const uint8_t* bytes, size_t length) noexcept {
+Engine::processSysExRequest_WQ(const uint8_t* bytes, size_t length) {
   // `queueSysExRequest_RT` checked the length range, and `doMIDIEvent` the manufacturer and the trailing EOX.
   LoadPresetSysExPayload payload;
   std::memcpy(&payload, bytes, sizeof(payload));
@@ -625,19 +625,19 @@ Engine::processSysExRequest_WQ(const uint8_t* bytes, size_t length) noexcept {
 }
 
 SF2::IO::File::LoadResponse
-Engine::loadFileAndPreset(std::string path, size_t presetIndex) noexcept {
+Engine::loadFileAndPreset(std::string path, size_t presetIndex) {
   ++presetChangesPending_;
   return beginLoadFileAndPreset_WQ(path, presetIndex);
 }
 
 SF2::IO::File::LoadResponse
-Engine::loadFileAndPreset(int fd, size_t presetIndex) noexcept {
+Engine::loadFileAndPreset(int fd, size_t presetIndex) {
   ++presetChangesPending_;
   return concludeLoad_WQ(fd, presetIndex);
 }
 
 SF2::IO::File::LoadResponse
-Engine::beginLoadFileAndPreset_WQ(std::string path, size_t presetIndex) noexcept {
+Engine::beginLoadFileAndPreset_WQ(std::string path, size_t presetIndex) {
   os_log_debug(log_, "beginLoadFileAndPreset_WQ BEGIN");
   if (!path.empty()) {
     return concludeLoad_WQ(path, presetIndex);
@@ -650,7 +650,7 @@ Engine::beginLoadFileAndPreset_WQ(std::string path, size_t presetIndex) noexcept
 }
 
 SF2::IO::File::LoadResponse
-Engine::concludeLoad_WQ(const std::string& path, size_t index) noexcept
+Engine::concludeLoad_WQ(const std::string& path, size_t index)
 {
   os_log_debug(log_, "concludeLoad_WQ - path: '%{public}s' index: %lu", path.c_str(), index);
   assert(presetChangesPending_.load() > 0);
@@ -667,13 +667,13 @@ Engine::concludeLoad_WQ(const std::string& path, size_t index) noexcept
 }
 
 SF2::IO::File::LoadResponse
-Engine::loadBookmarkAndPreset(NSData *bookmark, size_t presetIndex) noexcept {
+Engine::loadBookmarkAndPreset(NSData *bookmark, size_t presetIndex) {
   ++presetChangesPending_;
   return beginLoadBookmarkAndPreset_WQ(bookmark, presetIndex);
 }
 
 SF2::IO::File::LoadResponse
-Engine::beginLoadBookmarkAndPreset_WQ(NSData* bookmark, size_t presetIndex) noexcept {
+Engine::beginLoadBookmarkAndPreset_WQ(NSData* bookmark, size_t presetIndex) {
   os_log_debug(log_, "loadBookmarkAndPreset BEGIN");
 
   NSError* error = nil;
@@ -736,7 +736,7 @@ Engine::beginLoadBookmarkAndPreset_WQ(NSData* bookmark, size_t presetIndex) noex
 }
 
 SF2::IO::File::LoadResponse
-Engine::concludeLoad_WQ(int fd, size_t index) noexcept
+Engine::concludeLoad_WQ(int fd, size_t index)
 {
   os_log_debug(log_, "concludeLoad - fd: %d index: %lu", fd, index);
   assert(presetChangesPending_.load() > 0);
@@ -753,14 +753,14 @@ Engine::concludeLoad_WQ(int fd, size_t index) noexcept
 
 std::vector<uint8_t>
 Engine::createLoadFileUsePresetPayload(const std::string& filePath, size_t presetIndex,
-                                       const MIDI::GeneratorOverrideVector& overrides) noexcept
+                                       const MIDI::GeneratorOverrideVector& overrides)
 {
   return LoadPresetSysExPayload::make(overrides, filePath, presetIndex);
 }
 
 std::vector<uint8_t>
 Engine::createLoadBookmarkUsePresetPayload(const NSData* bookmark, size_t presetIndex,
-                                           const std::vector<SF2::MIDI::GeneratorOverride>& overrides) noexcept
+                                           const std::vector<SF2::MIDI::GeneratorOverride>& overrides)
 {
   return LoadPresetSysExPayload::make(overrides, bookmark, presetIndex);
 }

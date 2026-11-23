@@ -12,7 +12,7 @@ struct SWIFT_ESCAPABLE SF2PresetInfo {
 
   SF2PresetInfo(const SF2::Entity::Preset& preset);
 
-  std::string name() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE { return name_; }
+  std::string name() const SWIFT_RETURNS_INDEPENDENT_VALUE { return name_; }
 
   int bank() const noexcept { return bank_; }
 

@@ -227,7 +227,7 @@ ChannelState::setContinuousControllerValue(MIDI::ControlChange cc, uint8_t value
 }
 
 void
-ChannelState::dump() const noexcept
+ChannelState::dump() const
 {
   for (size_t index = 0; index < 128; ++index) {
     std::cout << "CC " << index << " = " << continuousControllerValues_[index] << '\n';

@@ -15,8 +15,8 @@ namespace SF2::IO {
  */
 class NormalizedSampleSource {
 public:
-  inline static constexpr Float normalizationScale = 1.0_F / Float(1 << 15);
-  inline static constexpr size_t sizePaddingAfterEnd = 46; // SF2 spec 7.10
+  static constexpr Float normalizationScale = 1.0_F / Float(1 << 15);
+  static constexpr size_t sizePaddingAfterEnd = 46; // SF2 spec 7.10
 
   /**
    Construct a span of normalized samples defined by a SampleHeader entity.
@@ -33,7 +33,7 @@ public:
   {}
 
   /// @returns number of samples in the canonical representation
-  inline size_t size() const noexcept { return span_.size(); }
+  size_t size() const noexcept { return span_.size(); }
 
   /**
    Obtain the sample at the given index. Note that due to how the span of samples is defined, the indexing is zero-based and is
@@ -42,10 +42,10 @@ public:
    @param index the index to use
    @returns sample at the index
    */
-  inline Float operator[](size_t index) const noexcept { return span_[index]; }
+  Float operator[](size_t index) const noexcept { return span_[index]; }
 
   /// @returns the sample header ('shdr') of the sample stream being rendered
-  inline const Entity::SampleHeader& header() const noexcept { return header_; }
+  const Entity::SampleHeader& header() const noexcept { return header_; }
 
 private:
   const Entity::SampleHeader& header_;

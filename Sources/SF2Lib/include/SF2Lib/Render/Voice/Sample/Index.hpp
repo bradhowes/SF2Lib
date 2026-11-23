@@ -39,10 +39,10 @@ public:
   void stop() noexcept { whole_ = bounds_.endPos(); }
 
   /// @returns true if the index has been stopped.
-  inline bool finished() const noexcept { return whole_ >= bounds_.endPos(); }
+  bool finished() const noexcept { return whole_ >= bounds_.endPos(); }
 
   /// @returns true if the index has looped.
-  inline bool looped() const noexcept { return looped_; }
+  bool looped() const noexcept { return looped_; }
 
   /**
    Increment the index to the next location. Properly handles looping and buffer end.
@@ -50,7 +50,7 @@ public:
    @param increment the increment to apply to the internal index
    @param canLoop true if looping is allowed
    */
-  inline void increment(Float increment, bool canLoop) noexcept {
+  void increment(Float increment, bool canLoop) noexcept {
     if (finished()) return;
 
     auto wholeIncrement{size_t(increment)};
@@ -78,10 +78,10 @@ public:
   }
 
   /// @returns index to first sample to use for rendering
-  inline size_t whole() const noexcept { return whole_; }
+  size_t whole() const noexcept { return whole_; }
 
   /// @returns normalized position between 2 samples. For instance, 0.5 indicates half-way between two samples.
-  inline Float partial() const noexcept { return partial_; }
+  Float partial() const noexcept { return partial_; }
 
 private:
   size_t whole_{0};

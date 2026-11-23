@@ -28,7 +28,7 @@ namespace SF2::IO {
  */
 class File {
 public:
-  File() noexcept = default;
+  File() = default;
 
   /**
    Constructor.
@@ -37,7 +37,7 @@ public:
 
    @param path the file to open and load
    */
-  File(const char* path) noexcept;
+  File(const char* path);
 
   /**
    Constructor.
@@ -46,14 +46,14 @@ public:
 
    @param path the file to open and load
    */
-  File(std::string path) noexcept;
+  File(std::string path);
 
   File(const File&) = delete;
 
   File(File&& rhs) noexcept = default;
 
   /// Closes the file if it was loaded successfully.
-  ~File() noexcept = default;
+  ~File() = default;
 
   enum class LoadResponse: int {
     ok = 0,
@@ -83,57 +83,57 @@ public:
   LoadResponse load(int fd) noexcept;
 
   /// @returns true if the file has been loaded successfully.
-  inline bool loaded() const noexcept { return loaded_; }
+  bool loaded() const noexcept { return loaded_; }
 
   /// @returns the embedded name in the file
-  inline const std::string& embeddedName() const noexcept { return embeddedName_; }
+  const std::string& embeddedName() const noexcept { return embeddedName_; }
 
   /// @returns the embedded author name in the file
-  inline const std::string& embeddedAuthor() const noexcept { return embeddedAuthor_; }
+  const std::string& embeddedAuthor() const noexcept { return embeddedAuthor_; }
 
   /// @returns any embedded comment in the file
-  inline const std::string& embeddedComment() const noexcept { return embeddedComment_; }
+  const std::string& embeddedComment() const noexcept { return embeddedComment_; }
 
   /// @returns any embedded copyright notice in the file
-  inline const std::string& embeddedCopyright() const noexcept { return embeddedCopyright_; }
+  const std::string& embeddedCopyright() const noexcept { return embeddedCopyright_; }
 
   /// @returns reference to preset definitions found in the file
-  inline const ChunkItems<Entity::Preset>& presets() const noexcept { return presets_; };
+  const ChunkItems<Entity::Preset>& presets() const noexcept { return presets_; };
 
   /// @returns reference to preset zone definitions
-  inline const ChunkItems<Entity::Bag>& presetZones() const noexcept { return presetZones_; };
+  const ChunkItems<Entity::Bag>& presetZones() const noexcept { return presetZones_; };
 
   /// @returns reference to preset zone generator definitions
-  inline const ChunkItems<Entity::Generator::Generator>& presetZoneGenerators() const noexcept {
+  const ChunkItems<Entity::Generator::Generator>& presetZoneGenerators() const noexcept {
     return presetZoneGenerators_;
   };
 
   /// @returns reference to preset zone modulator definitions
-  inline const ChunkItems<Entity::Modulator::Modulator>& presetZoneModulators() const noexcept {
+  const ChunkItems<Entity::Modulator::Modulator>& presetZoneModulators() const noexcept {
     return presetZoneModulators_;
   };
 
   /// @returns reference to instrument definitions found in the file
-  inline const ChunkItems<Entity::Instrument>& instruments() const noexcept { return instruments_; };
+  const ChunkItems<Entity::Instrument>& instruments() const noexcept { return instruments_; };
 
   /// @returns reference to instrument zone definitions
-  inline const ChunkItems<Entity::Bag>& instrumentZones() const noexcept { return instrumentZones_; };
+  const ChunkItems<Entity::Bag>& instrumentZones() const noexcept { return instrumentZones_; };
 
   /// @returns reference to instrument zone generator definitions
-  inline const ChunkItems<Entity::Generator::Generator>& instrumentZoneGenerators() const noexcept {
+  const ChunkItems<Entity::Generator::Generator>& instrumentZoneGenerators() const noexcept {
     return instrumentZoneGenerators_;
   };
 
   /// @returns reference to instrument zone modulator definitions
-  inline const ChunkItems<Entity::Modulator::Modulator>& instrumentZoneModulators() const noexcept {
+  const ChunkItems<Entity::Modulator::Modulator>& instrumentZoneModulators() const noexcept {
     return instrumentZoneModulators_;
   };
 
   /// @returns reference to samples definitions
-  inline const ChunkItems<Entity::SampleHeader>& sampleHeaders() const noexcept { return sampleHeaders_; };
+  const ChunkItems<Entity::SampleHeader>& sampleHeaders() const noexcept { return sampleHeaders_; };
 
   /// @returns reference to collection of preset indices that order the Preset entities by bank and program.
-  inline const std::vector<size_t>& presetIndicesOrderedByBankProgram() const noexcept {
+  const std::vector<size_t>& presetIndicesOrderedByBankProgram() const noexcept {
     return presetIndicesOrderedByBankProgram_;
   }
 
@@ -143,7 +143,7 @@ public:
 
   void dumpThreaded() const noexcept;
 
-  void dump() const noexcept;
+  void dump() const;
 
 private:
   /**

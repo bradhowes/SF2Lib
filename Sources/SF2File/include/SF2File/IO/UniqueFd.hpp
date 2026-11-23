@@ -16,7 +16,7 @@ namespace SF2::IO {
 class UniqueFd {
 public:
   /// Construct an instance that owns nothing.
-  UniqueFd() noexcept = default;
+  UniqueFd() = default;
 
   /**
    Take ownership of a file descriptor.
@@ -52,7 +52,7 @@ public:
     return *this;
   }
 
-  ~UniqueFd() noexcept { reset(); }
+  ~UniqueFd() { reset(); }
 
   /// @returns the owned descriptor, or -1 if there is none. Ownership is not transferred.
   int get() const noexcept { return fd_; }

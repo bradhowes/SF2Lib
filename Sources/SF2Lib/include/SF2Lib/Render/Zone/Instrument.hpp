@@ -30,7 +30,7 @@ public:
 
   /// @returns the original 'shrd' entity for this instrument zone as found in the SF2 file if this is not a
   /// global zone. Otherwise, returns `nullptr`
-  inline const Entity::SampleHeader* sampleHeader() const noexcept { return sampleHeader_; }
+  const Entity::SampleHeader* sampleHeader() const noexcept { return sampleHeader_; }
 
   /// @returns the sample buffer registered to this zone, or nullptr if there is none (a global zone, or samples not
   /// loaded). Does not throw: it is reached from the render thread through `Config::samples()`.

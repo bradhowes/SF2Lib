@@ -40,7 +40,7 @@ public:
    @param key the key (note) to set
    @param value the pressure value to record
    */
-  inline void setNotePressure(int key, uint8_t value) noexcept {
+  void setNotePressure(int key, uint8_t value) noexcept {
     DSPHeaders::checkedVectorIndexing(notePressureValues_, key) = value;
   }
 
@@ -50,17 +50,17 @@ public:
    @param key the key to get
    @returns the current pressure value for a key
    */
-  inline uint8_t notePressure(int key) const noexcept { return DSPHeaders::checkedVectorIndexing(notePressureValues_, key); }
+  uint8_t notePressure(int key) const noexcept { return DSPHeaders::checkedVectorIndexing(notePressureValues_, key); }
 
   /**
    Set the channel pressure.
 
    @param value the pressure value to record
    */
-  inline void setChannelPressure(uint8_t value) noexcept { channelPressure_ = value; }
+  void setChannelPressure(uint8_t value) noexcept { channelPressure_ = value; }
 
   /// @returns the current channel pressure
-  inline uint8_t channelPressure() const noexcept { return channelPressure_; }
+  uint8_t channelPressure() const noexcept { return channelPressure_; }
 
   /**
    Set the pitch wheel value. For MIDI v1 this is a 14-bit value [0-16383] and at rest, it should report out a value
@@ -68,12 +68,12 @@ public:
 
    @param value the pitch wheel value
    */
-  inline void setPitchWheelValue(int value) noexcept {
+  void setPitchWheelValue(int value) noexcept {
     pitchWheelValue_ = std::clamp(value, 0, maxPitchWheelValue);
   }
 
   /// @returns the current pitch wheel value
-  inline int pitchWheelValue() const noexcept { return pitchWheelValue_; }
+  int pitchWheelValue() const noexcept { return pitchWheelValue_; }
 
   /**
    Set the pitch wheel sensitivity in semitones. The default is 2, a 2-semitone bend in either direction. This is the
@@ -82,7 +82,7 @@ public:
 
    @param value the sensitivity in semitones (0-127)
    */
-  inline void setPitchWheelSensitivity(int value) noexcept { pitchWheelSensitivity_ = value; }
+  void setPitchWheelSensitivity(int value) noexcept { pitchWheelSensitivity_ = value; }
 
   /**
    Respond to MIDI Reset All Controllers (CC 121) as described by MIDI RP-015: modulation, expression, the pedals
@@ -93,7 +93,7 @@ public:
   void resetControllers() noexcept;
 
   /// @returns the current pitch wheel sensitivity value
-  inline int pitchWheelSensitivity() const noexcept { return pitchWheelSensitivity_; }
+  int pitchWheelSensitivity() const noexcept { return pitchWheelSensitivity_; }
 
   /**
    Set the continuous controller value.
@@ -109,7 +109,7 @@ public:
    @param cc the controller ID to get
    @returns the controller value
    */
-  inline uint8_t continuousControllerValue(MIDI::ControlChange cc) const noexcept {
+  uint8_t continuousControllerValue(MIDI::ControlChange cc) const noexcept {
     return continuousControllerValues_[cc];
   }
 
@@ -119,13 +119,13 @@ public:
    @param index the generator ID to fetch
    @returns the NRPN value for the generator
    */
-  inline int nrpnValue(Entity::Generator::Index index) const noexcept { return nrpnValues_[index]; }
+  int nrpnValue(Entity::Generator::Index index) const noexcept { return nrpnValues_[index]; }
 
   /// @returns true if currently decoding a generator index
-  inline bool isActivelyDecoding() const noexcept { return activeDecoding_; }
+  bool isActivelyDecoding() const noexcept { return activeDecoding_; }
 
   /// @returns the currently decoded generator index
-  inline size_t nrpnIndex() const noexcept { return nrpnIndex_; }
+  size_t nrpnIndex() const noexcept { return nrpnIndex_; }
 
   /**
    State of control pedals -- those that have ON/OFF values.
@@ -137,9 +137,9 @@ public:
   };
 
   /// @returns current state of control pedals.
-  inline PedalState pedalState() const noexcept { return pedalState_; }
+  PedalState pedalState() const noexcept { return pedalState_; }
 
-  void dump() const noexcept;
+  void dump() const;
 
 private:
   using ContinuousControllerValues = DSPHeaders::EnumIndexableValueArray<uint8_t, ControlChange, 128>;
