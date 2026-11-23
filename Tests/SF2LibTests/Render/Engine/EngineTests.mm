@@ -250,7 +250,6 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testRolandPianoChordRenderLinear {
-  self.playAudio = true;
   auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
@@ -545,7 +544,6 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineMIDINoteRandomNoteOff
 {
-  self.playAudio = true;
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
@@ -1711,8 +1709,6 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineActiveVoiceCount
 {
-  self.playAudio = true;
-
   auto harness{TestEngineHarness{48000.0}};
   auto& engine{harness.engine()};
   auto address = valueOf(ParameterAddress::activeVoiceCount);
