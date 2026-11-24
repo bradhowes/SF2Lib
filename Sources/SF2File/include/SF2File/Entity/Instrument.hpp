@@ -29,9 +29,18 @@ public:
   /// @returns the index of the first Zone of the instrument
   size_t firstZoneIndex() const noexcept { return wInstBagNdx; }
 
-  /// @returns the number of instrument zones
-  size_t zoneCount() const noexcept {
-    return (this + 1)->firstZoneIndex() - firstZoneIndex();
+  /// @returns the number of instrument zones. Set by `ChunkItems` when the INST chunk is loaded (0 for the terminal
+  /// record).
+  size_t zoneCount() const noexcept { return zoneCount_; }
+
+  /**
+   Record the number of zones from the following INST record. SF2.01 7.6: the zones of an instrument run up to the next
+   instrument's `wInstBagNdx`. A decreasing index gives 0 (`File` rejects such files).
+
+   @param next the INST record that follows this one
+   */
+  void setCountsFrom(const Instrument& next) noexcept {
+    zoneCount_ = next.wInstBagNdx > wInstBagNdx ? uint16_t(next.wInstBagNdx - wInstBagNdx) : 0;
   }
 
   void dump(const std::string& indent, size_t index) const;
@@ -39,6 +48,9 @@ public:
 private:
   char achInstName[20];
   uint16_t wInstBagNdx;
+
+  // Not part of the file record
+  uint16_t zoneCount_{0};
 };
 
 } // end namespace SF2::Entity

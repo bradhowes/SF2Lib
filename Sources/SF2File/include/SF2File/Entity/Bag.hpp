@@ -16,12 +16,11 @@ namespace SF2::Entity {
  Memory layout of a 'ibag/pbag' entry in a sound font resource. Used to access packed values from a
  resource. Per spec, the size of this must be 4. The wGenNdx and wModNdx properties contain the first index
  of the generator/modulator that belongs to one instrument/preset zone. The number of generator or
- modulator settings is found by subtracting the index value of this instance from the index value of the
- subsequent instance. This is guaranteed to be safe in a well-formed SF2 file, as all collections that
- operate in this way have a terminating instance whose index value is the total number of generators or
- modulators in the preset or instrument zones.
+ modulator settings is the difference between this record's index and the next record's (SF2.01 7.3, 7.7). Every
+ list ends with a terminal record whose indices are the total number of generators and modulators.
 
- NOTE: because of this counting logic, it is unsafe to operate on a `Bag` instance outside of its container.
+ The counts are computed once by `ChunkItems` when the chunk is loaded (see `setCountsFrom`), so a copy of a `Bag`
+ outside its container is self-contained. The terminal record's counts are 0.
  */
 class Bag {
 public:
@@ -38,16 +37,23 @@ public:
   size_t firstGeneratorIndex() const noexcept { return wGenNdx; }
 
   /// @returns number of generators in this collection
-  size_t generatorCount() const noexcept {
-    return (this + 1)->firstGeneratorIndex() - firstGeneratorIndex();
-  }
+  size_t generatorCount() const noexcept { return generatorCount_; }
 
   /// @returns first modulator index in this collection
   size_t firstModulatorIndex() const noexcept { return wModNdx; }
 
   /// @returns number of modulators in this collection
-  size_t modulatorCount() const noexcept {
-    return (this + 1)->firstModulatorIndex() - firstModulatorIndex();
+  size_t modulatorCount() const noexcept { return modulatorCount_; }
+
+  /**
+   Record the generator and modulator counts from the following bag record. A decreasing index gives 0 (`File`
+   rejects such files).
+
+   @param next the bag record that follows this one
+   */
+  void setCountsFrom(const Bag& next) noexcept {
+    generatorCount_ = next.wGenNdx > wGenNdx ? uint16_t(next.wGenNdx - wGenNdx) : 0;
+    modulatorCount_ = next.wModNdx > wModNdx ? uint16_t(next.wModNdx - wModNdx) : 0;
   }
 
   /**
@@ -61,6 +67,10 @@ public:
 private:
   uint16_t wGenNdx;
   uint16_t wModNdx;
+
+  // Not part of the file record
+  uint16_t generatorCount_{0};
+  uint16_t modulatorCount_{0};
 };
 
 } // end namespace SF2::Entity

@@ -10,7 +10,8 @@ using namespace SF2::Entity;
 
 Instrument::Instrument(IO::Pos& pos)
 {
-  pos = pos.readInto(*this);
+  // Read only the 22-byte file record: the zone count that follows it is not in the file.
+  pos = pos.readInto(*this, entity_size);
   SF2::Utils::trim_property(achInstName);
 }
 

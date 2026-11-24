@@ -128,6 +128,12 @@ private:
     Pos pos = source.begin();
     Pos end = pos.advance(off_t(count * itemSize));
     while (pos < end) items_.emplace_back(pos);
+
+    // Entities whose counts come from the following record (PHDR, INST, PBAG/IBAG) store them now, so that an entity
+    // never has to look at its neighbour in memory. The terminal record keeps counts of 0.
+    if constexpr (requires (T& item, const T& next) { item.setCountsFrom(next); }) {
+      for (size_t index = 0; index + 1 < items_.size(); ++index) items_[index].setCountsFrom(items_[index + 1]);
+    }
   }
 
   ItemCollection items_{};

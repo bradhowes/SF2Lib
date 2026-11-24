@@ -10,7 +10,8 @@ using namespace SF2::Entity;
 
 Bag::Bag(IO::Pos& pos)
 {
-  pos = pos.readInto(*this);
+  // Read only the 4-byte file record: the counts that follow it are not in the file.
+  pos = pos.readInto(*this, entity_size);
 }
 
 void

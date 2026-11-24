@@ -198,7 +198,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 
 - ~~`noexcept` is applied mechanically, including on functions that throw or call throwing code. Reserve it for code that really can't fail (move ops, RT render path).~~ Partly addressed (2026-11-24, see §11): removed where it was redundant or wrong. It remains on getters, math helpers, the RT path and moves.
 - Exceptions used as control flow (`throw File::LoadResponse::invalidFormat`, an enum value). Prefer `std::expected<T, LoadResponse>` (C++23 is already enabled).
-- `(this + 1)->firstZoneIndex()` in `Preset`/`Bag`/`Instrument` relies on the entity living inside a vector with a sentinel. That is fragile, and UB for a stand-alone copy. Compute counts in `ChunkItems` instead.
+- ~~`(this + 1)->firstZoneIndex()` in `Preset`/`Bag`/`Instrument` relies on the entity living inside a vector with a sentinel. That is fragile, and UB for a stand-alone copy. Compute counts in `ChunkItems` instead.~~ Fixed 2026-11-24 (see §11): counts are stored when the chunk is loaded.
 - ~~Redundant `inline` on in-class definitions throughout~~ (removed 2026-11-24, see §11); `inline static size_t entity_size` is non-const in `Modulator` (const elsewhere).
 - Advertised but unimplemented: mono mode, portamento, retrigger, minimum note duration, generator overrides, `durationBuckets_`, plus the `ENABLE_LOWPASS_FILTER` / `USE_ACCELERATE` flags. Either implement these or remove them from the AU parameter tree and `Package.swift`.
 - MIDI channel nibble ignored (omni). Fine for an AUv3 instrument, but worth documenting.
@@ -535,3 +535,23 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - `File::load*` and `Preset::loadSamples`, which catch internally;
   - the `std::array` payload builders, getters, math helpers, everything on the render thread, and moves.
 - No behaviour or audio changes; no test changes.
+
+**Follow-up (2026-11-24): §7 neighbour-dependent counts in `Preset` / `Instrument` / `Bag`. Not yet committed. `make test-macOS`: 378 tests, 0 failures.**
+- **Problem:** `zoneCount()`, `generatorCount()` and `modulatorCount()` were computed as `(this + 1)->firstXIndex() - firstXIndex()`. That is only valid inside the `ChunkItems` vector. A stand-alone copy, or the terminal record, read past the object.
+- **Change:**
+  - Each entity stores its counts in `uint16_t` members after the file record. These are `zoneCount_` for `Preset` and `Instrument`, and `generatorCount_` / `modulatorCount_` for `Bag`.
+  - `setCountsFrom(next)` fills them in, clamping to 0 if an index decreases. `File::validateZones` still rejects such files.
+  - `ChunkItems::load` calls `setCountsFrom` once for every record except the terminal, through an `if constexpr` `requires` check. Other entity types are unaffected. The terminal record's counts are 0.
+  - The accessors return the stored values. Callers (`Render::Preset`, `Render::Instrument`, `File::dump`) are unchanged.
+- **Parsing fix that goes with it:** `Bag(Pos&)` and `Instrument(Pos&)` used `pos.readInto(*this)`, which reads `sizeof(*this)` bytes. With the extra members that would read past the record. They now read exactly `entity_size` bytes. `Preset` already read its fields explicitly.
+- **Tests:** a new `EntityCountTests` file, using an `SF2Builder` file with a 2-zone preset (a global zone with 1 modulator, then the instrument zone) and an instrument zone with 2 generators and 2 modulators:
+  - `testCountsInContainer`;
+  - `testTerminalRecordsHaveNoCounts`;
+  - `testCopiesOutsideTheContainerKeepTheirCounts`: each copy sits next to an identical copy, so the old code deterministically gave 0;
+  - `testRecordsAreStillParsedAtTheirFileSize`;
+  - `testMultiZonePresetRendersThroughEngine`: end to end through `TestEngineHarness`, the output must equal the minimal file's.
+- **Checked that the tests catch the bugs,** by putting back each old behaviour on its own:
+  - with `(this + 1)` back, the copy and terminal tests fail; the terminal record returned garbage such as 18446744073709551614 and 119;
+  - reading `sizeof` bytes misparses the records, and the test process aborts;
+  - without the `setCountsFrom` pass, the count tests and most rendering tests fail.
+- No hard-coded rendering values changed. Memory cost is 2 or 4 bytes per preset, instrument or bag record.

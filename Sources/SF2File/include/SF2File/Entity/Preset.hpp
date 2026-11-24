@@ -53,8 +53,18 @@ public:
   /// @returns meta data that classifies the sound (may be empty)
   uint32_t morphology() const noexcept { return dwMorphology; }
 
-  /// @returns the number of preset zones
-  size_t zoneCount() const noexcept { return (this + 1)->firstZoneIndex() - firstZoneIndex(); }
+  /// @returns the number of preset zones. Set by `ChunkItems` when the PHDR chunk is loaded (0 for the terminal record).
+  size_t zoneCount() const noexcept { return zoneCount_; }
+
+  /**
+   Record the number of zones from the following PHDR record. SF2.01 7.2: the zones of a preset run up to the next
+   preset's `wPresetBagNdx`. A decreasing index gives 0 (`File` rejects such files).
+
+   @param next the PHDR record that follows this one
+   */
+  void setCountsFrom(const Preset& next) noexcept {
+    zoneCount_ = next.wPresetBagNdx > wPresetBagNdx ? uint16_t(next.wPresetBagNdx - wPresetBagNdx) : 0;
+  }
 
   /// Write out description of the preset to std::cout
   void dump(const std::string& indent, size_t index) const;
@@ -78,6 +88,9 @@ private:
   uint32_t dwLibrary;
   uint32_t dwGenre;
   uint32_t dwMorphology;
+
+  // Not part of the file record
+  uint16_t zoneCount_{0};
 };
 
 } // end namespace SF2::Entity
