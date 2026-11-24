@@ -189,8 +189,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 5. **`updateStateMods`:** iterates all 60 generators plus every modulator for every voice on every CC, including CCs no modulator listens to. Precompute a per-voice bitmask of the CCs/sources it depends on.
 6. **`setContinuousControllerValue` always returns true**, so every CC notifies all voices even when the value didn't change.
 7. **`loadSamples`** loads the whole `[minStart, maxEnd]` range for a preset. For drum kits whose samples are scattered across the bank, that is most of the file. Per-sample-header spans (with a de-dupe map) would cut memory a lot.
-8. **`Preset::find`** walks preset zones linearly, then instrument zones. That's fine for typical counts; a 128-entry key→zone-list table built at load would make note-on O(matches).
-9. ~~**Time-budget check:** `Timer::delta` is called once per voice. Fine, but `voice.stop()` on budget overrun is an abrupt cut; a fast release, or skipping the voice for one cycle, is gentler.~~ Fixed 2026-11-24 (see §11): voices that would not fit are given a fast release ahead of time, and an overrun fades the remaining voices out instead of cutting them.
+8. ~~**Time-budget check:** `Timer::delta` is called once per voice. Fine, but `voice.stop()` on budget overrun is an abrupt cut; a fast release, or skipping the voice for one cycle, is gentler.~~ Fixed 2026-11-24 (see §11): voices that would not fit are given a fast release ahead of time, and an overrun fades the remaining voices out instead of cutting them.
 
 ---
 
@@ -556,7 +555,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - without the `setCountsFrom` pass, the count tests and most rendering tests fail.
 - No hard-coded rendering values changed. Memory cost is 2 or 4 bytes per preset, instrument or bag record.
 
-**Follow-up (2026-11-24): §6 item 9, render time budget. Commit `653e8a9`. `make test-macOS`: 383 tests, 0 failures.**
+**Follow-up (2026-11-24): §6 item 8 (item 9 before the old item 8 was removed), render time budget. Commit `653e8a9`. `make test-macOS`: 383 tests, 0 failures.**
 - **Before:** `Engine::renderInto` checked `Timer::delta(entryTime) < budget` before each voice, newest to oldest. On an overrun it called `voice.stop()`, which cut a sounding voice to 0 in one sample (a click). It also lost every older note for good, even after a one-off slow slice.
 - **Skipping a voice for one cycle** (the other option in the item) was not used: the voice would drop out for a whole slice and then jump back in, with its envelopes and sample position frozen, giving two discontinuities instead of one.
 - **Shedding ahead of time:**
