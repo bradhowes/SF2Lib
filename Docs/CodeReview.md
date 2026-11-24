@@ -188,7 +188,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 4. ~~**Silent tail:** `Voice::renderInto` loops over the remaining frames calling `mixer.add(…, 0, 0, …)`. That's pure overhead; just stop.~~ Fixed 2026-11-24 (see §11).
 5. **`updateStateMods`:** iterates all 60 generators plus every modulator for every voice on every CC, including CCs no modulator listens to. Precompute a per-voice bitmask of the CCs/sources it depends on.
 6. **`setContinuousControllerValue` always returns true**, so every CC notifies all voices even when the value didn't change.
-7. **`loadSamples`** loads the whole `[minStart, maxEnd]` range for a preset. For drum kits whose samples are scattered across the bank, that is most of the file. Per-sample-header spans (with a de-dupe map) would cut memory a lot.
+7. ~~**`loadSamples`** loads the whole `[minStart, maxEnd]` range for a preset. For drum kits whose samples are scattered across the bank, that is most of the file. Per-sample-header spans (with a de-dupe map) would cut memory a lot.~~ Fixed 2026-11-24 (see §11): only the merged runs of samples a preset uses are loaded.
 8. ~~**Time-budget check:** `Timer::delta` is called once per voice. Fine, but `voice.stop()` on budget overrun is an abrupt cut; a fast release, or skipping the voice for one cycle, is gentler.~~ Fixed 2026-11-24 (see §11): voices that would not fit are given a fast release ahead of time, and an overrun fades the remaining voices out instead of cutting them.
 
 ---
@@ -587,3 +587,29 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - The dry buffer is pre-filled with -0.0, which adding +0.0 turns into +0.0. The last 256 frames of both channels must still be -0.0.
   - With the old loop back, all 512 of those samples are overwritten and the test fails.
 - No hard-coded rendering values changed.
+
+**Follow-up (2026-11-24): §6 item 7, load only the samples a preset uses. Not yet committed. `make test-macOS`: 390 tests, 0 failures.**
+- **Before:** `Preset::loadSamples` converted everything in the `smpl` chunk between the lowest sample start and the highest sample end of the preset's instrument zones. For presets whose samples are spread across the bank, that is mostly samples the preset never plays.
+- **Change:**
+  - `loadSamples` collects one run per instrument zone, covering `[start, end + 46)`: the sample plus its SF2.01 7.10 padding.
+  - It sorts the runs and merges the ones that overlap or touch. This also removes duplicates: zones sharing a header, and headers sharing samples.
+  - It allocates one buffer for the total, packs the runs into it, and reads each run in 32K batches. Reads stop at the end of the chunk, with the rest left as zeros, as before.
+  - Each zone's `NormalizedSampleSpan` is found by binary search over the runs. Its constructor now takes the buffer index of the header's first sample instead of a file offset, because file positions no longer map directly onto the buffer.
+  - Spans were already self-contained (reads before index 0 return 0), so nothing on the render thread changed. Loading still happens on the work queue only.
+  - Running out of memory (`bad_alloc`) is now caught and returns `false`, like a read error. It used to escape a `noexcept` function.
+  - New `Preset::loadedSampleCount()` for tests.
+- **Effect:** samples are stored back to back, each followed by its 46 padding samples, so a typical melodic preset is still one run of the same size. Totals over all presets, measured with a temporary test (not committed):
+  - GeneralUser GS (270 presets): 893.5 M → 81.7 M samples, about 11×. For example "SFX Kit" went from 15.5 M to 1.0 M.
+  - FreeFont (235 presets): 61.5 M → 4.3 M, about 14×.
+  - RolandNicePiano (1 preset): unchanged, apart from one surplus sample after the padding that the old `+ 1` added.
+- **Tests:** a new `PresetSampleLoadingTests` file, using `SF2Builder` files with two looping sines (different periods) on two key ranges, optionally separated by a 100,000-sample filler that no zone uses:
+  - `testOnlyUsedSamplesAreLoaded`: exactly 2 × (2000 + 46) samples, not the filler;
+  - `testAdjacentSamplesStillLoadAsOneRun`;
+  - `testSharedSampleIsLoadedOnce`;
+  - `testOverlappingHeadersAreLoadedOnce`;
+  - `testSpreadSamplesRenderLikeAdjacentOnes`: end to end through `TestEngineHarness`, keys 60 and 72 render identically with and without the filler, and the two zones really differ;
+  - `testPresetWithoutSamplesLoadsNothing`.
+- **Checked that the tests catch the bugs:**
+  - collapsing everything back into one `[min, max]` run fails the memory test;
+  - computing span offsets from the file position instead of the buffer position crashes the test run.
+- No hard-coded rendering values changed: the sample data is identical, only its placement in memory differs.

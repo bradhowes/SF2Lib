@@ -47,79 +47,110 @@ Preset::loadSamples(const IO::File &file) noexcept {
   // 32K seems to be a good value to use for speed.
   static constexpr size_t batchSampleCount = 32 * 1024;
   static constexpr Float normalizationScale = 1.0_F / Float(1 << 15);
+  static constexpr size_t padding = Zone::NormalizedSampleSpan::sizePaddingAfterEnd;
 
   os_log_debug(log_, "loadSamples - %s", configuration().name().c_str());
 
-  auto pos = file.sampleDataBegin();
-  assert(pos.available() >= 0);
+  /// A run of the `smpl` chunk to load: file sample indices [fileStart, fileEnd), stored from `bufferStart` onwards.
+  struct Run {
+    size_t fileStart;
+    size_t fileEnd;
+    size_t bufferStart;
+  };
 
-  // Assume that samples for a preset will lie in the same general area of the samples chunk, so that we can simply identify the
-  // min start and max end values and go. Alternate approach would be to take all of the start/end pairs, order by start, remove
-  // duplicates, and then process each pair in turn. The first approach requires less book-keeping and should be marginally faster.
-  // The risk is that there are holes in the spans and the underlying `normalizedSamples_` container is too large.
-
-  size_t minStartIndex = size_t(pos.offset()) + size_t(pos.available());
-  size_t maxEndIndex = 0;
-
-  // Visit each preset zone.
-  for (const auto& presetZone : zones()) {
-    if (presetZone.isGlobal()) continue;
-    const auto& instrument = presetZone.instrument();
-
-    // Visit each instrument zone to get the instrument's sample header bounds.
-    for (const auto& instrumentZone : instrument.zones()) {
-      auto sampleHeader = instrumentZone.sampleHeader();
-      if (sampleHeader == nullptr) continue;
-      // Update the range of samples we will convert.
-      minStartIndex = std::min(sampleHeader->startIndex(), minStartIndex);
-      maxEndIndex = std::max(sampleHeader->endIndex(), maxEndIndex);
+  // Load only the samples that the preset's instrument zones use: each header's samples plus the 46 that follow it
+  // (SF2.01 7.10). Loading everything between the lowest start and the highest end used to hold most of the file for
+  // presets whose samples are spread out, such as drum kits. Overlapping or touching runs are merged. Samples are
+  // usually stored one after another with their 46 padding samples in between, so a typical preset is still one run.
+  // This runs on the work queue, so the temporary vector is fine.
+  std::vector<Run> runs;
+  try {
+    for (const auto& presetZone : zones()) {
+      if (presetZone.isGlobal()) continue;
+      for (const auto& instrumentZone : presetZone.instrument().zones()) {
+        auto sampleHeader = instrumentZone.sampleHeader();
+        if (sampleHeader == nullptr) continue;
+        runs.push_back({sampleHeader->startIndex(), sampleHeader->endIndex() + padding, 0});
+      }
     }
+  } catch (const std::bad_alloc&) {
+    os_log_error(log_, "loadSamples - out of memory for %{public}s", configuration().name().c_str());
+    normalizedSamples_.clear();
+    return false;
   }
 
-  os_log_debug(log_, "loadSamples - minStartIndex: %ld maxEndIndex %ld", minStartIndex, maxEndIndex);
-
   // A preset whose zones reference no samples has nothing to load.
-  if (maxEndIndex < minStartIndex) {
+  if (runs.empty()) {
     normalizedSamples_.clear();
     return true;
   }
 
-  size_t remainingSampleCount = (maxEndIndex - minStartIndex) + Zone::NormalizedSampleSpan::sizePaddingAfterEnd + 1;
-  os_log_debug(log_, "loadSamples - remainingSampleCount: %ld", remainingSampleCount);
+  std::sort(runs.begin(), runs.end(), [](const Run& lhs, const Run& rhs) { return lhs.fileStart < rhs.fileStart; });
+  size_t merged = 0;
+  for (size_t index = 1; index < runs.size(); ++index) {
+    if (runs[index].fileStart <= runs[merged].fileEnd) {
+      runs[merged].fileEnd = std::max(runs[merged].fileEnd, runs[index].fileEnd);
+    } else {
+      runs[++merged] = runs[index];
+    }
+  }
+  runs.resize(merged + 1);
 
-  normalizedSamples_.assign(remainingSampleCount, 0_F);
+  size_t totalSampleCount = 0;
+  for (auto& run : runs) {
+    run.bufferStart = totalSampleCount;
+    totalSampleCount += run.fileEnd - run.fileStart;
+  }
+  os_log_info(log_, "loadSamples - runs: %ld samples: %ld", runs.size(), totalSampleCount);
+
   std::array<int16_t, batchSampleCount> rawSamples;
-
-  // Point to the first 16-bit sample associated with this preset, and copy over remainingSampleCount 16-bit samples in
-  // batchSampleCount chunks. `File::validate` guarantees that every sample header lies inside the `smpl` chunk, but the
-  // padding after the last one may not, so stop at the end of the chunk and leave the rest as zeros.
-  pos = pos.advance(off_t(minStartIndex * sizeof(int16_t)));
-  remainingSampleCount = std::min(remainingSampleCount, size_t(pos.available()) / sizeof(int16_t));
-  auto ptr = normalizedSamples_.data();
-  using elemType = std::remove_pointer_t<decltype(ptr)>;
+  using elemType = SampleVector::value_type;
+  auto chunkBegin = file.sampleDataBegin();
+  assert(chunkBegin.available() >= 0);
+  auto chunkSampleCount = size_t(chunkBegin.available()) / sizeof(int16_t);
   try {
-    while (remainingSampleCount > 0) {
-      auto sampleCount = std::min(remainingSampleCount, batchSampleCount);
-      remainingSampleCount -= sampleCount;
-      pos = pos.readInto(rawSamples.data(), sampleCount * sizeof(int16_t));
-      DSPHeaders::Accelerated<elemType>::conversionProc(rawSamples.data(), 1, ptr, 1, sampleCount);
-      DSPHeaders::Accelerated<elemType>::scaleProc(ptr, 1, &normalizationScale, ptr, 1, sampleCount);
-      ptr += sampleCount;
+    normalizedSamples_.assign(totalSampleCount, 0_F);
+    for (const auto& run : runs) {
+      // `File::validate` guarantees that every sample header lies inside the `smpl` chunk, but the padding after the
+      // last one may not, so stop at the end of the chunk and leave the rest as zeros.
+      if (run.fileStart >= chunkSampleCount) continue;
+      auto remainingSampleCount = std::min(run.fileEnd, chunkSampleCount) - run.fileStart;
+      auto pos = chunkBegin.advance(off_t(run.fileStart * sizeof(int16_t)));
+      auto ptr = normalizedSamples_.data() + run.bufferStart;
+      while (remainingSampleCount > 0) {
+        auto sampleCount = std::min(remainingSampleCount, batchSampleCount);
+        remainingSampleCount -= sampleCount;
+        pos = pos.readInto(rawSamples.data(), sampleCount * sizeof(int16_t));
+        DSPHeaders::Accelerated<elemType>::conversionProc(rawSamples.data(), 1, ptr, 1, sampleCount);
+        DSPHeaders::Accelerated<elemType>::scaleProc(ptr, 1, &normalizationScale, ptr, 1, sampleCount);
+        ptr += sampleCount;
+      }
     }
   } catch (IO::File::LoadResponse) {
     os_log_error(log_, "loadSamples - failed to read samples for %{public}s", configuration().name().c_str());
     normalizedSamples_.clear();
     return false;
+  } catch (const std::bad_alloc&) {
+    os_log_error(log_, "loadSamples - out of memory for %{public}s", configuration().name().c_str());
+    normalizedSamples_.clear();
+    return false;
   }
 
-  // Update all instrument zones to use spans of normalized samples.
+  // Update all instrument zones to use spans of normalized samples. Each header lies inside exactly one merged run: the
+  // last one that starts at or before it.
   for (auto& presetZone : zones()) {
     if (presetZone.isGlobal()) continue;
     auto& instrument = presetZone.instrument();
     for (auto& instrumentZone : instrument.zones()) {
       auto sampleHeader = instrumentZone.sampleHeader();
       if (sampleHeader == nullptr) continue;
-      instrumentZone.setSamples(std::make_shared<Zone::NormalizedSampleSpan>(normalizedSamples_, minStartIndex, *sampleHeader));
+      auto start = sampleHeader->startIndex();
+      auto run = std::prev(std::upper_bound(runs.begin(), runs.end(), start, [](size_t value, const Run& run) {
+        return value < run.fileStart;
+      }));
+      auto firstIndex = run->bufferStart + (start - run->fileStart);
+      instrumentZone.setSamples(std::make_shared<Zone::NormalizedSampleSpan>(normalizedSamples_, firstIndex,
+                                                                             *sampleHeader));
     }
   }
 

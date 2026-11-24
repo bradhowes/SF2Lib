@@ -70,6 +70,9 @@ public:
    */
   ConfigCollection find(int key, int velocity) const noexcept;
 
+  /// @returns the number of normalized samples held for the preset by `loadSamples` (0 when not loaded)
+  size_t loadedSampleCount() const noexcept { return normalizedSamples_.size(); }
+
 private:
   SampleVector normalizedSamples_{};
   inline static const os_log_t log_{Log::create("Preset")};
