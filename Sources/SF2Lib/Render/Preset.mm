@@ -49,7 +49,7 @@ Preset::loadSamples(const IO::File &file) noexcept {
   static constexpr Float normalizationScale = 1.0_F / Float(1 << 15);
   static constexpr size_t padding = Zone::NormalizedSampleSpan::sizePaddingAfterEnd;
 
-  os_log_debug(log_, "loadSamples - %s", configuration().name().c_str());
+  os_log_info(log_, "loadSamples - %s", configuration().name().c_str());
 
   /// A run of the `smpl` chunk to load: file sample indices [fileStart, fileEnd), stored from `bufferStart` onwards.
   struct Run {
@@ -70,7 +70,7 @@ Preset::loadSamples(const IO::File &file) noexcept {
       for (const auto& instrumentZone : presetZone.instrument().zones()) {
         auto sampleHeader = instrumentZone.sampleHeader();
         if (sampleHeader == nullptr) continue;
-        runs.push_back({sampleHeader->startIndex(), sampleHeader->endIndex() + padding, 0});
+        runs.emplace_back(sampleHeader->startIndex(), sampleHeader->endIndex() + padding, 0);
       }
     }
   } catch (const std::bad_alloc&) {
@@ -85,6 +85,8 @@ Preset::loadSamples(const IO::File &file) noexcept {
     return true;
   }
 
+  // Sort the runs by the fileStart value. Look for overlaps and consolidate any. Should be left with the minimum number of
+  // runs necessary to hold the samples of the preset.
   std::sort(runs.begin(), runs.end(), [](const Run& lhs, const Run& rhs) { return lhs.fileStart < rhs.fileStart; });
   size_t merged = 0;
   for (size_t index = 1; index < runs.size(); ++index) {
@@ -94,13 +96,17 @@ Preset::loadSamples(const IO::File &file) noexcept {
       runs[++merged] = runs[index];
     }
   }
+
+  // Drop off runs that have been merged.
   runs.resize(merged + 1);
 
+  // Update each run with the offset to use for the first sample.
   size_t totalSampleCount = 0;
   for (auto& run : runs) {
     run.bufferStart = totalSampleCount;
     totalSampleCount += run.fileEnd - run.fileStart;
   }
+
   os_log_info(log_, "loadSamples - runs: %ld samples: %ld", runs.size(), totalSampleCount);
 
   std::array<int16_t, batchSampleCount> rawSamples;
@@ -109,6 +115,8 @@ Preset::loadSamples(const IO::File &file) noexcept {
   assert(chunkBegin.available() >= 0);
   auto chunkSampleCount = size_t(chunkBegin.available()) / sizeof(int16_t);
   try {
+
+    // Now build the collection of samples from the runs.
     normalizedSamples_.assign(totalSampleCount, 0_F);
     for (const auto& run : runs) {
       // `File::validate` guarantees that every sample header lies inside the `smpl` chunk, but the padding after the
@@ -149,8 +157,7 @@ Preset::loadSamples(const IO::File &file) noexcept {
         return value < run.fileStart;
       }));
       auto firstIndex = run->bufferStart + (start - run->fileStart);
-      instrumentZone.setSamples(std::make_shared<Zone::NormalizedSampleSpan>(normalizedSamples_, firstIndex,
-                                                                             *sampleHeader));
+      instrumentZone.setSamples(std::make_shared<Zone::NormalizedSampleSpan>(normalizedSamples_, firstIndex, *sampleHeader));
     }
   }
 
