@@ -588,7 +588,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - With the old loop back, all 512 of those samples are overwritten and the test fails.
 - No hard-coded rendering values changed.
 
-**Follow-up (2026-11-24): §6 item 7, load only the samples a preset uses. Not yet committed. `make test-macOS`: 390 tests, 0 failures.**
+**Follow-up (2026-11-24): §6 item 7, load only the samples a preset uses. Commit `fc1d2b5`. `make test-macOS`: 390 tests, 0 failures.**
 - **Before:** `Preset::loadSamples` converted everything in the `smpl` chunk between the lowest sample start and the highest sample end of the preset's instrument zones. For presets whose samples are spread across the bank, that is mostly samples the preset never plays.
 - **Change:**
   - `loadSamples` collects one run per instrument zone, covering `[start, end + 46)`: the sample plus its SF2.01 7.10 padding.
