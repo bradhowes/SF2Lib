@@ -536,7 +536,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - the `std::array` payload builders, getters, math helpers, everything on the render thread, and moves.
 - No behaviour or audio changes; no test changes.
 
-**Follow-up (2026-11-24): §7 neighbour-dependent counts in `Preset` / `Instrument` / `Bag`. Not yet committed. `make test-macOS`: 378 tests, 0 failures.**
+**Follow-up (2026-11-24): §7 neighbour-dependent counts in `Preset` / `Instrument` / `Bag`. Commit `e554bf5`. `make test-macOS`: 378 tests, 0 failures.**
 - **Problem:** `zoneCount()`, `generatorCount()` and `modulatorCount()` were computed as `(this + 1)->firstXIndex() - firstXIndex()`. That is only valid inside the `ChunkItems` vector. A stand-alone copy, or the terminal record, read past the object.
 - **Change:**
   - Each entity stores its counts in `uint16_t` members after the file record. These are `zoneCount_` for `Preset` and `Instrument`, and `generatorCount_` / `modulatorCount_` for `Bag`.
