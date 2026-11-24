@@ -16,6 +16,8 @@ jobs:
       run: ls -l /Applications && sudo xcode-select -s /Applications/Xcode_27.2.app
     - name: Show simctl devices
       run: xcrun simctl list devices
+    - name: Download iOS
+      run: xcodebuild -downloadPlatform iOS
     - name: Build, test, and code coverage
       run: make
     - name: Create Coverage Badge
