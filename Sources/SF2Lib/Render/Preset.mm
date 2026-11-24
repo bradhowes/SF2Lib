@@ -1,5 +1,7 @@
 // Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
+#include "DSPHeaders/Accelerated.hpp"
+
 #include "SF2File/IO/File.hpp"
 #include "SF2Lib/Render/Preset.hpp"
 
