@@ -57,6 +57,15 @@ public:
   using Voice = Voice::Voice;
   using Interpolator = Render::Voice::Sample::Interpolator;
 
+  /// Source of the time used for the render budget, in nanoseconds. Must be monotonic and safe on the render thread.
+  using Clock = uint64_t (*)() noexcept;
+
+  /// Frames over which a voice is faded out when a render slice has already used up its time budget.
+  static constexpr AUAudioFrameCount budgetFadeOutFrames = 64;
+
+  /// Weight given to the latest measurement in the running average of the cost of rendering one voice for one frame.
+  static constexpr double voiceCostSmoothing = 0.25;
+
   /**
    Construct new engine and its voices.
 
@@ -64,8 +73,10 @@ public:
    @param voiceCountLimit the maximum number of individual voices to support (must be <= maxVoiceCount)
    @param interpolator the type of interpolation to use when rendering samples
    @param renderingTimeBudgetScaling scaling to apply to the frameCount time budget (the number of nanoseconds in a render frame).
-   This value runs between 0.0  and 1.0. A value of 0.0 or negative will disable the budget check. During a render call, once the
-   time budget is reached, any remaining notes will be automatically released and silenced.
+   This value runs between 0.0  and 1.0. A value of 0.0 or negative will disable the budget check. Before rendering, if the
+   running estimate of the cost of the active voices exceeds the budget, the oldest voices beyond what fits are given a
+   fast (5 ms) release, so the load drops without clicks. If a render call still runs out of time, each remaining voice
+   is faded out over `budgetFadeOutFrames` frames and stopped.
    @param minimumNoteDurationMilliseconds the minimum duration of a note-on/note-off sequence for a voice.
    */
   Engine(Float sampleRate,
@@ -550,6 +561,16 @@ private:
 
   OldestVoiceCollection::iterator stopVoice_RT(size_t voiceIndex) noexcept;
 
+  /**
+   Give a fast release to the oldest voices that would not fit in the time budget, going by the running average of the
+   cost of rendering one voice for one frame. The newest voice is always kept. Voices that are already fast-releasing
+   count towards the load (they are still rendered) but are not released again.
+
+   @param frameCount the number of frames in the render slice
+   @param timeBudget the time available for the slice in nanoseconds
+   */
+  void shedVoicesOverBudget_RT(AUAudioFrameCount frameCount, uint64_t timeBudget) noexcept;
+
   void notifyActiveVoicesChannelStateChanged_RT() noexcept;
 
   void processChannelMessage_RT(MIDI::ControlChange cc, uint8_t value) noexcept;
@@ -641,6 +662,8 @@ private:
 
   uint64_t renderingTimeBudgetIntervalNanoseconds_;
   double renderingTimeBudgetScaling_;
+  Clock clock_{&Utils::Timer::now};
+  double averageVoiceFrameNanoseconds_{0.0};
 
   dispatch_queue_t workQueue_;
 

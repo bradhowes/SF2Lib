@@ -134,6 +134,16 @@ public:
    Record that the key is no longer pressed due to another with the same exclusiveClass setting.
    */
   void releaseKeyViaExclusiveClass() noexcept;
+
+  /**
+   Terminate the voice quickly but without a click: both envelopes enter a short release
+   (`Envelope::Generator::noteAbortReleaseDuration`) from their current values. Used for exclusiveClass (SF2.01 8.1.2
+   #57) and to shed voices when rendering would exceed its time budget.
+   */
+  void fastRelease() noexcept;
+
+  /// @returns true if `fastRelease` was called since the voice started
+  bool isFastReleasing() const noexcept { return fastReleasing_; }
   /**
    Notification that a sustain or sostenuto pedal was released. Voices whose release was postponed and that are no
    longer held by any pedal transition to their release phase. Voices whose key is still down are not affected.
@@ -225,6 +235,28 @@ public:
   }
 
   /**
+   Render `frameCount` samples while ramping the output linearly down to 0, then stop the voice. This is the last-resort
+   path when a render slice runs out of its time budget: it costs only `frameCount` samples (the caller keeps that
+   small) and avoids the step that stopping a sounding voice outright would cause.
+
+   @param mixer collection of buffers to mix into
+   @param frameCount number of samples over which to fade out
+   */
+  void renderFadeOut(Engine::Mixer& mixer, SF2::AUAudioFrameCount frameCount) noexcept {
+    SF2::AUValue chorusSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend)));
+    SF2::AUValue reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
+    for (SF2::AUAudioFrameCount index = 0; index < frameCount && active_; ++index) {
+      Float gain{Float(frameCount - index - 1) / Float(frameCount)};
+      Float sample{renderSample() * gain};
+      Float pan{state_.modulated(Index::pan)};
+      Float leftPan, rightPan;
+      DSP::panLookup(pan, leftPan, rightPan);
+      mixer.add(index, SF2::AUValue(leftPan * sample), SF2::AUValue(rightPan * sample), chorusSend, reverbSend);
+    }
+    stop();
+  }
+
+  /**
    Repeatedly invoke `renderSample` `frameCount` times.
 
    @param mixer collection of buffers to mix into
@@ -282,6 +314,7 @@ private:
   bool released_{false};
   bool postponedRelease_{false};
   bool sostenutoActive_{false};
+  bool fastReleasing_{false};
 
   size_t voiceIndex_;
   const os_log_t log_{Log::create("Voice")};

@@ -69,6 +69,28 @@ static int allocationsDuring(void (^block)())
   XCTAssertEqual(count, 0);
 }
 
+- (void)testRenderBudgetPathsDoNotAllocate {
+  // §6 item 9: shedding voices (fast release) and the overrun fade-out run on the render thread.
+  auto harness{TestEngineHarness{48000.0}};
+  XCTAssertEqual(harness.load(self.contexts->context0.path(), 0), LoadResponse::ok);
+  auto mixer{harness.createMixer(1.0)};
+  harness.sendNoteOn(60, 100);
+  harness.renderMaxFramesCount(mixer);
+  harness.sendNoteOff(60);
+
+  // A tiny budget with the real clock: every render overruns, so both shedding and the fade-out path are taken.
+  harness.enableRenderingBudget(1.0e-6, &SF2::Utils::Timer::now);
+  harness.setAverageVoiceFrameNanoseconds(1.0e6);
+  auto __block harnessPtr = &harness;
+  auto __block mixerPtr = &mixer;
+  int count = allocationsDuring(^{
+    for (uint8_t key : {60, 64, 67, 72}) harnessPtr->sendNoteOn(key, 100);
+    for (int render = 0; render < 4; ++render) harnessPtr->renderMaxFramesCount(*mixerPtr);
+  });
+  XCTAssertEqual(count, 0);
+  XCTAssertLessThan(harness.engine().activeVoiceCount(), size_t(4));
+}
+
 - (void)testProgramChangeRunsOnWorkQueue {
   // §4: a program change used to load the preset's samples on the render thread. Now the render thread only stops the
   // voices and queues the change; until it completes, notes are ignored and nothing renders.

@@ -190,7 +190,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 6. **`setContinuousControllerValue` always returns true**, so every CC notifies all voices even when the value didn't change.
 7. **`loadSamples`** loads the whole `[minStart, maxEnd]` range for a preset. For drum kits whose samples are scattered across the bank, that is most of the file. Per-sample-header spans (with a de-dupe map) would cut memory a lot.
 8. **`Preset::find`** walks preset zones linearly, then instrument zones. That's fine for typical counts; a 128-entry key→zone-list table built at load would make note-on O(matches).
-9. **Time-budget check:** `Timer::delta` is called once per voice. Fine, but `voice.stop()` on budget overrun is an abrupt cut; a fast release, or skipping the voice for one cycle, is gentler.
+9. ~~**Time-budget check:** `Timer::delta` is called once per voice. Fine, but `voice.stop()` on budget overrun is an abrupt cut; a fast release, or skipping the voice for one cycle, is gentler.~~ Fixed 2026-11-24 (see §11): voices that would not fit are given a fast release ahead of time, and an overrun fades the remaining voices out instead of cutting them.
 
 ---
 
@@ -555,3 +555,28 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - reading `sizeof` bytes misparses the records, and the test process aborts;
   - without the `setCountsFrom` pass, the count tests and most rendering tests fail.
 - No hard-coded rendering values changed. Memory cost is 2 or 4 bytes per preset, instrument or bag record.
+
+**Follow-up (2026-11-24): §6 item 9, render time budget. Not yet committed. `make test-macOS`: 383 tests, 0 failures.**
+- **Before:** `Engine::renderInto` checked `Timer::delta(entryTime) < budget` before each voice, newest to oldest. On an overrun it called `voice.stop()`, which cut a sounding voice to 0 in one sample (a click). It also lost every older note for good, even after a one-off slow slice.
+- **Skipping a voice for one cycle** (the other option in the item) was not used: the voice would drop out for a whole slice and then jump back in, with its envelopes and sample position frozen, giving two discontinuities instead of one.
+- **Shedding ahead of time:**
+  - `Engine` keeps a running average (`voiceCostSmoothing` = 0.25) of the nanoseconds it takes to render one voice for one frame, updated after each budgeted slice.
+  - Before rendering, `shedVoicesOverBudget_RT` estimates how many voices fit in the budget (always at least 1). It gives the oldest voices beyond that a fast release: the new `Voice::fastRelease`, the same 5 ms release used for exclusiveClass, which `releaseKeyViaExclusiveClass` now calls.
+  - Those voices are still rendered while they fade, so there is no click, and the load drops within a slice or two. Voices already fast-releasing count towards the load but are not released again (`Voice::isFastReleasing`).
+- **Safety net:** if a slice still runs out of time, each remaining voice renders the new `Voice::renderFadeOut` over `min(frameCount, budgetFadeOutFrames = 64)` frames, a linear ramp to 0, and is then stopped. That costs at most 1/8 of a 512-frame render.
+- **Clock:** `Utils::Timer::now` now uses `CLOCK_UPTIME_RAW` instead of `CLOCK_REALTIME`. Wall-clock time can jump with NTP, which could fake an overrun, or go backwards so that the unsigned `delta` wraps around.
+  - `Engine` now reads time through a `Clock` function pointer (`clock_`, default `Timer::now`), so tests can use a deterministic clock.
+  - The clock is only read when the budget is enabled.
+- **Test hooks:** `TestEngineHarness` gained `enableRenderingBudget(scaling, clock)`, `disableRenderingBudget`, `averageVoiceFrameNanoseconds` / `setAverageVoiceFrameNanoseconds`, `frameNanoseconds` and `voice(index)`. The harness still runs without a budget by default, so no hard-coded rendering values changed.
+- **Tests:** a new `RenderBudgetTests` file, using the `SF2Builder` sine with 4 sustained notes and a fake clock:
+  - `testOverrunFadesOutRemainingVoicesInsteadOfCuttingThem`: an overrun after the 2 newest voices. Each output sample must equal the 2 newest voices plus the linear ramp of the 2 oldest. The expected values are built from each note rendered alone; the accuracy is 1e-5.
+  - `testPredictedOverrunFastReleasesOldestVoices`: a cost estimate that fits 2 voices. After 1 ms all 4 are active and the 2 oldest (keys 60, 64) are fast-releasing, the first sample matches the unshed output, and after 10 ms only 2 voices remain.
+  - `testNoSheddingWithinBudget`: the budgeted output is identical to the unbudgeted output, and the estimate is maintained.
+  - `testTimerIsMonotonic`.
+  - `RealTimeSafetyTests::testRenderBudgetPathsDoNotAllocate`: the shedding and fade-out paths, taken with a tiny budget, make no allocations.
+- **Checked that the tests catch the bugs,** by putting back each old behaviour on its own:
+  - `stop()` on overrun fails the overrun test (63 assertions);
+  - with no shedding, the predicted-overrun test fails;
+  - shedding the newest voices instead of the oldest also fails it.
+  - The clock change cannot be checked this way, because a wall-clock jump cannot be produced in a test.
+- **Left over:** §6 item 4, the zero-filling loop after a voice stops in `Voice::renderInto`, is unchanged. `renderFadeOut` does not zero-fill.

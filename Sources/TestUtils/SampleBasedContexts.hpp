@@ -84,6 +84,32 @@ struct TestEngineHarness {
 
   Engine& engine() noexcept { return engine_; }
 
+  /**
+   Turn on the render time budget (the harness normally runs without one) and use the given clock for it.
+
+   @param scaling the fraction of the real-time duration of a render slice that rendering may use
+   @param clock the time source, in nanoseconds
+   */
+  void enableRenderingBudget(double scaling, Engine::Clock clock) noexcept {
+    engine_.renderingTimeBudgetScaling_ = scaling;
+    engine_.clock_ = clock;
+  }
+
+  /// Turn the render time budget off again.
+  void disableRenderingBudget() noexcept { engine_.renderingTimeBudgetScaling_ = -1.0; }
+
+  /// @returns the engine's running average of the nanoseconds it takes to render one voice for one frame
+  double averageVoiceFrameNanoseconds() const noexcept { return engine_.averageVoiceFrameNanoseconds_; }
+
+  /// Set the engine's running average of the nanoseconds it takes to render one voice for one frame
+  void setAverageVoiceFrameNanoseconds(double value) noexcept { engine_.averageVoiceFrameNanoseconds_ = value; }
+
+  /// @returns the nanoseconds of real time in one frame at the engine's sample rate
+  uint64_t frameNanoseconds() const noexcept { return engine_.renderingTimeBudgetIntervalNanoseconds_; }
+
+  /// @returns the voice with the given index
+  SF2::Render::Voice::Voice& voice(size_t index) noexcept { return engine_.voices_[index]; }
+
   SF2::IO::File::LoadResponse load(const std::string& path, size_t index) {
     return engine_.loadFileAndPreset(path, index);
   }

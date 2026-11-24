@@ -261,19 +261,25 @@ Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
   if (activeVoiceCount() == 0) return;
 
   auto timeBudget = timeBudgetNanoseconds(frameCount);
-  auto entryTime = Utils::Timer::now();
+  auto budgeted = renderingTimeBudgetScaling_ > 0.0;
+  auto entryTime = budgeted ? clock_() : 0;
+  if (budgeted) shedVoicesOverBudget_RT(frameCount, timeBudget);
 
-  // Iterate over the active voices -- the voices are ordered from newest to oldest. If we run out of time we will stop
-  // the oldest ones.
+  // Iterate over the active voices -- the voices are ordered from newest to oldest. If we run out of time, the oldest
+  // ones are faded out over a few frames and stopped. (Stopping a sounding voice outright would click.)
+  uint64_t voiceFrames = 0;
   for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
     auto voiceIndex = *pos;
 
     auto& voice{voices_[voiceIndex]};
     if (voice.isActive()) {
-      if (Utils::Timer::delta(entryTime) < timeBudget) {
+      if (!budgeted || clock_() - entryTime < timeBudget) {
         voice.renderInto(mixer, frameCount);
+        voiceFrames += frameCount;
       } else {
-        voice.stop();
+        auto fadeFrames = std::min(frameCount, budgetFadeOutFrames);
+        voice.renderFadeOut(mixer, fadeFrames);
+        voiceFrames += fadeFrames;
       }
     } else {
       os_log_error(log_, "renderInto - encountered active voice that is not active - %lu", voiceIndex);
@@ -284,6 +290,31 @@ Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
     } else {
       ++pos;
     }
+  }
+
+  // Update the running average of the cost of one voice for one frame, used by `shedVoicesOverBudget_RT`.
+  if (budgeted && voiceFrames > 0) {
+    auto measured = double(clock_() - entryTime) / double(voiceFrames);
+    averageVoiceFrameNanoseconds_ = averageVoiceFrameNanoseconds_ == 0.0
+    ? measured
+    : averageVoiceFrameNanoseconds_ + voiceCostSmoothing * (measured - averageVoiceFrameNanoseconds_);
+  }
+}
+
+void
+Engine::shedVoicesOverBudget_RT(AUAudioFrameCount frameCount, uint64_t timeBudget) noexcept
+{
+  auto voiceCost = averageVoiceFrameNanoseconds_ * double(frameCount);
+  if (voiceCost <= 0.0) return;
+  auto affordable = std::max<size_t>(1, size_t(double(timeBudget) / voiceCost));
+  if (activeVoiceCount() <= affordable) return;
+
+  // Newest to oldest: keep the first `affordable` voices, fast-release the rest.
+  size_t counted = 0;
+  for (auto voiceIndex : oldestVoiceIndices_) {
+    auto& voice{voices_[voiceIndex]};
+    if (!voice.isActive()) continue;
+    if (++counted > affordable && !voice.isFastReleasing()) voice.fastRelease();
   }
 }
 
