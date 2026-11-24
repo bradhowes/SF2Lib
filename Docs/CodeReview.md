@@ -556,7 +556,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - without the `setCountsFrom` pass, the count tests and most rendering tests fail.
 - No hard-coded rendering values changed. Memory cost is 2 or 4 bytes per preset, instrument or bag record.
 
-**Follow-up (2026-11-24): §6 item 9, render time budget. Not yet committed. `make test-macOS`: 383 tests, 0 failures.**
+**Follow-up (2026-11-24): §6 item 9, render time budget. Commit `653e8a9`. `make test-macOS`: 383 tests, 0 failures.**
 - **Before:** `Engine::renderInto` checked `Timer::delta(entryTime) < budget` before each voice, newest to oldest. On an overrun it called `voice.stop()`, which cut a sounding voice to 0 in one sample (a click). It also lost every older note for good, even after a one-off slow slice.
 - **Skipping a voice for one cycle** (the other option in the item) was not used: the voice would drop out for a whole slice and then jump back in, with its envelopes and sample position frozen, giving two discontinuities instead of one.
 - **Shedding ahead of time:**
