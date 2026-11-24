@@ -47,6 +47,10 @@ Pos::makeChunk() const
 ChunkList
 Pos::makeChunkList() const
 {
+  // buffer[0] -- type of the list (eg 'PBAG')
+  // buffer[1] -- size of the list in bytes
+  // buffer[2] -- type of the individual elements in the list (technically this belongs to the list but easier to read now and
+  //              save for future use.
   uint32_t buffer[3];
   if (static_cast<size_t>(available()) < sizeof(buffer)) throw File::LoadResponse::invalidFormat;
   if (Pos::seek(fd_, off_t(pos_), SEEK_SET) != off_t(pos_)) throw File::LoadResponse::invalidFormat;

@@ -91,22 +91,30 @@ File::load(UniqueFd&& owned) noexcept
     if (riff.tag() != Tags::riff || riff.kind() != Tags::sfbk) throw File::LoadResponse::invalidFormat;
     auto p0 = riff.begin();
     while (p0 < riff.end()) {
+      // Everthing that follows is a list of items held in a ChunkList.
       auto chunkList = p0.makeChunkList();
       if (chunkList.tag() != Tags::list) throw File::LoadResponse::invalidFormat;
+
+      // Cheat at just check for valid list types. We then use the same loop to process them all, so technically not
+      // spec-conformant since it could let in invalid SF2 files.
       if (chunkList.kind() != Tags::info &&
           chunkList.kind() != Tags::sdta &&
           chunkList.kind() != Tags::pdta) throw File::LoadResponse::invalidFormat;
+
       auto p1 = chunkList.begin();
       p0 = chunkList.advance();
       while (p1 < chunkList.end()) {
         auto chunk = p1.makeChunk();
         p1 = chunk.advance();
         switch (chunk.tag().toTags()) {
+
+            // 'INFO" list tags
           case Tags::ifil:
             if (chunk.size() != 4) throw File::LoadResponse::invalidFormat;
             soundFontVersion_.load(chunk.begin());
             hasIFIL = true;
             break;
+
           case Tags::isng: soundEngine_ = chunk.extract(); break;
           case Tags::inam: embeddedName_ = chunk.extract(); break;
           case Tags::icrd: embeddedCreationDate_ = chunk.extract(); break;
@@ -114,6 +122,8 @@ File::load(UniqueFd&& owned) noexcept
           case Tags::iprd: embeddedProduct_ = chunk.extract(); break;
           case Tags::icop: embeddedCopyright_ = chunk.extract(); break;
           case Tags::icmt: embeddedComment_ = chunk.extract(); break;
+
+            // 'PDTA' tags
           case Tags::phdr: presets_.load(chunk); break;
           case Tags::pbag: presetZones_.load(chunk); break;
           case Tags::pgen: presetZoneGenerators_.load(chunk); break;
@@ -122,11 +132,15 @@ File::load(UniqueFd&& owned) noexcept
           case Tags::ibag: instrumentZones_.load(chunk); break;
           case Tags::igen: instrumentZoneGenerators_.load(chunk); break;
           case Tags::imod: instrumentZoneModulators_.load(chunk); break;
+
+            // 'SDTA' tags
           case Tags::shdr: sampleHeaders_.load(chunk); break;
           case Tags::smpl:
             // Limit reads to the `smpl` chunk so that sample headers cannot reach into `pdta` (or past the file end).
             sampleDataBegin_ = chunk.begin().limit(off_t(chunk.size()));
             break;
+
+            // Silently ignore any tag we do not recognize.
           default:
             break;
         }

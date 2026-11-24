@@ -1,6 +1,12 @@
 # SF2Lib: notes for coding agents
 
-SF2Lib is a SoundFont 2 (SF2) file parser and real-time synthesizer, written in C++23 / Objective-C++ (`.mm`) and shipped as a Swift package. Its main client is an AUv3 instrument, so the render path runs on a real-time audio thread.
+SF2Lib is a SoundFont 2 (SF2) file parser and real-time synthesizer, written in C++23 / Objective-C++ (`.mm`) and shipped as a
+Swift package. Its main client is an AUv3 instrument, so the render path runs on a real-time audio thread. When rendering is active
+we must limit the amount of work that is done in order to avoid missing a deadline and failing to deliver audio samples to the
+CoreAudio engine, resulting in an audio glitch.
+
+This is especially important when changing sound fonts or switching presets: this must only be done once there are no active voices
+generating audio samples. Only then is it safe to allocate and dispose of memory and perform file I/O.
 
 ## Current work plan
 
@@ -26,7 +32,8 @@ Steps already done are listed in §11.
 | `Tests/SF2LibTests`, `Tests/EngineTests` | XCTest suites (Objective-C++) |
 | `SoundFont Spec 2.01.pdf` | The reference spec. Cite section numbers (e.g. "8.1.2") in comments when implementing spec behaviour |
 
-Dependency: [DSPHeaders](https://github.com/bradhowes/DSPHeaders) (Swift package). `useLocalDSPHeaders` in `Package.swift` must stay `false` in commits.
+Dependency: [DSPHeaders](https://github.com/bradhowes/DSPHeaders) (Swift package). The value `useLocalDSPHeaders` in `Package.swift`
+must stay `false` in commits.
 
 ## Build and test
 
@@ -39,8 +46,10 @@ Dependency: [DSPHeaders](https://github.com/bradhowes/DSPHeaders) (Swift package
 
 ## Conventions
 
-- Match the existing style: 2-space indent, 120-column lines, `/** ... */` doc comments with `@param` / `@returns`, `SF2::` namespaces mirroring directories.
-- Functions suffixed `_RT` are intended for the render thread. Don't add allocation, locks, file I/O, Objective-C messaging or exceptions to render-thread paths.
+- Match the existing style: 2-space indent, 120-column lines, `/** ... */` doc comments with `@param` / `@returns`, `SF2::`
+namespaces mirroring directories.
+- Functions suffixed `_RT` are intended for the render thread. Don't add allocation, locks, file I/O, Objective-C messaging or
+exceptions to render-thread paths.
 - Don't put `noexcept` on code that can throw or that calls code that throws. Parser errors currently use `throw File::LoadResponse`.
 - Untrusted input (SF2 files, MIDI/SysEx bytes) must be validated before it is used as an index.
 - Keep changes focused on the current step. Note unrelated problems in the progress log rather than fixing them in passing.

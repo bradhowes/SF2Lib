@@ -15,11 +15,13 @@ namespace SF2::Entity {
 /**
  Memory layout of a 'ibag/pbag' entry in a sound font resource. Used to access packed values from a
  resource. Per spec, the size of this must be 4. The wGenNdx and wModNdx properties contain the first index
- of the generator/modulator that belongs to the instrument/preset zone. The number of generator or
- modulator settings is found by subtracting index value of this instance from the index value of the
+ of the generator/modulator that belongs to one instrument/preset zone. The number of generator or
+ modulator settings is found by subtracting the index value of this instance from the index value of the
  subsequent instance. This is guaranteed to be safe in a well-formed SF2 file, as all collections that
  operate in this way have a terminating instance whose index value is the total number of generators or
  modulators in the preset or instrument zones.
+
+ NOTE: because of this counting logic, it is unsafe to operate on a `Bag` instance outside of its container.
  */
 class Bag {
 public:
