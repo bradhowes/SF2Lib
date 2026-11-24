@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bradhowes/DSPHeaders",
       "state" : {
-        "revision" : "8cf51c43537df85a989751d8894a39f78dc7a670",
-        "version" : "1.6.1"
+        "revision" : "26b09318e6fa8655e038d5b75ba721d6e77121ae",
+        "version" : "1.7.1"
       }
     }
   ],
