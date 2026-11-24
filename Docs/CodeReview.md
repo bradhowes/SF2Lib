@@ -581,7 +581,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - The clock change cannot be checked this way, because a wall-clock jump cannot be produced in a test.
 - **Left over:** §6 item 4, the zero-filling loop after a voice stops in `Voice::renderInto`, is unchanged. `renderFadeOut` does not zero-fill. (Since fixed; see the next entry.)
 
-**Follow-up (2026-11-24): §6 item 4, silent tail. Not yet committed. `make test-macOS`: 384 tests, 0 failures.**
+**Follow-up (2026-11-24): §6 item 4, silent tail. Commit `0ce654b`. `make test-macOS`: 384 tests, 0 failures.**
 - **Change:** when a voice stopped part-way through a slice, `Voice::renderInto` went on calling `mixer.add(index, 0, 0, …)` for every remaining frame, on all three busses. `Mixer::add` only accumulates (`BusBuffers::addStereo` is `+=`), so this did nothing audible. The loop is removed, and the render loop now stops as soon as the voice becomes inactive.
 - **Test:** `EngineTests::testStoppedVoiceDoesNotWriteRestOfSlice`.
   - The `SF2Builder` sine plays for 64 frames, gets a note-off, and stops about 1 ms into the next 448-frame slice.
