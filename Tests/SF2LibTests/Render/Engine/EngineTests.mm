@@ -2809,4 +2809,39 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertEqual(reference, tapped);
 }
 
+- (void)testStoppedVoiceDoesNotWriteRestOfSlice
+{
+  // §6 item 4: after a voice stopped part-way through a render slice, `Voice::renderInto` added 0 to every remaining
+  // frame. That is pure overhead. It is inaudible, but adding +0.0 turns -0.0 into +0.0, so pre-fill the output with -0.0
+  // and check that the frames after the voice stopped are left alone.
+  auto path = std::string(NSTemporaryDirectory().UTF8String) + "SF2LibStoppedVoice.sf2";
+  SF2Builder::minimal().writeTo(path);
+  auto harness{TestEngineHarness{48000.0}};
+  XCTAssertEqual(harness.load(path, 0), SF2::IO::File::LoadResponse::ok);
+  auto mixer{harness.createMixer(512.0 / 48000.0)};
+  for (int channel = 0; channel < 2; ++channel) {
+    float* data = harness.dryBuffer().floatChannelData[channel];
+    std::fill(data, data + harness.bufferFrameCount(), -0.0f);
+  }
+
+  // The default release is about 1 ms, so the voice stops early in the second slice of 448 frames.
+  harness.sendNoteOn(69, 127);
+  harness.renderForCount(mixer, 64);
+  harness.sendNoteOff(69);
+  harness.renderForCount(mixer, 448);
+  XCTAssertEqual(harness.engine().activeVoiceCount(), size_t(0));
+
+  const float* left = harness.dryBuffer().floatChannelData[0];
+  double level = 0.0;
+  for (size_t index = 0; index < 64; ++index) level = std::max(level, std::abs(double(left[index])));
+  XCTAssertGreaterThan(level, 0.01);  // the note did sound
+
+  size_t overwritten = 0;
+  for (int channel = 0; channel < 2; ++channel) {
+    const float* data = harness.dryBuffer().floatChannelData[channel];
+    for (size_t index = 256; index < 512; ++index) if (!std::signbit(data[index])) ++overwritten;
+  }
+  XCTAssertEqual(overwritten, size_t(0));
+}
+
 @end

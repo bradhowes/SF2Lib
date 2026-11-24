@@ -257,25 +257,21 @@ public:
   }
 
   /**
-   Repeatedly invoke `renderSample` `frameCount` times.
+   Repeatedly invoke `renderSample` up to `frameCount` times, stopping early if the voice becomes inactive. The mixer
+   only accumulates, so nothing is written for the frames after that.
 
    @param mixer collection of buffers to mix into
    @param frameCount number of samples to render
    */
   void renderInto(Engine::Mixer& mixer, SF2::AUAudioFrameCount frameCount) noexcept {
-    SF2::AUAudioFrameCount index = 0;
     SF2::AUValue chorusSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend)));
     SF2::AUValue reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
-    for (; index < frameCount && active_; ++index) {
+    for (SF2::AUAudioFrameCount index = 0; index < frameCount && active_; ++index) {
       Float sample{renderSample()};
       Float pan{state_.modulated(Index::pan)};
       Float leftPan, rightPan;
       DSP::panLookup(pan, leftPan, rightPan);
       mixer.add(index, SF2::AUValue(leftPan * sample), SF2::AUValue(rightPan * sample), chorusSend, reverbSend);
-    }
-
-    for (; index < frameCount; ++index) {
-      mixer.add(index, 0_F, 0_F, chorusSend, reverbSend);
     }
   }
 

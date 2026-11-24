@@ -185,7 +185,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 1. **Memory:** samples are stored as `double` (`Float = double`), 4× the size of the int16 source. GeneralUser GS (~30 MB) becomes ~120 MB per fully loaded preset range. Storing `float` (or keeping `int16` and scaling at interpolation) halves or quarters that and improves cache behaviour. The render math could be `float` as well; the AU output is `float` anyway.
 2. **Block-rate control:** pan, sends, initialAttenuation, filter coefficients and the phase-increment components only change on MIDI or parameter events. Compute them once per render slice; EventProcessor already splits at event boundaries. Per-sample, keep only the LFO/envelope ramps. That also opens the FluidSynth-style 64-sample inner loop the README mentions, and SIMD.
 3. **Interpolator dispatch:** a member-function pointer is called per sample. Template `Voice::renderInto` on the interpolator and branch once per block.
-4. **Silent tail:** `Voice::renderInto` loops over the remaining frames calling `mixer.add(…, 0, 0, …)`. That's pure overhead; just stop.
+4. ~~**Silent tail:** `Voice::renderInto` loops over the remaining frames calling `mixer.add(…, 0, 0, …)`. That's pure overhead; just stop.~~ Fixed 2026-11-24 (see §11).
 5. **`updateStateMods`:** iterates all 60 generators plus every modulator for every voice on every CC, including CCs no modulator listens to. Precompute a per-voice bitmask of the CCs/sources it depends on.
 6. **`setContinuousControllerValue` always returns true**, so every CC notifies all voices even when the value didn't change.
 7. **`loadSamples`** loads the whole `[minStart, maxEnd]` range for a preset. For drum kits whose samples are scattered across the bank, that is most of the file. Per-sample-header spans (with a de-dupe map) would cut memory a lot.
@@ -579,4 +579,12 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - with no shedding, the predicted-overrun test fails;
   - shedding the newest voices instead of the oldest also fails it.
   - The clock change cannot be checked this way, because a wall-clock jump cannot be produced in a test.
-- **Left over:** §6 item 4, the zero-filling loop after a voice stops in `Voice::renderInto`, is unchanged. `renderFadeOut` does not zero-fill.
+- **Left over:** §6 item 4, the zero-filling loop after a voice stops in `Voice::renderInto`, is unchanged. `renderFadeOut` does not zero-fill. (Since fixed; see the next entry.)
+
+**Follow-up (2026-11-24): §6 item 4, silent tail. Not yet committed. `make test-macOS`: 384 tests, 0 failures.**
+- **Change:** when a voice stopped part-way through a slice, `Voice::renderInto` went on calling `mixer.add(index, 0, 0, …)` for every remaining frame, on all three busses. `Mixer::add` only accumulates (`BusBuffers::addStereo` is `+=`), so this did nothing audible. The loop is removed, and the render loop now stops as soon as the voice becomes inactive.
+- **Test:** `EngineTests::testStoppedVoiceDoesNotWriteRestOfSlice`.
+  - The `SF2Builder` sine plays for 64 frames, gets a note-off, and stops about 1 ms into the next 448-frame slice.
+  - The dry buffer is pre-filled with -0.0, which adding +0.0 turns into +0.0. The last 256 frames of both channels must still be -0.0.
+  - With the old loop back, all 512 of those samples are overwritten and the test fails.
+- No hard-coded rendering values changed.
