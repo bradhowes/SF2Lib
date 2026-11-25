@@ -9,21 +9,9 @@
 
 namespace Eng = SF2::Render::Engine;
 
-SF2Engine::SF2Engine(double sampleRate, size_t voiceCount)
-: impl_{std::make_shared<Eng::Engine>(sampleRate, std::clamp<size_t>(voiceCount, 1, Eng::traits::maxVoiceCount), 0.85)}
+SF2Engine::SF2Engine()
+: impl_{std::make_shared<Eng::Engine>()}
 {}
-
-size_t
-SF2Engine::maxVoiceCount() noexcept
-{
-  return Eng::traits::maxVoiceCount;
-}
-
-size_t
-SF2Engine::voiceCountLimit() const noexcept
-{
-  return impl_->voiceCountLimit();
-}
 
 bool
 SF2Engine::setRenderingFormat(NSInteger busCount, AVAudioFormat *format, AUAudioFrameCount maxFramesToRender) const noexcept

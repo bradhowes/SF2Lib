@@ -66,29 +66,14 @@ public:
   static constexpr double voiceCostSmoothing = 0.25;
 
   /**
-   Construct new engine and its voices.
-
-   @param sampleRate the expected sample rate to use
-   @param voiceCountLimit the maximum number of individual voices to support (must be <= maxVoiceCount)
-   @param renderingTimeBudgetScaling scaling to apply to the frameCount time budget (the number of nanoseconds in a render frame).
-   This value runs between 0.0  and 1.0. A value of 0.0 or negative will disable the budget check. Before rendering, if the
-   running estimate of the cost of the active voices exceeds the budget, the oldest voices beyond what fits are given a
-   fast (5 ms) release, so the load drops without clicks. If a render call still runs out of time, each remaining voice
-   is faded out over `budgetFadeOutFrames` frames and stopped.
+   Construct new engine.
    */
-  Engine(Float sampleRate,
-         size_t voiceCountLimit,
-         double renderingTimeBudgetScaling // = 0.85
-         );
+  Engine();
 
   /// Waits for queued loads to finish, then frees every preset state.
   ~Engine();
 
-  /// @returns maximum number of voices available for simultaneous rendering in engine.
   size_t maxVoiceCount() const noexcept { return traits::maxVoiceCount; }
-
-  /// @returns configured maximum number of voices available for rendering [legacy].
-  size_t voiceCountLimit() const noexcept { return voiceCountLimit_; }
 
   void setMinimumNoteDuration(size_t milliseconds) noexcept {
     minimumNoteDurationMilliseconds_ = milliseconds;
@@ -96,6 +81,20 @@ public:
   }
 
   size_t minimumNoteDuration() const noexcept { return minimumNoteDurationMilliseconds_; }
+
+  /**
+   Set the scaling factor to use when calculating how much time is available to process voices without missing a render cycle.
+
+   @param scaling the value to use. If negative, then time budgeting is disabled.
+   */
+  void setRenderingTimeBudgetScaling(double scaling) {
+    renderingTimeBudgetScaling_ = scaling;
+  }
+
+  /// @return current scaling used for time budgeting.
+  double renderingTimeBudgetScaling() const noexcept {
+    return renderingTimeBudgetScaling_;
+  }
 
   /**
    Update kernel and buffers to support the given format and channel count
@@ -703,10 +702,9 @@ private:
   os_signpost_id_t stopVoiceSignpost_;
 
   AUValue lastLoadFinishedCounter_{traits::minLastLoadFinished};
-  std::vector<AUValue> durationBuckets_;
 
   uint64_t renderingTimeBudgetIntervalNanoseconds_;
-  double renderingTimeBudgetScaling_{0.85};
+  double renderingTimeBudgetScaling_{1.0};
   Clock clock_{&Utils::Timer::now};
   double averageVoiceFrameNanoseconds_{0.0};
 

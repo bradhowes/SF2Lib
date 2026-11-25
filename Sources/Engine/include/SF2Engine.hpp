@@ -40,17 +40,9 @@ namespace Render { namespace Engine { class Engine; } }
 struct SWIFT_ESCAPABLE SWIFT_SELF_CONTAINED SF2Engine
 {
   /**
-   Constructs a new Engine. Swift imports this as `init(_:_:)`. There is no default constructor: every other method
-   needs the engine that this creates.
-
-   @param sampleRate the sample rate to use when rendering. Note that this is not fixed and may change in the
-   call to `setRenderingFormat`.
-   @param voiceCount the max number of voices to allow to simultaneously render. Values above `maxVoiceCount()` are
-   clamped to it (the engine used to throw, which terminates a Swift caller), and 0 becomes 1. See `voiceCountLimit()`.
+   Constructs a new Engine.
    */
-  SF2Engine(double sampleRate, size_t voiceCount);
-
-  SF2Engine() = delete;
+  SF2Engine();
 
   /// @returns the largest voice count that an engine supports
   static size_t maxVoiceCount() noexcept;

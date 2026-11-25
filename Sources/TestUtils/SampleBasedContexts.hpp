@@ -24,8 +24,8 @@ struct TestEngineHarness {
   using Mixer = SF2::Render::Engine::Mixer;
   using Interpolator = SF2::Render::Voice::Sample::Interpolator;
 
-  explicit TestEngineHarness(SF2::Float sampleRate, size_t voiceCount = SF2::Render::Engine::traits::maxVoiceCount) noexcept :
-  engine_{sampleRate, voiceCount, -1.0}
+  explicit TestEngineHarness(SF2::Float sampleRate = 48'000.0) noexcept :
+  engine_{}
   {
     format_ = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
     engine_.setRenderingFormat(3, format_, 512);
@@ -53,6 +53,10 @@ struct TestEngineHarness {
     DSPHeaders::BusBuffers reverb{reverbFacet_.busBuffers()};
 
     return Mixer(dry, chorus, reverb);
+  }
+
+  void setRenderingTimeBudgetScaling(double scaling) {
+    engine_.setRenderingTimeBudgetScaling(scaling);
   }
 
   void renderMaxFramesCount(Mixer& mixer, AVAudioFrameCount count = 1) noexcept {

@@ -19,10 +19,14 @@ let useAccelerate = true
 // `local_dspheaders_check` that can be used to prevent this from happening.
 let useLocalDSPHeaders = false
 
+// Set to true to build optimized version of library.
+let makeOptimized = false
+
 // Set to true to enable unsafe C++ flags -- only to be used for development/debugging
 // NOTE: do NOT commit when set to true or else downstream release builds may break. There is a pre-commit hook
 // `unsafe_flags_check` that can be used to prevent this from happening.
-let useUnsafeFlags = false
+let useUnsafeFlags = makeOptimized
+let optimizeFlag = makeOptimized ? "-O3" : "-g"
 
 let package = Package(
   name: "SF2Lib",
@@ -148,7 +152,7 @@ extension Array where Element == SwiftSetting {
 extension Array where Element == CXXSetting {
   static var cxxSettings: [CXXSetting] {
     let unsafeFlags = [
-      "-g",
+      optimizeFlag,
       "-pedantic",
       "-Wall",
       "-Wassign-enum",

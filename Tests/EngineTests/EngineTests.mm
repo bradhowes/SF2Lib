@@ -19,7 +19,7 @@ struct SF2EngineTestAccess {
 @synthesize engine;
 
 - (void)setUp {
-  self.engine = new SF2Engine(48000.0, 48);
+  self.engine = new SF2Engine();
 }
 
 - (void)tearDown {
@@ -28,21 +28,6 @@ struct SF2EngineTestAccess {
 - (void)testDestruction {
   delete self.engine;
   self.engine = nullptr;
-}
-
-- (void)testWithTooManyVoices {
-  // The engine throws for too many voices, and a C++ exception that reaches Swift terminates the program. The wrapper
-  // clamps the count instead.
-  delete self.engine;
-  XCTAssertNoThrow(self.engine = new SF2Engine(48000.0, 99999));
-  XCTAssertEqual(self.engine->voiceCountLimit(), SF2Engine::maxVoiceCount());
-  XCTAssertEqual(SF2Engine::maxVoiceCount(), size_t(128));
-  delete self.engine;
-  self.engine = new SF2Engine(48000.0, 0);
-  XCTAssertEqual(self.engine->voiceCountLimit(), size_t(1));
-  delete self.engine;
-  self.engine = new SF2Engine(48000.0, 48);
-  XCTAssertEqual(self.engine->voiceCountLimit(), size_t(48));
 }
 
 - (void)testRenderBlockKeepsEngineAlive {

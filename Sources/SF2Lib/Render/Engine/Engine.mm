@@ -14,31 +14,19 @@
 using namespace SF2::Entity::Generator;
 using namespace SF2::Render::Engine;
 
-Engine::Engine(Float sampleRate, size_t voiceCountLimit, double renderingTimeBudgetScaling)
+Engine::Engine()
   : super(Log::create("Engine")),
-    sampleRate_{sampleRate},
+    sampleRate_{0},
     parameters_{},
     oldestVoiceIndices_{},
-    voiceCountLimit_{voiceCountLimit},
     renderSignpost_{os_signpost_id_generate(log_)},
     noteOnSignpost_{os_signpost_id_generate(log_)},
     noteOffSignpost_{os_signpost_id_generate(log_)},
     startVoiceSignpost_{os_signpost_id_generate(log_)},
     stopVoiceSignpost_{os_signpost_id_generate(log_)},
-    renderingTimeBudgetScaling_{renderingTimeBudgetScaling},
     workQueue_{dispatch_queue_create("SF2Lib::Engine", DISPATCH_QUEUE_SERIAL)},
     activeVoiceCountQueue_{dispatch_queue_create("SF2Lib::Engine.activeVoiceCount", DISPATCH_QUEUE_SERIAL)}
 {
-  if (voiceCountLimit > traits::maxVoiceCount) {
-    throw std::runtime_error("voiceCountLimit is too large");
-  }
-
-  durationBuckets_.reserve(voiceCountLimit);
-
-  for (size_t voiceIndex = 0; voiceIndex < voiceCountLimit; ++voiceIndex) {
-    voices_[voiceIndex].initialize(voiceIndex, sampleRate);
-  }
-
   makeTree();
 }
 
@@ -942,11 +930,11 @@ void
 Engine::initialize(Float sampleRate) noexcept
 {
   sampleRate_ = sampleRate;
-  minimumNoteDurationSamples_ = minimumNoteDurationMilliseconds_ * sampleRate_ / 1'000_F;
-  renderingTimeBudgetIntervalNanoseconds_ = uint64_t(1.0 / sampleRate * 1.0e9);
+  minimumNoteDurationSamples_ = minimumNoteDurationMilliseconds_ * sampleRate / 1'000_F;
+  renderingTimeBudgetIntervalNanoseconds_ = uint64_t(1.0e9 / sampleRate);
   allOff_RT();
-  for (auto& voice : voices_) {
-    voice.setSampleRate(sampleRate);
+  for (size_t index = 0; index < traits::maxVoiceCount; ++index) {
+    voices_[index].initialize(index, sampleRate);
   }
   parameters_.reset();
 }
@@ -1264,7 +1252,7 @@ Engine::makeTree() noexcept
                                                                          name:@"activeVoiceCount"
                                                                       address:DSPHeaders::valueOf(ParameterAddress::activeVoiceCount)
                                                                           min:0
-                                                                          max:AUValue(voiceCountLimit())
+                                                                          max:AUValue(traits::maxVoiceCount)
                                                                          unit:kAudioUnitParameterUnit_Generic
                                                                      unitName:nullptr
                                                                         flags:flags

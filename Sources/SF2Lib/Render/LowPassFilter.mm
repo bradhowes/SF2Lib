@@ -26,12 +26,12 @@ LowPassFilter::updateSettings(Float frequency, Float resonance, size_t rampDurat
 
   // Bounds taken from FluidSynth, where the upper bound serves as an anti-aliasing filter, just below the
   // Nyquist frequency.
-  auto frequencyHz = DSP::clamp(DSP::centsToFrequency(frequency), 5_F, 0.45_F * sampleRate_);
+  auto frequencyHz = DSP::clamp(DSP::centsToFrequency(frequency), 5.0, 0.45 * sampleRate_);
   auto coefficients{Coefficients::LPF2(sampleRate_, frequencyHz, DSP::centibelsToResonance(resonance))};
 
   // SF2.01 8.1.2 #9: "The filter gain at DC is also affected by this parameter such that the gain at DC is reduced by
   // half the specified gain." LPF2 has unity gain at DC, so scale the numerator.
-  auto dcGain = DSP::centibelsToAttenuationInterpolated(DSP::clamp(resonance, 0_F, 960_F) / 2_F);
+  auto dcGain = DSP::centibelsToAttenuationInterpolated(DSP::clamp(resonance, 0.0, 960.0) / 2.0);
   coefficients.a0 *= dcGain;
   coefficients.a1 *= dcGain;
   coefficients.a2 *= dcGain;

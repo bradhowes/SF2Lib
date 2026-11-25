@@ -115,12 +115,12 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)setUp {
   [super setUp];
-  self.playAudio = true;
+  // self.playAudio = true;
 }
 
 - (void)testInit {
-  Engine engine(44100.0, 32, -1.0);
-  XCTAssertEqual(engine.voiceCountLimit(), size_t(32));
+  Engine engine;
+  XCTAssertEqual(engine.maxVoiceCount(), size_t(128));
   XCTAssertEqual(engine.activeVoiceCount(), size_t(0));
   XCTAssertTrue(engine.polyphonicModeEnabled());
   XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
@@ -134,7 +134,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testPortamento {
-  auto harness{TestEngineHarness{48000.0, 32}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
 
   XCTAssertFalse(engine.portamentoModeEnabled());
@@ -152,7 +152,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testPhonicMode {
-  auto harness{TestEngineHarness{48000.0, 32}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
 
   XCTAssertTrue(engine.polyphonicModeEnabled());
@@ -168,7 +168,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testOneVoicePerKey {
-  auto harness{TestEngineHarness{48000.0, 32}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
 
   XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
@@ -181,7 +181,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testRetriggering {
-  auto harness{TestEngineHarness{48000.0, 32}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
 
   XCTAssertTrue(engine.retriggerModeEnabled());
@@ -194,7 +194,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testLoad {
-  auto harness{TestEngineHarness{48000.0, 32}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqualWithAccuracy(engine.lastLoadFinishedCounter(), 0.0, 0.0005);
@@ -229,7 +229,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testUsePresetByIndex {
-  auto harness{TestEngineHarness{48000.0, 32}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -248,82 +248,9 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertEqual("", engine.activePresetName());
 }
 
-//- (void)testRolandPianoChordRenderLinear {
-//  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
-//  auto& engine{harness.engine()};
-//  harness.load(self.contexts->context2.path(), 0);
-//
-//  int cycles = 5;
-//  auto mixer{harness.createMixer(12.0)};
-//  XCTAssertEqual(size_t(0), engine.activeVoiceCount());
-//
-//  std::vector<AUValue> samples;
-//
-//  auto playChord = [&](uint8_t note1, uint8_t note2, uint8_t note3, bool sustain) {
-//    harness.renderMaxFramesCount(mixer);
-//    harness.sendNoteOn(note1);
-//    harness.sendNoteOn(note2);
-//    harness.sendNoteOn(note3);
-//    harness.renderForDuration(mixer, 0.25);
-//    if (!sustain) {
-//      harness.sendNoteOff(note1);
-//      harness.sendNoteOff(note2);
-//      harness.sendNoteOff(note3);
-//    }
-//  };
-//
-//  for (auto count = 0; count < cycles; ++count) {
-//    playChord(60, 64, 67, false);
-//    samples.push_back(harness.lastDrySample());
-//    playChord(60, 65, 69, false);
-//    samples.push_back(harness.lastDrySample());
-//    playChord(60, 64, 67, false);
-//    samples.push_back(harness.lastDrySample());
-//    playChord(59, 62, 67, false);
-//    samples.push_back(harness.lastDrySample());
-//    playChord(60, 64, 67, count == cycles - 1);
-//    samples.push_back(harness.lastDrySample());
-//  }
-//
-//  XCTAssertEqual(size_t(54), engine.activeVoiceCount());
-//  harness.renderToEnd(mixer);
-//  samples.push_back(harness.lastDrySample());
-//  XCTAssertEqual(size_t(0), engine.activeVoiceCount());
-//
-//  [self dumpSamples: samples];
-//
-//  XCTAssertEqualWithAccuracy(0.0484130382538, samples[0], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0209413710982, samples[1], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0479802936316, samples[2], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0732565447688, samples[3], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0271318107843, samples[4], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.04047684744, samples[5], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0161847602576, samples[6], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0476960875094, samples[7], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0730952322483, samples[8], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0271220896393, samples[9], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0405118837953, samples[10], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0161952637136, samples[11], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0476932115853, samples[12], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0730952322483, samples[13], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0271220896393, samples[14], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0405118837953, samples[15], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0161952637136, samples[16], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0476932115853, samples[17], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0730952322483, samples[18], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0271220896393, samples[19], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0405118837953, samples[20], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0161952637136, samples[21], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0476932115853, samples[22], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0730952322483, samples[23], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0.0271220896393, samples[24], self.epsilon);
-//  XCTAssertEqualWithAccuracy(0, samples[25], self.epsilon);
-//
-//  [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
-//}
-
 - (void)testRolandPianoChordRenderCubic4thOrder {
-  auto harness{TestEngineHarness{48000.0, 32}};
+  auto harness{TestEngineHarness{}};
+  harness.setRenderingTimeBudgetScaling(-1.0);
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
 
@@ -392,13 +319,13 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertEqualWithAccuracy(0.0477178432047, samples[22], self.epsilon);
   XCTAssertEqualWithAccuracy(0.0731818154454, samples[23], self.epsilon);
   XCTAssertEqualWithAccuracy(0.0271355789155, samples[24], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0, samples[25], epsilon);
+  XCTAssertEqualWithAccuracy(0, samples[25], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
 }
 
 - (void)testEngineMIDIProgramChange {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -495,7 +422,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineMIDINoteOnOffProcessing
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -543,7 +470,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineMIDINoteRandomNoteOff
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -579,7 +506,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineMIDINoteOnAsNoteOff
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -601,7 +528,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineMIDIPitchBendProcessing
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
 
@@ -675,7 +602,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   // SF2.01 8.1.2 #57: a new note with the same exclusiveClass "rapidly terminates" a sounding one. Use a ~5 ms release
   // rather than a hard cut: the old voice must still be fading after 1 ms and gone after 6 ms. It actually stops after
   // about 2 ms, because its gain (which includes the velocity attenuation) drops below the -80 dB cut-off early.
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context1.path(), 260);
   auto mixer{harness.createMixer(1.5)};
@@ -700,7 +627,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 {
   // A note that has been released and is still ringing out is also "sounding" (8.1.2 #57), so a new note in the same
   // class cuts it off. Previously a voice already in its release phase was skipped.
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context1.path(), 260);
   auto mixer{harness.createMixer(1.0)};
@@ -721,7 +648,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineMIDIChannelPressure
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context1.path(), 14);
 
@@ -762,7 +689,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineMIDIKeyPressure // no effect as there is no modulator using it
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context1.path(), 14);
 
@@ -814,7 +741,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineSustainPedalProcessing
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context1.path(), 0);
 
@@ -887,7 +814,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineSostenutoPedalProcessing
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context1.path(), 0);
 
@@ -960,7 +887,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   std::cout << "SNAPSHOT_ARTIFACTS: " << blah << "\n";
   // return;
 
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 18);
 
@@ -1398,7 +1325,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testEngineMIDIReset {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -1416,7 +1343,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testEngineMIDILoadPath {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
 
@@ -1445,7 +1372,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testEngineDirectLoadPath {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
 
@@ -1466,7 +1393,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testEngineMIDILoadPathEmpty {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
   XCTAssertEqual(std::string("Piano 1"), engine.activePresetName());
@@ -1494,7 +1421,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testEngineMIDILoadBookmark {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
 
@@ -1526,7 +1453,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testEngineDirectLoadBookmark {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
 
@@ -1550,7 +1477,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testEngineMIDILoadBookmarkMultiple {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
 
@@ -1604,7 +1531,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testEngineRenderStopFlushesPendingQueue {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
 
@@ -1659,7 +1586,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineOneVoicePerKey
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -1708,7 +1635,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineActiveVoiceCount
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   auto address = DSPHeaders::valueOf(ParameterAddress::activeVoiceCount);
   AUParameter* param = [engine.parameterTree() parameterWithAddress: address];
@@ -1743,7 +1670,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineParameterTreeHasGenerators
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   auto flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable;
 
@@ -1762,7 +1689,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineParameterControlChangeForPanning
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
 
   harness.load(self.contexts->context0.path(), 18);
@@ -2194,7 +2121,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineChangePresetByIndex
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
   harness.load(self.contexts->context0.path(), 0);
@@ -2227,7 +2154,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineChangePresetByBankProgram
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
   XCTAssertEqual("Piano 1", engine.activePresetName());
@@ -2246,7 +2173,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineAllSoundOff
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -2258,7 +2185,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineAllNotesOff
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -2270,7 +2197,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineResetAllControllers
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -2338,7 +2265,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineMonoOn
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -2353,7 +2280,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEnginePolyOn
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -2369,7 +2296,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineOmniOff
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -2381,7 +2308,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testEngineOmniOn
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -2394,7 +2321,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
 - (void)testMIDIPitchBendDecodesFull14BitRange
 {
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   auto& engine{harness.engine()};
 
   // At rest the wheel is centred.
@@ -2456,7 +2383,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   // Render a note, sending `before` ahead of the note-on and `after` once it sounds.
   const auto path = self.contexts->context0.path();
   auto render = [&path](std::vector<Bytes> before, std::vector<Bytes> after) {
-    auto harness{TestEngineHarness{48000.0}};
+    auto harness{TestEngineHarness{}};
     harness.load(path, 0);
     auto mixer{harness.createMixer(0.25)};
     for (const auto& bytes : before) harness.sendRaw(bytes);
@@ -2737,7 +2664,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   // startAddrsCoarseOffset (gen 4) of 1000 x 32768 samples is far beyond any sample in the file. The start clamps to
   // the end of the sample, so the note produces no audio and its voice finishes straight away.
   const auto path = self.contexts->context0.path();
-  auto harness{TestEngineHarness{48000.0}};
+  auto harness{TestEngineHarness{}};
   harness.load(path, 0);
   harness.setParameter(Index::startAddressCoarseOffset, 1'000);
   auto mixer{harness.createMixer(0.25)};
@@ -2850,7 +2777,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   // The active voice count used to be set on the `activeVoiceCount` parameter from the render thread. That was removed
   // (Objective-C messaging is not real-time safe) with no replacement, so a UI observing the parameter stopped seeing
   // it. Now the render thread shares the count through an atomic and a timer publishes it while rendering.
-  auto harness{TestEngineHarness{48000.0}};
+  TestEngineHarness harness;
   auto& engine{harness.engine()};
   XCTAssertTrue(engine.isRendering());
   harness.load(self.contexts->context0.path(), 0);

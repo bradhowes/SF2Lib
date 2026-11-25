@@ -18,15 +18,9 @@ private let freeFontPath = resources.appendingPathComponent("FreeFont.sf2").path
 /// `std::optional`, non-copyable types) is compiled and checked from the Swift side.
 @Suite struct EngineSwiftTests {
 
-  @Test func engineInitialiserClampsVoiceCount() {
-    #expect(SF2Engine(48000.0, 99999).voiceCountLimit() == SF2Engine.maxVoiceCount())
-    #expect(SF2Engine(48000.0, 0).voiceCountLimit() == 1)
-    #expect(SF2Engine(48000.0, 32).voiceCountLimit() == 32)
-  }
-
   @Test func engineMethodsAreNonMutating() {
     // A `let`: this only compiles if every method used is `const` in C++ (imported as non-mutating).
-    let engine = SF2Engine(48000.0, 32)
+    let engine = SF2Engine()
     #expect(engine.loadFileAndPreset(std.string(freeFontPath), 0) == .ok)
     #expect(String(engine.activePresetName()) == "Piano 1")
     #expect(engine.activeVoiceCount() == 0)
@@ -34,14 +28,14 @@ private let freeFontPath = resources.appendingPathComponent("FreeFont.sf2").path
   }
 
   @Test func engineCopiesShareTheEngine() {
-    let first = SF2Engine(48000.0, 32)
+    let first = SF2Engine()
     let second = first
     #expect(first.loadFileAndPreset(std.string(freeFontPath), 2) == .ok)
     #expect(String(second.activePresetName()) == "Piano 3")
   }
 
   @Test func engineReportsLoadFailures() {
-    let engine = SF2Engine(48000.0, 32)
+    let engine = SF2Engine()
     #expect(engine.loadFileAndPreset(std.string("/does/not/exist.sf2"), 0) != .ok)
   }
 
