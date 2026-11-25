@@ -14,7 +14,7 @@
 using namespace SF2::Entity::Generator;
 using namespace SF2::Render::Engine;
 
-Engine::Engine(Float sampleRate, size_t voiceCountLimit, Interpolator interpolator, double renderingTimeBudgetScaling,
+Engine::Engine(Float sampleRate, size_t voiceCountLimit, double renderingTimeBudgetScaling,
                size_t minimumNoteDurationMilliseconds)
   : super(Log::create("Engine")),
     sampleRate_{sampleRate},

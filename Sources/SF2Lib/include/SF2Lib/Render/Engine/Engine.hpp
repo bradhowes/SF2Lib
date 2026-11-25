@@ -55,7 +55,6 @@ class Engine : public DSPHeaders::EventProcessor<Engine> {
 public:
   using Config = Voice::State::Config;
   using Voice = Voice::Voice;
-  using Interpolator = Render::Voice::Sample::Interpolator;
 
   /// Source of the time used for the render budget, in nanoseconds. Must be monotonic and safe on the render thread.
   using Clock = uint64_t (*)() noexcept;
@@ -71,7 +70,6 @@ public:
 
    @param sampleRate the expected sample rate to use
    @param voiceCountLimit the maximum number of individual voices to support (must be <= maxVoiceCount)
-   @param interpolator the type of interpolation to use when rendering samples
    @param renderingTimeBudgetScaling scaling to apply to the frameCount time budget (the number of nanoseconds in a render frame).
    This value runs between 0.0  and 1.0. A value of 0.0 or negative will disable the budget check. Before rendering, if the
    running estimate of the cost of the active voices exceeds the budget, the oldest voices beyond what fits are given a
@@ -81,7 +79,6 @@ public:
    */
   Engine(Float sampleRate,
          size_t voiceCountLimit,
-         Interpolator interpolator,
          double renderingTimeBudgetScaling, // = 0.85,
          size_t minimumNoteDurationMilliseconds = 10
          );

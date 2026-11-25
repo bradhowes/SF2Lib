@@ -28,7 +28,7 @@ using namespace SF2::Render::Voice::State;
 }
 
 - (void)testVoiceRepeatedRenderGeneratesSameOutputRolandPiano {
-  auto harness{TestEngineHarness{48000.0, 96, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder}};
+  auto harness{TestEngineHarness{48000.0, 96}};
   harness.load(self.contexts->context2.path(), 0);
 
   double seconds = 4.0;

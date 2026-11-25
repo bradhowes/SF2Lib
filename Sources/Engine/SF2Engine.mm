@@ -10,8 +10,7 @@
 namespace Eng = SF2::Render::Engine;
 
 SF2Engine::SF2Engine(double sampleRate, size_t voiceCount)
-: impl_{std::make_shared<Eng::Engine>(sampleRate, std::clamp<size_t>(voiceCount, 1, Eng::traits::maxVoiceCount),
-                                      Eng::Engine::Interpolator::cubic4thOrder, 0.85)}
+: impl_{std::make_shared<Eng::Engine>(sampleRate, std::clamp<size_t>(voiceCount, 1, Eng::traits::maxVoiceCount), 0.85)}
 {}
 
 size_t

@@ -119,7 +119,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testInit {
-  Engine engine(44100.0, 32, SF2::Render::Voice::Sample::Interpolator::linear, -1.0);
+  Engine engine(44100.0, 32, -1.0);
   XCTAssertEqual(engine.voiceCountLimit(), size_t(32));
   XCTAssertEqual(engine.activeVoiceCount(), size_t(0));
   XCTAssertTrue(engine.polyphonicModeEnabled());
@@ -134,7 +134,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testPortamento {
-  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
+  auto harness{TestEngineHarness{48000.0, 32}};
   auto& engine{harness.engine()};
 
   XCTAssertFalse(engine.portamentoModeEnabled());
@@ -152,7 +152,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testPhonicMode {
-  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
+  auto harness{TestEngineHarness{48000.0, 32}};
   auto& engine{harness.engine()};
 
   XCTAssertTrue(engine.polyphonicModeEnabled());
@@ -168,7 +168,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testOneVoicePerKey {
-  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
+  auto harness{TestEngineHarness{48000.0, 32}};
   auto& engine{harness.engine()};
 
   XCTAssertFalse(engine.oneVoicePerKeyModeEnabled());
@@ -181,7 +181,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testRetriggering {
-  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
+  auto harness{TestEngineHarness{48000.0, 32}};
   auto& engine{harness.engine()};
 
   XCTAssertTrue(engine.retriggerModeEnabled());
@@ -194,7 +194,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testLoad {
-  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
+  auto harness{TestEngineHarness{48000.0, 32}};
   auto& engine{harness.engine()};
   XCTAssertFalse(engine.hasActivePreset());
   XCTAssertEqualWithAccuracy(engine.lastLoadFinishedCounter(), 0.0, 0.0005);
@@ -229,7 +229,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 }
 
 - (void)testUsePresetByIndex {
-  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::linear}};
+  auto harness{TestEngineHarness{48000.0, 32}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context0.path(), 0);
 
@@ -323,7 +323,7 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 //}
 
 - (void)testRolandPianoChordRenderCubic4thOrder {
-  auto harness{TestEngineHarness{48000.0, 32, SF2::Render::Voice::Sample::Interpolator::cubic4thOrder}};
+  auto harness{TestEngineHarness{48000.0, 32}};
   auto& engine{harness.engine()};
   harness.load(self.contexts->context2.path(), 0);
 
