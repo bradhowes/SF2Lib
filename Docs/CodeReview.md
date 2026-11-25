@@ -703,7 +703,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - Without the timer, or without the render thread sharing the count, the test fails.
 - **Note:** each step's progress log used to be checked against the end-to-end tests only. None of them observed the parameter tree, which is how this went unnoticed.
 
-**Follow-up (2026-11-25): SF2.01 7.10 stereo links. Code committed by the user as `ad54423`; this entry and one extra test are not yet committed. `make test-macOS`: 438 tests, 0 failures.**
+**Follow-up (2026-11-25): SF2.01 7.10 stereo links. Code committed by the user as `ad54423`; this entry and one extra test are in `60bcfdc`. `make test-macOS`: 438 tests, 0 failures.**
 - **Spec:** "If sfSampleType indicates a left or right sample, then wSampleLink is the sample header index of the associated right or left stereo sample respectively. Both samples should be played entirely synchronously, with their pitch controlled by the right sample's generators. All non-pitch generators should apply as normal; in particular the panning of the individual samples to left and right should be accomplished via the pan generator. Left-right pairs should always be found within the same instrument." Before this, the two zones of a pair played as independent voices, each with its own pitch and lifecycle.
 - **Pairing:**
   - `Engine::noteOn_RT` now keeps the voice index started for each config.
