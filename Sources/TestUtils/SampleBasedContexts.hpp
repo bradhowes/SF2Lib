@@ -247,7 +247,7 @@ struct TestVoiceCollection {
     voices_.reserve(presetConfigs_.size());
     for (size_t index = 0; index < presetConfigs_.size(); ++index) {
       voices_.emplace_back();
-      voices_.back().initialize(index, sampleRate_, SF2::Render::Voice::Sample::Interpolator::linear);
+      voices_.back().initialize(index, sampleRate_);
       voices_.back().configure(presetConfigs_[index], channelState_);
     }
   }

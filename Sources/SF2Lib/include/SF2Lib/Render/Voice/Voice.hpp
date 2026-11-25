@@ -55,9 +55,8 @@ public:
 
    @param voiceIndex the unique index assigned to this voice
    @param sampleRate the sample rate to use for generating audio
-   @param interpolator how to interpolate sample values
    */
-  void initialize(size_t voiceIndex, Float sampleRate, Sample::Interpolator interpolator) noexcept;
+  void initialize(size_t voiceIndex, Float sampleRate) noexcept;
 
   /// Allow move operations during construction to support std::vector
   Voice(Voice&&) noexcept = default;

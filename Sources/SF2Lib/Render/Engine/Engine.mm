@@ -38,7 +38,7 @@ Engine::Engine(Float sampleRate, size_t voiceCountLimit, Interpolator interpolat
   durationBuckets_.reserve(voiceCountLimit);
 
   for (size_t voiceIndex = 0; voiceIndex < voiceCountLimit; ++voiceIndex) {
-    voices_[voiceIndex].initialize(voiceIndex, sampleRate, interpolator);
+    voices_[voiceIndex].initialize(voiceIndex, sampleRate);
   }
 
   makeTree();

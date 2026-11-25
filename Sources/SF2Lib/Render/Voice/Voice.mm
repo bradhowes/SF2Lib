@@ -14,10 +14,9 @@ using namespace SF2::Render::Voice;
 using namespace SF2::Entity::Generator;
 
 void
-Voice::initialize(size_t voiceIndex, Float sampleRate, Sample::Interpolator interpolator) noexcept
+Voice::initialize(size_t voiceIndex, Float sampleRate) noexcept
 {
   voiceIndex_ = voiceIndex;
-  sampleGenerator_.setInterpolator(interpolator);
   state_.setSampleRate(sampleRate);
   filter_.setSampleRate(sampleRate);
 }

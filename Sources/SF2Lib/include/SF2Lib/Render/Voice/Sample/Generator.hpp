@@ -36,12 +36,8 @@ public:
   /**
    Construct new instance. NOTE: the instance is not usable for audio rendering at this point. One must call
    `configure` in order to be useable for rendering purposes.
-
-   @param kind the interpolation to apply to the samples
    */
-  Generator(Interpolator kind = Interpolator::linear) noexcept : interpolatorProc_{interpolator(kind)} {}
-
-  void setInterpolator(Interpolator kind) noexcept { interpolatorProc_ = interpolator(kind); }
+  Generator() noexcept {}
 
   /**
    Configure instance to use the given sample source. NOTE: this is invoked before start of rendering a note. This
@@ -81,7 +77,7 @@ public:
     // sample before the loop start the one at the loop end.
     auto hasLooped = canLoop && index_.looped();
     index_.increment(increment, canLoop);
-    return (this->*interpolatorProc_)(whole, partial, canLoop, hasLooped);
+    return cubic4thOrderInterpolate(whole, partial, canLoop, hasLooped);
   }
 
   /// @returns true if sill generating samples
@@ -91,25 +87,6 @@ public:
   bool looped() const noexcept { return index_.looped(); }
 
 private:
-  using InterpolatorProc = Float (Generator::*)(size_t, Float, bool, bool) const;
-
-  static InterpolatorProc interpolator(Interpolator kind) noexcept {
-    return kind == Interpolator::linear ? &Generator::linearInterpolate : &Generator::cubic4thOrderInterpolate;
-  }
-
-  /**
-   Obtain a linearly interpolated sample for a given index value.
-
-   @param whole the index of the first sample to use
-   @param partial the non-integral part of the index
-   @param canLoop true if wrapping around in loop is allowed
-   @param hasLooped true if playback has already wrapped around the loop (unused: linear does not look backwards)
-   @returns interpolated sample result
-   */
-  Float linearInterpolate(size_t whole, Float partial, bool canLoop, bool) const noexcept {
-    return Float(DSPHeaders::DSP::Interpolation::linear(partial, sample(whole, canLoop), sample(whole + 1, canLoop)));
-  }
-
   /**
    Obtain a cubic 4th-order interpolated sample for a given index value.
 
@@ -120,17 +97,22 @@ private:
    @returns interpolated sample result
    */
   Float cubic4thOrderInterpolate(size_t whole, Float partial, bool canLoop, bool hasLooped) const noexcept {
-    return Float(DSPHeaders::DSP::Interpolation::cubic4thOrder(partial, before(whole, canLoop, hasLooped),
-                                                               sample(whole, canLoop), sample(whole + 1, canLoop),
-                                                               sample(whole + 2, canLoop)));
+    auto s0 = before(whole, canLoop, hasLooped);
+    auto s1 = sample(whole, canLoop); ++whole;
+    auto s2 = sample(whole, canLoop); ++whole;
+    auto s3 = sample(whole, canLoop);
+    return DSPHeaders::DSP::Interpolation::cubic4thOrder(partial, s0, s1, s2, s3);
   }
 
   /**
    Fetch a sample for interpolation. When looping, any index at or past the loop end maps back into the loop: cubic
    interpolation reads up to two samples ahead, so `endLoopPos + 1` must become `startLoopPos + 1` (only `endLoopPos`
    itself used to be wrapped).
+
+   @param whole reference to index of the sample to fetch
+   @param canLoop `true` if the samples can and should loop around
    */
-  Float sample(size_t whole, bool canLoop) const noexcept {
+  Float sample(size_t& whole, bool canLoop) const noexcept {
     if (canLoop && whole >= bounds_.endLoopPos()) {
       whole = bounds_.startLoopPos() + (whole - bounds_.endLoopPos()) % bounds_.loopSize();
     }
@@ -150,7 +132,6 @@ private:
 
   Bounds bounds_{};
   Index index_{};
-  InterpolatorProc interpolatorProc_;
   std::shared_ptr<Zone::NormalizedSampleSpan> samples_{};
 };
 

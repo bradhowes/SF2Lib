@@ -137,7 +137,7 @@ static void checkLoopingAgainstReference(Float increment, int steps)
   SampleHeader header{0, uint32_t(end), uint32_t(startLoop), uint32_t(endLoop), 48'000, 69, 0};
   auto span = std::make_shared<SF2::Render::Zone::NormalizedSampleSpan>(values, 0, header);
   State::State state(48'000.0);
-  Sample::Generator generator{Interpolator::cubic4thOrder};
+  Sample::Generator generator;
   generator.configure(std::move(span));
   generator.start(state);
 
@@ -195,7 +195,7 @@ static void checkLoopingAgainstReference(Float increment, int steps)
   for (int offset : {0, 1, 500}) {
     auto state = context.makeState(config);
     self.sst.setValue(state, GenIndex::startAddressOffset, offset);
-    Sample::Generator generator{Interpolator::linear};
+    Sample::Generator generator;
     generator.configure(config.samples());
     generator.start(state);
     XCTAssertEqual(generator.generate(1_F, false), (*span)[size_t(offset)], @"offset %d", offset);
