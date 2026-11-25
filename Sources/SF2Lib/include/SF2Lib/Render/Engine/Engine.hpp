@@ -571,6 +571,23 @@ private:
    */
   void shedVoicesOverBudget_RT(AUAudioFrameCount frameCount, uint64_t timeBudget) noexcept;
 
+  /// Record the active voice count for `publishActiveVoiceCount`. Lock-free, so safe on the render thread.
+  void shareActiveVoiceCount_RT() noexcept {
+    activeVoiceCountShared_.store(uint32_t(oldestVoiceIndices_.activeVoiceCount()), std::memory_order_relaxed);
+  }
+
+  /**
+   Set the `activeVoiceCount` parameter from the value shared by the render thread, if it changed, which notifies the
+   parameter's observers. Runs on `activeVoiceCountQueue_` (never on the render thread: it uses Objective-C).
+   */
+  void publishActiveVoiceCount() noexcept;
+
+  /// Start the timer that calls `publishActiveVoiceCount` (when rendering starts).
+  void startPublishingActiveVoiceCount() noexcept;
+
+  /// Stop the timer, then publish the final count (when rendering stops, and on destruction).
+  void stopPublishingActiveVoiceCount() noexcept;
+
   void notifyActiveVoicesChannelStateChanged_RT() noexcept;
 
   void processChannelMessage_RT(MIDI::ControlChange cc, uint8_t value) noexcept;
@@ -639,10 +656,20 @@ private:
   std::mutex retiredMutex_;
   std::vector<PresetsState*> retired_;
 
-  // std::unique_ptr<IO::File> file_{};
-  // PresetCollection presets_{};
-
   std::atomic<int> presetChangesPending_{0};
+
+  /// How often the active voice count is published to the `activeVoiceCount` parameter while rendering.
+  static constexpr int64_t activeVoiceCountPublishIntervalNanoseconds = 50 * NSEC_PER_MSEC;
+
+  /// Active voice count written by the render thread (lock-free) and read by `publishActiveVoiceCount`.
+  std::atomic<uint32_t> activeVoiceCountShared_{0};
+
+  /// The last value given to the `activeVoiceCount` parameter. Only used on `activeVoiceCountQueue_`.
+  uint32_t activeVoiceCountPublished_{0};
+
+  /// Serial queue and timer that publish the active voice count while rendering, off the render thread.
+  dispatch_queue_t activeVoiceCountQueue_;
+  dispatch_source_t activeVoiceCountTimer_{nullptr};
 
   size_t portamentoRateMillisecondsPerSemitone_{100};
 

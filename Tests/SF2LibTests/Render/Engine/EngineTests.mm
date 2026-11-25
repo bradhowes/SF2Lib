@@ -2844,4 +2844,41 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   XCTAssertEqual(overwritten, size_t(0));
 }
 
+- (void)testActiveVoiceCountIsPublishedToParameterObservers
+{
+  // The active voice count used to be set on the `activeVoiceCount` parameter from the render thread. That was removed
+  // (Objective-C messaging is not real-time safe) with no replacement, so a UI observing the parameter stopped seeing
+  // it. Now the render thread shares the count through an atomic and a timer publishes it while rendering.
+  auto harness{TestEngineHarness{48000.0}};
+  auto& engine{harness.engine()};
+  XCTAssertTrue(engine.isRendering());
+  harness.load(self.contexts->context0.path(), 0);
+  auto mixer{harness.createMixer(1.0)};
+
+  auto address = DSPHeaders::valueOf(SF2::Render::Engine::ParameterAddress::activeVoiceCount);
+  auto sawThree = [self expectationWithDescription:@"observer saw 3 active voices"];
+  auto sawZero = [self expectationWithDescription:@"observer saw 0 active voices again"];
+  __block bool seenThree = false;
+  __block bool seenZero = false;
+  auto token = [engine.parameterTree() tokenByAddingParameterObserver:^(AUParameterAddress changed, AUValue value) {
+    if (changed != address) return;
+    if (!seenThree && value == 3) { seenThree = true; [sawThree fulfill]; }
+    else if (seenThree && !seenZero && value == 0) { seenZero = true; [sawZero fulfill]; }
+  }];
+
+  for (uint8_t key : {60, 64, 67}) harness.sendNoteOn(key, 100);
+  harness.renderForDuration(mixer, 0.1);
+  XCTAssertEqual(engine.activeVoiceCount(), size_t(3));
+  [self waitForExpectations:@[sawThree] timeout:2.0];
+  XCTAssertEqual([engine.parameterTree() parameterWithAddress:address].value, 3.0);
+
+  for (uint8_t key : {60, 64, 67}) harness.sendNoteOff(key);
+  harness.renderToEnd(mixer);
+  XCTAssertEqual(engine.activeVoiceCount(), size_t(0));
+  [self waitForExpectations:@[sawZero] timeout:2.0];
+  XCTAssertEqual([engine.parameterTree() parameterWithAddress:address].value, 0.0);
+
+  [engine.parameterTree() removeParameterObserver:token];
+}
+
 @end

@@ -28,7 +28,8 @@ Engine::Engine(Float sampleRate, size_t voiceCountLimit, Interpolator interpolat
     startVoiceSignpost_{os_signpost_id_generate(log_)},
     stopVoiceSignpost_{os_signpost_id_generate(log_)},
     renderingTimeBudgetScaling_{renderingTimeBudgetScaling},
-    workQueue_{dispatch_queue_create("SF2Lib::Engine", DISPATCH_QUEUE_SERIAL)}
+    workQueue_{dispatch_queue_create("SF2Lib::Engine", DISPATCH_QUEUE_SERIAL)},
+    activeVoiceCountQueue_{dispatch_queue_create("SF2Lib::Engine.activeVoiceCount", DISPATCH_QUEUE_SERIAL)}
 {
   if (voiceCountLimit > traits::maxVoiceCount) {
     throw std::runtime_error("voiceCountLimit is too large");
@@ -89,6 +90,9 @@ Engine::activePresetIndex() const noexcept
 
 Engine::~Engine()
 {
+  // The publishing timer uses this instance.
+  stopPublishingActiveVoiceCount();
+
   // Let queued loads finish: they use this instance.
   dispatch_sync(workQueue_, ^{ });
   std::lock_guard<std::mutex> lock(retiredMutex_);
@@ -376,7 +380,50 @@ Engine::doRenderingStateChanged(bool state) noexcept
     reclaimRetiredPresetsStates_WQ(true);
   }
 
+  if (state) {
+    startPublishingActiveVoiceCount();
+  } else {
+    stopPublishingActiveVoiceCount();
+  }
+
   [[parameterTree_ parameterWithAddress: DSPHeaders::valueOf(ParameterAddress::isRendering)] setValue: DSPHeaders::fromBool(state)];
+}
+
+void
+Engine::publishActiveVoiceCount() noexcept
+{
+  auto value = activeVoiceCountShared_.load(std::memory_order_relaxed);
+  if (value == activeVoiceCountPublished_) return;
+  auto parameter = [parameterTree_ parameterWithAddress: DSPHeaders::valueOf(ParameterAddress::activeVoiceCount)];
+  if (parameter == nil) return;
+  activeVoiceCountPublished_ = value;
+  [parameter setValue: AUValue(value)];
+}
+
+void
+Engine::startPublishingActiveVoiceCount() noexcept
+{
+  // The active voice count used to be set from `startVoice_RT` / `stopVoice_RT`, which put Objective-C messaging and
+  // the parameter's observers on the render thread. That was removed, but nothing replaced it, so observers stopped
+  // seeing the count. Now the render thread only stores the count in an atomic, and this timer publishes it.
+  if (activeVoiceCountTimer_ != nullptr) return;
+  activeVoiceCountTimer_ = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, activeVoiceCountQueue_);
+  dispatch_source_set_timer(activeVoiceCountTimer_, dispatch_time(DISPATCH_TIME_NOW, 0),
+                            uint64_t(activeVoiceCountPublishIntervalNanoseconds), 10 * NSEC_PER_MSEC);
+  dispatch_source_set_event_handler(activeVoiceCountTimer_, ^{ publishActiveVoiceCount(); });
+  dispatch_resume(activeVoiceCountTimer_);
+}
+
+void
+Engine::stopPublishingActiveVoiceCount() noexcept
+{
+  if (activeVoiceCountTimer_ != nullptr) {
+    dispatch_source_cancel(activeVoiceCountTimer_);
+    activeVoiceCountTimer_ = nullptr;
+  }
+  // Wait for any handler that is running, and publish the final count (0 once rendering has stopped). No handler runs
+  // after this, so the instance can then be destroyed.
+  dispatch_sync(activeVoiceCountQueue_, ^{ publishActiveVoiceCount(); });
 }
 
 void
@@ -906,6 +953,7 @@ Engine::startVoice_RT(const Config& config) noexcept
   voices_[voiceIndex].configure(config, channelState_);
   parameters_.applyChanged(voices_[voiceIndex].state());
   voices_[voiceIndex].start();
+  shareActiveVoiceCount_RT();
   os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice_RT");
 }
 
@@ -916,6 +964,7 @@ Engine::stopVoice_RT(size_t voiceIndex) noexcept
   os_log_debug(log_, "stopVoice_RT - %lu", voiceIndex);
   voices_[voiceIndex].stop();
   auto pos = oldestVoiceIndices_.voiceRelease(voiceIndex);
+  shareActiveVoiceCount_RT();
   os_signpost_interval_end(log_, stopVoiceSignpost_, "stopVoice_RT");
   return pos;
 }
@@ -1011,7 +1060,8 @@ Engine::provideParameterValue(AUParameter* parameter) const noexcept
         value = DSPHeaders::fromBool(polyphonicModeEnabled());
         break;
       case ParameterAddress::activeVoiceCount:
-        return AUValue(oldestVoiceIndices_.activeVoiceCount());
+        // Read the shared copy: the voice collection itself belongs to the render thread.
+        return AUValue(activeVoiceCountShared_.load(std::memory_order_relaxed));
       case ParameterAddress::retriggerModeEnabled:
         value = DSPHeaders::fromBool(retriggerModeEnabled());
         break;

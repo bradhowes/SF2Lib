@@ -689,3 +689,17 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - `SF2FileInfo` load, metadata, the checked subscript through `std::optional.value`, and a missing file.
   - **Checked that it catches regressions:** making the `std::string` overload of `loadFileAndPreset` non-`const` again stops the Swift tests from compiling.
 - `EngineTests` / `FileInfoTests` are updated for `SF2::IO::LoadResponse` and for the `load()` return value.
+
+**Follow-up (2026-11-25): active voice count no longer reached `AUParameterTree` observers (regression from step 8). Not yet committed. `make test-macOS`: 430 tests, 0 failures.**
+- **Cause:** step 8 (`984e8fc`) removed `updateActiveVoiceCount_RT`. That function set the `activeVoiceCount` parameter (address 1004) from `startVoice_RT` / `stopVoice_RT`, which put Objective-C messaging and the parameter's observers on the render thread. Nothing replaced it, so a UI observing the parameter (for example in the simulator) stopped receiving the count.
+  - Reading `parameter.value` still worked, through `provideParameterValue`. But it read the render thread's voice collection without synchronisation.
+- **Fix:**
+  - `startVoice_RT` and `stopVoice_RT` store the count in `std::atomic<uint32_t> activeVoiceCountShared_` (`shareActiveVoiceCount_RT`, lock-free).
+  - While rendering, a dispatch timer on its own serial queue (`activeVoiceCountQueue_`, every 50 ms) calls `publishActiveVoiceCount`. That sets the parameter, which notifies its observers, only when the count has changed.
+  - The timer starts in `doRenderingStateChanged(true)`. On `doRenderingStateChanged(false)` it is cancelled and the final count (0) is published. The destructor also stops it, and waits on the queue so that no handler can run after the engine is gone.
+  - `provideParameterValue` now reads the atomic.
+- **Test:** `EngineTests::testActiveVoiceCountIsPublishedToParameterObservers`.
+  - It registers an observer with `tokenByAddingParameterObserver`, plays three notes through `doMIDIEvent`, and expects the observer to see 3. After note-offs, once the voices have finished, it expects 0.
+  - `parameter.value` must match at both points.
+  - Without the timer, or without the render thread sharing the count, the test fails.
+- **Note:** each step's progress log used to be checked against the end-to-end tests only. None of them observed the parameter tree, which is how this went unnoticed.
