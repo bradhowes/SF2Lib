@@ -5,6 +5,11 @@
 #import "TestResources.hpp"
 #import "SF2Engine.hpp"
 
+/// Test-only access to the engine's shared pointer (declared a friend of SF2Engine).
+struct SF2EngineTestAccess {
+  static long useCount(const SF2Engine& engine) { return engine.impl_.use_count(); }
+};
+
 @interface EngineTests : XCTestCase
 @property (nonatomic) SF2Engine* engine;
 @end
@@ -14,8 +19,7 @@
 @synthesize engine;
 
 - (void)setUp {
-  self.engine = new SF2Engine();
-  self.engine->create(48000.0, 48);
+  self.engine = new SF2Engine(48000.0, 48);
 }
 
 - (void)tearDown {
@@ -27,8 +31,40 @@
 }
 
 - (void)testWithTooManyVoices {
-  self.engine = new SF2Engine();
-  XCTAssertThrowsSpecific(self.engine->create(48000.0, 99999), std::runtime_error);
+  // The engine throws for too many voices, and a C++ exception that reaches Swift terminates the program. The wrapper
+  // clamps the count instead.
+  delete self.engine;
+  XCTAssertNoThrow(self.engine = new SF2Engine(48000.0, 99999));
+  XCTAssertEqual(self.engine->voiceCountLimit(), SF2Engine::maxVoiceCount());
+  XCTAssertEqual(SF2Engine::maxVoiceCount(), size_t(128));
+  delete self.engine;
+  self.engine = new SF2Engine(48000.0, 0);
+  XCTAssertEqual(self.engine->voiceCountLimit(), size_t(1));
+  delete self.engine;
+  self.engine = new SF2Engine(48000.0, 48);
+  XCTAssertEqual(self.engine->voiceCountLimit(), size_t(48));
+}
+
+- (void)testRenderBlockKeepsEngineAlive {
+  // The render block used to capture the raw engine pointer, which dangled once the SF2Engine was destroyed while
+  // CoreAudio still held the block. It now holds its own reference.
+  auto audioFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:48000.0 channels:2];
+  XCTAssertTrue(self.engine->setRenderingFormat(3, audioFormat, 512));
+  XCTAssertEqual(SF2EngineTestAccess::useCount(*self.engine), 1);
+
+  AUInternalRenderBlock block = self.engine->getRenderBlock();
+  XCTAssertEqual(SF2EngineTestAccess::useCount(*self.engine), 2);
+
+  delete self.engine;
+  self.engine = nullptr;
+
+  // The engine is still alive and still knows its format: more frames than the 512 it was set up for are refused.
+  auto timestamp = AudioTimeStamp();
+  AudioUnitRenderActionFlags actionFlags = kAudioUnitRenderAction_PreRender;
+  auto audioBufferList = AudioBufferList();
+  XCTAssertEqual(block(&actionFlags, &timestamp, 4096, 0, &audioBufferList, nullptr, nullptr),
+                 kAudioUnitErr_TooManyFramesToProcess);
+  block = nil;
 }
 
 - (void)testSetRenderingFormat {

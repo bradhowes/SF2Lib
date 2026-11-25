@@ -26,9 +26,9 @@ SF2FileInfo::size() const noexcept {
   return impl_->presets().size();
 }
 
-SF2PresetInfo
-SF2FileInfo::operator[](size_t index) const noexcept {
-  auto chunkIndex = impl_->presetIndicesOrderedByBankProgram()[index];
-  auto preset = impl_->presets()[chunkIndex];
-  return {preset};
+std::optional<SF2PresetInfo>
+SF2FileInfo::operator[](size_t index) const {
+  const auto& ordered = impl_->presetIndicesOrderedByBankProgram();
+  if (index >= size() || index >= ordered.size()) return std::nullopt;
+  return SF2PresetInfo(impl_->presets()[ordered[index]]);
 }

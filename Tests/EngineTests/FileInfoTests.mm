@@ -72,19 +72,31 @@
   fi1.load();
   XCTAssertEqual(size_t(235), fi1.size());
   auto presetInfo = fi1[0];
-  XCTAssertTrue(std::string("Piano 1") == presetInfo.name());
-  XCTAssertEqual(0, presetInfo.bank());
-  XCTAssertEqual(0, presetInfo.program());
+  XCTAssertTrue(presetInfo.has_value());
+  XCTAssertTrue(std::string("Piano 1") == presetInfo->name());
+  XCTAssertEqual(0, presetInfo->bank());
+  XCTAssertEqual(0, presetInfo->program());
 
   presetInfo = fi1[2];
-  XCTAssertTrue(std::string("Piano 3") == presetInfo.name());
-  XCTAssertEqual(0, presetInfo.bank());
-  XCTAssertEqual(2, presetInfo.program());
+  XCTAssertTrue(std::string("Piano 3") == presetInfo->name());
+  XCTAssertEqual(0, presetInfo->bank());
+  XCTAssertEqual(2, presetInfo->program());
 
   presetInfo = fi1[234];
-  XCTAssertTrue(std::string("SFX") == presetInfo.name());
-  XCTAssertEqual(128, presetInfo.bank());
-  XCTAssertEqual(56, presetInfo.program());
+  XCTAssertTrue(std::string("SFX") == presetInfo->name());
+  XCTAssertEqual(128, presetInfo->bank());
+  XCTAssertEqual(56, presetInfo->program());
+}
+
+- (void)testPresetInfoIndexIsChecked {
+  // Swift does no bounds checking on a C++ subscript, and the index used to go straight into a vector.
+  auto path = [TestResources getResourcePath: 0];
+  auto fi1 = SF2FileInfo(path);
+  XCTAssertFalse(fi1[0].has_value());  // before load
+  fi1.load();
+  XCTAssertTrue(fi1[234].has_value());
+  XCTAssertFalse(fi1[235].has_value());
+  XCTAssertFalse(fi1[size_t(-1)].has_value());
 }
 
 @end

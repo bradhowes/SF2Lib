@@ -1,5 +1,6 @@
 // Copyright © 2023 Brad Howes. All rights reserved.
 
+#include <algorithm>
 #include <iostream>
 
 #include "SF2Engine.hpp"
@@ -8,10 +9,21 @@
 
 namespace Eng = SF2::Render::Engine;
 
-void SF2Engine::create(double sampleRate, NSUInteger voiceCount)
+SF2Engine::SF2Engine(double sampleRate, NSUInteger voiceCount)
+: impl_{std::make_shared<Eng::Engine>(sampleRate, std::clamp<size_t>(voiceCount, 1, Eng::traits::maxVoiceCount),
+                                      Eng::Engine::Interpolator::cubic4thOrder, 0.85)}
+{}
+
+size_t
+SF2Engine::maxVoiceCount() noexcept
 {
-  assert(impl_.get() == nullptr);
-  impl_.reset(new Eng::Engine(sampleRate, voiceCount, Eng::Engine::Interpolator::cubic4thOrder, 0.85));
+  return Eng::traits::maxVoiceCount;
+}
+
+size_t
+SF2Engine::voiceCountLimit() const noexcept
+{
+  return impl_->voiceCountLimit();
 }
 
 bool
@@ -23,11 +35,10 @@ SF2Engine::setRenderingFormat(NSInteger busCount, AVAudioFormat *format, AUAudio
 
 AUInternalRenderBlock
 SF2Engine::getRenderBlock() const noexcept {
-  // Technically, this makes the class "unsafe" since it is allowing the internal engine pointer to escape its wrapper.
-  // We do this under the assumption that Apple won't hold onto this block after rendering has stopped.
-  NSInteger bus = 0;
-  auto engine = impl_.get();
-  assert(engine != nullptr);
+  // The block captures its own copy of the shared pointer (blocks copy-construct captured C++ objects), so the engine
+  // lives as long as the block does. It used to capture the raw pointer, which dangled once the last SF2Engine went
+  // away while CoreAudio still held the block.
+  auto engine = impl_;
   return ^AUAudioUnitStatus(AudioUnitRenderActionFlags* _Nonnull actionFlags, const AudioTimeStamp* _Nonnull timestamp,
                             AUAudioFrameCount frameCount, NSInteger outputBusNumber, AudioBufferList* _Nonnull output,
                             const AURenderEvent* __nullable realtimeEventListHead,

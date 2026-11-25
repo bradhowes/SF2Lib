@@ -36,13 +36,23 @@ namespace Render { namespace Engine { class Engine; } }
 struct SWIFT_ESCAPABLE SF2Engine
 {
   /**
-   Constructs a new Engine.
+   Constructs a new Engine. Swift imports this as `init(_:_:)`. There is no default constructor: every other method
+   needs the engine that this creates.
 
    @param sampleRate the sample rate to use when rendering. Note that this is not fixed and may change in the
    call to `setRenderingFormat`.
-   @param voiceCount the max number of voices to allow to simultaneously render
+   @param voiceCount the max number of voices to allow to simultaneously render. Values above `maxVoiceCount()` are
+   clamped to it (the engine used to throw, which terminates a Swift caller), and 0 becomes 1. See `voiceCountLimit()`.
    */
-  void create(double sampleRate, NSUInteger voiceCount);
+  SF2Engine(double sampleRate, NSUInteger voiceCount);
+
+  SF2Engine() = delete;
+
+  /// @returns the largest voice count that an engine supports
+  static size_t maxVoiceCount() noexcept;
+
+  /// @returns the number of voices this engine was created with, after clamping
+  size_t voiceCountLimit() const noexcept;
 
   /**
    Set the rendering format to be when rendering in CoreAudio infrastructure. After returning from this call,
@@ -58,7 +68,9 @@ struct SWIFT_ESCAPABLE SF2Engine
   bool setRenderingFormat(NSInteger busCount, AVAudioFormat* format, AUAudioFrameCount maxFramesToRender) const noexcept;
 
   /**
-   Obtain a render block to be used to invoke the `processAndRender` method below.
+   Obtain a render block to be used to invoke the `processAndRender` method below. The block holds its own reference
+   to the engine, so it stays valid even if every `SF2Engine` copy is destroyed first. If the block is the last
+   holder, releasing it destroys the engine, so do not release it on the render thread.
    */
   AUInternalRenderBlock getRenderBlock() const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
 
@@ -194,4 +206,6 @@ struct SWIFT_ESCAPABLE SF2Engine
 private:
   // Use of shared_ptr is on purpose in order to hide the internal API.
   std::shared_ptr<SF2::Render::Engine::Engine> impl_;
+
+  friend struct SF2EngineTestAccess;
 } SWIFT_SELF_CONTAINED;

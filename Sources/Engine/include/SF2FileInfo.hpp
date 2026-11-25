@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <swift/bridging>
 
@@ -46,12 +47,13 @@ struct SWIFT_ESCAPABLE SF2FileInfo
   size_t size() const noexcept;
 
   /**
-   Obtain an `SF2PresetInfo` for the preset at the given index.
+   Obtain an `SF2PresetInfo` for the preset at the given index, in bank/program order. The index is checked: Swift
+   does no bounds checking on a C++ subscript, and this used to read past the end for a bad index or before `load`.
 
-   @param index the preset to reference. Must be between 0 and size() - 1.
-   @returns SF2PresetInfo for the indicated preset
+   @param index the preset to reference
+   @returns SF2PresetInfo for the indicated preset, or no value if `index` is not less than `size()`
    */
-  SF2PresetInfo operator[](size_t index) const noexcept SWIFT_RETURNS_INDEPENDENT_VALUE;
+  std::optional<SF2PresetInfo> operator[](size_t index) const SWIFT_RETURNS_INDEPENDENT_VALUE;
 
 private:
   std::unique_ptr<SF2::IO::File> impl_;

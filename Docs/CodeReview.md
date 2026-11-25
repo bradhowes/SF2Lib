@@ -613,3 +613,47 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - collapsing everything back into one `[min, max]` run fails the memory test;
   - computing span offsets from the file position instead of the buffer position crashes the test run.
 - No hard-coded rendering values changed: the sample data is identical, only its placement in memory differs.
+
+**Follow-up (2026-11-25): Swift/C++ interop review of `SF2Engine`, `SF2FileInfo` and `SF2PresetInfo`, items 1–4. Not yet committed. `make test-macOS`: 390 (`SF2LibTests`) + 32 (`EngineTests`) tests, 0 failures. Earlier entries' counts are the `SF2LibTests` bundle only.**
+- **1. Use before setup.**
+  - `SF2Engine` had two-phase set-up: `create(sampleRate, voiceCount)` built the engine, but Swift also got an implicit `SF2Engine()`, and every other method then dereferenced a null `impl_`.
+  - `create` is replaced by a constructor `SF2Engine(double sampleRate, NSUInteger voiceCount)`, which Swift imports as `init(_:_:)`. The default constructor is deleted.
+  - This changes the API for Swift clients: `SF2Engine(); engine.create(r, n)` becomes `SF2Engine(r, n)`.
+- **2. C++ exception into Swift.**
+  - `Engine::Engine` throws `std::runtime_error` when `voiceCountLimit > traits::maxVoiceCount`. A C++ exception that reaches Swift terminates the program; Swift cannot catch it.
+  - The wrapper now clamps the voice count to [1, `maxVoiceCount`]. New `SF2Engine::maxVoiceCount()` and `voiceCountLimit()` report the limit and the value actually used.
+  - Allocation failure (`bad_alloc`) is the only exception left on this path.
+- **3. Unchecked subscript.**
+  - `SF2FileInfo::operator[]` was `noexcept` and indexed `presetIndicesOrderedByBankProgram()` directly. Swift does no bounds checking on a C++ subscript, so an out-of-range index, or any index before `load()`, was undefined behaviour.
+  - It now returns `std::optional<SF2PresetInfo>`, which is empty when the index is out of range. Swift supports `std::optional`.
+- **4. Escaping render block.**
+  - `getRenderBlock` captured `impl_.get()`, so the block dangled if the last `SF2Engine` copy was destroyed while CoreAudio still held it. That also contradicted the method's `SWIFT_RETURNS_INDEPENDENT_VALUE` annotation.
+  - The block now captures a copy of the `shared_ptr` (blocks copy-construct captured C++ objects), so the engine lives as long as the block.
+  - Documented: if the block is the last holder, releasing it destroys the engine, so do not release it on the render thread.
+- **Tests (`Tests/EngineTests`):**
+  - `EngineTests::testWithTooManyVoices` now expects clamping (99999 → 128, 0 → 1, 48 → 48) instead of a `std::runtime_error`.
+  - New `testRenderBlockKeepsEngineAlive`: the shared pointer's use count goes from 1 to 2 when the block is taken. After `delete` of the `SF2Engine`, the block still works and still refuses more than its 512 frames. This uses a test-only `SF2EngineTestAccess` friend.
+  - New `FileInfoTests::testPresetInfoIndexIsChecked`: empty before `load`, valid at 234, empty at 235 and at `size_t(-1)`.
+  - `testPresetInfo` was updated for the `std::optional` return.
+  - `setUp` uses the new constructor.
+- **Checked that the tests catch the bugs:**
+  - with the raw-pointer capture back, the use-count assertion fails and the run crashes (use after free);
+  - with no clamp, `testWithTooManyVoices` fails;
+  - with no bounds check, the index test crashes the run.
+- **Left over from the interop review** (not done):
+  - **5.** `const` usage is inconsistent: `loadFileAndPreset`/`loadBookmarkAndPreset` are non-`const`, so they are imported as `mutating` and risk exclusivity conflicts, while `setRenderingFormat` is `const`.
+  - **6.** Copying `SF2Engine` silently shares the engine (value type with reference behaviour). Consider `SWIFT_NONCOPYABLE` or `SWIFT_SHARED_REFERENCE`.
+  - **7.** `SF2FileInfo` is implicitly `~Copyable` because of its `unique_ptr`. Make that explicit.
+  - **8.** `SF2FileInfo::load` returns `bool` and loses the `LoadResponse`.
+  - **9.–12. Annotations:**
+    - `SWIFT_SELF_CONTAINED` placement;
+    - `SWIFT_RETURNS_INDEPENDENT_VALUE` is redundant on `std::string` returns;
+    - the `SF2PresetInfo(const Entity::Preset&)` constructor takes an incomplete type and should not be public;
+    - `SWIFT_COMPUTED_PROPERTY` for the getters.
+  - **13.** The `SF2Engine.hpp` umbrella exposes internal headers such as `SF2File/IO/File.hpp` to Swift.
+  - **14.** Small points:
+    - `NSUInteger` vs `size_t`;
+    - a stale commented-out parameter;
+    - the "Engin" typo;
+    - missing copyright lines.
+  - No Swift code in the repo imports `Engine`. A small Swift Testing target would catch import and semantic problems.
