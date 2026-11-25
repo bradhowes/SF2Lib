@@ -14,11 +14,9 @@
 using namespace SF2::Entity::Generator;
 using namespace SF2::Render::Engine;
 
-Engine::Engine(Float sampleRate, size_t voiceCountLimit, double renderingTimeBudgetScaling,
-               size_t minimumNoteDurationMilliseconds)
+Engine::Engine(Float sampleRate, size_t voiceCountLimit, double renderingTimeBudgetScaling)
   : super(Log::create("Engine")),
     sampleRate_{sampleRate},
-    minimumNoteDurationMilliseconds_{minimumNoteDurationMilliseconds},
     parameters_{},
     oldestVoiceIndices_{},
     voiceCountLimit_{voiceCountLimit},
@@ -944,6 +942,7 @@ void
 Engine::initialize(Float sampleRate) noexcept
 {
   sampleRate_ = sampleRate;
+  minimumNoteDurationSamples_ = minimumNoteDurationMilliseconds_ * sampleRate_ / 1'000_F;
   renderingTimeBudgetIntervalNanoseconds_ = uint64_t(1.0 / sampleRate * 1.0e9);
   allOff_RT();
   for (auto& voice : voices_) {

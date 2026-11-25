@@ -75,26 +75,27 @@ public:
    running estimate of the cost of the active voices exceeds the budget, the oldest voices beyond what fits are given a
    fast (5 ms) release, so the load drops without clicks. If a render call still runs out of time, each remaining voice
    is faded out over `budgetFadeOutFrames` frames and stopped.
-   @param minimumNoteDurationMilliseconds the minimum duration of a note-on/note-off sequence for a voice.
    */
   Engine(Float sampleRate,
          size_t voiceCountLimit,
-         double renderingTimeBudgetScaling, // = 0.85,
-         size_t minimumNoteDurationMilliseconds = 10
+         double renderingTimeBudgetScaling // = 0.85
          );
 
   /// Waits for queued loads to finish, then frees every preset state.
   ~Engine();
-
-  size_t minimumNoteDurationSamples() const noexcept {
-    return static_cast<size_t>(ceil(Float(minimumNoteDurationMilliseconds_) / 1000_F * sampleRate_));
-  }
 
   /// @returns maximum number of voices available for simultaneous rendering in engine.
   size_t maxVoiceCount() const noexcept { return traits::maxVoiceCount; }
 
   /// @returns configured maximum number of voices available for rendering [legacy].
   size_t voiceCountLimit() const noexcept { return voiceCountLimit_; }
+
+  void setMinimumNoteDuration(size_t milliseconds) noexcept {
+    minimumNoteDurationMilliseconds_ = milliseconds;
+    minimumNoteDurationSamples_ = milliseconds * sampleRate_ / 1'000_F;
+  }
+
+  size_t minimumNoteDuration() const noexcept { return minimumNoteDurationMilliseconds_; }
 
   /**
    Update kernel and buffers to support the given format and channel count
@@ -520,7 +521,7 @@ private:
   template <typename Visitor>
   void visitActiveVoice_RT(Visitor visitor) noexcept
   {
-    auto releaseKeyState = Voice::ReleaseKeyState{minimumNoteDurationSamples(), channelState_.pedalState()};
+    auto releaseKeyState = Voice::ReleaseKeyState{minimumNoteDurationSamples_, channelState_.pedalState()};
     visitActiveVoice_RT(visitor, releaseKeyState);
   }
 
@@ -635,7 +636,8 @@ private:
   void applyPedals_RT() noexcept;
 
   Float sampleRate_;
-  size_t minimumNoteDurationMilliseconds_{0};
+  size_t minimumNoteDurationMilliseconds_{10};
+  size_t minimumNoteDurationSamples_;
 
   MIDI::ChannelState channelState_{};
   LiveGeneratorParameters parameters_{};
@@ -704,7 +706,7 @@ private:
   std::vector<AUValue> durationBuckets_;
 
   uint64_t renderingTimeBudgetIntervalNanoseconds_;
-  double renderingTimeBudgetScaling_;
+  double renderingTimeBudgetScaling_{0.85};
   Clock clock_{&Utils::Timer::now};
   double averageVoiceFrameNanoseconds_{0.0};
 
