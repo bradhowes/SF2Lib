@@ -2,10 +2,14 @@
 
 #pragma once
 
+#include <cstddef>
 #include <memory>
 
+#include "SF2Lib/Render/Zone/Instrument.hpp"
+
+namespace SF2::Entity { class SampleHeader; }
+
 namespace SF2::Render::Zone {
-class Instrument;
 class NormalizedSampleSpan;
 class Preset;
 }
@@ -35,7 +39,7 @@ public:
          const Zone::Instrument* globalInstrument, int eventKey, int eventVelocity) noexcept;
 
   /// @returns the buffer of audio samples to use for rendering
-  std::shared_ptr<Zone::NormalizedSampleSpan> samples() const noexcept;
+  std::shared_ptr<Zone::NormalizedSampleSpan> samples() const noexcept { return instrument_.samples(); }
 
   /// @returns original MIDI key that triggered the voice
   int eventKey() const noexcept { return eventKey_; }
@@ -45,6 +49,31 @@ public:
 
   /// @returns value of `exclusiveClass` generator for an instrument if it is set, or 0 if not found.
   int exclusiveClass() const noexcept { return exclusiveClass_; }
+
+  /// @returns the sample header of the instrument zone
+  const Entity::SampleHeader* sampleHeader() const noexcept { return instrument_.sampleHeader(); }
+
+  /// @returns the index of the instrument zone's sample header in the SHDR chunk
+  size_t sampleIndex() const noexcept { return instrument_.sampleIndex(); }
+
+  /// @returns the preset zone that matched. Two configs from the same preset zone use the same instrument.
+  const Zone::Preset* presetZone() const noexcept { return &preset_; }
+
+  /**
+   Determine if this config and another are the two halves of a stereo pair (SF2.01 7.10): this one plays a right
+   sample and the other its left sample, both headers point to each other, and both come from the same preset zone (so
+   the same instrument: "Left-right pairs should always be found within the same instrument").
+
+   @param left the config to check as the left half
+   @returns true if this config is the right half and `left` the left half of the same stereo pair
+   */
+  bool isStereoRightOf(const Config& left) const noexcept {
+    auto rightHeader = sampleHeader();
+    auto leftHeader = left.sampleHeader();
+    if (rightHeader == nullptr || leftHeader == nullptr || presetZone() != left.presetZone()) return false;
+    return rightHeader->isRight() && leftHeader->isLeft() &&
+    rightHeader->sampleLinkIndex() == left.sampleIndex() && leftHeader->sampleLinkIndex() == sampleIndex();
+  }
 
   /**
    Update a state with the various zone configurations. This is done once during the initialization of a Voice with a

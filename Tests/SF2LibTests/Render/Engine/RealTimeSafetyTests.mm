@@ -69,6 +69,32 @@ static int allocationsDuring(void (^block)())
   XCTAssertEqual(count, 0);
 }
 
+- (void)testStereoPairsDoNotAllocate {
+  // SF2.01 7.10: pairing linked left/right voices at note-on and rendering them in lockstep run on the render thread.
+  // RolandNicePiano (context2) is made of stereo pairs.
+  auto harness{TestEngineHarness{48000.0}};
+  XCTAssertEqual(harness.load(self.contexts->context2.path(), 0), LoadResponse::ok);
+  auto mixer{harness.createMixer(1.0)};
+  harness.sendNoteOn(60, 100);
+  harness.renderMaxFramesCount(mixer);
+  harness.sendNoteOff(60);
+
+  auto __block harnessPtr = &harness;
+  auto __block mixerPtr = &mixer;
+  int count = allocationsDuring(^{
+    for (uint8_t key : {60, 64, 67, 72}) harnessPtr->sendNoteOn(key, 100);
+    for (int render = 0; render < 10; ++render) harnessPtr->renderMaxFramesCount(*mixerPtr);
+  });
+  size_t linked = 0;
+  for (size_t index = 0; index < SF2::Render::Engine::traits::maxVoiceCount; ++index) {
+    if (harness.voice(index).isActive() && harness.voice(index).partner() != SF2::Render::Voice::Voice::noPartner) {
+      ++linked;
+    }
+  }
+  XCTAssertGreaterThan(linked, size_t(0));
+  XCTAssertEqual(count, 0);
+}
+
 - (void)testRenderBudgetPathsDoNotAllocate {
   // §6 item 9: shedding voices (fast release) and the overrun fade-out run on the render thread.
   auto harness{TestEngineHarness{48000.0}};

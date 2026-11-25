@@ -86,11 +86,10 @@ protected:
 
   /**
    Obtain the link to the resource used by this zone. For an instrument zone, this points to the sample buffer to
-   use to render sounds. For a preset zone, this points to an instrument. It is undefined to call on a global zone.
+   use to render sounds. For a preset zone, this points to an instrument. It is undefined to call on a global zone -- doing so
+   raises an exception.
 
-   The returned value refers to the original SF2 file index for the resource.
-
-   @returns index of the resource that this zone uses
+   @returns index of the resource that this zone uses (refers to the original SF2 file index for the resource.)
    */
   uint16_t resourceLink() const;
 

@@ -36,12 +36,6 @@ Config::Config(const Zone::Preset &preset, const Zone::Preset *globalPreset,
   }
 }
 
-std::shared_ptr<SF2::Render::Zone::NormalizedSampleSpan>
-Config::samples() const noexcept
-{
-  return instrument_.samples();
-}
-
 void
 Config::applyTo(State& state) const noexcept
 {

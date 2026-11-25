@@ -213,9 +213,11 @@ Engine::noteOn_RT(int key, int velocity) noexcept
         }
       }
 
-      for (const Config& config : configs) {
-        startVoice_RT(config);
+      std::array<size_t, Preset::maxConfigsPerNote> voiceIndices;
+      for (size_t index = 0; index < configs.size(); ++index) {
+        voiceIndices[index] = startVoice_RT(configs[index]);
       }
+      linkStereoPairs_RT(configs, voiceIndices);
     }
   }
 
@@ -271,22 +273,54 @@ Engine::renderInto(Mixer mixer, AUAudioFrameCount frameCount) noexcept
 
   // Iterate over the active voices -- the voices are ordered from newest to oldest. If we run out of time, the oldest
   // ones are faded out over a few frames and stopped. (Stopping a sounding voice outright would click.)
+  //
+  // The two voices of a stereo pair (SF2.01 7.10) are rendered together, in lockstep, when the loop reaches either of
+  // them: the right-sample voice supplies the pitch for both. `renderSlice_` marks voices already rendered here.
+  ++renderSlice_;
   uint64_t voiceFrames = 0;
   for (auto pos = oldestVoiceIndices_.begin(); pos != oldestVoiceIndices_.end(); ) {
     auto voiceIndex = *pos;
 
     auto& voice{voices_[voiceIndex]};
-    if (voice.isActive()) {
-      if (!budgeted || clock_() - entryTime < timeBudget) {
-        voice.renderInto(mixer, frameCount);
-        voiceFrames += frameCount;
+    if (voice.renderedSlice() != renderSlice_) {
+      auto partnerIndex = voice.partner();
+      auto partner = (partnerIndex != Voice::noPartner && voices_[partnerIndex].isActive()) ? &voices_[partnerIndex]
+                                                                                             : nullptr;
+      auto& leader = (partner != nullptr && !voice.isPitchLeader()) ? *partner : voice;
+      auto follower = partner == nullptr ? nullptr : (&leader == &voice ? partner : &voice);
+      auto renderedVoices = follower != nullptr ? 2 : 1;
+
+      if (voice.isActive() || follower != nullptr) {
+        if (!budgeted || clock_() - entryTime < timeBudget) {
+          if (follower != nullptr) {
+            leader.renderLinkedInto(*follower, mixer, frameCount);
+          } else {
+            voice.renderInto(mixer, frameCount);
+          }
+          voiceFrames += frameCount * renderedVoices;
+        } else {
+          auto fadeFrames = std::min(frameCount, budgetFadeOutFrames);
+          if (follower != nullptr) {
+            leader.renderLinkedFadeOut(*follower, mixer, fadeFrames);
+          } else {
+            voice.renderFadeOut(mixer, fadeFrames);
+          }
+          voiceFrames += fadeFrames * renderedVoices;
+        }
       } else {
-        auto fadeFrames = std::min(frameCount, budgetFadeOutFrames);
-        voice.renderFadeOut(mixer, fadeFrames);
-        voiceFrames += fadeFrames;
+        os_log_error(log_, "renderInto - encountered active voice that is not active - %lu", voiceIndex);
       }
-    } else {
-      os_log_error(log_, "renderInto - encountered active voice that is not active - %lu", voiceIndex);
+
+      voice.markRendered(renderSlice_);
+      if (follower != nullptr) {
+        // `partnerIndex` is the other voice of the pair (use it, not `Voice::voiceIndex()`, which is only set for
+        // initialised voices).
+        auto& other = voices_[partnerIndex];
+        other.markRendered(renderSlice_);
+        // The other voice sits later in the list (had it come first, it would have rendered this pair already).
+        // Release it now if it has finished; the loop only advances past the current position, which is unaffected.
+        if (other.isDone()) stopVoice_RT(partnerIndex);
+      }
     }
 
     if (voice.isDone()) {
@@ -318,7 +352,12 @@ Engine::shedVoicesOverBudget_RT(AUAudioFrameCount frameCount, uint64_t timeBudge
   for (auto voiceIndex : oldestVoiceIndices_) {
     auto& voice{voices_[voiceIndex]};
     if (!voice.isActive()) continue;
-    if (++counted > affordable && !voice.isFastReleasing()) voice.fastRelease();
+    if (++counted > affordable && !voice.isFastReleasing()) {
+      voice.fastRelease();
+      // Keep a stereo pair together: shed both halves (SF2.01 7.10, "played entirely synchronously").
+      auto partner = voice.partner();
+      if (partner != Voice::noPartner && voices_[partner].isActive()) voices_[partner].fastRelease();
+    }
   }
 }
 
@@ -381,11 +420,13 @@ Engine::doRenderingStateChanged(bool state) noexcept
   }
 
   if (state) {
+    renderSlice_ = 0;
     startPublishingActiveVoiceCount();
   } else {
     stopPublishingActiveVoiceCount();
   }
 
+  // OK to do here since technically we are not yet rendering.
   [[parameterTree_ parameterWithAddress: DSPHeaders::valueOf(ParameterAddress::isRendering)] setValue: DSPHeaders::fromBool(state)];
 }
 
@@ -403,15 +444,13 @@ Engine::publishActiveVoiceCount() noexcept
 void
 Engine::startPublishingActiveVoiceCount() noexcept
 {
-  // The active voice count used to be set from `startVoice_RT` / `stopVoice_RT`, which put Objective-C messaging and
-  // the parameter's observers on the render thread. That was removed, but nothing replaced it, so observers stopped
-  // seeing the count. Now the render thread only stores the count in an atomic, and this timer publishes it.
-  if (activeVoiceCountTimer_ != nullptr) return;
-  activeVoiceCountTimer_ = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, activeVoiceCountQueue_);
-  dispatch_source_set_timer(activeVoiceCountTimer_, dispatch_time(DISPATCH_TIME_NOW, 0),
-                            uint64_t(activeVoiceCountPublishIntervalNanoseconds), 10 * NSEC_PER_MSEC);
-  dispatch_source_set_event_handler(activeVoiceCountTimer_, ^{ publishActiveVoiceCount(); });
-  dispatch_resume(activeVoiceCountTimer_);
+  if (activeVoiceCountTimer_ == nullptr) {
+    activeVoiceCountTimer_ = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, activeVoiceCountQueue_);
+    dispatch_source_set_timer(activeVoiceCountTimer_, dispatch_time(DISPATCH_TIME_NOW, 0),
+                              uint64_t(activeVoiceCountPublishIntervalNanoseconds), 10 * NSEC_PER_MSEC);
+    dispatch_source_set_event_handler(activeVoiceCountTimer_, ^{ publishActiveVoiceCount(); });
+    dispatch_resume(activeVoiceCountTimer_);
+  }
 }
 
 void
@@ -512,7 +551,6 @@ Engine::doMIDIEvent(const AUMIDIEvent& midiEvent) noexcept
 
     case MIDI::CoreEvent::systemExclusive:
       os_log_debug(log_, "doMIDIEvent systemExclusive");
-      // Check the length before reading `data[1]` and `data[2]` (this used to read them unconditionally).
       if (midiEvent.length >= 3 &&
           midiEvent.data[1] == LoadPresetSysExPayload::manufacturerValue &&
           midiEvent.data[midiEvent.length - 1] == DSPHeaders::valueOf(MIDI::CoreEvent::EOX) &&
@@ -938,7 +976,7 @@ Engine::stopSameKeyVoices_RT(int eventKey) noexcept
   }
 }
 
-void
+size_t
 Engine::startVoice_RT(const Config& config) noexcept
 {
   os_signpost_interval_begin(log_, startVoiceSignpost_, "startVoice_RT");
@@ -946,15 +984,54 @@ Engine::startVoice_RT(const Config& config) noexcept
     // Should not happen: a preset only becomes active once its samples are loaded.
     os_log_error(log_, "startVoice_RT - zone has no samples");
     os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice_RT");
-    return;
+    return Voice::noPartner;
   }
+
   auto voiceIndex = oldestVoiceIndices_.voiceAcquire();
   os_log_debug(log_, "startVoice_RT - %lu", voiceIndex);
+  // The voice may have been stolen from a stereo pair: its old partner carries on alone with its own pitch.
+  unlinkStereoPartner_RT(voiceIndex);
   voices_[voiceIndex].configure(config, channelState_);
   parameters_.applyChanged(voices_[voiceIndex].state());
   voices_[voiceIndex].start();
   shareActiveVoiceCount_RT();
   os_signpost_interval_end(log_, startVoiceSignpost_, "startVoice_RT");
+  return voiceIndex;
+}
+
+void
+Engine::linkStereoPairs_RT(const Preset::ConfigCollection& configs,
+                           const std::array<size_t, Preset::maxConfigsPerNote>& voiceIndices) noexcept
+{
+  // SF2.01 7.10: "If sfSampleType indicates a left or right sample, then wSampleLink is the sample header index of the
+  // associated right or left stereo sample respectively. Both samples should be played entirely synchronously, with
+  // their pitch controlled by the right sample's generators." Pair each right config with the left config it links to
+  // (and that links back), from the same preset zone. Each voice joins at most one pair ("no instrument should be
+  // designed in which it is possible to activate more than one instance of a particular stereo pair").
+  for (size_t right = 0; right < configs.size(); ++right) {
+    auto rightVoice = voiceIndices[right];
+    if (rightVoice == Voice::noPartner || voices_[rightVoice].partner() != Voice::noPartner) continue;
+    for (size_t left = 0; left < configs.size(); ++left) {
+      auto leftVoice = voiceIndices[left];
+      if (left == right || leftVoice == Voice::noPartner || leftVoice == rightVoice) continue;
+      if (voices_[leftVoice].partner() != Voice::noPartner) continue;
+      if (!configs[right].isStereoRightOf(configs[left])) continue;
+      // With a small voice limit, a later config may have stolen an earlier one's voice. Only link two live voices.
+      if (!voices_[rightVoice].isActive() || !voices_[leftVoice].isActive()) continue;
+      voices_[rightVoice].linkStereoPartner(leftVoice, true);
+      voices_[leftVoice].linkStereoPartner(rightVoice, false);
+      break;
+    }
+  }
+}
+
+void
+Engine::unlinkStereoPartner_RT(size_t voiceIndex) noexcept
+{
+  auto partner = voices_[voiceIndex].partner();
+  if (partner == Voice::noPartner) return;
+  voices_[partner].unlinkStereoPartner();
+  voices_[voiceIndex].unlinkStereoPartner();
 }
 
 OldestVoiceCollection::iterator
@@ -963,6 +1040,7 @@ Engine::stopVoice_RT(size_t voiceIndex) noexcept
   os_signpost_interval_begin(log_, stopVoiceSignpost_, "stopVoice_RT");
   os_log_debug(log_, "stopVoice_RT - %lu", voiceIndex);
   voices_[voiceIndex].stop();
+  unlinkStereoPartner_RT(voiceIndex);
   auto pos = oldestVoiceIndices_.voiceRelease(voiceIndex);
   shareActiveVoiceCount_RT();
   os_signpost_interval_end(log_, stopVoiceSignpost_, "stopVoice_RT");

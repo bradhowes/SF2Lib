@@ -32,6 +32,10 @@ public:
   /// global zone. Otherwise, returns `nullptr`
   const Entity::SampleHeader* sampleHeader() const noexcept { return sampleHeader_; }
 
+  /// @returns the index of the zone's sample header in the SHDR chunk (only meaningful if `sampleHeader()` is not null).
+  /// Recorded at construction, because `Zone::resourceLink()` may throw and so cannot be used on the render thread.
+  size_t sampleIndex() const noexcept { return sampleIndex_; }
+
   /// @returns the sample buffer registered to this zone, or nullptr if there is none (a global zone, or samples not
   /// loaded). Does not throw: it is reached from the render thread through `Config::samples()`.
   std::shared_ptr<NormalizedSampleSpan> samples() const noexcept { return samples_; }
@@ -57,6 +61,7 @@ public:
 
 private:
   const Entity::SampleHeader* sampleHeader_;
+  size_t sampleIndex_;
   std::shared_ptr<NormalizedSampleSpan> samples_{};
   inline static const os_log_t log_{Log::create("Zone::Instrument")};
 };

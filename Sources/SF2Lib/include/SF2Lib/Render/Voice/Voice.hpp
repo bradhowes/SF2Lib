@@ -1,9 +1,9 @@
-// Copyright © 2022 Brad Howes. All rights reserved.
+// Copyright © 2022, 2026 Brad Howes. All rights reserved.
 
 #pragma once
 
 #include <algorithm>
-
+#include <limits>
 
 #include "SF2Lib/MIDI/ChannelState.hpp"
 #include "SF2Lib/Render/Engine/Mixer.hpp"
@@ -41,6 +41,9 @@ public:
     activeEnvelope = 1,
     duringKeyPress = 3
   };
+
+  /// Value of `partner()` when the voice is not part of a stereo pair
+  static constexpr size_t noPartner = std::numeric_limits<size_t>::max();
 
   /**
    Construct a new voice renderer.
@@ -144,6 +147,36 @@ public:
 
   /// @returns true if `fastRelease` was called since the voice started
   bool isFastReleasing() const noexcept { return fastReleasing_; }
+
+  /**
+   Link this voice to the other half of a stereo pair (SF2.01 7.10). The right-sample voice is the pitch leader: the
+   pair renders in lockstep (see `renderLinkedInto`) and both use the leader's pitch.
+
+   @param partner the index of the other voice
+   @param isPitchLeader true if this voice plays the right sample
+   */
+  void linkStereoPartner(size_t partner, bool isPitchLeader) noexcept {
+    partner_ = partner;
+    pitchLeader_ = isPitchLeader;
+  }
+
+  /// Forget the stereo partner, so the voice renders on its own with its own pitch.
+  void unlinkStereoPartner() noexcept {
+    partner_ = noPartner;
+    pitchLeader_ = false;
+  }
+
+  /// @returns the index of the other voice of a stereo pair, or `noPartner`
+  size_t partner() const noexcept { return partner_; }
+
+  /// @returns true if this voice supplies the pitch for its stereo partner
+  bool isPitchLeader() const noexcept { return partner_ != noPartner && pitchLeader_; }
+
+  /// @returns the number of the last render slice this voice took part in (see `markRendered`)
+  uint64_t renderedSlice() const noexcept { return renderedSlice_; }
+
+  /// Record that the voice has been rendered in the given slice, so the engine does not render it twice.
+  void markRendered(uint64_t slice) noexcept { renderedSlice_ = slice; }
   /**
    Notification that a sustain or sostenuto pedal was released. Voices whose release was postponed and that are no
    longer held by any pedal transition to their release phase. Voices whose key is still down are not affected.
@@ -183,7 +216,20 @@ public:
 
    @returns next sample
    */
-  Float renderSample() noexcept {
+  Float renderSample() noexcept { return renderSample(nullptr, nullptr); }
+
+  /**
+   Renders the next sample, optionally taking the pitch from elsewhere. This supports stereo pairs (SF2.01 7.10):
+   "Both samples should be played entirely synchronously, with their pitch controlled by the right sample's
+   generators. All non-pitch generators should apply as normal". The right-sample voice reports its phase increment
+   through `incrementOut`, and the left-sample voice renders with it through `pitchIncrement`. Each voice still runs
+   its own LFOs and envelopes, which also drive volume, filter and (via modulators) other non-pitch values.
+
+   @param pitchIncrement if not null, the sample phase increment to use instead of this voice's own pitch
+   @param incrementOut if not null, receives the phase increment used for this sample
+   @returns next sample
+   */
+  Float renderSample(const Float* pitchIncrement, Float* incrementOut) noexcept {
     if (! active_) { return 0_F; }
 
     // Capture the current state of the modulators and envelopes and advance them to the next sample.
@@ -192,15 +238,14 @@ public:
     auto modEnv{modulatorEnvelope_.getNextValue()};
     auto volEnv{volumeEnvelope_.getNextValue()};
 
+    // Calculate the pitch to render. This is done even while the volume envelope is in its delay stage, so that a
+    // stereo partner always has an increment to follow.
+    auto increment{pitchIncrement != nullptr ? *pitchIncrement : pitch_.samplePhaseIncrement(modLFO, vibLFO, modEnv)};
+    if (incrementOut != nullptr) *incrementOut = increment;
+
     if (volumeEnvelope_.isDelayed()) return 0_F;
 
-    // Calculate the pitch to render and then generate a new sample.
-    //
-    // NOTE: according the SF2 7.10, linked L/R voices should "be played entirely synchronously, with their pitch
-    // controlled by the right sample's generators. All non-pitch generators should apply as normal". We do not do
-    // this, and I'm not entirely sure how to do it given that modLFO and modEnv do not just affect pitch. It seems to
-    // make sense to have common LFOs and envelopes for stereo voices.
-    auto increment{pitch_.samplePhaseIncrement(modLFO, vibLFO, modEnv)};
+    // Generate a new sample.
     auto sample{sampleGenerator_.generate(increment, canLoop())};
 
     // Calculate gain / attenuation to apply to sample. Here we are deviating from FluidSynth: it treats the
@@ -243,16 +288,7 @@ public:
    @param frameCount number of samples over which to fade out
    */
   void renderFadeOut(Engine::Mixer& mixer, SF2::AUAudioFrameCount frameCount) noexcept {
-    SF2::AUValue chorusSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend)));
-    SF2::AUValue reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
-    for (SF2::AUAudioFrameCount index = 0; index < frameCount && active_; ++index) {
-      Float gain{Float(frameCount - index - 1) / Float(frameCount)};
-      Float sample{renderSample() * gain};
-      Float pan{state_.modulated(Index::pan)};
-      Float leftPan, rightPan;
-      DSP::panLookup(pan, leftPan, rightPan);
-      mixer.add(index, SF2::AUValue(leftPan * sample), SF2::AUValue(rightPan * sample), chorusSend, reverbSend);
-    }
+    renderFrames(nullptr, mixer, frameCount, true);
     stop();
   }
 
@@ -264,15 +300,33 @@ public:
    @param frameCount number of samples to render
    */
   void renderInto(Engine::Mixer& mixer, SF2::AUAudioFrameCount frameCount) noexcept {
-    SF2::AUValue chorusSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend)));
-    SF2::AUValue reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
-    for (SF2::AUAudioFrameCount index = 0; index < frameCount && active_; ++index) {
-      Float sample{renderSample()};
-      Float pan{state_.modulated(Index::pan)};
-      Float leftPan, rightPan;
-      DSP::panLookup(pan, leftPan, rightPan);
-      mixer.add(index, SF2::AUValue(leftPan * sample), SF2::AUValue(rightPan * sample), chorusSend, reverbSend);
-    }
+    renderFrames(nullptr, mixer, frameCount, false);
+  }
+
+  /**
+   Render this voice (the right sample of a stereo pair) and its partner in lockstep, sample by sample, with the
+   partner using this voice's pitch (SF2.01 7.10). If this voice stops part way, the partner continues with its own
+   pitch.
+
+   @param follower the voice playing the left sample
+   @param mixer collection of buffers to mix into
+   @param frameCount number of samples to render
+   */
+  void renderLinkedInto(Voice& follower, Engine::Mixer& mixer, SF2::AUAudioFrameCount frameCount) noexcept {
+    renderFrames(&follower, mixer, frameCount, false);
+  }
+
+  /**
+   Like `renderFadeOut`, for a stereo pair rendered in lockstep. Both voices are stopped afterwards.
+
+   @param follower the voice playing the left sample
+   @param mixer collection of buffers to mix into
+   @param frameCount number of samples over which to fade out
+   */
+  void renderLinkedFadeOut(Voice& follower, Engine::Mixer& mixer, SF2::AUAudioFrameCount frameCount) noexcept {
+    renderFrames(&follower, mixer, frameCount, true);
+    stop();
+    follower.stop();
   }
 
   /// @returns `State` instance for the voice.
@@ -294,6 +348,57 @@ private:
   /// Move the envelopes into their release phase.
   void releaseEnvelopes() noexcept;
 
+  /// Mix one rendered sample into the output, panned with the voice's pan generator.
+  void mix(Engine::Mixer& mixer, SF2::AUAudioFrameCount index, Float sample, SF2::AUValue chorusSend,
+           SF2::AUValue reverbSend) const noexcept {
+    Float pan{state_.modulated(Index::pan)};
+    Float leftPan, rightPan;
+    DSP::panLookup(pan, leftPan, rightPan);
+    mixer.add(index, SF2::AUValue(leftPan * sample), SF2::AUValue(rightPan * sample), chorusSend, reverbSend);
+  }
+
+  /// @returns the chorus send level of the voice
+  SF2::AUValue chorusSend() const noexcept {
+    return SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend)));
+  }
+
+  /// @returns the reverb send level of the voice
+  SF2::AUValue reverbSend() const noexcept {
+    return SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
+  }
+
+  /**
+   Render up to `frameCount` samples of this voice and, if given, of a stereo partner that follows this voice's pitch.
+   Rendering stops once neither voice is active.
+
+   @param follower the stereo partner to render in lockstep, or nullptr
+   @param mixer collection of buffers to mix into
+   @param frameCount number of samples to render
+   @param fadeOut if true, ramp the output linearly down to 0 over the frames
+   */
+  void renderFrames(Voice* follower, Engine::Mixer& mixer, SF2::AUAudioFrameCount frameCount, bool fadeOut) noexcept {
+    auto leaderChorus = chorusSend();
+    auto leaderReverb = reverbSend();
+    auto followerChorus = follower != nullptr ? follower->chorusSend() : SF2::AUValue(0);
+    auto followerReverb = follower != nullptr ? follower->reverbSend() : SF2::AUValue(0);
+    for (SF2::AUAudioFrameCount index = 0; index < frameCount; ++index) {
+      bool leaderActive = active_;
+      bool followerActive = follower != nullptr && follower->active_;
+      if (!leaderActive && !followerActive) break;
+      Float gain{fadeOut ? Float(frameCount - index - 1) / Float(frameCount) : Float(1)};
+      Float increment{0_F};
+      if (leaderActive) {
+        mix(mixer, index, renderSample(nullptr, follower != nullptr ? &increment : nullptr) * gain, leaderChorus,
+            leaderReverb);
+      }
+      if (followerActive) {
+        // If the leader has stopped, the follower carries on with its own pitch.
+        Float sample{follower->renderSample(leaderActive ? &increment : nullptr, nullptr)};
+        follower->mix(mixer, index, sample * gain, followerChorus, followerReverb);
+      }
+    }
+  }
+
   State::State state_{};
   LoopingMode loopingMode_{LoopingMode::none};
   Sample::Pitch pitch_{state_};
@@ -311,6 +416,10 @@ private:
   bool postponedRelease_{false};
   bool sostenutoActive_{false};
   bool fastReleasing_{false};
+
+  size_t partner_{noPartner};
+  bool pitchLeader_{false};
+  uint64_t renderedSlice_{0};
 
   size_t voiceIndex_;
   const os_log_t log_{Log::create("Voice")};

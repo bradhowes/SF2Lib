@@ -58,6 +58,7 @@ Voice::start() noexcept
   postponedRelease_ = false;
   sostenutoActive_ = false;
   fastReleasing_ = false;
+  unlinkStereoPartner();
 
   loopingMode_ = loopingMode();
   initialAttenuation_ = DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));

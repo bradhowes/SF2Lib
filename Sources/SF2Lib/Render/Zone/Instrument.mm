@@ -7,7 +7,8 @@ using namespace SF2::Render::Zone;
 Instrument::Instrument(GeneratorCollection&& gens, ModulatorCollection&& mods,
                        const IO::ChunkItems<Entity::SampleHeader>& sampleHeaders) noexcept :
 Zone(std::forward<decltype(gens)>(gens), std::forward<decltype(mods)>(mods), Entity::Generator::Index::sampleID),
-sampleHeader_{isGlobal() ? nullptr : &sampleHeaders[resourceLink()]}
+sampleHeader_{isGlobal() ? nullptr : &sampleHeaders[resourceLink()]},
+sampleIndex_{isGlobal() ? size_t(0) : size_t(resourceLink())}
 {
   ;
 }

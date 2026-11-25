@@ -557,7 +557,26 @@ private:
 
   void stopSameKeyVoices_RT(int eventKey) noexcept;
 
-  void startVoice_RT(const Config& config) noexcept;
+  /**
+   Start a voice for the given configuration.
+
+   @param config the zones to use
+   @returns the index of the voice that was started, or `Voice::noPartner` if none was
+   */
+  size_t startVoice_RT(const Config& config) noexcept;
+
+  /**
+   Link the voices of any stereo pairs among the configs of a note-on (SF2.01 7.10), so that they render in lockstep
+   with the right sample's pitch.
+
+   @param configs the configs that `Preset::find` returned
+   @param voiceIndices the voice started for each config (`Voice::noPartner` if none)
+   */
+  void linkStereoPairs_RT(const Preset::ConfigCollection& configs, const std::array<size_t, Preset::maxConfigsPerNote>&
+                          voiceIndices) noexcept;
+
+  /// Unlink the given voice and its stereo partner, if it has one.
+  void unlinkStereoPartner_RT(size_t voiceIndex) noexcept;
 
   OldestVoiceCollection::iterator stopVoice_RT(size_t voiceIndex) noexcept;
 
@@ -691,6 +710,9 @@ private:
   double renderingTimeBudgetScaling_;
   Clock clock_{&Utils::Timer::now};
   double averageVoiceFrameNanoseconds_{0.0};
+
+  /// Counts calls to `renderInto`, so that a stereo pair rendered together is not rendered again in the same slice.
+  uint64_t renderSlice_{0};
 
   dispatch_queue_t workQueue_;
 
