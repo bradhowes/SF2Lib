@@ -690,7 +690,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - **Checked that it catches regressions:** making the `std::string` overload of `loadFileAndPreset` non-`const` again stops the Swift tests from compiling.
 - `EngineTests` / `FileInfoTests` are updated for `SF2::IO::LoadResponse` and for the `load()` return value.
 
-**Follow-up (2026-11-25): active voice count no longer reached `AUParameterTree` observers (regression from step 8). Not yet committed. `make test-macOS`: 430 tests, 0 failures.**
+**Follow-up (2026-11-25): active voice count no longer reached `AUParameterTree` observers (regression from step 8). Commit `f9e1b93`. Verified in the simulator. `make test-macOS`: 430 tests, 0 failures.**
 - **Cause:** step 8 (`984e8fc`) removed `updateActiveVoiceCount_RT`. That function set the `activeVoiceCount` parameter (address 1004) from `startVoice_RT` / `stopVoice_RT`, which put Objective-C messaging and the parameter's observers on the render thread. Nothing replaced it, so a UI observing the parameter (for example in the simulator) stopped receiving the count.
   - Reading `parameter.value` still worked, through `provideParameterValue`. But it read the render thread's voice collection without synchronisation.
 - **Fix:**
