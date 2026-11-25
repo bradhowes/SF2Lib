@@ -7,13 +7,13 @@
 import sys
 import re
 
-pat = re.compile('^let *useUnsafeFlags *= true')
+pat = re.compile("^let *(useUnsafeFlags|makeOptimized) *= true")
 
-if __name__ == '__main__':
-    if 'Package.swift' in sys.argv:
-        with open('Package.swift') as fd:
+if __name__ == "__main__":
+    if "Package.swift" in sys.argv:
+        with open("Package.swift") as fd:
             for line in fd.readlines():
                 if pat.match(line):
-                    print('** FOUND:', line)
+                    print("** FOUND:", line)
                     sys.exit(1)
     sys.exit(0)
