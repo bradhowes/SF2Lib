@@ -614,7 +614,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - computing span offsets from the file position instead of the buffer position crashes the test run.
 - No hard-coded rendering values changed: the sample data is identical, only its placement in memory differs.
 
-**Follow-up (2026-11-25): Swift/C++ interop review of `SF2Engine`, `SF2FileInfo` and `SF2PresetInfo`, items 1–4. Not yet committed. `make test-macOS`: 390 (`SF2LibTests`) + 32 (`EngineTests`) tests, 0 failures. Earlier entries' counts are the `SF2LibTests` bundle only.**
+**Follow-up (2026-11-25): Swift/C++ interop review of `SF2Engine`, `SF2FileInfo` and `SF2PresetInfo`, items 1–4. Commit `a85ffad`. `make test-macOS`: 390 (`SF2LibTests`) + 32 (`EngineTests`) tests, 0 failures. Earlier entries' counts are the `SF2LibTests` bundle only.**
 - **1. Use before setup.**
   - `SF2Engine` had two-phase set-up: `create(sampleRate, voiceCount)` built the engine, but Swift also got an implicit `SF2Engine()`, and every other method then dereferenced a null `impl_`.
   - `create` is replaced by a constructor `SF2Engine(double sampleRate, NSUInteger voiceCount)`, which Swift imports as `init(_:_:)`. The default constructor is deleted.
