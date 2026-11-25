@@ -91,7 +91,7 @@ Fix: validate generator opers once at load and drop invalid entries. Validate th
 - Manufacturer 0x7E is Universal Non-Real-Time. 0x7D is the ID reserved for non-commercial use.
 - `[data initWithBase64EncodedData:data …]` sends `init` to an already-initialised object (UB). Use `[[NSData alloc] initWithBase64EncodedData:…]`.
 
-**Voice-count limit not enforced.** The constructor initialises only `voiceCountLimit` voices, but `OldestVoiceCollection` hands out all `maxVoiceCount` (128) indices. Voices beyond the limit get used with an uninitialised `voiceIndex_` and the default interpolator. `assert(voiceCountLimit <= 128)` disappears in release builds, so `SF2Engine::create(…, 200)` writes past `voices_`.
+~~**Voice-count limit not enforced.**~~ The constructor initialises only `voiceCountLimit` voices, but `OldestVoiceCollection` hands out all `maxVoiceCount` (128) indices. Voices beyond the limit get used with an uninitialised `voiceIndex_` and the default interpolator. `assert(voiceCountLimit <= 128)` disappears in release builds, so `SF2Engine::create(…, 200)` writes past `voices_`.
 
 **Live attenuation changes ignored for sounding notes.** `initialAttenuation_` is captured once in `Voice::start()`, so CC7, CC11 and AU-parameter changes never affect held notes. That breaks volume and expression swells. Read `state_.modulated(initialAttenuation)` in the render path (once per block is enough).
 
@@ -175,7 +175,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 | 9.5.1 modulator identity includes transform | ✅ `operator==` compares source, destination, amount source and transform (9.5.1) for superseding and summing. Duplicates within a zone use the three enumerators only (7.4, `hasSameEnumerators`) |
 | 9.5.1 PMOD additive | ✅ [step 7] preset modulators add their amount to an identical instrument/default modulator, or are added as new; local preset supersedes global preset |
 | 9.5.1 inst modulators supersede defaults | ✅ |
-| 7.10 stereo links "played synchronously, pitch from right sample" | ❌ not implemented (acknowledged in `Voice.hpp`) |
+| 7.10 stereo links "played synchronously, pitch from right sample" | ✅ mutually linked left/right zones from the same preset zone are paired at note-on and rendered in lockstep; the left voice uses the right voice's pitch, while all other generators apply per voice (`ad54423`, see §11) |
 | Modulated value clamping to gen range after summation | ✅ clamped where each value is used (10.5). `State::modulated` still returns the raw sum; consumers that did not already bound it use `State::modulatedInRange`, which clamps to the generator's `Definition` range: coarseTune, the three pitch depths, modLfoToVolume, the two filter Fc depths and the key-number envelope scaling. LFO delays use `DSP::lfoDelayTimecentsToSeconds` (−32768 = no delay). Envelope times, sustain levels, LFO frequencies, filter Fc/Q, attenuation, pan and the sends were already bounded by their conversions. fineTune is deliberately not clamped: it carries the pitch-wheel modulator |
 
 ---
@@ -702,3 +702,36 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - `parameter.value` must match at both points.
   - Without the timer, or without the render thread sharing the count, the test fails.
 - **Note:** each step's progress log used to be checked against the end-to-end tests only. None of them observed the parameter tree, which is how this went unnoticed.
+
+**Follow-up (2026-11-25): SF2.01 7.10 stereo links. Code committed by the user as `ad54423`; this entry and one extra test are not yet committed. `make test-macOS`: 438 tests, 0 failures.**
+- **Spec:** "If sfSampleType indicates a left or right sample, then wSampleLink is the sample header index of the associated right or left stereo sample respectively. Both samples should be played entirely synchronously, with their pitch controlled by the right sample's generators. All non-pitch generators should apply as normal; in particular the panning of the individual samples to left and right should be accomplished via the pan generator. Left-right pairs should always be found within the same instrument." Before this, the two zones of a pair played as independent voices, each with its own pitch and lifecycle.
+- **Pairing:**
+  - `Engine::noteOn_RT` now keeps the voice index started for each config.
+  - `linkStereoPairs_RT` then pairs a right config with a left config (`Config::isStereoRightOf`) when both headers link to each other and both come from the same preset zone, and so the same instrument.
+  - Each voice joins at most one pair. One-way links, a lone half (for example when the other zone's velocity range does not match), and `linkedSample` (8, "not currently fully defined") stay unpaired.
+  - `Zone::Instrument` records its sample index at construction, because `resourceLink()` may throw and so cannot be called on the render thread.
+- **Lockstep rendering:**
+  - `Voice::renderSample(pitchIncrement, incrementOut)` can take its phase increment from elsewhere. `renderLinkedInto` / `renderLinkedFadeOut` render the right voice (the pitch leader) and the left voice sample by sample, with the left voice using the leader's increment.
+  - Each voice keeps its own envelopes, LFOs, filter, attenuation and pan.
+  - `Engine::renderInto` renders a pair when it reaches either voice. `renderSlice_` / `Voice::markRendered` stop the other voice being rendered twice, and a finished partner is released straight away.
+- **Keeping the pair together:**
+  - stopping or stealing one voice unlinks the other, which carries on with its own pitch;
+  - budget shedding releases both halves;
+  - an overrun fades both halves out in lockstep.
+- **Tests:** `StereoLinkTests` (11), using `SF2Builder` pairs panned −500 / +500 so that each output channel carries one sample:
+  - pairing, and the right voice leading;
+  - the left sample follows the right sample's pitch (an octave-up left zone is ignored);
+  - the right zone's fine tune drives both channels;
+  - non-pitch generators apply per voice;
+  - a one-way link and a lone half are not paired;
+  - stealing one half;
+  - shedding both halves;
+  - the leader ending first;
+  - `testBudgetOverrunFadesOutAPairInLockstep` (added with this entry): sample-exact against the unbudgeted render times the ramp;
+  - `RealTimeSafetyTests::testStereoPairsDoNotAllocate`.
+- **Checked that the tests catch the bugs,** by removing each behaviour on its own: no pairing; the left voice using its own pitch; no unlink on steal or on stop; shedding only one half; no double-render guard (the RolandNicePiano hard-coded values fail); fading the halves separately. Each makes tests fail.
+- **Hard-coded values:** RolandNicePiano (`context2`) is entirely stereo pairs with identical pitch data, and its hard-coded rendering values did not change.
+- **Found while doing this:** the voice limit was not enforced. `OldestVoiceCollection` handed out all 128 voices, but `Engine` only initialised the first `voiceCountLimit`, so voices above the limit rendered with an uninitialised `voiceIndex_`. The user's later constructor clean-up removed `voiceCountLimit`, and `Engine::initialize` now initialises all `traits::maxVoiceCount` voices, which resolves this.
+- **Known limits, not defects:**
+  - The left voice uses the right voice's entire phase increment, including the right header's root key, pitch correction and sample rate. That is correct for matched pairs, which is what the spec describes.
+  - Each voice keeps its own sample position and loop points, so a pair whose loops differ in length can still drift apart.

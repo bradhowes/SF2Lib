@@ -269,6 +269,45 @@ static std::vector<size_t> activeVoices(TestEngineHarness& harness)
   }
 }
 
+- (void)testBudgetOverrunFadesOutAPairInLockstep {
+  // When a slice has already used up its time budget, the pair is faded out together: the left channel keeps the right
+  // sample's pitch while both ramp down over `budgetFadeOutFrames`, then both voices stop. The left zone is an octave
+  // up, so fading the two voices separately would put the left channel at the wrong pitch.
+  auto path = writeFile({.leftGens = {{genCoarseTune, 12}}}, "fade");
+  static uint64_t now = 0;
+  static uint64_t step = 0;
+  auto slice = [&](bool overrun) {
+    auto harness{TestEngineHarness{48000.0}};
+    XCTAssertEqual(harness.load(path, 0), LoadResponse::ok);
+    auto mixer{harness.createMixer(1024.0 / 48000.0)};
+    harness.sendNoteOn(69, 127);
+    harness.renderForCount(mixer, 512);  // warm-up, no budget
+    if (overrun) {
+      now = 0;
+      step = 512 * harness.frameNanoseconds() * 2;  // the first check already finds the budget used up
+      harness.enableRenderingBudget(1.0, [] () noexcept -> uint64_t { return now += step; });
+    }
+    harness.renderForCount(mixer, 512);
+    if (overrun) XCTAssertEqual(harness.engine().activeVoiceCount(), size_t(0));
+    Channels result;
+    for (int channel = 0; channel < 2; ++channel) {
+      const AUValue* data = harness.dryBuffer().floatChannelData[channel];
+      (channel == 0 ? result.left : result.right).assign(data + 512, data + 1024);
+    }
+    return result;
+  };
+
+  auto reference = slice(false);
+  auto faded = slice(true);
+  auto fadeFrames = Render::Engine::Engine::budgetFadeOutFrames;
+  for (size_t index = 0; index < 512; ++index) {
+    double gain = index < fadeFrames ? double(fadeFrames - index - 1) / double(fadeFrames) : 0.0;
+    XCTAssertEqualWithAccuracy(faded.left[index], gain * reference.left[index], 1.0e-6, @"left frame %zu", index);
+    XCTAssertEqualWithAccuracy(faded.right[index], gain * reference.right[index], 1.0e-6, @"right frame %zu", index);
+  }
+  XCTAssertGreaterThan(peak(std::vector<AUValue>(reference.left.begin(), reference.left.begin() + 8)), 0.05);
+}
+
 - (void)testFollowerContinuesWhenTheLeaderEnds {
   // The right sample is short and does not loop, so the leader ends long before the left (looping) sample. The left
   // voice carries on, unlinked, with its own pitch.
