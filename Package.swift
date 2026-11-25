@@ -5,9 +5,6 @@ import PackageDescription
 // Set to true to enable C++ bounds checking
 let checkedVectorIndexing = false
 
-// Set to true to enable low-pass filter in sample generation (once sound quality bugs are fixed)
-let enableLowPassFilter = true
-
 // Set to true to play audio generated in tests.
 let playAudioDuringTests = false
 
@@ -268,8 +265,8 @@ extension Array where Element == CXXSetting {
       "-x", "objective-c++"
     ]
     return [
+      .define("NDEBUG", .when(configuration: .release)),
       .define("CHECKED_VECTOR_INDEXING", to: checkedVectorIndexing ? "1" : "0", .when(configuration: .debug)),
-      .define("ENABLE_LOWPASS_FILTER", to: enableLowPassFilter ? "1" : "0", .none),
       .define("PLAY_AUDIO", to: playAudioDuringTests ? "1" : "0", .when(configuration: .debug)),
       .define("USE_ACCELERATE", to: useAccelerate ? "1" : "0", .none)
     ] + (useUnsafeFlags ? [.unsafeFlags(unsafeFlags, .when(configuration: .debug))] : [])

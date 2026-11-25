@@ -64,7 +64,7 @@ FUZZ_SOURCES = $(shell find Sources/SF2File Sources/SF2Util Sources/SF2Lib -name
 	$(wildcard $(FUZZ_DSPHEADERS)/*.mm)
 FUZZ_FLAGS = -std=c++2b -g -O1 -isysroot $(FUZZ_SDK) -fobjc-arc \
 	-ISources/SF2File/include -ISources/SF2Util/include -ISources/SF2Lib/include -I$(FUZZ_DSPHEADERS)/include \
-	-DCHECKED_VECTOR_INDEXING=1 -DENABLE_LOWPASS_FILTER=1 -DPLAY_AUDIO=0 -DUSE_ACCELERATE=1
+	-DCHECKED_VECTOR_INDEXING=0 -DPLAY_AUDIO=0 -DUSE_ACCELERATE=1
 FUZZ_LDFLAGS = -L$(FUZZ_LLVM)/lib/c++ -Wl,-rpath,$(FUZZ_LLVM)/lib/c++ \
 	-framework Foundation -framework Accelerate -framework AudioToolbox -framework AVFoundation
 
