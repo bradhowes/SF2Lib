@@ -657,3 +657,35 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
     - the "Engin" typo;
     - missing copyright lines.
   - No Swift code in the repo imports `Engine`. A small Swift Testing target would catch import and semantic problems.
+
+**Follow-up (2026-11-25): Swift/C++ interop review, remaining items 5–14 and a Swift test target, in one commit. `make test-macOS`: 429 tests, 0 failures (390 `SF2LibTests` + 32 `EngineTests` + 7 `EngineSwiftTests`).**
+- **5. `const`:** `loadFileAndPreset` (both overloads) and `loadBookmarkAndPreset` are now `const`, like every other `SF2Engine` method. Swift imports them all as non-mutating: they can be called on a `let`, and they no longer need exclusive access to the variable holding the engine.
+- **6. Copy semantics:** documented as a handle. Copies, in C++ or Swift, share the same engine, like a `shared_ptr`, and the render block holds one too.
+  - Not `SWIFT_NONCOPYABLE`: a `~Copyable` engine would stop Swift clients capturing it in escaping closures.
+  - Not `SWIFT_SHARED_REFERENCE`: that needs an intrusive reference count on `Engine`.
+  - `EngineSwiftTests.engineCopiesShareTheEngine` pins this down.
+- **7. `SF2FileInfo` copies:** the copy constructor and copy assignment are now explicitly deleted, and the move operations and destructor are defined out of line, where `File` is complete. The header only forward-declares `File`, and it used to compile only because the umbrella header included `File.hpp`. Documented that Swift imports the type as `~Copyable`.
+- **8. `SF2FileInfo::load`** returns `SF2::IO::LoadResponse` instead of `bool`. A missing file gives `notFound`.
+- **9. Annotation placement:** `SWIFT_SELF_CONTAINED` now sits with `SWIFT_ESCAPABLE` before the type name on all three types.
+- **10. Redundant annotations:** `SWIFT_RETURNS_INDEPENDENT_VALUE` is removed from the `std::string` and `std::optional` returns, which are self-contained values. It stays on `getRenderBlock`, where it now holds true. The Swift tests build with `.strictMemorySafety()` and produce no warnings.
+- **11. Private constructor:** `SF2PresetInfo(const Entity::Preset&)` is now private, with `SF2FileInfo` as a friend.
+- **12. `SWIFT_COMPUTED_PROPERTY`: not adopted.** A probe showed it is silently ignored on `name()`, and only works on `getName()`, which is imported as a `name` property. Adopting it would mean renaming every getter (breaking the Objective-C++ and Swift callers) for a cosmetic gain.
+- **13. Umbrella header:**
+  - `LoadResponse` moved to its own `SF2File/IO/LoadResponse.hpp` (`SF2::IO::LoadResponse`). `File::LoadResponse` remains as an alias, so the parser and render code are unchanged.
+  - `SF2Engine.hpp` no longer includes `SF2File/IO/File.hpp` (the whole parsing API) or `SF2Lib/MIDI/GeneratorOverride.hpp`. It keeps `LoadResponse`, the generator `Index` and `ParameterAddress`, which its API and clients use.
+  - **API change:** Swift code that names `SF2.IO.File.LoadResponse` should use `SF2.IO.LoadResponse`; the enum values are unchanged.
+- **14. Small points:**
+  - `voiceCount` is `size_t`;
+  - the stale commented-out parameters are removed;
+  - "Engin" and "an receive" typos fixed;
+  - copyright lines added;
+  - doc comments added to `SF2PresetInfo`.
+- **Swift test target:** new `Tests/EngineSwiftTests`, using Swift Testing with the package's Swift settings (C++ interop, strict memory safety, Swift 6). It is added to `SF2Lib-Package.xctestplan` and to both shared schemes; `make test-macOS` uses the `SF2Lib-Package (Release)` scheme, which lists its testables directly. It locates the bundled `.sf2` files by path (`#filePath`) rather than importing `TestUtils`, which would expose its internal headers to Swift. It covers:
+  - the initialiser and voice clamping;
+  - methods called on a `let`;
+  - copies sharing the engine;
+  - load failures;
+  - SysEx payloads converted to a Swift `Array`;
+  - `SF2FileInfo` load, metadata, the checked subscript through `std::optional.value`, and a missing file.
+  - **Checked that it catches regressions:** making the `std::string` overload of `loadFileAndPreset` non-`const` again stops the Swift tests from compiling.
+- `EngineTests` / `FileInfoTests` are updated for `SF2::IO::LoadResponse` and for the `load()` return value.

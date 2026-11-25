@@ -1,4 +1,4 @@
-// Copyright © 2023 Brad Howes. All rights reserved.
+// Copyright © 2023, 2026 Brad Howes. All rights reserved.
 
 #include <algorithm>
 #include <iostream>
@@ -9,7 +9,7 @@
 
 namespace Eng = SF2::Render::Engine;
 
-SF2Engine::SF2Engine(double sampleRate, NSUInteger voiceCount)
+SF2Engine::SF2Engine(double sampleRate, size_t voiceCount)
 : impl_{std::make_shared<Eng::Engine>(sampleRate, std::clamp<size_t>(voiceCount, 1, Eng::traits::maxVoiceCount),
                                       Eng::Engine::Interpolator::cubic4thOrder, 0.85)}
 {}
@@ -71,32 +71,30 @@ SF2Engine::activePresetName() const
 
 std::vector<uint8_t>
 SF2Engine::createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex)
-//                                          SF2::MIDI::GeneratorOverrideVector overrides) noexcept
 {
   SF2::MIDI::GeneratorOverrideVector overrides;
   return SF2::Render::Engine::Engine::createLoadFileUsePresetPayload(filePath, presetIndex, overrides);
 }
 
-SF2::IO::File::LoadResponse
-SF2Engine::loadFileAndPreset(std::string path, size_t presetIndex) {
+SF2::IO::LoadResponse
+SF2Engine::loadFileAndPreset(std::string path, size_t presetIndex) const {
   return impl_->loadFileAndPreset(path, presetIndex);
 }
 
-SF2::IO::File::LoadResponse
-SF2Engine::loadFileAndPreset(int fd, size_t presetIndex) {
+SF2::IO::LoadResponse
+SF2Engine::loadFileAndPreset(int fd, size_t presetIndex) const {
   return impl_->loadFileAndPreset(fd, presetIndex);
 }
 
 std::vector<uint8_t>
 SF2Engine::createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetIndex)
-//                                          SF2::MIDI::GeneratorOverrideVector overrides) noexcept
 {
   SF2::MIDI::GeneratorOverrideVector overrides;
   return SF2::Render::Engine::Engine::createLoadBookmarkUsePresetPayload(bookmark, presetIndex, overrides);
 }
 
-SF2::IO::File::LoadResponse
-SF2Engine::loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) {
+SF2::IO::LoadResponse
+SF2Engine::loadBookmarkAndPreset(NSData* bookmark, size_t presetIndex) const {
   return impl_->loadBookmarkAndPreset(bookmark, presetIndex);
 }
 

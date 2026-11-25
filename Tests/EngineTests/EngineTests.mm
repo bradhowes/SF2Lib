@@ -129,10 +129,10 @@ struct SF2EngineTestAccess {
 - (void)testLoadFileNameAndPreset {
   auto path = [TestResources getResourcePath:0];
   auto result = self.engine->loadFileAndPreset(path, 0);
-  XCTAssertEqual(result, SF2::IO::File::LoadResponse::ok);
+  XCTAssertEqual(result, SF2::IO::LoadResponse::ok);
   XCTAssertTrue("Piano 1" == self.engine->activePresetName());
   result = self.engine->loadFileAndPreset("", 1);
-  XCTAssertEqual(result, SF2::IO::File::LoadResponse::ok);
+  XCTAssertEqual(result, SF2::IO::LoadResponse::ok);
   XCTAssertTrue("Piano 2" == self.engine->activePresetName());
 }
 
@@ -140,7 +140,7 @@ struct SF2EngineTestAccess {
   auto path = [TestResources getResourcePath:0];
   auto fd = ::open(path.c_str(), O_RDONLY);
   auto result = self.engine->loadFileAndPreset(fd, 0);
-  XCTAssertEqual(result, SF2::IO::File::LoadResponse::ok);
+  XCTAssertEqual(result, SF2::IO::LoadResponse::ok);
   XCTAssertTrue("Piano 1" == self.engine->activePresetName());
 }
 

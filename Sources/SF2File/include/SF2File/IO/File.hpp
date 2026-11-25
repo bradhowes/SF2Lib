@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "SF2File/IO/LoadResponse.hpp"
 #include "SF2File/Entity/Bag.hpp"
 #include "SF2File/Entity/Generator/Generator.hpp"
 #include "SF2File/Entity/Instrument.hpp"
@@ -55,12 +56,8 @@ public:
   /// Closes the file if it was loaded successfully.
   ~File() = default;
 
-  enum class LoadResponse: int {
-    ok = 0,
-    notFound = 1,
-    invalidFormat = 2,
-    none = -1
-  };
+  /// Result of a load (see `IO::LoadResponse`)
+  using LoadResponse = IO::LoadResponse;
 
   /**
    Load the file given in the constructor. Note that most of the File API is valid only if `load` was successful

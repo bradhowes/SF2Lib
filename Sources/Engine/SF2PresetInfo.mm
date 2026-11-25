@@ -1,3 +1,5 @@
+// Copyright © 2023, 2026 Brad Howes. All rights reserved.
+
 #include "SF2File/Entity/Preset.hpp"
 
 #include "SF2PresetInfo.hpp"

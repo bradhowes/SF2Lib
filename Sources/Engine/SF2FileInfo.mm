@@ -1,4 +1,4 @@
-// Copyright © 2023 Brad Howes. All rights reserved.
+// Copyright © 2023, 2026 Brad Howes. All rights reserved.
 
 #include "SF2FileInfo.hpp"
 #include "SF2File/Entity/Preset.hpp"
@@ -8,12 +8,18 @@ SF2FileInfo::SF2FileInfo(std::string path)
 : impl_{new SF2::IO::File()}, path_{path}
 {}
 
-bool
+// Defined here, where `File` is complete (the header only forward-declares it).
+SF2FileInfo::SF2FileInfo(SF2FileInfo&&) = default;
+SF2FileInfo& SF2FileInfo::operator=(SF2FileInfo&&) = default;
+SF2FileInfo::~SF2FileInfo() = default;
+
+SF2::IO::LoadResponse
 SF2FileInfo::load()
 {
   // `File::load(int)` keeps its own duplicate of the descriptor, so ours is closed when `fd` goes out of scope.
   auto fd = SF2::IO::UniqueFd::openForReading(path_.c_str());
-  return impl_->load(fd.get()) == SF2::IO::File::LoadResponse::ok;
+  if (!fd.isValid()) return SF2::IO::LoadResponse::notFound;
+  return impl_->load(fd.get());
 }
 
 std::string SF2FileInfo::embeddedName() const { return impl_->embeddedName(); }

@@ -11,11 +11,12 @@
 @implementation FileInfoTests
 
 - (void)testLoading {
+  // `load` returns the reason for a failure (it used to return a bool).
   auto fi1 = SF2FileInfo("a.b");
-  XCTAssertFalse(fi1.load());
+  XCTAssertEqual(fi1.load(), SF2::IO::LoadResponse::notFound);
   auto path = [TestResources getResourcePath:0];
   auto fi2 = SF2FileInfo(path);
-  XCTAssertTrue(fi2.load());
+  XCTAssertEqual(fi2.load(), SF2::IO::LoadResponse::ok);
 }
 
 - (void)testLoadingDoesNotLeakDescriptors {
@@ -30,7 +31,7 @@
   auto before = countOpen();
   for (int count = 0; count < 10; ++count) {
     auto info = SF2FileInfo(path);
-    XCTAssertTrue(info.load());
+    XCTAssertEqual(info.load(), SF2::IO::LoadResponse::ok);
     XCTAssertEqual(countOpen(), before + 1);
   }
   XCTAssertEqual(countOpen(), before);
@@ -69,7 +70,7 @@
 - (void)testPresetInfo {
   auto path = [TestResources getResourcePath: 0];
   auto fi1 = SF2FileInfo(path);
-  fi1.load();
+  XCTAssertEqual(fi1.load(), SF2::IO::LoadResponse::ok);
   XCTAssertEqual(size_t(235), fi1.size());
   auto presetInfo = fi1[0];
   XCTAssertTrue(presetInfo.has_value());
@@ -93,7 +94,7 @@
   auto path = [TestResources getResourcePath: 0];
   auto fi1 = SF2FileInfo(path);
   XCTAssertFalse(fi1[0].has_value());  // before load
-  fi1.load();
+  XCTAssertEqual(fi1.load(), SF2::IO::LoadResponse::ok);
   XCTAssertTrue(fi1[234].has_value());
   XCTAssertFalse(fi1[235].has_value());
   XCTAssertFalse(fi1[size_t(-1)].has_value());

@@ -107,6 +107,11 @@ let package = Package(
       cxxSettings: .cxxSettings
     ),
     .testTarget(
+      name: "EngineSwiftTests",
+      dependencies: ["Engine"],
+      swiftSettings: .swiftSettings
+    ),
+    .testTarget(
       name: "SF2LibTests",
       dependencies: ["SF2Lib", "TestUtils"],
       cxxSettings: .cxxSettings
