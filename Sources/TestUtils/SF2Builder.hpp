@@ -68,6 +68,9 @@ struct SF2Builder {
   /// If set, the size to write in the `pdta` LIST header instead of the real one
   int64_t pdtaListSizeOverride{-1};
 
+  /// Write pdta before sdta to construct an invalid top-level LIST order
+  bool pdtaBeforeSdta{false};
+
   /**
    @returns builder for a valid file: preset "Sine" (bank 0, program 0) -> instrument "Sine" -> sample "Sine", a 441 Hz
    sine at 44.1 kHz with root key 69, looped over whole periods from sample 100 to 1900 (sampleModes = 1).
@@ -133,8 +136,13 @@ struct SF2Builder {
     Bytes body;
     body.tag("sfbk");
     body.list("INFO", info);
-    body.list("sdta", sdta);
-    body.list("pdta", pdta, pdtaListSizeOverride);
+    if (pdtaBeforeSdta) {
+      body.list("pdta", pdta, pdtaListSizeOverride);
+      body.list("sdta", sdta);
+    } else {
+      body.list("sdta", sdta);
+      body.list("pdta", pdta, pdtaListSizeOverride);
+    }
     Bytes riff;
     riff.tag("RIFF").u32(uint32_t(body.data.size())).append(body);
     return riff.data;

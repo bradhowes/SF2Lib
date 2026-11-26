@@ -44,8 +44,12 @@ ssize_t mockRead(int, void* buffer, size_t count) {
 }
 
 - (void)testCheckValidity {
-  XCTAssertTrue(Pos(-1, 0, 10));
-  XCTAssertTrue(Pos(0, 11, 10));
+  XCTAssertTrue(Pos(0, 0, 10).isValid());
+  XCTAssertFalse(Pos(-1, 0, 10).isValid());
+  XCTAssertFalse(Pos(0, 11, 10).isValid());
+  XCTAssertFalse(Pos(0, 0, 10).atEnd());
+  XCTAssertTrue(Pos(0, 10, 10).atEnd());
+  XCTAssertTrue(Pos(0, 11, 10).atEnd());
 }
 
 @end

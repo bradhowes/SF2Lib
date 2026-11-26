@@ -85,6 +85,12 @@ static double peak(const std::vector<AUValue>& samples)
   XCTAssertGreaterThan(peak(samples), 0.01);
 }
 
+- (void)testTopLevelListsOutOfOrderAreRejected {
+  auto builder = SF2Builder::minimal();
+  builder.pdtaBeforeSdta = true;
+  XCTAssertEqual(load(builder), LoadResponse::invalidFormat);
+}
+
 - (void)testEveryTruncationIsRejected {
   // Previously a truncated pdta sub-chunk threw inside a noexcept function, which terminated the host.
   auto bytes = SF2Builder::minimal().build();

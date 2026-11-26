@@ -380,6 +380,12 @@ using namespace SF2::MIDI;
   z = ((21 << 7) | 123) - 8192;
   XCTAssertEqual(channelState.nrpnValue(SF2::Entity::Generator::Index(56)), z);
   XCTAssertEqual(size_t(56), channelState.nrpnIndex());
+
+  // An LSB arriving after the MSB refines the current value immediately.
+  channelState.setContinuousControllerValue(ControlChange::dataEntryMSB, 20);
+  channelState.setContinuousControllerValue(ControlChange::dataEntryLSB, 5);
+  z = ((20 << 7) | 5) - 8192;
+  XCTAssertEqual(channelState.nrpnValue(SF2::Entity::Generator::Index(56)), z);
 }
 
 @end

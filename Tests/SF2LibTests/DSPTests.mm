@@ -63,6 +63,15 @@ using namespace SF2::DSP;
   XCTAssertEqual(14000, clampFilterCutoff(14000));
 }
 
+- (void)testSecondsToCents {
+  for (auto seconds : {0.5_F, 1_F, 1.5_F, 2_F, 4_F}) {
+    XCTAssertEqualWithAccuracy(centsToSeconds(secondsToCents(seconds)), seconds, self.epsilon);
+  }
+  XCTAssertEqualWithAccuracy(secondsToCents(0.5_F), -1200_F, self.epsilon);
+  XCTAssertEqualWithAccuracy(secondsToCents(1_F), 0_F, self.epsilon);
+  XCTAssertEqualWithAccuracy(secondsToCents(2_F), 1200_F, self.epsilon);
+}
+
 - (void)testUnipolarModulation {
   XCTAssertEqual(unipolarModulation(-3.0, 10.0, 20.0), 10.0);
   XCTAssertEqual(unipolarModulation(0.0, 10.0, 20.0), 10.0);

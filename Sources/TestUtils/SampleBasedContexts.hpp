@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <deque>
 #include <iomanip>
 #include <AVFoundation/AVFoundation.h>
 #include <XCTest/XCTest.h>
@@ -251,7 +252,6 @@ struct TestVoiceCollection {
   channelState_{channelState},
   voices_{}
   {
-    voices_.reserve(presetConfigs_.size());
     for (size_t index = 0; index < presetConfigs_.size(); ++index) {
       voices_.emplace_back();
       voices_.back().initialize(index, sampleRate_);
@@ -286,7 +286,7 @@ private:
   SF2::Render::Preset preset_;
   SF2::Render::Preset::ConfigCollection presetConfigs_;
   const SF2::MIDI::ChannelState& channelState_;
-  std::vector<SF2::Render::Voice::Voice> voices_;
+  std::deque<SF2::Render::Voice::Voice> voices_;
 };
 
 struct PresetTestContextBase

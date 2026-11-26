@@ -87,8 +87,11 @@ struct Pos {
    */
   Pos limit(off_t count) const noexcept { return Pos(fd_, pos_, std::min(end_, pos_ + std::max(off_t(0), count))); }
 
-  /// @returns true if Pos is invalid
-  explicit operator bool() const noexcept { return fd_ < 0 || pos_ >= end_; }
+  /// @returns true if this position refers to a valid descriptor and has bytes available
+  bool isValid() const noexcept { return fd_ >= 0 && pos_ < end_; }
+
+  /// @returns true if this position has reached or passed its read limit
+  bool atEnd() const noexcept { return pos_ >= end_; }
 
   /// @returns true if first Pos value is less than the second one
   friend bool operator <(const Pos& lhs, const Pos& rhs) noexcept { return lhs.pos_ < rhs.pos_; }

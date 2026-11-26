@@ -58,8 +58,10 @@ public:
    */
   void initialize(size_t voiceIndex, Float sampleRate) noexcept;
 
-  /// Allow move operations during construction to support std::vector
-  Voice(Voice&&) noexcept = default;
+  // `Pitch` holds a reference to this voice's `state_`, so a default move would leave it referring to the moved-from
+  // voice. Voices live in the Engine's fixed array and must not be moved.
+  Voice(Voice&&) = delete;
+  Voice& operator=(Voice&&) = delete;
 
   /**
    Set the sample rate to use for rendering.

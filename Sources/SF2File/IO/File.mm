@@ -1,5 +1,6 @@
 // Copyright © 2022 Brad Howes. All rights reserved.
 
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -85,6 +86,8 @@ File::load(UniqueFd&& owned) noexcept
 
   size_ = fileSize;
   auto hasIFIL = false;
+  constexpr std::array<Tags, 3> expectedListOrder{Tags::info, Tags::sdta, Tags::pdta};
+  size_t listIndex = 0;
 
   try {
     auto riff = Pos(fd, 0, size_).makeChunkList();
@@ -95,11 +98,10 @@ File::load(UniqueFd&& owned) noexcept
       auto chunkList = p0.makeChunkList();
       if (chunkList.tag() != Tags::list) throw File::LoadResponse::invalidFormat;
 
-      // Cheat at just check for valid list types. We then use the same loop to process them all, so technically not
-      // spec-conformant since it could let in invalid SF2 files.
-      if (chunkList.kind() != Tags::info &&
-          chunkList.kind() != Tags::sdta &&
-          chunkList.kind() != Tags::pdta) throw File::LoadResponse::invalidFormat;
+      // SF2.01 5.1 requires exactly three top-level LIST chunks, in INFO, sdta, pdta order.
+      if (listIndex >= expectedListOrder.size() || chunkList.kind() != expectedListOrder[listIndex++]) {
+        throw File::LoadResponse::invalidFormat;
+      }
 
       auto p1 = chunkList.begin();
       p0 = chunkList.advance();
@@ -146,7 +148,7 @@ File::load(UniqueFd&& owned) noexcept
         }
       }
     }
-    if (!hasIFIL) reject();
+    if (listIndex != expectedListOrder.size() || !hasIFIL) reject();
     validate();
   } catch (File::LoadResponse) {
     sampleDataBegin_ = Pos(-1, 0, 0);

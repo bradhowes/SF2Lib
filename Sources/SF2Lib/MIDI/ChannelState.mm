@@ -67,6 +67,18 @@ ChannelState::applyRPNDataEntry(uint8_t value) noexcept
 bool
 ChannelState::decodeNRPN(MIDI::ControlChange cc, uint8_t value) noexcept
 {
+  auto applyDataEntry = [&]() noexcept {
+    if (!activeDecoding_ || nrpnIndex_ >= nrpnValues_.size()) return false;
+    auto index = Entity::Generator::Index(nrpnIndex_);
+    auto msb = (0x7F & checkedVectorIndexing(continuousControllerValues_,
+                                             static_cast<size_t>(MIDI::ControlChange::dataEntryMSB))) << 7;
+    auto lsb = 0x7F & checkedVectorIndexing(continuousControllerValues_,
+                                            static_cast<size_t>(MIDI::ControlChange::dataEntryLSB));
+    auto factor = Entity::Generator::Definition::definition(index).nrpnMultiplier();
+    nrpnValues_[index] = ((msb | lsb) - 8192) * factor;
+    return true;
+  };
+
   switch (cc) {
     case MIDI::ControlChange::nrpnMSB:
 
@@ -108,24 +120,13 @@ ChannelState::decodeNRPN(MIDI::ControlChange cc, uint8_t value) noexcept
       break;
 
     case MIDI::ControlChange::dataEntryLSB:
+      continuousControllerValues_[MIDI::ControlChange::dataEntryLSB] = value;
+      if (applyDataEntry()) return true;
       break;
 
     case MIDI::ControlChange::dataEntryMSB:
-
-      // We set new values when we see an MSB value. The LSB value comes from the current channel state.
-      if (activeDecoding_) {
-        if (nrpnIndex_ < nrpnValues_.size()) {
-          auto index = Entity::Generator::Index(nrpnIndex_);
-          auto msb = ((0x7F & value) << 7);
-          auto lsb = 0x7F & checkedVectorIndexing(continuousControllerValues_,
-                                                  static_cast<size_t>(MIDI::ControlChange::dataEntryLSB));
-          auto factor = Entity::Generator::Definition::definition(index).nrpnMultiplier();
-          auto modValue = ((msb | lsb) - 8192) * factor;
-
-          nrpnValues_[index] = modValue;
-          return true;
-        }
-      }
+      continuousControllerValues_[MIDI::ControlChange::dataEntryMSB] = value;
+      if (applyDataEntry()) return true;
       break;
 
       // Data Entry values are ONLY applied as SoundFont 2.01 controllers if and only if the most recently sent

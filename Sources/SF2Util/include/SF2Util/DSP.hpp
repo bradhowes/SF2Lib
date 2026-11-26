@@ -57,11 +57,11 @@ private:
  Convert centibels [0-1440] into an attenuation value from [1.0-0.0].
 
  - Zero indicates no attenuation (1.0)
- - 20 centibels (-2 dB) gives 0.1 attenuation (10% reduction of original signal)
- - 60 centibels (-6 dB) gives 0.5 attenuation (50% reduction of original signal)
- - 120 centibels (-12 dB) gives 0.25 attenuation
+ - 20 centibels (-2 dB) gives approximately 0.794 attenuation
+ - 60 centibels (-6 dB) gives approximately 0.501 attenuation
+ - 120 centibels (-12 dB) gives approximately 0.251 attenuation
 
- and every 200 is a reduction by a power of 10 (200 = 0.1, 400 = 0.001, etc.)
+ and every 200 is a reduction by a power of 10 (200 = 0.1, 400 = 0.01, etc.)
 
  NOTE: attenuation greater than 96 dB is in the noise floor for 16-bit samples.
 
@@ -209,7 +209,7 @@ static constexpr Float centsToSeconds(Float value) noexcept { return centsToPowe
  @param value the number to convert in seconds
  @returns duration in time cents
  */
-static constexpr Float secondsToCents(Float value) noexcept { return std::log2(value * CentsPerOctave); }
+static constexpr Float secondsToCents(Float value) noexcept { return CentsPerOctave * std::log2(value); }
 
 /**
  Convert cents to frequency, with 0 being 8.175798 Hz. Values are clamped to [-16000, 4500].
@@ -243,7 +243,7 @@ static constexpr Float centibelsToResonance(Float value) noexcept {
 }
 
 /**
- Restrict lowpass filter cutoff value to be between 1500 and 13500, inclusive.
+ Restrict lowpass filter cutoff value to be between 1500 and 20000, inclusive.
 
  @param value cutoff value
  @returns clamped cutoff value
