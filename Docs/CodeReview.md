@@ -736,13 +736,13 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - The left voice uses the right voice's entire phase increment, including the right header's root key, pitch correction and sample rate. That is correct for matched pairs, which is what the spec describes.
   - Each voice keeps its own sample position and loop points, so a pair whose loops differ in length can still drift apart.
 
-**Follow-up (2026-11-26): intermittent failures of `testEngineParameterControlChangeForPanning` (and potentially any multi-voice rendering test). Not yet committed. `make test-macOS`: 439 tests, 0 failures.**
+**Follow-up (2026-11-26): intermittent failures of `testEngineParameterControlChangeForPanning` (and potentially any multi-voice rendering test). Commit `08b145c`. `make test-macOS`: 439 tests, 0 failures.**
 - **Cause:** not a MIDI timing race. The harness delivers MIDI (`doMIDIEvent`) and parameter changes (`doParameterEvent`) synchronously, before the render they apply to. The problem was the render time budget. `Engine::renderingTimeBudgetScaling_` defaults to `1.0`, and since `5bfb804` (when the engine constructor stopped taking the scaling) the harness no longer turned the budget off; it had passed `-1.0` since `f6980ac`. Every harness test therefore rendered against the real clock, and a slow moment (parallel tests, coverage, a debugger, CI) could shed or fade voices and change the rendered samples.
 - **Fix:** the `TestEngineHarness` constructor calls `engine_.setRenderingTimeBudgetScaling(-1.0)`. Tests of the budget (`RenderBudgetTests`, `RealTimeSafetyTests`, `StereoLinkTests`) already turn it back on with `enableRenderingBudget` and a fake clock.
 - **Test:** `RenderBudgetTests::testHarnessRendersWithoutABudget` checks that a new harness has the budget off, while a plain `Engine` keeps its default. Removing the harness line makes it fail.
 - **Note:** sample-accurate event timestamps could be added to the harness (an `AURenderEvent` list with `eventSampleTime`, delivered through `processAndRender`) if a test needs them, but they would not have fixed this.
 
-**Follow-up (2026-11-26): minimum note duration (§3.2 sustain/sostenuto, last point; §7). Not yet committed. `make test-macOS`: 442 tests, 0 failures.**
+**Follow-up (2026-11-26): minimum note duration (§3.2 sustain/sostenuto, last point; §7). Commit `2a63e9f`. `make test-macOS`: 442 tests, 0 failures.**
 - **Before:** `Engine::setMinimumNoteDuration` (exposed on `SF2Engine` in `4d95069`) stored the value, and note-off passed it to `Voice::releaseKey` in `ReleaseKeyState::minimumNoteDurationSamples`, but nothing read it.
 - **Behaviour (as documented on `SF2Engine::setMinimumNoteDuration`):** if note-off arrives before the voice has played the minimum duration, the note is cancelled rather than played, a debounce for very short taps. The cancel uses `Voice::fastRelease` (the 5 ms release used for exclusiveClass), so there is no click. It applies whatever the pedals: a tap under the minimum is cancelled even with sustain down. A minimum of 0 turns the check off. CC 123 (All Notes Off) passes 0 and is unaffected.
 - **Implementation:**
