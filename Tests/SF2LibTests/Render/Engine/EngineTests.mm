@@ -2164,4 +2164,63 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   [engine.parameterTree() removeParameterObserver:token];
 }
 
+- (void)testMinimumNoteDurationCancelsShortNotes
+{
+  // A note released before it has played for the minimum note duration (default 10 ms) is cancelled with a fast
+  // release instead of being played: a debounce for very short taps. The sine has a 2 s release, so a normal release
+  // keeps the voice sounding while a cancelled note is gone within a few milliseconds. (The duration used to be passed
+  // to `Voice::releaseKey` and ignored.)
+  auto builder = SF2Builder::minimal();
+  builder.igen.insert(builder.igen.begin(), {38, 1200});  // releaseVolEnv: 2 s
+  builder.ibag[1].generatorIndex += 1;
+  auto path = std::string(NSTemporaryDirectory().UTF8String) + "SF2LibMinimumNoteDuration.sf2";
+  builder.writeTo(path);
+
+  // Play key 69, release it after `heldFrames`, then render 10 ms more.
+  struct Outcome { bool fastReleasing; size_t voicesAfter; };
+  auto play = [&](AVAudioFrameCount heldFrames, size_t minimumMilliseconds, bool sustain) {
+    auto harness{TestEngineHarness{48000.0}};
+    XCTAssertEqual(harness.load(path, 0), SF2::IO::File::LoadResponse::ok);
+    harness.engine().setMinimumNoteDuration(minimumMilliseconds);
+    auto mixer{harness.createMixer(0.2)};
+    if (sustain) harness.sendRaw(std::array<uint8_t, 3>{0xB0, 64, 127});
+    harness.sendNoteOn(69, 127);
+    harness.renderForCount(mixer, heldFrames);
+    harness.sendNoteOff(69);
+    bool fastReleasing = false;
+    for (size_t index = 0; index < SF2::Render::Engine::traits::maxVoiceCount; ++index) {
+      if (harness.voice(index).isActive() && harness.voice(index).isFastReleasing()) fastReleasing = true;
+    }
+    harness.renderForDuration(mixer, 0.010);
+    return Outcome{fastReleasing, harness.engine().activeVoiceCount()};
+  };
+
+  XCTAssertEqual(SF2::Render::Engine::Engine().minimumNoteDuration(), size_t(10));
+
+  // 5 ms tap with the default 10 ms minimum: cancelled.
+  auto tap = play(240, 10, false);
+  XCTAssertTrue(tap.fastReleasing);
+  XCTAssertEqual(tap.voicesAfter, size_t(0));
+
+  // 20 ms note: longer than the minimum, so it releases normally and is still sounding 10 ms later.
+  auto held = play(960, 10, false);
+  XCTAssertFalse(held.fastReleasing);
+  XCTAssertEqual(held.voicesAfter, size_t(1));
+
+  // A minimum of 0 turns the check off: the same 5 ms tap releases normally.
+  auto disabled = play(240, 0, false);
+  XCTAssertFalse(disabled.fastReleasing);
+  XCTAssertEqual(disabled.voicesAfter, size_t(1));
+
+  // A longer minimum cancels a longer note: 20 ms is under a 30 ms minimum.
+  auto longer = play(960, 30, false);
+  XCTAssertTrue(longer.fastReleasing);
+  XCTAssertEqual(longer.voicesAfter, size_t(0));
+
+  // The sustain pedal does not save a cancelled tap.
+  auto sustained = play(240, 10, true);
+  XCTAssertTrue(sustained.fastReleasing);
+  XCTAssertEqual(sustained.voicesAfter, size_t(0));
+}
+
 @end

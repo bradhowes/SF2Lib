@@ -65,11 +65,11 @@ Fix: validate generator opers once at load and drop invalid entries. Validate th
 
 ### 3.2 High
 
-**Sustain/sostenuto handling.** *(Re-verified 2026-11-25: the first three points are fixed; the last is still open.)*
+**Sustain/sostenuto handling.** *(All four points fixed; the last on 2026-11-26.)*
 - ~~`applyPedals_RT` calls `releaseKey` on every active voice. With the pedal now up, `releaseKey` releases unconditionally, including voices whose key is still physically held. Tap the pedal while holding a chord and the chord cuts out.~~ Fixed: `Voice::pedalReleased` only releases voices whose release was postponed.
 - ~~`postponedRelease_` is set but never read. That is the flag `applyPedals` should check (only release voices with `postponedRelease_ && !keyHeld`).~~ Fixed: `pedalReleased` checks it.
 - ~~`sostenutoActive_` and `postponedRelease_` are never reset in `configure`/`start`, so a recycled voice inherits sostenuto from its previous note.~~ Fixed: `Voice::start` resets both.
-- `ReleaseKeyState::minimumNoteDurationSamples` is passed in but ignored. **Still open:** `Voice::releaseKey` never reads it (see also §7, "minimum note duration").
+- ~~`ReleaseKeyState::minimumNoteDurationSamples` is passed in but ignored.~~ Fixed 2026-11-26 (see §11): a note released before it has played the minimum duration is cancelled with a fast release.
 
 ~~**Sample start offsets ignored.** `Bounds::make` computes `startPos_` correctly, but `Index::start()` sets `whole_ = 0`, and `startPos()` has no callers. `BoundsTests` exercises `Bounds` only. Fix: `whole_ = bounds_.startPos();`.~~ Fixed: `Index::start()` sets `whole_ = bounds_.startPos()`.
 
@@ -199,7 +199,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 - Exceptions used as control flow (`throw File::LoadResponse::invalidFormat`, an enum value). Prefer `std::expected<T, LoadResponse>` (C++23 is already enabled).
 - ~~`(this + 1)->firstZoneIndex()` in `Preset`/`Bag`/`Instrument` relies on the entity living inside a vector with a sentinel. That is fragile, and UB for a stand-alone copy. Compute counts in `ChunkItems` instead.~~ Fixed 2026-11-24 (see §11): counts are stored when the chunk is loaded.
 - ~~Redundant `inline` on in-class definitions throughout~~ (removed 2026-11-24, see §11); `inline static size_t entity_size` is non-const in `Modulator` (const elsewhere).
-- Advertised but unimplemented: mono mode, portamento, retrigger, minimum note duration, generator overrides, `durationBuckets_`, plus the `ENABLE_LOWPASS_FILTER` / `USE_ACCELERATE` flags. Either implement these or remove them from the AU parameter tree and `Package.swift`.
+- Advertised but unimplemented: mono mode, portamento, retrigger, ~~minimum note duration~~ (implemented 2026-11-26, see §11), generator overrides, `durationBuckets_`, plus the `ENABLE_LOWPASS_FILTER` / `USE_ACCELERATE` flags. Either implement these or remove them from the AU parameter tree and `Package.swift`.
 - MIDI channel nibble ignored (omni). Fine for an AUv3 instrument, but worth documenting.
 
 ---
@@ -741,3 +741,18 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - **Fix:** the `TestEngineHarness` constructor calls `engine_.setRenderingTimeBudgetScaling(-1.0)`. Tests of the budget (`RenderBudgetTests`, `RealTimeSafetyTests`, `StereoLinkTests`) already turn it back on with `enableRenderingBudget` and a fake clock.
 - **Test:** `RenderBudgetTests::testHarnessRendersWithoutABudget` checks that a new harness has the budget off, while a plain `Engine` keeps its default. Removing the harness line makes it fail.
 - **Note:** sample-accurate event timestamps could be added to the harness (an `AURenderEvent` list with `eventSampleTime`, delivered through `processAndRender`) if a test needs them, but they would not have fixed this.
+
+**Follow-up (2026-11-26): minimum note duration (§3.2 sustain/sostenuto, last point; §7). Not yet committed. `make test-macOS`: 442 tests, 0 failures.**
+- **Before:** `Engine::setMinimumNoteDuration` (exposed on `SF2Engine` in `4d95069`) stored the value, and note-off passed it to `Voice::releaseKey` in `ReleaseKeyState::minimumNoteDurationSamples`, but nothing read it.
+- **Behaviour (as documented on `SF2Engine::setMinimumNoteDuration`):** if note-off arrives before the voice has played the minimum duration, the note is cancelled rather than played, a debounce for very short taps. The cancel uses `Voice::fastRelease` (the 5 ms release used for exclusiveClass), so there is no click. It applies whatever the pedals: a tap under the minimum is cancelled even with sustain down. A minimum of 0 turns the check off. CC 123 (All Notes Off) passes 0 and is unaffected.
+- **Implementation:**
+  - `Voice` counts the samples it has rendered since `start` (`samplesRendered_`, one increment per sample on the render thread).
+  - `releaseKey` cancels when the count is below the minimum.
+  - `Engine::minimumNoteDurationSamples_` is now initialised to 0 until a sample rate is known.
+- **Test:** `EngineTests::testMinimumNoteDurationCancelsShortNotes`, using the `SF2Builder` sine with a 2 s release, through `doMIDIEvent`:
+  - a 5 ms tap with the default 10 ms minimum is cancelled and gone 10 ms later;
+  - a 20 ms note releases normally and is still sounding;
+  - a minimum of 0 lets the 5 ms tap release normally;
+  - a 30 ms minimum cancels the 20 ms note;
+  - a tap with sustain down is still cancelled.
+  Without the check in `releaseKey`, the three cancel cases fail. No existing test releases a note within 10 ms of note-on, so none changed.

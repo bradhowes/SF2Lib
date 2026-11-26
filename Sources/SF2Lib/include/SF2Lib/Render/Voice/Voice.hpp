@@ -119,6 +119,7 @@ public:
    Engine state that governs how a voice will react to a key release event.
    */
   struct ReleaseKeyState {
+    /// A note released before it has rendered this many samples is cancelled (a debounce). 0 disables the check.
     size_t minimumNoteDurationSamples;
     MIDI::ChannelState::PedalState pedalState;
   };
@@ -127,6 +128,9 @@ public:
    Record that the key is no longer pressed. If a pedal is holding the voice (sustain, or sostenuto when this voice was
    held at the time the sostenuto pedal went down) the release is postponed until `pedalReleased` says otherwise.
    Otherwise the envelopes transition to their release phase.
+
+   If the voice has rendered fewer than `releaseKeyState.minimumNoteDurationSamples` samples, the note is instead
+   cancelled with a fast release (see `fastRelease`), whatever the pedals: very short notes are treated as unintended.
 
    @param releaseKeyState -- engine state that may affect if/when the key release actually takes place.
    */
@@ -230,6 +234,7 @@ public:
    */
   Float renderSample(const Float* pitchIncrement, Float* incrementOut) noexcept {
     if (! active_) { return 0_F; }
+    ++samplesRendered_;
 
     // Capture the current state of the modulators and envelopes and advance them to the next sample.
     auto modLFO{modulatorLFO_.getNextValue()};
@@ -415,6 +420,9 @@ private:
   bool postponedRelease_{false};
   bool sostenutoActive_{false};
   bool fastReleasing_{false};
+
+  /// Samples rendered since `start`, for the minimum note duration check in `releaseKey`
+  size_t samplesRendered_{0};
 
   size_t partner_{noPartner};
   bool pitchLeader_{false};

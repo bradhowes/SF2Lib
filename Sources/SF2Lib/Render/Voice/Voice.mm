@@ -57,6 +57,7 @@ Voice::start() noexcept
   postponedRelease_ = false;
   sostenutoActive_ = false;
   fastReleasing_ = false;
+  samplesRendered_ = 0;
   unlinkStereoPartner();
 
   loopingMode_ = loopingMode();
@@ -100,6 +101,16 @@ Voice::releaseKey(const ReleaseKeyState& releaseKeyState) noexcept
 {
   keyDown_ = false;
   if (released_) return;
+
+  // Minimum note duration: a note released sooner than this is cancelled rather than played (a debounce for very
+  // short taps). The fast release avoids a click.
+  if (samplesRendered_ < releaseKeyState.minimumNoteDurationSamples) {
+    os_log_debug(log_, "releaseKey - cancelled: %zu samples < minimum %zu", samplesRendered_,
+                 releaseKeyState.minimumNoteDurationSamples);
+    fastRelease();
+    return;
+  }
+
   if (isHeldByPedal(releaseKeyState.pedalState)) {
     postponedRelease_ = true;
     os_log_debug(log_, "releaseKey - postponed due to pedal state");

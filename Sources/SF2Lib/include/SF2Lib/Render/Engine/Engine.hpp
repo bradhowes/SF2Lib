@@ -636,7 +636,7 @@ private:
 
   Float sampleRate_;
   size_t minimumNoteDurationMilliseconds_{10};
-  size_t minimumNoteDurationSamples_;
+  size_t minimumNoteDurationSamples_{0};
 
   MIDI::ChannelState channelState_{};
   LiveGeneratorParameters parameters_{};
