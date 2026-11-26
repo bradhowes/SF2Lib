@@ -27,6 +27,10 @@ struct TestEngineHarness {
   explicit TestEngineHarness(SF2::Float sampleRate = 48'000.0) noexcept :
   engine_{}
   {
+    // Tests must be deterministic, so no wall-clock render budget: a slow moment (parallel tests, coverage, a debugger)
+    // would otherwise shed or fade voices and change the rendered samples. Tests of the budget turn it back on with
+    // `enableRenderingBudget` and a fake clock.
+    engine_.setRenderingTimeBudgetScaling(-1.0);
     format_ = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:sampleRate channels:2];
     engine_.setRenderingFormat(3, format_, 512);
     engine_.makeTree();

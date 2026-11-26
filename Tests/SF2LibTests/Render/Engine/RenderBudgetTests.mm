@@ -148,6 +148,16 @@ static size_t activeVoices(TestEngineHarness& harness) { return harness.engine()
   XCTAssertGreaterThan(average, 0.0);
 }
 
+- (void)testHarnessRendersWithoutABudget {
+  // Rendering tests compare against hard-coded samples, so the harness must not use the wall-clock budget: under load
+  // it sheds or fades voices. The engine's own default (1.0) is for real use. (The harness lost its `-1.0` when the
+  // engine constructor stopped taking the scaling, which made multi-voice tests such as
+  // `testEngineParameterControlChangeForPanning` fail now and then.)
+  auto harness{TestEngineHarness{}};
+  XCTAssertLessThanOrEqual(harness.engine().renderingTimeBudgetScaling(), 0.0);
+  XCTAssertGreaterThan(SF2::Render::Engine::Engine().renderingTimeBudgetScaling(), 0.0);
+}
+
 - (void)testTimerIsMonotonic {
   // CLOCK_REALTIME could jump backwards (NTP), making `now() - then` wrap around.
   auto last = Utils::Timer::now();
