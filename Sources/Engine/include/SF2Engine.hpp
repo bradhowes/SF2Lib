@@ -48,6 +48,31 @@ struct SWIFT_ESCAPABLE SWIFT_SELF_CONTAINED SF2Engine
   static size_t maxVoiceCount() noexcept;
 
   /**
+   Set the minimum note duration for MIDI ON/OFF pairs. If the delta between the two events is smaller than the given value, the
+   voice(s) assigned to the MIDI ON will be cancelled.
+
+   @param milliseconds the minium duration to support
+   */
+  void setMinimumNoteDuration(size_t milliseconds) const noexcept;
+
+  /// @returns the minimum duration value
+  size_t minimumNoteDuration() const noexcept;
+
+  /**
+   Set the time budget scaling factor. Values should be up to 1.0; negative values are supported but they just disable any time
+   budgeting. The best-case amount of time available to generate samples in a render call is the number of frames being asked for
+   (say 512) divided by the sample rate (e.g. 48K). However, not all of this time frame is available for the render processing, so
+   we multiply the best-case with a scaling factor to determine the maxium number of time the synth can spend on voice processing.
+   Voices that cannot be handled are released with a fast release stage to limit any audio artifacts.
+
+   @param scaling the factor to multiply with the frame count / sample rate ratio. A negative value disables time budgeting
+   */
+  void setRenderingTimeBudgetScaling(double scaling) const noexcept;
+
+  /// @returns the scaling factor being used for time budget calculations
+  double renderingTimeBudgetScaling() const noexcept;
+
+  /**
    Set the rendering format to be when rendering in CoreAudio infrastructure. After returning from this call,
    the engine will be ready to process and render samples -- though no sound will be emitted until a SF2 file
    is installed and a preset is chosen.

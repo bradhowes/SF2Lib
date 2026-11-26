@@ -13,6 +13,30 @@ SF2Engine::SF2Engine()
 : impl_{std::make_shared<Eng::Engine>()}
 {}
 
+void
+SF2Engine::setMinimumNoteDuration(size_t duration) const noexcept
+{
+  impl_->setMinimumNoteDuration(duration);
+}
+
+size_t
+SF2Engine::minimumNoteDuration() const noexcept
+{
+  impl_->minimumNoteDuration();
+}
+
+void
+SF2Engine::setRenderingTimeBudgetScaling(double scaling) const noexcept
+{
+  impl_->setRenderingTimeBudgetScaling(scaling);
+}
+
+double
+SF2Engine::renderingTimeBudgetScaling() const noexcept
+{
+  impl_->renderingTimeBudgetScaling();
+}
+
 bool
 SF2Engine::setRenderingFormat(NSInteger busCount, AVAudioFormat *format, AUAudioFrameCount maxFramesToRender) const noexcept
 {
