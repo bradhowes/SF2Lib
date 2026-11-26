@@ -61,7 +61,6 @@ Voice::start() noexcept
   unlinkStereoPartner();
 
   loopingMode_ = loopingMode();
-  initialAttenuation_ = DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));
 
   volumeEnvelope_.configure(state_);
   modulatorEnvelope_.configure(state_);

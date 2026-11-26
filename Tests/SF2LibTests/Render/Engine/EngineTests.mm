@@ -108,6 +108,39 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   return std::sqrt(sum / double(end - begin));
 }
 
+struct LiveAttenuationResult {
+  double before;
+  double after;
+  size_t activeVoiceCount;
+};
+
+/// Render a held, looped note before and after a live controller or parameter change.
+template <typename Change>
+static LiveAttenuationResult renderLiveAttenuationChange(const std::string& path, Change change)
+{
+  constexpr AVAudioFrameCount blocksPerHalf = 10;
+  auto harness{TestEngineHarness{48000.0}};
+  if (harness.load(path, 0) != IO::File::LoadResponse::ok) return {};
+  harness.setParameter(Index::delayVolumeEnvelope, -12'000);
+  harness.setParameter(Index::attackVolumeEnvelope, -12'000);
+  harness.setParameter(Index::holdVolumeEnvelope, -12'000);
+  harness.setParameter(Index::decayVolumeEnvelope, -12'000);
+  harness.setParameter(Index::sustainVolumeEnvelope, 0);
+  harness.setParameter(Index::modulatorLFOToVolume, 0);
+  auto mixer{harness.createMixer(double(2 * blocksPerHalf * harness.maxFramesToRender()) / 48'000.0)};
+  harness.sendNoteOn(69, 127);
+  harness.renderMaxFramesCount(mixer, blocksPerHalf);
+  change(harness);
+  harness.renderMaxFramesCount(mixer, blocksPerHalf);
+
+  const AUValue* data = harness.dryBuffer().floatChannelData[0];
+  std::vector<AUValue> samples(data, data + harness.bufferFrameCount());
+  auto half = size_t(blocksPerHalf * harness.maxFramesToRender());
+  auto window = size_t(5 * harness.maxFramesToRender());
+  return {rms(samples, half - window, half), rms(samples, 2 * half - window, 2 * half),
+          harness.engine().activeVoiceCount()};
+}
+
 @interface EngineTests : SamplePlayingTestCase
 @end
 
@@ -1846,6 +1879,35 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   auto expected = std::pow(10.0, -120.0 / 200.0);
   // Allow ~2% for integer-centibel rounding when modLFO-to-volume is also active in the preset.
   XCTAssertEqualWithAccuracy(reducedRMS / fullRMS, expected, expected * 0.02);
+}
+
+- (void)testLiveAttenuationChangesAffectHeldNote
+{
+  auto path = std::string(NSTemporaryDirectory().UTF8String) + "SF2LibLiveAttenuation.sf2";
+  SF2Builder::minimal().writeTo(path);
+
+  auto reference = renderLiveAttenuationChange(path, [](TestEngineHarness&) {});
+  auto verify = [&reference](const LiveAttenuationResult& result, double expected) {
+    XCTAssertGreaterThan(result.before, 0.001);
+    XCTAssertEqual(result.activeVoiceCount, size_t(1));
+    XCTAssertEqualWithAccuracy(result.before / reference.before, 1.0, 0.001);
+    XCTAssertEqualWithAccuracy(result.after / reference.after, expected, expected * 0.03);
+  };
+
+  // CC7 defaults to 100, so moving it to 64 adds 77 cB after lookup-table rounding.
+  verify(renderLiveAttenuationChange(path, [](TestEngineHarness& harness) {
+    harness.sendRaw(std::array<uint8_t, 3>{0xB0, 7, 64});
+  }), std::pow(10.0, -77.0 / 200.0));
+
+  // CC11 defaults to 127, so moving it to 64 adds the full 119.0495 cB from its default modulator.
+  verify(renderLiveAttenuationChange(path, [](TestEngineHarness& harness) {
+    harness.sendRaw(std::array<uint8_t, 3>{0xB0, 11, 64});
+  }), std::pow(10.0, -119.049498788827904 / 200.0));
+
+  auto parameterExpected = std::pow(10.0, -120.0 / 200.0);
+  verify(renderLiveAttenuationChange(path, [](TestEngineHarness& harness) {
+    harness.setParameter(Index::initialAttenuation, 120);
+  }), parameterExpected);
 }
 
 - (void)testSustainPedalTapDoesNotReleaseHeldKey

@@ -233,6 +233,11 @@ public:
    @returns next sample
    */
   Float renderSample(const Float* pitchIncrement, Float* incrementOut) noexcept {
+    return renderSample(pitchIncrement, incrementOut, attenuation());
+  }
+
+  /// Render the next sample using an initial-attenuation gain captured for the current render slice.
+  Float renderSample(const Float* pitchIncrement, Float* incrementOut, Float attenuation) noexcept {
     if (! active_) { return 0_F; }
     ++samplesRendered_;
 
@@ -261,7 +266,7 @@ public:
     // attenuation that is applied to the sample.
     auto volEnvCB{Envelope::volumeEnvelopeToCentibels(volEnv.val)};
     auto modLFOValCB{modLFO.val * -state_.modulatedInRange(Index::modulatorLFOToVolume)};
-    auto gain{initialAttenuation_ * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB)};
+    auto gain{attenuation * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB)};
 
     // Update the low-pass filter parameters every `LowPassFilter::updateInterval` samples. Only the frequency can be
     // affected by the mod LFO and mod envelope, and both are in cents so they add to the absolute-cents cutoff
@@ -344,6 +349,11 @@ public:
 
 private:
 
+  /// @returns the current initial-attenuation generator value as a linear gain
+  Float attenuation() const noexcept {
+    return DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));
+  }
+
   /// @returns true if the given pedal state holds this voice after its key is released
   bool isHeldByPedal(const MIDI::ChannelState::PedalState& pedalState) const noexcept {
     return pedalState.sustainPedalActive || (pedalState.sostenutoPedalActive && sostenutoActive_);
@@ -383,8 +393,10 @@ private:
   void renderFrames(Voice* follower, Engine::Mixer& mixer, SF2::AUAudioFrameCount frameCount, bool fadeOut) noexcept {
     auto leaderChorus = chorusSend();
     auto leaderReverb = reverbSend();
+    auto leaderAttenuation = attenuation();
     auto followerChorus = follower != nullptr ? follower->chorusSend() : SF2::AUValue(0);
     auto followerReverb = follower != nullptr ? follower->reverbSend() : SF2::AUValue(0);
+    auto followerAttenuation = follower != nullptr ? follower->attenuation() : 1_F;
     for (SF2::AUAudioFrameCount index = 0; index < frameCount; ++index) {
       bool leaderActive = active_;
       bool followerActive = follower != nullptr && follower->active_;
@@ -392,12 +404,13 @@ private:
       Float gain{fadeOut ? Float(frameCount - index - 1) / Float(frameCount) : Float(1)};
       Float increment{0_F};
       if (leaderActive) {
-        mix(mixer, index, renderSample(nullptr, follower != nullptr ? &increment : nullptr) * gain, leaderChorus,
+        mix(mixer, index, renderSample(nullptr, follower != nullptr ? &increment : nullptr, leaderAttenuation) * gain,
+            leaderChorus,
             leaderReverb);
       }
       if (followerActive) {
         // If the leader has stopped, the follower carries on with its own pitch.
-        Float sample{follower->renderSample(leaderActive ? &increment : nullptr, nullptr)};
+        Float sample{follower->renderSample(leaderActive ? &increment : nullptr, nullptr, followerAttenuation)};
         follower->mix(mixer, index, sample * gain, followerChorus, followerReverb);
       }
     }
@@ -412,8 +425,6 @@ private:
   ModLFO modulatorLFO_{};
   VibLFO vibratoLFO_{};
   LowPassFilter filter_{};
-  Float initialAttenuation_{1_F};
-
   bool active_{false};
   bool keyDown_{false};
   bool released_{false};
