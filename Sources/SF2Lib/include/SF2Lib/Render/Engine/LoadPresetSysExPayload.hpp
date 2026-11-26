@@ -11,7 +11,7 @@
 namespace SF2::Render::Engine {
 
   struct LoadPresetSysExPayload {
-    static constexpr uint8_t manufacturerValue = 0x7E;
+    static constexpr uint8_t manufacturerValue = 0x7C; // public non-commercial (for now)
     static constexpr uint8_t modelPathPayload = 0x00; // the payload holds a path string to a file
     static constexpr uint8_t modelBookmarkPayload = 0x01; // the payload holds a bookmark to a file
 
