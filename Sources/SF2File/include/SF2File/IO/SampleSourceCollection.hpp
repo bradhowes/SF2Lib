@@ -12,7 +12,7 @@
 namespace SF2::IO {
 
 /**
- Collection of all of the SampleHeader entities from a SoundFont paired with a span of normalized samples to use when
+ Collection of all of the SampleHeader entities from a SoundFont paired with a span of native 16-bit samples to use when
  rendering. Does not hold the actual samples themselves.
  */
 class SampleSourceCollection
@@ -23,12 +23,12 @@ public:
   /**
    Construct the collection of NormalizedSampleSource values from the given ones.
 
-   @param normalizedSamples all of the samples in normalized form from the SF2 file
+   @param samples all of the native 16-bit samples from the SF2 file
    @param sampleHeaders all of the SampleHeader entities from the SF2 file
    */
-  void build(const SampleVector& normalizedSamples, const IO::ChunkItems<Entity::SampleHeader>& sampleHeaders) {
+  void build(const SampleVector& samples, const IO::ChunkItems<Entity::SampleHeader>& sampleHeaders) {
     for (const auto& header : sampleHeaders) {
-      collection_.emplace_back(normalizedSamples, header);
+      collection_.emplace_back(samples, header);
     }
   }
 

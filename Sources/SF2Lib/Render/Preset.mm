@@ -1,7 +1,5 @@
 // Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
-#include "DSPHeaders/Accelerated.hpp"
-
 #include "SF2File/IO/File.hpp"
 #include "SF2Lib/Render/Preset.hpp"
 
@@ -48,7 +46,6 @@ bool
 Preset::loadSamples(const IO::File &file) noexcept {
   // 32K seems to be a good value to use for speed.
   static constexpr size_t batchSampleCount = 32 * 1024;
-  static constexpr Float normalizationScale = 1.0_F / Float(1 << 15);
   static constexpr size_t padding = Zone::NormalizedSampleSpan::sizePaddingAfterEnd;
 
   os_log_info(log_, "loadSamples - %s", configuration().name().c_str());
@@ -77,13 +74,13 @@ Preset::loadSamples(const IO::File &file) noexcept {
     }
   } catch (const std::bad_alloc&) {
     os_log_error(log_, "loadSamples - out of memory for %{public}s", configuration().name().c_str());
-    normalizedSamples_.clear();
+    samples_.clear();
     return false;
   }
 
   // A preset whose zones reference no samples has nothing to load.
   if (runs.empty()) {
-    normalizedSamples_.clear();
+    samples_.clear();
     return true;
   }
 
@@ -111,42 +108,38 @@ Preset::loadSamples(const IO::File &file) noexcept {
 
   os_log_info(log_, "loadSamples - runs: %ld samples: %ld", runs.size(), totalSampleCount);
 
-  std::array<int16_t, batchSampleCount> rawSamples;
-  using elemType = SampleVector::value_type;
   auto chunkBegin = file.sampleDataBegin();
   assert(chunkBegin.available() >= 0);
   auto chunkSampleCount = size_t(chunkBegin.available()) / sizeof(int16_t);
   try {
 
     // Now build the collection of samples from the runs.
-    normalizedSamples_.assign(totalSampleCount, 0_F);
+    samples_.assign(totalSampleCount, int16_t{0});
     for (const auto& run : runs) {
       // `File::validate` guarantees that every sample header lies inside the `smpl` chunk, but the padding after the
       // last one may not, so stop at the end of the chunk and leave the rest as zeros.
       if (run.fileStart >= chunkSampleCount) continue;
       auto remainingSampleCount = std::min(run.fileEnd, chunkSampleCount) - run.fileStart;
       auto pos = chunkBegin.advance(off_t(run.fileStart * sizeof(int16_t)));
-      auto ptr = normalizedSamples_.data() + run.bufferStart;
+      auto ptr = samples_.data() + run.bufferStart;
       while (remainingSampleCount > 0) {
         auto sampleCount = std::min(remainingSampleCount, batchSampleCount);
         remainingSampleCount -= sampleCount;
-        pos = pos.readInto(rawSamples.data(), sampleCount * sizeof(int16_t));
-        DSPHeaders::Accelerated<elemType>::conversionProc(rawSamples.data(), 1, ptr, 1, sampleCount);
-        DSPHeaders::Accelerated<elemType>::scaleProc(ptr, 1, &normalizationScale, ptr, 1, sampleCount);
+        pos = pos.readInto(ptr, sampleCount * sizeof(int16_t));
         ptr += sampleCount;
       }
     }
   } catch (IO::File::LoadResponse) {
     os_log_error(log_, "loadSamples - failed to read samples for %{public}s", configuration().name().c_str());
-    normalizedSamples_.clear();
+    samples_.clear();
     return false;
   } catch (const std::bad_alloc&) {
     os_log_error(log_, "loadSamples - out of memory for %{public}s", configuration().name().c_str());
-    normalizedSamples_.clear();
+    samples_.clear();
     return false;
   }
 
-  // Update all instrument zones to use spans of normalized samples. Each header lies inside exactly one merged run: the
+  // Update all instrument zones to use spans of native samples. Each header lies inside exactly one merged run: the
   // last one that starts at or before it.
   for (auto& presetZone : zones()) {
     if (presetZone.isGlobal()) continue;
@@ -159,7 +152,7 @@ Preset::loadSamples(const IO::File &file) noexcept {
         return value < run.fileStart;
       }));
       auto firstIndex = run->bufferStart + (start - run->fileStart);
-      instrumentZone.setSamples(std::make_shared<Zone::NormalizedSampleSpan>(normalizedSamples_, firstIndex, *sampleHeader));
+      instrumentZone.setSamples(std::make_shared<Zone::NormalizedSampleSpan>(samples_, firstIndex, *sampleHeader));
     }
   }
 
@@ -169,7 +162,7 @@ Preset::loadSamples(const IO::File &file) noexcept {
 void
 Preset::clearSamples() noexcept
 {
-  // Update all instrument zones to forget their normalized samples.
+  // Update all instrument zones to forget their samples.
   for (auto& presetZone : zones()) {
     if (presetZone.isGlobal()) continue;
     auto& instrument = presetZone.instrument();
@@ -179,5 +172,5 @@ Preset::clearSamples() noexcept
       instrumentZone.releaseSamples();
     }
   }
-  normalizedSamples_.clear();
+  samples_.clear();
 }

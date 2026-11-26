@@ -13,8 +13,7 @@
 namespace SF2::Render::Zone {
 
 /**
- Contains the span of samples that pertain to a specific MIDI key and velocity mapping. The samples come from the normalized vector
- of samples derived from 16-bit samples from the SF2 file.
+ Contains the span of native 16-bit samples that pertain to a specific MIDI key and velocity mapping.
  */
 class NormalizedSampleSpan {
 public:
@@ -22,9 +21,9 @@ public:
   static constexpr size_t sizePaddingAfterEnd = 46; // SF2 spec 7.10
 
   /**
-   Construct a span of normalized samples defined by a SampleHeader entity.
+   Construct a span of native 16-bit samples defined by a SampleHeader entity.
 
-   @param samples collection of normalized samples for a `Preset`. It holds only the runs of the `smpl` chunk that the
+   @param samples collection of native 16-bit samples for a `Preset`. It holds only the runs of the `smpl` chunk that the
    preset uses, packed together (see `Preset::loadSamples`), so file positions do not map directly onto it.
    @param firstIndex the index in `samples` of the header's first sample
    @param header defines the samples to use: `sampleSize()` samples plus `sizePaddingAfterEnd` padding samples
@@ -47,14 +46,14 @@ public:
    @param index the index to use
    @returns sample at the index
    */
-  Float operator[](size_t index) const noexcept { return span_[index]; }
+  int16_t operator[](size_t index) const noexcept { return span_[index]; }
 
   /// @returns the sample header ('shdr') of the sample stream being rendered
   const Entity::SampleHeader& header() const noexcept { return header_; }
 
 private:
   const Entity::SampleHeader& header_;
-  const std::span<const Float> span_;
+  const std::span<const int16_t> span_;
 
   inline static const os_log_t log_{Log::create("NormalizedSampleSpan")};
 };

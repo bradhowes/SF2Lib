@@ -10,8 +10,8 @@
 namespace SF2::IO {
 
 /**
- Contains the span of samples that pertain to a specific MIDI key and velocity mapping. The samples come from the normalized vector
- of samples derived from 16-bit samples from the SF2 file.
+ Contains the span of samples that pertain to a specific MIDI key and velocity mapping. Samples remain in their native 16-bit
+ representation until they are accessed.
  */
 class NormalizedSampleSource {
 public:
@@ -19,9 +19,9 @@ public:
   static constexpr size_t sizePaddingAfterEnd = 46; // SF2 spec 7.10
 
   /**
-   Construct a span of normalized samples defined by a SampleHeader entity.
+   Construct a span of native 16-bit samples defined by a SampleHeader entity.
 
-   @param samples collection of normalized samples for a preset
+   @param samples collection of native 16-bit samples for a preset
    @param header defines the range of samples to actually load
    */
   NormalizedSampleSource(const SampleVector& samples, const Entity::SampleHeader& header) noexcept :
@@ -42,14 +42,14 @@ public:
    @param index the index to use
    @returns sample at the index
    */
-  Float operator[](size_t index) const noexcept { return span_[index]; }
+  Float operator[](size_t index) const noexcept { return Float(span_[index]) * normalizationScale; }
 
   /// @returns the sample header ('shdr') of the sample stream being rendered
   const Entity::SampleHeader& header() const noexcept { return header_; }
 
 private:
   const Entity::SampleHeader& header_;
-  std::span<const Float> span_;
+  std::span<const int16_t> span_;
 };
 
 } // namespace SF2::IO

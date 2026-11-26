@@ -7,6 +7,7 @@
 #include <AudioToolbox/AUParameters.h>
 #include <cmath>
 #include <concepts>
+#include <cstdint>
 #include <type_traits>
 #include <vector>
 
@@ -17,7 +18,7 @@ namespace SF2 {
 using DSPHeaders::operator""_F;
 
 using Float = float;
-using SampleVector = std::vector<Float>;
+using SampleVector = std::vector<int16_t>;
 
 #ifndef __AVAudioTypes_h__
 using AUValue = float;

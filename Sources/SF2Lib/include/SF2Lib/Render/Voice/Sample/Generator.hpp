@@ -101,7 +101,8 @@ private:
     auto s1 = sample(whole, canLoop); ++whole;
     auto s2 = sample(whole, canLoop); ++whole;
     auto s3 = sample(whole, canLoop);
-    return DSPHeaders::DSP::Interpolation::cubic4thOrder(partial, s0, s1, s2, s3);
+    return DSPHeaders::DSP::Interpolation::cubic4thOrder(partial, s0, s1, s2, s3) *
+           Zone::NormalizedSampleSpan::normalizationScale;
   }
 
   /**

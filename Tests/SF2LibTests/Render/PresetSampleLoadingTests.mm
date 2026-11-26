@@ -70,7 +70,7 @@ static std::string writeBuilder(const SF2Builder& builder, const std::string& na
   return path;
 }
 
-/// Load preset 0 of the file and its samples. @returns the number of normalized samples held for it.
+/// Load preset 0 of the file and its samples. @returns the number of samples held for it.
 static size_t loadedSampleCount(const std::string& path)
 {
   IO::File file{path};

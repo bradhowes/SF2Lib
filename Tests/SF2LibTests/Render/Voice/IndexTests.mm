@@ -132,7 +132,7 @@ static void checkLoopingAgainstReference(Float increment, int steps)
   const size_t startLoop = 16, endLoop = 32, end = 64;
   const size_t loopSize = endLoop - startLoop;
   SampleVector values(end + SF2::Render::Zone::NormalizedSampleSpan::sizePaddingAfterEnd + 1);
-  for (size_t i = 0; i < values.size(); ++i) values[i] = Float(i) * 0.01_F;
+  for (size_t i = 0; i < values.size(); ++i) values[i] = int16_t(i * 100);
 
   SampleHeader header{0, uint32_t(end), uint32_t(startLoop), uint32_t(endLoop), 48'000, 69, 0};
   auto span = std::make_shared<SF2::Render::Zone::NormalizedSampleSpan>(values, 0, header);
@@ -152,7 +152,8 @@ static void checkLoopingAgainstReference(Float increment, int steps)
 
   for (int step = 0; step < steps; ++step) {
     Float expected = DSPHeaders::DSP::Interpolation::cubic4thOrder(partial, before(whole), sampleAt(whole),
-                                                                   sampleAt(whole + 1), sampleAt(whole + 2));
+                                                                   sampleAt(whole + 1), sampleAt(whole + 2)) *
+                     SF2::Render::Zone::NormalizedSampleSpan::normalizationScale;
     Float actual = generator.generate(increment, true);
     XCTAssertEqualWithAccuracy(actual, expected, 1.0e-6, @"increment %f step %d whole %zu", increment, step, whole);
     XCTAssertTrue(generator.isActive());
@@ -198,8 +199,12 @@ static void checkLoopingAgainstReference(Float increment, int steps)
     Sample::Generator generator;
     generator.configure(config.samples());
     generator.start(state);
-    XCTAssertEqual(generator.generate(1_F, false), (*span)[size_t(offset)], @"offset %d", offset);
-    XCTAssertEqual(generator.generate(1_F, false), (*span)[size_t(offset + 1)], @"offset %d", offset);
+    XCTAssertEqual(generator.generate(1_F, false),
+                   Float((*span)[size_t(offset)]) * SF2::Render::Zone::NormalizedSampleSpan::normalizationScale,
+                   @"offset %d", offset);
+    XCTAssertEqual(generator.generate(1_F, false),
+                   Float((*span)[size_t(offset + 1)]) * SF2::Render::Zone::NormalizedSampleSpan::normalizationScale,
+                   @"offset %d", offset);
   }
 }
 

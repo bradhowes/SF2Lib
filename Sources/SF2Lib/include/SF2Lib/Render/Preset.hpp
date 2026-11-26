@@ -47,8 +47,7 @@ public:
   Preset(IO::File& file, InstrumentCollection& instruments, const Entity::Preset& config) noexcept;
 
   /**
-   Create a `SamplesVector` that contains the normalized samples for the preset, and installs spans over it for each instrument in
-   the preset.
+   Load the native 16-bit samples for the preset and install spans over them for each instrument in the preset.
 
    @param file the SF2 file that holds the samples
    @returns `true` if successful, `false` otherwise
@@ -56,7 +55,7 @@ public:
   bool loadSamples(const IO::File& file) noexcept;
 
   /**
-   Remove normalized samples. NOTE: once called, any attempt to use the preset will fail until `loadSamples` is invoked.
+   Remove loaded samples. NOTE: once called, any attempt to use the preset will fail until `loadSamples` is invoked.
    */
   void clearSamples() noexcept;
 
@@ -70,11 +69,11 @@ public:
    */
   ConfigCollection find(int key, int velocity) const noexcept;
 
-  /// @returns the number of normalized samples held for the preset by `loadSamples` (0 when not loaded)
-  size_t loadedSampleCount() const noexcept { return normalizedSamples_.size(); }
+  /// @returns the number of samples held for the preset by `loadSamples` (0 when not loaded)
+  size_t loadedSampleCount() const noexcept { return samples_.size(); }
 
 private:
-  SampleVector normalizedSamples_{};
+  SampleVector samples_{};
   inline static const os_log_t log_{Log::create("Preset")};
 };
 

@@ -32,7 +32,7 @@ SF2 file ─► IO::File (RIFF walk, Pos/Chunk/ChunkItems<Entity::*>)        [SF
               │  raw entity vectors + sorted preset index
               ▼
 Render::PresetCollection ─► Render::Preset ─► Zone::Preset ─► Render::Instrument ─► Zone::Instrument
-              │  (lazily) Preset::loadSamples → SampleVector<double> + NormalizedSampleSpan per zone
+              │  (lazily) Preset::loadSamples → SampleVector<int16_t> + NormalizedSampleSpan per zone
               ▼
 Engine (AUv3 EventProcessor) ── MIDI/params ─► ChannelState, LiveGeneratorParameters
    noteOn → Preset::find(key,vel) → vector<Config> → Voice::configure/start
@@ -182,7 +182,7 @@ Re-evaluated on 2026-11-22 against `2357c6a` (after steps 1–9 in §10). Each r
 
 ## 6. Optimisation opportunities
 
-1. **Memory:** samples are stored as `double` (`Float = double`), 4× the size of the int16 source. GeneralUser GS (~30 MB) becomes ~120 MB per fully loaded preset range. Storing `float` (or keeping `int16` and scaling at interpolation) halves or quarters that and improves cache behaviour. The render math could be `float` as well; the AU output is `float` anyway.
+1. ~~**Memory:** samples were expanded from their `int16` source representation. They are now retained as `int16_t` and scaled once after interpolation, halving the sample storage used by the previous `float` representation and improving cache behaviour.~~
 2. **Block-rate control:** pan, sends, initialAttenuation, filter coefficients and the phase-increment components only change on MIDI or parameter events. Compute them once per render slice; EventProcessor already splits at event boundaries. Per-sample, keep only the LFO/envelope ramps. That also opens the FluidSynth-style 64-sample inner loop the README mentions, and SIMD.
 3. **Interpolator dispatch:** a member-function pointer is called per sample. Template `Voice::renderInto` on the interpolator and branch once per block.
 4. ~~**Silent tail:** `Voice::renderInto` loops over the remaining frames calling `mixer.add(…, 0, 0, …)`. That's pure overhead; just stop.~~ Fixed 2026-11-24 (see §11).
@@ -389,9 +389,7 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - **Float epsilon is now 1e-6.** That is about 10–100× a float ULP for typical sample values, and leaves room for small differences between CPUs and Accelerate versions while still catching the 1e-5 drift above.
 - No source code changes in this step: only `Sources/TestUtils/SampleBasedContexts.hpp` (the tolerance) and test values.
 - **Left over:**
-  - §6.1's further option, keeping samples as `int16` and scaling during interpolation (a quarter of the original `double` footprint), was not done. Neither was §6.7's per-sample-header loading, which avoids loading the whole `[minStart, maxEnd]` range for scattered drum kits.
   - An SF2-specific `_F` literal returning `Float` would remove the explicit `<Float>` template arguments.
-  - §2's diagram still says `SampleVector<double>`.
 
 **Follow-up (2026-11-22): SF2.01 8.2.1 source 16, RPN 0 pitch-wheel sensitivity. Not yet committed. `make test-macOS`: 344 tests, 0 failures.**
 - `ChannelState::setContinuousControllerValue` now tracks RPN selection: CC 101/100 select it (the RPN null 127/127 deselects), and selecting an NRPN deselects it. A Data Entry MSB (CC 6) with RPN 0 selected sets `pitchWheelSensitivity_` in semitones. That is the value of modulator source 16, which the default pitch-wheel modulator (8.4.10) uses as its amount source.
