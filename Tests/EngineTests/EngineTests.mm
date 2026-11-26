@@ -75,7 +75,7 @@ struct SF2EngineTestAccess {
   auto data = [NSData dataWithBytes: bytes length: 6];
   auto payload = self.engine->createLoadBookmarkUsePresetPayload(data, 123, {});
   XCTAssertEqual(payload[0], 240);
-  XCTAssertEqual(payload[1], 126);
+  XCTAssertEqual(payload[1], 124);
   XCTAssertEqual(payload[2], 1);
   XCTAssertEqual(payload[3], 101);
   XCTAssertEqual(payload[4], 119);
