@@ -22,7 +22,7 @@ SF2Engine::setMinimumNoteDuration(size_t duration) const noexcept
 size_t
 SF2Engine::minimumNoteDuration() const noexcept
 {
-  impl_->minimumNoteDuration();
+  return impl_->minimumNoteDuration();
 }
 
 void
@@ -34,7 +34,7 @@ SF2Engine::setRenderingTimeBudgetScaling(double scaling) const noexcept
 double
 SF2Engine::renderingTimeBudgetScaling() const noexcept
 {
-  impl_->renderingTimeBudgetScaling();
+  return impl_->renderingTimeBudgetScaling();
 }
 
 bool
@@ -81,9 +81,9 @@ SF2Engine::activePresetName() const
 }
 
 std::vector<uint8_t>
-SF2Engine::createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex)
+SF2Engine::createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex,
+                                          const SF2::MIDI::GeneratorOverrideVector& overrides)
 {
-  SF2::MIDI::GeneratorOverrideVector overrides;
   return SF2::Render::Engine::Engine::createLoadFileUsePresetPayload(filePath, presetIndex, overrides);
 }
 
@@ -98,9 +98,9 @@ SF2Engine::loadFileAndPreset(int fd, size_t presetIndex) const {
 }
 
 std::vector<uint8_t>
-SF2Engine::createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetIndex)
+SF2Engine::createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetIndex,
+                                              const SF2::MIDI::GeneratorOverrideVector& overrides)
 {
-  SF2::MIDI::GeneratorOverrideVector overrides;
   return SF2::Render::Engine::Engine::createLoadBookmarkUsePresetPayload(bookmark, presetIndex, overrides);
 }
 

@@ -11,6 +11,7 @@
 #include <CoreAudioKit/CoreAudioKit.h>
 #include <SF2File/Entity/Generator/Index.hpp>
 #include <SF2File/IO/LoadResponse.hpp>
+#include <SF2Lib/MIDI/GeneratorOverride.hpp>
 #include <SF2Lib/Render/Engine/ParameterAddress.hpp>
 
 #include <swift/bridging>
@@ -131,7 +132,8 @@ struct SWIFT_ESCAPABLE SWIFT_SELF_CONTAINED SF2Engine
    @param presetIndex the index of the preset in the file to use
    @returns MIDI SYSEX command as a byte sequence
    */
-  static std::vector<uint8_t> createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex);
+  static std::vector<uint8_t> createLoadFileUsePresetPayload(std::string filePath, size_t presetIndex,
+                                                             const SF2::MIDI::GeneratorOverrideVector& overrides);
 
   /**
    Load a soundfont file at the given path. If successful, make active the preset at the given index.
@@ -158,7 +160,8 @@ struct SWIFT_ESCAPABLE SWIFT_SELF_CONTAINED SF2Engine
    @param presetIndex the index of the preset in the file to use
    @returns MIDI SYSEX command as a byte sequence
    */
-  static std::vector<uint8_t> createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetIndex);
+  static std::vector<uint8_t> createLoadBookmarkUsePresetPayload(NSData* bookmark, size_t presetIndex,
+                                                                 const SF2::MIDI::GeneratorOverrideVector& overrides);
 
   /**
    Load a soundfont file using a bookmark. If successful, make active the preset at the given index.

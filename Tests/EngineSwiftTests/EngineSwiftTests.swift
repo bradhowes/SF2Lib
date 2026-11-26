@@ -40,7 +40,7 @@ private let freeFontPath = resources.appendingPathComponent("FreeFont.sf2").path
   }
 
   @Test func payloads() {
-    let payload = Array(SF2Engine.createLoadFileUsePresetPayload(std.string(freeFontPath), 1))
+    let payload = Array(SF2Engine.createLoadFileUsePresetPayload(std.string(freeFontPath), 1, []))
     #expect(payload.first == 0xF0)
     #expect(payload.last == 0xF7)
   }

@@ -4,6 +4,7 @@
 #import <XCTest/XCTest.h>
 #import "TestResources.hpp"
 #import "SF2Engine.hpp"
+#import "SF2Lib/MIDI/GeneratorOverride.hpp"
 
 /// Test-only access to the engine's shared pointer (declared a friend of SF2Engine).
 struct SF2EngineTestAccess {
@@ -65,14 +66,14 @@ struct SF2EngineTestAccess {
 - (void)testCreateLoadFileUseIndexNoOverrides {
   auto path = [TestResources getResourcePath:0];
   // auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
-  auto data = self.engine->createLoadFileUsePresetPayload(path, 123);
+  auto data = self.engine->createLoadFileUsePresetPayload(path, 123, {});
   XCTAssertTrue(data.size() > path.size());
 }
 
 - (void)testCreateLoadBookmarkPresetPayload {
   uint8_t bytes[] = {1, 2, 3, 4, 5, 6};
   auto data = [NSData dataWithBytes: bytes length: 6];
-  auto payload = self.engine->createLoadBookmarkUsePresetPayload(data, 123);
+  auto payload = self.engine->createLoadBookmarkUsePresetPayload(data, 123, {});
   XCTAssertEqual(payload[0], 240);
   XCTAssertEqual(payload[1], 126);
   XCTAssertEqual(payload[2], 1);
@@ -138,14 +139,14 @@ struct SF2EngineTestAccess {
   XCTAssertEqual(result, SF2::IO::File::LoadResponse::notFound);
 }
 
-//- (void)testCreateLoadFileUseIndexWithOverrides {
-//  auto url = [TestResources getResourceUrl:0];
-//  auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
-//  overrides.emplace_back(123, 456);
-//  overrides.emplace_back(124, -23);
-//  auto data = engine->createLoadFileUsePresetPayload(url.path.UTF8String, 123, overrides);
-//  XCTAssertTrue(data.size() > url.path.length);
-//}
+- (void)testCreateLoadFileUseIndexWithOverrides {
+  auto url = [TestResources getResourceUrl:0];
+  auto overrides = std::vector<SF2::MIDI::GeneratorOverride>();
+  overrides.emplace_back(123, 456);
+  overrides.emplace_back(124, -23);
+  auto data = engine->createLoadFileUsePresetPayload(url.path.UTF8String, 123, overrides);
+  XCTAssertTrue(data.size() > url.path.length);
+}
 
 - (void)testCreateResetCommand {
   auto data = self.engine->createResetCommandPayload();
@@ -227,6 +228,32 @@ struct SF2EngineTestAccess {
   auto payload = engine->createAllSoundOffPayload();
   auto expected = std::array<uint8_t, 3>{0xB0, 0x78, 0};
   XCTAssertTrue(payload == expected);
+}
+
+- (void)testMinimumNoteDuration {
+  // Default is 10 ms; the setter must be seen by the getter, including before and after a rendering format is set.
+  XCTAssertEqual(self.engine->minimumNoteDuration(), size_t(10));
+  self.engine->setMinimumNoteDuration(25);
+  XCTAssertEqual(self.engine->minimumNoteDuration(), size_t(25));
+  auto audioFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:44100.0 channels:2];
+  XCTAssertTrue(self.engine->setRenderingFormat(3, audioFormat, 512));
+  XCTAssertEqual(self.engine->minimumNoteDuration(), size_t(25));
+  self.engine->setMinimumNoteDuration(0);
+  XCTAssertEqual(self.engine->minimumNoteDuration(), size_t(0));
+}
+
+- (void)testRenderingTimeBudgetScaling {
+  // Default is 1.0 (budgeting on); a negative value disables budgeting and must read back unchanged.
+  XCTAssertEqual(self.engine->renderingTimeBudgetScaling(), 1.0);
+  self.engine->setRenderingTimeBudgetScaling(0.85);
+  XCTAssertEqual(self.engine->renderingTimeBudgetScaling(), 0.85);
+  self.engine->setRenderingTimeBudgetScaling(-1.0);
+  XCTAssertEqual(self.engine->renderingTimeBudgetScaling(), -1.0);
+
+  // Setting the rendering format must not reset the scaling.
+  auto audioFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:48000.0 channels:2];
+  XCTAssertTrue(self.engine->setRenderingFormat(3, audioFormat, 512));
+  XCTAssertEqual(self.engine->renderingTimeBudgetScaling(), -1.0);
 }
 
 @end
