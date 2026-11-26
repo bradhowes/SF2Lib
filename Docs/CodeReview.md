@@ -101,7 +101,7 @@ Fix: validate generator opers once at load and drop invalid entries. Validate th
 
 - ~~**Loop wrap at high pitch:** `Index::increment` subtracts `loopSize()` once. With a short loop (≥ 32 samples per spec) and a large increment, `whole_` can stay past `endLoopPos` and step outside the span. Use `while`, or a modulo.~~ Fixed (gen 54 follow-up): the position wraps by modulo.
 - ~~**Interpolation at loop end:** `sample()` only wraps `whole == endLoopPos`. Cubic interpolation also reads `whole+2`, which can be `endLoopPos+1`. `before()` wraps on the *first* pass through `startLoopPos`, before any looping has happened.~~ Fixed (gen 54 follow-up): every read at or past the loop end wraps, and `before()` only wraps once playback has looped.
-- *(Still open, re-verified 2026-11-25.)* **Pitch quantised to 1 cent:** `power2Lookup(int(round(phase)))`. Each sample-rate term is also rounded separately (`sampleRateDeltaCents`). Detuned layers beat at the wrong rate and vibrato stair-steps. Interpolate the table, or use `exp2` once per block.
+- ~~**Pitch quantised to 1 cent:** `power2Lookup(int(round(phase)))`. Each sample-rate term was also rounded separately (`sampleRateDeltaCents`). Detuned layers beat at the wrong rate and vibrato stair-stepped.~~ Fixed (2026-11-26): phase increments use an interpolated lookup for fractional cents, and the sample-rate adjustment is calculated from the exact rate ratio.
 - ~~**Release time capped at 5000 timecents (≈18 s)** in `releaseTimecentsToSeconds`. The spec and `Definition` both allow 8000 (≈100 s).~~ Fixed: `releaseTimecentsToSeconds` clamps to 8000.
 - ~~**exclusiveClass:** `Config` reads it only from the local instrument zone (the global zone is ignored, which disagrees with `Voice::exclusiveClass()`). Voices are also hard-stopped; a ~5 ms fast release would avoid clicks.~~ Fixed (see §11, gen 57 follow-up).
 - ~~**Duplicate bank/program:** spec 7.2 says the *first* preset in PHDR wins. `std::sort` is not stable; use `std::stable_sort`.~~ Fixed: `File` uses `std::stable_sort`.
@@ -756,3 +756,10 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - a 30 ms minimum cancels the 20 ms note;
   - a tap with sustain down is still cancelled.
   Without the check in `releaseKey`, the three cancel cases fail. No existing test releases a note within 10 ms of note-on, so none changed.
+
+**Follow-up (2026-11-26): fractional pitch precision (§3.3 item 3). Not yet committed. Xcode `RunAllTests`: 448 tests, 0 failures.**
+- `DSP::power2LookupInterpolated` linearly interpolates between the existing one-cent `Power2Lookup` entries. It clamps before indexing and handles the +12,000-cent endpoint without reading beyond the table. The integer lookup remains unchanged for existing callers.
+- `Pitch::samplePhaseIncrement` passes the complete fractional-cent sum to that lookup instead of rounding it. Sub-cent pitch-wheel, LFO and modulation-envelope contributions therefore change the phase increment smoothly.
+- `Pitch::configure` now calculates the sample-rate correction as `1200 * log2(sourceRate / renderRate)`. It previously converted each rate to cents, rounded each independently and subtracted the integers.
+- New `DSPTests` cover fractional accuracy against `exp2`, continuity across a cent boundary and both clamp endpoints. New `PitchTests` cover a quarter-cent vibrato contribution, monotonic positive/negative sub-cent modulation and the exact 48 kHz / 44.1 kHz rate ratio.
+- The corrected phase increments changed 220 hard-coded sample values in `EngineTests` and `VoiceTests`. These are deterministic golden renders; their behavioural and formula-based pitch coverage is separate. The first full run exposed only those baselines plus an assertion-type issue in the new DSP test; after updating them, the complete 448-test Xcode run passed.

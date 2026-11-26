@@ -126,6 +126,17 @@ struct Power2Lookup {
     return lookup_[static_cast<size_t>(std::clamp<int>(cents + Offset, 0, int(TableSize - 1)))];
   }
 
+  /// @return the value 2 ^ cents, interpolated between the one-cent table entries
+  static Float query(Float cents) noexcept {
+    auto clamped{std::clamp<Float>(cents, -Float(Offset), Float(Offset))};
+    auto lowerCents{int(std::floor(clamped))};
+    auto lower{query(lowerCents)};
+    if (lowerCents == Offset) return lower;
+
+    auto fraction{clamped - Float(lowerCents)};
+    return lower + fraction * (query(lowerCents + 1) - lower);
+  }
+
 private:
   static constexpr int Range = CentsPerOctave * 10 * 2 + 1;
   static constexpr int Offset = Range / 2;
@@ -138,6 +149,7 @@ private:
 };
 
 inline static Float power2Lookup(int cents) noexcept { return Power2Lookup::query(cents); }
+inline static Float power2LookupInterpolated(Float cents) noexcept { return Power2Lookup::query(cents); }
 
 /**
  Lookup table for SF2 pan values, where -500 means only left-channel, and +500 means only right channel. Other values

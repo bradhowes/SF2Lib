@@ -47,13 +47,11 @@ Pitch::configure(const Entity::SampleHeader& header) noexcept
   // value should be used." The spec gives 400 Hz as the lowest practical rate.
   auto headerSampleRate{std::max<Float>(header.sampleRate(), 400_F)};
 
-  auto sampleRateDeltaCents{0};
+  auto sampleRateDeltaCents{0_F};
   if (state_.sampleRate() != headerSampleRate) {
-    // Calculate ratio of sample rates as a difference in their cent frequency values, which can then be added to
-    // the sum of the phase increments. Saves us from a multiply later on.
-    auto sampleRateCents{int(std::round(1200 * std::log2(state_.sampleRate() / 440_F)))};
-    auto originalSampleRateCents{int(std::round(1200 * std::log2(headerSampleRate / 440_F)))};
-    sampleRateDeltaCents = originalSampleRateCents - sampleRateCents;
+    // Express the exact sample-rate ratio in cents so it can be folded into the phase increment below. Computing the
+    // ratio directly avoids the error from converting both rates to cents and rounding them independently.
+    sampleRateDeltaCents = 1200_F * std::log2(headerSampleRate / state_.sampleRate());
   }
 
   /*

@@ -41,6 +41,50 @@ using namespace SF2::Render::Voice::Sample;
   XCTAssertEqualWithAccuracy(inc, 1.0, self.epsilon);
 }
 
+- (void)testFractionalPitchModulationIsNotQuantized {
+  Float sampleRate = 44100.0;
+  auto key = 69;
+  Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sampleRate), uint8_t(key));
+  State::State state{sampleRate, key};
+  self.sst.setValue(state, State::State::Index::vibratoLFOToPitch, 1);
+  Pitch pitch{state};
+  pitch.configure(header);
+
+  auto increment = pitch.samplePhaseIncrement(ModLFO::Value(0_F), VibLFO::Value(0.25_F), Modulation::Value(0_F));
+  XCTAssertEqualWithAccuracy(increment, std::exp2(0.25_F / 1200_F), 2.0e-7_F);
+  XCTAssertNotEqual(increment, 1_F);
+}
+
+- (void)testFractionalPitchModulationChangesSmoothly {
+  Float sampleRate = 44100.0;
+  auto key = 69;
+  Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sampleRate), uint8_t(key));
+  State::State state{sampleRate, key};
+  self.sst.setValue(state, State::State::Index::vibratoLFOToPitch, 1);
+  Pitch pitch{state};
+  pitch.configure(header);
+
+  auto negative = pitch.samplePhaseIncrement(ModLFO::Value(0_F), VibLFO::Value(-0.25_F), Modulation::Value(0_F));
+  auto zero = pitch.samplePhaseIncrement(ModLFO::Value(0_F), VibLFO::Value(0_F), Modulation::Value(0_F));
+  auto positive = pitch.samplePhaseIncrement(ModLFO::Value(0_F), VibLFO::Value(0.25_F), Modulation::Value(0_F));
+  XCTAssertLessThan(negative, zero);
+  XCTAssertLessThan(zero, positive);
+  XCTAssertEqualWithAccuracy(negative * positive, 1_F, 2.0e-7_F);
+}
+
+- (void)testNonOctaveSampleRateRatioIsExact {
+  constexpr Float renderSampleRate = 44100_F;
+  constexpr Float sourceSampleRate = 48000_F;
+  auto key = 69;
+  Entity::SampleHeader header(0, 100, 80, 90, uint32_t(sourceSampleRate), uint8_t(key));
+  State::State state{renderSampleRate, key};
+  Pitch pitch{state};
+  pitch.configure(header);
+
+  auto increment = pitch.samplePhaseIncrement(ModLFO::Value(0_F), VibLFO::Value(0_F), Modulation::Value(0_F));
+  XCTAssertEqualWithAccuracy(increment, sourceSampleRate / renderSampleRate, 2.0e-7_F);
+}
+
 - (void)test2x {
   Float sampleRate = 44100.0;
   auto key = 69;

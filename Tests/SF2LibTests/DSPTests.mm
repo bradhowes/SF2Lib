@@ -142,6 +142,28 @@ using namespace SF2::DSP;
   }
 }
 
+- (void)testPower2LookupInterpolatesFractionalCents {
+  constexpr Float tolerance = 1.0e-6_F;
+  for (auto cents : {-11999.5_F, -100.75_F, -0.5_F, 0_F, 0.25_F, 100.5_F, 11999.75_F}) {
+    auto expected{Float(std::exp2(Float(cents) / 1200_F))};
+    XCTAssertEqualWithAccuracy(power2LookupInterpolated(Float(cents)), expected, Float(tolerance * expected));
+  }
+}
+
+- (void)testPower2LookupIsContinuousAcrossCentBoundaries {
+  auto below = power2LookupInterpolated(99.999_F);
+  auto boundary = power2LookupInterpolated(100_F);
+  auto above = power2LookupInterpolated(100.001_F);
+  XCTAssertLessThan(below, boundary);
+  XCTAssertLessThan(boundary, above);
+}
+
+- (void)testPower2LookupClampsFractionalCents {
+  XCTAssertEqual(power2LookupInterpolated(-12001.5_F), power2Lookup(-12000));
+  XCTAssertEqual(power2LookupInterpolated(12001.5_F), power2Lookup(12000));
+  XCTAssertEqual(power2LookupInterpolated(12000_F), power2Lookup(12000));
+}
+
 - (void)testCentToFrequency {
   if constexpr (std::is_same_v<Float, float>) {
     XCTAssertEqualWithAccuracy(1.0, centsToFrequency(-1), self.epsilon); // A0

@@ -83,7 +83,7 @@ public:
     auto vibLFOValue{vibLFO.val * state_.modulatedInRange(Index::vibratoLFOToPitch)};
     auto modEnvValue{modEnv.val * state_.modulatedInRange(Index::modulatorEnvelopeToPitch)};
     auto phase{phaseBase_ + phaseOffset + modLFOValue + vibLFOValue + modEnvValue};
-    return DSP::power2Lookup(int(std::round(phase)));
+    return DSP::power2LookupInterpolated(Float(phase));
   }
 
 private:

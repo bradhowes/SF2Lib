@@ -294,31 +294,31 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   [self dumpSamples: samples];
 
   auto epsilon = self.epsilon;
-  XCTAssertEqualWithAccuracy(0.0484381914139, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0209572464228, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0480050891638, samples[2], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0733431056142, samples[3], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0271453429013, samples[4], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0404991656542, samples[5], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0161975510418, samples[6], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0477207191288, samples[7], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0731818154454, samples[8], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0271355789155, samples[9], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0405342169106, samples[10], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0162080544978, samples[11], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0477178432047, samples[12], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0731818154454, samples[13], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0271355789155, samples[14], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0405342169106, samples[15], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0162080544978, samples[16], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0477178432047, samples[17], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0731818154454, samples[18], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0271355789155, samples[19], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0405342169106, samples[20], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0162080544978, samples[21], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0477178432047, samples[22], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0731818154454, samples[23], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0271355789155, samples[24], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.039129, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.059538, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.040952, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.062327, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.022343, samples[4], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.035629, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.056754, samples[6], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.039886, samples[7], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.061996, samples[8], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.022218, samples[9], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.035579, samples[10], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.056758, samples[11], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.039888, samples[12], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.061996, samples[13], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.022218, samples[14], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.035579, samples[15], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.056758, samples[16], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.039888, samples[17], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.061996, samples[18], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.022218, samples[19], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.035579, samples[20], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.056758, samples[21], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.039888, samples[22], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.061996, samples[23], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.022218, samples[24], self.epsilon);
   XCTAssertEqualWithAccuracy(0, samples[25], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
@@ -372,8 +372,8 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
   [self dumpSamples: samples];
 
-  XCTAssertEqualWithAccuracy(-0.00132336514071, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0147862089798, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.005160, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.004066, samples[1], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
 }
@@ -588,11 +588,11 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
   [self dumpSamples: samples];
 
-  XCTAssertEqualWithAccuracy(0.194214180112, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0128473900259, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00808507762849, samples[2], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0160565469414, samples[3], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00837563537061, samples[4], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.132158, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.053145, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.006965, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.010662, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.002302, samples[4], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
 }
@@ -680,9 +680,9 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
   [self dumpSamples: samples];
 
-  XCTAssertEqualWithAccuracy(0.00927150808275, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0303932055831, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00281225889921, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.007683, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.017845, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.006056, samples[2], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
 }
@@ -725,16 +725,16 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
   [self dumpSamples: samples];
 
-  XCTAssertEqualWithAccuracy(0.0137237422168, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0827673971653, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0523559898138, samples[2], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.052486486733, samples[3], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0136061022058, samples[4], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0617988854647, samples[5], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0901300311089, samples[6], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0392570383847, samples[7], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0674479976296, samples[8], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0153729561716, samples[9], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.055174, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.126231, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.024512, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.097875, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.068169, samples[4], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.016668, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.070357, samples[6], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.066461, samples[7], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.052915, samples[8], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.014250, samples[9], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
 }
@@ -801,12 +801,12 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
   [self dumpSamples: samples];
 
-  XCTAssertEqualWithAccuracy(0.067690089345, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0105933696032, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0229632202536, samples[2], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00023230604711, samples[3], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0681528672576, samples[4], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00174471200444, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.071227, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.009531, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.012803, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.002166, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.071308, samples[4], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.001850, samples[5], self.epsilon);
   XCTAssertEqualWithAccuracy(0, samples[6], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
@@ -871,12 +871,12 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
   [self dumpSamples: samples];
 
-  XCTAssertEqualWithAccuracy(0.0724020972848, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.067690089345, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0276621151716, samples[2], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0541961565614, samples[3], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00824993383139, samples[4], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00429384317249, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.079032, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.071227, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.019970, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.064721, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.002118, samples[4], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.003020, samples[5], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
 }
@@ -956,46 +956,46 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
   [self dumpSamples: samples];
 
-  XCTAssertEqualWithAccuracy(-0.0135538503528, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0135538503528, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.023015787825, samples[2], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.022444486618, samples[3], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0367697998881, samples[4], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0252428501844, samples[5], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0932796448469, samples[6], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0440731719136, samples[7], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0123098911718, samples[8], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0034092082642, samples[9], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0753212720156, samples[10], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00735877128318, samples[11], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0248098820448, samples[12], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00152178388089, samples[13], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0254766959697, samples[14], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00603182660416, samples[15], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.003492385149, samples[16], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00144659355283, samples[17], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00545788928866, samples[18], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00345166772604, samples[19], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0280782375485, samples[20], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0254687201232, samples[21], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0229217298329, samples[22], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0293595902622, samples[23], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0153835304081, samples[24], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0279825367033, samples[25], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0024051181972, samples[26], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0067135412246, samples[27], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00624635489658, samples[28], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0361249446869, samples[29], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00140355667099, samples[30], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0388323068619, samples[31], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00838042609394, samples[32], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0421312451363, samples[33], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00735207414255, samples[34], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0190930217505, samples[35], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00449881935492, samples[36], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00771734816954, samples[37], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0119786243886, samples[38], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0142502970994, samples[39], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.014590, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.014590, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.023030, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.022458, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.034774, samples[4], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.023873, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.082167, samples[6], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.038823, samples[7], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.016316, samples[8], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.004519, samples[9], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.072060, samples[10], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.007040, samples[11], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.056595, samples[12], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.003471, samples[13], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.033718, samples[14], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.007983, samples[15], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.004398, samples[16], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.001822, samples[17], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.017997, samples[18], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.011382, samples[19], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.021290, samples[20], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.019311, samples[21], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.030234, samples[22], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.038725, samples[23], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.018208, samples[24], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.033121, samples[25], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.013147, samples[26], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.036698, samples[27], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.006571, samples[28], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.038005, samples[29], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.001577, samples[30], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.043627, samples[31], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.006705, samples[32], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.033710, samples[33], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.026536, samples[34], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.068912, samples[35], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.022025, samples[36], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.037783, samples[37], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.027964, samples[38], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.033267, samples[39], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
 }
@@ -1301,10 +1301,10 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
 
   [self dumpSamples: samples];
 
-  XCTAssertEqualWithAccuracy(0.00482171215117, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00380147737451, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0023975179065, samples[2], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0023975179065, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.003008, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.003023, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.002096, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.002096, samples[3], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
 }
@@ -1430,46 +1430,46 @@ static double rms(const std::vector<AUValue>& samples, size_t begin, size_t end)
   [self dumpSamples: samples];
   auto epsilon = self.epsilon;
 
-  XCTAssertEqualWithAccuracy(-0.0135538503528, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0135538503528, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0229097697884, samples[2], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0225526988506, samples[3], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0365704074502, samples[4], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0255308561027, samples[5], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0932796448469, samples[6], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0440731719136, samples[7], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0122936880216, samples[8], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00346717843786, samples[9], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0752485692501, samples[10], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00806831941009, samples[11], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0247998312116, samples[12], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00167763780337, samples[13], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0254671871662, samples[14], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00607183715329, samples[15], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00347859598696, samples[16], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00147944316268, samples[17], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00543609261513, samples[18], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00348589289933, samples[19], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0280782375485, samples[20], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0254687201232, samples[21], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0228293780237, samples[22], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.0294314548373, samples[23], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0150749208406, samples[24], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0281499940902, samples[25], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00227815052494, samples[26], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00675767846406, samples[27], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00573504343629, samples[28], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0362096391618, samples[29], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.000671378918923, samples[30], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0388518646359, samples[31], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00785034149885, samples[32], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0422332249582, samples[33], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.00705126766115, samples[34], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0192061476409, samples[35], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00443806918338, samples[36], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.00775244273245, samples[37], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0117986109108, samples[38], self.epsilon);
-  XCTAssertEqualWithAccuracy(0.0143996942788, samples[39], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.014590, samples[0], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.014590, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.022924, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.022567, samples[3], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.034585, samples[4], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.024145, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.082167, samples[6], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.038823, samples[7], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.016295, samples[8], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.004596, samples[9], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.071991, samples[10], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.007719, samples[11], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.056572, samples[12], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.003827, samples[13], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.033706, samples[14], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.008036, samples[15], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.004381, samples[16], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.001863, samples[17], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.017925, samples[18], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.011495, samples[19], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.021290, samples[20], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.019311, samples[21], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.030112, samples[22], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.038820, samples[23], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.017843, samples[24], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.033319, samples[25], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.012453, samples[26], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.036939, samples[27], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.006033, samples[28], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.038094, samples[29], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.000754, samples[30], self.epsilon);
+  XCTAssertEqualWithAccuracy(0.043649, samples[31], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.006281, samples[32], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.033792, samples[33], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.025450, samples[34], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.069320, samples[35], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.021728, samples[36], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.037954, samples[37], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.027544, samples[38], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.033616, samples[39], self.epsilon);
 
   [self playSamples: harness.dryBuffer() count: harness.bufferFrameCount()];
 }
