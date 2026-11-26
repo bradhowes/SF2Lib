@@ -1,6 +1,10 @@
 #pragma once
 
+#include <cstdint>
+#include <optional>
+#include <span>
 #include <string>
+#include <vector>
 
 namespace SF2::Utils {
 
@@ -9,32 +13,28 @@ namespace SF2::Utils {
  */
 struct Base64 {
   /**
-   Convert given string from Base-64 to ASCII/UTF-8.
+   Convert given string from Base-64 to vector of unsigned bytes.
 
-   @param ptr start of the text sequence
-   @param size the number of characters to decode
-
-   @returns converted character sequence
+   @param encoded_str the Base64-encoded string
+   @returns converted byte sequence
    */
-  static std::string decode(const unsigned char* ptr, size_t size);
+  static std::optional<std::vector<std::uint8_t>> decode(std::string_view encoded_str);
 
   /**
-   Convert the given string from Base-64 to ASCII/UTF-8.
+   Convert the given sequence of unsigned bytes into a Base-64 string.
 
-   @param input the string to convert
-
-   @returns converted character sequence
-   */
-  static std::string decode(const std::string& input);
-
-  /**
-   Convert the given string to Base-64.
-
-   @param input the string to convert
-
+   @param input the contents to convert
    @returns Base-64 character sequence
    */
-  static std::string encode(const std::string& input);
+  static std::string encode(std::span<std::uint8_t const> input);
+
+  /**
+   Convert the given sequence of unsigned bytes into a Base-64 string.
+
+   @param input the contents to convert
+   @returns Base-64 character sequence
+   */
+  static std::string encode(std::string_view input);
 };
 
 } // end namespace SF2::Utils

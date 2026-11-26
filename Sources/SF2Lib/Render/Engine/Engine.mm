@@ -684,43 +684,78 @@ Engine::processSysExRequest_WQ(void* context) noexcept {
 }
 
 void
-Engine::processSysExRequest_WQ(const uint8_t* bytes, size_t length) {
-  // `queueSysExRequest_RT` checked the length range, and `doMIDIEvent` the manufacturer and the trailing EOX.
-  LoadPresetSysExPayload payload;
-  std::memcpy(&payload, bytes, sizeof(payload));
+Engine::processSysExRequest_WQ(const uint8_t* msg, size_t length) {
 
-  // Bound the override count by the bytes actually present before using it. (It used to come straight off the wire.)
-  // The overrides are parsed but not applied yet: the generator-override feature is not implemented.
-  auto available = length - sizeof(LoadPresetSysExPayload) - 1;
-  if (payload.overrideCount > available / sizeof(MIDI::GeneratorOverride)) {
-    os_log_error(log_, "processSysExRequest_WQ - override count %zu exceeds payload", payload.overrideCount);
+  // From doMIDIEvent we have confirmed that:
+  // - length >= 3
+  // - msg[0] == MIDI::CoreEvent::systemExclusive
+  // - msg[1] == LoadPresetSysExPayload::manufacturerValue
+  // - msg[2] == LoadPresetSysExPayload::modelPathPayload OR LoadPresetSysExPayload::modelBookmarkPayload
+  // - msg[length - 1] == MIDI::CoreEvent::EOX
+  //
+  // The Base64-encoded payload consists of bytes in msg[3]...msg[length - 2].
+  //
+  // NOTE: this routine does not run on the audio render thread, so we are safe to allocate memory here, for the decoding of the
+  // SysEx payload and the Generator override vector (TODO).
+  //
+  auto ptr = reinterpret_cast<const char*>(msg + 3);
+  auto decoded = SF2::Utils::Base64::decode({ptr, length - 4});
+  if (!decoded.has_value()) {
+    os_log_error(log_, "processSysExRequest_WQ - failed to decode Base64 payload");
     --presetChangesPending_;
     return;
   }
-  auto dataStart = bytes + sizeof(LoadPresetSysExPayload) + payload.overrideCount * sizeof(MIDI::GeneratorOverride);
-  auto dataCount = size_t((bytes + length - 1) - dataStart);
 
-  switch (payload.model) {
+  auto decodedBytes = decoded.value();
+  auto available = decodedBytes.size();
+
+  if (available < sizeof(LoadPresetSysExPayload::Fixed)) {
+    os_log_error(log_, "processSysExRequest_WQ - decodedBytes too small for LoadPresetSysExPayload::Payload");
+    --presetChangesPending_;
+    return;
+  }
+
+  const LoadPresetSysExPayload::Fixed* payload = reinterpret_cast<const LoadPresetSysExPayload::Fixed*>(decodedBytes.data());
+  auto presetIndex = payload->presetIndex;
+  auto overrideCount = payload->overrideCount;
+  available -= sizeof(LoadPresetSysExPayload::Fixed);
+
+  if (available < overrideCount * sizeof(MIDI::GeneratorOverride)) {
+    os_log_error(log_, "processSysExRequest_WQ - decodedBytes too small for LoadPresetSysExPayload.overrideCount");
+    --presetChangesPending_;
+    return;
+  }
+
+  const MIDI::GeneratorOverride* pos = reinterpret_cast<const MIDI::GeneratorOverride*>(payload + 1);
+  MIDI::GeneratorOverrideVector overrides;
+  while (overrideCount-- > 0) {
+    overrides.push_back(*pos++);
+    available -= sizeof(SF2::MIDI::GeneratorOverride);
+  }
+
+  auto pathStart = reinterpret_cast<const char*>(pos);
+
+  switch (msg[2]) {
     case LoadPresetSysExPayload::modelPathPayload: {
-      auto path = dataCount == 0 ? std::string("") : Utils::Base64::decode(dataStart, dataCount);
-      beginLoadFileAndPreset_WQ(path, payload.presetIndex);
-      break;
+      auto path = available == 0 ? std::string("") : std::string(pathStart, available);
+        beginLoadFileAndPreset_WQ(path, payload->presetIndex);
+        break;
     }
 
     case LoadPresetSysExPayload::modelBookmarkPayload: {
-      NSData* encoded = [NSData dataWithBytes:dataStart length:dataCount];
-      NSData* bookmark = [[NSData alloc] initWithBase64EncodedData:encoded options:0];
+      NSData* bookmark = [NSData dataWithBytes:pathStart length:available];
       if (bookmark == nil) {
         os_log_error(log_, "processSysExRequest_WQ - invalid Base64 bookmark");
         --presetChangesPending_;
         return;
       }
-      beginLoadBookmarkAndPreset_WQ(bookmark, payload.presetIndex);
+      beginLoadBookmarkAndPreset_WQ(bookmark, payload->presetIndex);
       break;
     }
 
+      // Seems as if the check in doMIDIEvent is no longer accurate.
     default:
-      os_log_error(log_, "processSysExRequest_WQ - unknown model %d", payload.model);
+      os_log_error(log_, "processSysExRequest_WQ - unknown SysEx model %d", msg[2]);
       --presetChangesPending_;
       break;
   }

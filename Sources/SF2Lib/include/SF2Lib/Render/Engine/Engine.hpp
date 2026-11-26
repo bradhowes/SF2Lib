@@ -44,9 +44,9 @@ namespace SF2::Render::Engine {
  switch to a new preset collection and/or a new preset index. There are no locks in the code so as to not block the render thread.
 
  The engine supports a maximum of `traits::maxVoiceCount` simultaneous voices -- these are allocated all at once in one continuous
- block of memory. However, the engine can be configured to use fewer voices at construction time via the `voiceCountLimit`. Further,
- the engine's audio rendering routine will by default limit voices when there is the threat of delaying a render cycle and causing
- an audio glitch.
+ block of memory. Note that the engine's audio rendering routine will by default limit voices when there is the threat of delaying
+ a render cycle and causing an audio glitch. This can be tuned via the `setRenderingTimeBudgetScaling` method -- give it a negative
+ value to disable the budgeting and shedding of old active voices.
  */
 class Engine : public DSPHeaders::EventProcessor<Engine> {
   using super = DSPHeaders::EventProcessor<Engine>;
@@ -644,7 +644,6 @@ private:
   AUParameterTree* parameterTree_;
   std::array<Voice, traits::maxVoiceCount> voices_{};
   OldestVoiceCollection oldestVoiceIndices_;
-  std::size_t voiceCountLimit_;
 
   std::atomic<PresetsState*> presetsState_{nullptr};
 

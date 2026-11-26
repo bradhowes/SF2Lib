@@ -12,65 +12,58 @@
 - (void)testRoundTrip {
   std::string data{"/This/is a test/of the emergency/broadcasting/system.sf2"};
   std::string encoded = SF2::Utils::Base64::encode(data);
-  // std::cout << "encoded: " << encoded << '\n';
-  std::string decoded = SF2::Utils::Base64::decode(encoded);
-  // std::cout << "decoded: " << decoded << '\n';
-  XCTAssertEqual(data, decoded);
+  auto decoded = SF2::Utils::Base64::decode(encoded);
+  XCTAssertTrue(decoded.has_value());
+  XCTAssertEqual(data, std::string({reinterpret_cast<const char*>(decoded.value().data()), decoded.value().size()}));
 }
 
 - (void)testIdiom {
   std::string data{"Many hands make light work."};
   std::string encoded = SF2::Utils::Base64::encode(data);
-  // std::cout << "encoded: " << encoded << '\n';
   XCTAssertEqual(encoded, "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu");
-  std::string decoded = SF2::Utils::Base64::decode(encoded);
-  // std::cout << "decoded: " << decoded << '\n';
-  XCTAssertEqual(data, decoded);
+  auto decoded = SF2::Utils::Base64::decode(encoded);
+  XCTAssertTrue(decoded.has_value());
+  XCTAssertEqual(data, std::string({reinterpret_cast<const char*>(decoded.value().data()), decoded.value().size()}));
 }
 
 - (void)testEmptyString {
   std::string data{""};
   std::string encoded = SF2::Utils::Base64::encode(data);
-  // std::cout << "encoded: " << encoded << '\n';
-  std::string decoded = SF2::Utils::Base64::decode(encoded);
-  // std::cout << "decoded: " << decoded << '\n';
-  XCTAssertEqual(data, decoded);
+  auto decoded = SF2::Utils::Base64::decode(encoded);
+  XCTAssertTrue(decoded.has_value());
+  XCTAssertEqual(data, std::string({reinterpret_cast<const char*>(decoded.value().data()), decoded.value().size()}));
 }
 
 - (void)testOneCharString {
   std::string data{"A"};
   std::string encoded = SF2::Utils::Base64::encode(data);
-  // std::cout << "encoded: " << encoded << '\n';
-  std::string decoded = SF2::Utils::Base64::decode(encoded);
-  // std::cout << "decoded: " << decoded << '\n';
-  XCTAssertEqual(data, decoded);
+  auto decoded = SF2::Utils::Base64::decode(encoded);
+  XCTAssertTrue(decoded.has_value());
+  XCTAssertEqual(data, std::string({reinterpret_cast<const char*>(decoded.value().data()), decoded.value().size()}));
 }
 
 - (void)testTwoCharString {
   std::string data{"AB"};
   std::string encoded = SF2::Utils::Base64::encode(data);
-  // std::cout << "encoded: " << encoded << '\n';
-  std::string decoded = SF2::Utils::Base64::decode(encoded);
-  // std::cout << "decoded: " << decoded << '\n';
-  XCTAssertEqual(data, decoded);
+  auto decoded = SF2::Utils::Base64::decode(encoded);
+  XCTAssertTrue(decoded.has_value());
+  XCTAssertEqual(data, std::string({reinterpret_cast<const char*>(decoded.value().data()), decoded.value().size()}));
 }
 
 - (void)testThreeCharString {
   std::string data{"ABc"};
   std::string encoded = SF2::Utils::Base64::encode(data);
-  // std::cout << "encoded: " << encoded << '\n';
-  std::string decoded = SF2::Utils::Base64::decode(encoded);
-  // std::cout << "decoded: " << decoded << '\n';
-  XCTAssertEqual(data, decoded);
+  auto decoded = SF2::Utils::Base64::decode(encoded);
+  XCTAssertTrue(decoded.has_value());
+  XCTAssertEqual(data, std::string({reinterpret_cast<const char*>(decoded.value().data()), decoded.value().size()}));
 }
 
 - (void)testFourCharString {
   std::string data{"ABcd"};
   std::string encoded = SF2::Utils::Base64::encode(data);
-  // std::cout << "encoded: " << encoded << '\n';
-  std::string decoded = SF2::Utils::Base64::decode(encoded);
-  // std::cout << "decoded: " << decoded << '\n';
-  XCTAssertEqual(data, decoded);
+  auto decoded = SF2::Utils::Base64::decode(encoded);
+  XCTAssertTrue(decoded.has_value());
+  XCTAssertEqual(data, std::string({reinterpret_cast<const char*>(decoded.value().data()), decoded.value().size()}));
 }
 
 - (void)testPadding {

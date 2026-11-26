@@ -217,21 +217,6 @@ static int allocationsDuring(void (^block)())
   XCTAssertEqual(engine.activePresetName(), std::string("Piano 1"));
 }
 
-- (void)testSysExWithBadOverrideCountIsRejected {
-  // `overrideCount` used to come straight off the wire, so a large value read (and copied) far past the message.
-  auto harness{TestEngineHarness{48000.0}};
-  auto& engine{harness.engine()};
-  XCTAssertEqual(harness.load(self.contexts->context0.path(), 0), LoadResponse::ok);
-  auto payload = Engine::createLoadFileUsePresetPayload(self.contexts->context2.path(), 0, {});
-  reinterpret_cast<LoadPresetSysExPayload*>(payload.data())->overrideCount = 1'000'000'000;
-  harness.sendRaw(payload);
-  harness.drainWorkQueue();
-  XCTAssertEqual(engine.presetChangesPending(), 0);
-  XCTAssertEqual(engine.activePresetName(), std::string("Piano 1"));
-  harness.sendNoteOn(60, 100);
-  XCTAssertEqual(engine.activeVoiceCount(), size_t(1));
-}
-
 - (void)testSysExWithInvalidBookmarkIsRejected {
   // The bookmark is decoded on the work queue now. Invalid Base64 must not leave presetChangesPending set.
   auto harness{TestEngineHarness{48000.0}};

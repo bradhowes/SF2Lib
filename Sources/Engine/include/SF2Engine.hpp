@@ -47,9 +47,6 @@ struct SWIFT_ESCAPABLE SWIFT_SELF_CONTAINED SF2Engine
   /// @returns the largest voice count that an engine supports
   static size_t maxVoiceCount() noexcept;
 
-  /// @returns the number of voices this engine was created with, after clamping
-  size_t voiceCountLimit() const noexcept;
-
   /**
    Set the rendering format to be when rendering in CoreAudio infrastructure. After returning from this call,
    the engine will be ready to process and render samples -- though no sound will be emitted until a SF2 file

@@ -18,63 +18,112 @@ namespace SF2::Render::Engine {
     uint8_t sysExBegin;    // 0
     uint8_t manufacturer;  // 1
     uint8_t model;         // 2
-    // Here lies 5 bytes of padding
-    size_t presetIndex;    // 8
-    size_t overrideCount;  // 16
-    // SF2::MIDI::GeneratorOverride overrides[1];
-    // char filePath[1];
-    // uint8_t sysExEnd;   // 25 is smallest payload size
+    // char base_64_payload[1]; N
+    uint8_t sysExEnd;      // N + 1
+
+    struct Fixed {
+      size_t presetIndex;
+      size_t overrideCount;
+      // MIDI::GeneratorOverride override[1]; // variable size based on overrideCount value
+      // char path[1]; // bookmark or string
+    };
 
     static constexpr size_t minPayloadSize = 25;
 
-    static std::vector<uint8_t> make(const SF2::MIDI::GeneratorOverrideVector& overrides,
-                                     const std::string& filePath, size_t presetIndex) {
-      auto encodedFilePath = filePath.empty() ? std::string("") : SF2::Utils::Base64::encode(filePath);
-      auto payloadSize = (sizeof(LoadPresetSysExPayload)
-                          + overrides.size() * sizeof(SF2::MIDI::GeneratorOverride)
-                          + encodedFilePath.size()) + 1;
-      auto bytes = std::vector<uint8_t>(payloadSize, 0);
-      auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
-      payload->sysExBegin = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
-      payload->manufacturer = manufacturerValue;
-      payload->model = modelPathPayload;
-      payload->presetIndex = presetIndex;
-      payload->overrideCount = overrides.size();
-      auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>((bytes.data() + sizeof(LoadPresetSysExPayload)));
-      auto pos2 = std::copy(overrides.begin(), overrides.end(), pos1);
-      auto pos3 = reinterpret_cast<uint8_t*>(std::copy(encodedFilePath.begin(), encodedFilePath.end(),
-                                                       reinterpret_cast<char*>(pos2)));
-      *pos3++ = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::EOX);
+    /**
+     Create a new SysEx payload to switch to another sound font and preset + zero or more override settings for generators (TODO).
+     NOTE: this is for entities wishing to command SF2Lib to use a new preset and font file. It is *not* used by SF2Lib itself
+     so we are free to do memory allocations here.
 
-      assert(pos3 - bytes.data() == long(bytes.size()));
-      assert(bytes.size() >= minPayloadSize);
+     @param overrides collection of `GeneratorOveride` entities to apply to the preset.
+     @param filePath the location of the font file to use. If empty, and only change the preset of the currently loaded font file.
+     @param presetIndex the index of the preset to load
 
-      return bytes;
+     @returns MIDI SysEx payload that can be sent to an SF2Lib synth
+     */
+    static std::vector<uint8_t>
+    make(const MIDI::GeneratorOverrideVector& overrides, const std::string& filePath, size_t presetIndex) {
+
+      // The payload for the SysEx message.
+      auto payloadSize = (sizeof(Fixed)
+                          + overrides.size() * sizeof(MIDI::GeneratorOverride)
+                          + filePath.size());
+      auto payloadBytes = std::vector<uint8_t>(payloadSize, 0);
+      auto payloadPtr = reinterpret_cast<Fixed*>(payloadBytes.data());
+
+      payloadPtr->presetIndex = presetIndex;
+      payloadPtr->overrideCount = overrides.size();
+
+      // Add any overrides
+      auto overridePtr = reinterpret_cast<MIDI::GeneratorOverride*>(payloadPtr + 1);
+      auto pathPtr = reinterpret_cast<char*>(std::copy(overrides.begin(), overrides.end(), overridePtr));
+
+      // Copy over the file path.
+      auto endPos = reinterpret_cast<uint8_t*>(std::copy(filePath.begin(), filePath.end(), pathPtr));
+
+      // Generate Base64 encoding.
+      auto encodedPayload = SF2::Utils::Base64::encode({payloadBytes.data(), endPos});
+
+      // Create the SysEx message without any bytes > 0x7F.
+      auto msg = std::vector<uint8_t>(encodedPayload.size() + 4);
+      msg[0] = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
+      msg[1] = manufacturerValue;
+      msg[2] = modelPathPayload;
+      std::copy(encodedPayload.begin(), encodedPayload.end(), reinterpret_cast<char*>(msg.data() + 3));
+      msg[msg.size() - 1] = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::EOX);
+
+      return msg;
     }
 
-    static std::vector<uint8_t> make(const SF2::MIDI::GeneratorOverrideVector& overrides,
-                                     const NSData* bookmark, size_t presetIndex) {
-      NSData* encodedBookmark = [bookmark base64EncodedDataWithOptions: 0];
-      auto payloadSize = (sizeof(LoadPresetSysExPayload)
-                          + overrides.size() * sizeof(SF2::MIDI::GeneratorOverride)
-                          + encodedBookmark.length) + 1;
-      auto bytes = std::vector<uint8_t>(payloadSize, 0);
-      auto payload = reinterpret_cast<LoadPresetSysExPayload*>(bytes.data());
-      payload->sysExBegin = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
-      payload->manufacturer = manufacturerValue;
-      payload->model = modelBookmarkPayload;
-      payload->presetIndex = presetIndex;
-      payload->overrideCount = overrides.size();
-      auto pos1 = reinterpret_cast<SF2::MIDI::GeneratorOverride*>((bytes.data() + sizeof(LoadPresetSysExPayload)));
-      auto pos2 = reinterpret_cast<uint8_t*>(std::copy(overrides.begin(), overrides.end(), pos1));
-      [encodedBookmark getBytes: pos2 length: encodedBookmark.length];
-      auto pos3 = pos2 + encodedBookmark.length;
-      *pos3++ = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::EOX);
+    /**
+     Create a new SysEx payload to switch to another sound font and preset + zero or more override settings for generators (TODO).
+     NOTE: this is for entities wishing to command SF2Lib to use a new preset and font file. It is *not* used by SF2Lib itself
+     so we are free to do memory allocations here.
 
-      assert(pos3 - bytes.data() == long(bytes.size()));
-      assert(bytes.size() >= minPayloadSize);
+     @param overrides collection of `GeneratorOveride` entities to apply to the preset.
+     @param bookmark the location of the font file to use. If nullptr or empty, only change the preset of the currently loaded
+     font file.
+     @param presetIndex the index of the preset to load
 
-      return bytes;
+     @returns MIDI SysEx payload that can be sent to an SF2Lib synth
+     */
+    static std::vector<uint8_t>
+    make(const SF2::MIDI::GeneratorOverrideVector& overrides, const NSData* bookmark, size_t presetIndex) {
+
+      size_t bookmarkSize = bookmark != nullptr ? bookmark.length : 0;
+
+      // The payload for the SysEx message.
+      auto payloadSize = (sizeof(Fixed)
+                          + overrides.size() * sizeof(MIDI::GeneratorOverride)
+                          + bookmarkSize);
+      auto payloadBytes = std::vector<uint8_t>(payloadSize, 0);
+      auto payloadPtr = reinterpret_cast<Fixed*>(payloadBytes.data());
+
+      payloadPtr->presetIndex = presetIndex;
+      payloadPtr->overrideCount = overrides.size();
+
+      // Add any overrides
+      auto overridePtr = reinterpret_cast<MIDI::GeneratorOverride*>(payloadPtr + 1);
+      auto pathPtr = reinterpret_cast<char*>(std::copy(overrides.begin(), overrides.end(), overridePtr));
+
+      // Copy over the bookmark data.
+      if (bookmark != nullptr) {
+        [bookmark getBytes: pathPtr length: bookmark.length];
+      }
+
+      // Generate Base64 encoding.
+      auto endPos = reinterpret_cast<uint8_t*>(pathPtr + bookmarkSize);
+      auto encodedPayload = SF2::Utils::Base64::encode({payloadBytes.data(), endPos});
+
+      // Create the SysEx message without any bytes > 0x7F.
+      auto msg = std::vector<uint8_t>(encodedPayload.size() + 4);
+      msg[0] = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::systemExclusive);
+      msg[1] = manufacturerValue;
+      msg[2] = modelBookmarkPayload;
+      std::copy(encodedPayload.begin(), encodedPayload.end(), reinterpret_cast<char*>(msg.data() + 3));
+      msg[msg.size() - 1] = DSPHeaders::valueOf(SF2::MIDI::CoreEvent::EOX);
+
+      return msg;
     }
   };
 
