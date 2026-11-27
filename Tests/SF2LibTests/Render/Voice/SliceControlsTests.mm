@@ -94,7 +94,7 @@ static constexpr size_t changeIndex = warmUpFrames + changeFrame;
   // 6 dB of extra attenuation halves the level. Gain is applied before the (active) low-pass filter, whose history
   // smooths the step for a few samples, so compare once it has settled.
   for (auto index = totalFrames - 64; index < totalFrames; ++index) {
-    XCTAssertEqualWithAccuracy(quieter.left[index], reference.left[index] * 0.501187, 1.0e-4, @"frame %zu", index);
+    XCTAssertEqualWithAccuracy(quieter.left[index], reference.left[index] * 0.501187, 1.0e-4, @"frame %u", index);
   }
 }
 
