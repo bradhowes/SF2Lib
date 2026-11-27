@@ -831,4 +831,15 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - `testLiveValuesMatchTheSameValuesInTheFile` (end to end): no delay, instant attack and bypassed filter set live must render exactly like the same generators in the instrument zone.
   - `testLiveValueRanges`: the new bounds, and unchanged ones such as pan and the LFO delays.
   - `testParameterTreeUsesTheLiveRanges`: every generator parameter's `minValue` and `maxValue` match `liveValueRange`.
-- Not changed: the LFO delays (#21, #23), whose code has no special meaning for -32768. A modulator can still push the cutoff above 13500 through `modulated`, as before.
+- Not changed at the time: the LFO delays (#21, #23). The reason given then, that their code has no special meaning for -32768, was wrong: `DSP::lfoDelayTimecentsToSeconds` already treats -32768 as no delay. See the next entry. A modulator can still push the cutoff above 13500 through `modulated`, as before.
+
+**Follow-up (2026-11-27, branch `simd-voice-blocks`): -32768 for LFO delays and envelope holds. `make test-macOS`: 431 tests, 0 failures.**
+- Spec check: SF2.01 8.1.2 says "The most negative number (-32768) conventionally indicates" no delay for `delayModLFO` (#21), `delayVibLFO` (#23), `delayModEnv` (#25) and `delayVolEnv` (#33); an instantaneous attack for #26 and #34; and no hold phase for `holdModEnv` (#27) and `holdVolEnv` (#35). The 8.1.3 table still lists -12000 as the minimum for all of them.
+- LFO delays: SF2 files were already handled (`lfoDelayTimecentsToSeconds`). `liveValueRange` now also accepts -32768 for #21 and #23, so live values and the AUParameter minimum match.
+- Holds: a conformance bug for file and live values alike. `holdTimecentsToSeconds` clamped -32768 to -12000, giving a 1 ms hold. It now returns 0 (no hold stage) for a generator value of -32768 or less. The check is made on the generator value before the key number scaling (#31, #39) is added; otherwise any scaling would bring the 1 ms hold back. `liveValueRange` accepts -32768 for #27 and #35.
+- Decay and release (#28, #30, #36, #38) have no such convention in the spec and keep the -12000 minimum.
+- New tests:
+  - `EnvelopeTests/testHoldOfMinus32768IsNoHold` covers both envelopes, keys 36, 60 and 96, with keyboard tracking at 100. It fails without the fix.
+  - `LiveGeneratorRangeTests/testLiveLFODelayMatchesTheSameValueInTheFile` and `testLiveHoldMatchesTheSameValueInTheFile` (end to end): live equals file, and both differ from the default 1 ms.
+  - `testLiveValueRanges` is updated for the new bounds and checks that decay and release keep -12000.
+- No hard-coded sample values changed, since no existing test file uses a -32768 hold.

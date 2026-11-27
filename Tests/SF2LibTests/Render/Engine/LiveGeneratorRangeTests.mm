@@ -40,6 +40,24 @@ static std::vector<AUValue> render(const SF2Builder& builder, std::function<void
   return std::vector<AUValue>(data, data + renderFrames);
 }
 
+/// @returns the minimal file with the given generators added to its instrument zone
+static SF2Builder withGenerators(std::vector<SF2Builder::Gen> generators)
+{
+  auto builder = SF2Builder::minimal();
+  generators.push_back({SF2Builder::genSampleModes, 1});
+  generators.push_back({SF2Builder::genSampleID, 0});
+  auto count = uint16_t(generators.size());
+  generators.push_back({0, 0});
+  builder.igen = generators;
+  builder.ibag = {{0, 0}, {count, 0}};
+  return builder;
+}
+
+static constexpr uint16_t genVibLfoToPitch = 6;
+static constexpr uint16_t genDelayVibLFO = 23;
+static constexpr uint16_t genHoldVolEnv = 35;
+static constexpr uint16_t genSustainVolEnv = 37;
+
 @interface LiveGeneratorRangeTests : XCTestCase
 @end
 
@@ -69,6 +87,30 @@ static std::vector<AUValue> render(const SF2Builder& builder, std::function<void
   XCTAssertFalse(live == defaults);
 }
 
+- (void)testLiveLFODelayMatchesTheSameValueInTheFile {
+  // A vibrato LFO with no delay (-32768), set live and in the file, must sound the same, and differ from the default
+  // 1 ms delay.
+  auto noDelay = uint16_t(int16_t(-32'768));
+  auto expected = render(withGenerators({{genVibLfoToPitch, 1'200}, {genDelayVibLFO, noDelay}}), nullptr);
+  auto live = render(withGenerators({{genVibLfoToPitch, 1'200}}), [](TestEngineHarness& harness) {
+    harness.setParameter(Index::delayVibratoLFO, -32'768);
+  });
+  XCTAssertTrue(live == expected);
+  XCTAssertFalse(live == render(withGenerators({{genVibLfoToPitch, 1'200}}), nullptr));
+}
+
+- (void)testLiveHoldMatchesTheSameValueInTheFile {
+  // With a sustain below full level the end of the hold is audible: no hold (-32768) set live and in the file must
+  // sound the same, and differ from the default 1 ms hold.
+  auto noHold = uint16_t(int16_t(-32'768));
+  auto expected = render(withGenerators({{genSustainVolEnv, 200}, {genHoldVolEnv, noHold}}), nullptr);
+  auto live = render(withGenerators({{genSustainVolEnv, 200}}), [](TestEngineHarness& harness) {
+    harness.setParameter(Index::holdVolumeEnvelope, -32'768);
+  });
+  XCTAssertTrue(live == expected);
+  XCTAssertFalse(live == render(withGenerators({{genSustainVolEnv, 200}}), nullptr));
+}
+
 - (void)testLiveValueRanges {
   LiveGeneratorParameters parameters;
   auto check = [&](Index index, AUValue value, AUValue expected) {
@@ -76,9 +118,10 @@ static std::vector<AUValue> render(const SF2Builder& builder, std::function<void
     XCTAssertEqual(parameters.getLiveValue(index), expected, @"generator %d value %f", int(index), value);
   };
 
-  // Envelope delay and attack: down to -32768, upper bound as in the spec.
-  for (auto index : {Index::delayVolumeEnvelope, Index::attackVolumeEnvelope, Index::delayModulatorEnvelope,
-    Index::attackModulatorEnvelope}) {
+  // LFO delays and envelope delay, attack and hold: down to -32768, upper bound as in the spec.
+  for (auto index : {Index::delayModulatorLFO, Index::delayVibratoLFO, Index::delayVolumeEnvelope,
+    Index::attackVolumeEnvelope, Index::holdVolumeEnvelope, Index::delayModulatorEnvelope,
+    Index::attackModulatorEnvelope, Index::holdModulatorEnvelope}) {
     check(index, -40'000, -32'768);
     check(index, -32'768, -32'768);
     check(index, -20'000, -20'000);
@@ -91,10 +134,10 @@ static std::vector<AUValue> render(const SF2Builder& builder, std::function<void
   check(Index::initialFilterCutoff, 13'505, 13'505);
   check(Index::initialFilterCutoff, 0, 1'500);
 
-  // Everything else keeps the spec range, e.g. pan and the LFO delays.
+  // Everything else keeps the spec range, e.g. pan and the decay times (which have no -32768 convention).
   check(Index::pan, 900, 500);
-  check(Index::delayModulatorLFO, -32'768, -12'000);
-  check(Index::delayVibratoLFO, -32'768, -12'000);
+  check(Index::decayVolumeEnvelope, -32'768, -12'000);
+  check(Index::releaseModulatorEnvelope, -32'768, -12'000);
 }
 
 - (void)testParameterTreeUsesTheLiveRanges {

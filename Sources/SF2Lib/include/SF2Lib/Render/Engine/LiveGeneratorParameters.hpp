@@ -58,9 +58,10 @@ public:
    Obtain the range of values accepted for a generator from the AUParameterTree. This is the generator's range from the
    spec, except where the engine gives meaning to a value outside it:
 
-   - the delay and attack of the volume and modulation envelopes (SF2.01 8.1.2 #25, #26, #33, #34) may be -32768,
-     which the envelopes take as no time at all instead of the 1 ms of the spec's -12000 lower bound (see
-     `Envelope::Generator`)
+   - the LFO delays and the delay, attack and hold of the volume and modulation envelopes (SF2.01 8.1.2 #21, #23,
+     #25-#27, #33-#35) may be -32768, which the spec says "conventionally indicates" no delay, an instantaneous attack
+     or no hold phase. The LFOs and envelopes take it as no time at all, instead of the 1 ms of the spec's -12000
+     lower bound (see `DSP::lfoDelayTimecentsToSeconds` and `Envelope::Generator`).
    - initialFilterCutoff (#8) may reach `LowPassFilter::bypassFrequency`, where a filter without resonance does not
      affect the signal; the spec's 13500 upper bound is just below it
 

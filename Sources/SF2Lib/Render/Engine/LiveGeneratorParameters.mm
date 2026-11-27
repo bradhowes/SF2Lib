@@ -47,10 +47,14 @@ LiveGeneratorParameters::liveValueRange(Index index) noexcept
 {
   const auto& range = Definition::definition(index).valueRange();
   switch (index) {
+    case Index::delayModulatorLFO:
+    case Index::delayVibratoLFO:
     case Index::delayModulatorEnvelope:
     case Index::attackModulatorEnvelope:
+    case Index::holdModulatorEnvelope:
     case Index::delayVolumeEnvelope:
     case Index::attackVolumeEnvelope:
+    case Index::holdVolumeEnvelope:
       return {-32'768, range.max};
     case Index::initialFilterCutoff:
       return {range.min, int(SF2::Render::LowPassFilter::bypassFrequency)};

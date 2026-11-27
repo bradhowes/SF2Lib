@@ -38,8 +38,18 @@ constexpr Float attackTimecentsToSeconds(Float value) noexcept {
   return (value <= -32'768.0) ? 0.0 : ::DSP::centsToSeconds(::DSP::clamp(value, lowerBoundTimecents, 8'000.0));
 }
 
-constexpr Float holdTimecentsToSeconds(Float value) noexcept {
-  return ::DSP::centsToSeconds(::DSP::clamp(value, lowerBoundTimecents, 5'000.0));
+/**
+ Convert a hold time to seconds. SF2.01 8.1.2 #27 holdModEnv / #35 holdVolEnv: "The most negative number (-32768)
+ conventionally indicates no hold phase." That applies to the generator value itself, so it is checked before the key
+ number scaling (#31, #39) is added; otherwise any scaling would turn it back into a 1 ms hold.
+
+ @param value the hold generator value in timecents
+ @param keyAdjustment the key number scaling to add, in timecents
+ @returns hold time in seconds
+ */
+constexpr Float holdTimecentsToSeconds(Float value, Float keyAdjustment) noexcept {
+  if (value <= -32'768.0) return 0.0;
+  return ::DSP::centsToSeconds(::DSP::clamp(value + keyAdjustment, lowerBoundTimecents, 5'000.0));
 }
 
 constexpr Float decayTimecentsToSeconds(Float value) noexcept {
@@ -147,8 +157,9 @@ Generator::configureVolumeEnvelope(const State& state) noexcept
   auto attackTimecents = state.modulated(Index::attackVolumeEnvelope);
   stages_[StageIndex::attack].setAttack(durationInSamples(attackTimecentsToSeconds(attackTimecents)));
 
-  auto holdTimecents = state.modulated(Index::holdVolumeEnvelope) + midiKeyVolumeEnvelopeHoldAdjustment(state);
-  stages_[StageIndex::hold].setHold(durationInSamples(holdTimecentsToSeconds(holdTimecents)));
+  auto holdTimecents = state.modulated(Index::holdVolumeEnvelope);
+  auto holdSeconds = holdTimecentsToSeconds(holdTimecents, midiKeyVolumeEnvelopeHoldAdjustment(state));
+  stages_[StageIndex::hold].setHold(durationInSamples(holdSeconds));
 
   auto decayTimecents = state.modulated(Index::decayVolumeEnvelope) + midiKeyVolumeEnvelopeDecayAdjustment(state);
   stages_[StageIndex::decay].setDecay(sustainLevel_, durationInSamples(decayTimecentsToSeconds(decayTimecents)));
@@ -190,8 +201,9 @@ Generator::configureModulationEnvelope(const State& state) noexcept
   auto attackTimecents = state.modulated(Index::attackModulatorEnvelope);
   stages_[StageIndex::attack].setAttack(durationInSamples(attackTimecentsToSeconds(attackTimecents)));
 
-  auto holdTimecents = state.modulated(Index::holdModulatorEnvelope) + midiKeyModulatorEnvelopeHoldAdjustment(state);
-  stages_[StageIndex::hold].setHold(durationInSamples(holdTimecentsToSeconds(holdTimecents)));
+  auto holdTimecents = state.modulated(Index::holdModulatorEnvelope);
+  auto holdSeconds = holdTimecentsToSeconds(holdTimecents, midiKeyModulatorEnvelopeHoldAdjustment(state));
+  stages_[StageIndex::hold].setHold(durationInSamples(holdSeconds));
 
   auto decayTimecents = state.modulated(Index::decayModulatorEnvelope) + midiKeyModulatorEnvelopeDecayAdjustment(state);
   stages_[StageIndex::decay].setDecay(sustainLevel_, durationInSamples(decayTimecentsToSeconds(decayTimecents)));

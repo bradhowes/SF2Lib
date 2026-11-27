@@ -553,4 +553,27 @@ gen.noteReleased();
   XCTAssertEqual(gen.value().val, volumeEnvelopeAttackCurve(progress));
 }
 
+- (void)testHoldOfMinus32768IsNoHold {
+  // SF2.01 8.1.2 #27 / #35: "The most negative number (-32768) conventionally indicates no hold phase." This used to be
+  // clamped to -12000, a 1 ms hold. Key number scaling must not bring the hold back.
+  for (int key : {36, 60, 96}) {
+    auto state = self.contexts->context2.makeState(0, key, 32);
+    self.sst.setValue(state, State::State::Index::holdVolumeEnvelope, -32'768);
+    self.sst.setValue(state, State::State::Index::midiKeyToVolumeEnvelopeHold, 100);
+    self.sst.setValue(state, State::State::Index::holdModulatorEnvelope, -32'768);
+    self.sst.setValue(state, State::State::Index::midiKeyToModulatorEnvelopeHold, 100);
+    auto volume = Volume();
+    volume.configure(state);
+    XCTAssertEqual(volume.stage(StageIndex::hold).durationInSamples(), 0, @"key %d", key);
+    auto modulation = Modulation();
+    modulation.configure(state);
+    XCTAssertEqual(modulation.stage(StageIndex::hold).durationInSamples(), 0, @"key %d", key);
+
+    // One timecent more is the shortest hold the range allows (1 ms), with key scaling applied as before.
+    self.sst.setValue(state, State::State::Index::holdVolumeEnvelope, -12'000);
+    volume.configure(state);
+    XCTAssertGreaterThan(volume.stage(StageIndex::hold).durationInSamples(), 0, @"key %d", key);
+  }
+}
+
 @end
