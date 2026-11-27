@@ -406,16 +406,43 @@ private:
   /// Move the envelopes into their release phase.
   void releaseEnvelopes() noexcept;
 
-  /// Mix one rendered sample into the output, panned and sent to the effects with the slice's values.
-  static void mix(Engine::Mixer& mixer, SF2::AUAudioFrameCount index, Float sample,
-                  const SliceControls& controls) noexcept {
-    mixer.add(index, SF2::AUValue(controls.leftPan * sample), SF2::AUValue(controls.rightPan * sample),
-              controls.chorusSend, controls.reverbSend);
+  /// Number of frames rendered per stage in `renderFrames`
+  static constexpr SF2::AUAudioFrameCount blockSize = Engine::Mixer::maxBlockSize;
+
+  /**
+   Render up to `count` samples of this voice into `out`, stopping early if the voice becomes inactive. This is the
+   stateful part of rendering (envelopes, LFOs, sample interpolation and the filter all depend on the previous sample),
+   so it runs one sample at a time.
+
+   @param count the number of samples to render (at most `blockSize`)
+   @param pitchIncrements if not null, the phase increments to use for the first `pitchIncrementCount` samples instead
+   of this voice's own pitch
+   @param pitchIncrementCount the number of valid entries in `pitchIncrements`
+   @param incrementsOut if not null, receives the phase increment used for each sample
+   @param controls the values captured for the current render slice
+   @param out receives the samples
+   @returns the number of samples rendered (less than `count` if the voice stopped)
+   */
+  SF2::AUAudioFrameCount renderBlock(SF2::AUAudioFrameCount count, const Float* pitchIncrements,
+                                     SF2::AUAudioFrameCount pitchIncrementCount, Float* incrementsOut,
+                                     const SliceControls& controls, Float* out) noexcept {
+    SF2::AUAudioFrameCount index = 0;
+    for (; index < count && active_; ++index) {
+      const Float* pitchIncrement = index < pitchIncrementCount ? pitchIncrements + index : nullptr;
+      out[index] = renderSample(pitchIncrement, incrementsOut != nullptr ? incrementsOut + index : nullptr, controls);
+    }
+    return index;
   }
 
   /**
    Render up to `frameCount` samples of this voice and, if given, of a stereo partner that follows this voice's pitch.
    Rendering stops once neither voice is active.
+
+   The frames are processed in blocks of `blockSize`. For each block, each voice first renders its samples one at a time
+   (`renderBlock`), then the optional fade, the pan, the sends and the accumulation into the output buses run as
+   separate loops over the whole block (`Mixer::addBlock`), which the compiler can vectorize. The results are the same
+   as rendering and mixing each sample in turn: the leader's rendering does not depend on the follower, and each output
+   frame still receives the leader's sample before the follower's.
 
    @param follower the stereo partner to render in lockstep, or nullptr
    @param mixer collection of buffers to mix into
@@ -427,22 +454,48 @@ private:
     // the generator-derived values are fixed until the next call.
     auto leaderControls{sliceControls()};
     auto followerControls{follower != nullptr ? follower->sliceControls() : SliceControls{}};
-    for (SF2::AUAudioFrameCount index = 0; index < frameCount; ++index) {
-      bool leaderActive = active_;
-      bool followerActive = follower != nullptr && follower->active_;
-      if (!leaderActive && !followerActive) break;
-      Float gain{fadeOut ? Float(frameCount - index - 1) / Float(frameCount) : Float(1)};
-      Float increment{0_F};
-      if (leaderActive) {
-        mix(mixer, index, renderSample(nullptr, follower != nullptr ? &increment : nullptr, leaderControls) * gain,
-            leaderControls);
+    Float leaderSamples[blockSize];
+    Float followerSamples[blockSize];
+    Float increments[blockSize];
+    for (SF2::AUAudioFrameCount blockStart = 0; blockStart < frameCount; blockStart += blockSize) {
+      auto count = std::min(blockSize, frameCount - blockStart);
+
+      // The leader reports its increments only when there is a follower to use them. A voice that stops part way
+      // stays stopped, so the follower uses the leader's pitch for exactly the frames the leader rendered, and its own
+      // pitch after that.
+      auto leaderCount = renderBlock(count, nullptr, 0, follower != nullptr ? increments : nullptr, leaderControls,
+                                     leaderSamples);
+      auto followerCount = SF2::AUAudioFrameCount(0);
+      if (follower != nullptr) {
+        followerCount = follower->renderBlock(count, increments, leaderCount, nullptr, followerControls,
+                                              followerSamples);
       }
-      if (followerActive) {
-        // If the leader has stopped, the follower carries on with its own pitch.
-        Float sample{follower->renderSample(leaderActive ? &increment : nullptr, nullptr, followerControls)};
-        mix(mixer, index, sample * gain, followerControls);
+
+      if (fadeOut) {
+        applyFade(leaderSamples, leaderCount, blockStart, frameCount);
+        applyFade(followerSamples, followerCount, blockStart, frameCount);
       }
+      if (leaderCount > 0) mix(mixer, blockStart, leaderSamples, leaderCount, leaderControls);
+      if (followerCount > 0) mix(mixer, blockStart, followerSamples, followerCount, followerControls);
+
+      if (leaderCount < count && followerCount < count) break;
     }
+  }
+
+  /// Scale `samples` by the linear fade-out gain of `renderFadeOut`, for frames starting at `blockStart` of `frameCount`.
+  static void applyFade(Float* samples, SF2::AUAudioFrameCount count, SF2::AUAudioFrameCount blockStart,
+                        SF2::AUAudioFrameCount frameCount) noexcept {
+    for (SF2::AUAudioFrameCount index = 0; index < count; ++index) {
+      Float gain{Float(frameCount - (blockStart + index) - 1) / Float(frameCount)};
+      samples[index] *= gain;
+    }
+  }
+
+  /// Mix a block of rendered samples into the output, panned and sent to the effects with the slice's values.
+  static void mix(Engine::Mixer& mixer, SF2::AUAudioFrameCount start, const Float* samples,
+                  SF2::AUAudioFrameCount count, const SliceControls& controls) noexcept {
+    mixer.addBlock(start, samples, count, controls.leftPan, controls.rightPan, controls.chorusSend,
+                   controls.reverbSend);
   }
 
   State::State state_{};
