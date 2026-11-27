@@ -6,6 +6,7 @@
 
 #include <CoreAudioKit/CoreAudioKit.h>
 
+#include "SF2File/Entity/Generator/Definition.hpp"
 #include "SF2File/Entity/Generator/Index.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
 
@@ -52,6 +53,21 @@ public:
    @returns the current value
    */
   AUValue getLiveValue(Index index) const noexcept { return AUValue(liveValues_[index]); }
+
+  /**
+   Obtain the range of values accepted for a generator from the AUParameterTree. This is the generator's range from the
+   spec, except where the engine gives meaning to a value outside it:
+
+   - the delay and attack of the volume and modulation envelopes (SF2.01 8.1.2 #25, #26, #33, #34) may be -32768,
+     which the envelopes take as no time at all instead of the 1 ms of the spec's -12000 lower bound (see
+     `Envelope::Generator`)
+   - initialFilterCutoff (#8) may reach `LowPassFilter::bypassFrequency`, where a filter without resonance does not
+     affect the signal; the spec's 13500 upper bound is just below it
+
+   @param index the index of the generator
+   @returns the range of accepted values
+   */
+  static Entity::Generator::Definition::ValueRange liveValueRange(Index index) noexcept;
 
   /**
    Apply one changed value to the given voice state.

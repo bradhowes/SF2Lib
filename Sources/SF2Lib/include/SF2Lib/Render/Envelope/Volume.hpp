@@ -45,6 +45,9 @@ public:
    */
   Value getNextValue() noexcept { return {Generator::getNextValue()}; }
 
+  /// @returns the amplitude fraction (0 to 1) of the attack curve, valid while `activeIndex()` is the attack stage
+  Float attackAmplitude() const noexcept { return attackProgress(); }
+
   /**
    Calculate the next `count` envelope values, exactly as `count` calls to `getNextValue` would (see
    `Generator::fillBlock`).

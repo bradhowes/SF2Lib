@@ -240,10 +240,12 @@ public:
   Float renderSample(const Float* pitchIncrement, Float* incrementOut) noexcept {
     if (! active_) { return 0_F; }
     auto modEnv{modulatorEnvelope_.getNextValue()};
-    auto volEnv{volumeEnvelope_.getNextValue()};
+    auto volEnv{volumeEnvelope_.getNextValue().val};
+    // Same convention as `Envelope::Volume::fillBlock`: during the attack the voice works with the amplitude fraction.
+    auto volStage{volumeEnvelope_.activeIndex()};
+    if (volStage == Envelope::StageIndex::attack) volEnv = volumeEnvelope_.attackAmplitude();
     GainCache gainCache{};
-    return renderSample(pitchIncrement, incrementOut, sliceControls(),
-                        {modEnv.val, volEnv.val, volumeEnvelope_.activeIndex()}, gainCache);
+    return renderSample(pitchIncrement, incrementOut, sliceControls(), {modEnv.val, volEnv, volStage}, gainCache);
   }
 
 private:
@@ -288,7 +290,11 @@ private:
     return controls;
   }
 
-  /// The envelope values for one sample, and the volume envelope stage after producing it.
+  /**
+   The envelope values for one sample, and the volume envelope stage after producing it. While `volStage` is the attack
+   stage, `volEnv` is the linear amplitude fraction of the attack (see `Envelope::Generator::fillBlock`); otherwise it
+   is the normalized-dB envelope value.
+   */
   struct EnvelopeSample {
     Float modEnv;
     Float volEnv;
@@ -339,10 +345,17 @@ private:
     // `Envelope::volumeEnvelopeToCentibels`), convert it to cB, and then combine it with the modLFO value into an
     // attenuation that is applied to the sample.
     //
+    // The attack is the exception: SF2.01 8.1.2 #34 asks for an attack that is linear in amplitude, and the envelope
+    // supplies that amplitude fraction directly, so it scales the gain as is (no `log10`, no rounding to whole cB).
+    //
     // With no mod LFO to volume, `modLFOValCB` is +/-0 and adding it to the (non-negative) `volEnvCB` changes nothing,
     // so the gain is a function of the volume envelope value alone and can be reused while that value is unchanged.
+    // The cache is not used in the attack, where the value means something else.
     Float gain;
-    if (controls.modLFOToVolume == 0_F && gainCache.valid && gainCache.volEnv == envelopes.volEnv) {
+    if (envelopes.volStage == Envelope::StageIndex::attack) {
+      auto modLFOValCB{modLFO.val * controls.modLFOToVolume};
+      gain = controls.attenuation * DSP::centibelsToAttenuation(modLFOValCB) * envelopes.volEnv;
+    } else if (controls.modLFOToVolume == 0_F && gainCache.valid && gainCache.volEnv == envelopes.volEnv) {
       gain = gainCache.gain;
     } else {
       auto volEnvCB{Envelope::volumeEnvelopeToCentibels(envelopes.volEnv)};

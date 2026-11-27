@@ -31,4 +31,19 @@ static constexpr uint8_t voiceCount = 32;
   }];
 }
 
+- (void)testRender32VoicesInALongAttack {
+  // Every voice stays in a 2 s volume attack (1200 timecents) for the whole second rendered.
+  auto path = std::string(NSTemporaryDirectory().UTF8String) + "SF2LibRenderPerformance.sf2";
+  SF2Builder::minimal().writeTo(path);
+  [self measureBlock:^{
+    auto harness{TestEngineHarness{48000.0}};
+    harness.load(path, 0);
+    harness.setParameter(SF2::Entity::Generator::Index::attackVolumeEnvelope, 1'200);
+    auto mixer{harness.createMixer(double(renderFrames) / 48000.0)};
+    for (uint8_t key = 0; key < voiceCount; ++key) harness.sendNoteOn(uint8_t(40 + key), 127);
+    harness.renderToEnd(mixer);
+    XCTAssertEqual(harness.engine().activeVoiceCount(), size_t(voiceCount));
+  }];
+}
+
 @end

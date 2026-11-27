@@ -41,7 +41,9 @@ struct EnvelopeTestInjector {
 /**
  Run two copies of the same envelope for `total` samples: one with `getNextValue`, the other with `fillBlock` in random
  block sizes from 1 to 64. At `releaseAt` the note is released (or aborted, if `abort`), between two blocks as in the
- engine. The values and the stages must match exactly.
+ engine. The values and the stages must match exactly, except that during the volume envelope's attack `fillBlock`
+ reports the amplitude fraction (`attackAmplitude`). Every value after the attack, including a release that interrupts
+ it, must still match `getNextValue`.
  */
 template <EnvelopeGenerator T>
 static void checkFillBlockMatches(EnvelopeTests* self, T perSample, T blocked, std::mt19937& random, int total,
@@ -68,6 +70,10 @@ static void checkFillBlockMatches(EnvelopeTests* self, T perSample, T blocked, s
     }
     for (int index = 0; index < count; ++index) {
       auto expected = perSample.getNextValue().val;
+      if constexpr (std::is_same_v<T, Volume>) {
+        // During the convex attack `fillBlock` reports the amplitude fraction instead of the shaped value.
+        if (perSample.activeIndex() == StageIndex::attack) expected = perSample.attackAmplitude();
+      }
       if (values[index] != expected) {
         XCTFail(@"%@: sample %d: %.9g != %.9g", label, position + index, values[index], expected);
         return;
@@ -510,6 +516,41 @@ gen.noteReleased();
     XCTAssertTrue(stages[index] == StageIndex::sustain);
   }
   XCTAssertEqual(gen.counter(), counter - 64);
+}
+
+- (void)testFillBlockReportsAttackAsAmplitude {
+  // A 10-sample convex attack: while the envelope is still in the attack, `fillBlock` reports the linear progress
+  // (1/10, 2/10, ...). The sample that ends the attack is the shaped value, which the 3-sample hold then keeps.
+  auto gen = EnvelopeTestInjector::DAHDSR(0, 10, 3, 5, 200, 20);
+  gen.start();
+  Float values[12];
+  StageIndex stages[12];
+  gen.fillBlock(values, stages, 12);
+  for (int index = 0; index < 9; ++index) {
+    XCTAssertTrue(stages[index] == StageIndex::attack, @"sample %d", index);
+    XCTAssertEqualWithAccuracy(values[index], Float(index + 1) / 10_F, 1.0e-6, @"sample %d", index);
+  }
+  for (int index = 9; index < 12; ++index) {
+    XCTAssertTrue(stages[index] == StageIndex::hold, @"sample %d", index);
+    XCTAssertEqual(values[index], gen.value().val, @"sample %d", index);
+  }
+  XCTAssertEqualWithAccuracy(gen.value().val, 1.0, 1.0e-6);
+}
+
+- (void)testReleaseDuringBlockAttackStartsFromShapedLevel {
+  // `fillBlock` does not shape attack samples, so the release must work out the shaped level when it interrupts the
+  // attack: the same level `getNextValue` would have reached, with no jump.
+  auto gen = EnvelopeTestInjector::DAHDSR(0, 100, 0, 5, 200, 50);
+  gen.start();
+  Float values[30];
+  StageIndex stages[30];
+  gen.fillBlock(values, stages, 30);
+  XCTAssertTrue(gen.activeIndex() == StageIndex::attack);
+  auto progress = gen.attackAmplitude();
+  XCTAssertEqualWithAccuracy(progress, 0.3, 1.0e-6);
+  gen.noteReleased();
+  XCTAssertTrue(gen.activeIndex() == StageIndex::release);
+  XCTAssertEqual(gen.value().val, volumeEnvelopeAttackCurve(progress));
 }
 
 @end

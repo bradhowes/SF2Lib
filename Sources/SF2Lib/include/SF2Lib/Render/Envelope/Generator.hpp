@@ -195,6 +195,13 @@ protected:
   /// @returns the current envelope value.
   Float value() const noexcept { return value_; }
 
+  /// @returns the linear progress through the attack stage, from 0 to 1. For the volume envelope this is the amplitude
+  /// fraction that the convex attack curve represents (SF2.01 8.1.2 #34).
+  Float attackProgress() const noexcept { return attackProgress_; }
+
+  /// @returns true if the envelope is in a convex (volume) attack
+  bool isConvexAttack() const noexcept { return convexAttack_ && stageIndex_ == StageIndex::attack; }
+
   /**
    Calculate the next envelope value. This must be called on every sample for proper timing of the stages.
    NOTE: part of render processing chain
@@ -219,16 +226,21 @@ protected:
   }
 
   /**
-   Calculate the next `count` envelope values, exactly as `count` calls to `getNextValue` would, but with the stage
-   bookkeeping done once per run of samples instead of twice per sample. Within a stage the envelope either holds its
-   value (delay, hold, sustain) or adds the same increment each sample (attack, decay, release), so a run that ends
-   before the stage does needs no transition checks: a constant stage becomes a fill, a ramp a tight add loop. The
-   sample that ends a stage, a ramp sample that would go below 0, and convex attack samples go through `getNextValue`
-   itself.
+   Calculate the next `count` envelope values, as `count` calls to `getNextValue` would, but with the stage bookkeeping
+   done once per run of samples instead of twice per sample. Within a stage the envelope either holds its value (delay,
+   hold, sustain) or adds the same increment each sample (attack, decay, release), so a run that ends before the stage
+   does needs no transition checks: a constant stage becomes a fill, a ramp a tight add loop. The sample that ends a
+   stage and a ramp sample that would go below 0 go through `getNextValue` itself.
+
+   The one difference from `getNextValue` is the convex (volume) attack: for a sample after which the envelope is still
+   in the attack stage, the value is the linear attack progress (the amplitude fraction, see `attackProgress`) instead
+   of the shaped value. The voice turns that directly into a gain, which avoids a `log10` per sample here and the
+   rounding to whole centibels in the voice. The shaped value is still worked out once, when the attack ends (see
+   `enterStage`), so later stages start from the same level.
 
    NOTE: part of render processing chain
 
-   @param values receives the envelope values
+   @param values receives the envelope values (the attack progress for convex attack samples, see above)
    @param stages if not null, receives the stage the envelope is in after each value (what `activeIndex` would
    report after the corresponding `getNextValue` call)
    @param count the number of values to generate
@@ -244,11 +256,19 @@ protected:
       }
 
       // With `counter_ >= 2`, the next `counter_ - 1` samples stay in the current stage.
-      if (counter_ >= 2 && !(convexAttack_ && stageIndex_ == StageIndex::attack)) {
+      if (counter_ >= 2) {
         auto run = std::min(size_t(counter_ - 1), count - index);
         auto increment = stages_[stageIndex_].increment();
         size_t done = 0;
-        if (increment == 0_F) {
+        if (isConvexAttack()) {
+          // Same progress steps as `getNextValue`, without shaping each one.
+          auto progress = attackProgress_;
+          for (; done < run; ++done) {
+            progress = std::min<Float>(progress + increment, 1_F);
+            values[index + done] = progress;
+          }
+          attackProgress_ = progress;
+        } else if (increment == 0_F) {
           // `value_ + 0` is `value_`, which is already within [0, 1].
           std::fill(values + index, values + index + run, value_);
           done = run;
@@ -272,6 +292,7 @@ protected:
       }
 
       values[index] = getNextValue();
+      if (isConvexAttack()) values[index] = attackProgress_;
       if (stages != nullptr) stages[index] = stageIndex_;
       ++index;
     }
@@ -292,6 +313,9 @@ private:
    @param next the stage to enter
    */
   void enterStage(StageIndex next) noexcept {
+    // `fillBlock` does not shape the convex attack sample by sample, so settle the shaped value on the way out of the
+    // attack. After `getNextValue` this recomputes the same value it already holds.
+    if (isConvexAttack() && next != StageIndex::attack) value_ = volumeEnvelopeAttackCurve(attackProgress_);
     stageIndex_ = next;
     if (next != StageIndex::idle) {
       counter_ = stages_[stageIndex_].durationInSamples();

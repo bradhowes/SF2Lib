@@ -457,16 +457,16 @@ using namespace SF2::Render::Voice::State;
 
   [self dumpSamples: samples];
   XCTAssertEqualWithAccuracy(0, samples[0], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.005949, samples[1], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.006342, samples[2], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00594534212723, samples[1], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00633953884244, samples[2], self.epsilon);
   XCTAssertEqualWithAccuracy(0, samples[3], self.epsilon);
   XCTAssertEqualWithAccuracy(0, samples[4], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.010493, samples[5], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.008408, samples[6], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.0104875322431, samples[5], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.008404860273, samples[6], self.epsilon);
   XCTAssertEqualWithAccuracy(0, samples[7], self.epsilon);
   XCTAssertEqualWithAccuracy(0, samples[8], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.008480, samples[9], self.epsilon);
-  XCTAssertEqualWithAccuracy(-0.003351, samples[10], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00847498700023, samples[9], self.epsilon);
+  XCTAssertEqualWithAccuracy(-0.00334932375699, samples[10], self.epsilon);
   XCTAssertEqualWithAccuracy(0, samples[11], self.epsilon);
 
   [self playSamples: buffer count: sampleCount];

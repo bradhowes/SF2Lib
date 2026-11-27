@@ -804,3 +804,31 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - The clamp to 1 inside the ramp loop cannot be reached in practice, since the run ends before the stage's last sample. It is kept so the loop matches `getNextValue` regardless.
 - Release `RenderPerformanceTests` (32 voices for 1 s): 39.2 ms before, 30.7 ms after (about 22%). Against the original 41.0 ms, that is about 25%.
 - Left over: replacing the per-sample `log10` in the convex volume attack (this changes output bits during the attack), and the inlining check from the previous entry.
+
+**Follow-up (2026-11-27, branch `simd-voice-blocks`): volume attack without per-sample `log10`. Audio change. `make test-macOS`: 425 tests, 0 failures.**
+- Before, each sample of the convex volume attack (SF2.01 8.1.2 #34) took the linear progress p and shaped it with `log10` (`volumeEnvelopeAttackCurve`). The voice then converted it back to centibels and to a gain through `centibelsToAttenuation`, which rounds to whole centibels. That cost a `log10` per sample and made the attack a staircase of 1 cB steps (up to 0.58% in amplitude).
+- Now:
+  - `Envelope::Generator::fillBlock` reports p itself for samples after which the envelope is still in the attack. The attack is a plain ramp, so it uses the fast run loop; the `isConvexAttack` special case is gone.
+  - The voice multiplies the gain by p in that stage: `attenuation * centibelsToAttenuation(modLFO cB) * p`. That is linear in amplitude, as the spec asks.
+  - The shaped value is computed once, in `enterStage`, when the attack ends (into hold, or into release via `noteReleased`/`noteAborted`). Later stages therefore start from exactly the same level as before.
+  - `getNextValue` is unchanged. The public per-sample `Voice::renderSample()` uses the new `Volume::attackAmplitude()` during the attack, so both render paths agree. `GainCache` is not used in the attack, where the value means something else.
+- Only `VoiceTests/testViolinRenderWithSlowAttackRelease` changed: it samples frames inside a 1.5 s attack. Its hard-coded values were regenerated from `dumpSamples` (by Brad), with differences of about 0.05%. No other hard-coded values changed.
+- New tests:
+  - `VolumeAttackTests/testAttackIsLinearInAmplitude` renders a note with a 2 s attack and with an instant one, with no delay and the filter bypassed. Every frame of the first must be p times the second, to 1e-6 relative. With the old formula in place, 4,798 of the 4,800 frames fail.
+  - `EnvelopeTests/testFillBlockReportsAttackAsAmplitude` and `testReleaseDuringBlockAttackStartsFromShapedLevel`.
+  - `testFillBlockMatchesGetNextValue` now compares attack samples against `attackAmplitude()`.
+- `RenderPerformanceTests/testRender32VoicesInALongAttack` (32 voices, all in a 2 s attack for 1 s), Release: 42.4 ms before, 33.2 ms after (about 22%). The held-note case is unchanged (30.4 / 30.9 ms, within noise).
+- Found while writing the test: live generator values (`LiveGeneratorParameters::setLiveValue`) were clamped to the generator's range. So a live delay or attack of -32768 (the spec's "no time") became -12000 (about 1 ms), and a live `initialFilterCutoff` could not reach the filter bypass above 13500 cents. The new test puts these values in the instrument zone instead. Loosened in the follow-up below.
+- Left over: decay and release are still rounded to whole centibels by `centibelsToAttenuation`. `centibelsToAttenuationInterpolated` would smooth them, which is a separate audio change. The release inlining check also remains open.
+
+**Follow-up (2026-11-27, branch `simd-voice-blocks`): wider live ranges for envelope delay and attack, and filter cutoff. `make test-macOS`: 428 tests, 0 failures.**
+- New `LiveGeneratorParameters::liveValueRange(index)` is the single source of the accepted range for a live (AUParameterTree) generator value. It is the spec range except:
+  - `delayVolEnv`, `attackVolEnv`, `delayModEnv` and `attackModEnv` (#33, #34, #25, #26) go down to -32768, which `Envelope::Generator` already treats as zero time. Values from -32767 to -12001 still mean 1 ms.
+  - `initialFilterCutoff` (#8) goes up to `LowPassFilter::bypassFrequency` (13508), where a filter without resonance is bypassed.
+- Both `setLiveValue` (the clamp) and `Engine::makeGeneratorParameter` (the AUParameter `min`/`max`) use it. A host can therefore send these values, and the engine keeps them.
+- Nothing downstream clamps them again: the envelopes and the filter read `State::modulated` (not `modulatedInRange`), the same path that already handled these values from SF2 files.
+- New `LiveGeneratorRangeTests`:
+  - `testLiveValuesMatchTheSameValuesInTheFile` (end to end): no delay, instant attack and bypassed filter set live must render exactly like the same generators in the instrument zone.
+  - `testLiveValueRanges`: the new bounds, and unchanged ones such as pan and the LFO delays.
+  - `testParameterTreeUsesTheLiveRanges`: every generator parameter's `minValue` and `maxValue` match `liveValueRange`.
+- Not changed: the LFO delays (#21, #23), whose code has no special meaning for -32768. A modulator can still push the cutoff above 13500 through `modulated`, as before.

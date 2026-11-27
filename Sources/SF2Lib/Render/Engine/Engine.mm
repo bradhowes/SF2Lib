@@ -1193,12 +1193,15 @@ Engine::makeGeneratorParameter(Entity::Generator::Index index) noexcept
 {
   const auto& definition = Entity::Generator::Definition::definition(index);
   NSString* name = [NSString stringWithUTF8String:definition.name().data()];
+  // The same range that `LiveGeneratorParameters::setLiveValue` accepts, which is wider than the spec's for a few
+  // generators.
+  auto range = LiveGeneratorParameters::liveValueRange(index);
   auto flags = kAudioUnitParameterFlag_IsReadable | kAudioUnitParameterFlag_IsWritable;
   return [AUParameterTree createParameterWithIdentifier:name
                                                    name:name
                                                 address:AUParameterAddress(DSPHeaders::valueOf(index))
-                                                    min:AUValue(definition.valueRange().min)
-                                                    max:AUValue(definition.valueRange().max)
+                                                    min:AUValue(range.min)
+                                                    max:AUValue(range.max)
                                                    unit:AudioUnitParameterUnit::kAudioUnitParameterUnit_Generic
                                                unitName:nullptr
                                                   flags:flags
