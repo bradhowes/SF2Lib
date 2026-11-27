@@ -1,6 +1,5 @@
 // Copyright © 2022, 2025 Brad Howes. All rights reserved.
 
-#include "SF2File/IO/NormalizedSampleSource.hpp"
 #include "SF2Lib/Render/Voice/State/Config.hpp"
 #include "SF2Lib/Render/Zone/NormalizedSampleSpan.hpp"
 #include "SF2Lib/Render/Zone/Preset.hpp"

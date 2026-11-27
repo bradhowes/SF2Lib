@@ -90,7 +90,7 @@ public:
    global zones that are not the first zone.
 
    @param notGlobalIfPresent generator index that if present at end of gen collection means the zone is not global. For
-   a `PresetZone`, this is an index to an `Instrument`. For an `InstrumentZone`, it is an index to a `SampleSource`.
+   a `PresetZone`, this is an index to an `Instrument`. For an `InstrumentZone`, it is an index to a `SampleHeader`.
    @param gens collection of generators that defines the zone
    @param mods collection of modulators that defines the zone
    @param values additional arguments for the Zone construction

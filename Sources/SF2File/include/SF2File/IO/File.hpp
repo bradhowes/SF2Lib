@@ -14,7 +14,6 @@
 #include "SF2File/Entity/Version.hpp"
 
 #include "SF2File/IO/ChunkItems.hpp"
-#include "SF2File/IO/SampleSourceCollection.hpp"
 #include "SF2File/IO/UniqueFd.hpp"
 
 /**

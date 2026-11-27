@@ -761,3 +761,8 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
 - `Pitch::configure` now calculates the sample-rate correction as `1200 * log2(sourceRate / renderRate)`. It previously converted each rate to cents, rounded each independently and subtracted the integers.
 - New `DSPTests` cover fractional accuracy against `exp2`, continuity across a cent boundary and both clamp endpoints. New `PitchTests` cover a quarter-cent vibrato contribution, monotonic positive/negative sub-cent modulation and the exact 48 kHz / 44.1 kHz rate ratio.
 - The corrected phase increments changed 220 hard-coded sample values in `EngineTests` and `VoiceTests`. These are deterministic golden renders; their behavioural and formula-based pitch coverage is separate. The first full run exposed only those baselines plus an assertion-type issue in the new DSP test; after updating them, the complete 448-test Xcode run passed.
+
+**Follow-up (2026-11-27): remove dead sample-source code. `make test-macOS`: 411 tests, 0 failures.**
+- Deleted `IO::SampleSourceCollection` (`SampleSourceCollection.hpp` and the empty `Entity/SampleSourceCollection.mm`) and `IO::NormalizedSampleSource`. Nothing called `SampleSourceCollection::build()` or constructed either class. Samples are loaded per active preset by `Render::Preset::loadSamples`, and each instrument zone holds a `Zone::NormalizedSampleSpan` into that buffer.
+- Removed the unused includes from `IO/File.hpp` and `Voice/State/Config.mm`, and the commented-out `testSamples` block in `SFFileTestsObjC.mm`. Updated the comments in `Zone/Instrument.hpp` and `Zone/Collection.hpp` that referred to the old classes.
+- No behaviour change, so no new tests.

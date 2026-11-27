@@ -13,7 +13,7 @@ namespace SF2::Render::Zone {
 
 /**
  A specialization of a Zone for an Instrument. Non-global instrument zones must have a sample header that defines where the
- raw samples are in the SF2 file. When a preset is loaded, the instrument will acquire a `NormalizedSampleSource` entry that
+ raw samples are in the SF2 file. When a preset is loaded, the instrument will acquire a `NormalizedSampleSpan` that
  holds the actual samples to use for rendering.
  */
 class Instrument : public Zone {
