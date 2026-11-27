@@ -45,6 +45,15 @@ public:
    */
   Value getNextValue() noexcept { return {Generator::getNextValue()}; }
 
+  /**
+   Calculate the next `count` envelope values, exactly as `count` calls to `getNextValue` would (see
+   `Generator::fillBlock`).
+
+   @param values receives the envelope values
+   @param count the number of values to generate
+   */
+  void fillBlock(Float* values, size_t count) noexcept { Generator::fillBlock(values, nullptr, count); }
+
 private:
   Modulation(Float sampleRate, Float delay, Float attack, Float hold, Float decay, int sustain, Float release) noexcept :
   Generator(sampleRate, "ModGen", delay, attack, hold, decay, sustain, release) {}

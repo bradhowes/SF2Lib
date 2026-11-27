@@ -194,8 +194,11 @@ public:
   LoopingMode loopingMode() const noexcept;
 
   /// @returns true if the voice can enter a loop if it is available
-  bool canLoop() const noexcept {
-    return ((loopingMode_ == LoopingMode::activeEnvelope && volumeEnvelope_.isActive()) ||
+  bool canLoop() const noexcept { return canLoop(volumeEnvelope_.activeIndex()); }
+
+  /// @returns true if the voice can enter a loop when the volume envelope is in the given stage
+  bool canLoop(Envelope::StageIndex volStage) const noexcept {
+    return ((loopingMode_ == LoopingMode::activeEnvelope && volStage != Envelope::StageIndex::idle) ||
             (loopingMode_ == LoopingMode::duringKeyPress && !released_));
   }
 
@@ -236,7 +239,11 @@ public:
    */
   Float renderSample(const Float* pitchIncrement, Float* incrementOut) noexcept {
     if (! active_) { return 0_F; }
-    return renderSample(pitchIncrement, incrementOut, sliceControls());
+    auto modEnv{modulatorEnvelope_.getNextValue()};
+    auto volEnv{volumeEnvelope_.getNextValue()};
+    GainCache gainCache{};
+    return renderSample(pitchIncrement, incrementOut, sliceControls(),
+                        {modEnv.val, volEnv.val, volumeEnvelope_.activeIndex()}, gainCache);
   }
 
 private:
@@ -281,16 +288,36 @@ private:
     return controls;
   }
 
-  /// Render the next sample using values captured for the current render slice.
-  Float renderSample(const Float* pitchIncrement, Float* incrementOut, const SliceControls& controls) noexcept {
-    if (! active_) { return 0_F; }
+  /// The envelope values for one sample, and the volume envelope stage after producing it.
+  struct EnvelopeSample {
+    Float modEnv;
+    Float volEnv;
+    Envelope::StageIndex volStage;
+  };
+
+  /**
+   The last gain computed from the volume envelope. When the mod LFO does not affect the volume, the gain depends only
+   on the volume envelope value, which is unchanged for long stretches (delay, hold, sustain), so the conversion from
+   centibels can be skipped while it stays the same.
+   */
+  struct GainCache {
+    bool valid{false};
+    Float volEnv{0_F};
+    Float gain{0_F};
+  };
+
+  /**
+   Render the next sample using values captured for the current render slice and envelope values already advanced for
+   this sample. The caller must check `active_` first.
+   */
+  Float renderSample(const Float* pitchIncrement, Float* incrementOut, const SliceControls& controls,
+                     const EnvelopeSample& envelopes, GainCache& gainCache) noexcept {
     ++samplesRendered_;
 
-    // Capture the current state of the modulators and envelopes and advance them to the next sample.
+    // Capture the current state of the LFOs and advance them to the next sample.
     auto modLFO{modulatorLFO_.getNextValue()};
     auto vibLFO{vibratoLFO_.getNextValue()};
-    auto modEnv{modulatorEnvelope_.getNextValue()};
-    auto volEnv{volumeEnvelope_.getNextValue()};
+    Envelope::Modulation::Value modEnv{envelopes.modEnv};
 
     // Calculate the pitch to render. This is done even while the volume envelope is in its delay stage, so that a
     // stereo partner always has an increment to follow.
@@ -299,10 +326,10 @@ private:
                    : Sample::Pitch::phaseIncrement(controls.pitch, modLFO, vibLFO, modEnv)};
     if (incrementOut != nullptr) *incrementOut = increment;
 
-    if (volumeEnvelope_.isDelayed()) return 0_F;
+    if (envelopes.volStage == Envelope::StageIndex::delay) return 0_F;
 
     // Generate a new sample.
-    auto sample{sampleGenerator_.generate(increment, canLoop())};
+    auto sample{sampleGenerator_.generate(increment, canLoop(envelopes.volStage))};
 
     // Calculate gain / attenuation to apply to sample. Here we are deviating from FluidSynth: it treats the
     // attack stage of the volume envelope as special and just a linear ramp from 0.0 - 1.0. The other stages are
@@ -311,9 +338,18 @@ private:
     // We instead always treat the envelope value as a normalized dB attenuation (see
     // `Envelope::volumeEnvelopeToCentibels`), convert it to cB, and then combine it with the modLFO value into an
     // attenuation that is applied to the sample.
-    auto volEnvCB{Envelope::volumeEnvelopeToCentibels(volEnv.val)};
-    auto modLFOValCB{modLFO.val * controls.modLFOToVolume};
-    auto gain{controls.attenuation * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB)};
+    //
+    // With no mod LFO to volume, `modLFOValCB` is +/-0 and adding it to the (non-negative) `volEnvCB` changes nothing,
+    // so the gain is a function of the volume envelope value alone and can be reused while that value is unchanged.
+    Float gain;
+    if (controls.modLFOToVolume == 0_F && gainCache.valid && gainCache.volEnv == envelopes.volEnv) {
+      gain = gainCache.gain;
+    } else {
+      auto volEnvCB{Envelope::volumeEnvelopeToCentibels(envelopes.volEnv)};
+      auto modLFOValCB{modLFO.val * controls.modLFOToVolume};
+      gain = controls.attenuation * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB);
+      if (controls.modLFOToVolume == 0_F) gainCache = {true, envelopes.volEnv, gain};
+    }
 
     // Update the low-pass filter parameters every `LowPassFilter::updateInterval` samples. Only the frequency can be
     // affected by the mod LFO and mod envelope, and both are in cents so they add to the absolute-cents cutoff
@@ -327,8 +363,8 @@ private:
     auto filtered{filter_.transform(sample * gain)};
 
     if (!sampleGenerator_.isActive() ||
-        !volumeEnvelope_.isActive() ||
-        (volumeEnvelope_.isRelease() && gain < 0.0001)) {
+        envelopes.volStage == Envelope::StageIndex::idle ||
+        (envelopes.volStage == Envelope::StageIndex::release && gain < 0.0001)) {
       stop();
     }
 
@@ -426,10 +462,22 @@ private:
   SF2::AUAudioFrameCount renderBlock(SF2::AUAudioFrameCount count, const Float* pitchIncrements,
                                      SF2::AUAudioFrameCount pitchIncrementCount, Float* incrementsOut,
                                      const SliceControls& controls, Float* out) noexcept {
+    if (!active_) return 0;
+
+    // Advance both envelopes for the whole block first. If the voice stops part way, the values past that point are
+    // unused, and the envelopes are configured afresh before the voice plays again.
+    Float modEnv[blockSize];
+    Float volEnv[blockSize];
+    Envelope::StageIndex volStages[blockSize];
+    modulatorEnvelope_.fillBlock(modEnv, count);
+    volumeEnvelope_.fillBlock(volEnv, volStages, count);
+
+    GainCache gainCache{};
     SF2::AUAudioFrameCount index = 0;
     for (; index < count && active_; ++index) {
       const Float* pitchIncrement = index < pitchIncrementCount ? pitchIncrements + index : nullptr;
-      out[index] = renderSample(pitchIncrement, incrementsOut != nullptr ? incrementsOut + index : nullptr, controls);
+      out[index] = renderSample(pitchIncrement, incrementsOut != nullptr ? incrementsOut + index : nullptr, controls,
+                                {modEnv[index], volEnv[index], volStages[index]}, gainCache);
     }
     return index;
   }

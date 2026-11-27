@@ -1,5 +1,7 @@
 // Copyright © 2020 Brad Howes. All rights reserved.
 
+#include <random>
+
 #include <XCTest/XCTest.h>
 
 #include "SampleBasedContexts.hpp"
@@ -35,6 +37,54 @@ struct EnvelopeTestInjector {
 
 @interface EnvelopeTests : SamplePlayingTestCase
 @end
+
+/**
+ Run two copies of the same envelope for `total` samples: one with `getNextValue`, the other with `fillBlock` in random
+ block sizes from 1 to 64. At `releaseAt` the note is released (or aborted, if `abort`), between two blocks as in the
+ engine. The values and the stages must match exactly.
+ */
+template <EnvelopeGenerator T>
+static void checkFillBlockMatches(EnvelopeTests* self, T perSample, T blocked, std::mt19937& random, int total,
+                                  int releaseAt, bool abort, NSString* label) {
+  std::uniform_int_distribution<int> blockSizes(1, 64);
+  perSample.start();
+  blocked.start();
+  int position = 0;
+  bool released = false;
+  while (position < total) {
+    if (!released && position == releaseAt) {
+      if (abort) { perSample.noteAborted(); blocked.noteAborted(); }
+      else { perSample.noteReleased(); blocked.noteReleased(); }
+      released = true;
+    }
+    int count = std::min(blockSizes(random), total - position);
+    if (!released && releaseAt < position + count) count = releaseAt - position;
+    Float values[64];
+    StageIndex stages[64];
+    if constexpr (std::is_same_v<T, Volume>) {
+      blocked.fillBlock(values, stages, size_t(count));
+    } else {
+      blocked.fillBlock(values, size_t(count));
+    }
+    for (int index = 0; index < count; ++index) {
+      auto expected = perSample.getNextValue().val;
+      if (values[index] != expected) {
+        XCTFail(@"%@: sample %d: %.9g != %.9g", label, position + index, values[index], expected);
+        return;
+      }
+      if constexpr (std::is_same_v<T, Volume>) {
+        if (stages[index] != perSample.activeIndex()) {
+          XCTFail(@"%@: sample %d: stage %zu != %zu", label, position + index, size_t(stages[index]),
+                  size_t(perSample.activeIndex()));
+          return;
+        }
+      }
+    }
+    position += count;
+    XCTAssertTrue(blocked.activeIndex() == perSample.activeIndex(), @"%@", label);
+    XCTAssertEqual(blocked.counter(), perSample.counter(), @"%@", label);
+  }
+}
 
 /**
  Configure `gen` from a voice state (the production path), with a 2 s release, and check `noteAborted` (exclusiveClass,
@@ -413,6 +463,53 @@ gen.noteReleased();
   gen.configure(s4);
   duration = gen.stage(StageIndex::hold).durationInSamples();
   XCTAssertEqualWithAccuracy(960, duration, 0.000001);
+}
+
+- (void)testFillBlockMatchesGetNextValue {
+  // `fillBlock` (render path) must give exactly what per-sample `getNextValue` gives, for both envelope kinds, across
+  // zero-length and long stages, releases and aborts at any point (including before the attack ends), ramps that
+  // overshoot 1 or go below 0, and the idle tail.
+  std::mt19937 random{20261127};
+  std::uniform_int_distribution<int> shortStage(0, 6);
+  std::uniform_int_distribution<int> longStage(0, 90);
+  std::uniform_int_distribution<int> sustainLevel(0, 1000);
+  std::uniform_int_distribution<int> releasePoint(0, 300);
+  for (int trial = 0; trial < 400; ++trial) {
+    Float delay = Float(shortStage(random));
+    Float attack = Float(longStage(random));
+    Float hold = Float(shortStage(random));
+    Float decay = Float(longStage(random));
+    int sustain = sustainLevel(random);
+    Float release = Float(longStage(random));
+    int releaseAt = releasePoint(random);
+    bool abort = (trial % 3) == 0;
+    auto label = [NSString stringWithFormat:@"trial %d (%g %g %g %g %d %g, release at %d%@)", trial, delay, attack,
+                  hold, decay, sustain, release, releaseAt, abort ? @", aborted" : @""];
+    checkFillBlockMatches(self, EnvelopeTestInjector::DAHDSR(delay, attack, hold, decay, sustain, release),
+                          EnvelopeTestInjector::DAHDSR(delay, attack, hold, decay, sustain, release), random, 500,
+                          releaseAt, abort, [@"volume " stringByAppendingString:label]);
+    checkFillBlockMatches(self, EnvelopeTestInjector::modDAHDSR(delay, attack, hold, decay, sustain, release),
+                          EnvelopeTestInjector::modDAHDSR(delay, attack, hold, decay, sustain, release), random, 500,
+                          releaseAt, abort, [@"modulation " stringByAppendingString:label]);
+  }
+}
+
+- (void)testFillBlockHoldsSustainWithoutTransitions {
+  // The common case for a held note: a whole block in sustain is one fill, and the counter moves on by the block size.
+  auto gen = EnvelopeTestInjector::DAHDSR(0, 1, 0, 1, 200, 10);
+  gen.start();
+  for (int index = 0; index < 4; ++index) gen.getNextValue();
+  XCTAssertTrue(gen.activeIndex() == StageIndex::sustain);
+  auto counter = gen.counter();
+  auto level = gen.value().val;
+  Float values[64];
+  StageIndex stages[64];
+  gen.fillBlock(values, stages, 64);
+  for (int index = 0; index < 64; ++index) {
+    XCTAssertEqual(values[index], level);
+    XCTAssertTrue(stages[index] == StageIndex::sustain);
+  }
+  XCTAssertEqual(gen.counter(), counter - 64);
 }
 
 @end

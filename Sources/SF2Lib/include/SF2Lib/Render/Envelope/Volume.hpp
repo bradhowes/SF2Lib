@@ -45,6 +45,18 @@ public:
    */
   Value getNextValue() noexcept { return {Generator::getNextValue()}; }
 
+  /**
+   Calculate the next `count` envelope values, exactly as `count` calls to `getNextValue` would (see
+   `Generator::fillBlock`).
+
+   @param values receives the envelope values
+   @param stages receives the stage the envelope is in after each value
+   @param count the number of values to generate
+   */
+  void fillBlock(Float* values, StageIndex* stages, size_t count) noexcept {
+    Generator::fillBlock(values, stages, count);
+  }
+
 private:
   Volume(Float sampleRate, Float delay, Float attack, Float hold, Float decay, int sustain, Float release) noexcept :
   Generator(sampleRate, "VolGen", delay, attack, hold, decay, sustain, release) { enableConvexAttack(); }

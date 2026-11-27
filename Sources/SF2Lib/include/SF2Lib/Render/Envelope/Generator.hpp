@@ -218,6 +218,65 @@ protected:
     return value_;
   }
 
+  /**
+   Calculate the next `count` envelope values, exactly as `count` calls to `getNextValue` would, but with the stage
+   bookkeeping done once per run of samples instead of twice per sample. Within a stage the envelope either holds its
+   value (delay, hold, sustain) or adds the same increment each sample (attack, decay, release), so a run that ends
+   before the stage does needs no transition checks: a constant stage becomes a fill, a ramp a tight add loop. The
+   sample that ends a stage, a ramp sample that would go below 0, and convex attack samples go through `getNextValue`
+   itself.
+
+   NOTE: part of render processing chain
+
+   @param values receives the envelope values
+   @param stages if not null, receives the stage the envelope is in after each value (what `activeIndex` would
+   report after the corresponding `getNextValue` call)
+   @param count the number of values to generate
+   */
+  void fillBlock(Float* values, StageIndex* stages, size_t count) noexcept {
+    size_t index = 0;
+    while (index < count) {
+      if (stageIndex_ == StageIndex::idle && counter_ == 0) {
+        // `getNextValue` returns 0 from here on.
+        std::fill(values + index, values + count, 0_F);
+        if (stages != nullptr) std::fill(stages + index, stages + count, StageIndex::idle);
+        return;
+      }
+
+      // With `counter_ >= 2`, the next `counter_ - 1` samples stay in the current stage.
+      if (counter_ >= 2 && !(convexAttack_ && stageIndex_ == StageIndex::attack)) {
+        auto run = std::min(size_t(counter_ - 1), count - index);
+        auto increment = stages_[stageIndex_].increment();
+        size_t done = 0;
+        if (increment == 0_F) {
+          // `value_ + 0` is `value_`, which is already within [0, 1].
+          std::fill(values + index, values + index + run, value_);
+          done = run;
+        } else {
+          auto value = value_;
+          for (; done < run; ++done) {
+            Float next = value + increment;
+            if (next < 0_F) break;  // `getNextValue` stops the envelope here
+            // The run ends before the stage's last sample, so a linear attack should not reach 1 here; the clamp keeps
+            // the loop identical to `getNextValue` regardless.
+            if (next > 1_F) next = 1_F;
+            value = next;
+            values[index + done] = value;
+          }
+          value_ = value;
+        }
+        if (stages != nullptr) std::fill(stages + index, stages + index + done, stageIndex_);
+        counter_ -= int(done);
+        index += done;
+        if (done == run) continue;
+      }
+
+      values[index] = getNextValue();
+      if (stages != nullptr) stages[index] = stageIndex_;
+      ++index;
+    }
+  }
+
   void configureVolumeEnvelope(const State& state) noexcept;
 
   /// Shape the attack with `volumeEnvelopeAttackCurve` (volume envelope only). The modulation envelope keeps a linear

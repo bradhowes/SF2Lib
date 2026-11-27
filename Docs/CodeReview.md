@@ -789,3 +789,18 @@ The unit coverage of individual classes is good: Bounds, envelopes, LFO, modulat
   - Several trivial accessors (`Pitch::Controls::isConstant`, `Bounds::startLoopPos`, `std::trunc`) show up as separate frames in the release profile, so it is worth checking the release optimisation and inlining settings.
   - §6 item 3 is stale: `Sample::Generator::generate` calls `cubic4thOrderInterpolate` directly, and there is no longer a member-function pointer.
   - `make test-iOS` was not run.
+
+**Follow-up (2026-11-27, branch `simd-voice-blocks`): block envelopes and cached gain. `make test-macOS`: 421 tests, 0 failures.**
+- `Envelope::Generator::fillBlock`, used through `Volume::fillBlock` and `Modulation::fillBlock`, produces a block of values exactly as repeated `getNextValue` calls would. Stage bookkeeping happens once per run of samples instead of twice per sample (`checkForNextStage` before and after each step).
+  - While the stage counter is at least 2, the next `counter - 1` samples cannot change stage. A constant stage (delay, hold, sustain) becomes a fill. A ramp (decay, release, linear mod-envelope attack) becomes a tight `value + increment` loop, adding the same increment in the same order.
+  - The sample that ends a stage, a ramp step that would go below 0 (where `getNextValue` stops the envelope), and convex volume-attack samples, which still use `log10`, all go through `getNextValue`. An idle envelope fills with 0.
+  - The volume envelope also reports its stage after each value, which the voice needs.
+- `Voice::renderBlock` fills both envelopes for the block, then renders each sample with those values. Delay, looping (`canLoop(stage)`), idle and release checks now use the per-sample stage instead of querying the envelope. Releases only arrive between slices, so within a block the stages change only when a counter runs out, exactly as before. The public per-sample `renderSample()` still uses `getNextValue`.
+- Gain cache: when `modulatorLFOToVolume` is 0, the mod LFO term is +/-0 and adding it to the non-negative `volEnvCB` changes nothing. The gain is then a function of the volume envelope value alone, so `Voice::GainCache` reuses it while that value is unchanged. This skips `volumeEnvelopeToCentibels` and `centibelsToAttenuation` for the whole delay, hold and sustain stages.
+- The output is bit-identical: all hard-coded sample tests pass unchanged.
+- New `EnvelopeTests`:
+  - `testFillBlockMatchesGetNextValue` runs 400 random envelopes (zero-length and long stages, release or abort at any point, including during the attack) of both kinds. It compares `fillBlock` in random block sizes against `getNextValue`, sample for sample: value, stage and counter. Removing the below-zero stop from the ramp loop makes it fail.
+  - `testFillBlockHoldsSustainWithoutTransitions` checks a whole sustain block.
+- The clamp to 1 inside the ramp loop cannot be reached in practice, since the run ends before the stage's last sample. It is kept so the loop matches `getNextValue` regardless.
+- Release `RenderPerformanceTests` (32 voices for 1 s): 39.2 ms before, 30.7 ms after (about 22%). Against the original 41.0 ms, that is about 25%.
+- Left over: replacing the per-sample `log10` in the convex volume attack (this changes output bits during the attack), and the inlining check from the previous entry.
