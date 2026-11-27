@@ -7,7 +7,7 @@
 #include "SF2File/Entity/SampleHeader.hpp"
 #include "SF2File/IO/ChunkItems.hpp"
 #include "SF2Lib/Render/Zone/Zone.hpp"
-#include "SF2Lib/Render/Zone/NormalizedSampleSpan.hpp"
+#include "SF2Lib/Render/Zone/SampleSpan.hpp"
 
 namespace SF2::Render::Zone {
 
@@ -38,7 +38,7 @@ public:
 
   /// @returns the sample buffer registered to this zone, or nullptr if there is none (a global zone, or samples not
   /// loaded). Does not throw: it is reached from the render thread through `Config::samples()`.
-  std::shared_ptr<NormalizedSampleSpan> samples() const noexcept { return samples_; }
+  std::shared_ptr<SampleSpan> samples() const noexcept { return samples_; }
 
   /**
    Apply the instrument zone to the given voice state. Sets the nominal value of the generators in the zone.
@@ -52,7 +52,7 @@ public:
 
    @param samples container holding normalized floating-point samples.
    */
-  void setSamples(std::shared_ptr<NormalizedSampleSpan>&& samples) noexcept { samples_ = samples; }
+  void setSamples(std::shared_ptr<SampleSpan>&& samples) noexcept { samples_ = samples; }
 
   /**
    Stop using any previously-installed `NormalizedSampleSpan` value.
@@ -62,7 +62,7 @@ public:
 private:
   const Entity::SampleHeader* sampleHeader_;
   size_t sampleIndex_;
-  std::shared_ptr<NormalizedSampleSpan> samples_{};
+  std::shared_ptr<SampleSpan> samples_{};
   inline static const os_log_t log_{Log::create("Zone::Instrument")};
 };
 

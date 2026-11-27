@@ -46,7 +46,7 @@ bool
 Preset::loadSamples(const IO::File &file) noexcept {
   // 32K seems to be a good value to use for speed.
   static constexpr size_t batchSampleCount = 32 * 1024;
-  static constexpr size_t padding = Zone::NormalizedSampleSpan::sizePaddingAfterEnd;
+  static constexpr size_t padding = Zone::SampleSpan::sizePaddingAfterEnd;
 
   os_log_info(log_, "loadSamples - %s", configuration().name().c_str());
 
@@ -152,7 +152,7 @@ Preset::loadSamples(const IO::File &file) noexcept {
         return value < run.fileStart;
       }));
       auto firstIndex = run->bufferStart + (start - run->fileStart);
-      instrumentZone.setSamples(std::make_shared<Zone::NormalizedSampleSpan>(samples_, firstIndex, *sampleHeader));
+      instrumentZone.setSamples(std::make_shared<Zone::SampleSpan>(samples_, firstIndex, *sampleHeader));
     }
   }
 

@@ -10,7 +10,7 @@
 namespace SF2::Entity { class SampleHeader; }
 
 namespace SF2::Render::Zone {
-class NormalizedSampleSpan;
+class SampleSpan;
 class Preset;
 }
 
@@ -39,7 +39,7 @@ public:
          const Zone::Instrument* globalInstrument, int eventKey, int eventVelocity) noexcept;
 
   /// @returns the buffer of audio samples to use for rendering
-  std::shared_ptr<Zone::NormalizedSampleSpan> samples() const noexcept { return instrument_.samples(); }
+  std::shared_ptr<Zone::SampleSpan> samples() const noexcept { return instrument_.samples(); }
 
   /// @returns original MIDI key that triggered the voice
   int eventKey() const noexcept { return eventKey_; }

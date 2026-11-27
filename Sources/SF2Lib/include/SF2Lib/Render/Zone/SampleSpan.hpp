@@ -13,9 +13,11 @@
 namespace SF2::Render::Zone {
 
 /**
- Contains the span of native 16-bit samples that pertain to a specific MIDI key and velocity mapping.
+ Contains the span of native 16-bit samples that pertain to a specific MIDI key and velocity mapping. It does not hold the samples
+ itself, but just start and end references created from an Entity::SampleHeader and a `SampleVector` reference which must remain
+ valid for the lifetime of a SampleSpan instance.
  */
-class NormalizedSampleSpan {
+class SampleSpan {
 public:
   static constexpr Float normalizationScale = 1.0_F / Float(1 << 15);
   static constexpr size_t sizePaddingAfterEnd = 46; // SF2 spec 7.10
@@ -28,7 +30,7 @@ public:
    @param firstIndex the index in `samples` of the header's first sample
    @param header defines the samples to use: `sampleSize()` samples plus `sizePaddingAfterEnd` padding samples
    */
-  NormalizedSampleSpan(const SampleVector& samples, size_t firstIndex, const Entity::SampleHeader& header) noexcept :
+  SampleSpan(const SampleVector& samples, size_t firstIndex, const Entity::SampleHeader& header) noexcept :
   header_{header},
   span_{
     std::ranges::next(samples.begin(), long(firstIndex), samples.end()),

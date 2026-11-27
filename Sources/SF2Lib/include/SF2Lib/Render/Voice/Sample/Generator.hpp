@@ -13,7 +13,7 @@
 #include "SF2Lib/Render/Voice/Sample/Index.hpp"
 #include "SF2Lib/Render/Voice/Sample/Pitch.hpp"
 #include "SF2Lib/Render/Voice/State/State.hpp"
-#include "SF2Lib/Render/Zone/NormalizedSampleSpan.hpp"
+#include "SF2Lib/Render/Zone/SampleSpan.hpp"
 
 namespace SF2::Render::Voice::Sample {
 
@@ -45,7 +45,7 @@ public:
 
    @param samples the samples to use for rendering
    */
-  void configure(std::shared_ptr<Zone::NormalizedSampleSpan>&& samples) noexcept { samples_ = samples; }
+  void configure(std::shared_ptr<Zone::SampleSpan>&& samples) noexcept { samples_ = samples; }
 
   /**
    Begin rendering samples from the generator. The sample bounds are calculated here rather than in `configure` so that
@@ -102,7 +102,7 @@ private:
     auto s2 = sample(whole, canLoop); ++whole;
     auto s3 = sample(whole, canLoop);
     return DSPHeaders::DSP::Interpolation::cubic4thOrder(partial, s0, s1, s2, s3) *
-           Zone::NormalizedSampleSpan::normalizationScale;
+           Zone::SampleSpan::normalizationScale;
   }
 
   /**
@@ -133,7 +133,7 @@ private:
 
   Bounds bounds_{};
   Index index_{};
-  std::shared_ptr<Zone::NormalizedSampleSpan> samples_{};
+  std::shared_ptr<Zone::SampleSpan> samples_{};
 };
 
 } // namespace SF2::Render::Sample

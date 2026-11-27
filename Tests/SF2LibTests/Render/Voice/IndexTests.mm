@@ -7,7 +7,7 @@
 #include "SF2Lib/Render/Voice/Sample/Bounds.hpp"
 #include "SF2Lib/Render/Voice/Sample/Generator.hpp"
 #include "SF2Lib/Render/Voice/Sample/Index.hpp"
-#include "SF2Lib/Render/Zone/NormalizedSampleSpan.hpp"
+#include "SF2Lib/Render/Zone/SampleSpan.hpp"
 
 using namespace SF2;
 using namespace SF2::Entity;
@@ -131,11 +131,11 @@ static void checkLoopingAgainstReference(Float increment, int steps)
 {
   const size_t startLoop = 16, endLoop = 32, end = 64;
   const size_t loopSize = endLoop - startLoop;
-  SampleVector values(end + SF2::Render::Zone::NormalizedSampleSpan::sizePaddingAfterEnd + 1);
+  SampleVector values(end + SF2::Render::Zone::SampleSpan::sizePaddingAfterEnd + 1);
   for (size_t i = 0; i < values.size(); ++i) values[i] = int16_t(i * 100);
 
   SampleHeader header{0, uint32_t(end), uint32_t(startLoop), uint32_t(endLoop), 48'000, 69, 0};
-  auto span = std::make_shared<SF2::Render::Zone::NormalizedSampleSpan>(values, 0, header);
+  auto span = std::make_shared<SF2::Render::Zone::SampleSpan>(values, 0, header);
   State::State state(48'000.0);
   Sample::Generator generator;
   generator.configure(std::move(span));
@@ -153,7 +153,7 @@ static void checkLoopingAgainstReference(Float increment, int steps)
   for (int step = 0; step < steps; ++step) {
     Float expected = DSPHeaders::DSP::Interpolation::cubic4thOrder(partial, before(whole), sampleAt(whole),
                                                                    sampleAt(whole + 1), sampleAt(whole + 2)) *
-                     SF2::Render::Zone::NormalizedSampleSpan::normalizationScale;
+                     SF2::Render::Zone::SampleSpan::normalizationScale;
     Float actual = generator.generate(increment, true);
     XCTAssertEqualWithAccuracy(actual, expected, 1.0e-6, @"increment %f step %d whole %zu", increment, step, whole);
     XCTAssertTrue(generator.isActive());
@@ -200,10 +200,10 @@ static void checkLoopingAgainstReference(Float increment, int steps)
     generator.configure(config.samples());
     generator.start(state);
     XCTAssertEqual(generator.generate(1_F, false),
-                   Float((*span)[size_t(offset)]) * SF2::Render::Zone::NormalizedSampleSpan::normalizationScale,
+                   Float((*span)[size_t(offset)]) * SF2::Render::Zone::SampleSpan::normalizationScale,
                    @"offset %d", offset);
     XCTAssertEqual(generator.generate(1_F, false),
-                   Float((*span)[size_t(offset + 1)]) * SF2::Render::Zone::NormalizedSampleSpan::normalizationScale,
+                   Float((*span)[size_t(offset + 1)]) * SF2::Render::Zone::SampleSpan::normalizationScale,
                    @"offset %d", offset);
   }
 }
