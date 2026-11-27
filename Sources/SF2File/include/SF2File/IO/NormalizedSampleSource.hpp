@@ -32,7 +32,7 @@ public:
   }
   {}
 
-  /// @returns number of samples in the canonical representation
+  /// @returns number of samples used for this ssmple source.
   size_t size() const noexcept { return span_.size(); }
 
   /**

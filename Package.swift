@@ -13,15 +13,17 @@ let useAccelerate = true
 
 // Set to true to use local DSPHeaders sources
 // NOTE: do NOT commit when set to true or else CI pipeline builds will break. There is a pre-commit hook
-// `local_dspheaders_check` that can be used to prevent this from happening.
+// `local_dspheaders_check` that is used to prevent this from happening.
 let useLocalDSPHeaders = false
 
 // Set to true to build optimized version of library.
+// NOTE: do NOT commit when set to true or else downstream release builds may break. There is a pre-commit hook
+// `unsafe_flags_check` that is used to prevent this from happening.
 let makeOptimized = false
 
 // Set to true to enable unsafe C++ flags -- only to be used for development/debugging
 // NOTE: do NOT commit when set to true or else downstream release builds may break. There is a pre-commit hook
-// `unsafe_flags_check` that can be used to prevent this from happening.
+// `unsafe_flags_check` that is used to prevent this from happening.
 let useUnsafeFlags = makeOptimized
 let optimizeFlag = makeOptimized ? "-O3" : "-g"
 
