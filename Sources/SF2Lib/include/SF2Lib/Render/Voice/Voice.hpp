@@ -235,11 +235,54 @@ public:
    @returns next sample
    */
   Float renderSample(const Float* pitchIncrement, Float* incrementOut) noexcept {
-    return renderSample(pitchIncrement, incrementOut, attenuation());
+    if (! active_) { return 0_F; }
+    return renderSample(pitchIncrement, incrementOut, sliceControls());
   }
 
-  /// Render the next sample using an initial-attenuation gain captured for the current render slice.
-  Float renderSample(const Float* pitchIncrement, Float* incrementOut, Float attenuation) noexcept {
+private:
+
+  /**
+   Values derived from generators that only change on MIDI or parameter events. `EventProcessor` handles those between
+   render slices, so `renderFrames` computes these once per slice instead of once per sample.
+   */
+  struct SliceControls {
+    Sample::Pitch::Controls pitch;
+    /// The phase increment to use for every sample when `pitch.isConstant()`
+    Float constantIncrement;
+    /// Linear gain from `initialAttenuation`
+    Float attenuation;
+    /// Centibels of attenuation at full mod LFO swing (negated `modulatorLFOToVolume`)
+    Float modLFOToVolume;
+    Float filterCutoff;
+    Float modLFOToFilterCutoff;
+    Float modEnvToFilterCutoff;
+    Float filterResonance;
+    Float leftPan;
+    Float rightPan;
+    SF2::AUValue chorusSend;
+    SF2::AUValue reverbSend;
+  };
+
+  /// @returns the values that stay the same until the next MIDI or parameter event.
+  SliceControls sliceControls() const noexcept {
+    SliceControls controls;
+    controls.pitch = pitch_.controls();
+    controls.constantIncrement = controls.pitch.isConstant() ? Sample::Pitch::constantPhaseIncrement(controls.pitch)
+                                                             : 0_F;
+    controls.attenuation = DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));
+    controls.modLFOToVolume = -state_.modulatedInRange(Index::modulatorLFOToVolume);
+    controls.filterCutoff = state_.modulated(Index::initialFilterCutoff);
+    controls.modLFOToFilterCutoff = state_.modulatedInRange(Index::modulatorLFOToFilterCutoff);
+    controls.modEnvToFilterCutoff = state_.modulatedInRange(Index::modulatorEnvelopeToFilterCutoff);
+    controls.filterResonance = state_.modulated(Index::initialFilterResonance);
+    DSP::panLookup(state_.modulated(Index::pan), controls.leftPan, controls.rightPan);
+    controls.chorusSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend)));
+    controls.reverbSend = SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
+    return controls;
+  }
+
+  /// Render the next sample using values captured for the current render slice.
+  Float renderSample(const Float* pitchIncrement, Float* incrementOut, const SliceControls& controls) noexcept {
     if (! active_) { return 0_F; }
     ++samplesRendered_;
 
@@ -251,7 +294,9 @@ public:
 
     // Calculate the pitch to render. This is done even while the volume envelope is in its delay stage, so that a
     // stereo partner always has an increment to follow.
-    auto increment{pitchIncrement != nullptr ? *pitchIncrement : pitch_.samplePhaseIncrement(modLFO, vibLFO, modEnv)};
+    auto increment{pitchIncrement != nullptr ? *pitchIncrement
+                   : controls.pitch.isConstant() ? controls.constantIncrement
+                   : Sample::Pitch::phaseIncrement(controls.pitch, modLFO, vibLFO, modEnv)};
     if (incrementOut != nullptr) *incrementOut = increment;
 
     if (volumeEnvelope_.isDelayed()) return 0_F;
@@ -267,17 +312,17 @@ public:
     // `Envelope::volumeEnvelopeToCentibels`), convert it to cB, and then combine it with the modLFO value into an
     // attenuation that is applied to the sample.
     auto volEnvCB{Envelope::volumeEnvelopeToCentibels(volEnv.val)};
-    auto modLFOValCB{modLFO.val * -state_.modulatedInRange(Index::modulatorLFOToVolume)};
-    auto gain{attenuation * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB)};
+    auto modLFOValCB{modLFO.val * controls.modLFOToVolume};
+    auto gain{controls.attenuation * DSP::centibelsToAttenuation(modLFOValCB + volEnvCB)};
 
     // Update the low-pass filter parameters every `LowPassFilter::updateInterval` samples. Only the frequency can be
     // affected by the mod LFO and mod envelope, and both are in cents so they add to the absolute-cents cutoff
     // (SF2.01 8.1.2 #8, #10, #11). Both can also have external modulators attached to their primary state value.
     if (filter_.needsUpdate()) {
-      auto frequency{state_.modulated(Index::initialFilterCutoff) +
-                     state_.modulatedInRange(Index::modulatorLFOToFilterCutoff) * modLFO.val +
-                     state_.modulatedInRange(Index::modulatorEnvelopeToFilterCutoff) * modEnv.val};
-      filter_.update(frequency, state_.modulated(Index::initialFilterResonance));
+      auto frequency{controls.filterCutoff +
+                     controls.modLFOToFilterCutoff * modLFO.val +
+                     controls.modEnvToFilterCutoff * modEnv.val};
+      filter_.update(frequency, controls.filterResonance);
     }
     auto filtered{filter_.transform(sample * gain)};
 
@@ -289,6 +334,8 @@ public:
 
     return filtered;
   }
+
+public:
 
   /**
    Render `frameCount` samples while ramping the output linearly down to 0, then stop the voice. This is the last-resort
@@ -351,11 +398,6 @@ public:
 
 private:
 
-  /// @returns the current initial-attenuation generator value as a linear gain
-  Float attenuation() const noexcept {
-    return DSP::centibelsToAttenuation(state_.modulated(Index::initialAttenuation));
-  }
-
   /// @returns true if the given pedal state holds this voice after its key is released
   bool isHeldByPedal(const MIDI::ChannelState::PedalState& pedalState) const noexcept {
     return pedalState.sustainPedalActive || (pedalState.sostenutoPedalActive && sostenutoActive_);
@@ -364,23 +406,11 @@ private:
   /// Move the envelopes into their release phase.
   void releaseEnvelopes() noexcept;
 
-  /// Mix one rendered sample into the output, panned with the voice's pan generator.
-  void mix(Engine::Mixer& mixer, SF2::AUAudioFrameCount index, Float sample, SF2::AUValue chorusSend,
-           SF2::AUValue reverbSend) const noexcept {
-    Float pan{state_.modulated(Index::pan)};
-    Float leftPan, rightPan;
-    DSP::panLookup(pan, leftPan, rightPan);
-    mixer.add(index, SF2::AUValue(leftPan * sample), SF2::AUValue(rightPan * sample), chorusSend, reverbSend);
-  }
-
-  /// @returns the chorus send level of the voice
-  SF2::AUValue chorusSend() const noexcept {
-    return SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::chorusEffectSend)));
-  }
-
-  /// @returns the reverb send level of the voice
-  SF2::AUValue reverbSend() const noexcept {
-    return SF2::AUValue(DSP::tenthPercentageToNormalized(state_.modulated(Index::reverbEffectSend)));
+  /// Mix one rendered sample into the output, panned and sent to the effects with the slice's values.
+  static void mix(Engine::Mixer& mixer, SF2::AUAudioFrameCount index, Float sample,
+                  const SliceControls& controls) noexcept {
+    mixer.add(index, SF2::AUValue(controls.leftPan * sample), SF2::AUValue(controls.rightPan * sample),
+              controls.chorusSend, controls.reverbSend);
   }
 
   /**
@@ -393,12 +423,10 @@ private:
    @param fadeOut if true, ramp the output linearly down to 0 over the frames
    */
   void renderFrames(Voice* follower, Engine::Mixer& mixer, SF2::AUAudioFrameCount frameCount, bool fadeOut) noexcept {
-    auto leaderChorus = chorusSend();
-    auto leaderReverb = reverbSend();
-    auto leaderAttenuation = attenuation();
-    auto followerChorus = follower != nullptr ? follower->chorusSend() : SF2::AUValue(0);
-    auto followerReverb = follower != nullptr ? follower->reverbSend() : SF2::AUValue(0);
-    auto followerAttenuation = follower != nullptr ? follower->attenuation() : 1_F;
+    // No MIDI or parameter event can arrive during a slice (`EventProcessor` splits rendering at event boundaries), so
+    // the generator-derived values are fixed until the next call.
+    auto leaderControls{sliceControls()};
+    auto followerControls{follower != nullptr ? follower->sliceControls() : SliceControls{}};
     for (SF2::AUAudioFrameCount index = 0; index < frameCount; ++index) {
       bool leaderActive = active_;
       bool followerActive = follower != nullptr && follower->active_;
@@ -406,14 +434,13 @@ private:
       Float gain{fadeOut ? Float(frameCount - index - 1) / Float(frameCount) : Float(1)};
       Float increment{0_F};
       if (leaderActive) {
-        mix(mixer, index, renderSample(nullptr, follower != nullptr ? &increment : nullptr, leaderAttenuation) * gain,
-            leaderChorus,
-            leaderReverb);
+        mix(mixer, index, renderSample(nullptr, follower != nullptr ? &increment : nullptr, leaderControls) * gain,
+            leaderControls);
       }
       if (followerActive) {
         // If the leader has stopped, the follower carries on with its own pitch.
-        Float sample{follower->renderSample(leaderActive ? &increment : nullptr, nullptr, followerAttenuation)};
-        follower->mix(mixer, index, sample * gain, followerChorus, followerReverb);
+        Float sample{follower->renderSample(leaderActive ? &increment : nullptr, nullptr, followerControls)};
+        mix(mixer, index, sample * gain, followerControls);
       }
     }
   }

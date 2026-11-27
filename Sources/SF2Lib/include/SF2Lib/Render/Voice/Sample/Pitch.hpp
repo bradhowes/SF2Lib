@@ -74,16 +74,68 @@ public:
    */
   Float samplePhaseIncrement(ModLFO::Value modLFO, VibLFO::Value vibLFO, Modulation::Value modEnv) const noexcept
   {
+    return phaseIncrement(controls(), modLFO, vibLFO, modEnv);
+  }
+
+  /**
+   The parts of the pitch calculation that only change on MIDI or parameter events, so they can be computed once per
+   render slice (see `controls` and `phaseIncrement`).
+   */
+  struct Controls {
+    /// Type of the cents sum. `_F` literals are wider than `Float`, so the sum is only narrowed at the table lookup;
+    /// keeping it that way leaves the result exactly as it was when everything was computed per sample.
+    using Cents = decltype(Float{} * 100_F);
+
+    /// Pitch in cents before the LFO and envelope contributions: key, tuning, sample correction and rate correction
+    Cents baseCents;
+    /// Cents of pitch change at full mod LFO swing
+    Float modLFODepth;
+    /// Cents of pitch change at full vibrato LFO swing
+    Float vibLFODepth;
+    /// Cents of pitch change at full mod envelope level
+    Float modEnvDepth;
+
+    /// @returns true if the LFOs and the mod envelope do not affect the pitch, so the increment is the same each sample
+    bool isConstant() const noexcept { return modLFODepth == 0_F && vibLFODepth == 0_F && modEnvDepth == 0_F; }
+  };
+
+  /// @returns the pitch values from the current state that stay the same until the next MIDI or parameter event.
+  Controls controls() const noexcept
+  {
     // Clamp summed values to their generator ranges (SF2.01 10.5). fineTune is the exception: it also carries the
     // pitch-wheel modulator (see `Modulator::defaults`), whose output legitimately exceeds the +/-99 cent range.
     auto coarseTune{state_.modulatedInRange(Index::coarseTune)};
     auto fineTune{state_.modulated(Index::fineTune)};
     auto phaseOffset{coarseTune * 100_F + fineTune};
-    auto modLFOValue{modLFO.val * state_.modulatedInRange(Index::modulatorLFOToPitch)};
-    auto vibLFOValue{vibLFO.val * state_.modulatedInRange(Index::vibratoLFOToPitch)};
-    auto modEnvValue{modEnv.val * state_.modulatedInRange(Index::modulatorEnvelopeToPitch)};
-    auto phase{phaseBase_ + phaseOffset + modLFOValue + vibLFOValue + modEnvValue};
+    return {phaseBase_ + phaseOffset,
+      state_.modulatedInRange(Index::modulatorLFOToPitch),
+      state_.modulatedInRange(Index::vibratoLFOToPitch),
+      state_.modulatedInRange(Index::modulatorEnvelopeToPitch)};
+  }
+
+  /**
+   Calculate the sample increment from values captured by `controls` and the current LFO and envelope values.
+
+   @param controls the values from `controls`
+   @param modLFO the current modulation LFO value
+   @param vibLFO the current vibrato LFO value
+   @param modEnv the current modulation envelope value
+   @returns the sample phase increment
+   */
+  static Float phaseIncrement(const Controls& controls, ModLFO::Value modLFO, VibLFO::Value vibLFO,
+                              Modulation::Value modEnv) noexcept
+  {
+    auto modLFOValue{modLFO.val * controls.modLFODepth};
+    auto vibLFOValue{vibLFO.val * controls.vibLFODepth};
+    auto modEnvValue{modEnv.val * controls.modEnvDepth};
+    auto phase{controls.baseCents + modLFOValue + vibLFOValue + modEnvValue};
     return DSP::power2LookupInterpolated(Float(phase));
+  }
+
+  /// @returns the sample increment when `controls.isConstant()` is true.
+  static Float constantPhaseIncrement(const Controls& controls) noexcept
+  {
+    return DSP::power2LookupInterpolated(Float(controls.baseCents));
   }
 
 private:
